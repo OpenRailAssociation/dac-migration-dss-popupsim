@@ -2,7 +2,7 @@
 import os
 import stat
 
-COMMIT_MSG_HOOK = '''#!/usr/bin/env python3
+COMMIT_MSG_HOOK = """#!/usr/bin/env python3
 import sys
 import re
 
@@ -31,25 +31,27 @@ def validate_commit_message(commit_msg_file):
 if __name__ == "__main__":
     if not validate_commit_message(sys.argv[1]):
         sys.exit(1)
-'''
+"""
+
 
 def setup_commit_msg_hook():
-    hooks_dir = '.git/hooks'
-    hook_path = os.path.join(hooks_dir, 'commit-msg')
+	hooks_dir = '.git/hooks'
+	hook_path = os.path.join(hooks_dir, 'commit-msg')
 
-    if not os.path.exists(hooks_dir):
-        print("❌ Not a git repository")
-        return False
+	if not os.path.exists(hooks_dir):
+		print('❌ Not a git repository')
+		return False
 
-    with open(hook_path, 'w') as f:
-        f.write(COMMIT_MSG_HOOK)
+	with open(hook_path, 'w') as f:
+		f.write(COMMIT_MSG_HOOK)
 
-    # Make executable
-    st = os.stat(hook_path)
-    os.chmod(hook_path, st.st_mode | stat.S_IEXEC)
+	# Make executable
+	st = os.stat(hook_path)
+	os.chmod(hook_path, st.st_mode | stat.S_IEXEC)
 
-    print("✅ Commit message hook installed successfully!")
-    return True
+	print('✅ Commit message hook installed successfully!')
+	return True
 
-if __name__ == "__main__":
-    setup_commit_msg_hook()
+
+if __name__ == '__main__':
+	setup_commit_msg_hook()
