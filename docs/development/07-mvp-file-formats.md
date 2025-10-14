@@ -33,11 +33,6 @@ Diese Datei definiert alle Input- und Output-Dateiformate für den MVP mit JSON 
       "format": "date",
       "description": "Simulationsende (YYYY-MM-DD)"
     },
-    "random_seed": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Seed für Reproduzierbarkeit"
-    },
     "workshop": {
       "type": "object",
       "required": ["tracks"],
@@ -88,8 +83,9 @@ Diese Datei definiert alle Input- und Output-Dateiformate für den MVP mit JSON 
 ```json
 {
   "scenario_id": "scenario_001",
-  "start_date": "2025-10-15",
-  "end_date": "2025-10-16",
+  "start_date": "2024-01-15",
+  "end_date": "2024-01-16",
+  "random_seed": 42,
   "workshop": {
     "tracks": [
       {
@@ -117,20 +113,36 @@ Diese Datei definiert alle Input- und Output-Dateiformate für den MVP mit JSON 
 
 ### 2. workshop_tracks.csv (Alternative zu JSON)
 
-**Zweck:** Tabellarische Definition von Werkstattgleisen
+**Zweck:** Tabellarische Definition von Werkstattgleisen mit Funktionszuweisung
 
 **Format:**
 ```csv
-track_id,capacity,retrofit_time_min
-TRACK01,5,30
-TRACK02,3,45
-TRACK03,4,35
+track_id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30
+TRACK02,werkstattgleis,3,45
+TRACK03,sammelgleis,10,0
+TRACK04,parkgleis,8,0
+TRACK05,werkstattzufuehrung,2,0
+TRACK06,werkstattabfuehrung,2,0
+TRACK07,bahnhofskopf,3,0
 ```
 
 **Validierung:**
-- `track_id`: Muss Pattern `TRACK\d{2}` entsprechen
-- `capacity`: Integer, 1-20
-- `retrofit_time_min`: Integer, 10-300
+- `track_id`: String (z.B. `TRACK01` oder OSM Way ID)
+- `function`: Enum aus 6 Werten:
+  - `sammelgleis`: Sammelgleis für ankommende Züge
+  - `parkgleis`: Parkgleis für wartende Wagen
+  - `werkstattgleis`: Werkstattgleis für Umrüstung
+  - `werkstattzufuehrung`: Zuführungsgleis zur Werkstatt
+  - `werkstattabfuehrung`: Abführungsgleis von Werkstatt
+  - `bahnhofskopf`: Bahnhofskopf für Rangieroperationen
+- `capacity`: Integer, > 0 (Anzahl Wagen)
+- `retrofit_time_min`: Integer, >= 0 (nur für werkstattgleis > 0, sonst 0)
+
+**Hinweise:**
+- Gleise ohne Funktionszuweisung werden in der Simulation nicht berücksichtigt
+- Bei OSM-Konvertierung: track_id = OSM Way ID, function wird manuell zugewiesen
+- Siehe `topology-to-mvp-conversion.md` für Details zum Konvertierungsprozess
 
 **Verwendung:**
 ```python
@@ -145,7 +157,64 @@ tracks = [
 
 ---
 
-### 3. train_schedule.csv
+### 3. routes.csv
+
+**Zweck:** Definition der Routen für Rangierloks zwischen Gleisfunktionen
+
+**Format:**
+```csv
+route_id,from_function,to_function,track_sequence,distance_m,time_min
+ROUTE01,sammelgleis,werkstattzufuehrung,"TRACK03,TRACK05",450,5
+ROUTE02,werkstattzufuehrung,werkstattgleis,"TRACK05,TRACK01",120,2
+ROUTE03,werkstattgleis,werkstattabfuehrung,"TRACK01,TRACK06",120,2
+ROUTE04,werkstattabfuehrung,parkgleis,"TRACK06,TRACK04",380,4
+ROUTE05,sammelgleis,bahnhofskopf,"TRACK03,TRACK07",200,3
+```
+
+**Validierung:**
+- `route_id`: String, eindeutige Route-ID
+- `from_function`: Enum (sammelgleis, parkgleis, werkstattgleis, werkstattzufuehrung, werkstattabfuehrung, bahnhofskopf)
+- `to_function`: Enum (sammelgleis, parkgleis, werkstattgleis, werkstattzufuehrung, werkstattabfuehrung, bahnhofskopf)
+- `track_sequence`: Komma-separierte Liste von track_ids (in Anführungszeichen)
+- `distance_m`: Float, > 0 (Gesamtdistanz in Metern)
+- `time_min`: Integer, > 0 (Fahrzeit für Rangierlok in Minuten)
+
+**Hinweise:**
+- Routen werden vom Nutzer manuell definiert basierend auf Betriebsabläufen
+- `track_sequence` definiert die Gleise, die die Lok durchfährt (implizite Konnektivität)
+- Während der Fahrt werden alle Gleise in `track_sequence` blockiert
+- Siehe `topology-to-mvp-conversion.md` für Details zur Routendefinition
+
+**Verwendung:**
+```python
+import pandas as pd
+
+df = pd.read_csv("routes.csv")
+routes = {}
+
+for _, row in df.iterrows():
+    routes[row['route_id']] = {
+        'from_function': row['from_function'],
+        'to_function': row['to_function'],
+        'track_sequence': row['track_sequence'].split(','),
+        'distance_m': row['distance_m'],
+        'time_min': row['time_min']
+    }
+
+# Simulation: Lok fährt Route
+route = routes['ROUTE01']
+for track_id in route['track_sequence']:
+    yield tracks[track_id].request()  # SimPy Resource
+yield env.timeout(route['time_min'])
+```
+
+**Beispiel-Missionen:**
+- "Fahre Wagen von Sammelgleis zu Werkstatt A": Route ROUTE01 → ROUTE02
+- "Fahre Wagen von Werkstatt B zu Parkgleis X": Route ROUTE03 → ROUTE04
+
+---
+
+### 4. train_schedule.csv
 
 **Zweck:** Explizite Definition aller Zugankünfte mit Wageninformationen
 
@@ -331,8 +400,8 @@ timestamp,event_type,wagon_id,train_id,track_id,data
     }
   ],
   "metadata": {
-    "simulation_start": "2024-10-15T10:00:00",
-    "simulation_end": "2024-10-15T10:05:30",
+    "simulation_start": "2024-01-15T10:00:00",
+    "simulation_end": "2024-01-15T10:05:30",
     "config_file": "config/examples/small_scenario/scenario.json",
     "random_seed": 42
   }
@@ -399,8 +468,8 @@ results/
 ```json
 {
   "scenario_id": "small_scenario",
-  "start_date": "2024-10-15",
-  "end_date": "2024-10-15",
+  "start_date": "2024-01-15",
+  "end_date": "2024-01-15",
   "random_seed": 42,
   "workshop": {
     "tracks": [
@@ -431,8 +500,8 @@ TRAIN002,2024-01-15,10:00,W002_02,18.0,true,false
 ```json
 {
   "scenario_id": "medium_scenario",
-  "start_date": "2024-10-15",
-  "end_date": "2024-10-15",
+  "start_date": "2024-01-15",
+  "end_date": "2024-01-15",
   "random_seed": 42,
   "workshop": {
     "tracks": [
@@ -447,10 +516,10 @@ TRAIN002,2024-01-15,10:00,W002_02,18.0,true,false
 **train_schedule_medium.csv:** (Auszug)
 ```csv
 train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-TRAIN001,2025-10-15,08:00,W001_01,15.5,true,true
-TRAIN001,2025-10-15,08:00,W001_02,15.5,false,true
+TRAIN001,2024-01-15,08:00,W001_01,15.5,true,true
+TRAIN001,2024-01-15,08:00,W001_02,15.5,false,true
 ...
-TRAIN008,2025-10-15,15:00,W008_10,15.5,true,true
+TRAIN008,2024-01-15,15:00,W008_10,15.5,true,true
 ```
 
 **Erwartete Ergebnisse:**
@@ -464,8 +533,8 @@ TRAIN008,2025-10-15,15:00,W008_10,15.5,true,true
 ```json
 {
   "scenario_id": "large_scenario",
-  "start_date": "2025-10-15",
-  "end_date": "2025-10-16",
+  "start_date": "2024-01-15",
+  "end_date": "2024-01-16",
   "random_seed": 42,
   "workshop": {
     "tracks": [
@@ -482,10 +551,10 @@ TRAIN008,2025-10-15,15:00,W008_10,15.5,true,true
 **train_schedule_large.csv:** (Auszug - 48 Züge mit je 15 Wagen)
 ```csv
 train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-TRAIN001,2025-10-15,00:30,W001_01,15.5,true,true
-TRAIN001,2025-10-15,00:30,W001_02,15.5,false,true
+TRAIN001,2024-01-15,00:30,W001_01,15.5,true,true
+TRAIN001,2024-01-15,00:30,W001_02,15.5,false,true
 ...
-TRAIN048,2025-10-16,23:30,W048_15,15.5,true,true
+TRAIN048,2024-01-16,23:30,W048_15,15.5,true,true
 ```
 
 **Erwartete Ergebnisse:**
@@ -629,4 +698,4 @@ def validate_output_files(output_path: Path):
 
 ---
 
-**Navigation:** [← Technology Stack](06-mvp-technology-stack.md) | [Testing Strategy →](08-mvp-testing-strategy.md)
+**Navigation:** [← Technology Stack](06-mvp-technology-stack.md) | [Testing strategy →](08-mvp-testing-strategy.md)
