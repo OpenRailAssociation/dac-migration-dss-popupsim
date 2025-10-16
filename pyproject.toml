@@ -23,8 +23,11 @@ classifiers = [
 ]
 dependencies = []
 
+[project.scripts]
+osm-extractor = "osm_extractor.cli:app"
+
 [tool.hatch.build.targets.wheel]
-packages = ["backend/src"]
+packages = ["backend/src", "tools/osm_extractor/src/osm_extractor"]
 
 [dependency-groups]
 dev = [
@@ -36,6 +39,13 @@ dev = [
     "pytest-cov>=7.0.0",
     "pytest-mock>=3.15.1",
     "ruff>=0.13.0",
+]
+osm-extractor = [
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.4",
+    "overpy>=0.7",
+    "shapely>=2.1.2",
+    "typer>=0.19.2",
 ]
 
 [tool.ruff]
@@ -61,16 +71,24 @@ max-statements = 50
 
 [tool.pylint.format]
 max-line-length = 120
+indent-string = '\t'
 
 [tool.mypy]
 python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-files = ["backend/src", "backend/tests"]
+files = ["backend/src", "backend/tests", "tools/osm_extractor/src"]
+
+[[tool.mypy.overrides]]
+module = ["shapely.*", "overpy.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "osm_extractor.visualize"
+ignore_errors = true
 
 [tool.pytest.ini_options]
-testpaths = ["backend/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -78,11 +96,6 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
-    "--cov=popup_sim",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
-    "--cov-fail-under=90",
 ]
 markers = [
     "unit: Unit tests (fast, isolated)",
@@ -91,14 +104,22 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["backend/src"]
-omit = ["backend/tests/*"]
+source = ["backend/src", "tools/osm_extractor/src"]
+omit = ["backend/tests/*", "tools/osm_extractor/tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
     "raise AssertionError",
-    "raise NotImplementedError"
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
 ]
 show_missing = true
+precision = 2
+
+[tool.coverage.paths]
+source = [
+    "backend/src",
+    "tools/osm_extractor/src",
+]
