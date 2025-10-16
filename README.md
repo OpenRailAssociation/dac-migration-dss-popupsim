@@ -115,19 +115,49 @@ uv run pre-commit run --all-files
 graph TD
     A[PopUp-Sim] --> B[backend/]
     A --> C[frontend/]
-    A --> D[pyproject.toml]
-    A --> E[README.md]
+    A --> D[tools/]
+    A --> E[pyproject.toml]
+    A --> F[README.md]
 
-    B --> F[src/]
-    B --> G[tests/]
-    F --> H[popup_sim/]
+    B --> G[src/]
+    B --> H[tests/]
+    G --> I[popup_sim/]
 
-    C --> I[Vue.js application]
+    C --> J[Vue.js application]
+    
+    D --> K[osm_extractor/]
 
     style A fill:#e1f5fe
     style B fill:#f3e5f5
     style C fill:#e8f5e8
-    style H fill:#fff3e0
+    style D fill:#fff9c4
+    style I fill:#fff3e0
+```
+
+## Tools
+
+The project includes specialized tools for data extraction and processing:
+
+### OSM Railway Data Extractor
+
+A comprehensive tool for extracting, processing, and visualizing railway infrastructure data from OpenStreetMap.
+
+**Features:**
+- Extract railway data from OSM using Overpass API
+- Clip data to precise geographic boundaries
+- Project coordinates to Cartesian system
+- Visualize railway networks with specialized markers
+
+**Documentation:** [tools/osm_extractor/README.md](tools/osm_extractor/README.md)
+
+**Quick Start:**
+```bash
+# Install dependencies
+uv sync --group osm-extractor
+
+# Extract railway data
+uv run --group osm-extractor osm-extractor extract \
+  "47.37,8.54,47.39,8.56" -t bbox -o railway_data.json
 ```
 
 ## Contributing
