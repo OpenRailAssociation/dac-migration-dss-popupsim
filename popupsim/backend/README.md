@@ -52,20 +52,19 @@ uv sync --frozen
    .venv\Scripts\activate
    ```
 
-5. **Install pre-commit hooks:**
+5. **Install pre-commit hooks for developers:**
    ```bash
-   uv run pre-commit install
-   ```
-
-6. **Setup dev hooks:**
-  ```bash
+  in project root
+  uv pip install pre-commit
+  pre-commit install
   uv run ./setup/dev/set_commit_msg_hooks.py
-   ```
+ ```
 
 ### Development Commands
 
 - **Run tests:**
   ```bash
+  in project root/popupsim/backend
   uv run pytest
   ```
 
