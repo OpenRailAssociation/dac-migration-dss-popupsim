@@ -14,7 +14,7 @@ repos:
     rev: v0.13.0
     hooks:
       - id: ruff-format
-        files: ^backend/
+        files: ^popupsim/backend/
       - id: ruff
         files: ^backend/
         args: [--fix, --exit-non-zero-on-fix]
@@ -23,7 +23,7 @@ repos:
     rev: v1.18.1
     hooks:
       - id: mypy
-        files: ^backend/src/
+        files: ^popupsim/backend/src/
         args: [--show-error-codes, --no-error-summary, --show-column-numbers]
         additional_dependencies: []
 
@@ -31,5 +31,5 @@ repos:
     rev: v3.3.8
     hooks:
       - id: pylint
-        files: ^backend/src/
-        args: [--output-format=colorized]
+        files: ^popupsim/backend/src/
+        args: [--output-format=colorized, --max-line-length=120]

@@ -20,6 +20,7 @@ classifiers = [
 dependencies = [
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
+    "ruff>=0.14.1",
 ]
 
 [build-system]
@@ -40,12 +41,13 @@ dev = [
 
 # Preserving all tool configurations
 [tool.ruff]
+indent-width = 4
 line-length = 120
 target-version = "py313"
 
 [tool.ruff.format]
 quote-style = "single"
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = true
 
 [tool.ruff.lint]
@@ -53,6 +55,13 @@ select = ["F", "B", "S", "C4", "DTZ", "ARG", "I", "SIM", "N", "C90", "PLR09", "R
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # Allow use of assert in tests
+    "PLR2004", # Allow magic values in tests (common in assertions)
+    "E501",    # Allow long lines in test assertions
+]
 
 [tool.ruff.lint.pylint]
 max-args = 5
@@ -69,6 +78,7 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 files = ["src", "tests"]
+disable_error_code = ["annotation-unchecked", "line-too-long"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

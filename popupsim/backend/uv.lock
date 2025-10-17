@@ -240,6 +240,7 @@ source = { editable = "." }
 dependencies = [
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "ruff" },
 ]
 
 [package.optional-dependencies]
@@ -265,6 +266,7 @@ requires-dist = [
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.0.0" },
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.15.1" },
+    { name = "ruff", specifier = ">=0.14.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.13.0" },
 ]
 provides-extras = ["dev"]
