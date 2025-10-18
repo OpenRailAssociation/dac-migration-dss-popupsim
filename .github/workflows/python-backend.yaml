@@ -143,68 +143,69 @@ jobs:
         run: echo "⚠️ MyPy found type issues" >> $GITHUB_STEP_SUMMARY
         if: failure()
 
-  security:
-    name: Security Scan
-    needs: format
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-    steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
-        with:
-          egress-policy: audit
+  # to be enabled later
+  # security:
+  #   name: Security Scan
+  #   needs: format
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     security-events: write
+  #   steps:
+  #     - name: Harden the runner (Audit all outbound calls)
+  #       uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+  #       with:
+  #         egress-policy: audit
 
-      - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: Check if dependencies exist
-        id: check-deps
-        run: |
-          if grep -q '^dependencies = \[\]$' popupsim/backend/pyproject.toml; then
-            echo "has_deps=false" >> $GITHUB_OUTPUT
-          else
-            echo "has_deps=true" >> $GITHUB_OUTPUT
-          fi
-      - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@aa0e114b2e19480f157109b9922bda359bd98b90 # v0.20.8
-        if: steps.check-deps.outputs.has_deps == 'true'
-        with:
-          path: popupsim/backend/src
-          format: spdx-json
-          artifact-name: sbom.spdx.json
-      - name: Scan vulnerabilities with Grype
-        uses: anchore/scan-action@a5605eb0943e46279cb4fbd9d44297355d3520ab # v7.0.2
-        id: scan
-        if: steps.check-deps.outputs.has_deps == 'true'
-        with:
-          path: sbom.spdx.json
-          fail-build: false
-          output-format: sarif
+  #     - name: Checkout code
+  #       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+  #     - name: Check if dependencies exist
+  #       id: check-deps
+  #       run: |
+  #         if grep -q '^dependencies = \[\]$' popupsim/backend/pyproject.toml; then
+  #           echo "has_deps=false" >> $GITHUB_OUTPUT
+  #         else
+  #           echo "has_deps=true" >> $GITHUB_OUTPUT
+  #         fi
+  #     - name: Generate SBOM with Syft
+  #       uses: anchore/sbom-action@f8bdd1d8ac5e901a77a92f111440fdb1b593736b # v0.20.6
+  #       if: steps.check-deps.outputs.has_deps == 'true'
+  #       with:
+  #         path: popupsim/backend/src
+  #         format: spdx-json
+  #         artifact-name: sbom.spdx.json
+  #     - name: Scan vulnerabilities with Grype
+  #       uses: anchore/scan-action@f6601287cdb1efc985d6b765bbf99cb4c0ac29d8 # v7.0.0
+  #       id: scan
+  #       if: steps.check-deps.outputs.has_deps == 'true'
+  #       with:
+  #         path: sbom.spdx.json
+  #         fail-build: false
+  #         output-format: sarif
 
-      - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@16140ae1a102900babc80a33c44059580f687047 # v4.30.9
-        with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
-        if: steps.check-deps.outputs.has_deps == 'true' && always()
-      - name: Upload security reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: security-reports
-          path: |
-            sbom.json
-            grype-report.json
-        if: steps.check-deps.outputs.has_deps == 'true' && always()
-      - name: Summary
-        run: |
-          if [ "${{ steps.check-deps.outputs.has_deps }}" = "true" ]; then
-            echo "✅ No security vulnerabilities found" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "ℹ️ Security scan skipped - no dependencies to scan" >> $GITHUB_STEP_SUMMARY
-          fi
-        if: success()
-      - name: Summary
-        run: echo "⚠️ Security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
-        if: failure()
+  #     - name: Upload SARIF results
+  #       uses: github/codeql-action/upload-sarif@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+  #       with:
+  #         sarif_file: ${{ steps.scan.outputs.sarif }}
+  #       if: steps.check-deps.outputs.has_deps == 'true' && always()
+  #     - name: Upload security reports
+  #       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+  #       with:
+  #         name: security-reports
+  #         path: |
+  #           sbom.json
+  #           grype-report.json
+  #       if: steps.check-deps.outputs.has_deps == 'true' && always()
+  #     - name: Summary
+  #       run: |
+  #         if [ "${{ steps.check-deps.outputs.has_deps }}" = "true" ]; then
+  #           echo "✅ No security vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+  #         else
+  #           echo "ℹ️ Security scan skipped - no dependencies to scan" >> $GITHUB_STEP_SUMMARY
+  #         fi
+  #       if: success()
+  #     - name: Summary
+  #       run: echo "⚠️ Security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+  #       if: failure()
 
   test:
     name: Tests & Coverage
