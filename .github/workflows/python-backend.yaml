@@ -32,7 +32,8 @@ jobs:
       - name: Setup Python development environment
         uses: ./.github/actions/setup-python-dev
       - name: Check code formatting with ruff
-        run: uv run ruff format --check --diff ./popupsim/backend
+        working-directory: ./popupsim/backend
+        run: uv run ruff format --check --diff .
       - name: Summary
         run: echo "✅ Code formatting check completed" >> $GITHUB_STEP_SUMMARY
         if: success()
@@ -55,9 +56,11 @@ jobs:
       - name: Setup Python development environment
         uses: ./.github/actions/setup-python-dev
       - name: Lint with ruff (annotations)
-        run: uv run ruff check --output-format=github ./popupsim/backend
+        working-directory: ./popupsim/backend
+        run: uv run ruff check --output-format=github .
       - name: Generate SARIF report
-        run: uv run ruff check --output-format=sarif --exit-zero -o ruff-results.sarif ./popupsim/backend
+        working-directory: ./popupsim/backend
+        run: uv run ruff check --output-format=sarif --exit-zero -o ruff-results.sarif .
         if: always()
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@16140ae1a102900babc80a33c44059580f687047 # v4.30.9
@@ -86,7 +89,8 @@ jobs:
       - name: Setup Python development environment
         uses: ./.github/actions/setup-python-dev
       - name: Lint with pylint
-        run: uv run pylint popupsim/backend/src/ --output-format=github,json:pylint-report.json
+        working-directory: ./popupsim/backend
+        run: uv run pylint ./src/ --output-format=github,json:pylint-report.json
       - name: Upload pylint report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -117,12 +121,14 @@ jobs:
       - name: Add mypy problem matcher
         run: echo "::add-matcher::.github/problem-matchers/mypy.json"
       - name: Type check with mypy
-        run: uv run mypy popupsim/backend/src/ --show-error-codes --no-error-summary --show-column-numbers
+        working-directory: ./popupsim/backend
+        run: uv run mypy ./src/ --show-error-codes --no-error-summary --show-column-numbers
       - name: Remove mypy problem matcher
         run: echo "::remove-matcher owner=mypy::"
         if: always()
       - name: Generate mypy JSON report
-        run: uv run mypy popupsim/backend/src/ --show-error-codes --no-error-summary --output json > mypy-report.json || true
+        working-directory: ./popupsim/backend
+        run: uv run mypy ./src/ --show-error-codes --no-error-summary --output json > mypy-report.json || true
         if: always()
       - name: Upload mypy report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
