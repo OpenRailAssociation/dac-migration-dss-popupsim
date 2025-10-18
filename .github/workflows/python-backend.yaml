@@ -65,7 +65,7 @@ jobs:
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@16140ae1a102900babc80a33c44059580f687047 # v4.30.9
         with:
-          sarif_file: ruff-results.sarif
+          sarif_file: ./popupsim/backend/ruff-results.sarif
         if: always()
       - name: Summary
         run: echo "✅ Ruff linting completed successfully" >> $GITHUB_STEP_SUMMARY
@@ -95,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: pylint-report
-          path: pylint-report.json
+          path: ./popupsim/backend/pylint-report.json
         if: always()
       - name: Summary
         run: echo "✅ Pylint analysis completed successfully" >> $GITHUB_STEP_SUMMARY
@@ -134,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: mypy-report
-          path: mypy-report.json
+          path: ./popupsim/backend/mypy-report.json
         if: always()
       - name: Summary
         run: echo "✅ Type checking completed successfully" >> $GITHUB_STEP_SUMMARY
