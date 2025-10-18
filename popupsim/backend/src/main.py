@@ -5,7 +5,7 @@ import argparse
 APP_NAME = 'popupsim'
 
 
-def main():
+def main() -> None:
     """Main entry point for the popupsim application."""
     parser = argparse.ArgumentParser(description=f'Main entry point for the {APP_NAME} application.')
     parser.add_argument('--configpath', type=str, default=None, help='Path to the configuration file.')

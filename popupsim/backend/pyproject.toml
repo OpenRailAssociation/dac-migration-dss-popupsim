@@ -78,7 +78,7 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 files = ["src", "tests"]
-disable_error_code = ["annotation-unchecked", "line-too-long"]
+disable_error_code = ["annotation-unchecked"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

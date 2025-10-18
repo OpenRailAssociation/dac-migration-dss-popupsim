@@ -160,7 +160,7 @@ jobs:
       - name: Check if dependencies exist
         id: check-deps
         run: |
-          if grep -q '^dependencies = \[\]$' pyproject.toml; then
+          if grep -q '^dependencies = \[\]$' popupsim/backend/pyproject.toml; then
             echo "has_deps=false" >> $GITHUB_OUTPUT
           else
             echo "has_deps=true" >> $GITHUB_OUTPUT
@@ -169,7 +169,7 @@ jobs:
         uses: anchore/sbom-action@aa0e114b2e19480f157109b9922bda359bd98b90 # v0.20.8
         if: steps.check-deps.outputs.has_deps == 'true'
         with:
-          path: backend/src
+          path: popupsim/backend/src
           format: spdx-json
           artifact-name: sbom.spdx.json
       - name: Scan vulnerabilities with Grype
