@@ -160,7 +160,7 @@ jobs:
             echo "has_deps=true" >> $GITHUB_OUTPUT
           fi
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@f8bdd1d8ac5e901a77a92f111440fdb1b593736b # v0.20.6
+        uses: anchore/sbom-action@aa0e114b2e19480f157109b9922bda359bd98b90 # v0.20.8
         if: steps.check-deps.outputs.has_deps == 'true'
         with:
           path: backend/src
