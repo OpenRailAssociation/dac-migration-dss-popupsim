@@ -60,7 +60,7 @@ jobs:
         run: uv run ruff check --output-format=sarif --exit-zero -o ruff-results.sarif .
         if: always()
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+        uses: github/codeql-action/upload-sarif@16140ae1a102900babc80a33c44059580f687047 # v4.30.9
         with:
           sarif_file: ruff-results.sarif
         if: always()
@@ -176,7 +176,7 @@ jobs:
           output-format: sarif
 
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+        uses: github/codeql-action/upload-sarif@16140ae1a102900babc80a33c44059580f687047 # v4.30.9
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
         if: steps.check-deps.outputs.has_deps == 'true' && always()
