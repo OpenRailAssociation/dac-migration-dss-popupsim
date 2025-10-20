@@ -1,32 +1,33 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "PopUp-Sim"
 description = "Freight rail transport simulation tool for Digital Automatic Coupler retrofit"
-version = "0.1.0"
+version = "0.0.1"
 license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.13"
 authors = [
     { name = "Jan-Hendrik Wendisch", email = "jan-hendrik.wendisch@deutschebahn.com" },
-    { name = "Volker Kuehn", email = "volker.kuehn@deutschebahn.com" }
+    { name = "Volker Kuehn", email = "volker.kuehn@deutschebahn.com" },
+    { name = "Hueseyin H. Guerbuez", email = "Hueseyin.H.Guerbuez@deutschebahn.com"}
 ]
 keywords = ["railway", "digital automatic coupler", "simulation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
 ]
-dependencies = []
+dependencies = [
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.1",
+]
 
-[tool.hatch.build.targets.wheel]
-packages = ["backend/src"]
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "mypy>=1.18.1",
     "pre-commit>=4.3.0",
@@ -38,13 +39,15 @@ dev = [
     "ruff>=0.13.0",
 ]
 
+# Preserving all tool configurations
 [tool.ruff]
+indent-width = 4
 line-length = 120
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.format]
 quote-style = "single"
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = true
 
 [tool.ruff.lint]
@@ -52,6 +55,13 @@ select = ["F", "B", "S", "C4", "DTZ", "ARG", "I", "SIM", "N", "C90", "PLR09", "R
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # Allow use of assert in tests
+    "PLR2004", # Allow magic values in tests (common in assertions)
+    "E501",    # Allow long lines in test assertions
+]
 
 [tool.ruff.lint.pylint]
 max-args = 5
@@ -67,10 +77,11 @@ python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-files = ["backend/src", "backend/tests"]
+files = ["src", "tests"]
+disable_error_code = ["annotation-unchecked"]
 
 [tool.pytest.ini_options]
-testpaths = ["backend/tests"]
+testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -78,7 +89,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
-    "--cov=popup_sim",
+    "--cov=src",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -91,8 +102,8 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["backend/src"]
-omit = ["backend/tests/*"]
+source = ["src"]
+omit = ["tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
