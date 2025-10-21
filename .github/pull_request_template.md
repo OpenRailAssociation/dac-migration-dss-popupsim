@@ -1,6 +1,3 @@
-## Description
-<!-- Describe your changes -->
-
 ## Summary
 <!-- Concisely describe what this PR changes and why. -->
 
