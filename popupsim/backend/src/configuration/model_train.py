@@ -9,7 +9,7 @@ through validation methods.
 
 import logging
 import re
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 from typing import List
 
 from pydantic import BaseModel, Field, model_validator
@@ -31,7 +31,7 @@ class TrainArrival(BaseModel):
     @property
     def arrival_datetime(self) -> datetime:
         """Combined arrival date and time."""
-        return datetime.combine(self.arrival_date, self.arrival_time)
+        return datetime.combine(self.arrival_date, self.arrival_time, tzinfo=timezone.utc)
 
     @model_validator(mode='after')
     def validate_wagons(self) -> 'TrainArrival':
@@ -42,7 +42,7 @@ class TrainArrival(BaseModel):
 
     @model_validator(mode='before')
     @classmethod
-    def validate_and_parse_arrival_time(cls, values):  # pylint: disable=E0213
+    def validate_and_parse_arrival_time(cls, values):
         """Parse and validate arrival_time field, ensuring correct format and type."""
         data = dict(values)
         arrival_time_value = data.get('arrival_time')

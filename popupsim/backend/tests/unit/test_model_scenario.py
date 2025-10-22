@@ -399,6 +399,7 @@ class TestScenarioConfig:
         json_str = config.model_dump_json()
 
         # Should be valid JSON that can be parsed back
+
         import json
 
         parsed = json.loads(json_str)
