@@ -4,7 +4,7 @@ zur Simulation der schlagartigen Umrüstung auf DAK
 
 **April 2025**
 
-Frederik Schäfer  
+Frederik Schäfer
 DB Cargo AG
 
 ---

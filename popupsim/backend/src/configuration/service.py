@@ -1,26 +1,16 @@
 """
-Configuration service for loading and validating scenario configurations and workshop track data.
-
-This module provides functionality to:
-- Load and validate scenario configurations from JSON files.
-- Load and validate workshop track data from CSV files.
-- Use Pydantic models for schema validation and error handling.
-- Ensure data integrity and consistency through custom validation logic.
-
-Key Features:
-- Scenario configuration validation includes checks for date ranges, random seeds, and file references.
-- Train schedule validation ensures proper structure, required fields, and data consistency.
-- Custom exceptions (`ConfigurationError`) are used for error handling.
+Service for loading and validating train simulation configuration files.
 """
 
 import json
 import logging
-from datetime import date, datetime, time
 from pathlib import Path
 from typing import List, Optional, Union
 
 import pandas as pd
-from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
+from pydantic import ValidationError
+
+from .model import ScenarioConfig, TrainArrival, WagonInfo
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -29,82 +19,6 @@ logger = logging.getLogger(__name__)
 # pylint: disable=too-few-public-methods
 class ConfigurationError(Exception):
     """Custom exception for configuration-related errors."""
-
-
-class WagonInfo(BaseModel):
-    """Information about a single wagon."""
-
-    wagon_id: str = Field(description='Unique identifier for the wagon')
-    length: float = Field(gt=0, description='Length of the wagon in meters')
-    is_loaded: bool = Field(description='Whether the wagon is loaded')
-    needs_retrofit: bool = Field(description='Whether the wagon needs retrofit')
-
-
-class TrainArrival(BaseModel):
-    """Information about a train arrival with its wagons."""
-
-    train_id: str = Field(description='Unique identifier for the train')
-    arrival_date: date = Field(description='Date of arrival')
-    arrival_time: time = Field(description='Time of arrival')
-    wagons: List[WagonInfo] = Field(description='List of wagons in the train')
-
-    @property
-    def arrival_datetime(self) -> datetime:
-        """Combined arrival date and time."""
-        return datetime.combine(self.arrival_date, self.arrival_time)
-
-    @model_validator(mode='after')
-    def validate_wagons(self) -> 'TrainArrival':
-        """Ensure train has at least one wagon."""
-        if not self.wagons:
-            raise ValueError(f'Train {self.train_id} must have at least one wagon')
-        return self
-
-
-class ScenarioConfig(BaseModel):
-    """
-    Configuration model for simulation scenarios.
-
-    Validates scenario parameters including date ranges, random seeds,
-    and required file references.
-    """
-
-    scenario_id: str = Field(
-        pattern=r'^[a-zA-Z0-9_-]+$', description='Unique identifier for the scenario', min_length=1, max_length=50
-    )
-    start_date: date = Field(description='Simulation start date')
-    end_date: date = Field(description='Simulation end date')
-    random_seed: Optional[int] = Field(default=None, ge=0, description='Random seed for reproducible simulations')
-    train_schedule_file: str = Field(description='Path to the train schedule file', min_length=1)
-
-    @field_validator('train_schedule_file')
-    @classmethod
-    def validate_train_schedule_file(cls, v: str) -> str:
-        """Validate that the train schedule file has a valid extension."""
-        if not v.endswith(('.json', '.csv', '.xlsx')):
-            raise ValueError(
-                f"Invalid file extension for train_schedule_file: '{v}'. Expected one of: .json, .csv, .xlsx"
-            )
-        return v
-
-    # mode="after" gives you the constructed instance (self),
-    # so you can safely compare self.end_date and self.start_date.
-    @model_validator(mode='after')
-    def validate_dates(self) -> 'ScenarioConfig':
-        """Ensure end_date is after start_date and duration is reasonable."""
-        if self.end_date <= self.start_date:
-            raise ValueError(
-                f'Invalid date range: end_date ({self.end_date}) must be after start_date ({self.start_date}).'
-            )
-        duration = (self.end_date - self.start_date).days
-
-        if duration > 365:
-            logger.warning(
-                "Simulation duration of %d days for scenario '%s' may impact performance.", duration, self.scenario_id
-            )
-        elif duration < 1:
-            raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
-        return self
 
 
 class ConfigurationService:
@@ -209,19 +123,18 @@ class ConfigurationService:
         try:
             df = pd.read_csv(
                 file_path,
-                dtype={
-                    'train_id': str,
-                    'wagon_id': str,
-                    'length': float,
-                    'is_loaded': bool,
-                    'needs_retrofit': bool,
+                dtype={'train_id': str, 'wagon_id': str, 'length': float, 'arrival_time': str},
+                converters={
+                    'is_loaded': self.to_bool,
+                    'needs_retrofit': self.to_bool,
                 },
                 parse_dates=['arrival_date'],
                 date_format='%Y-%m-%d',
             )
-        except pd.errors.EmptyDataError as err:
-            raise ConfigurationError(f'Train schedule file is empty or invalid: {file_path}') from err
-        except pd.errors.ParserError as err:
+            # Check that the loaded object is a pandas DataFrame
+            if not isinstance(df, pd.DataFrame):
+                raise ConfigurationError(f'Loaded object is not a pandas DataFrame: got {type(df)}')
+        except (pd.errors.ParserError, TypeError) as err:
             raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
         if df.empty:
             raise ConfigurationError(f'Train schedule file is empty: {file_path}')
@@ -240,7 +153,29 @@ class ConfigurationService:
                 f'Missing required columns in {file_path}: '
                 f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
             )
+        # Validate arrival_date format
+        if not pd.api.types.is_datetime64_any_dtype(df['arrival_date']):
+            raise ConfigurationError("Column 'arrival_date' must be in YYYY-MM-DD format.")
+
+        # Validate arrival_time format
+        invalid_times = df[~df['arrival_time'].astype(str).str.match(r'^[0-2][0-9]:[0-5][0-9]$')]
+        if not invalid_times.empty:
+            raise ConfigurationError(
+                f"Column 'arrival_time' must be in HH:MM format. Invalid values:"
+                f' {", ".join(map(str, invalid_times["arrival_time"].unique()))}'
+            )
         return df
+
+    @staticmethod
+    def to_bool(value):
+        """Robustly convert a value to boolean for CSV converters."""
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() == 'true'
+        return False
 
     def _create_wagons_from_group(self, group: pd.DataFrame) -> List[WagonInfo]:
         """Create WagonInfo objects from a train group."""
@@ -248,10 +183,10 @@ class ConfigurationService:
         for _, row in group.iterrows():
             try:
                 wagon = WagonInfo(
-                    wagon_id=row['wagon_id'],
-                    length=row['length'],
-                    is_loaded=row['is_loaded'],
-                    needs_retrofit=row['needs_retrofit'],
+                    wagon_id=str(row['wagon_id']),
+                    length=float(row['length']),
+                    is_loaded=bool(row['is_loaded']),
+                    needs_retrofit=bool(row['needs_retrofit']),
                 )
                 wagons.append(wagon)
             except ValidationError as err:

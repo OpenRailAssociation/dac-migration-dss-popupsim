@@ -20,15 +20,15 @@ class Simulation:
     end_time: Optional[datetime]
     current_time: datetime
     created_at: datetime
-    
+
     def start(self) -> None:
         if self.status != SimulationStatus.READY:
             raise SimulationNotReadyError()
-            
+
         self.status = SimulationStatus.RUNNING
         self.start_time = datetime.now()
         self.current_time = self.start_time
-        
+
         # Domain Event
         DomainEvents.raise_event(SimulationStartedEvent(
             simulation_id=self.id.value,
@@ -36,27 +36,27 @@ class Simulation:
             start_time=self.start_time,
             timestamp=datetime.now()
         ))
-    
+
     def pause(self) -> None:
         if self.status != SimulationStatus.RUNNING:
             raise SimulationNotRunningError()
-            
+
         self.status = SimulationStatus.PAUSED
-        
+
         # Domain Event
         DomainEvents.raise_event(SimulationPausedEvent(
             simulation_id=self.id.value,
             paused_at=self.current_time,
             timestamp=datetime.now()
         ))
-    
+
     def stop(self) -> None:
         if self.status not in [SimulationStatus.RUNNING, SimulationStatus.PAUSED]:
             raise SimulationCannotBeStoppedError()
-            
+
         self.status = SimulationStatus.STOPPED
         self.end_time = datetime.now()
-        
+
         # Domain Event
         DomainEvents.raise_event(SimulationStoppedEvent(
             simulation_id=self.id.value,
@@ -64,13 +64,13 @@ class Simulation:
             duration_minutes=self.get_duration_minutes(),
             timestamp=datetime.now()
         ))
-    
+
     def advance_time(self, minutes: int) -> None:
         if self.status != SimulationStatus.RUNNING:
             return
-            
+
         self.current_time += timedelta(minutes=minutes)
-        
+
         # Domain Event
         DomainEvents.raise_event(SimulationTimeAdvancedEvent(
             simulation_id=self.id.value,
@@ -78,7 +78,7 @@ class Simulation:
             advanced_minutes=minutes,
             timestamp=datetime.now()
         ))
-    
+
     def get_duration_minutes(self) -> Optional[int]:
         if self.start_time and self.end_time:
             return int((self.end_time - self.start_time).total_seconds() / 60)
@@ -94,10 +94,10 @@ class SimulationParameters:
     time_acceleration: float
     train_arrival_interval_minutes: int
     schraubkupplung_percentage: int  # 0-100
-    
+
     def get_simulation_duration(self) -> timedelta:
         return timedelta(hours=self.simulation_hours)
-    
+
     def get_total_simulation_minutes(self) -> int:
         return self.simulation_hours * 60
 ```
@@ -175,29 +175,29 @@ class SimulationOrchestrator:
         self._workshop = workshop_service
         self._rules = rules_engine_service
         self._monitoring = monitoring_service
-    
+
     def process_simulation_step(self, simulation: Simulation, train_schedule: List[TrainArrival]) -> None:
         """Verarbeitet einen Simulationsschritt"""
         if simulation.status != SimulationStatus.RUNNING:
             return
-        
+
         # 1. Hole ankommende Züge
         arriving_trains = self._get_trains_for_time(train_schedule, simulation.current_time)
-        
+
         # 2. Verarbeite jeden ankommenden Zug
         for train_arrival in arriving_trains:
             self._process_train_arrival(train_arrival)
-        
+
         # 3. Verarbeite laufende Umrüstungen
         self._process_ongoing_retrofits()
-        
+
         # 4. Sammle Metriken
         self._collect_step_metrics(simulation)
-        
+
         # 5. Prüfe Abschlussbedingungen
         if self._is_simulation_completed(simulation, train_schedule):
             simulation.status = SimulationStatus.COMPLETED
-            
+
             # Domain Event
             DomainEvents.raise_event(SimulationCompletedEvent(
                 simulation_id=simulation.id.value,
@@ -205,25 +205,25 @@ class SimulationOrchestrator:
                 total_duration_minutes=simulation.get_duration_minutes(),
                 timestamp=datetime.now()
             ))
-    
+
     def _get_trains_for_time(self, train_schedule: List[TrainArrival], current_time: datetime) -> List[TrainArrival]:
         """Holt Züge die zu gegebener Zeit ankommen sollen"""
         return [
             arrival for arrival in train_schedule
             if arrival.scheduled_time <= current_time
         ]
-    
+
     def _is_simulation_completed(self, simulation: Simulation, train_schedule: List[TrainArrival]) -> bool:
         """Prüft ob Simulation abgeschlossen ist"""
         if not train_schedule:
             return True
-        
+
         # Simulation ist fertig wenn alle Züge angekommen sind und Simulationszeit abgelaufen
         last_train_time = max(arrival.scheduled_time for arrival in train_schedule)
         simulation_end = simulation.start_time + simulation.parameters.get_simulation_duration()
-        
+
         return simulation.current_time >= max(last_train_time, simulation_end)
-    
+
     def _process_train_arrival(self, train_arrival: TrainArrival) -> None:
         """Verarbeitet Zugankunft"""
         # Erstelle Zug-Daten
@@ -238,10 +238,10 @@ class SimulationOrchestrator:
             priority=train_arrival.priority,
             status="arrived"
         )
-        
+
         # Bestimme Priorität über Rules Engine
         priority = self._rules.evaluate_train_priority(train_info)
-        
+
         # Simuliere Zug-Ankunft Event
         DomainEvents.raise_event(TrainArrivedEvent(
             train_id=train_arrival.train_id,
@@ -249,11 +249,11 @@ class SimulationOrchestrator:
             wagon_count=train_arrival.wagon_count,
             timestamp=train_arrival.scheduled_time
         ))
-    
+
     def _process_ongoing_retrofits(self) -> None:
         """Verarbeitet laufende Umrüstungen"""
         pending_orders = self._workshop.get_pending_orders()
-        
+
         # Simuliere Umrüstungsabschlüsse
         for order in pending_orders[:2]:  # Max 2 pro Schritt
             # Simuliere Umrüstungsabschluss
@@ -266,7 +266,7 @@ class SimulationOrchestrator:
                 duration_minutes=45,
                 timestamp=datetime.now()
             ))
-    
+
     def _collect_step_metrics(self, simulation: Simulation) -> None:
         """Sammelt Metriken für aktuellen Schritt"""
         self._monitoring.record_metric(
@@ -276,7 +276,7 @@ class SimulationOrchestrator:
             source_context="simulation_control",
             tags={"simulation_id": simulation.id.value}
         )
-    
+
     def _wagon_config_to_info(self, config: WagonConfig) -> WagonInfo:
         """Konvertiert WagonConfig zu WagonInfo"""
         return WagonInfo(
@@ -299,16 +299,16 @@ class TrainScheduleGenerator:
         """Generiert Zugfahrplan basierend auf Parametern"""
         train_arrivals = []
         base_time = datetime.now()
-        
+
         # Erstelle Züge basierend auf Parametern
         for i in range(parameters.train_count):
             wagon_configs = []
             wagon_count = random.randint(5, 15)
-            
+
             for j in range(wagon_count):
                 # Schraubkupplung-Anteil basierend auf Parameter
                 coupling_type = "schraubkupplung" if random.random() < (parameters.schraubkupplung_percentage / 100) else "dak"
-                
+
                 wagon_configs.append(WagonConfig(
                     wagon_id=f"wagon_{i}_{j}",
                     length=random.uniform(15.0, 25.0),
@@ -316,7 +316,7 @@ class TrainScheduleGenerator:
                     front_coupling_type=coupling_type,
                     rear_coupling_type=coupling_type
                 ))
-            
+
             train_arrivals.append(TrainArrival(
                 train_id=f"train_{i:03d}",
                 scheduled_time=base_time + timedelta(minutes=i * parameters.train_arrival_interval_minutes),
@@ -326,7 +326,7 @@ class TrainScheduleGenerator:
                 priority=random.randint(1, 10),
                 wagon_configs=wagon_configs
             ))
-        
+
         return train_arrivals
 ```
 
@@ -403,7 +403,7 @@ class ScenarioInfo:
 ```python
 class SimulationControlService:
     """Öffentliche API für Simulationssteuerung"""
-    
+
     def __init__(self,
                  simulation_repository: SimulationRepository,
                  scenario_repository: ScenarioRepository,
@@ -413,7 +413,7 @@ class SimulationControlService:
         self._scenarios = scenario_repository
         self._orchestrator = orchestrator
         self._generator = generator
-    
+
     def create_simulation(self, name: str, parameters: SimulationParameters) -> str:
         """Erstellt neue Simulation"""
         simulation = Simulation(
@@ -426,10 +426,10 @@ class SimulationControlService:
             current_time=datetime.now(),
             created_at=datetime.now()
         )
-        
+
         self._simulations.save(simulation)
         return simulation.id.value
-    
+
     def start_simulation(self, simulation_id: str) -> bool:
         """Startet Simulation"""
         try:
@@ -439,7 +439,7 @@ class SimulationControlService:
             return True
         except:
             return False
-    
+
     def pause_simulation(self, simulation_id: str) -> bool:
         """Pausiert Simulation"""
         try:
@@ -449,7 +449,7 @@ class SimulationControlService:
             return True
         except:
             return False
-    
+
     def stop_simulation(self, simulation_id: str) -> bool:
         """Stoppt Simulation"""
         try:
@@ -459,33 +459,33 @@ class SimulationControlService:
             return True
         except:
             return False
-    
+
     def run_simulation_step(self, simulation_id: str) -> bool:
         """Führt einen Simulationsschritt aus"""
         try:
             simulation = self._simulations.get_by_id(SimulationId(simulation_id))
-            
+
             # Generiere Zugfahrplan falls noch nicht vorhanden
             if not hasattr(simulation, '_train_schedule'):
                 simulation._train_schedule = self._generator.generate_train_schedule(simulation.parameters)
-            
+
             # Verarbeite Schritt
             self._orchestrator.process_simulation_step(simulation, simulation._train_schedule)
-            
+
             # Advance Zeit
             simulation.advance_time(5)  # 5 Minuten pro Schritt
-            
+
             self._simulations.save(simulation)
             return True
         except:
             return False
-    
+
     def get_simulation_status(self, simulation_id: str) -> Optional[SimulationInfo]:
         """Holt Simulationsstatus"""
         try:
             simulation = self._simulations.get_by_id(SimulationId(simulation_id))
             scenario = self._scenarios.get_by_id(simulation.scenario_id)
-            
+
             return SimulationInfo(
                 id=simulation.id.value,
                 name=simulation.name,
@@ -498,13 +498,13 @@ class SimulationControlService:
             )
         except:
             return None
-    
+
     def create_default_scenario(self) -> str:
         """Erstellt Standard-Szenario"""
         scenario = self._generator.create_default_scenario()
         self._scenarios.save(scenario)
         return scenario.id.value
-    
+
     def get_available_scenarios(self) -> List[ScenarioInfo]:
         """Holt verfügbare Szenarien"""
         scenarios = self._scenarios.find_active()
@@ -544,24 +544,24 @@ class SimulationLoop:
     def __init__(self, control_service: SimulationControlService):
         self._control = control_service
         self._running = False
-    
+
     async def run_simulation(self, simulation_id: str) -> None:
         """Führt Simulation aus"""
         self._running = True
-        
+
         while self._running:
             success = self._control.run_simulation_step(simulation_id)
             if not success:
                 break
-                
+
             # Prüfe Status
             status = self._control.get_simulation_status(simulation_id)
             if not status or status.status in ["stopped", "completed", "error"]:
                 break
-            
+
             # Warte zwischen Schritten
             await asyncio.sleep(1.0)  # 1 Sekunde pro Schritt
-    
+
     def stop_loop(self) -> None:
         self._running = False
 ```
