@@ -54,11 +54,11 @@ uv sync --frozen
 
 5. **Install pre-commit hooks for developers:**
    ```bash
-  in project root
-  uv pip install pre-commit
-  pre-commit install
-  uv run ./setup/dev/set_commit_msg_hooks.py
- ```
+   in project root
+   uv pip install pre-commit
+   pre-commit install
+   uv run ./setup/dev/set_commit_msg_hooks.py
+   ```
 
 ### Development Commands
 
