@@ -12,25 +12,25 @@ graph TB
     CONFIG[Configuration Context]
     WORKSHOP[Workshop Context]
     SIMCTRL[Simulation Control Context]
-    
+
     %% Direct Service Calls (Monolith)
     CONFIG -->|Direct Call| WORKSHOP
     CONFIG -->|Direct Call| SIMCTRL
     WORKSHOP -->|Direct Call| SIMCTRL
-    
+
     %% File System Integration
     FILES[File System<br/>JSON/CSV]
     OUTPUT[Output Files<br/>CSV/PNG]
-    
+
     FILES -->|Read| CONFIG
     SIMCTRL -->|Write| OUTPUT
-    
+
     %% Styling
     classDef coreDomain fill:#4caf50,stroke:#2e7d32,stroke-width:3px,color:#fff
     classDef supportingDomain fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
     classDef genericDomain fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
     classDef external fill:#9e9e9e,stroke:#616161,stroke-width:2px
-    
+
     class WORKSHOP coreDomain
     class CONFIG supportingDomain
     class SIMCTRL genericDomain
@@ -44,7 +44,7 @@ graph TB
 #### **Workshop Context**
 - **DDD-Klassifikation**: Core Domain
 - **Rolle**: Kern-Geschäftslogik
-- **Verantwortung**: 
+- **Verantwortung**:
   - DAK-Umrüstungsprozesse
   - SimPy-Integration für Werkstatt-Simulation
   - Arbeitsplanung und Ressourcenzuweisung
@@ -182,7 +182,7 @@ graph TB
 class WorkshopService:
     def __init__(self, config_service: ConfigurationService):
         self._config = config_service
-    
+
     def setup_workshop(self):
         scenario = self._config.load_scenario()  # Direkter Aufruf
         return self._create_workshop(scenario)
@@ -191,7 +191,7 @@ class WorkshopService:
 class SimulationService:
     def __init__(self, workshop_service: WorkshopService):
         self._workshop = workshop_service
-    
+
     def run_simulation(self):
         workshop = self._workshop.setup_workshop()  # Direkter Aufruf
         return self._execute_simulation(workshop)
@@ -262,7 +262,7 @@ graph LR
         MVPW[Workshop]
         MVPS[Simulation Control]
     end
-    
+
     subgraph "Vollversion (7 Contexts)"
         FC[Configuration]
         FI[Infrastructure]
@@ -272,7 +272,7 @@ graph LR
         FS[Simulation Control]
         FA[Analytics]
     end
-    
+
     MVPC --> FC
     MVPC --> FI
     MVPW --> FR

@@ -11,14 +11,14 @@ graph TD
     A[Pull Request/Push to main] --> B[Format Job]
     B --> C[Lint Jobs]
     B --> D[Test Jobs]
-    
+
     C --> E[Ruff Lint]
     C --> F[Pylint]
     C --> G[MyPy]
-    
+
     D --> H[Pytest + Coverage]
     H --> I[Upload Coverage]
-    
+
     style B fill:#e1f5fe
     style C fill:#f3e5f5
     style D fill:#e8f5e8
@@ -81,18 +81,18 @@ sequenceDiagram
     participant GH as GitHub
     participant CI as CI Pipeline
     participant CC as Codecov
-    
+
     Dev->>GH: Push/PR to main
     GH->>CI: Trigger workflow
-    
+
     CI->>CI: Format check (2 jobs)
-    
+
     par Parallel execution after format
         CI->>CI: Lint jobs (6 jobs)
     and
         CI->>CI: Test jobs (2 jobs)
     end
-    
+
     CI->>CC: Upload coverage (Python 3.11)
     CI->>GH: Report results
     GH->>Dev: Show status + annotations

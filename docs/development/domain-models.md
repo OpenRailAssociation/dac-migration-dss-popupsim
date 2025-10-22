@@ -18,7 +18,7 @@ class ScenarioConfig(BaseModel):
     """Hauptkonfiguration für ein Simulationsszenario"""
     duration_hours: int = Field(gt=0, description="Simulationsdauer in Stunden")
     random_seed: int = Field(default=42, description="Seed für Reproduzierbarkeit")
-    
+
     workshop: "WorkshopConfig"
     trains: "TrainConfig"
 
@@ -31,7 +31,7 @@ class WorkshopTrackConfig(BaseModel):
     id: str = Field(pattern=r"^TRACK\d{2}$", description="Track ID (z.B. TRACK01)")
     capacity: int = Field(gt=0, le=20, description="Gesamtkapazität des Gleises")
     retrofit_time_min: int = Field(ge=10, le=300, description="Umrüstzeit in Minuten")
-    
+
     # Hinweis für Vollversion:
     # In Vollversion wird dies zu list[StationConfig] mit einzelnen Stationen
 
@@ -57,7 +57,7 @@ class Workshop(BaseModel):
     """Werkstatt mit mehreren Gleisen (MVP: Vereinfacht)"""
     id: str
     tracks: list["WorkshopTrack"]
-    
+
     class Config:
         arbitrary_types_allowed = True  # Für SimPy Resources
 
@@ -67,13 +67,13 @@ class WorkshopTrack(BaseModel):
     capacity: int
     retrofit_time_min: int
     current_wagons: int = 0
-    
+
     # SimPy Resource (wird zur Laufzeit gesetzt)
     resource: Optional[simpy.Resource] = None
-    
+
     class Config:
         arbitrary_types_allowed = True
-    
+
     def is_available(self) -> bool:
         """Prüft ob Gleis verfügbar ist"""
         return self.current_wagons < self.capacity
@@ -83,22 +83,22 @@ class Wagon(BaseModel):
     id: str
     train_id: str
     needs_retrofit: bool = True  # Bestimmt ob Wagen umgerüstet werden muss
-    
+
     # Zeitstempel
     arrival_time: Optional[float] = None
     retrofit_start_time: Optional[float] = None
     retrofit_end_time: Optional[float] = None
-    
+
     # MVP: Welches Gleis hat den Wagen bearbeitet
     track_id: Optional[str] = None
-    
+
     @property
     def waiting_time(self) -> Optional[float]:
         """Wartezeit bis Umrüstung beginnt"""
         if self.arrival_time and self.retrofit_start_time:
             return self.retrofit_start_time - self.arrival_time
         return None
-    
+
     @property
     def retrofit_duration(self) -> Optional[float]:
         """Tatsächliche Umrüstdauer"""
@@ -111,7 +111,7 @@ class Train(BaseModel):
     id: str
     wagons: list[Wagon]
     arrival_time: float
-    
+
     @property
     def wagon_count(self) -> int:
         return len(self.wagons)
@@ -131,23 +131,23 @@ class SimulationResults(BaseModel):
     """Ergebnisse einer Simulation"""
     scenario_id: str
     duration_hours: float
-    
+
     # Durchsatz
     total_wagons_processed: int = Field(ge=0)
     throughput_per_hour: float = Field(ge=0.0)
-    
+
     # Wartezeiten
     average_waiting_time: float = Field(ge=0.0, description="Durchschnittliche Wartezeit in Minuten")
     max_waiting_time: float = Field(ge=0.0)
     min_waiting_time: float = Field(ge=0.0)
-    
+
     # Auslastung
     track_utilization: float = Field(ge=0.0, le=1.0, description="Durchschnittliche Gleisauslastung (MVP)")
-    
+
     # Warteschlange
     average_queue_length: float = Field(ge=0.0)
     max_queue_length: int = Field(ge=0)
-    
+
     # Zeitstempel
     simulation_start: datetime
     simulation_end: datetime
@@ -155,13 +155,13 @@ class SimulationResults(BaseModel):
 class KPIData(BaseModel):
     """KPI-Datenpunkt für Zeitreihen"""
     timestamp: float = Field(description="Simulationszeit in Stunden")
-    
+
     # Momentane Werte
     throughput: float = Field(ge=0.0, description="Wagen/Stunde")
     utilization: float = Field(ge=0.0, le=1.0, description="Auslastung 0-1")
     queue_length: int = Field(ge=0, description="Wartende Wagen")
     waiting_time: float = Field(ge=0.0, description="Aktuelle Wartezeit")
-    
+
     # Kumulative Werte
     total_processed: int = Field(ge=0, description="Gesamt verarbeitete Wagen")
 
@@ -172,7 +172,7 @@ class TrackMetrics(BaseModel):
     utilization: float = Field(ge=0.0, le=1.0)
     average_retrofit_time: float = Field(ge=0.0)
     idle_time: float = Field(ge=0.0, description="Leerlaufzeit in Stunden")
-    
+
     # Hinweis für Vollversion:
     # In Vollversion wird dies zu StationMetrics mit Pro-Station-Details
 ```
@@ -247,11 +247,11 @@ class ValidationResult(BaseModel):
     is_valid: bool
     errors: list[str] = []
     warnings: list[str] = []
-    
+
     def add_error(self, message: str):
         self.errors.append(message)
         self.is_valid = False
-    
+
     def add_warning(self, message: str):
         self.warnings.append(message)
 
@@ -260,7 +260,7 @@ class ConfigValidation(BaseModel):
     scenario: ValidationResult
     workshop: ValidationResult
     trains: ValidationResult
-    
+
     @property
     def is_valid(self) -> bool:
         return all([
@@ -304,7 +304,7 @@ import json
 def load_scenario(config_path: Path) -> ScenarioConfig:
     with open(config_path / "scenario.json") as f:
         data = json.load(f)
-    
+
     # Pydantic validiert automatisch
     scenario = ScenarioConfig(**data)
     return scenario
@@ -330,39 +330,39 @@ def setup_workshop(config: WorkshopConfig, env: simpy.Environment) -> Workshop:
             resource=simpy.Resource(env, capacity=track_config.capacity)
         )
         tracks.append(track)
-    
+
     return Workshop(id="workshop_001", tracks=tracks)
 
 # Wagen verarbeiten (MVP: Vereinfacht)
 def process_wagon(env: simpy.Environment, wagon: Wagon, track: WorkshopTrack):
     wagon.arrival_time = env.now
-    
+
     with track.resource.request() as req:
         yield req
-        
+
         wagon.retrofit_start_time = env.now
         wagon.track_id = track.id
         track.current_wagons += 1
-        
+
         yield env.timeout(track.retrofit_time_min / 60)  # Minuten → Stunden
-        
+
         wagon.retrofit_end_time = env.now
         track.current_wagons -= 1
-    
+
     return Workshop(id="workshop_001", stations=stations)
 
 # Wagen verarbeiten
 def process_wagon(env: simpy.Environment, wagon: Wagon, station: Station):
     wagon.arrival_time = env.now
-    
+
     with station.resource.request() as req:
         yield req
-        
+
         wagon.retrofit_start_time = env.now
         station.current_wagons += 1
-        
+
         yield env.timeout(station.retrofit_time_min / 60)  # Minuten → Stunden
-        
+
         wagon.retrofit_end_time = env.now
         station.current_wagons -= 1
 ```
@@ -373,9 +373,9 @@ def process_wagon(env: simpy.Environment, wagon: Wagon, station: Station):
 # KPIs berechnen
 def calculate_kpis(wagons: list[Wagon], duration_hours: float) -> SimulationResults:
     processed = [w for w in wagons if w.retrofit_end_time is not None]
-    
+
     waiting_times = [w.waiting_time for w in processed if w.waiting_time]
-    
+
     return SimulationResults(
         scenario_id="scenario_001",
         duration_hours=duration_hours,
@@ -417,13 +417,13 @@ except ValidationError as e:
 class ScenarioConfig(BaseModel):
     duration_hours: int
     workshop: WorkshopConfig
-    
+
     @validator('duration_hours')
     def duration_must_be_reasonable(cls, v):
         if v > 168:  # 1 Woche
             raise ValueError('Simulation länger als 1 Woche nicht sinnvoll')
         return v
-    
+
     @validator('workshop')
     def workshop_must_have_capacity(cls, v):
         total_capacity = sum(s.capacity for s in v.stations)

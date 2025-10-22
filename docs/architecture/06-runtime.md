@@ -12,27 +12,27 @@ sequenceDiagram
     participant Workshop as Workshop
     participant SimPy as SimPy
     participant Output as Output
-    
+
     User->>Main: python main.py
-    
+
     Main->>Config: load_scenario()
     Config->>Config: read JSON/CSV
     Config->>Main: return config
-    
+
     Main->>Workshop: setup_workshop(config)
     Workshop->>Workshop: create stations
     Workshop->>Main: return workshop
-    
+
     Main->>SimPy: run_simulation(24h)
-    
+
     loop Every Hour
         SimPy->>Workshop: train_arrival()
         Workshop->>Workshop: process_wagons()
         Workshop->>SimPy: retrofit_complete()
     end
-    
+
     SimPy->>Main: simulation_done
-    
+
     Main->>Output: generate_results()
     Output->>Output: create CSV
     Output->>Output: create charts
@@ -73,7 +73,7 @@ sequenceDiagram
 ### Skalierbarkeit
 
 - **Klein**: 100 Wagen < 5s
-- **Mittel**: 1000 Wagen < 30s  
+- **Mittel**: 1000 Wagen < 30s
 - **Groß**: 5000 Wagen < 2min
 - **MVP Limit**: 10000 Wagen < 5min
 

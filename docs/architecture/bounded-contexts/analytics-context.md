@@ -6,7 +6,7 @@
 
 ### Kernaufgaben
 - **Echtzeit-KPIs**: Auslastung, Durchsatz, Wartezeiten
-- **Aggregierte Metriken**: Tages-/Wochen-/Monatsstatistiken  
+- **Aggregierte Metriken**: Tages-/Wochen-/Monatsstatistiken
 - **Performance-Indikatoren**: Engpässe, Effizienz, Kapazitätsnutzung
 - **Trend-Analysen**: Zeitreihen, Vergleiche, Prognosen
 
@@ -15,7 +15,7 @@
 ```python
 class KPICalculationService:
     """Zentrale KPI-Berechnung im Backend"""
-    
+
     def calculate_real_time_kpis(self, simulation_state: SimulationState) -> RealTimeKPIs:
         """Berechnet Echtzeit-KPIs"""
         return RealTimeKPIs(
@@ -26,14 +26,14 @@ class KPICalculationService:
             throughput_per_hour=self._calculate_throughput(simulation_state),
             average_waiting_time=self._calculate_waiting_times(simulation_state)
         )
-    
+
     def _calculate_track_utilization(self, state: SimulationState) -> Dict[str, float]:
         """Berechnet Gleisauslastung in %"""
         utilization = {}
         for track in state.tracks:
             utilization[track.id] = (track.current_occupancy / track.capacity) * 100
         return utilization
-    
+
     def _calculate_workshop_utilization(self, state: SimulationState) -> Dict[str, float]:
         """Berechnet Werkstattauslastung in %"""
         utilization = {}
@@ -45,7 +45,7 @@ class KPICalculationService:
 class RealTimeKPIs:
     """KPIs werden im Backend berechnet, ans Frontend gesendet"""
     track_utilization: Dict[str, float]
-    workshop_utilization: Dict[str, float] 
+    workshop_utilization: Dict[str, float]
     locomotive_utilization: Dict[str, float]
     worker_utilization: Dict[str, float]
     throughput_per_hour: float
