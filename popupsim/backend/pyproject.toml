@@ -18,9 +18,13 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "matplotlib>=3.10.7",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.3",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.1",
+    "simpy>=4.1.1",
 ]
 
 [build-system]
@@ -119,3 +123,10 @@ exclude_lines = [
     "raise NotImplementedError"
 ]
 show_missing = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "ruff>=0.14.1",
+]
