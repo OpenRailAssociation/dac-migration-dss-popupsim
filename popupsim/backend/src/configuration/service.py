@@ -1,5 +1,12 @@
 """
-Service for loading and validating train simulation configuration files.
+Configuration service for loading, validating, and managing train simulation data.
+
+This module provides the ConfigurationService class that handles:
+- Loading and validating scenario configurations from JSON files
+- Loading and parsing train schedule data from CSV files
+- Creating validated domain models (ScenarioConfig, TrainArrival, WagonInfo)
+- Cross-validation between scenario dates and train arrival dates
+- Comprehensive error handling and logging for configuration issues
 """
 
 import json
@@ -10,7 +17,9 @@ from typing import List, Optional, Union
 import pandas as pd
 from pydantic import ValidationError
 
-from .model import ScenarioConfig, TrainArrival, WagonInfo
+from .model_scenario import ScenarioConfig
+from .model_train import TrainArrival
+from .model_wagon import WagonInfo
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -251,9 +260,9 @@ class ConfigurationService:
         logger.info('Loading train schedule from %s', file_path)
         try:
             df = self._read_and_validate_csv(file_path)
-            trains = self._create_train_arrivals(df)
-            logger.info('Successfully loaded %d trains with %d wagons from %s', len(trains), len(df), file_path)
-            return trains
+            train_arrivals = self._create_train_arrivals(df)
+            logger.info('Successfully loaded %d trains with %d wagons from %s', len(train_arrivals), len(df), file_path)
+            return train_arrivals
         except ConfigurationError as err:
             raise err
         except Exception as err:
