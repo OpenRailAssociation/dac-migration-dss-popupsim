@@ -43,9 +43,9 @@ PopUp-Sim is a Python-based simulation tool for modeling the European freight ra
 - To add a new simulation scenario, create a module in `popupsim/backend/src/` and corresponding tests in `popupsim/backend/tests/unit/`.
 
 ## References
-- [popupsim/backend/README.md](popupsim/backend/README.md)
-- [docs/architecture/](docs/architecture/)
-- [.github/workflows/README.md](.github/workflows/README.md)
+- [popupsim/backend/README.md](../popupsim/backend/README.md)
+- [docs/architecture/](../docs/architecture/)
+- [.github/workflows/README.md](workflows/README.md)
 
 ---
 **Feedback requested:** Please review for missing or unclear sections, especially regarding build/test workflows, code conventions, or integration points.
