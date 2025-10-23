@@ -1,9 +1,9 @@
 # Bounded Contexts Übersicht
 
-Die aktuellen Boundend Context sind aus dem Event-Storming im Rahmen des Skydeck accelerators erstanden.
+Die aktuellen Boundend Context sind aus dem Event-Storming im Rahmen des Skydeck Accelerators erstanden.
 
 
-## Vorhandene Bounded Conextes
+## Vorhandene Bounded Contexts
 
 ### Core Contexts
 1. **[Infrastructure Context](bounded-contexts/infrastructure-context.md)** - Gleise, Weichen, Topologie
