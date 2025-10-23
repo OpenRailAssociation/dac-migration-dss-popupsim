@@ -7,16 +7,19 @@
     "tracks": [
       {
         "id": "TRACK01",
+        "function": "werkstattgleis",
         "capacity": 5,
         "retrofit_time_min": 30
       },
       {
         "id": "TRACK02",
+        "function": "werkstattgleis",
         "capacity": 3,
         "retrofit_time_min": 45
       },
       {
         "id": "TRACK03",
+        "function": "werkstattgleis",
         "capacity": 4,
         "retrofit_time_min": 35
       }

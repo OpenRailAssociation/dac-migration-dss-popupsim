@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.main import APP_NAME, main
+from main import APP_NAME, main
 
 
 @pytest.mark.unit
