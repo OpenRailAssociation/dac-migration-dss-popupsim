@@ -10,9 +10,9 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
-from src.configuration.model_scenario import ScenarioConfig
-from src.configuration.model_track import Track
-from src.configuration.model_workshop import Workshop
+from configuration.model_scenario import ScenarioConfig
+from configuration.model_track import TrackFunction, WorkshopTrackConfig
+from configuration.model_workshop import Workshop
 
 
 class TestScenarioConfig:
@@ -38,8 +38,8 @@ class TestScenarioConfig:
     def test_scenario_config_creation_valid_data_with_workshop(self):
         """Test successful scenario config creation with workshop."""
         tracks = [
-            Track(id='TRACK01', capacity=5, retrofit_time_min=30),
-            Track(id='TRACK02', capacity=3, retrofit_time_min=45),
+            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
         ]
         workshop = Workshop(tracks=tracks)
 
@@ -66,9 +66,9 @@ class TestScenarioConfig:
             'random_seed': 42,
             'workshop': {
                 'tracks': [
-                    {'id': 'TRACK01', 'capacity': 5, 'retrofit_time_min': 30},
-                    {'id': 'TRACK02', 'capacity': 3, 'retrofit_time_min': 45},
-                    {'id': 'TRACK03', 'capacity': 4, 'retrofit_time_min': 35},
+                    {'id': 'TRACK01', 'function': 'werkstattgleis', 'capacity': 5, 'retrofit_time_min': 30},
+                    {'id': 'TRACK02', 'function': 'werkstattgleis', 'capacity': 3, 'retrofit_time_min': 45},
+                    {'id': 'TRACK03', 'function': 'werkstattgleis', 'capacity': 4, 'retrofit_time_min': 35},
                 ]
             },
             'train_schedule_file': 'train_schedule.csv',
@@ -367,7 +367,9 @@ class TestScenarioConfig:
 
     def test_scenario_config_dict_conversion(self):
         """Test scenario config conversion to dictionary."""
-        tracks = [Track(id='TRACK01', capacity=5, retrofit_time_min=30)]
+        tracks = [
+            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
+        ]
         workshop = Workshop(tracks=tracks)
 
         config = ScenarioConfig(
@@ -418,9 +420,9 @@ class TestScenarioConfig:
             'random_seed': 42,
             'workshop': {
                 'tracks': [
-                    {'id': 'TRACK01', 'capacity': 5, 'retrofit_time_min': 30},
-                    {'id': 'TRACK02', 'capacity': 3, 'retrofit_time_min': 45},
-                    {'id': 'TRACK03', 'capacity': 4, 'retrofit_time_min': 35},
+                    {'id': 'TRACK01', 'function': 'werkstattgleis', 'capacity': 5, 'retrofit_time_min': 30},
+                    {'id': 'TRACK02', 'function': 'werkstattgleis', 'capacity': 3, 'retrofit_time_min': 45},
+                    {'id': 'TRACK03', 'function': 'werkstattgleis', 'capacity': 4, 'retrofit_time_min': 35},
                 ]
             },
             'train_schedule_file': 'train_schedule.csv',

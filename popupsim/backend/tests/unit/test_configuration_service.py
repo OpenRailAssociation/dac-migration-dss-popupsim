@@ -4,9 +4,10 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.configuration.model_scenario import ScenarioConfig
-from src.configuration.model_train import TrainArrival
-from src.configuration.service import ConfigurationError, ConfigurationService
+from configuration.model_scenario import ScenarioConfig
+from configuration.model_track import TrackFunction, WorkshopTrackConfig
+from configuration.model_train import TrainArrival
+from configuration.service import ConfigurationError, ConfigurationService
 
 
 class TestConfigurationService:
@@ -40,6 +41,14 @@ class TestConfigurationService:
         \nT001,2024-01-05,14:30,W001,12.5,True,False
         \nT001,2024-01-05,14:30,W002,10.0,False,True
         \nT002,2024-01-07,09:15,W003,15.0,True,False"""
+
+    @pytest.fixture
+    def valid_workshop_tracks_csv(self):
+        """Valid CSV data for workshop tracks."""
+        return """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30
+TRACK02,werkstattgleis,3,45
+TRACK03,sammelgleis,10,0"""
 
     def test_service_initialization_default_path(self):
         """Test service initialization with default path."""
@@ -235,7 +244,7 @@ class TestConfigurationService:
         schedule_file.write_text(malformed_csv)
         # ExtraColumn is not expected
         with pytest.raises(ConfigurationError) as exc_info:
-            service._read_and_validate_csv(schedule_file)
+            service._read_and_validate_train_schedule_csv(schedule_file)
         assert 'Missing required columns' in str(exc_info.value)
 
     def test_create_train_arrivals_invalid_time_format(self, service):
@@ -278,9 +287,9 @@ class TestConfigurationService:
         dummy_csv = tmp_path / 'schedule.csv'
         dummy_csv.write_text('train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n')
         # Use monkeypatch to replace pd.read_csv with a function returning None
-        monkeypatch.setattr(pd, 'read_csv', lambda *_a, **_k: None)
+        monkeypatch.setattr(pd, 'read_csv', lambda *_args, **_kwargs: None)
         with pytest.raises(ConfigurationError) as exc_info:
-            service._read_and_validate_csv(dummy_csv)
+            service._read_and_validate_train_schedule_csv(dummy_csv)
         assert 'not a pandas DataFrame' in str(exc_info.value)
 
     def test_read_and_validate_csv_success(self, service, tmp_path, monkeypatch):
@@ -300,8 +309,8 @@ class TestConfigurationService:
                 'needs_retrofit': [False],
             }
         )
-        monkeypatch.setattr(pd, 'read_csv', lambda *_a, **_k: df_mock)
-        result = service._read_and_validate_csv(dummy_csv)
+        monkeypatch.setattr(pd, 'read_csv', lambda *_args, **_kwargs: df_mock)
+        result = service._read_and_validate_train_schedule_csv(dummy_csv)
         assert isinstance(result, pd.DataFrame)
         assert result.equals(df_mock)
 
@@ -431,8 +440,13 @@ class TestConfigurationService:
             'end_date': '2024-01-16',
             'workshop': {
                 'tracks': [
-                    {'id': 'TRACK01', 'capacity': 5, 'retrofit_time_min': 30},
-                    {'id': 'TRACK01', 'capacity': 3, 'retrofit_time_min': 45},  # Duplicate ID
+                    {'id': 'TRACK01', 'function': 'werkstattgleis', 'capacity': 5, 'retrofit_time_min': 30},
+                    {
+                        'id': 'TRACK01',
+                        'function': 'werkstattgleis',
+                        'capacity': 3,
+                        'retrofit_time_min': 45,
+                    },  # Duplicate ID
                 ]
             },
             'train_schedule_file': 'test_train_schedule.csv',
@@ -460,6 +474,8 @@ TRAIN001,2024-01-15,08:00,WAGON001
         with pytest.raises(ConfigurationError) as exc_info:
             service.load_train_schedule(schedule_file)
         assert 'Missing required columns' in str(exc_info.value)
+        assert 'arrival_date' in str(exc_info.value)
+        assert 'arrival_time' in str(exc_info.value)
 
     def test_load_fixture_train_schedule_invalid_date_format(self, tmp_path):
         """Test ConfigurationError with invalid date format in train schedule."""
@@ -584,3 +600,390 @@ TRAIN004,2024-01-15,14:00,WAGON004,20.0,yes,no
         train1 = next(t for t in trains if t.train_id == 'TRAIN001')
         assert train1.wagons[0].is_loaded is True
         assert train1.wagons[0].needs_retrofit is False
+
+    def test_load_workshop_tracks_success(self, service, tmp_path, valid_workshop_tracks_csv):
+        """Test successful loading of workshop tracks from CSV file."""
+        tracks_file = tmp_path / 'workshop_tracks.csv'
+        tracks_file.write_text(valid_workshop_tracks_csv)
+
+        workshop = service.load_workshop_tracks(tracks_file)
+        tracks = workshop.tracks
+        assert len(tracks) == 3
+        assert isinstance(tracks[0], WorkshopTrackConfig)
+
+        # Verify first track
+        track1 = tracks[0]
+        assert track1.id == 'TRACK01'
+        assert track1.function == TrackFunction.WERKSTATTGLEIS
+        assert track1.capacity == 5
+        assert track1.retrofit_time_min == 30
+
+        # Verify second track
+        track2 = tracks[1]
+        assert track2.id == 'TRACK02'
+        assert track2.function == TrackFunction.WERKSTATTGLEIS
+        assert track2.capacity == 3
+        assert track2.retrofit_time_min == 45
+
+        # Verify third track (sammelgleis)
+        track3 = tracks[2]
+        assert track3.id == 'TRACK03'
+        assert track3.function == TrackFunction.SAMMELGLEIS
+        assert track3.capacity == 10
+        assert track3.retrofit_time_min == 0
+
+    def test_load_workshop_tracks_file_not_found(self, service, tmp_path):
+        """Test ConfigurationError when workshop tracks file not found."""
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tmp_path / 'nonexistent_tracks.csv')
+        assert 'Workshop tracks file not found' in str(exc_info.value)
+
+    def test_load_workshop_tracks_empty_file(self, service, tmp_path):
+        """Test ConfigurationError for empty workshop tracks CSV file."""
+        tracks_file = tmp_path / 'empty_tracks.csv'
+        tracks_file.write_text('')
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'No columns to parse from file' in str(exc_info.value) or 'Workshop tracks file is empty' in str(
+            exc_info.value
+        )
+
+    def test_load_workshop_tracks_missing_required_columns(self, service, tmp_path):
+        """Test ConfigurationError for missing required columns in workshop tracks CSV."""
+        incomplete_csv = """id,function
+TRACK01,werkstattgleis"""
+
+        tracks_file = tmp_path / 'incomplete_tracks.csv'
+        tracks_file.write_text(incomplete_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Missing required columns' in str(exc_info.value)
+        assert 'capacity' in str(exc_info.value)
+        assert 'retrofit_time_min' in str(exc_info.value)
+
+    def test_load_workshop_tracks_duplicate_track_ids(self, service, tmp_path):
+        """Test ConfigurationError for duplicate track IDs in workshop tracks."""
+        duplicate_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30
+TRACK01,werkstattgleis,3,45"""
+
+        tracks_file = tmp_path / 'duplicate_tracks.csv'
+        tracks_file.write_text(duplicate_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Duplicate track IDs found' in str(exc_info.value)
+        assert 'TRACK01' in str(exc_info.value)
+
+    def test_load_workshop_tracks_invalid_capacity_type(self, service, tmp_path):
+        """Test ConfigurationError for invalid capacity data type."""
+        invalid_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,invalid_capacity,30"""
+
+        tracks_file = tmp_path / 'invalid_capacity_tracks.csv'
+        tracks_file.write_text(invalid_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        error_msg = str(exc_info.value)
+        assert 'Unexpected error' in error_msg or 'invalid literal for int()' in error_msg
+
+    def test_load_workshop_tracks_invalid_retrofit_time_type(self, service, tmp_path):
+        """Test ConfigurationError for invalid retrofit_time_min data type."""
+        invalid_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,invalid_time"""
+
+        tracks_file = tmp_path / 'invalid_time_tracks.csv'
+        tracks_file.write_text(invalid_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        error_msg = str(exc_info.value)
+        assert 'Unexpected error' in error_msg or 'invalid literal for int()' in error_msg
+
+    def test_load_workshop_tracks_negative_capacity(self, service, tmp_path):
+        """Test ConfigurationError for negative capacity values."""
+        negative_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,-5,30"""
+
+        tracks_file = tmp_path / 'negative_capacity_tracks.csv'
+        tracks_file.write_text(negative_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Validation failed' in str(exc_info.value)
+
+    def test_load_workshop_tracks_negative_retrofit_time(self, service, tmp_path):
+        """Test ConfigurationError for negative retrofit_time_min values."""
+        negative_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,-30"""
+
+        tracks_file = tmp_path / 'negative_time_tracks.csv'
+        tracks_file.write_text(negative_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Validation failed' in str(exc_info.value)
+
+    def test_load_workshop_tracks_empty_track_id(self, service, tmp_path):
+        """Test ConfigurationError for empty track ID."""
+        empty_id_csv = """id,function,capacity,retrofit_time_min
+,werkstattgleis,5,30"""
+
+        tracks_file = tmp_path / 'empty_id_tracks.csv'
+        tracks_file.write_text(empty_id_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Validation failed' in str(exc_info.value)
+
+    def test_load_workshop_tracks_empty_function(self, service, tmp_path):
+        """Test ConfigurationError for empty function field."""
+        empty_function_csv = """id,function,capacity,retrofit_time_min
+TRACK01,,5,30"""
+
+        tracks_file = tmp_path / 'empty_function_tracks.csv'
+        tracks_file.write_text(empty_function_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        error_msg = str(exc_info.value)
+        assert 'Invalid data type for track TRACK01' in error_msg
+
+    def test_load_workshop_tracks_zero_capacity(self, service, tmp_path):
+        """Test ConfigurationError for zero capacity values."""
+        zero_capacity_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,0,30"""
+
+        tracks_file = tmp_path / 'zero_capacity_tracks.csv'
+        tracks_file.write_text(zero_capacity_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Validation failed' in str(exc_info.value)
+
+    def test_load_workshop_tracks_malformed_csv(self, service, tmp_path):
+        """Test ConfigurationError for malformed CSV structure."""
+        malformed_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30,extra_column_value
+TRACK02,werkstattgleis"""  # Missing values
+
+        tracks_file = tmp_path / 'malformed_tracks.csv'
+        tracks_file.write_text(malformed_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        error_msg = str(exc_info.value)
+        assert 'Unexpected error' in error_msg or 'Integer column has NA values' in error_msg
+
+    def test_load_workshop_tracks_extra_columns_ignored(self, service, tmp_path):
+        """Test that extra columns in CSV are ignored."""
+        extra_columns_csv = """id,function,capacity,retrofit_time_min,extra_column,another_extra
+TRACK01,werkstattgleis,5,30,ignored1,ignored2
+TRACK02,sammelgleis,8,0,ignored3,ignored4"""
+
+        tracks_file = tmp_path / 'extra_columns_tracks.csv'
+        tracks_file.write_text(extra_columns_csv)
+
+        workshop = service.load_workshop_tracks(tracks_file)
+        tracks = workshop.tracks
+        assert len(tracks) == 2
+        assert tracks[0].id == 'TRACK01'
+        assert tracks[0].function == TrackFunction.WERKSTATTGLEIS
+        assert tracks[0].capacity == 5
+        assert tracks[0].retrofit_time_min == 30
+
+    def test_load_workshop_tracks_whitespace_handling(self, service, tmp_path):
+        """Test that whitespace in CSV values is handled correctly."""
+        whitespace_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30
+TRACK02,sammelgleis,8,0"""
+
+        tracks_file = tmp_path / 'whitespace_tracks.csv'
+        tracks_file.write_text(whitespace_csv)
+
+        workshop = service.load_workshop_tracks(tracks_file)
+        tracks = workshop.tracks
+        assert len(tracks) == 2
+        # Verify whitespace is properly handled
+        assert tracks[0].id == 'TRACK01'  # Should be trimmed
+        assert tracks[0].function == TrackFunction.WERKSTATTGLEIS  # Should be trimmed
+        assert tracks[0].capacity == 5
+        assert tracks[0].retrofit_time_min == 30
+
+    def test_load_workshop_tracks_single_track(self, service, tmp_path):
+        """Test successful loading of single workshop track."""
+        single_track_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30"""
+
+        tracks_file = tmp_path / 'single_track.csv'
+        tracks_file.write_text(single_track_csv)
+
+        workshop = service.load_workshop_tracks(tracks_file)
+        tracks = workshop.tracks
+        assert len(tracks) == 1
+        assert tracks[0].id == 'TRACK01'
+        assert tracks[0].function == TrackFunction.WERKSTATTGLEIS
+        assert tracks[0].capacity == 5
+        assert tracks[0].retrofit_time_min == 30
+
+    def test_load_workshop_tracks_multiple_functions(self, service, tmp_path):
+        """Test loading workshop tracks with multiple function types."""
+        multi_function_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30
+TRACK02,sammelgleis,10,0
+TRACK03,parkgleis,8,0
+TRACK04,werkstattgleis,3,45"""
+
+        tracks_file = tmp_path / 'multi_function_tracks.csv'
+        tracks_file.write_text(multi_function_csv)
+
+        workshop = service.load_workshop_tracks(tracks_file)
+        tracks = workshop.tracks
+        assert len(tracks) == 4
+
+        # Verify different function types
+        functions = [track.function for track in tracks]
+        assert TrackFunction.WERKSTATTGLEIS in functions
+        assert TrackFunction.SAMMELGLEIS in functions
+        assert TrackFunction.PARKGLEIS in functions
+
+        # Verify werkstattgleis tracks have non-zero retrofit times
+        werkstatt_tracks = [track for track in tracks if track.function == TrackFunction.WERKSTATTGLEIS]
+        for track in werkstatt_tracks:
+            assert track.retrofit_time_min > 0
+
+        # Verify non-werkstattgleis tracks have zero retrofit times
+        non_werkstatt_tracks = [track for track in tracks if track.function != TrackFunction.WERKSTATTGLEIS]
+        for track in non_werkstatt_tracks:
+            assert track.retrofit_time_min == 0
+
+    def test_load_workshop_tracks_large_capacity_values(self, service, tmp_path):
+        """Test loading workshop tracks with large capacity values."""
+        large_capacity_csv = """id,function,capacity,retrofit_time_min
+TRACK01,sammelgleis,1000,0
+TRACK02,werkstattgleis,500,60"""
+
+        tracks_file = tmp_path / 'large_capacity_tracks.csv'
+        tracks_file.write_text(large_capacity_csv)
+
+        workshop = service.load_workshop_tracks(tracks_file)
+        tracks = workshop.tracks
+        assert len(tracks) == 2
+        assert tracks[0].capacity == 1000
+        assert tracks[1].capacity == 500
+
+    def test_load_workshop_tracks_pandas_dataframe_validation(self, service, tmp_path, monkeypatch):
+        """Test ConfigurationError if pandas.read_csv does not return a DataFrame."""
+        tracks_file = tmp_path / 'test_tracks.csv'
+        tracks_file.write_text('id,function,capacity,retrofit_time_min\n')
+
+        # Mock pd.read_csv to return None instead of DataFrame
+        monkeypatch.setattr(pd, 'read_csv', lambda *_args, **_kwargs: None)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'not a pandas DataFrame' in str(exc_info.value)
+
+    def test_create_workshop_tracks_from_dataframe_success(self, service):
+        """Test successful creation of WorkshopTrackConfig objects from DataFrame."""
+        df = pd.DataFrame(
+            {
+                'id': ['TRACK01', 'TRACK02'],
+                'function': ['werkstattgleis', 'sammelgleis'],
+                'capacity': [5, 10],
+                'retrofit_time_min': [30, 0],
+            }
+        )
+
+        tracks = service._create_workshop_tracks_from_dataframe(df)
+
+        assert len(tracks) == 2
+        assert isinstance(tracks[0], WorkshopTrackConfig)
+        assert tracks[0].id == 'TRACK01'
+        assert tracks[0].function == TrackFunction.WERKSTATTGLEIS
+        assert tracks[0].capacity == 5
+        assert tracks[0].retrofit_time_min == 30
+
+    def test_create_workshop_tracks_from_dataframe_validation_error(self, service):
+        """Test ConfigurationError when WorkshopTrackConfig validation fails."""
+        # DataFrame with invalid data (negative capacity)
+        df = pd.DataFrame(
+            {
+                'id': ['TRACK01'],
+                'function': ['werkstattgleis'],
+                'capacity': [-5],  # Invalid: negative capacity
+                'retrofit_time_min': [30],
+            }
+        )
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service._create_workshop_tracks_from_dataframe(df)
+        assert 'Validation failed for track TRACK01' in str(exc_info.value)
+
+    def test_create_workshop_tracks_from_dataframe_type_error(self, service):
+        """Test ConfigurationError when DataFrame contains invalid data types."""
+        # DataFrame with invalid data types
+        df = pd.DataFrame(
+            {
+                'id': ['TRACK01'],
+                'function': ['werkstattgleis'],
+                'capacity': ['invalid'],  # Invalid: string instead of int
+                'retrofit_time_min': [30],
+            }
+        )
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service._create_workshop_tracks_from_dataframe(df)
+        assert 'Invalid data type for track TRACK01' in str(exc_info.value)
+
+    def test_load_workshop_tracks_invalid_function_enum(self, service, tmp_path):
+        """Test ConfigurationError for invalid function enum value."""
+        invalid_function_csv = """id,function,capacity,retrofit_time_min
+TRACK01,invalid_function,5,30"""
+
+        tracks_file = tmp_path / 'invalid_function_tracks.csv'
+        tracks_file.write_text(invalid_function_csv)
+
+        with pytest.raises(ConfigurationError) as exc_info:
+            service.load_workshop_tracks(tracks_file)
+        assert 'Invalid data type for track TRACK01' in str(exc_info.value)
+
+    def test_load_workshop_tracks_all_valid_functions(self, service, tmp_path):
+        """Test loading workshop tracks with all valid function enum values."""
+        all_functions_csv = """id,function,capacity,retrofit_time_min
+TRACK01,werkstattgleis,5,30
+TRACK02,sammelgleis,8,0
+TRACK03,parkgleis,6,0
+TRACK04,werkstattzufuehrung,4,0
+TRACK05,werkstattabfuehrung,3,0
+TRACK06,bahnhofskopf,10,0"""
+
+        tracks_file = tmp_path / 'all_functions_tracks.csv'
+        tracks_file.write_text(all_functions_csv)
+
+        tracks = service.load_workshop_tracks(tracks_file)
+        tracks = tracks.tracks
+        assert len(tracks) == 6
+
+        # Verify all function types are present
+        functions = [track.function for track in tracks]
+        expected_functions = [
+            TrackFunction.WERKSTATTGLEIS,
+            TrackFunction.SAMMELGLEIS,
+            TrackFunction.PARKGLEIS,
+            TrackFunction.WERKSTATTZUFUEHRUNG,
+            TrackFunction.WERKSTATTABFUEHRUNG,
+            TrackFunction.BAHNHOFSKOPF,
+        ]
+        for expected_func in expected_functions:
+            assert expected_func in functions
+
+        # Verify only werkstattgleis has non-zero retrofit time
+        for track in tracks:
+            if track.function == TrackFunction.WERKSTATTGLEIS:
+                assert track.retrofit_time_min > 0
+            else:
+                assert track.retrofit_time_min == 0

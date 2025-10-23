@@ -18,8 +18,10 @@ import pandas as pd
 from pydantic import ValidationError
 
 from .model_scenario import ScenarioConfig
+from .model_track import TrackFunction, WorkshopTrackConfig
 from .model_train import TrainArrival
 from .model_wagon import WagonInfo
+from .model_workshop import Workshop
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -127,7 +129,7 @@ class ConfigurationService:
         logger.info('All referenced files validated for scenario: %s', scenario_config.scenario_id)
         return scenario_config
 
-    def _read_and_validate_csv(self, file_path: Path) -> pd.DataFrame:
+    def _read_and_validate_train_schedule_csv(self, file_path: Path) -> pd.DataFrame:
         """Read CSV and validate required columns and emptiness."""
         try:
             df = pd.read_csv(
@@ -259,7 +261,7 @@ class ConfigurationService:
             raise ConfigurationError(f'Train schedule file not found: {file_path}')
         logger.info('Loading train schedule from %s', file_path)
         try:
-            df = self._read_and_validate_csv(file_path)
+            df = self._read_and_validate_train_schedule_csv(file_path)
             train_arrivals = self._create_train_arrivals(df)
             logger.info('Successfully loaded %d trains with %d wagons from %s', len(train_arrivals), len(df), file_path)
             return train_arrivals
@@ -267,6 +269,113 @@ class ConfigurationService:
             raise err
         except Exception as err:
             raise ConfigurationError(f'Unexpected error loading train schedule from {file_path}: {err}') from err
+
+    def _create_workshop_tracks_from_dataframe(self, df: pd.DataFrame) -> List[WorkshopTrackConfig]:
+        """Create WorkshopTrackConfig objects from DataFrame rows."""
+        tracks = []
+        for _, row in df.iterrows():
+            try:
+                track = WorkshopTrackConfig(
+                    id=str(row['id']).strip(),
+                    function=TrackFunction(str(row['function']).strip()),
+                    capacity=int(row['capacity']),
+                    retrofit_time_min=int(row['retrofit_time_min']),
+                )
+                tracks.append(track)
+            except ValidationError as err:
+                error_details = []
+                for error in err.errors():
+                    field_path = ' -> '.join(str(loc) for loc in error['loc'])
+                    error_details.append(f"Field '{field_path}': {error['msg']}")
+                raise ConfigurationError(
+                    f'Validation failed for track {row["id"]}:\n'
+                    f'  • {chr(10).join("  • " + detail for detail in error_details)}'
+                ) from err
+            except (ValueError, TypeError) as err:
+                raise ConfigurationError(f'Invalid data type for track {row["id"]}: {err}') from err
+        return tracks
+
+    def _read_and_validate_workshop_tracks_csv(self, file_path: Path) -> pd.DataFrame:
+        """Read and validate workshop tracks CSV file."""
+        try:
+            # Read CSV with appropriate data types
+            df = pd.read_csv(file_path, dtype={'id': str, 'function': str, 'capacity': int, 'retrofit_time_min': int})
+
+            # Check that the loaded object is a pandas DataFrame
+            if not isinstance(df, pd.DataFrame):
+                raise ConfigurationError(f'Loaded object is not a pandas DataFrame: got {type(df)}')
+
+            if df.empty:
+                raise ConfigurationError(f'Workshop tracks file is empty: {file_path}')
+
+            # Validate required columns
+            required_columns = ['id', 'function', 'capacity', 'retrofit_time_min']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                raise ConfigurationError(
+                    f'Missing required columns in {file_path}: '
+                    f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
+                )
+
+            # Check for duplicate track IDs
+            duplicate_ids = df[df.duplicated(subset=['id'], keep=False)]['id'].unique()
+            if len(duplicate_ids) > 0:
+                raise ConfigurationError(f'Duplicate track IDs found: {", ".join(duplicate_ids)}')
+
+            return df
+
+        except pd.errors.ParserError as err:
+            raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
+
+    def _create_workshop_from_tracks(self, tracks: List[WorkshopTrackConfig]) -> Workshop:
+        """Create Workshop object from tracks with validation."""
+        try:
+            return Workshop(tracks=tracks)
+        except ValidationError as err:
+            error_details = []
+            for error in err.errors():
+                field_path = ' -> '.join(str(loc) for loc in error['loc'])
+                error_details.append(f"Field '{field_path}': {error['msg']}")
+            raise ConfigurationError(
+                f'Validation failed for workshop configuration:\n'
+                f'  • {chr(10).join("  • " + detail for detail in error_details)}'
+            ) from err
+        except Exception as err:
+            raise ConfigurationError(f'Unexpected error creating workshop from tracks: {err}') from err
+
+    def load_workshop_tracks(self, file_path: Union[str, Path]) -> Workshop:
+        """
+        Load workshop tracks from CSV file and validate data.
+        Args:
+            file_path: Path to the workshop_tracks.csv file
+        Returns:
+            Workshop: Validated workshop configuration with tracks
+        Raises:
+            ConfigurationError: If file not found, CSV parsing fails, or validation fails
+        """
+        file_path = Path(file_path)
+        if not file_path.exists():
+            raise ConfigurationError(f'Workshop tracks file not found: {file_path}')
+
+        logger.info('Loading workshop tracks from %s', file_path)
+
+        try:
+            # Read and validate CSV data
+            df = self._read_and_validate_workshop_tracks_csv(file_path)
+
+            # Create WorkshopTrackConfig objects
+            tracks = self._create_workshop_tracks_from_dataframe(df)
+
+            # Create Workshop with validation
+            workshop = self._create_workshop_from_tracks(tracks)
+
+            logger.info('Successfully loaded %d workshop tracks from %s', len(tracks), file_path)
+            return workshop
+
+        except ConfigurationError as err:
+            raise err
+        except Exception as err:
+            raise ConfigurationError(f'Unexpected error loading workshop tracks from {file_path}: {err}') from err
 
     def load_complete_scenario(self, path: Union[str, Path]) -> tuple[ScenarioConfig, List[TrainArrival]]:
         """
