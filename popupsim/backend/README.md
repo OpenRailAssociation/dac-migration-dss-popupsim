@@ -54,7 +54,7 @@ uv sync --frozen
 
 5. **Install pre-commit hooks for developers:**
    ```bash
-   in project root
+   # in project root
    uv pip install pre-commit
    pre-commit install
    uv run ./setup/dev/set_commit_msg_hooks.py
@@ -64,7 +64,7 @@ uv sync --frozen
 
 - **Run tests:**
   ```bash
-  in project root/popupsim/backend
+  # in project root/popupsim/backend
   uv run pytest
   ```
 
@@ -114,19 +114,26 @@ uv run pre-commit run --all-files
 graph TD
     A[PopUp-Sim] --> B[backend/]
     A --> C[frontend/]
-    A --> D[pyproject.toml]
     A --> E[README.md]
 
-    B --> F[src/]
-    B --> G[tests/]
-    F --> H[popup_sim/]
+    subgraph Backend
+        B --> D[pyproject.toml]
+        B --> F[src/]
+        B --> G[tests/]
+        B --> I[README.md]
+    end
 
-    C --> I[Vue.js application]
+    subgraph Frontend
+        C --> J[Vue.js application]
+    end
+
+    E --> I
 
     style A fill:#e1f5fe
     style B fill:#f3e5f5
-    style C fill:#e8f5e8
-    style H fill:#fff3e0
+    style F fill:#e8f5e8
+    style G fill:#fff3e0
+
 ```
 
 ## Contributing
