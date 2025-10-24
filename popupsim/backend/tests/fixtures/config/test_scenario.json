@@ -25,5 +25,5 @@
       }
     ]
   },
-  "train_schedule_file": "train_schedule.csv"
+  "train_schedule_file": "test_train_schedule.csv"
 }

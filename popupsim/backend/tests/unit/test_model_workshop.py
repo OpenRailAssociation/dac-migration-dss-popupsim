@@ -8,7 +8,7 @@ duplicate track ID validation, and TrackFunction validation for workshop configu
 import pytest
 from pydantic import ValidationError
 
-from src.configuration.model_track import TrackFunction, WorkshopTrackConfig
+from src.configuration.model_track import TrackFunction, WorkshopTrack
 from src.configuration.model_workshop import Workshop
 
 
@@ -18,9 +18,9 @@ class TestWorkshop:
     def test_workshop_creation_valid_data(self):
         """Test successful workshop creation with valid data."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
-            WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
+            WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
         ]
 
         workshop = Workshop(tracks=tracks)
@@ -32,9 +32,7 @@ class TestWorkshop:
 
     def test_workshop_creation_single_track(self):
         """Test workshop creation with minimum single werkstattgleis track."""
-        track = WorkshopTrackConfig(
-            id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30
-        )
+        track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
         workshop = Workshop(tracks=[track])
 
         assert len(workshop.tracks) == 1
@@ -56,8 +54,8 @@ class TestWorkshop:
     def test_workshop_validation_duplicate_track_ids(self):
         """Test validation error when tracks have duplicate IDs."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(
                 id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0
             ),  # Duplicate ID
         ]
@@ -70,8 +68,8 @@ class TestWorkshop:
     def test_workshop_validation_missing_werkstattgleis(self):
         """Test validation error when no werkstattgleis track is present."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
         ]
 
         with pytest.raises(ValidationError) as exc_info:
@@ -81,18 +79,18 @@ class TestWorkshop:
 
     def test_workshop_validation_werkstattgleis_invalid_retrofit_time(self):
         """Test validation error when werkstattgleis has invalid retrofit_time_min."""
-        # This validation happens at the WorkshopTrackConfig level, not Workshop level
+        # This validation happens at the WorkshopTrack level, not Workshop level
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(
+            WorkshopTrack(
                 id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=0
             )  # Invalid: should be > 0
         assert 'retrofit_time_min must be > 0 for werkstattgleis' in str(exc_info.value)
 
     def test_workshop_validation_non_werkstattgleis_invalid_retrofit_time(self):
         """Test validation error when non-werkstattgleis has non-zero retrofit_time_min."""
-        # This validation happens at the WorkshopTrackConfig level, not Workshop level
+        # This validation happens at the WorkshopTrack level, not Workshop level
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(
+            WorkshopTrack(
                 id='TRACK02', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=15
             )  # Invalid: should be 0
         assert 'retrofit_time_min must be 0 unless function is werkstattgleis' in str(exc_info.value)
@@ -101,10 +99,8 @@ class TestWorkshop:
         """Test validation error when feeder/exit tracks are unbalanced."""
         # Test: werkstattzufuehrung without werkstattabfuehrung
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
-                id='TRACK02', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0),
             # Missing WERKSTATTABFUEHRUNG
         ]
 
@@ -114,10 +110,8 @@ class TestWorkshop:
 
         # Test: werkstattabfuehrung without werkstattzufuehrung
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
-                id='TRACK02', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0),
             # Missing WERKSTATTZUFUEHRUNG
         ]
 
@@ -128,13 +122,9 @@ class TestWorkshop:
     def test_workshop_validation_balanced_feeder_tracks_valid(self):
         """Test valid workshop with balanced feeder/exit tracks."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
-                id='TRACK02', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
-            WorkshopTrackConfig(
-                id='TRACK03', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK03', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0),
         ]
 
         workshop = Workshop(tracks=tracks)
@@ -143,17 +133,13 @@ class TestWorkshop:
     def test_workshop_all_track_functions_valid(self):
         """Test workshop with all valid track function types."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
-            WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
-            WorkshopTrackConfig(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
-            WorkshopTrackConfig(
-                id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
-            WorkshopTrackConfig(
-                id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
-            WorkshopTrackConfig(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
+            WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0),
         ]
 
         workshop = Workshop(tracks=tracks)
@@ -180,7 +166,7 @@ class TestWorkshop:
             {'id': 'TRACK07', 'function': 'bahnhofskopf', 'capacity': 3, 'retrofit_time_min': 0},
         ]
 
-        tracks = [WorkshopTrackConfig(**track_data) for track_data in csv_tracks_data]
+        tracks = [WorkshopTrack(**track_data) for track_data in csv_tracks_data]
 
         # Create workshop
         workshop = Workshop(tracks=tracks)
@@ -192,12 +178,12 @@ class TestWorkshop:
     def test_workshop_multiple_duplicates_validation(self):
         """Test validation error with multiple duplicate track IDs."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(
                 id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0
             ),  # Duplicate
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
-            WorkshopTrackConfig(
+            WorkshopTrack(id='TRACK02', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
+            WorkshopTrack(
                 id='TRACK02', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0
             ),  # Another duplicate
         ]
@@ -211,12 +197,12 @@ class TestWorkshop:
     def test_workshop_function_capacity_calculation(self):
         """Test that workshop correctly handles function capacity calculations."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(
                 id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45
             ),  # Total werkstatt: 8
-            WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
-            WorkshopTrackConfig(
+            WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(
                 id='TRACK04', function=TrackFunction.SAMMELGLEIS, capacity=5, retrofit_time_min=0
             ),  # Total sammel: 15
         ]
@@ -236,7 +222,7 @@ class TestWorkshop:
         """Test warning for missing core workflow functions (sammelgleis, parkgleis)."""
         # Only werkstattgleis, missing sammelgleis and parkgleis
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
         ]
 
         workshop = Workshop(tracks=tracks)
@@ -246,7 +232,7 @@ class TestWorkshop:
         """Test enhanced German error messages matching reference validation style."""
         # Test enhanced werkstattgleis missing message
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
         ]
 
         with pytest.raises(ValidationError) as exc_info:
@@ -258,7 +244,7 @@ class TestWorkshop:
         """Test enhanced German error messages for retrofit time validation."""
         # Test enhanced non-werkstattgleis error message
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=15)
+            WorkshopTrack(id='TRACK02', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=15)
 
         assert 'retrofit_time_min must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
@@ -266,10 +252,8 @@ class TestWorkshop:
         """Test enhanced German error messages for feeder track validation."""
         # Test enhanced feeder track imbalance message
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(
-                id='TRACK02', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0),
         ]
 
         with pytest.raises(ValidationError) as exc_info:
@@ -280,9 +264,9 @@ class TestWorkshop:
     def test_workshop_throughput_info_calculation(self):
         """Test werkstatt throughput information calculation."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=60),
-            WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=60),
+            WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
         ]
 
         workshop = Workshop(tracks=tracks)
@@ -300,13 +284,13 @@ class TestWorkshop:
         """Test throughput info when no werkstattgleis tracks exist."""
         # Create a workshop with valid tracks first, then manually modify for testing
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
         ]
         workshop = Workshop(tracks=tracks)
 
         # Now replace tracks to simulate no werkstattgleis scenario
         workshop.tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0)
+            WorkshopTrack(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0)
         ]
 
         throughput_info = workshop.get_werkstatt_throughput_info()
@@ -316,8 +300,8 @@ class TestWorkshop:
     def test_workshop_capacity_utilization_validation(self):
         """Test capacity utilization validation with different load scenarios."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
         ]
 
         workshop = Workshop(tracks=tracks)
@@ -353,13 +337,13 @@ class TestWorkshop:
         """Test capacity utilization validation when no werkstattgleis exists."""
         # Create a valid workshop first, then modify it for testing
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
         ]
         workshop = Workshop(tracks=tracks)
 
         # Now replace tracks to simulate no werkstattgleis scenario
         workshop.tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0)
+            WorkshopTrack(id='TRACK01', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0)
         ]
 
         messages = workshop.validate_capacity_utilization(100)
@@ -371,18 +355,14 @@ class TestWorkshop:
         # Realistic workshop setup
         tracks = [
             # Werkstattgleise
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
             # Supporting tracks
-            WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
-            WorkshopTrackConfig(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
-            WorkshopTrackConfig(
-                id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
-            WorkshopTrackConfig(
-                id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0
-            ),
-            WorkshopTrackConfig(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0),
+            WorkshopTrack(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0),
         ]
 
         workshop = Workshop(tracks=tracks)

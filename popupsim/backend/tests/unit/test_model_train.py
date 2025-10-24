@@ -1,7 +1,7 @@
 """
-Unit tests for TrainArrival model.
+Unit tests for Train model.
 
-Tests the TrainArrival model validation logic, time parsing,
+Tests the Train model validation logic, time parsing,
 wagon validation, and datetime combination functionality.
 """
 
@@ -11,24 +11,22 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from configuration.model_train import TrainArrival
-from configuration.model_wagon import WagonInfo
+from configuration.model_train import Train
+from configuration.model_wagon import Wagon
 from configuration.service import ConfigurationError, ConfigurationService
 
 
-class TestTrainArrival:
-    """Test cases for TrainArrival model."""
+class TestTrain:
+    """Test cases for Train model."""
 
-    def test_train_arrival_creation_valid_data(self):
+    def test_train_arrival_creation_valid_data(self) -> None:
         """Test successful train arrival creation with valid data."""
         wagons = [
-            WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False),
-            WagonInfo(wagon_id='W002', length=12.0, is_loaded=False, needs_retrofit=True),
+            Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001'),
+            Wagon(wagon_id='W002', length=12.0, is_loaded=False, needs_retrofit=True, train_id='TRAIN001'),
         ]
 
-        train = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
         assert train.train_id == 'TRAIN001'
         assert train.arrival_date == date(2024, 1, 15)
@@ -36,20 +34,18 @@ class TestTrainArrival:
         assert len(train.wagons) == 2
         assert train.wagons[0].wagon_id == 'W001'
 
-    def test_train_arrival_datetime_property(self):
+    def test_train_arrival_datetime_property(self) -> None:
         """Test the arrival_datetime property combines date and time correctly."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
-        train = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(14, 30, 45), wagons=wagons
-        )
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(14, 30, 45), wagons=wagons)
 
         expected_datetime = datetime(2024, 1, 15, 14, 30, 45, tzinfo=timezone.utc)
         assert train.arrival_datetime == expected_datetime
 
-    def test_train_arrival_time_string_parsing_valid_formats(self):
+    def test_train_arrival_time_string_parsing_valid_formats(self) -> None:
         """Test parsing of arrival time from valid string formats."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
         valid_time_strings = [
             ('08:30', time(8, 30)),
@@ -61,14 +57,12 @@ class TestTrainArrival:
         ]
 
         for time_str, expected_time in valid_time_strings:
-            train = TrainArrival(
-                train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_str, wagons=wagons
-            )
+            train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_str, wagons=wagons)
             assert train.arrival_time == expected_time
 
-    def test_train_arrival_time_string_parsing_invalid_formats(self):
+    def test_train_arrival_time_string_parsing_invalid_formats(self) -> None:
         """Test validation error with invalid time string formats."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
         invalid_time_strings = [
             '25:30',  # Invalid hour
@@ -88,21 +82,21 @@ class TestTrainArrival:
 
         for time_str in invalid_time_strings:
             with pytest.raises(ValidationError) as exc_info:
-                TrainArrival(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_str, wagons=wagons)
+                Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_str, wagons=wagons)
             assert 'arrival_time must be in HH:MM format' in str(exc_info.value)
 
-    def test_train_arrival_time_object_validation(self):
+    def test_train_arrival_time_object_validation(self) -> None:
         """Test that time objects are accepted directly."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
         time_obj = time(14, 30, 45)
-        train = TrainArrival(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_obj, wagons=wagons)
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_obj, wagons=wagons)
 
         assert train.arrival_time == time_obj
 
-    def test_train_arrival_time_invalid_types(self):
+    def test_train_arrival_time_invalid_types(self) -> None:
         """Test validation error with invalid time types."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
         invalid_time_values = [
             123,  # Integer
@@ -114,75 +108,73 @@ class TestTrainArrival:
 
         for time_val in invalid_time_values:
             with pytest.raises(ValidationError) as exc_info:
-                TrainArrival(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_val, wagons=wagons)
+                Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time_val, wagons=wagons)
             error_msg = str(exc_info.value)
             assert (
                 'arrival_time must be a string in HH:MM format or a time object' in error_msg
                 or 'arrival_time must be in HH:MM format' in error_msg
             )
 
-    def test_train_arrival_empty_wagons_validation(self):
+    def test_train_arrival_empty_wagons_validation(self) -> None:
         """Test validation error when wagons list is empty."""
         with pytest.raises(ValidationError) as exc_info:
-            TrainArrival(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=[])
+            Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=[])
         assert 'must have at least one wagon' in str(exc_info.value)
 
-    def test_train_arrival_missing_wagons_field(self):
+    def test_train_arrival_missing_wagons_field(self) -> None:
         """Test validation error when wagons field is missing."""
         with pytest.raises(ValidationError) as exc_info:
-            TrainArrival(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30))
+            Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30))
         assert 'Field required' in str(exc_info.value)
 
-    def test_train_arrival_single_wagon(self):
+    def test_train_arrival_single_wagon(self) -> None:
         """Test train arrival with single wagon."""
-        wagon = WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)
+        wagon = Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')
 
-        train = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=[wagon]
-        )
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=[wagon])
 
         assert len(train.wagons) == 1
         assert train.wagons[0].wagon_id == 'W001'
 
-    def test_train_arrival_multiple_wagons(self):
+    def test_train_arrival_multiple_wagons(self) -> None:
         """Test train arrival with multiple wagons."""
         wagons = [
-            WagonInfo(wagon_id=f'W{i:03d}', length=15.5, is_loaded=i % 2 == 0, needs_retrofit=i % 3 == 0)
+            Wagon(
+                wagon_id=f'W{i:03d}', length=15.5, is_loaded=i % 2 == 0, needs_retrofit=i % 3 == 0, train_id='TRAIN001'
+            )
             for i in range(1, 11)  # 10 wagons
         ]
 
-        train = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
         assert len(train.wagons) == 10
         assert train.wagons[0].wagon_id == 'W001'
         assert train.wagons[9].wagon_id == 'W010'
 
-    def test_train_arrival_missing_required_fields(self):
+    def test_train_arrival_missing_required_fields(self) -> None:
         """Test validation error when required fields are missing."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
         # Missing train_id
         with pytest.raises(ValidationError) as exc_info:
-            TrainArrival(arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
+            Train(arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
         assert 'Field required' in str(exc_info.value)
 
         # Missing arrival_date
         with pytest.raises(ValidationError) as exc_info:
-            TrainArrival(train_id='TRAIN001', arrival_time=time(8, 30), wagons=wagons)
+            Train(train_id='TRAIN001', arrival_time=time(8, 30), wagons=wagons)
         assert 'Field required' in str(exc_info.value)
 
         # Missing arrival_time
         with pytest.raises(ValidationError) as exc_info:
-            TrainArrival(train_id='TRAIN001', arrival_date=date(2024, 1, 15), wagons=wagons)
+            Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), wagons=wagons)
         # arrival_time field shows a different error message when missing
         error_msg = str(exc_info.value)
         assert 'Field required' in error_msg or 'Input should be a valid time' in error_msg
 
-    def test_train_arrival_date_validation(self):
+    def test_train_arrival_date_validation(self) -> None:
         """Test arrival_date field validation."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
         # Valid date formats
         valid_dates = [
@@ -193,38 +185,30 @@ class TestTrainArrival:
         ]
 
         for test_date in valid_dates:
-            train = TrainArrival(train_id='TRAIN001', arrival_date=test_date, arrival_time=time(8, 30), wagons=wagons)
+            train = Train(train_id='TRAIN001', arrival_date=test_date, arrival_time=time(8, 30), wagons=wagons)
             if isinstance(test_date, str):
                 assert train.arrival_date == date(2024, 1, 15)
             else:
                 assert train.arrival_date == test_date
 
-    def test_train_arrival_equality(self):
+    def test_train_arrival_equality(self) -> None:
         """Test train arrival equality comparison."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
-        train1 = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train1 = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
-        train2 = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train2 = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
-        train3 = TrainArrival(
-            train_id='TRAIN002', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train3 = Train(train_id='TRAIN002', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
         assert train1 == train2
         assert train1 != train3
 
-    def test_train_arrival_dict_conversion(self):
+    def test_train_arrival_dict_conversion(self) -> None:
         """Test train arrival conversion to dictionary."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
-        train = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
         train_dict = train.model_dump()
 
@@ -234,13 +218,11 @@ class TestTrainArrival:
         assert len(train_dict['wagons']) == 1
         assert train_dict['wagons'][0]['wagon_id'] == 'W001'
 
-    def test_train_arrival_json_serialization(self):
+    def test_train_arrival_json_serialization(self) -> None:
         """Test train arrival JSON serialization."""
-        wagons = [WagonInfo(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False)]
+        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='TRAIN001')]
 
-        train = TrainArrival(
-            train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons
-        )
+        train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(8, 30), wagons=wagons)
 
         json_str = train.model_dump_json()
 
@@ -254,16 +236,18 @@ class TestTrainArrival:
         assert parsed['arrival_time'] == '08:30:00'
         assert len(parsed['wagons']) == 1
 
-    def test_train_arrival_from_dict(self):
+    def test_train_arrival_from_dict(self) -> None:
         """Test train arrival creation from dictionary."""
         train_data = {
             'train_id': 'TRAIN001',
             'arrival_date': '2024-01-15',
             'arrival_time': '08:30',
-            'wagons': [{'wagon_id': 'W001', 'length': 15.5, 'is_loaded': True, 'needs_retrofit': False}],
+            'wagons': [
+                {'wagon_id': 'W001', 'train_id': 'TRAIN001', 'length': 15.5, 'is_loaded': True, 'needs_retrofit': False}
+            ],
         }
 
-        train = TrainArrival(**train_data)
+        train = Train(**train_data)
 
         assert train.train_id == 'TRAIN001'
         assert train.arrival_date == date(2024, 1, 15)
@@ -271,16 +255,16 @@ class TestTrainArrival:
         assert len(train.wagons) == 1
         assert train.wagons[0].wagon_id == 'W001'
 
-    def test_train_arrival_realistic_scenarios(self):
+    def test_train_arrival_realistic_scenarios(self) -> None:
         """Test train arrival with realistic scenario data."""
         # Early morning freight train
         freight_wagons = [
-            WagonInfo(wagon_id='FREIGHT_001', length=20.0, is_loaded=True, needs_retrofit=False),
-            WagonInfo(wagon_id='FREIGHT_002', length=20.0, is_loaded=True, needs_retrofit=True),
-            WagonInfo(wagon_id='FREIGHT_003', length=18.5, is_loaded=False, needs_retrofit=False),
+            Wagon(wagon_id='FREIGHT_001', length=20.0, is_loaded=True, needs_retrofit=False, train_id='FREIGHT_001'),
+            Wagon(wagon_id='FREIGHT_002', length=20.0, is_loaded=True, needs_retrofit=True, train_id='FREIGHT_001'),
+            Wagon(wagon_id='FREIGHT_003', length=18.5, is_loaded=False, needs_retrofit=False, train_id='FREIGHT_001'),
         ]
 
-        freight_train = TrainArrival(
+        freight_train = Train(
             train_id='FREIGHT_001', arrival_date=date(2024, 1, 15), arrival_time='06:15', wagons=freight_wagons
         )
 
@@ -289,9 +273,11 @@ class TestTrainArrival:
         assert len(freight_train.wagons) == 3
 
         # Late night maintenance train
-        maint_wagons = [WagonInfo(wagon_id='MAINT_001', length=12.0, is_loaded=False, needs_retrofit=True)]
+        maint_wagons = [
+            Wagon(wagon_id='MAINT_001', length=12.0, is_loaded=False, needs_retrofit=True, train_id='MAINT_SPECIAL')
+        ]
 
-        maint_train = TrainArrival(
+        maint_train = Train(
             train_id='MAINT_SPECIAL', arrival_date=date(2024, 1, 16), arrival_time=time(23, 45), wagons=maint_wagons
         )
 
@@ -304,21 +290,21 @@ class TestTrainScheduleCSVLoading:
     """Test cases for loading train schedules from CSV files."""
 
     @pytest.fixture
-    def config_service(self):
+    def config_service(self) -> ConfigurationService:
         """Return a ConfigurationService instance for testing."""
         return ConfigurationService()
 
     @pytest.fixture
-    def valid_csv_path(self):
+    def valid_csv_path(self) -> Path:
         """Return path to valid test CSV file."""
         return Path(__file__).parent.parent / 'fixtures' / 'config' / 'test_train_schedule.csv'
 
     @pytest.fixture
-    def invalid_csv_path(self):
+    def invalid_csv_path(self) -> Path:
         """Return path to invalid test CSV file."""
         return Path(__file__).parent.parent / 'fixtures' / 'config' / 'test_train_schedule_invalid.csv'
 
-    def test_load_train_schedule_csv_success(self, config_service, valid_csv_path):
+    def test_load_train_schedule_csv_success(self, config_service: ConfigurationService, valid_csv_path: Path) -> None:
         """Test successful loading of train schedule from valid CSV file."""
         train_arrivals = config_service.load_train_schedule(valid_csv_path)
 
@@ -357,7 +343,7 @@ class TestTrainScheduleCSVLoading:
         assert train003.arrival_time == time(14, 15)
         assert len(train003.wagons) == 3
 
-    def test_load_train_schedule_csv_nonexistent_file(self, config_service):
+    def test_load_train_schedule_csv_nonexistent_file(self, config_service: ConfigurationService) -> None:
         """Test error handling when CSV file does not exist."""
         nonexistent_path = Path('/nonexistent/path/train_schedule.csv')
 
@@ -366,7 +352,7 @@ class TestTrainScheduleCSVLoading:
 
         assert 'Train schedule file not found' in str(exc_info.value)
 
-    def test_load_train_schedule_csv_empty_file(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_empty_file(self, config_service: ConfigurationService, tmp_path: Path) -> None:
         """Test error handling when CSV file is empty."""
         empty_csv = tmp_path / 'empty_train_schedule.csv'
         empty_csv.write_text('')
@@ -375,9 +361,11 @@ class TestTrainScheduleCSVLoading:
             config_service.load_train_schedule(empty_csv)
 
         # The actual error message for completely empty files
-        assert 'No columns to parse from file' in str(exc_info.value)
+        assert 'Train schedule file is empty' in str(exc_info.value)
 
-    def test_load_train_schedule_csv_missing_columns(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_missing_columns(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling when CSV file has missing required columns."""
         incomplete_csv = tmp_path / 'incomplete_train_schedule.csv'
         incomplete_csv.write_text('train_id,arrival_date\nTRAIN001,2024-01-15')
@@ -389,7 +377,9 @@ class TestTrainScheduleCSVLoading:
         assert 'Missing required columns' in error_msg
         assert 'arrival_time' in error_msg
 
-    def test_load_train_schedule_csv_invalid_time_format(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_invalid_time_format(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling with invalid time formats."""
         invalid_time_csv = tmp_path / 'invalid_time_train_schedule.csv'
         csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
@@ -402,7 +392,9 @@ TRAIN001,2024-01-15,25:30,WAGON001,15.5,true,true"""
         error_msg = str(exc_info.value)
         assert 'arrival_time' in error_msg and 'HH:MM format' in error_msg
 
-    def test_load_train_schedule_csv_invalid_date_format(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_invalid_date_format(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling with invalid date formats."""
         invalid_date_csv = tmp_path / 'invalid_date_train_schedule.csv'
         csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
@@ -415,7 +407,9 @@ TRAIN001,2024-13-45,08:30,WAGON001,15.5,true,true"""
         # The actual error message for invalid date format
         assert 'arrival_date' in str(exc_info.value) and 'YYYY-MM-DD format' in str(exc_info.value)
 
-    def test_load_train_schedule_csv_duplicate_wagon_ids(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_duplicate_wagon_ids(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling when duplicate wagon IDs are present."""
         duplicate_wagon_csv = tmp_path / 'duplicate_wagon_train_schedule.csv'
         csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
@@ -430,7 +424,9 @@ TRAIN002,2024-01-15,10:00,WAGON_DUP,15.5,false,false"""
         assert 'Duplicate wagon IDs found' in error_msg
         assert 'WAGON_DUP' in error_msg
 
-    def test_load_train_schedule_csv_inconsistent_train_times(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_inconsistent_train_times(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling when train has inconsistent arrival times across wagons."""
         inconsistent_time_csv = tmp_path / 'inconsistent_time_train_schedule.csv'
         csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
@@ -445,7 +441,9 @@ TRAIN001,2024-01-15,09:00,WAGON001_02,15.5,false,false"""
         assert 'inconsistent arrival date/time' in error_msg
         assert 'TRAIN001' in error_msg
 
-    def test_load_train_schedule_csv_invalid_wagon_length(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_invalid_wagon_length(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling with invalid wagon length values."""
         invalid_length_csv = tmp_path / 'invalid_length_train_schedule.csv'
         csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
@@ -458,7 +456,9 @@ TRAIN001,2024-01-15,08:00,WAGON001,-5.0,true,true"""
         error_msg = str(exc_info.value)
         assert 'Validation failed for wagon' in error_msg
 
-    def test_load_train_schedule_csv_invalid_boolean_values(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_invalid_boolean_values(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test handling of various boolean value formats."""
         # Test valid boolean conversions
         valid_bool_csv = tmp_path / 'valid_bool_train_schedule.csv'
@@ -481,7 +481,9 @@ TRAIN001,2024-01-15,08:00,WAGON001_04,15.5,1,0"""
         # Note: 1 and 0 as strings are converted differently than expected
         assert wagons[3].is_loaded is False and wagons[3].needs_retrofit is False
 
-    def test_load_train_schedule_csv_missing_wagon_data(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_missing_wagon_data(
+        self, config_service: ConfigurationService, tmp_path: Path
+    ) -> None:
         """Test error handling with missing wagon data."""
         missing_data_csv = tmp_path / 'missing_data_train_schedule.csv'
         csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
@@ -495,7 +497,7 @@ TRAIN001,2024-01-15,08:00,,15.5,true,true"""
         # The empty wagon_id becomes 'nan' string due to pandas processing
         assert train_arrivals[0].wagons[0].wagon_id == 'nan'
 
-    def test_load_train_schedule_csv_malformed_csv(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_malformed_csv(self, config_service: ConfigurationService, tmp_path: Path) -> None:
         """Test handling of malformed CSV content."""
         malformed_csv = tmp_path / 'malformed_train_schedule.csv'
         # CSV with mismatched number of columns - pandas fills with NaN which gets converted to False for booleans
@@ -514,7 +516,7 @@ TRAIN001,2024-01-15,08:00,WAGON001,15.5"""
         assert wagon.is_loaded is False
         assert wagon.needs_retrofit is False
 
-    def test_load_train_schedule_csv_edge_cases(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_edge_cases(self, config_service: ConfigurationService, tmp_path: Path) -> None:
         """Test edge cases for train schedule CSV loading."""
         # Test with minimum valid data (single wagon train)
         minimal_csv = tmp_path / 'minimal_train_schedule.csv'
@@ -528,7 +530,7 @@ MINIMAL_TRAIN,2024-12-31,23:59,SINGLE_WAGON,0.1,false,false"""
         assert train_arrivals[0].train_id == 'MINIMAL_TRAIN'
         assert train_arrivals[0].arrival_time == time(23, 59)
 
-    def test_load_train_schedule_csv_large_dataset(self, config_service, tmp_path):
+    def test_load_train_schedule_csv_large_dataset(self, config_service: ConfigurationService, tmp_path: Path) -> None:
         """Test loading a larger dataset to verify performance and correctness."""
         large_csv = tmp_path / 'large_train_schedule.csv'
 

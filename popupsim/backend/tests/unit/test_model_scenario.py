@@ -11,7 +11,7 @@ import pytest
 from pydantic import ValidationError
 
 from configuration.model_scenario import ScenarioConfig
-from configuration.model_track import TrackFunction, WorkshopTrackConfig
+from configuration.model_track import TrackFunction, WorkshopTrack
 from configuration.model_workshop import Workshop
 
 
@@ -38,8 +38,8 @@ class TestScenarioConfig:
     def test_scenario_config_creation_valid_data_with_workshop(self):
         """Test successful scenario config creation with workshop."""
         tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
-            WorkshopTrackConfig(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
+            WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30),
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=3, retrofit_time_min=45),
         ]
         workshop = Workshop(tracks=tracks)
 
@@ -367,9 +367,7 @@ class TestScenarioConfig:
 
     def test_scenario_config_dict_conversion(self):
         """Test scenario config conversion to dictionary."""
-        tracks = [
-            WorkshopTrackConfig(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
-        ]
+        tracks = [WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)]
         workshop = Workshop(tracks=tracks)
 
         config = ScenarioConfig(

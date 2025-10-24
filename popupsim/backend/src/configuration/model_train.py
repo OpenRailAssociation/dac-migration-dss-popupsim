@@ -14,19 +14,19 @@ from typing import List
 
 from pydantic import BaseModel, Field, model_validator
 
-from .model_wagon import WagonInfo
+from .model_wagon import Wagon
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
-class TrainArrival(BaseModel):
+class Train(BaseModel):
     """Information about a train arrival with its wagons."""
 
     train_id: str = Field(description='Unique identifier for the train')
     arrival_date: date = Field(description='Date of arrival')
     arrival_time: time = Field(description='Time of arrival')
-    wagons: List[WagonInfo] = Field(description='List of wagons in the train')
+    wagons: List[Wagon] = Field(description='List of wagons in the train')
 
     @property
     def arrival_datetime(self) -> datetime:
@@ -34,7 +34,7 @@ class TrainArrival(BaseModel):
         return datetime.combine(self.arrival_date, self.arrival_time, tzinfo=timezone.utc)
 
     @model_validator(mode='after')
-    def validate_wagons(self) -> 'TrainArrival':
+    def validate_wagons(self) -> 'Train':
         """Ensure train has at least one wagon."""
         if not self.wagons:
             raise ValueError(f'Train {self.train_id} must have at least one wagon')
@@ -42,7 +42,7 @@ class TrainArrival(BaseModel):
 
     @model_validator(mode='before')
     @classmethod
-    def validate_and_parse_arrival_time(cls, values):
+    def validate_and_parse_arrival_time(cls, values) -> dict:
         """Parse and validate arrival_time field, ensuring correct format and type."""
         data = dict(values)
         arrival_time_value = data.get('arrival_time')
