@@ -1,64 +1,191 @@
 """Unit tests for the main entry point module."""
 
-from unittest.mock import MagicMock
+import tempfile
+from pathlib import Path
+from typing import Generator
 
 import pytest
+import typer
+from typer.testing import CliRunner
 
-from main import APP_NAME, main
+from main import APP_NAME, app, validate_output_path, validate_scenario_path
+
+
+@pytest.fixture
+def runner() -> CliRunner:
+    """Provide a CLI runner for testing."""
+    return CliRunner()
+
+
+@pytest.fixture
+def temp_scenario_file() -> Generator[Path, None, None]:
+    """Create a temporary scenario file for testing."""
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        f.write('{"test": "data"}')
+        yield Path(f.name)
+    Path(f.name).unlink(missing_ok=True)
+
+
+@pytest.fixture
+def temp_output_dir() -> Generator[Path, None, None]:
+    """Create a temporary output directory for testing."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield Path(temp_dir)
 
 
 @pytest.mark.unit
-def test_app_name():
+def test_app_name() -> None:
     """Test that APP_NAME constant is correctly set."""
     assert APP_NAME == 'popupsim'
 
 
 @pytest.mark.unit
-def test_main_with_config_path(mocker):
-    """Test main function when config path is provided."""
-    # Arrange
-    test_config_path = '/path/to/config'
-    mock_args = MagicMock()
-    mock_args.configpath = test_config_path
-    mocker.patch('argparse.ArgumentParser.parse_args', return_value=mock_args)
-    mock_print = mocker.patch('builtins.print')
+def test_main_with_no_parameters(runner: CliRunner) -> None:
+    """Test main function shows help when no parameters are provided."""
+    result = runner.invoke(app, [])
 
-    # Act
-    main()
-
-    # Assert
-    mock_print.assert_called_once_with(f'Using config file at: {test_config_path}')
+    assert result.exit_code == 1
+    assert 'No required parameters provided. Showing help:' in result.stdout
 
 
 @pytest.mark.unit
-def test_main_without_config_path(mocker):
-    """Test main function when no config path is provided."""
-    # Arrange
-    mock_args = MagicMock()
-    mock_args.configpath = None
-    mocker.patch('argparse.ArgumentParser.parse_args', return_value=mock_args)
-    mock_print = mocker.patch('builtins.print')
+def test_main_with_missing_scenario_path(runner: CliRunner, temp_output_dir: Path) -> None:
+    """Test main function fails when scenario path is missing."""
+    result = runner.invoke(app, ['--outputPath', str(temp_output_dir)])
 
-    # Act
-    main()
-
-    # Assert
-    mock_print.assert_called_once_with('No config path provided. Using default configuration.')
+    # This should fail because scenario path is missing, not show help
+    assert result.exit_code != 0
+    assert 'Error: Scenario path is required but not provided' in result.stdout
 
 
 @pytest.mark.unit
-def test_argument_parser_creation(mocker):
-    """Test argument parser is created with correct parameters."""
-    # Arrange
-    mock_parser = mocker.patch('argparse.ArgumentParser')
-    mock_parser_instance = MagicMock()
-    mock_parser.return_value = mock_parser_instance
+def test_main_with_missing_output_path(runner: CliRunner, temp_scenario_file: Path) -> None:
+    """Test main function fails when output path is missing."""
+    result = runner.invoke(app, ['--scenarioPath', str(temp_scenario_file)])
 
-    # Act
-    main()
+    # This should fail because output path is missing, not show help
+    assert result.exit_code == 1
+    assert 'Error: Output path is required but not provided' in result.stdout
 
-    # Assert
-    mock_parser.assert_called_once()  # Assert on the mock, not on the patcher
-    mock_parser_instance.add_argument.assert_called_once_with(
-        '--configpath', type=str, default=None, help='Path to the configuration file.'
+
+@pytest.mark.unit
+def test_main_with_invalid_debug_level(runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
+    """Test main function fails with invalid debug level."""
+    result = runner.invoke(
+        app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--debug', 'INVALID']
     )
+
+    assert result.exit_code == 1
+    assert 'Error: Invalid debug level: INVALID' in result.stdout
+
+
+@pytest.mark.unit
+def test_main_with_valid_parameters(runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
+    """Test main function succeeds with valid parameters."""
+    result = runner.invoke(app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir)])
+
+    assert result.exit_code == 0
+    assert f'✓ Using scenario file at: {temp_scenario_file}' in result.stdout
+    assert f'✓ Output will be saved to: {temp_output_dir}' in result.stdout
+    assert '✓ Debug level set to: INFO' in result.stdout
+    assert '🚀 Starting popupsim processing...' in result.stdout
+
+
+@pytest.mark.unit
+def test_main_with_verbose_flag(runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
+    """Test main function with verbose flag enabled."""
+    result = runner.invoke(
+        app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--verbose']
+    )
+
+    assert result.exit_code == 0
+    assert '✓ Verbose mode enabled.' in result.stdout
+
+
+@pytest.mark.unit
+def test_main_with_custom_debug_level(runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
+    """Test main function with custom debug level."""
+    result = runner.invoke(
+        app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--debug', 'DEBUG']
+    )
+
+    assert result.exit_code == 0
+    assert '✓ Debug level set to: DEBUG' in result.stdout
+
+
+@pytest.mark.unit
+def test_validate_scenario_path_none() -> None:
+    """Test validate_scenario_path with None input."""
+    with pytest.raises(typer.Exit) as exc_info:
+        validate_scenario_path(None)
+
+    assert exc_info.value.exit_code == 1
+
+
+@pytest.mark.unit
+def test_validate_scenario_path_nonexistent() -> None:
+    """Test validate_scenario_path with non-existent file."""
+    nonexistent_path = Path('/nonexistent/file.json')
+    with pytest.raises(typer.Exit):
+        validate_scenario_path(nonexistent_path)
+
+
+@pytest.mark.unit
+def test_validate_scenario_path_directory(temp_output_dir: Path) -> None:
+    """Test validate_scenario_path with directory instead of file."""
+    with pytest.raises(typer.Exit):
+        validate_scenario_path(temp_output_dir)
+
+
+@pytest.mark.unit
+def test_validate_scenario_path_valid(temp_scenario_file: Path) -> None:
+    """Test validate_scenario_path with valid file."""
+    result = validate_scenario_path(temp_scenario_file)
+    assert result == temp_scenario_file
+
+
+@pytest.mark.unit
+def test_validate_output_path_none() -> None:
+    """Test validate_output_path with None input."""
+    with pytest.raises(typer.Exit):
+        validate_output_path(None)
+
+
+@pytest.mark.unit
+def test_validate_output_path_nonexistent() -> None:
+    """Test validate_output_path with non-existent directory."""
+    nonexistent_path = Path('/nonexistent/directory')
+    with pytest.raises(typer.Exit):
+        validate_output_path(nonexistent_path)
+
+
+@pytest.mark.unit
+def test_validate_output_path_file(temp_scenario_file: Path) -> None:
+    """Test validate_output_path with file instead of directory."""
+    with pytest.raises(typer.Exit):
+        validate_output_path(temp_scenario_file)
+
+
+@pytest.mark.unit
+def test_validate_output_path_valid(temp_output_dir: Path) -> None:
+    """Test validate_output_path with valid directory."""
+    result = validate_output_path(temp_output_dir)
+    assert result == temp_output_dir
+
+
+@pytest.mark.unit
+def test_validate_output_path_write_permission() -> None:
+    """Test validate_output_path write permission check."""
+    # Test with a read-only directory (if possible to create)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        # This test might be platform-dependent
+        result = validate_output_path(temp_path)
+        assert result == temp_path
+
+
+@pytest.mark.unit
+def test_app_configuration() -> None:
+    """Test that the Typer app is configured correctly."""
+    assert app.info.name == APP_NAME
+    assert 'freight rail DAC migration simulation tool' in app.info.help

@@ -7,7 +7,7 @@ validate them using the Route model, and make them available to the simulation.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, Iterator, List, Optional, Union
 
 import pandas as pd
 
@@ -137,7 +137,7 @@ class RoutesConfig:
         """Return the number of loaded routes."""
         return len(self.routes)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Route]:
         """Iterate through all routes."""
         return iter(self.routes)
 
