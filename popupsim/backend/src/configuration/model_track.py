@@ -33,7 +33,7 @@ class TrackFunction(Enum):
     BAHNHOFSKOPF = 'bahnhofskopf'  # Station head tracks
 
 
-class WorkshopTrackConfig(BaseModel):
+class WorkshopTrack(BaseModel):
     """
     Configuration model for individual workshop tracks.
 
