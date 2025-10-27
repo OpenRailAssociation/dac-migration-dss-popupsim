@@ -95,6 +95,7 @@ namespace_packages = true
 explicit_package_bases = true
 show_column_numbers = true
 show_error_codes = true
+plugins = ['pydantic.mypy']
 
 [[tool.mypy.overrides]]
 module = ["typer.*", "simpy.*", "matplotlib.*", "pytest.*"]
@@ -103,6 +104,10 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = ["pandas.*", "pydantic.*"]
 ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
