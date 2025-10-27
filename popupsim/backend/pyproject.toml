@@ -1,5 +1,5 @@
 [project]
-name = "PopUp-Sim"
+name = "PopUpSim"
 description = "Freight rail transport simulation tool for Digital Automatic Coupler retrofit"
 version = "0.0.1"
 license = "Apache-2.0"
@@ -21,9 +21,6 @@ dependencies = [
     "matplotlib>=3.10.7",
     "pandas>=2.3.3",
     "pydantic>=2.12.3",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.14.1",
     "simpy>=4.1.1",
     "typer>=0.20.0",
 ]
@@ -31,22 +28,6 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[project.optional-dependencies]
-dev = [
-    "mypy>=1.18.1",
-    "pre-commit>=4.3.0",
-    "pre-commit-hooks>=6.0.0",
-    "pylint>=3.3.8",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "pytest-mock>=3.15.1",
-    "ruff>=0.13.0",
-    "pandas>=2.3.0",
-    "pydantic>=2.12.0",
-    "pandas-stubs>=2.3.2.240528",
-    "typer>=0.20.0",
-]
 
 # Preserving all tool configurations
 [tool.ruff]
@@ -147,5 +128,11 @@ show_missing = true
 dev = [
     "mypy>=1.18.2",
     "pre-commit>=4.3.0",
+    "pre-commit-hooks>=6.0.0",
+    "pylint>=3.3.8",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
     "ruff>=0.14.1",
+    "pandas-stubs>=2.3.2.240528",
 ]
