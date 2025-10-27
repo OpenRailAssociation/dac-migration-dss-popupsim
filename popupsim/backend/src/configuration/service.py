@@ -24,6 +24,7 @@ from .model_track import TrackFunction, WorkshopTrack
 from .model_train import Train
 from .model_wagon import Wagon
 from .model_workshop import Workshop
+from .validation import ConfigurationValidator, ValidationResult
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ class ConfigurationService:
             base_path: Base directory for configuration files. Defaults to current directory.
         """
         self.base_path = base_path or Path.cwd()
+        self.validator = ConfigurationValidator()
 
     def load_scenario(self, path: Union[str, Path]) -> dict[str, Any]:
         """
@@ -151,13 +153,15 @@ class ConfigurationService:
                 parse_dates=['arrival_date'],
                 date_format='%Y-%m-%d',
             )
-            # Check that the loaded object is a pandas DataFrame
-            if not isinstance(df, pd.DataFrame):
-                raise ConfigurationError(f'Loaded object is not a pandas DataFrame: got {type(df)}')
         except pd.errors.EmptyDataError as err:
             raise ConfigurationError('Train schedule file is empty') from err
         except (pd.errors.ParserError, TypeError) as err:
             raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
+
+        # Validate that the result is actually a DataFrame
+        if not isinstance(df, pd.DataFrame):
+            raise ConfigurationError('Loaded object is not a pandas DataFrame')
+
         if df.empty:
             raise ConfigurationError('Train schedule file is empty')
         required_columns = [
@@ -207,7 +211,9 @@ class ConfigurationService:
                 wagon = Wagon(
                     wagon_id=str(row['wagon_id']),  # Use wagon_id directly
                     train_id=str(row['train_id']),
-                    length=float(row['length']),
+                    length=float(row['length'])
+                    if pd.api.types.is_scalar(row['length'])
+                    else float(row['length'].iloc[0]),
                     is_loaded=bool(row['is_loaded']),
                     needs_retrofit=bool(row['needs_retrofit']),
                 )
@@ -274,10 +280,12 @@ class ConfigurationService:
 
             try:
                 arrival_date = self._convert_arrival_date(group.iloc[0]['arrival_date'])
+                # Get scalar value using .iloc[0] which returns the actual value, not Series
+                arrival_time_value = group['arrival_time'].iloc[0]
                 train = Train(
                     train_id=str(train_id),
                     arrival_date=arrival_date,
-                    arrival_time=group.iloc[0]['arrival_time'],
+                    arrival_time=arrival_time_value,
                     wagons=wagons,
                 )
                 trains.append(train)
@@ -312,11 +320,16 @@ class ConfigurationService:
         tracks = []
         for _, row in df.iterrows():
             try:
+                current_wagons = self._parse_current_wagons(row, df)
+                capacity = self._extract_scalar_int(row['capacity'])
+                retrofit_time = self._extract_scalar_int(row['retrofit_time_min'])
+
                 track = WorkshopTrack(
                     id=str(row['track_id']).strip(),
                     function=TrackFunction(str(row['function']).strip()),
-                    capacity=int(row['capacity']),
-                    retrofit_time_min=int(row['retrofit_time_min']),
+                    capacity=capacity,
+                    current_wagons=current_wagons,
+                    retrofit_time_min=retrofit_time,
                 )
                 tracks.append(track)
             except ValidationError as err:
@@ -332,41 +345,71 @@ class ConfigurationService:
                 raise ConfigurationError(f'Invalid data type for track {row["track_id"]}: {err}') from err
         return tracks
 
+    def _parse_current_wagons(self, row: pd.Series, df: pd.DataFrame) -> List[int]:
+        """Parse current_wagons field from DataFrame row."""
+        current_wagons: List[int] = []
+        if 'current_wagons' in df.columns and pd.notna(row['current_wagons']):
+            current_wagons_val = row['current_wagons']
+            # Extract scalar value if needed
+            if not pd.api.types.is_scalar(current_wagons_val):
+                current_wagons_val = current_wagons_val.iloc[0]
+
+            # Parse the current_wagons value
+            if isinstance(current_wagons_val, str):
+                # Handle comma-separated string of wagon IDs
+                current_wagons_str = current_wagons_val.strip()
+                if current_wagons_str:
+                    current_wagons = [int(wagon_id.strip()) for wagon_id in current_wagons_str.split(',')]
+            elif isinstance(current_wagons_val, (int, float)):
+                # Handle single wagon ID as integer
+                current_wagons = [int(current_wagons_val)]
+        return current_wagons
+
+    def _extract_scalar_int(self, value: Any) -> int:
+        """Extract scalar integer value from pandas Series or scalar."""
+        return int(value) if pd.api.types.is_scalar(value) else int(value.iloc[0])
+
     def _read_and_validate_workshop_tracks_csv(self, file_path: Path) -> pd.DataFrame:
         """Read and validate workshop tracks CSV file."""
         try:
             # Read CSV with appropriate data types - expect track_id column
             df = pd.read_csv(
-                file_path, dtype={'track_id': str, 'function': str, 'capacity': int, 'retrofit_time_min': int}
+                file_path,
+                dtype={
+                    'track_id': str,
+                    'function': str,
+                    'capacity': int,
+                    'retrofit_time_min': int,
+                    'current_wagons': str,  # List of wagons as string parsed later will be List[int]
+                },
             )
-
-            # Check that the loaded object is a pandas DataFrame
-            if not isinstance(df, pd.DataFrame):
-                raise ConfigurationError(f'Loaded object is not a pandas DataFrame: got {type(df)}')
-
-            if df.empty:
-                raise ConfigurationError('Workshop tracks file is empty')
-
-            # Validate required columns - expect track_id instead of id
-            required_columns = ['track_id', 'function', 'capacity', 'retrofit_time_min']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            if missing_columns:
-                raise ConfigurationError(
-                    f'Missing required columns in {file_path}: '
-                    f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
-                )
-
-            # Check for duplicate track IDs - use track_id column
-            duplicate_ids = df[df.duplicated(subset=['track_id'], keep=False)]['track_id'].unique()
-            if len(duplicate_ids) > 0:
-                raise ConfigurationError(f'Duplicate track IDs found: {", ".join(duplicate_ids)}')
-
-            return df
-
         except pd.errors.EmptyDataError as err:
             raise ConfigurationError('Workshop tracks file is empty') from err
         except pd.errors.ParserError as err:
             raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
+
+        # Validate that the result is actually a DataFrame
+        if not isinstance(df, pd.DataFrame):
+            raise ConfigurationError('Loaded object is not a pandas DataFrame')
+
+        if df.empty:
+            raise ConfigurationError('Workshop tracks file is empty')
+
+        # Validate required columns - expect track_id instead of id
+        required_columns = ['track_id', 'function', 'capacity', 'retrofit_time_min']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise ConfigurationError(
+                f'Missing required columns in {file_path}: '
+                f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
+            )
+
+        # Check for duplicate track IDs - use track_id column
+        duplicate_ids = df[df.duplicated(subset=['track_id'], keep=False)]['track_id'].unique()
+        if len(duplicate_ids) > 0:
+            raise ConfigurationError(f'Duplicate track IDs found: {", ".join(duplicate_ids)}')
+
+        return df
 
     def _create_workshop_from_tracks(self, tracks: List[WorkshopTrack]) -> Workshop:
         """Create Workshop object from tracks with validation."""
@@ -485,7 +528,7 @@ class ConfigurationService:
             routes=routes,
         )
 
-    def load_complete_scenario(self, path: Union[str, Path]) -> ScenarioConfig:
+    def load_complete_scenario(self, path: Union[str, Path]) -> tuple[ScenarioConfig, ValidationResult]:
         """
         Load scenario configuration and train schedule data.
         Args:
@@ -523,4 +566,19 @@ class ConfigurationService:
         )
 
         logger.info('Successfully loaded complete scenario: %s', config.scenario_id)
-        return config
+
+        # 5. Validate configuration
+        logger.info('Starting configuration validation for scenario: %s', config.scenario_id)
+        validation_result = self.validator.validate(config)
+
+        # 6. Output validation results
+        logger.info(
+            'Configuration validation completed for scenario: %s. Valid: %s, Errors: %d, Warnings: %d',
+            config.scenario_id,
+            validation_result.is_valid,
+            len(validation_result.get_errors()),
+            len(validation_result.get_warnings()),
+        )
+        validation_result.print_summary()
+
+        return config, validation_result

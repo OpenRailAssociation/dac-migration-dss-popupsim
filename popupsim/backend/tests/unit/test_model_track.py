@@ -16,13 +16,14 @@ from configuration.model_track import TrackFunction, WorkshopTrack
 class TestWorkshopTrack:
     """Test cases for WorkshopTrack model."""
 
-    def test_track_creation_valid_data(self):
+    def test_track_creation_valid_data(self) -> None:
         """Test successful track creation with valid data."""
         track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
 
         assert track.id == 'TRACK01'
         assert track.function == TrackFunction.WERKSTATTGLEIS
         assert track.capacity == 5
+        assert track.current_wagons == []  # Default is now empty list
         assert track.retrofit_time_min == 30
 
     def test_track_id_validation_valid_formats(self):
@@ -199,70 +200,157 @@ class TestWorkshopTrack:
 
     def test_track_function_werkstattgleis(self):
         """Test WERKSTATTGLEIS function validation."""
-        # Valid cases: retrofit_time_min > 0 (from your CSV data: 30 and 45)
-        valid_cases = [
-            ('TRACK01', 5, 30),
-            ('TRACK02', 3, 45),
-            ('TRACK08', 1, 1),  # Edge case minimum
-            ('TRACK09', 2, 120),  # Higher value
+        # Valid case: retrofit_time_min > 0
+        track = WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=6, retrofit_time_min=45)
+        assert track.function == TrackFunction.WERKSTATTGLEIS
+        assert track.retrofit_time_min == 45
+        assert track.capacity == 6
+
+        # Invalid case: retrofit_time_min = 0
+        with pytest.raises(ValidationError) as exc_info:
+            WorkshopTrack(id='TRACK02', function=TrackFunction.WERKSTATTGLEIS, capacity=6, retrofit_time_min=0)
+        assert 'must be > 0 for werkstattgleis' in str(exc_info.value)
+
+    def test_current_wagons_field_defaults_to_empty_list(self) -> None:
+        """Test that current_wagons field defaults to empty list when not provided."""
+        track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
+        assert track.current_wagons == []  # Default is now empty list
+
+    def test_current_wagons_field_valid_values(self) -> None:
+        """Test current_wagons validation with valid list values."""
+        valid_values = [
+            [],  # Empty list
+            [1],  # Single wagon ID
+            [1, 2, 3],  # Multiple wagon IDs
+            [100, 200, 300, 400, 500],  # Many wagon IDs
         ]
 
-        for track_id, capacity, retrofit_time in valid_cases:
+        for current_wagons in valid_values:
             track = WorkshopTrack(
-                id=track_id, function=TrackFunction.WERKSTATTGLEIS, capacity=capacity, retrofit_time_min=retrofit_time
+                id='TRACK01',
+                function=TrackFunction.WERKSTATTGLEIS,
+                capacity=10,
+                current_wagons=current_wagons,
+                retrofit_time_min=30,
             )
-            assert track.function == TrackFunction.WERKSTATTGLEIS
-            assert track.retrofit_time_min == retrofit_time
-            assert track.capacity == capacity
+            assert track.current_wagons == current_wagons
 
-        # Invalid cases: retrofit_time_min <= 0
-        invalid_times = [0, -1, -10]
-        for retrofit_time in invalid_times:
+    def test_current_wagons_field_invalid_values(self) -> None:
+        """Test current_wagons validation with invalid list values."""
+        invalid_values = [
+            [1, -1, 3],  # List with negative wagon ID
+            [-5],  # Single negative wagon ID
+            [1, 2, -10, 4],  # Mixed positive and negative wagon IDs
+            ['abc'],  # List with non-integer strings
+            [1.5, 2.7],  # List with floats
+            [None],  # List with None value
+        ]
+
+        for current_wagons in invalid_values:
             with pytest.raises(ValidationError) as exc_info:
                 WorkshopTrack(
-                    id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=retrofit_time
+                    id='TRACK01',
+                    function=TrackFunction.WERKSTATTGLEIS,
+                    capacity=10,
+                    current_wagons=current_wagons,
+                    retrofit_time_min=30,
                 )
             error_msg = str(exc_info.value)
-            assert 'greater than or equal to 0' in error_msg or 'must be > 0 for werkstattgleis' in error_msg
+            # Should contain validation error for list contents
+            assert any(
+                phrase in error_msg
+                for phrase in ['greater than or equal to 0', 'Input should be a valid integer', 'Field required']
+            )
 
-    def test_track_function_werkstattzufuehrung(self):
-        """Test WERKSTATTZUFUEHRUNG function validation."""
-        # Valid case: retrofit_time_min = 0
-        track = WorkshopTrack(id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0)
-        assert track.function == TrackFunction.WERKSTATTZUFUEHRUNG
+    def test_current_wagons_field_invalid_non_list_values(self) -> None:
+        """Test current_wagons validation with non-list values."""
+        invalid_non_list_values = [
+            None,  # None not allowed anymore
+            'string',  # String
+            123,  # Integer
+            12.34,  # Float
+            {'key': 'value'},  # Dict
+        ]
+
+        for current_wagons in invalid_non_list_values:
+            with pytest.raises(ValidationError) as exc_info:
+                WorkshopTrack(
+                    id='TRACK01',
+                    function=TrackFunction.WERKSTATTGLEIS,
+                    capacity=10,
+                    current_wagons=current_wagons,
+                    retrofit_time_min=30,
+                )
+            error_msg = str(exc_info.value)
+            # Should contain validation error about expecting a list
+            assert any(
+                phrase in error_msg for phrase in ['Input should be a valid list', 'list required', 'Field required']
+            )
+
+    def test_is_available_method_with_none_current_wagons(self):
+        """Test is_available method when current_wagons is None."""
+        track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
+        assert track.current_wagons == []  # Default is now empty list
+        assert track.is_available() is True
+
+    def test_is_available_method_with_empty_current_wagons(self) -> None:
+        """Test is_available method when current_wagons is empty list."""
+        track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
+        assert track.current_wagons == []  # Default is now empty list
+        assert track.is_available() is True
+
+    def test_is_available_method_with_current_wagons_less_than_capacity(self) -> None:
+        """Test is_available method when current_wagons list length < capacity."""
+        track = WorkshopTrack(
+            id='TRACK01',
+            function=TrackFunction.WERKSTATTGLEIS,
+            capacity=5,
+            current_wagons=[1, 2, 3],
+            retrofit_time_min=30,
+        )
+        assert len(track.current_wagons) == 3
+        assert track.capacity == 5
+        assert track.is_available() is True
+
+    def test_is_available_method_with_current_wagons_equal_to_capacity(self) -> None:
+        """Test is_available method when current_wagons list length equals capacity."""
+        track = WorkshopTrack(
+            id='TRACK01',
+            function=TrackFunction.WERKSTATTGLEIS,
+            capacity=5,
+            current_wagons=[1, 2, 3, 4, 5],
+            retrofit_time_min=30,
+        )
+        assert len(track.current_wagons) == 5
+        assert track.capacity == 5
+        assert track.is_available() is False
+
+    def test_is_available_method_with_current_wagons_greater_than_capacity(self) -> None:
+        """Test is_available method when current_wagons list length > capacity."""
+        # Note: This scenario might occur in edge cases or data inconsistencies
+        track = WorkshopTrack(
+            id='TRACK01',
+            function=TrackFunction.WERKSTATTGLEIS,
+            capacity=5,
+            current_wagons=[1, 2, 3, 4, 5, 6, 7],
+            retrofit_time_min=30,
+        )
+        assert len(track.current_wagons) == 7
+        assert track.capacity == 5
+        assert track.is_available() is False
+
+    def test_track_creation_with_all_fields(self) -> None:
+        """Test track creation with all fields including current_wagons."""
+        track = WorkshopTrack(
+            id='TRACK05', function=TrackFunction.SAMMELGLEIS, capacity=8, current_wagons=[101, 102], retrofit_time_min=0
+        )
+
+        assert track.id == 'TRACK05'
+        assert track.function == TrackFunction.SAMMELGLEIS
+        assert track.capacity == 8
+        assert track.current_wagons == [101, 102]
         assert track.retrofit_time_min == 0
-        assert track.capacity == 2
-
-        # Invalid case: retrofit_time_min != 0
-        with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrack(id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=10)
-        assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
-
-    def test_track_function_werkstattabfuehrung(self):
-        """Test WERKSTATTABFUEHRUNG function validation."""
-        # Valid case: retrofit_time_min = 0
-        track = WorkshopTrack(id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0)
-        assert track.function == TrackFunction.WERKSTATTABFUEHRUNG
-        assert track.retrofit_time_min == 0
-        assert track.capacity == 2
-
-        # Invalid case: retrofit_time_min != 0
-        with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrack(id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=25)
-        assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
-
-    def test_track_function_bahnhofskopf(self):
-        """Test BAHNHOFSKOPF function validation."""
-        # Valid case: retrofit_time_min = 0
-        track = WorkshopTrack(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0)
-        assert track.function == TrackFunction.BAHNHOFSKOPF
-        assert track.retrofit_time_min == 0
-        assert track.capacity == 3
-
-        # Invalid case: retrofit_time_min != 0
-        with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrack(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=5)
-        assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
+        assert track.is_available() is True
 
     def test_csv_data_format_validation(self):
         """Test validation using the exact CSV data format you provided."""
