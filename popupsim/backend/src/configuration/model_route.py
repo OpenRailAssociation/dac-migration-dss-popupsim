@@ -7,7 +7,7 @@ and travel times.
 """
 
 import logging
-from typing import Any
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -29,36 +29,32 @@ class Route(BaseModel):
 
     @model_validator(mode='before')
     @classmethod
-    def parse_track_sequence(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def parse_track_sequence(cls, data: Union[Dict[str, Any], List[str], str]) -> Dict[str, Any]:
         """Parse track_sequence from string to list if needed."""
+
         # If data is already a list, wrap it in a dict
-        if isinstance(data.get('track_sequence'), list):
-            return data
+        if isinstance(data, list):
+            return {'track_sequence': data}
 
         # If data is a string (direct track_sequence value)
-        if isinstance(data.get('track_sequence'), str):
-            track_sequence = data.get('track_sequence')
-            if track_sequence is None or track_sequence.strip() == '':
-                raise ValueError('track_sequence cannot be an empty string')
-            track_sequence = track_sequence.strip('"\'')
-            parsed_sequence = [t.strip() for t in track_sequence.split(',')]
+        if isinstance(data, str):
+            track_sequences = data.strip('"\'')
+            parsed_sequence = [t.strip() for t in track_sequences.split(',')]
 
-            if len(parsed_sequence) <= 1:
-                raise ValueError('track_sequence must be a list or a comma-separated string')
+            if not all(isinstance(item, str) for item in parsed_sequence):
+                raise ValueError('All items in track_sequence must be strings')
 
-            data['track_sequence'] = parsed_sequence
-            return data
+            return {'track_sequence': parsed_sequence}
 
         # If data is a dict, process the track_sequence field
-        if isinstance(data.get('track_sequence'), dict):
+        if isinstance(data, dict):
             if 'track_sequence' not in data:
                 return data  # Return as-is if no track_sequence field
 
-            track_sequence = data.get('track_sequence')
+            track_sequence = data['track_sequence']
 
             # If track_sequence is already a list, return the dict as-is
             if isinstance(track_sequence, list):
-                data['track_sequence'] = parsed_sequence
                 return data
 
             # If track_sequence is a string, parse it
@@ -66,6 +62,10 @@ class Route(BaseModel):
                 # Remove any quotes that might be present in CSV
                 track_sequences = track_sequence.strip('"\'')
                 parsed_sequence = [t.strip() for t in track_sequences.split(',')]
+
+                # Validate all items are strings
+                if not all(isinstance(item, str) for item in parsed_sequence):
+                    raise ValueError('All items in track_sequence must be strings')
 
                 data['track_sequence'] = parsed_sequence
                 return data
