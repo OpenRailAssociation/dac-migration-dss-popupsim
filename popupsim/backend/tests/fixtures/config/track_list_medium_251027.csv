@@ -1,0 +1,42 @@
+﻿id;location_code;name;lenth;type;sh_1;sh_1_id;sh_n;sh_n_Id;vaild_from;valid_to;pos_x;pos_y
+1;XYZ;1;260;workshop;1;5;0;;;;1;7
+2;XYZ;2;260;workshop;1;5;0;;;;1;6
+3;XYZ;3;426;to_be_retroffitted;1;5;1;6;;;1;2
+4;XYZ;4;352;retrofitted;1;5;1;6;;;1;3
+5;XYZ;5;395;station_head_1;;;;;;;0;1
+6;XYZ;6;621;station_head_n;;;;;;;1;1
+7;XYZ;7;670;circulating_track;1;5;1;6;;;2;1
+8;XYZ;8;150;parking;1;5;1;6;;;;4
+9;XYZ;9;270;parking;1;5;1;6;;;;5
+10;XYZ;10;257;parking;1;5;;;;;1;8
+11;XYZ;11;216;parking;1;5;;;;;1;9
+12;XYZ;12;169;parking;1;5;;;;;1;10
+13;XYZ;13;266;parking;1;5;;;;;1;11
+14;XYZ;14;212;parking;1;5;;;;;1;12
+15;XYZ;15;203;parking;1;5;;;;;1;13
+16;ABC_D;17;774;collection;;;;;;2031-08-14 00:00;1;14
+17;ABC_D;B1;561;dispenser;;;;;2031-08-16 00:00;;;
+18;ABC_D;Hump;50;selector;;;;;;;;
+19;ABC_D;B1;548;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;1
+20;ABC_D;B2;635;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;2
+21;ABC_D;B3;664;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;3
+22;ABC_D;B4;575;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;4
+23;ABC_D;B5;555;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;5
+24;ABC_D;B6;530;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;6
+25;ABC_D;B7;607;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;7
+26;ABC_D;B8;642;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;8
+27;ABC_D;B9;562;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;9
+28;ABC_D;B10;523;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;10
+29;ABC_D;B11;586;dispenser;;;1;18;2031-08-14 00:00;2031-08-16 00:00;0;11
+30;ABC_D;C22-23;9116;dispenser_2_control;1;18;;;2031-08-14 00:00;2031-08-21 00:00;1;
+31;ABC_D;A1-A14;7991;to_parking_control;;;;;2031-08-14 00:00;2031-08-24 00:00;2;
+32;Werk RT;Track_1;400;parking;;;;; ; ;1;1
+33;Werk RT;Track_2;400;parking;;;;;;;1;2
+34;Werk RT;Track_3;400;parking;;;;;;;1;3
+35;Werk RT;Track_4;400;parking;;;;;;;1;4
+36;Werk RT;Track_5;400;parking;;;;;;;1;5
+37;Werk RT;Track_6;400;parking;;;;;;;1;6
+38;Werk RT;Track_7;400;parking;;;;;;;1;7
+39;Werk RT;Track_D;1000;parking;;;;;;;2;1
+40;1234;mainline track;8000;parking;;;;;;;1;1
+;;;;;;;;;;; ; 

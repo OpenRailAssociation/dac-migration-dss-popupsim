@@ -1,0 +1,26 @@
+﻿id;group;number;location;process_step;time_sc;time_dac;other unit;loco;inspector;track;station_head;comment
+;1;1;0;train_approach_loco;3;3;;1;0;1;1;loco drives to wagons
+;1;2;0;train_preparation_base;30;30;;1;1;1;0;train is coupled and examined base
+;1;3;0;train_perparation_add_per_wagon;5;3;;1;1;1;0;time to couple an additional wagon
+;1;4;0;train_departure;3;3;;1;0;1;1;train moves from station track to mainline track
+;1;5;0;train_arrival;3;3;;1;0;1;1;train moves form mainline track to station track
+;1;6;0;train_detach;5;1;;1;0;1;0;loco in uncouples
+ ;1;7;0;train_drive-off_loco;3;3;;1;0;1;1;loco drives off
+;2;1;0;shunting_approach_loco;3;3;;1;0;1;1;
+;2;2;0;shunting_preparation_base;5;5;;1;1;1;0;
+;2;3;0;shunting_preparation_add_per_wagon;1;1;;1;1;1;0;
+;2;4;0;shunting_movement;7;7;;1;0;1;1;includes one movement back and forth  (Saegefahrt, Umsetzverfahren)
+;2;5;0;shunting_detach;5;1;;1;0;1;0;
+;2;6;0;shunting_drive-off_loco;3;3;;1;0;1;1;
+;3;1;0;workshop_lot_size;;;3;1;0;1;1;Number of wagons which are moved into workshop at same time
+;3;2;0;workshop_per_lot_time;180;;;1;0;1;1;Time until wagons are processed
+;3;3;0;workshop_offset_tracks;90;;;;;;;
+;4;1;0;delay_selector;60;;;;;;;time after arrival of train until wagons are presented to selector. May be interpreted as time wagons are at hump after arrival
+;4;1;0;train_split_up;60;;;;;;;time after arrival until track is freed
+;4;2;0;ready_for_job_in_location; ;120;;;;;;time after train arriving from parking is split up are ready to take next job
+;4;3;0;wait_for_job_in location;;2160;;;;;;maximum time wagon waits for job at is location
+;4;4;0;ready_for_job_in_vicinity;;2160;;;;;;time is ready for job in other location in vicinity (e.g. Bediensegment)
+;4;5;0;wait_for_job_in_vicinity;;4320;;;;;;maximum time wagon waits for job in vicinity
+;4;6;0;ready_for_job_global;;4320;;;;;;time after which wagon can be used werever it is needed
+;1;1;Strecke_6892;train_approach_loco;15;15;;1;0;1;1;
+ ;1;7;Strecke_6892;train_drive-off_loco;15;15;;1;0;1;1;
