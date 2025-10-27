@@ -7,6 +7,7 @@ and travel times.
 """
 
 import logging
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -28,56 +29,59 @@ class Route(BaseModel):
 
     @model_validator(mode='before')
     @classmethod
-    def parse_track_sequence(cls, values: dict) -> dict:
-        """Parse track_sequence from string to list if needed.
+    def parse_track_sequence(cls, data: Union[Dict[str, Any], List[str], str]) -> Dict[str, Any]:
+        """Parse track_sequence from string to list if needed."""
 
-        Parameters
-        ----------
-        values : dict
-            Raw field values from validation.
+        # If data is already a list, wrap it in a dict
+        if isinstance(data, list):
+            return {'track_sequence': data}
 
-        Returns
-        -------
-        dict
-            Processed values with parsed track_sequence.
-        """
-        data = dict(values)
-        track_sequence = data.get('track_sequence')
+        # If data is a string (direct track_sequence value)
+        if isinstance(data, str):
+            track_sequences = data.strip('"\'')
+            parsed_sequence = [t.strip() for t in track_sequences.split(',')]
 
-        # If already a list, no need to parse
-        if isinstance(track_sequence, list):
-            return data
+            if not all(isinstance(item, str) for item in parsed_sequence):
+                raise ValueError('All items in track_sequence must be strings')
 
-        # If string, parse as comma-separated list
-        if isinstance(track_sequence, str):
-            # Remove any quotes that might be present in CSV
-            track_sequence = track_sequence.strip('"\'')
-            data['track_sequence'] = [t.strip() for t in track_sequence.split(',')]
+            return {'track_sequence': parsed_sequence}
 
+        # If data is a dict, process the track_sequence field
+        if isinstance(data, dict):
+            if 'track_sequence' not in data:
+                return data  # Return as-is if no track_sequence field
+
+            track_sequence = data['track_sequence']
+
+            # If track_sequence is already a list, return the dict as-is
+            if isinstance(track_sequence, list):
+                return data
+
+            # If track_sequence is a string, parse it
+            if isinstance(track_sequence, str):
+                # Remove any quotes that might be present in CSV
+                track_sequences = track_sequence.strip('"\'')
+                parsed_sequence = [t.strip() for t in track_sequences.split(',')]
+
+                # Validate all items are strings
+                if not all(isinstance(item, str) for item in parsed_sequence):
+                    raise ValueError('All items in track_sequence must be strings')
+
+                data['track_sequence'] = parsed_sequence
+                return data
+
+        # This should never be reached due to type hints, but ensures MyPy compliance
         return data
 
     @model_validator(mode='after')
     def validate_route(self) -> 'Route':
-        """Validate route integrity.
-
-        Returns
-        -------
-        Route
-            Validated route instance.
-
-        Raises
-        ------
-        ValueError
-            If route validation fails.
-        """
-        # Ensure track_sequence contains at least from_track and to_track
-        first_track = self.track_sequence[0] if self.track_sequence else None
-        last_track = self.track_sequence[-1] if self.track_sequence else None
-
-        if first_track is None or last_track is None:
+        """Validate route integrity."""
+        # Check if track_sequence is empty
+        if not self.track_sequence:
             raise ValueError(f'Route {self.route_id} must have a valid track_sequence')
 
-        if not self.track_sequence or len(self.track_sequence) < 2:
+        # Check minimum length
+        if len(self.track_sequence) < 2:
             raise ValueError(f'Route {self.route_id} must have at least two tracks in sequence')
 
         # Validate that sequence contains at least the from and to tracks
