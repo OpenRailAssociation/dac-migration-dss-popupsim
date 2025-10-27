@@ -13,7 +13,7 @@ Key Features:
 """
 
 from enum import Enum
-from typing import Optional, Self
+from typing import Annotated, List, Self
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -48,7 +48,9 @@ class WorkshopTrack(BaseModel):
 
     capacity: int = Field(gt=0, description='Maximum number of wagons/trains the track can hold')
 
-    current_wagons: Optional[int] = Field(default=None, ge=0, description='Current number of wagons on the track')
+    current_wagons: List[Annotated[int, Field(ge=0)]] = Field(
+        default=[], description='List of wagon IDs currently on the track'
+    )
 
     retrofit_time_min: int = Field(ge=0, description='Time in minutes required for retrofit operations on this track')
 
@@ -75,12 +77,10 @@ class WorkshopTrack(BaseModel):
         Determine if the track has available capacity for additional wagons/trains.
 
         This method checks whether the current number of wagons on the track
-        is less than the track's maximum capacity. If current_wagons is None,
-        assumes the track is available.
+        is less than the track's maximum capacity. Uses len() of the wagon list
+        to determine current occupancy.
 
         Returns:
             bool: True if the track has available capacity, False otherwise.
         """
-        if self.current_wagons is None:
-            return True
-        return self.current_wagons < self.capacity
+        return len(self.current_wagons) < self.capacity

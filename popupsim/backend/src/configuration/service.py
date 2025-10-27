@@ -320,27 +320,9 @@ class ConfigurationService:
         tracks = []
         for _, row in df.iterrows():
             try:
-                # Handle optional current_wagons field
-                current_wagons = None
-                if 'current_wagons' in df.columns and pd.notna(row['current_wagons']):
-                    current_wagons_val = row['current_wagons']
-                    # pandas.DataFrame.iterrows(), the returned row values are not always scalar types, ensure the type
-                    current_wagons = (
-                        int(current_wagons_val)
-                        if pd.api.types.is_scalar(current_wagons_val)
-                        else int(current_wagons_val.iloc[0])
-                    )
-
-                # Extract scalar values properly
-                capacity_val = row['capacity']
-                capacity = int(capacity_val) if pd.api.types.is_scalar(capacity_val) else int(capacity_val.iloc[0])
-
-                retrofit_time_val = row['retrofit_time_min']
-                retrofit_time = (
-                    int(retrofit_time_val)
-                    if pd.api.types.is_scalar(retrofit_time_val)
-                    else int(retrofit_time_val.iloc[0])
-                )
+                current_wagons = self._parse_current_wagons(row, df)
+                capacity = self._extract_scalar_int(row['capacity'])
+                retrofit_time = self._extract_scalar_int(row['retrofit_time_min'])
 
                 track = WorkshopTrack(
                     id=str(row['track_id']).strip(),
@@ -363,6 +345,30 @@ class ConfigurationService:
                 raise ConfigurationError(f'Invalid data type for track {row["track_id"]}: {err}') from err
         return tracks
 
+    def _parse_current_wagons(self, row: pd.Series, df: pd.DataFrame) -> List[int]:
+        """Parse current_wagons field from DataFrame row."""
+        current_wagons: List[int] = []
+        if 'current_wagons' in df.columns and pd.notna(row['current_wagons']):
+            current_wagons_val = row['current_wagons']
+            # Extract scalar value if needed
+            if not pd.api.types.is_scalar(current_wagons_val):
+                current_wagons_val = current_wagons_val.iloc[0]
+
+            # Parse the current_wagons value
+            if isinstance(current_wagons_val, str):
+                # Handle comma-separated string of wagon IDs
+                current_wagons_str = current_wagons_val.strip()
+                if current_wagons_str:
+                    current_wagons = [int(wagon_id.strip()) for wagon_id in current_wagons_str.split(',')]
+            elif isinstance(current_wagons_val, (int, float)):
+                # Handle single wagon ID as integer
+                current_wagons = [int(current_wagons_val)]
+        return current_wagons
+
+    def _extract_scalar_int(self, value: Any) -> int:
+        """Extract scalar integer value from pandas Series or scalar."""
+        return int(value) if pd.api.types.is_scalar(value) else int(value.iloc[0])
+
     def _read_and_validate_workshop_tracks_csv(self, file_path: Path) -> pd.DataFrame:
         """Read and validate workshop tracks CSV file."""
         try:
@@ -374,7 +380,7 @@ class ConfigurationService:
                     'function': str,
                     'capacity': int,
                     'retrofit_time_min': int,
-                    'current_wagons': int,
+                    'current_wagons': str,  # List of wagons as string parsed later will be List[int]
                 },
             )
         except pd.errors.EmptyDataError as err:
