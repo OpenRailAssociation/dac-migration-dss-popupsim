@@ -16,7 +16,7 @@ from typing import List
 
 from pydantic import BaseModel, Field, field_validator
 
-from .model_track import TrackFunction, WorkshopTrackConfig
+from .model_track import TrackFunction, WorkshopTrack
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -29,11 +29,11 @@ class Workshop(BaseModel):
     Contains all available tracks for train processing.
     """
 
-    tracks: List[WorkshopTrackConfig] = Field(min_length=1, description='List of available tracks in the workshop')
+    tracks: List[WorkshopTrack] = Field(min_length=1, description='List of available tracks in the workshop')
 
     @field_validator('tracks')
     @classmethod
-    def validate_unique_track_ids(cls, v: List[WorkshopTrackConfig]) -> List[WorkshopTrackConfig]:
+    def validate_unique_track_ids(cls, v: List[WorkshopTrack]) -> List[WorkshopTrack]:
         """Ensure all track IDs are unique."""
         track_ids = [track.id for track in v]
         if len(track_ids) != len(set(track_ids)):
@@ -43,7 +43,7 @@ class Workshop(BaseModel):
 
     @field_validator('tracks')
     @classmethod
-    def validate_track_functions(cls, v: List[WorkshopTrackConfig]) -> List[WorkshopTrackConfig]:
+    def validate_track_functions(cls, v: List[WorkshopTrack]) -> List[WorkshopTrack]:
         """Validate track functions for workshop operation requirements."""
         # Get all functions present in the workshop
         functions_present = {track.function for track in v}
@@ -79,7 +79,7 @@ class Workshop(BaseModel):
 
     @field_validator('tracks')
     @classmethod
-    def validate_workshop_capacity(cls, v: List[WorkshopTrackConfig]) -> List[WorkshopTrackConfig]:
+    def validate_workshop_capacity(cls, v: List[WorkshopTrack]) -> List[WorkshopTrack]:
         """Validate workshop capacity and configuration."""
         # Calculate total capacity by function
         function_capacities = {}

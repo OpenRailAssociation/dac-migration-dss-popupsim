@@ -1,7 +1,7 @@
 """
-Unit tests for WorkshopTrackConfig model.
+Unit tests for WorkshopTrack model.
 
-Tests the WorkshopTrackConfig model validation logic, field constraints,
+Tests the WorkshopTrack model validation logic, field constraints,
 and error handling for workshop track configurations.
 """
 
@@ -10,17 +10,15 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from configuration.model_track import TrackFunction, WorkshopTrackConfig
+from configuration.model_track import TrackFunction, WorkshopTrack
 
 
-class TestWorkshopTrackConfig:
-    """Test cases for WorkshopTrackConfig model."""
+class TestWorkshopTrack:
+    """Test cases for WorkshopTrack model."""
 
     def test_track_creation_valid_data(self):
         """Test successful track creation with valid data."""
-        track = WorkshopTrackConfig(
-            id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30
-        )
+        track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
 
         assert track.id == 'TRACK01'
         assert track.function == TrackFunction.WERKSTATTGLEIS
@@ -37,9 +35,7 @@ class TestWorkshopTrackConfig:
         ]
 
         for track_id in valid_ids:
-            track = WorkshopTrackConfig(
-                id=track_id, function=TrackFunction.WERKSTATTGLEIS, capacity=1, retrofit_time_min=1
-            )
+            track = WorkshopTrack(id=track_id, function=TrackFunction.WERKSTATTGLEIS, capacity=1, retrofit_time_min=1)
             assert track.id == track_id
 
     def test_track_id_validation_invalid_formats(self):
@@ -66,7 +62,7 @@ class TestWorkshopTrackConfig:
 
         for track_id in invalid_ids:
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(id=track_id, function=TrackFunction.WERKSTATTGLEIS, capacity=1, retrofit_time_min=1)
+                WorkshopTrack(id=track_id, function=TrackFunction.WERKSTATTGLEIS, capacity=1, retrofit_time_min=1)
             assert (
                 'String should match pattern' in str(exc_info.value)
                 or 'at least 7 characters' in str(exc_info.value)
@@ -77,7 +73,7 @@ class TestWorkshopTrackConfig:
         """Test function field validation with all enum values."""
         for function in TrackFunction:
             retrofit_time = 30 if function == TrackFunction.WERKSTATTGLEIS else 0
-            track = WorkshopTrackConfig(id='TRACK01', function=function, capacity=5, retrofit_time_min=retrofit_time)
+            track = WorkshopTrack(id='TRACK01', function=function, capacity=5, retrofit_time_min=retrofit_time)
             assert track.function == function
 
     def test_track_capacity_validation_valid_values(self):
@@ -85,7 +81,7 @@ class TestWorkshopTrackConfig:
         valid_capacities = [1, 5, 10, 100, 999]
 
         for capacity in valid_capacities:
-            track = WorkshopTrackConfig(
+            track = WorkshopTrack(
                 id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=capacity, retrofit_time_min=30
             )
             assert track.capacity == capacity
@@ -96,7 +92,7 @@ class TestWorkshopTrackConfig:
 
         for capacity in invalid_capacities:
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(
+                WorkshopTrack(
                     id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=capacity, retrofit_time_min=30
                 )
             assert 'greater than 0' in str(exc_info.value)
@@ -110,7 +106,7 @@ class TestWorkshopTrackConfig:
         ]
 
         for input_val, expected_val in convertible_values:
-            track = WorkshopTrackConfig(
+            track = WorkshopTrack(
                 id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=input_val, retrofit_time_min=30
             )
             assert track.capacity == expected_val
@@ -120,7 +116,7 @@ class TestWorkshopTrackConfig:
         invalid_fractional = [1.5, 2.7]
         for capacity in invalid_fractional:
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(
+                WorkshopTrack(
                     id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=capacity, retrofit_time_min=30
                 )
             error_msg = str(exc_info.value)
@@ -130,7 +126,7 @@ class TestWorkshopTrackConfig:
         non_convertible = [None, [], {}, 'abc']
         for capacity in non_convertible:
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(
+                WorkshopTrack(
                     id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=capacity, retrofit_time_min=30
                 )
             error_msg = str(exc_info.value)
@@ -145,7 +141,7 @@ class TestWorkshopTrackConfig:
         valid_times = [1, 15, 30, 60, 120, 999]
 
         for retrofit_time in valid_times:
-            track = WorkshopTrackConfig(
+            track = WorkshopTrack(
                 id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=retrofit_time
             )
             assert track.retrofit_time_min == retrofit_time
@@ -154,7 +150,7 @@ class TestWorkshopTrackConfig:
         invalid_times = [0, -1, -30]
         for retrofit_time in invalid_times:
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(
+                WorkshopTrack(
                     id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=retrofit_time
                 )
             # Should fail either at field level (ge=0) or model level validation
@@ -167,38 +163,38 @@ class TestWorkshopTrackConfig:
 
         for function in non_werkstatt_functions:
             # Valid case: retrofit_time_min = 0
-            track = WorkshopTrackConfig(id='TRACK01', function=function, capacity=5, retrofit_time_min=0)
+            track = WorkshopTrack(id='TRACK01', function=function, capacity=5, retrofit_time_min=0)
             assert track.retrofit_time_min == 0
 
             # Invalid case: retrofit_time_min != 0
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(id='TRACK01', function=function, capacity=5, retrofit_time_min=30)
+                WorkshopTrack(id='TRACK01', function=function, capacity=5, retrofit_time_min=30)
             assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
     def test_track_function_sammelgleis(self):
         """Test SAMMELGLEIS function validation."""
         # Valid case: retrofit_time_min = 0
-        track = WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0)
+        track = WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=0)
         assert track.function == TrackFunction.SAMMELGLEIS
         assert track.retrofit_time_min == 0
         assert track.capacity == 10
 
         # Invalid case: retrofit_time_min != 0
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=15)
+            WorkshopTrack(id='TRACK03', function=TrackFunction.SAMMELGLEIS, capacity=10, retrofit_time_min=15)
         assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
     def test_track_function_parkgleis(self):
         """Test PARKGLEIS function validation."""
         # Valid case: retrofit_time_min = 0
-        track = WorkshopTrackConfig(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0)
+        track = WorkshopTrack(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=0)
         assert track.function == TrackFunction.PARKGLEIS
         assert track.retrofit_time_min == 0
         assert track.capacity == 8
 
         # Invalid case: retrofit_time_min != 0
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=20)
+            WorkshopTrack(id='TRACK04', function=TrackFunction.PARKGLEIS, capacity=8, retrofit_time_min=20)
         assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
     def test_track_function_werkstattgleis(self):
@@ -212,7 +208,7 @@ class TestWorkshopTrackConfig:
         ]
 
         for track_id, capacity, retrofit_time in valid_cases:
-            track = WorkshopTrackConfig(
+            track = WorkshopTrack(
                 id=track_id, function=TrackFunction.WERKSTATTGLEIS, capacity=capacity, retrofit_time_min=retrofit_time
             )
             assert track.function == TrackFunction.WERKSTATTGLEIS
@@ -223,7 +219,7 @@ class TestWorkshopTrackConfig:
         invalid_times = [0, -1, -10]
         for retrofit_time in invalid_times:
             with pytest.raises(ValidationError) as exc_info:
-                WorkshopTrackConfig(
+                WorkshopTrack(
                     id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=retrofit_time
                 )
             error_msg = str(exc_info.value)
@@ -232,48 +228,40 @@ class TestWorkshopTrackConfig:
     def test_track_function_werkstattzufuehrung(self):
         """Test WERKSTATTZUFUEHRUNG function validation."""
         # Valid case: retrofit_time_min = 0
-        track = WorkshopTrackConfig(
-            id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0
-        )
+        track = WorkshopTrack(id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=0)
         assert track.function == TrackFunction.WERKSTATTZUFUEHRUNG
         assert track.retrofit_time_min == 0
         assert track.capacity == 2
 
         # Invalid case: retrofit_time_min != 0
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(
-                id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=10
-            )
+            WorkshopTrack(id='TRACK05', function=TrackFunction.WERKSTATTZUFUEHRUNG, capacity=2, retrofit_time_min=10)
         assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
     def test_track_function_werkstattabfuehrung(self):
         """Test WERKSTATTABFUEHRUNG function validation."""
         # Valid case: retrofit_time_min = 0
-        track = WorkshopTrackConfig(
-            id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0
-        )
+        track = WorkshopTrack(id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=0)
         assert track.function == TrackFunction.WERKSTATTABFUEHRUNG
         assert track.retrofit_time_min == 0
         assert track.capacity == 2
 
         # Invalid case: retrofit_time_min != 0
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(
-                id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=25
-            )
+            WorkshopTrack(id='TRACK06', function=TrackFunction.WERKSTATTABFUEHRUNG, capacity=2, retrofit_time_min=25)
         assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
     def test_track_function_bahnhofskopf(self):
         """Test BAHNHOFSKOPF function validation."""
         # Valid case: retrofit_time_min = 0
-        track = WorkshopTrackConfig(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0)
+        track = WorkshopTrack(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=0)
         assert track.function == TrackFunction.BAHNHOFSKOPF
         assert track.retrofit_time_min == 0
         assert track.capacity == 3
 
         # Invalid case: retrofit_time_min != 0
         with pytest.raises(ValidationError) as exc_info:
-            WorkshopTrackConfig(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=5)
+            WorkshopTrack(id='TRACK07', function=TrackFunction.BAHNHOFSKOPF, capacity=3, retrofit_time_min=5)
         assert 'must be 0 unless function is werkstattgleis' in str(exc_info.value)
 
     def test_csv_data_format_validation(self):
@@ -298,7 +286,7 @@ class TestWorkshopTrackConfig:
                 'retrofit_time_min': retrofit_time,
             }
 
-            track = WorkshopTrackConfig(**track_data)
+            track = WorkshopTrack(**track_data)
 
             assert track.id == track_id
             assert track.function.value == function_str  # Enum value matches string
@@ -332,7 +320,7 @@ class TestWorkshopTrackConfig:
             }
 
             # Create track instance
-            track = WorkshopTrackConfig(**track_data)
+            track = WorkshopTrack(**track_data)
             tracks.append(track)
 
         # Verify all tracks were created successfully

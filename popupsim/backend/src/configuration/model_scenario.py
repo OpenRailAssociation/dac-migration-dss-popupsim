@@ -8,10 +8,12 @@ such as date ranges, random seeds, workshop configurations, and file references.
 
 import logging
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from .model_route import Route
+from .model_train import Train
 from .model_workshop import Workshop
 
 # Configure logging
@@ -33,7 +35,11 @@ class ScenarioConfig(BaseModel):
     end_date: date = Field(description='Simulation end date')
     random_seed: Optional[int] = Field(default=None, ge=0, description='Random seed for reproducible simulations')
     workshop: Optional[Workshop] = Field(default=None, description='Workshop configuration with available tracks')
-    train_schedule_file: str = Field(description='Path to the train schedule file', min_length=1)
+    train_schedule_file: Optional[str] = Field(
+        pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to the train schedule file', min_length=1, max_length=50
+    )
+    train: Optional[List[Train]] = Field(default=None, description='Train configuration')
+    routes: Optional[List[Route]] = Field(default=None, description='Route configuration')
 
     @field_validator('train_schedule_file')
     @classmethod
