@@ -888,7 +888,7 @@ ROUTE01;TRACK_A;TRACK_B;TRACK_A,TRACK_B;1000;60"""
                 f.write(routes_content)
 
             # Should succeed even without random_seed
-            config = service.load_complete_scenario(temp_path)
+            config, _ = service.load_complete_scenario(temp_path)
             assert config.scenario_id == 'test_no_seed'
             assert config.random_seed is None  # Should be None when not provided
 

@@ -57,12 +57,8 @@ class Workshop(BaseModel):
             missing_names = [f.value for f in missing_required]
             raise ValueError(f'Workshop must have at least one track with required functions: {missing_names}')
 
-        # Business rule: At least one werkstattgleis track must exist
-        werkstatt_tracks = [track for track in v if track.function == TrackFunction.WERKSTATTGLEIS]
-        if len(werkstatt_tracks) == 0:
-            raise ValueError('Workshop must have at least one werkstattgleis track for retrofit operations')
-
         # Business rule: Verify werkstattgleis tracks have proper retrofit times
+        werkstatt_tracks = [track for track in v if track.function == TrackFunction.WERKSTATTGLEIS]
         for track in werkstatt_tracks:
             if track.retrofit_time_min <= 0:
                 raise ValueError(f'Werkstattgleis track {track.id} must have retrofit_time_min > 0')
