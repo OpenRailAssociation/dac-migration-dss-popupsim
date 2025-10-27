@@ -7,8 +7,7 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-merge-conflict
-      - id: mixed-line-ending
-        args: [--fix=lf]
+
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.13.0
@@ -16,7 +15,7 @@ repos:
       - id: ruff-format
         files: ^popupsim/backend/
       - id: ruff
-        files: ^backend/
+        files: ^popupsim/backend/
         args: [--fix, --exit-non-zero-on-fix]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
