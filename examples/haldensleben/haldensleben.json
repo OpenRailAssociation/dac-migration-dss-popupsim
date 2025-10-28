@@ -1,0 +1,5414 @@
+{
+  "nodes": [
+    {
+      "name": "N_447379843",
+      "x": 1269736.1605721754,
+      "y": 6851817.151734603,
+      "osm_local_ref": "2",
+      "osm_name": "Haldensleben",
+      "osm_network": "marego",
+      "osm_network:wikidata": "Q1883891",
+      "osm_network:wikipedia": "de:Magdeburger Regionalverkehrsverbund",
+      "osm_operator": "DB InfraGO AG",
+      "osm_public_transport": "stop_position",
+      "osm_railway": "stop",
+      "osm_train": "yes",
+      "osm_wheelchair": "yes",
+      "interior": true
+    },
+    {
+      "name": "N_1877303856",
+      "x": 1269741.5039077324,
+      "y": 6851824.321494762,
+      "osm_local_ref": "1",
+      "osm_name": "Haldensleben",
+      "osm_network": "marego",
+      "osm_network:wikidata": "Q1883891",
+      "osm_network:wikipedia": "de:Magdeburger Regionalverkehrsverbund",
+      "osm_operator": "DB InfraGO AG",
+      "osm_public_transport": "stop_position",
+      "osm_railway": "stop",
+      "osm_train": "yes",
+      "osm_wheelchair": "yes",
+      "interior": true
+    },
+    {
+      "name": "N_1877303900",
+      "x": 1270871.3410793818,
+      "y": 6850981.536205249,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "5",
+      "interior": false
+    },
+    {
+      "name": "N_1877303904",
+      "x": 1270764.5968196748,
+      "y": 6851050.24258102,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "6",
+      "interior": true
+    },
+    {
+      "name": "N_1877303912",
+      "x": 1270804.5048571187,
+      "y": 6851030.536746527,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "7",
+      "interior": true
+    },
+    {
+      "name": "N_1877303913",
+      "x": 1270734.2399945396,
+      "y": 6851072.841575149,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "9",
+      "interior": true
+    },
+    {
+      "name": "N_1877303916",
+      "x": 1270723.4420039344,
+      "y": 6851099.188952631,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "8",
+      "interior": true
+    },
+    {
+      "name": "N_1877303919",
+      "x": 1270691.1482196597,
+      "y": 6851098.370144718,
+      "osm_crossing:barrier": "double_half",
+      "osm_railway": "level_crossing",
+      "interior": true
+    },
+    {
+      "name": "N_1877303923",
+      "x": 1270694.2317695543,
+      "y": 6851102.209444781,
+      "osm_crossing:barrier": "double_half",
+      "osm_railway": "level_crossing",
+      "interior": true
+    },
+    {
+      "name": "N_1877303926",
+      "x": 1270699.0852993522,
+      "y": 6851108.395998487,
+      "osm_crossing:barrier": "double_half",
+      "osm_railway": "level_crossing",
+      "interior": true
+    },
+    {
+      "name": "N_1877303928",
+      "x": 1270653.7893985547,
+      "y": 6851119.495415571,
+      "interior": true
+    },
+    {
+      "name": "N_1877303930",
+      "x": 1270703.894301354,
+      "y": 6851114.582556944,
+      "osm_crossing:barrier": "double_half",
+      "osm_railway": "level_crossing",
+      "interior": true
+    },
+    {
+      "name": "N_1877303932",
+      "x": 1270676.4206510298,
+      "y": 6851115.237604589,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "A10",
+      "interior": true
+    },
+    {
+      "name": "N_1877303936",
+      "x": 1270567.66150854,
+      "y": 6851151.046956753,
+      "interior": true
+    },
+    {
+      "name": "N_1877303949",
+      "x": 1270517.1113277778,
+      "y": 6851167.73256795,
+      "osm_railway": "switch",
+      "osm_railway:switch": "double_slip",
+      "osm_railway:switch:configuration": "inside",
+      "osm_ref": "60",
+      "interior": true
+    },
+    {
+      "name": "N_1877303950",
+      "x": 1270612.6234508653,
+      "y": 6851162.255607794,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "11",
+      "interior": true
+    },
+    {
+      "name": "N_1877303951",
+      "x": 1270516.4879386295,
+      "y": 6851224.503935513,
+      "interior": true
+    },
+    {
+      "name": "N_1877303953",
+      "x": 1270438.9093855065,
+      "y": 6851207.417895348,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "61",
+      "interior": true
+    },
+    {
+      "name": "N_1877303955",
+      "x": 1270515.9090772772,
+      "y": 6851215.424129045,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "13",
+      "interior": true
+    },
+    {
+      "name": "N_1877303967",
+      "x": 1270094.5536727344,
+      "y": 6851418.91250561,
+      "interior": true
+    },
+    {
+      "name": "N_1877303974",
+      "x": 1270061.9147980383,
+      "y": 6851442.495144398,
+      "interior": true
+    },
+    {
+      "name": "N_1877303976",
+      "x": 1270257.3027682514,
+      "y": 6851406.375158604,
+      "interior": true
+    },
+    {
+      "name": "N_1877303978",
+      "x": 1270261.9113951698,
+      "y": 6851412.216213348,
+      "interior": true
+    },
+    {
+      "name": "N_1877303980",
+      "x": 1270266.7315291204,
+      "y": 6851417.838914899,
+      "interior": true
+    },
+    {
+      "name": "N_1877303982",
+      "x": 1270269.681495626,
+      "y": 6851424.698980043,
+      "interior": true
+    },
+    {
+      "name": "N_1877303984",
+      "x": 1270036.4226346503,
+      "y": 6851465.5137588065,
+      "interior": true
+    },
+    {
+      "name": "N_1877303986",
+      "x": 1270275.3031299103,
+      "y": 6851430.740209341,
+      "interior": true
+    },
+    {
+      "name": "N_1877303988",
+      "x": 1269968.6290647665,
+      "y": 6851534.0968817435,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "69",
+      "interior": true
+    },
+    {
+      "name": "N_1877303990",
+      "x": 1270161.1004643212,
+      "y": 6851504.418096023,
+      "interior": true
+    },
+    {
+      "name": "N_1877304011",
+      "x": 1269932.8175845833,
+      "y": 6851580.298470667,
+      "interior": true
+    },
+    {
+      "name": "N_1877304015",
+      "x": 1270026.927082087,
+      "y": 6851614.199214152,
+      "interior": true
+    },
+    {
+      "name": "N_1877304018",
+      "x": 1269883.113431951,
+      "y": 6851645.024812635,
+      "interior": true
+    },
+    {
+      "name": "N_1877304022",
+      "x": 1269837.9065867462,
+      "y": 6851697.523225361,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "34",
+      "interior": true
+    },
+    {
+      "name": "N_1877304028",
+      "x": 1269739.7784556255,
+      "y": 6851788.399968587,
+      "osm_railway": "switch",
+      "osm_railway:switch": "double_slip",
+      "osm_railway:switch:configuration": "inside",
+      "osm_railway:switch:electric": "yes",
+      "osm_railway:switch:heated": "yes",
+      "osm_ref": "41",
+      "interior": true
+    },
+    {
+      "name": "N_1877304031",
+      "x": 1269692.89068611,
+      "y": 6851831.655037757,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:switch:electric": "yes",
+      "osm_railway:switch:heated": "yes",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "42",
+      "interior": true
+    },
+    {
+      "name": "N_1877304035",
+      "x": 1269716.078536039,
+      "y": 6851843.301372852,
+      "osm_crossing": "controlled",
+      "osm_crossing:barrier": "no",
+      "osm_crossing:bell": "no",
+      "osm_crossing:light": "no",
+      "osm_railway": "crossing",
+      "interior": true
+    },
+    {
+      "name": "N_1877304043",
+      "x": 1269631.5759105897,
+      "y": 6851885.464886078,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:switch:electric": "no",
+      "osm_railway:switch:heated": "yes",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "43",
+      "interior": true
+    },
+    {
+      "name": "N_1877304045",
+      "x": 1269587.983198001,
+      "y": 6851917.965698892,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:switch:electric": "no",
+      "osm_railway:switch:heated": "yes",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "44",
+      "interior": true
+    },
+    {
+      "name": "N_1877304055",
+      "x": 1269592.4248456832,
+      "y": 6851897.438854506,
+      "interior": true
+    },
+    {
+      "name": "N_1877304057",
+      "x": 1269549.6336334283,
+      "y": 6851934.634699628,
+      "interior": true
+    },
+    {
+      "name": "N_1877304059",
+      "x": 1269522.2045109004,
+      "y": 6851960.202393277,
+      "interior": true
+    },
+    {
+      "name": "N_1877304060",
+      "x": 1269492.1371164413,
+      "y": 6851997.18015484,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:switch:electric": "no",
+      "osm_railway:switch:heated": "yes",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "45",
+      "interior": true
+    },
+    {
+      "name": "N_1877304061",
+      "x": 1269484.1666409015,
+      "y": 6851994.359502689,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "46",
+      "interior": true
+    },
+    {
+      "name": "N_1879956900",
+      "x": 1270447.1915556202,
+      "y": 6851116.147393074,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_1879956908",
+      "x": 1270402.340932786,
+      "y": 6851169.1154554915,
+      "interior": true
+    },
+    {
+      "name": "N_1879956909",
+      "x": 1270461.2512073054,
+      "y": 6851153.794530486,
+      "interior": true
+    },
+    {
+      "name": "N_1879956911",
+      "x": 1270455.4180659887,
+      "y": 6851165.3852988565,
+      "interior": true
+    },
+    {
+      "name": "N_1879956912",
+      "x": 1270494.5023392006,
+      "y": 6851154.485973029,
+      "interior": true
+    },
+    {
+      "name": "N_1879956915",
+      "x": 1270479.8526942143,
+      "y": 6851168.933496585,
+      "interior": true
+    },
+    {
+      "name": "N_1879956918",
+      "x": 1270354.2286488716,
+      "y": 6851179.086809482,
+      "interior": true
+    },
+    {
+      "name": "N_1879956921",
+      "x": 1270421.2875101161,
+      "y": 6851192.479012358,
+      "interior": true
+    },
+    {
+      "name": "N_1879956925",
+      "x": 1270559.9693317271,
+      "y": 6851184.600172921,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "12",
+      "interior": true
+    },
+    {
+      "name": "N_1879956927",
+      "x": 1270407.4727613106,
+      "y": 6851210.238272219,
+      "interior": true
+    },
+    {
+      "name": "N_1879956932",
+      "x": 1270395.4613882557,
+      "y": 6851241.5900118975,
+      "interior": true
+    },
+    {
+      "name": "N_1879956947",
+      "x": 1270441.569921336,
+      "y": 6851253.071729992,
+      "interior": true
+    },
+    {
+      "name": "N_1879956952",
+      "x": 1270371.7726006182,
+      "y": 6851259.8588705715,
+      "interior": true
+    },
+    {
+      "name": "N_1879956954",
+      "x": 1270202.8007455666,
+      "y": 6851268.210882491,
+      "interior": true
+    },
+    {
+      "name": "N_1879956956",
+      "x": 1270194.663290791,
+      "y": 6851283.513828751,
+      "interior": true
+    },
+    {
+      "name": "N_1879956960",
+      "x": 1270384.7190573958,
+      "y": 6851285.751955312,
+      "interior": true
+    },
+    {
+      "name": "N_1879956962",
+      "x": 1270244.9685686731,
+      "y": 6851297.743229332,
+      "interior": true
+    },
+    {
+      "name": "N_1879956967",
+      "x": 1270242.7199149595,
+      "y": 6851316.0122152325,
+      "interior": true
+    },
+    {
+      "name": "N_1879956971",
+      "x": 1270200.685675242,
+      "y": 6851299.089746804,
+      "interior": true
+    },
+    {
+      "name": "N_1879956972",
+      "x": 1270352.0690507507,
+      "y": 6851304.839742843,
+      "interior": true
+    },
+    {
+      "name": "N_1879956973",
+      "x": 1270126.2129359117,
+      "y": 6851368.308326021,
+      "interior": true
+    },
+    {
+      "name": "N_1879956974",
+      "x": 1270169.0932037593,
+      "y": 6851303.2384777125,
+      "interior": true
+    },
+    {
+      "name": "N_1879956976",
+      "x": 1270168.8260369813,
+      "y": 6851295.104783595,
+      "interior": true
+    },
+    {
+      "name": "N_1879956977",
+      "x": 1270327.801401761,
+      "y": 6851319.669656628,
+      "interior": true
+    },
+    {
+      "name": "N_1879956982",
+      "x": 1270302.1311271877,
+      "y": 6851337.556570529,
+      "interior": true
+    },
+    {
+      "name": "N_1879956983",
+      "x": 1270111.541027027,
+      "y": 6851355.86203926,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "58",
+      "interior": true
+    },
+    {
+      "name": "N_1879956985",
+      "x": 1270106.3090109604,
+      "y": 6851366.288532565,
+      "interior": true
+    },
+    {
+      "name": "N_1879957000",
+      "x": 1270065.2432508126,
+      "y": 6851418.130058132,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "65",
+      "interior": true
+    },
+    {
+      "name": "N_1879957008",
+      "x": 1270126.0793525225,
+      "y": 6851385.321921624,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "63",
+      "interior": true
+    },
+    {
+      "name": "N_1879957012",
+      "x": 1270187.6946906683,
+      "y": 6851348.001236455,
+      "interior": true
+    },
+    {
+      "name": "N_1879957013",
+      "x": 1270077.1321724278,
+      "y": 6851395.566489015,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "57",
+      "interior": true
+    },
+    {
+      "name": "N_1879957016",
+      "x": 1270137.6120517673,
+      "y": 6851407.066622802,
+      "interior": true
+    },
+    {
+      "name": "N_1879957018",
+      "x": 1270029.3761108841,
+      "y": 6851454.814189155,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "66",
+      "interior": true
+    },
+    {
+      "name": "N_1879957022",
+      "x": 1270249.5549316932,
+      "y": 6851376.096363191,
+      "interior": true
+    },
+    {
+      "name": "N_1879957024",
+      "x": 1270099.507390074,
+      "y": 6851429.19350864,
+      "interior": true
+    },
+    {
+      "name": "N_1879957025",
+      "x": 1270238.7569410878,
+      "y": 6851393.219153596,
+      "interior": true
+    },
+    {
+      "name": "N_1879957029",
+      "x": 1270246.1485552755,
+      "y": 6851396.858433607,
+      "interior": true
+    },
+    {
+      "name": "N_1879957030",
+      "x": 1270058.0520117083,
+      "y": 6851436.035386945,
+      "interior": true
+    },
+    {
+      "name": "N_1879957032",
+      "x": 1270252.5494259954,
+      "y": 6851401.2437682,
+      "interior": true
+    },
+    {
+      "name": "N_1879957033",
+      "x": 1270075.7852065891,
+      "y": 6851442.713502485,
+      "interior": true
+    },
+    {
+      "name": "N_1879957036",
+      "x": 1270000.199272351,
+      "y": 6851493.536508519,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "68",
+      "interior": true
+    },
+    {
+      "name": "N_1879957053",
+      "x": 1270040.240893184,
+      "y": 6851467.569970249,
+      "interior": true
+    },
+    {
+      "name": "N_1879957065",
+      "x": 1269905.8114761205,
+      "y": 6851638.346529528,
+      "interior": true
+    },
+    {
+      "name": "N_1879957066",
+      "x": 1269942.8363387533,
+      "y": 6851602.78976927,
+      "interior": true
+    },
+    {
+      "name": "N_1879957067",
+      "x": 1269880.23025714,
+      "y": 6851658.163031516,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "33",
+      "interior": true
+    },
+    {
+      "name": "N_1879957071",
+      "x": 1269923.5001432053,
+      "y": 6851643.769222201,
+      "interior": true
+    },
+    {
+      "name": "N_1879957072",
+      "x": 1269917.0770085875,
+      "y": 6851639.492937405,
+      "interior": true
+    },
+    {
+      "name": "N_1879957074",
+      "x": 1269839.1199691957,
+      "y": 6851706.057661669,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "35",
+      "interior": true
+    },
+    {
+      "name": "N_1879957077",
+      "x": 1269780.7885560282,
+      "y": 6851750.513304361,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "40",
+      "interior": true
+    },
+    {
+      "name": "N_3338129420",
+      "x": 1270464.4126808434,
+      "y": 6851117.366509798,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_3338129422",
+      "x": 1270492.7212273483,
+      "y": 6851122.406740616,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_3338129423",
+      "x": 1270611.454596212,
+      "y": 6851136.07178658,
+      "osm_crossing:barrier": "no",
+      "osm_crossing:bell": "no",
+      "osm_crossing:light": "no",
+      "osm_railway": "level_crossing",
+      "osm_supervised": "no",
+      "interior": true
+    },
+    {
+      "name": "N_3338129424",
+      "x": 1270397.8213614603,
+      "y": 6851141.930841343,
+      "interior": false
+    },
+    {
+      "name": "N_3338129425",
+      "x": 1270527.864790587,
+      "y": 6851133.087673366,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_3338129426",
+      "x": 1270533.9984945287,
+      "y": 6851138.983117608,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_3338129427",
+      "x": 1270513.2596733968,
+      "y": 6851130.758610161,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_3338129428",
+      "x": 1270541.2342614294,
+      "y": 6851144.42367028,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_3338129429",
+      "x": 1270406.2371149631,
+      "y": 6851146.516191518,
+      "interior": true
+    },
+    {
+      "name": "N_3338129432",
+      "x": 1270335.3488632357,
+      "y": 6851212.185242637,
+      "interior": true
+    },
+    {
+      "name": "N_3338129433",
+      "x": 1270431.1170211518,
+      "y": 6851178.777478976,
+      "interior": true
+    },
+    {
+      "name": "N_3338129434",
+      "x": 1270405.06826031,
+      "y": 6851185.6191447945,
+      "interior": true
+    },
+    {
+      "name": "N_3338129435",
+      "x": 1270440.3565388864,
+      "y": 6851190.04075638,
+      "interior": true
+    },
+    {
+      "name": "N_3338129436",
+      "x": 1270451.622071353,
+      "y": 6851175.247472814,
+      "interior": true
+    },
+    {
+      "name": "N_3338129437",
+      "x": 1270454.2380793865,
+      "y": 6851191.187100519,
+      "interior": true
+    },
+    {
+      "name": "N_3338129438",
+      "x": 1270459.9153734162,
+      "y": 6851194.826289344,
+      "interior": true
+    },
+    {
+      "name": "N_3338129439",
+      "x": 1270426.0853801689,
+      "y": 6851205.998609291,
+      "interior": true
+    },
+    {
+      "name": "N_3338129440",
+      "x": 1270268.2788700422,
+      "y": 6851225.522912431,
+      "interior": true
+    },
+    {
+      "name": "N_3338129442",
+      "x": 1270443.9076306422,
+      "y": 6851260.0226354245,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "14",
+      "interior": true
+    },
+    {
+      "name": "N_3338129446",
+      "x": 1270393.9474431812,
+      "y": 6851288.881694307,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "right",
+      "osm_ref": "B15",
+      "interior": true
+    },
+    {
+      "name": "N_3338129449",
+      "x": 1270232.8347441787,
+      "y": 6851339.103253648,
+      "interior": true
+    },
+    {
+      "name": "N_3338129450",
+      "x": 1270294.6170615603,
+      "y": 6851351.403944134,
+      "interior": true
+    },
+    {
+      "name": "N_3338129454",
+      "x": 1270180.5368474112,
+      "y": 6851345.126222534,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "62",
+      "interior": true
+    },
+    {
+      "name": "N_3338129471",
+      "x": 1269909.9191653305,
+      "y": 6851610.687214247,
+      "osm_crossing:barrier": "no",
+      "osm_crossing:bell": "no",
+      "osm_crossing:light": "no",
+      "osm_railway": "level_crossing",
+      "osm_supervised": "no",
+      "interior": true
+    },
+    {
+      "name": "N_4731123220",
+      "x": 1269952.3986830113,
+      "y": 6851669.154023314,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "A27",
+      "interior": true
+    },
+    {
+      "name": "N_4731124223",
+      "x": 1270090.8467336914,
+      "y": 6851577.259602607,
+      "interior": true
+    },
+    {
+      "name": "N_4731124224",
+      "x": 1270108.1123867112,
+      "y": 6851565.941193925,
+      "interior": true
+    },
+    {
+      "name": "N_4731124273",
+      "x": 1270881.4043613481,
+      "y": 6850964.723611359,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:position": "right",
+      "osm_railway:signal:speed_limit": "DE-ESO:dr:lf1/2",
+      "osm_railway:signal:speed_limit:form": "sign",
+      "osm_railway:signal:speed_limit:height": "normal",
+      "osm_railway:signal:speed_limit:speed": "10",
+      "interior": false
+    },
+    {
+      "name": "N_5015579198",
+      "x": 1270321.0999684164,
+      "y": 6851397.058594056,
+      "interior": true
+    },
+    {
+      "name": "N_5015579204",
+      "x": 1270228.292908955,
+      "y": 6851315.775664351,
+      "interior": true
+    },
+    {
+      "name": "N_5015579205",
+      "x": 1270267.5664253014,
+      "y": 6851330.569205741,
+      "interior": true
+    },
+    {
+      "name": "N_5015579576",
+      "x": 1270255.4103369082,
+      "y": 6851316.467120791,
+      "interior": true
+    },
+    {
+      "name": "N_6630116007",
+      "x": 1270710.8183736803,
+      "y": 6851087.161582485,
+      "interior": true
+    },
+    {
+      "name": "N_6630116008",
+      "x": 1270345.412145202,
+      "y": 6851316.703671687,
+      "interior": true
+    },
+    {
+      "name": "N_6630116009",
+      "x": 1270361.9430895825,
+      "y": 6851311.299395188,
+      "interior": true
+    },
+    {
+      "name": "N_6630116010",
+      "x": 1270409.5655677372,
+      "y": 6851285.078697666,
+      "interior": true
+    },
+    {
+      "name": "N_6630116011",
+      "x": 1270484.1607585074,
+      "y": 6851236.240373863,
+      "interior": true
+    },
+    {
+      "name": "N_6630116013",
+      "x": 1270647.2215485987,
+      "y": 6851134.124834537,
+      "interior": true
+    },
+    {
+      "name": "N_6630116016",
+      "x": 1270108.9138870449,
+      "y": 6851553.785750202,
+      "interior": true
+    },
+    {
+      "name": "N_6630116017",
+      "x": 1269499.3172235966,
+      "y": 6851982.167017616,
+      "interior": true
+    },
+    {
+      "name": "N_6630116020",
+      "x": 1269650.221925295,
+      "y": 6851868.996159161,
+      "interior": true
+    },
+    {
+      "name": "N_6630116021",
+      "x": 1269561.6784023303,
+      "y": 6851939.584453209,
+      "interior": true
+    },
+    {
+      "name": "N_6630116022",
+      "x": 1269525.8891860452,
+      "y": 6851969.919957889,
+      "interior": true
+    },
+    {
+      "name": "N_7598336888",
+      "x": 1269807.2825948333,
+      "y": 6851729.513760243,
+      "interior": true
+    },
+    {
+      "name": "N_7598337080",
+      "x": 1269918.8024606945,
+      "y": 6851622.2604425205,
+      "interior": true
+    },
+    {
+      "name": "N_7598337081",
+      "x": 1269714.3753478301,
+      "y": 6851815.513973028,
+      "interior": true
+    },
+    {
+      "name": "N_7598337082",
+      "x": 1269859.8810542258,
+      "y": 6851673.0481862575,
+      "interior": true
+    },
+    {
+      "name": "N_7598337083",
+      "x": 1269932.472494162,
+      "y": 6851645.952857868,
+      "interior": true
+    },
+    {
+      "name": "N_7598337084",
+      "x": 1269937.8603575155,
+      "y": 6851651.284570762,
+      "interior": true
+    },
+    {
+      "name": "N_7598337085",
+      "x": 1269941.9569147762,
+      "y": 6851657.034817975,
+      "interior": true
+    },
+    {
+      "name": "N_7598337086",
+      "x": 1269946.25384712,
+      "y": 6851662.512114232,
+      "interior": true
+    },
+    {
+      "name": "N_7598998615",
+      "x": 1270085.1249118655,
+      "y": 6851401.280161032,
+      "interior": true
+    },
+    {
+      "name": "N_7598998616",
+      "x": 1270020.6041350106,
+      "y": 6851471.318463249,
+      "interior": true
+    },
+    {
+      "name": "N_7598998617",
+      "x": 1270005.0639340982,
+      "y": 6851495.720103496,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "67",
+      "interior": true
+    },
+    {
+      "name": "N_7729112193",
+      "x": 1269951.229828358,
+      "y": 6851556.187722657,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "70",
+      "interior": true
+    },
+    {
+      "name": "N_8986577250",
+      "x": 1269636.4294403875,
+      "y": 6851890.833152398,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:height": "normal",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1",
+      "osm_railway:signal:main:substitute_signal": "DE-ESO:dr:zs1",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "G",
+      "interior": true
+    },
+    {
+      "name": "N_8986577251",
+      "x": 1269470.8750937027,
+      "y": 6852013.594550199,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:position": "right",
+      "osm_railway:signal:shunting": "DE-ESO:ra11",
+      "osm_railway:signal:shunting:form": "light",
+      "osm_railway:signal:shunting:height": "normal",
+      "osm_railway:signal:shunting:states": "DE-ESO:ra11;DE-ESO:sh1",
+      "interior": false
+    },
+    {
+      "name": "N_8986577252",
+      "x": 1269537.4218852897,
+      "y": 6851973.9416500395,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:height": "normal",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "F",
+      "interior": true
+    },
+    {
+      "name": "N_8996971070",
+      "x": 1270771.8214546263,
+      "y": 6851065.017439584,
+      "osm_railway": "buffer_stop",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:minor": "DE-ESO:sh0",
+      "osm_railway:signal:minor:form": "sign",
+      "osm_railway:signal:position": "in_track",
+      "interior": true
+    },
+    {
+      "name": "N_8997099871",
+      "x": 1269812.4478192052,
+      "y": 6851743.5073845135,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "light",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:height": "dwarf",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "K",
+      "interior": true
+    },
+    {
+      "name": "N_8997099872",
+      "x": 1269703.2211348542,
+      "y": 6851832.3283410445,
+      "osm_railway": "signal",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:height": "normal",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2",
+      "osm_railway:signal:main:substitute_signal": "DE-ESO:dr:zs1",
+      "osm_railway:signal:minor": "DE-ESO:sh1",
+      "osm_railway:signal:minor:form": "light",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "H",
+      "interior": true
+    },
+    {
+      "name": "N_9004581435",
+      "x": 1270531.0596599723,
+      "y": 6851232.273637757,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:height": "normal",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;?",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "D",
+      "interior": true
+    },
+    {
+      "name": "N_9004581437",
+      "x": 1270636.5682733315,
+      "y": 6851126.828317529,
+      "interior": true
+    },
+    {
+      "name": "N_9004581438",
+      "x": 1270672.001267246,
+      "y": 6851109.6151140435,
+      "osm_railway": "derail",
+      "osm_railway:derail": "wedge",
+      "osm_railway:signal:minor": "DE-ESO:sh",
+      "osm_railway:signal:minor:form": "semaphore",
+      "osm_railway:signal:minor:height": "dwarf",
+      "interior": true
+    },
+    {
+      "name": "N_9004581439",
+      "x": 1270533.041146908,
+      "y": 6851213.022258102,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "E4",
+      "interior": true
+    },
+    {
+      "name": "N_9004581440",
+      "x": 1270657.5074695465,
+      "y": 6851138.819355206,
+      "osm_railway": "signal",
+      "osm_railway:signal:distant": "DE-ESO:hl",
+      "osm_railway:signal:distant:form": "light",
+      "osm_railway:signal:distant:states": "DE-ESO:hl1;DE-ESO:hl7",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "Vg",
+      "interior": true
+    },
+    {
+      "name": "N_9004581441",
+      "x": 1270621.3842947893,
+      "y": 6851175.5022154795,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "C",
+      "interior": true
+    },
+    {
+      "name": "N_9004741859",
+      "x": 1270526.9853666099,
+      "y": 6851225.704872612,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:minor": "DE-ESO:sh",
+      "osm_railway:signal:minor:form": "light",
+      "osm_railway:signal:minor:height": "dwarf",
+      "osm_railway:signal:position": "right",
+      "interior": true
+    },
+    {
+      "name": "N_9004809701",
+      "x": 1270029.9883680833,
+      "y": 6851621.368793837,
+      "interior": true
+    },
+    {
+      "name": "N_9026565231",
+      "x": 1270079.5366734285,
+      "y": 6851429.266294547,
+      "interior": true
+    },
+    {
+      "name": "N_9026565234",
+      "x": 1270395.806478677,
+      "y": 6851200.30327162,
+      "interior": true
+    },
+    {
+      "name": "N_9026565235",
+      "x": 1270336.640169329,
+      "y": 6851238.150958472,
+      "interior": true
+    },
+    {
+      "name": "N_9026565236",
+      "x": 1270474.9991644165,
+      "y": 6851155.432157662,
+      "interior": true
+    },
+    {
+      "name": "N_9026565237",
+      "x": 1270432.5864384302,
+      "y": 6851151.429069607,
+      "interior": true
+    },
+    {
+      "name": "N_9026565238",
+      "x": 1270473.218052564,
+      "y": 6851187.748068588,
+      "interior": true
+    },
+    {
+      "name": "N_9026565239",
+      "x": 1270488.1682601757,
+      "y": 6851180.324131649,
+      "interior": true
+    },
+    {
+      "name": "N_9026565240",
+      "x": 1270471.7597672348,
+      "y": 6851183.162694962,
+      "interior": true
+    },
+    {
+      "name": "N_9026565241",
+      "x": 1270490.6284209217,
+      "y": 6851176.666753458,
+      "interior": true
+    },
+    {
+      "name": "N_9026565242",
+      "x": 1270439.3323995715,
+      "y": 6851198.720223204,
+      "interior": true
+    },
+    {
+      "name": "N_9026565243",
+      "x": 1270415.9553065079,
+      "y": 6851224.37656341,
+      "interior": true
+    },
+    {
+      "name": "N_9026565244",
+      "x": 1270405.1239200553,
+      "y": 6851233.65653636,
+      "interior": true
+    },
+    {
+      "name": "N_9026565245",
+      "x": 1270383.1049247794,
+      "y": 6851251.652435904,
+      "interior": true
+    },
+    {
+      "name": "N_9026565246",
+      "x": 1270396.0959093533,
+      "y": 6851234.184221416,
+      "interior": true
+    },
+    {
+      "name": "N_9026565247",
+      "x": 1270333.9017098555,
+      "y": 6851274.907055164,
+      "interior": true
+    },
+    {
+      "name": "N_9026565248",
+      "x": 1270182.0841883328,
+      "y": 6851283.823163281,
+      "interior": true
+    },
+    {
+      "name": "N_9026565249",
+      "x": 1270134.9515159377,
+      "y": 6851333.51699952,
+      "interior": true
+    },
+    {
+      "name": "N_9026565250",
+      "x": 1270153.7088501337,
+      "y": 6851309.243223595,
+      "interior": true
+    },
+    {
+      "name": "N_9026565251",
+      "x": 1270139.8161776846,
+      "y": 6851323.490865821,
+      "interior": true
+    },
+    {
+      "name": "N_9026565252",
+      "x": 1270310.3910334033,
+      "y": 6851197.228154862,
+      "interior": false
+    },
+    {
+      "name": "N_9026565253",
+      "x": 1270423.5472957792,
+      "y": 6851127.446974575,
+      "interior": true
+    },
+    {
+      "name": "N_9026565254",
+      "x": 1270446.3455274904,
+      "y": 6851125.390849876,
+      "interior": true
+    },
+    {
+      "name": "N_9026565255",
+      "x": 1270427.142915331,
+      "y": 6851134.961841901,
+      "interior": true
+    },
+    {
+      "name": "N_9026565256",
+      "x": 1270380.466652848,
+      "y": 6851162.219216046,
+      "interior": true
+    },
+    {
+      "name": "N_9026565257",
+      "x": 1270268.2900019912,
+      "y": 6851255.873926752,
+      "interior": true
+    },
+    {
+      "name": "N_9026565258",
+      "x": 1270172.388260686,
+      "y": 6851318.45050931,
+      "interior": true
+    },
+    {
+      "name": "N_9026565259",
+      "x": 1270122.9178789845,
+      "y": 6851352.786863172,
+      "interior": true
+    },
+    {
+      "name": "N_9026565260",
+      "x": 1270144.168769774,
+      "y": 6851337.083467503,
+      "interior": true
+    },
+    {
+      "name": "N_9026565262",
+      "x": 1270159.631047043,
+      "y": 6851344.343782212,
+      "interior": true
+    },
+    {
+      "name": "N_9026565263",
+      "x": 1270198.7153202551,
+      "y": 6851318.5050979955,
+      "interior": true
+    },
+    {
+      "name": "N_9026565264",
+      "x": 1270270.527523756,
+      "y": 6851272.159440165,
+      "interior": true
+    },
+    {
+      "name": "N_9026565265",
+      "x": 1270491.107094732,
+      "y": 6851148.11742553,
+      "interior": true
+    },
+    {
+      "name": "N_9026565266",
+      "x": 1270223.873525171,
+      "y": 6851312.518541424,
+      "interior": true
+    },
+    {
+      "name": "N_9026565267",
+      "x": 1270211.4725338984,
+      "y": 6851321.944185691,
+      "interior": true
+    },
+    {
+      "name": "N_9026565268",
+      "x": 1270100.5649252364,
+      "y": 6851407.758087068,
+      "interior": true
+    },
+    {
+      "name": "N_9026565269",
+      "x": 1270127.1925474305,
+      "y": 6851391.490496161,
+      "interior": true
+    },
+    {
+      "name": "N_9026565270",
+      "x": 1270099.6855012593,
+      "y": 6851405.0832124865,
+      "interior": true
+    },
+    {
+      "name": "N_9026565271",
+      "x": 1270077.4104711546,
+      "y": 6851421.951313988,
+      "osm_railway": "switch",
+      "osm_railway:switch": "default",
+      "osm_railway:turnout_side": "left",
+      "osm_ref": "64",
+      "interior": true
+    },
+    {
+      "name": "N_9026565272",
+      "x": 1270145.2040410382,
+      "y": 6851372.966590341,
+      "interior": true
+    },
+    {
+      "name": "N_9026565273",
+      "x": 1270154.8665728378,
+      "y": 6851367.544079796,
+      "interior": true
+    },
+    {
+      "name": "N_9026565274",
+      "x": 1270038.0590311647,
+      "y": 6851453.704200597,
+      "interior": true
+    },
+    {
+      "name": "N_9026565275",
+      "x": 1270048.968341261,
+      "y": 6851453.504038736,
+      "interior": true
+    },
+    {
+      "name": "N_9026565276",
+      "x": 1270056.1039206197,
+      "y": 6851455.960570937,
+      "interior": true
+    },
+    {
+      "name": "N_9026565277",
+      "x": 1269893.3770890008,
+      "y": 6851658.636153369,
+      "interior": true
+    },
+    {
+      "name": "N_9026565278",
+      "x": 1269903.9524406246,
+      "y": 6851649.7742217025,
+      "interior": true
+    },
+    {
+      "name": "N_9026565279",
+      "x": 1269881.109681117,
+      "y": 6851669.245008405,
+      "interior": true
+    },
+    {
+      "name": "N_9026668458",
+      "x": 1270411.8587492472,
+      "y": 6851292.3571617035,
+      "osm_railway": "signal",
+      "osm_railway:signal:direction": "forward",
+      "osm_railway:signal:main": "DE-ESO:hp",
+      "osm_railway:signal:main:form": "semaphore",
+      "osm_railway:signal:main:function": "exit",
+      "osm_railway:signal:main:height": "normal",
+      "osm_railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+      "osm_railway:signal:position": "right",
+      "osm_ref": "E5",
+      "interior": true
+    },
+    {
+      "name": "N_9026668459",
+      "x": 1270310.179526371,
+      "y": 6851349.857258649,
+      "interior": true
+    },
+    {
+      "name": "N_9556839614",
+      "x": 1269930.635722564,
+      "y": 6851612.088374652,
+      "interior": true
+    },
+    {
+      "name": "N_9556839615",
+      "x": 1270035.988488636,
+      "y": 6851533.441800071,
+      "interior": true
+    },
+    {
+      "name": "N_9556839616",
+      "x": 1269956.9739140822,
+      "y": 6851600.751720212,
+      "interior": true
+    },
+    {
+      "name": "N_9556871217",
+      "x": 1269860.2038807492,
+      "y": 6851676.7057896005,
+      "interior": true
+    },
+    {
+      "name": "N_9556871218",
+      "x": 1270325.652935589,
+      "y": 6851329.914140607,
+      "interior": true
+    },
+    {
+      "name": "N_9556871219",
+      "x": 1269884.1820990627,
+      "y": 6851672.866215984,
+      "interior": true
+    },
+    {
+      "name": "N_9556871220",
+      "x": 1269860.8384018464,
+      "y": 6851687.969762592,
+      "interior": true
+    },
+    {
+      "name": "N_9556871221",
+      "x": 1269808.507109232,
+      "y": 6851724.491347046,
+      "interior": true
+    },
+    {
+      "name": "N_9556871222",
+      "x": 1270448.6053131532,
+      "y": 6851264.917386563,
+      "interior": true
+    },
+    {
+      "name": "N_9556871223",
+      "x": 1270537.3937389974,
+      "y": 6851199.866568576,
+      "interior": true
+    },
+    {
+      "name": "N_9556871224",
+      "x": 1270508.0387892793,
+      "y": 6851213.932057615,
+      "interior": true
+    },
+    {
+      "name": "N_9556871225",
+      "x": 1270588.6341006025,
+      "y": 6851167.932722706,
+      "interior": true
+    },
+    {
+      "name": "N_9556871226",
+      "x": 1270100.4758696437,
+      "y": 6851531.494752078,
+      "interior": true
+    },
+    {
+      "name": "N_9556871227",
+      "x": 1270588.133162894,
+      "y": 6851178.35897301,
+      "interior": true
+    },
+    {
+      "name": "N_9556871228",
+      "x": 1270612.3674160363,
+      "y": 6851153.867313908,
+      "interior": true
+    },
+    {
+      "name": "N_9556871229",
+      "x": 1270456.6314484382,
+      "y": 6851286.6981553435,
+      "interior": true
+    },
+    {
+      "name": "N_9556871240",
+      "x": 1270146.851569502,
+      "y": 6851543.7047524005,
+      "interior": false
+    },
+    {
+      "name": "N_9556871241",
+      "x": 1270127.0255681942,
+      "y": 6851554.713784933,
+      "interior": true
+    },
+    {
+      "name": "N_9556871242",
+      "x": 1270050.6381336225,
+      "y": 6851606.847672061,
+      "interior": true
+    },
+    {
+      "name": "N_9556871244",
+      "x": 1270006.1771290058,
+      "y": 6851635.835350937,
+      "interior": true
+    },
+    {
+      "name": "N_9556871245",
+      "x": 1269981.2972228169,
+      "y": 6851649.901600527,
+      "interior": true
+    },
+    {
+      "name": "N_9556871246",
+      "x": 1269990.1248584357,
+      "y": 6851641.330829742,
+      "interior": true
+    },
+    {
+      "name": "N_9556871248",
+      "x": 1269669.6805722828,
+      "y": 6851877.567171951,
+      "interior": true
+    },
+    {
+      "name": "N_9556871249",
+      "x": 1269642.8191791582,
+      "y": 6851897.0021137,
+      "interior": true
+    },
+    {
+      "name": "N_9556871250",
+      "x": 1269709.5774777776,
+      "y": 6851836.659320311,
+      "interior": true
+    },
+    {
+      "name": "N_9556871251",
+      "x": 1269664.0589379985,
+      "y": 6851861.771766921,
+      "interior": true
+    },
+    {
+      "name": "N_9556871252",
+      "x": 1269680.8236533096,
+      "y": 6851842.391502324,
+      "interior": true
+    },
+    {
+      "name": "N_9556871253",
+      "x": 1269665.2166607028,
+      "y": 6851856.530902037,
+      "interior": true
+    },
+    {
+      "name": "N_9556871254",
+      "x": 1269675.2576787707,
+      "y": 6851835.549279181,
+      "interior": true
+    },
+    {
+      "name": "N_9556871255",
+      "x": 1269613.5421530837,
+      "y": 6851881.297658077,
+      "interior": true
+    },
+    {
+      "name": "N_9556871256",
+      "x": 1269580.0015905125,
+      "y": 6851907.4475043705,
+      "interior": true
+    },
+    {
+      "name": "N_9556871257",
+      "x": 1269568.3019120314,
+      "y": 6851917.947501314,
+      "interior": true
+    },
+    {
+      "name": "N_9556871258",
+      "x": 1269502.4898290837,
+      "y": 6851999.400281756,
+      "interior": false
+    },
+    {
+      "name": "N_9557597457",
+      "x": 1270458.6797270684,
+      "y": 6851138.164305646,
+      "interior": true
+    },
+    {
+      "name": "N_9557597461",
+      "x": 1270482.8583204653,
+      "y": 6851143.805011934,
+      "interior": true
+    },
+    {
+      "name": "N_9557597462",
+      "x": 1270444.4085683508,
+      "y": 6851162.674112925,
+      "interior": true
+    },
+    {
+      "name": "N_9557597463",
+      "x": 1270427.710644734,
+      "y": 6851172.208757414,
+      "interior": true
+    },
+    {
+      "name": "N_9557597464",
+      "x": 1270101.9786827692,
+      "y": 6851387.014184964,
+      "interior": true
+    },
+    {
+      "name": "N_9557597465",
+      "x": 1270052.0741550536,
+      "y": 6851426.736984601,
+      "interior": true
+    },
+    {
+      "name": "N_9557597466",
+      "x": 1270472.8840940918,
+      "y": 6851164.329937781,
+      "interior": true
+    },
+    {
+      "name": "N_9557597467",
+      "x": 1270518.747724292,
+      "y": 6851153.012108737,
+      "interior": true
+    },
+    {
+      "name": "N_9557597468",
+      "x": 1270497.0626874887,
+      "y": 6851161.254834746,
+      "interior": true
+    },
+    {
+      "name": "N_9557597469",
+      "x": 1270461.429318491,
+      "y": 6851178.158817994,
+      "interior": true
+    },
+    {
+      "name": "N_9557597470",
+      "x": 1270325.4302966075,
+      "y": 6851254.400043918,
+      "interior": true
+    },
+    {
+      "name": "N_9557597471",
+      "x": 1270208.9344495086,
+      "y": 6851327.130114366,
+      "interior": true
+    },
+    {
+      "name": "N_9557597472",
+      "x": 1270148.9332439792,
+      "y": 6851368.344718705,
+      "interior": true
+    },
+    {
+      "name": "N_9557597473",
+      "x": 1270191.3125741184,
+      "y": 6851354.351745526,
+      "interior": true
+    },
+    {
+      "name": "N_9557597474",
+      "x": 1270342.1616160714,
+      "y": 6851260.896048048,
+      "interior": true
+    },
+    {
+      "name": "N_9557597475",
+      "x": 1270284.8209463716,
+      "y": 6851306.950501913,
+      "interior": true
+    },
+    {
+      "name": "N_9557597476",
+      "x": 1270188.7522258305,
+      "y": 6851364.723647895,
+      "interior": true
+    },
+    {
+      "name": "N_9557597477",
+      "x": 1270114.9251395466,
+      "y": 6851406.720890695,
+      "interior": true
+    },
+    {
+      "name": "N_9557597478",
+      "x": 1270201.843397946,
+      "y": 6851369.67305162,
+      "interior": true
+    },
+    {
+      "name": "N_9557597479",
+      "x": 1270298.9473897514,
+      "y": 6851309.752717395,
+      "interior": true
+    },
+    {
+      "name": "N_9557606723",
+      "x": 1270836.2977036848,
+      "y": 6851004.717263415,
+      "interior": false
+    },
+    {
+      "name": "N_9557606724",
+      "x": 1270794.3302556616,
+      "y": 6851030.500355373,
+      "interior": true
+    },
+    {
+      "name": "N_9557606725",
+      "x": 1270714.2470139961,
+      "y": 6851087.689257954,
+      "interior": true
+    },
+    {
+      "name": "N_9557606726",
+      "x": 1270775.3948102803,
+      "y": 6851054.245618845,
+      "interior": true
+    },
+    {
+      "name": "N_9557606727",
+      "x": 1270746.2291036965,
+      "y": 6851079.701346776,
+      "interior": true
+    },
+    {
+      "name": "N_9557606728",
+      "x": 1270759.4761230992,
+      "y": 6851073.496619407,
+      "interior": true
+    },
+    {
+      "name": "N_9557606729",
+      "x": 1270747.442486146,
+      "y": 6851081.866633989,
+      "interior": true
+    },
+    {
+      "name": "N_11982814549",
+      "x": 1269457.3720394713,
+      "y": 6852014.231473092,
+      "interior": false
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Track_319161053_seg8",
+      "start_node": "N_7598337086",
+      "end_node": "N_447379843",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg9",
+      "start_node": "N_447379843",
+      "end_node": "N_9556871250",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg9",
+      "start_node": "N_4731123220",
+      "end_node": "N_1877303856",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg10",
+      "start_node": "N_1877303856",
+      "end_node": "N_1877304035",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_18516735_seg20",
+      "start_node": "N_1877303900",
+      "end_node": "N_1877303912",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "1",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_827902959_seg1",
+      "start_node": "N_1877303904",
+      "end_node": "N_9557606724",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434662_seg5",
+      "start_node": "N_1877303913",
+      "end_node": "N_1877303904",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975439222_seg1",
+      "start_node": "N_1877303904",
+      "end_node": "N_4731124273",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3a",
+      "osm_ref": "6891",
+      "osm_service": "yard",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_319161053_seg1",
+      "start_node": "N_1877303912",
+      "end_node": "N_1877303926",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434661_seg1",
+      "start_node": "N_1877303912",
+      "end_node": "N_9557606726",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg12",
+      "start_node": "N_6630116007",
+      "end_node": "N_1877303913",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434662_seg4",
+      "start_node": "N_9557606725",
+      "end_node": "N_1877303913",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg1",
+      "start_node": "N_1877303916",
+      "end_node": "N_1877303930",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982130_seg1",
+      "start_node": "N_1877303916",
+      "end_node": "N_9557606729",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434661_seg3",
+      "start_node": "N_9557606727",
+      "end_node": "N_1877303916",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg10",
+      "start_node": "N_9004581438",
+      "end_node": "N_1877303919",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg11",
+      "start_node": "N_1877303919",
+      "end_node": "N_6630116007",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434662_seg2",
+      "start_node": "N_1877303932",
+      "end_node": "N_1877303923",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434662_seg3",
+      "start_node": "N_1877303923",
+      "end_node": "N_9557606725",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg2",
+      "start_node": "N_1877303926",
+      "end_node": "N_9004581440",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg8",
+      "start_node": "N_9004581437",
+      "end_node": "N_1877303928",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg9",
+      "start_node": "N_1877303928",
+      "end_node": "N_9004581438",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg2",
+      "start_node": "N_1877303930",
+      "end_node": "N_9004581441",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273033_seg1",
+      "start_node": "N_1877303932",
+      "end_node": "N_6630116013",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434662_seg1",
+      "start_node": "N_1877303950",
+      "end_node": "N_1877303932",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg5",
+      "start_node": "N_1877303949",
+      "end_node": "N_1877303936",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg6",
+      "start_node": "N_1877303936",
+      "end_node": "N_3338129423",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg1",
+      "start_node": "N_1877303949",
+      "end_node": "N_9026565241",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg4",
+      "start_node": "N_9026565239",
+      "end_node": "N_1877303949",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273035_seg6",
+      "start_node": "N_9004741859",
+      "end_node": "N_1877303950",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg1",
+      "start_node": "N_1877303950",
+      "end_node": "N_9556871227",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg3",
+      "start_node": "N_9004581439",
+      "end_node": "N_1877303951",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg4",
+      "start_node": "N_1877303951",
+      "end_node": "N_1877303978",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg14",
+      "start_node": "N_9026565243",
+      "end_node": "N_1877303953",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg12",
+      "start_node": "N_9026565246",
+      "end_node": "N_1877303953",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg1",
+      "start_node": "N_1877303953",
+      "end_node": "N_3338129438",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273033_seg6",
+      "start_node": "N_9556871223",
+      "end_node": "N_1877303955",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434664_seg1",
+      "start_node": "N_1877303955",
+      "end_node": "N_6630116011",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434668_seg1",
+      "start_node": "N_1877303955",
+      "end_node": "N_9556871222",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "5",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "siding",
+      "osm_usage": "freight",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg5",
+      "start_node": "N_9026565231",
+      "end_node": "N_1877303967",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg6",
+      "start_node": "N_1877303967",
+      "end_node": "N_9557597477",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg3",
+      "start_node": "N_9026565275",
+      "end_node": "N_1877303974",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg4",
+      "start_node": "N_1877303974",
+      "end_node": "N_9026565231",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434668_seg3",
+      "start_node": "N_9026668458",
+      "end_node": "N_1877303976",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "5",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "siding",
+      "osm_usage": "freight",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434668_seg4",
+      "start_node": "N_1877303976",
+      "end_node": "N_7598337083",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "5",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "siding",
+      "osm_usage": "freight",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg5",
+      "start_node": "N_1877303978",
+      "end_node": "N_9556871226",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273035_seg4",
+      "start_node": "N_7598337085",
+      "end_node": "N_1877303980",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273035_seg5",
+      "start_node": "N_1877303980",
+      "end_node": "N_9004741859",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg5",
+      "start_node": "N_9556871229",
+      "end_node": "N_1877303982",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg6",
+      "start_node": "N_1877303982",
+      "end_node": "N_1877303990",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg1",
+      "start_node": "N_7598998617",
+      "end_node": "N_1877303984",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg2",
+      "start_node": "N_1877303984",
+      "end_node": "N_9026565275",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg4",
+      "start_node": "N_5015579198",
+      "end_node": "N_1877303986",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg5",
+      "start_node": "N_1877303986",
+      "end_node": "N_6630116016",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575708_seg5",
+      "start_node": "N_1879957036",
+      "end_node": "N_1877303988",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg6",
+      "start_node": "N_7729112193",
+      "end_node": "N_1877303988",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg7",
+      "start_node": "N_1877303988",
+      "end_node": "N_7598998617",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg7",
+      "start_node": "N_1877303990",
+      "end_node": "N_7598337086",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg4",
+      "start_node": "N_3338129471",
+      "end_node": "N_1877304011",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg5",
+      "start_node": "N_1877304011",
+      "end_node": "N_7729112193",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg6",
+      "start_node": "N_6630116016",
+      "end_node": "N_1877304015",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg7",
+      "start_node": "N_1877304015",
+      "end_node": "N_9556871246",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg2",
+      "start_node": "N_7598337082",
+      "end_node": "N_1877304018",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg3",
+      "start_node": "N_1877304018",
+      "end_node": "N_3338129471",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575711_seg1",
+      "start_node": "N_1877304022",
+      "end_node": "N_7598337082",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434670_seg3",
+      "start_node": "N_9556871221",
+      "end_node": "N_1877304022",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434670_seg4",
+      "start_node": "N_1877304022",
+      "end_node": "N_9556871217",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg1",
+      "start_node": "N_1877304028",
+      "end_node": "N_9556871254",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434668_seg5",
+      "start_node": "N_7598337083",
+      "end_node": "N_1877304028",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "5",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "siding",
+      "osm_usage": "freight",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434669",
+      "start_node": "N_1877304028",
+      "end_node": "N_1877304031",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434670_seg1",
+      "start_node": "N_1877304028",
+      "end_node": "N_1879957077",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg9",
+      "start_node": "N_7598337081",
+      "end_node": "N_1877304031",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434667_seg1",
+      "start_node": "N_1877304031",
+      "end_node": "N_9556871252",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg11",
+      "start_node": "N_1877304035",
+      "end_node": "N_9556871248",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273035_seg1",
+      "start_node": "N_1877304043",
+      "end_node": "N_9556871251",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434663",
+      "start_node": "N_1877304045",
+      "end_node": "N_1877304043",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434667_seg4",
+      "start_node": "N_6630116020",
+      "end_node": "N_1877304043",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273038_seg3",
+      "start_node": "N_6630116021",
+      "end_node": "N_1877304045",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_694349733_seg20",
+      "start_node": "N_1877304061",
+      "end_node": "N_1877304045",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "1a",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg3",
+      "start_node": "N_9556871255",
+      "end_node": "N_1877304055",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg4",
+      "start_node": "N_1877304055",
+      "end_node": "N_9556871256",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg6",
+      "start_node": "N_9556871257",
+      "end_node": "N_1877304057",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg7",
+      "start_node": "N_1877304057",
+      "end_node": "N_1877304059",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg8",
+      "start_node": "N_1877304059",
+      "end_node": "N_6630116017",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_38050800_seg1",
+      "start_node": "N_1877304060",
+      "end_node": "N_8986577251",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_177273038_seg1",
+      "start_node": "N_1877304060",
+      "end_node": "N_6630116022",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg11",
+      "start_node": "N_8986577250",
+      "end_node": "N_1877304060",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_694349733_seg19",
+      "start_node": "N_11982814549",
+      "end_node": "N_1877304061",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "1a",
+      "osm_service": "yard",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_705620052_seg9",
+      "start_node": "N_6630116017",
+      "end_node": "N_1877304061",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg1",
+      "start_node": "N_1879956900",
+      "end_node": "N_9026565253",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg3",
+      "start_node": "N_9026565237",
+      "end_node": "N_1879956908",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg4",
+      "start_node": "N_1879956908",
+      "end_node": "N_3338129432",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg2",
+      "start_node": "N_9557597461",
+      "end_node": "N_1879956909",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg3",
+      "start_node": "N_1879956909",
+      "end_node": "N_9557597462",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg3",
+      "start_node": "N_9026565236",
+      "end_node": "N_1879956911",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg4",
+      "start_node": "N_1879956911",
+      "end_node": "N_3338129433",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg1",
+      "start_node": "N_3338129426",
+      "end_node": "N_1879956912",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg2",
+      "start_node": "N_1879956912",
+      "end_node": "N_9557597466",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg3",
+      "start_node": "N_9557597468",
+      "end_node": "N_1879956915",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg4",
+      "start_node": "N_1879956915",
+      "end_node": "N_9557597469",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg5",
+      "start_node": "N_9026565256",
+      "end_node": "N_1879956918",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg6",
+      "start_node": "N_1879956918",
+      "end_node": "N_1879956956",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg4",
+      "start_node": "N_3338129436",
+      "end_node": "N_1879956921",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg5",
+      "start_node": "N_1879956921",
+      "end_node": "N_9557597470",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273033_seg4",
+      "start_node": "N_9556871225",
+      "end_node": "N_1879956925",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273033_seg5",
+      "start_node": "N_1879956925",
+      "end_node": "N_9556871223",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg12",
+      "start_node": "N_9556871224",
+      "end_node": "N_1879956925",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg6",
+      "start_node": "N_3338129435",
+      "end_node": "N_1879956927",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg7",
+      "start_node": "N_1879956927",
+      "end_node": "N_1879956967",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg11",
+      "start_node": "N_9026565245",
+      "end_node": "N_1879956932",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg12",
+      "start_node": "N_1879956932",
+      "end_node": "N_9026565244",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg10",
+      "start_node": "N_1879956960",
+      "end_node": "N_1879956947",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg11",
+      "start_node": "N_1879956947",
+      "end_node": "N_9556871224",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg9",
+      "start_node": "N_9557597479",
+      "end_node": "N_1879956952",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg10",
+      "start_node": "N_1879956952",
+      "end_node": "N_9026565245",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg6",
+      "start_node": "N_3338129440",
+      "end_node": "N_1879956954",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg7",
+      "start_node": "N_1879956954",
+      "end_node": "N_9026565248",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg7",
+      "start_node": "N_1879956956",
+      "end_node": "N_1879956974",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg9",
+      "start_node": "N_1879956972",
+      "end_node": "N_1879956960",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg7",
+      "start_node": "N_9026565235",
+      "end_node": "N_1879956962",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg8",
+      "start_node": "N_1879956962",
+      "end_node": "N_9026565266",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg8",
+      "start_node": "N_1879956967",
+      "end_node": "N_1879957012",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg6",
+      "start_node": "N_9026565257",
+      "end_node": "N_1879956971",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg7",
+      "start_node": "N_1879956971",
+      "end_node": "N_9026565258",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg8",
+      "start_node": "N_1879956977",
+      "end_node": "N_1879956972",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg9",
+      "start_node": "N_9026565262",
+      "end_node": "N_1879956973",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg10",
+      "start_node": "N_1879956973",
+      "end_node": "N_9557597464",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg8",
+      "start_node": "N_1879956974",
+      "end_node": "N_9026565249",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg8",
+      "start_node": "N_9026565248",
+      "end_node": "N_1879956976",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg9",
+      "start_node": "N_1879956976",
+      "end_node": "N_9026565250",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg7",
+      "start_node": "N_1879956982",
+      "end_node": "N_1879956977",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg6",
+      "start_node": "N_1879957022",
+      "end_node": "N_1879956982",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575708_seg1",
+      "start_node": "N_1879956983",
+      "end_node": "N_1879957013",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg9",
+      "start_node": "N_9026565249",
+      "end_node": "N_1879956983",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg11",
+      "start_node": "N_9026565251",
+      "end_node": "N_1879956983",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg10",
+      "start_node": "N_9026565259",
+      "end_node": "N_1879956985",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg11",
+      "start_node": "N_1879956985",
+      "end_node": "N_1879957013",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg12",
+      "start_node": "N_7598998615",
+      "end_node": "N_1879957000",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg13",
+      "start_node": "N_1879957000",
+      "end_node": "N_1879957018",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg12",
+      "start_node": "N_9557597472",
+      "end_node": "N_1879957008",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg11",
+      "start_node": "N_9026565272",
+      "end_node": "N_1879957008",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426956_seg1",
+      "start_node": "N_1879957008",
+      "end_node": "N_9026565270",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg9",
+      "start_node": "N_1879957012",
+      "end_node": "N_9026565273",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575708_seg2",
+      "start_node": "N_1879957013",
+      "end_node": "N_9557597465",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg5",
+      "start_node": "N_1879957024",
+      "end_node": "N_1879957016",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg6",
+      "start_node": "N_1879957016",
+      "end_node": "N_9557597478",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575708_seg3",
+      "start_node": "N_9557597465",
+      "end_node": "N_1879957018",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575708_seg4",
+      "start_node": "N_1879957018",
+      "end_node": "N_1879957036",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg5",
+      "start_node": "N_9556839615",
+      "end_node": "N_1879957022",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg4",
+      "start_node": "N_1879957033",
+      "end_node": "N_1879957024",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg3",
+      "start_node": "N_9556839616",
+      "end_node": "N_1879957025",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg4",
+      "start_node": "N_1879957025",
+      "end_node": "N_3338129450",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg6",
+      "start_node": "N_1879957072",
+      "end_node": "N_1879957029",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg7",
+      "start_node": "N_1879957029",
+      "end_node": "N_9026668459",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426956_seg3",
+      "start_node": "N_9026565271",
+      "end_node": "N_1879957030",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426956_seg4",
+      "start_node": "N_1879957030",
+      "end_node": "N_9026565274",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575718_seg2",
+      "start_node": "N_6630116010",
+      "end_node": "N_1879957032",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "6",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575718_seg3",
+      "start_node": "N_1879957032",
+      "end_node": "N_1879957071",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "6",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg3",
+      "start_node": "N_9026565276",
+      "end_node": "N_1879957033",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426956_seg6",
+      "start_node": "N_7598998616",
+      "end_node": "N_1879957036",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg1",
+      "start_node": "N_7598998617",
+      "end_node": "N_1879957053",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg2",
+      "start_node": "N_1879957053",
+      "end_node": "N_9026565276",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg1",
+      "start_node": "N_1879957067",
+      "end_node": "N_1879957065",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg2",
+      "start_node": "N_1879957065",
+      "end_node": "N_9556839616",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg3",
+      "start_node": "N_9556839614",
+      "end_node": "N_1879957066",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg4",
+      "start_node": "N_1879957066",
+      "end_node": "N_9556839615",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg1",
+      "start_node": "N_1879957067",
+      "end_node": "N_7598337080",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434670_seg5",
+      "start_node": "N_9556871217",
+      "end_node": "N_1879957067",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575718_seg4",
+      "start_node": "N_1879957071",
+      "end_node": "N_9556871219",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "6",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg5",
+      "start_node": "N_9026565278",
+      "end_node": "N_1879957072",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg1",
+      "start_node": "N_1879957074",
+      "end_node": "N_9556871220",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575718_seg5",
+      "start_node": "N_9556871219",
+      "end_node": "N_1879957074",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "6",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434665_seg1",
+      "start_node": "N_1879957074",
+      "end_node": "N_7598336888",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434665_seg2",
+      "start_node": "N_7598336888",
+      "end_node": "N_1879957077",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434670_seg2",
+      "start_node": "N_1879957077",
+      "end_node": "N_9556871221",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg1",
+      "start_node": "N_3338129420",
+      "end_node": "N_9026565254",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg1",
+      "start_node": "N_3338129422",
+      "end_node": "N_9557597457",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg7",
+      "start_node": "N_3338129423",
+      "end_node": "N_9004581437",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg2",
+      "start_node": "N_9026565253",
+      "end_node": "N_3338129424",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_177575720_seg1",
+      "start_node": "N_3338129425",
+      "end_node": "N_9026565265",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg1",
+      "start_node": "N_3338129427",
+      "end_node": "N_9557597461",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg1",
+      "start_node": "N_3338129428",
+      "end_node": "N_9557597467",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg3",
+      "start_node": "N_9026565255",
+      "end_node": "N_3338129429",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg4",
+      "start_node": "N_3338129429",
+      "end_node": "N_9026565256",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg5",
+      "start_node": "N_3338129432",
+      "end_node": "N_9026565257",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg5",
+      "start_node": "N_3338129433",
+      "end_node": "N_9026565234",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg5",
+      "start_node": "N_9557597463",
+      "end_node": "N_3338129434",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg6",
+      "start_node": "N_3338129434",
+      "end_node": "N_9026565264",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg5",
+      "start_node": "N_9557597469",
+      "end_node": "N_3338129435",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg3",
+      "start_node": "N_9557597466",
+      "end_node": "N_3338129436",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg3",
+      "start_node": "N_9026565240",
+      "end_node": "N_3338129437",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg4",
+      "start_node": "N_3338129437",
+      "end_node": "N_9026565242",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg2",
+      "start_node": "N_3338129438",
+      "end_node": "N_9026565238",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg5",
+      "start_node": "N_9026565242",
+      "end_node": "N_3338129439",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg6",
+      "start_node": "N_3338129439",
+      "end_node": "N_9557597474",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg5",
+      "start_node": "N_9026565252",
+      "end_node": "N_3338129440",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_177575718_seg1",
+      "start_node": "N_3338129442",
+      "end_node": "N_6630116010",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "6",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434664_seg2",
+      "start_node": "N_6630116011",
+      "end_node": "N_3338129442",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434666",
+      "start_node": "N_3338129446",
+      "end_node": "N_3338129442",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg7",
+      "start_node": "N_6630116008",
+      "end_node": "N_3338129446",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg9",
+      "start_node": "N_6630116009",
+      "end_node": "N_3338129446",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg8",
+      "start_node": "N_9557597476",
+      "end_node": "N_3338129449",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg9",
+      "start_node": "N_3338129449",
+      "end_node": "N_9557597475",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg5",
+      "start_node": "N_3338129450",
+      "end_node": "N_9556871218",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg8",
+      "start_node": "N_9557597471",
+      "end_node": "N_3338129454",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg10",
+      "start_node": "N_9026565267",
+      "end_node": "N_3338129454",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg11",
+      "start_node": "N_3338129454",
+      "end_node": "N_9557597472",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg8",
+      "start_node": "N_9556871246",
+      "end_node": "N_4731123220",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg1",
+      "start_node": "N_4731123220",
+      "end_node": "N_9556871245",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg5",
+      "start_node": "N_9556871242",
+      "end_node": "N_4731124223",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg6",
+      "start_node": "N_4731124223",
+      "end_node": "N_4731124224",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg7",
+      "start_node": "N_4731124224",
+      "end_node": "N_9556871241",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg3",
+      "start_node": "N_9004581441",
+      "end_node": "N_5015579198",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg6",
+      "start_node": "N_9557597470",
+      "end_node": "N_5015579204",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575719_seg7",
+      "start_node": "N_5015579204",
+      "end_node": "N_9557597471",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "18",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg7",
+      "start_node": "N_9557597478",
+      "end_node": "N_5015579205",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg8",
+      "start_node": "N_5015579205",
+      "end_node": "N_9557597479",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg7",
+      "start_node": "N_9557597474",
+      "end_node": "N_5015579576",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg8",
+      "start_node": "N_5015579576",
+      "end_node": "N_9557597473",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575713_seg6",
+      "start_node": "N_9556871218",
+      "end_node": "N_6630116008",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "8",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg8",
+      "start_node": "N_9026668459",
+      "end_node": "N_6630116009",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273033_seg2",
+      "start_node": "N_6630116013",
+      "end_node": "N_9556871228",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434667_seg3",
+      "start_node": "N_9556871253",
+      "end_node": "N_6630116020",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273038_seg2",
+      "start_node": "N_6630116022",
+      "end_node": "N_6630116021",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273037_seg2",
+      "start_node": "N_7598337080",
+      "end_node": "N_9556839614",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "9",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg8",
+      "start_node": "N_8997099871",
+      "end_node": "N_7598337081",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg6",
+      "start_node": "N_9556871226",
+      "end_node": "N_7598337084",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg7",
+      "start_node": "N_7598337084",
+      "end_node": "N_8997099871",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273035_seg3",
+      "start_node": "N_8997099872",
+      "end_node": "N_7598337085",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg11",
+      "start_node": "N_9557597464",
+      "end_node": "N_7598998615",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426956_seg5",
+      "start_node": "N_9026565274",
+      "end_node": "N_7598998616",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg10",
+      "start_node": "N_9556871250",
+      "end_node": "N_8986577250",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg13",
+      "start_node": "N_9556871249",
+      "end_node": "N_8986577252",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg14",
+      "start_node": "N_8986577252",
+      "end_node": "N_9556871258",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_512982130_seg3",
+      "start_node": "N_9557606728",
+      "end_node": "N_8996971070",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273035_seg2",
+      "start_node": "N_9556871251",
+      "end_node": "N_8997099872",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "3",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6891",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg3",
+      "start_node": "N_9004581440",
+      "end_node": "N_9004581435",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_319161053_seg4",
+      "start_node": "N_9004581435",
+      "end_node": "N_9556871229",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_maxspeed": "100",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_proposed:electrified": "contact_line",
+      "osm_proposed:frequency": "16.7",
+      "osm_proposed:voltage": "15000",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "2",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_ref": "6409",
+      "osm_usage": "main",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273043_seg2",
+      "start_node": "N_9556871227",
+      "end_node": "N_9004581439",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "4",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg3",
+      "start_node": "N_9556871244",
+      "end_node": "N_9004809701",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg4",
+      "start_node": "N_9004809701",
+      "end_node": "N_9556871242",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg6",
+      "start_node": "N_9026565234",
+      "end_node": "N_9026565235",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg2",
+      "start_node": "N_9026565265",
+      "end_node": "N_9026565236",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg2",
+      "start_node": "N_9557597457",
+      "end_node": "N_9026565237",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426955_seg3",
+      "start_node": "N_9026565238",
+      "end_node": "N_9026565239",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg2",
+      "start_node": "N_9026565241",
+      "end_node": "N_9026565240",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575706_seg13",
+      "start_node": "N_9026565244",
+      "end_node": "N_9026565243",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "10",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg11",
+      "start_node": "N_9026565247",
+      "end_node": "N_9026565246",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg10",
+      "start_node": "N_9557597475",
+      "end_node": "N_9026565247",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426953_seg10",
+      "start_node": "N_9026565250",
+      "end_node": "N_9026565251",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "24",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575716_seg2",
+      "start_node": "N_9026565254",
+      "end_node": "N_9026565255",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "23",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg8",
+      "start_node": "N_9026565258",
+      "end_node": "N_9026565260",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575714_seg9",
+      "start_node": "N_9026565260",
+      "end_node": "N_9026565259",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "22",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg8",
+      "start_node": "N_9026565263",
+      "end_node": "N_9026565262",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg7",
+      "start_node": "N_9026565264",
+      "end_node": "N_9026565263",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575720_seg9",
+      "start_node": "N_9026565266",
+      "end_node": "N_9026565267",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "19",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg10",
+      "start_node": "N_9026565269",
+      "end_node": "N_9026565268",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg11",
+      "start_node": "N_9026565268",
+      "end_node": "N_9026565271",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_327096409_seg9",
+      "start_node": "N_9557597473",
+      "end_node": "N_9026565269",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z2",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426956_seg2",
+      "start_node": "N_9026565270",
+      "end_node": "N_9026565271",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg10",
+      "start_node": "N_9026565273",
+      "end_node": "N_9026565272",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg3",
+      "start_node": "N_9026565279",
+      "end_node": "N_9026565277",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg4",
+      "start_node": "N_9026565277",
+      "end_node": "N_9026565278",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575717_seg2",
+      "start_node": "N_9556871220",
+      "end_node": "N_9026565279",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "7",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434668_seg2",
+      "start_node": "N_9556871222",
+      "end_node": "N_9026668458",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "5",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "siding",
+      "osm_usage": "freight",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273033_seg3",
+      "start_node": "N_9556871228",
+      "end_node": "N_9556871225",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982083_seg8",
+      "start_node": "N_9556871241",
+      "end_node": "N_9556871240",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_512982083_seg2",
+      "start_node": "N_9556871245",
+      "end_node": "N_9556871244",
+      "osm_disused:railway": "rail",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "13W",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "osm_usage": "industrial",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177273032_seg12",
+      "start_node": "N_9556871248",
+      "end_node": "N_9556871249",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_railway:track_ref": "1",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975434667_seg2",
+      "start_node": "N_9556871252",
+      "end_node": "N_9556871253",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg2",
+      "start_node": "N_9556871254",
+      "end_node": "N_9556871255",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_705620052_seg5",
+      "start_node": "N_9556871256",
+      "end_node": "N_9556871257",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575715_seg4",
+      "start_node": "N_9557597462",
+      "end_node": "N_9557597463",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "20",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_177575722_seg2",
+      "start_node": "N_9557597467",
+      "end_node": "N_9557597468",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "17",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_975426954_seg7",
+      "start_node": "N_9557597477",
+      "end_node": "N_9557597476",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:track_ref": "Z1",
+      "osm_railway:traffic_mode": "freight",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_827902959_seg2",
+      "start_node": "N_9557606724",
+      "end_node": "N_9557606723",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_railway": "rail",
+      "osm_service": "siding",
+      "crosses_boundary": true
+    },
+    {
+      "name": "Track_975434661_seg2",
+      "start_node": "N_9557606726",
+      "end_node": "N_9557606727",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_operator": "DB Netz AG",
+      "osm_passenger_lines": "2",
+      "osm_railway": "rail",
+      "osm_railway:pzb": "yes",
+      "osm_service": "siding",
+      "crosses_boundary": false
+    },
+    {
+      "name": "Track_512982130_seg2",
+      "start_node": "N_9557606729",
+      "end_node": "N_9557606728",
+      "osm_electrified": "no",
+      "osm_gauge": "1435",
+      "osm_railway": "rail",
+      "osm_railway:traffic_mode": "mixed",
+      "osm_service": "yard",
+      "crosses_boundary": false
+    }
+  ],
+  "polygon": [
+    [
+      1269509.1235736758,
+      6851998.0267557185
+    ],
+    [
+      1270831.245265845,
+      6851052.118536851
+    ],
+    [
+      1270785.86078439,
+      6850992.402109679
+    ],
+    [
+      1270449.060158857,
+      6851110.640635493
+    ],
+    [
+      1270054.9317160207,
+      6851357.866648819
+    ],
+    [
+      1269831.592277792,
+      6851679.141032601
+    ],
+    [
+      1269460.1561001828,
+      6852002.804072148
+    ]
+  ],
+  "stats": {
+    "original_nodes": 605,
+    "original_tracks": 619,
+    "clipped_nodes": 270,
+    "clipped_tracks": 278,
+    "interior_nodes": 263,
+    "boundary_crossing_tracks": 9
+  }
+}
