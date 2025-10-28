@@ -1,4 +1,5 @@
-"""Routes loader module for the simulation.
+"""
+Routes loader module for the simulation.
 
 This module provides functionality to load route configurations from CSV files,
 validate them using the Route model, and make them available to the simulation.
@@ -7,6 +8,7 @@ validate them using the Route model, and make them available to the simulation.
 from collections.abc import Iterator
 import logging
 from pathlib import Path
+from typing import Dict, Iterator, List, Optional, Union
 
 import pandas as pd
 
@@ -16,43 +18,46 @@ from .model_route import Route
 logger = logging.getLogger(__name__)
 
 
-class RoutesConfig:
-    """Routes configuration manager that loads and provides access to route data.
+class Routes:
+    """
+    Routes configuration manager that loads and provides access to route data.
 
     This class is responsible for loading route configurations from a CSV file,
     validating them through the Route model, and providing convenient access
     to route information for the simulation.
     """
 
-    def __init__(self, routes_file: str | Path | None = None) -> None:
-        """Initialize the routes configuration manager.
-
-        Parameters
-        ----------
-        routes_file : str | Path | None, optional
-            Path to the CSV file containing route data, by default None.
-            If None, no routes are loaded initially.
+    def __init__(self, routes_file: Optional[Union[str, Path]] = None, routes: Optional[List[Route]] = None) -> None:
         """
-        self.routes: list[Route] = []
-        self.routes_by_id: dict[str, Route] = {}
+        Initialize the routes configuration manager.
+
+        Args:
+            routes_file: Path to the CSV file containing route data. If None, no routes are loaded initially.
+        """
+        if routes is not None and len(routes or []) > 0:
+            self.routes = routes
+            self.routes_by_id = {route.route_id: route for route in routes}
+            return
+
+        if routes_file is None:
+            self.routes: list[Route] = []  # type: ignore[no-redef]  # for now: suppress mypy no-redef false positive
+            self.routes_by_id: Dict[str, Route] = {}  # type: ignore[no-redef]
+            return
 
         if routes_file:
             self.load_routes(routes_file)
+            return
 
-    def load_routes(self, csv_path: str | Path) -> None:
-        """Load routes from a CSV file.
+    def load_routes(self, csv_path: Union[str, Path]) -> None:
+        """
+        Load routes from a CSV file.
 
-        Parameters
-        ----------
-        csv_path : str | Path
-            Path to the CSV file containing route data.
+        Args:
+            csv_path: Path to the CSV file containing route data
 
-        Raises
-        ------
-        FileNotFoundError
-            If the CSV file does not exist.
-        ValueError
-            If the CSV file contains invalid route data.
+        Raises:
+            FileNotFoundError: If the CSV file does not exist
+            ValueError: If the CSV file contains invalid route data
         """
         path = Path(csv_path)
         if not path.exists():
@@ -145,6 +150,26 @@ class RoutesConfig:
                 return route
 
         return None
+
+    def append(self, route: Route) -> None:
+        """
+        Append a Route to the collection.
+
+        Args:
+            route: Route instance to add
+
+        Raises:
+            ValueError: If a route with the same route_id already exists
+        """
+        if route.route_id in self.routes_by_id:
+            raise ValueError(f'Route already exists: {route.route_id}')
+        self.routes.append(route)
+        self.routes_by_id[route.route_id] = route
+
+    @property
+    def length(self) -> int:
+        """Return the number of loaded routes."""
+        return len(self.routes)
 
     def __len__(self) -> int:
         """Return the number of loaded routes.
