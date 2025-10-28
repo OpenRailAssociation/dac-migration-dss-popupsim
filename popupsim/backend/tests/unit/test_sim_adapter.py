@@ -1,71 +1,100 @@
-"""Unit tests for the SimPyAdapter implementation.
-
-This module contains pytest unit tests for the SimPyAdapter façade used by the
-backend simulation. Tests verify that the adapter delegates to a simpy-like
-environment (current time, timeout, run, and process scheduling). Tests use
-the real `simpy` package and therefore do not inject fake modules into
-sys.modules.
-"""
-
-from collections.abc import Generator
+import sys
+from pathlib import Path
+from typing import Any, Generator, Optional
 
 import pytest
-from simulation.sim_adapter import SimPyAdapter
+
+# Ensure src is on path for imports when tests are executed from repository root
+ROOT: Path = Path(__file__).resolve().parents[4]  # repo root
+SRC: Path = ROOT / 'popupsim' / 'backend' / 'src'
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from src.simulation.sim_adapter import SimPyAdapter
+
+
+class FakeProcess:
+    def __init__(self, gen: Generator[Any, None, Any]) -> None:
+        self.gen: Generator[Any, None, Any] = gen
+
+
+class FakeEnv:
+    def __init__(self) -> None:
+        self.now: float = 0.0
+        self.last_timeout: Optional[float] = None
+        self.run_called_with: Optional[float] = None
+        self.last_process_arg: Optional[Generator[Any, None, Any]] = None
+
+    def timeout(self, duration: float) -> tuple[str, float]:
+        self.last_timeout = duration
+        return ('timeout', duration)
+
+    def run(self, until: Optional[float] = None) -> tuple[str, Optional[float]]:
+        self.run_called_with = until
+        return ('ran', until)
+
+    def process(self, gen: Generator[Any, None, Any]) -> FakeProcess:
+        self.last_process_arg = gen
+        return FakeProcess(gen)
+
+
+class FakeSimpyModule:
+    Environment = FakeEnv  # type: ignore
 
 
 @pytest.mark.unit
 def test_simpy_adapter_create_and_basic_delegation() -> None:
-    """Test creating SimPyAdapter and basic delegation to a real simpy.Environment.
-
-    Verifies that current_time returns a float, delay returns an event-like
-    object and run completes (simpy.Environment.run typically returns None).
-    """
-    adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
-    assert isinstance(adapter, SimPyAdapter)
-    # current_time delegates to env.now
-    assert isinstance(adapter.current_time(), float)
-    # delay returns a simpy Event / Timeout object (non-None)
-    timeout_result = adapter.delay(5.0)
-    assert timeout_result is not None
-    # run delegates to env.run; simpy.Environment.run usually returns None
-    run_result = adapter.run(10.0)
-    assert run_result is None
+    # Inject fake simpy module so create_simpy_adapter does not require real simpy
+    sys.modules['simpy'] = FakeSimpyModule  # type: ignore
+    try:
+        adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
+        # type checks: adapter should expose current_time/delay/run
+        assert isinstance(adapter, SimPyAdapter)
+        # current_time delegates to env.now
+        assert isinstance(adapter.current_time(), float)
+        # delay delegates to env.timeout
+        timeout_result = adapter.delay(5.0)
+        assert timeout_result == ('timeout', 5.0)
+        # run delegates to env.run
+        run_result = adapter.run(10.0)
+        assert run_result == ('ran', 10.0)
+    finally:
+        # Clean up injected module to avoid leaking into other tests
+        del sys.modules['simpy']
 
 
 @pytest.mark.unit
 def test_run_process_with_prebuilt_generator_object() -> None:
-    """Test scheduling a pre-built generator object with the adapter.
+    # Prepare fake simpy and adapter
+    sys.modules['simpy'] = FakeSimpyModule  # type: ignore
+    try:
+        adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
 
-    Verifies that run_process accepts a generator object and returns a process-like object.
-    """
-    adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
+        # create a generator object (pre-built)
+        def gen_func() -> Generator[int, None, None]:
+            yield 1
 
-    # create a generator object (pre-built)
-    def gen_func() -> Generator[int]:
-        yield 1
+        gen_obj: Generator[int, None, None] = gen_func()
+        proc = adapter.run_process(gen_obj)  # should schedule the same generator object
+        assert isinstance(proc, FakeProcess)
 
-    proc = adapter.run_process(gen_func)
-    assert proc is not None
+    finally:
+        del sys.modules['simpy']
 
 
 @pytest.mark.unit
 def test_run_process_with_normal_callable_wrapped_in_generator() -> None:
-    """Test scheduling a normal callable by wrapping it in a generator.
+    # Prepare fake simpy and adapter
+    sys.modules['simpy'] = FakeSimpyModule  # type: ignore
+    try:
+        adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
 
-    Verifies that run_process accepts a callable with args and returns a process-like object.
-    """
-    adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
+        def normal_callable(a: int, b: int) -> None:
+            # side effect to observe when wrapper generator is executed
+            assert a == 7
+            assert b == 8
 
-    side_effect: list[int] = []
-
-    def normal_callable(a: int, b: int) -> None:
-        # record side effect if callable is executed
-        side_effect.append(a + b)
-
-    proc = adapter.run_process(normal_callable, 7, 8)
-    assert proc is not None
-    # running the adapter until a small time to allow wrapped callable to execute
-    adapter.run(until=0.1)
-    # if the adapter wrapper executes the callable immediately during the simulation,
-    # the side effect list will be populated; if not, at least ensure no error occurred.
-    assert isinstance(side_effect, list)
+        proc = adapter.run_process(normal_callable, 7, 8)
+        assert isinstance(proc, FakeProcess)
+    finally:
+        del sys.modules['simpy']

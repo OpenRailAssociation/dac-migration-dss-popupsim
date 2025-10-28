@@ -10,16 +10,15 @@ All waiting and scheduling is expressed via the adapter interface, so the domain
 remains agnostic of the underlying simulation framework.
 """
 
-import logging
+# pylint: disable=relative-beyond-top-level,E0402  # for now: make linters pass until install/editable is used
+from typing import Any, Optional
 
-from configuration.model_scenario import ScenarioConfig
-
+# pylint: disable=relative-beyond-top-level,E0402  # for now: make linters pass until install/editable is used
 from .sim_adapter import SimulationAdapter
 
-logger = logging.getLogger('PopupSim')
 
-
-class PopupSim:  # pylint: disable=too-few-public-methods
+# pylint: disable=relative-beyond-top-level,R0903  # for now: make linters pass until install/editable is used
+class PopupSim:
     """High-level simulation orchestrator for PopUp-Sim.
 
     This facade coordinates simulation execution using a SimulationAdapter and a
@@ -27,34 +26,28 @@ class PopupSim:  # pylint: disable=too-few-public-methods
     the simulation backend directly, keeping business logic backend-agnostic.
     """
 
-    def __init__(self, adapter: SimulationAdapter, scenario: ScenarioConfig) -> None:
+    def __init__(self, adapter: SimulationAdapter, scenario: Any) -> None:
         """Initialize the PopupSim orchestrator.
 
-        Parameters
-        ----------
-        adapter : SimulationAdapter
-            SimulationAdapter instance used to drive the underlying
-            simulation environment (e.g., SimPy).
-        scenario : ScenarioConfig
-            Domain scenario object containing routes, wagons and other
-            configuration consumed by the simulation.
+        Args:
+            adapter: SimulationAdapter instance used to drive the underlying
+                simulation environment (e.g., SimPy).
+            scenario: Domain scenario object containing routes, wagons and other
+                configuration consumed by the simulation.
         """
         self.name: str = 'PopUpSim'
         self.adapter: SimulationAdapter = adapter
-        self.scenario: ScenarioConfig = scenario
+        self.scenario: Any = scenario
 
-    def run(self, until: float | None = None) -> None:
+    def run(self, until: Optional[float] = None) -> None:
         """Run the simulation until an optional time.
 
         The method delegates execution to the configured SimulationAdapter.
 
-        Parameters
-        ----------
-        until : float or None, optional
-            Simulation time indicating when to stop the simulation.
-            If None, the adapter runs until its own completion.
+        Args:
+            until: Optional simulation time (float) indicating when to stop the
+                simulation. If None, the adapter runs until its own completion.
         """
-        runinfo = f'Starting {self.name} for: {self.scenario}'
-        logger.info(runinfo)
+        print(f'Starting {self.name} for: {self.scenario}')
         self.adapter.run(until)
-        logger.info('Simulation completed.')
+        print('Simulation completed.')

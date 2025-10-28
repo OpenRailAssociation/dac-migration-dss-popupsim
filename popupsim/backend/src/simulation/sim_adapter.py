@@ -7,12 +7,8 @@ to obtain an adapter when SimPy is available; the import is performed lazily to
 avoid a hard dependency.
 """
 
-from abc import ABC
-from abc import abstractmethod
-from collections.abc import Callable
-from collections.abc import Generator
-from typing import Any
-from typing import cast
+from abc import ABC, abstractmethod
+from typing import Any, Callable, Generator, Optional
 
 
 class SimulationAdapter(ABC):
@@ -53,9 +49,8 @@ class SimulationAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def run(self, until: float | None = None) -> Any:
-        """Run the simulation.
-
+    def run(self, until: Optional[float] = None) -> Any:
+        """Run the simulation
         Parameters
         ----------
         until : float | None, optional
@@ -194,15 +189,11 @@ class SimPyAdapter(SimulationAdapter):
 
         # If fn is a generator-function, call it inside the sim context and schedule its generator
         if inspect.isgeneratorfunction(fn):
-            # Type checker knows fn is callable here
-            callable_fn = cast(Callable[..., Any], fn)
-            return self._env.process(callable_fn(*args, **kwargs))
+            return self._env.process(fn(*args, **kwargs))
 
         # Otherwise fn is a normal callable; wrap it in a tiny generator so SimPy can schedule it
-        def _wrap() -> Generator[None]:
-            # Type checker knows fn is callable here
-            callable_fn = cast(Callable[..., Any], fn)
-            callable_fn(*args, **kwargs)
+        def _wrap() -> Generator[None, None, None]:
+            fn(*args, **kwargs)
             yield from ()
 
         return self._env.process(_wrap())

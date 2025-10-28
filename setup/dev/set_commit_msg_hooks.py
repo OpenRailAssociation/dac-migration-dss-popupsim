@@ -4,11 +4,10 @@
 This script creates platform-specific Git hooks that validate commit messages
 against the Conventional Commits format to ensure consistent commit history.
 """
-
-from pathlib import Path
 import platform
 import stat
 import sys
+from pathlib import Path
 
 
 def create_validation_script() -> str:
@@ -20,10 +19,10 @@ def create_validation_script() -> str:
         Path to the created validation script.
     """
     # Add shebang only for Unix-like systems
-    shebang = '#!/usr/bin/env python3\n' if platform.system() != 'Windows' else ''
+    shebang = "#!/usr/bin/env python3\n" if platform.system() != "Windows" else ""
 
     # Define commit types
-    commit_types = 'feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert'
+    commit_types = "feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert"
 
     script_content = f"""{shebang}import sys
 import re

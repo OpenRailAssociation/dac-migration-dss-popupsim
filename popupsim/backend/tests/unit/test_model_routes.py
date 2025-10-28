@@ -5,9 +5,8 @@ import tempfile
 
 import pytest
 
-from configuration.model_route import Route
-from configuration.model_routes import Routes
-from configuration.model_routes import load_routes_from_csv
+from src.configuration.model_route import Route
+from src.configuration.model_routes import Routes, load_routes_from_csv
 
 
 @pytest.fixture
