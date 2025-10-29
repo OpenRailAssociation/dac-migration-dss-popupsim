@@ -1,12 +1,13 @@
 """Unit tests for the RoutesConfig class and related functions."""
 
-import tempfile
 from pathlib import Path
+import tempfile
 
 import pytest
 
 from src.configuration.model_route import Route
-from src.configuration.model_routes import RoutesConfig, load_routes_from_csv
+from src.configuration.model_routes import RoutesConfig
+from src.configuration.model_routes import load_routes_from_csv
 
 
 @pytest.fixture

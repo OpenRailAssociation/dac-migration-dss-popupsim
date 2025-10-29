@@ -40,6 +40,12 @@ quote-style = "single"
 indent-style = "space"
 docstring-code-format = true
 
+[tool.ruff.lint.isort]
+force-single-line = true
+force-sort-within-sections = true
+nown-first-party = ["configuration"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
 [tool.ruff.lint]
 select = ["F", "B", "S", "C4", "DTZ", "ARG", "I", "SIM", "N", "C90", "PLR09", "RUF"]
 

@@ -7,11 +7,12 @@ workshop integration, and file reference validation.
 
 from datetime import date
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from configuration.model_scenario import ScenarioConfig
-from configuration.model_track import TrackFunction, WorkshopTrack
+from configuration.model_track import TrackFunction
+from configuration.model_track import WorkshopTrack
 from configuration.model_workshop import Workshop
 
 

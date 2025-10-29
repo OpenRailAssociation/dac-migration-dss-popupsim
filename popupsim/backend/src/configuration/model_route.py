@@ -10,7 +10,9 @@ and travel times.
 import logging
 from typing import List
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import model_validator
 
 # Configure logging
 logger = logging.getLogger(__name__)

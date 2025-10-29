@@ -1,14 +1,17 @@
 """Unit tests for the main entry point module."""
 
-import tempfile
 from pathlib import Path
+import tempfile
 from typing import Generator
 
 import pytest
 import typer
 from typer.testing import CliRunner
 
-from main import APP_NAME, app, validate_output_path, validate_scenario_path
+from main import APP_NAME
+from main import app
+from main import validate_output_path
+from main import validate_scenario_path
 
 
 @pytest.fixture

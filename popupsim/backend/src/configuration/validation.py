@@ -7,7 +7,8 @@ and simulation duration checks. It ensures that loaded configurations are
 logically consistent and meet business requirements.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from enum import Enum
 
 from .model_scenario import ScenarioConfig

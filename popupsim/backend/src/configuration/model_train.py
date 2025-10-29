@@ -7,12 +7,17 @@ arrival dates, times, and associated wagons, ensuring data integrity
 through validation methods.
 """
 
+from datetime import date
+from datetime import datetime
+from datetime import time
+from datetime import timezone
 import logging
 import re
-from datetime import date, datetime, time, timezone
 from typing import List
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import model_validator
 
 from .model_wagon import Wagon
 

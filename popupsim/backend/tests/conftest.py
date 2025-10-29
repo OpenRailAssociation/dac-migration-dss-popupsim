@@ -1,7 +1,7 @@
 """Configure pytest to find the src package."""
 
-import sys
 from pathlib import Path
+import sys
 
 # Get the absolute path to the project root directory
 project_root = Path(__file__).parent.parent.absolute()

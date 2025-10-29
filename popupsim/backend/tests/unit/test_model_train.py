@@ -5,15 +5,19 @@ Tests the Train model validation logic, time parsing,
 wagon validation, and datetime combination functionality.
 """
 
-from datetime import date, datetime, time, timezone
+from datetime import date
+from datetime import datetime
+from datetime import time
+from datetime import timezone
 from pathlib import Path
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from configuration.model_train import Train
 from configuration.model_wagon import Wagon
-from configuration.service import ConfigurationError, ConfigurationService
+from configuration.service import ConfigurationError
+from configuration.service import ConfigurationService
 
 
 class TestTrain:

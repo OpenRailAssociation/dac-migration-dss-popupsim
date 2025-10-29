@@ -7,7 +7,11 @@ validate them using the Route model, and make them available to the simulation.
 
 import logging
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Union
+from typing import Dict
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Union
 
 import pandas as pd
 

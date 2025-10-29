@@ -8,7 +8,8 @@ and specific requirements such as loading status and retrofit needs.
 import logging
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 # Configure logging
 logger = logging.getLogger(__name__)

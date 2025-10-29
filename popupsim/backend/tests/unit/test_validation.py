@@ -5,22 +5,22 @@ Tests the validation logic including ValidationLevel, ValidationIssue,
 ValidationResult, and ConfigurationValidator classes.
 """
 
-from datetime import date, time
+from datetime import date
+from datetime import time
 from io import StringIO
 from unittest.mock import patch
 
 from configuration.model_route import Route
 from configuration.model_scenario import ScenarioConfig
-from configuration.model_track import TrackFunction, WorkshopTrack
+from configuration.model_track import TrackFunction
+from configuration.model_track import WorkshopTrack
 from configuration.model_train import Train
 from configuration.model_wagon import Wagon
 from configuration.model_workshop import Workshop
-from configuration.validation import (
-    ConfigurationValidator,
-    ValidationIssue,
-    ValidationLevel,
-    ValidationResult,
-)
+from configuration.validation import ConfigurationValidator
+from configuration.validation import ValidationIssue
+from configuration.validation import ValidationLevel
+from configuration.validation import ValidationResult
 
 
 class TestValidationLevel:

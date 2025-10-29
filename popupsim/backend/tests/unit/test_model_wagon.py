@@ -5,10 +5,11 @@ This module contains unit tests for the Wagon model, including validation,
 property calculations, and edge case handling.
 """
 
-from typing import Any, Dict
+from typing import Any
+from typing import Dict
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from configuration.model_wagon import Wagon
 

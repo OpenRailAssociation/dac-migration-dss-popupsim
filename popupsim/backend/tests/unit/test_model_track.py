@@ -7,10 +7,11 @@ and error handling for workshop track configurations.
 
 from pathlib import Path
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
-from configuration.model_track import TrackFunction, WorkshopTrack
+from configuration.model_track import TrackFunction
+from configuration.model_track import WorkshopTrack
 
 
 class TestWorkshopTrack:
