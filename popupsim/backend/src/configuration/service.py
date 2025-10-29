@@ -1,5 +1,4 @@
-"""
-Configuration service for loading, validating, and managing train simulation data.
+"""Configuration service for loading, validating, and managing train simulation data.
 
 This module provides the ConfigurationService class that handles:
 - Loading and validating scenario configurations from JSON files
@@ -14,9 +13,6 @@ import json
 import logging
 from pathlib import Path
 from typing import Any
-from typing import List
-from typing import Optional
-from typing import Union
 
 import pandas as pd
 from pydantic import ValidationError
@@ -43,22 +39,34 @@ class ConfigurationError(Exception):
 class ConfigurationService:
     """Service for loading and validating configuration files."""
 
-    def __init__(self, base_path: Optional[Path] = None):
-        """
-        Initialize the configuration service.
-        Args:
-            base_path: Base directory for configuration files. Defaults to current directory.
+    def __init__(self, base_path: Path | None = None):
+        """Initialize the configuration service.
+
+        Parameters
+        ----------
+        base_path : Path | None, optional
+            Base directory for configuration files, by default None (uses current directory).
         """
         self.base_path = base_path or Path.cwd()
         self.validator = ConfigurationValidator()
 
-    def load_scenario(self, path: Union[str, Path]) -> dict[str, Any]:
-        """
-        Load scenario configuration from a JSON file.
-        Args:
-            path: Directory path containing scenario.json or direct path to JSON file
-        Returns:
-            dict[str, Any]: Scenario configuration data
+    def load_scenario(self, path: str | Path) -> dict[str, Any]:
+        """Load scenario configuration from a JSON file.
+
+        Parameters
+        ----------
+        path : str | Path
+            Directory path containing scenario.json or direct path to JSON file.
+
+        Returns
+        -------
+        dict[str, Any]
+            Scenario configuration data.
+
+        Raises
+        ------
+        ConfigurationError
+            If file not found, JSON is invalid, or required fields are missing.
         """
         path = Path(path)
 
@@ -80,7 +88,7 @@ class ConfigurationService:
         logger.info('Loading scenario configuration from %s', file_path)
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 data = json.load(f)
 
             # Validate required fields exist before creating model
@@ -94,7 +102,7 @@ class ConfigurationService:
                 )
 
             logger.info('Successfully loaded scenario: %s', data.get('scenario_id'))
-            return data
+            return data  # type: ignore[no-any-return]
 
         except json.JSONDecodeError as e:
             error_msg = (
@@ -119,13 +127,23 @@ class ConfigurationService:
             logger.error('%s', error_msg)
             raise ConfigurationError(error_msg) from e
 
-    def load_and_validate_scenario(self, path: Union[str, Path]) -> dict[str, Any]:
-        """
-        Load scenario configuration and validate all referenced files exist.
-        Args:
-            path: Directory path containing scenario.json
-        Returns:
-            dict[str, Any]: Validated scenario configuration data
+    def load_and_validate_scenario(self, path: str | Path) -> dict[str, Any]:
+        """Load scenario configuration and validate all referenced files exist.
+
+        Parameters
+        ----------
+        path : str | Path
+            Directory path containing scenario.json.
+
+        Returns
+        -------
+        dict[str, Any]
+            Validated scenario configuration data.
+
+        Raises
+        ------
+        ConfigurationError
+            If scenario loading fails or referenced files don't exist.
         """
         scenario_data = self.load_scenario(path)
         config_dir = Path(path) if isinstance(path, str) else path
@@ -146,7 +164,23 @@ class ConfigurationService:
         return scenario_data
 
     def _read_and_validate_train_schedule_csv(self, file_path: Path) -> pd.DataFrame:
-        """Read CSV and validate required columns and emptiness."""
+        """Read CSV and validate required columns and emptiness.
+
+        Parameters
+        ----------
+        file_path : Path
+            Path to the CSV file to read.
+
+        Returns
+        -------
+        pd.DataFrame
+            Validated DataFrame with train schedule data.
+
+        Raises
+        ------
+        ConfigurationError
+            If file is empty, has parsing errors, or missing required columns.
+        """
         try:
             df = pd.read_csv(
                 file_path,
@@ -199,7 +233,18 @@ class ConfigurationService:
 
     @staticmethod
     def to_bool(value: Any) -> bool:
-        """Robustly convert a value to boolean for CSV converters."""
+        """Robustly convert a value to boolean for CSV converters.
+
+        Parameters
+        ----------
+        value : Any
+            Value to convert to boolean.
+
+        Returns
+        -------
+        bool
+            Converted boolean value.
+        """
         if isinstance(value, bool):
             return value
         if isinstance(value, (int, float)):
@@ -208,8 +253,24 @@ class ConfigurationService:
             return value.strip().lower() == 'true'
         return False
 
-    def _create_wagons_from_group(self, group: pd.DataFrame) -> List[Wagon]:
-        """Create Wagon objects from a train group."""
+    def _create_wagons_from_group(self, group: pd.DataFrame) -> list[Wagon]:
+        """Create Wagon objects from a train group.
+
+        Parameters
+        ----------
+        group : pd.DataFrame
+            DataFrame group containing wagon data for a single train.
+
+        Returns
+        -------
+        list[Wagon]
+            List of validated Wagon objects.
+
+        Raises
+        ------
+        ConfigurationError
+            If wagon validation fails.
+        """
         wagons = []
         for _, row in group.iterrows():
             try:
@@ -257,10 +318,10 @@ class ConfigurationService:
     def _convert_arrival_date(self, arrival_date_value: Any) -> date:
         """Convert pandas Timestamp or string to Python date object."""
         if hasattr(arrival_date_value, 'date'):
-            return arrival_date_value.date()
+            return arrival_date_value.date()  # type: ignore[no-any-return]
         if isinstance(arrival_date_value, str):
             return date.fromisoformat(arrival_date_value)
-        return arrival_date_value
+        return arrival_date_value  # type: ignore[no-any-return]
 
     def _handle_train_validation_error(self, train_id: str, err: ValidationError) -> None:
         """Handle validation errors when creating Train objects."""
@@ -273,7 +334,7 @@ class ConfigurationService:
             f'  • {chr(10).join("  • " + detail for detail in error_details)}'
         ) from err
 
-    def _create_train_arrivals(self, df: pd.DataFrame) -> List[Train]:
+    def _create_train_arrivals(self, df: pd.DataFrame) -> list[Train]:
         """Group by train and create Train objects."""
         self._parse_arrival_time(df)
         self._check_duplicate_wagons(df)
@@ -298,13 +359,23 @@ class ConfigurationService:
                 self._handle_train_validation_error(str(train_id), err)
         return trains
 
-    def load_train_schedule(self, file_path: Union[str, Path]) -> List[Train]:
-        """
-        Load train schedule from CSV file and validate data.
-        Args:
-            file_path: Path to the train schedule CSV file
-        Returns:
-            List[Train]: Validated train arrivals with wagon information
+    def load_train_schedule(self, file_path: str | Path) -> list[Train]:
+        """Load train schedule from CSV file and validate data.
+
+        Parameters
+        ----------
+        file_path : str | Path
+            Path to the train schedule CSV file.
+
+        Returns
+        -------
+        list[Train]
+            Validated train arrivals with wagon information.
+
+        Raises
+        ------
+        ConfigurationError
+            If file not found, CSV parsing fails, or validation fails.
         """
         file_path = Path(file_path)
         if not file_path.exists():
@@ -320,7 +391,7 @@ class ConfigurationService:
         except Exception as err:
             raise ConfigurationError(f'Unexpected error loading train schedule from {file_path}: {err}') from err
 
-    def _create_workshop_tracks_from_dataframe(self, df: pd.DataFrame) -> List[WorkshopTrack]:
+    def _create_workshop_tracks_from_dataframe(self, df: pd.DataFrame) -> list[WorkshopTrack]:
         """Create WorkshopTrack objects from DataFrame rows."""
         tracks = []
         for _, row in df.iterrows():
@@ -350,9 +421,9 @@ class ConfigurationService:
                 raise ConfigurationError(f'Invalid data type for track {row["track_id"]}: {err}') from err
         return tracks
 
-    def _parse_current_wagons(self, row: pd.Series, df: pd.DataFrame) -> List[int]:
+    def _parse_current_wagons(self, row: pd.Series, df: pd.DataFrame) -> list[int]:
         """Parse current_wagons field from DataFrame row."""
-        current_wagons: List[int] = []
+        current_wagons: list[int] = []
         if 'current_wagons' in df.columns and pd.notna(row['current_wagons']):
             current_wagons_val = row['current_wagons']
             # Extract scalar value if needed
@@ -416,7 +487,7 @@ class ConfigurationService:
 
         return df
 
-    def _create_workshop_from_tracks(self, tracks: List[WorkshopTrack]) -> Workshop:
+    def _create_workshop_from_tracks(self, tracks: list[WorkshopTrack]) -> Workshop:
         """Create Workshop object from tracks with validation."""
         try:
             return Workshop(tracks=tracks)
@@ -432,15 +503,23 @@ class ConfigurationService:
         except Exception as err:
             raise ConfigurationError(f'Unexpected error creating workshop from tracks: {err}') from err
 
-    def load_workshop_tracks(self, file_path: Union[str, Path]) -> Workshop:
-        """
-        Load workshop tracks from CSV file and validate data.
-        Args:
-            file_path: Path to the workshop_tracks.csv file
-        Returns:
-            Workshop: Validated workshop configuration with tracks
-        Raises:
-            ConfigurationError: If file not found, CSV parsing fails, or validation fails
+    def load_workshop_tracks(self, file_path: str | Path) -> Workshop:
+        """Load workshop tracks from CSV file and validate data.
+
+        Parameters
+        ----------
+        file_path : str | Path
+            Path to the workshop_tracks.csv file.
+
+        Returns
+        -------
+        Workshop
+            Validated workshop configuration with tracks.
+
+        Raises
+        ------
+        ConfigurationError
+            If file not found, CSV parsing fails, or validation fails.
         """
         file_path = Path(file_path)
         if not file_path.exists():
@@ -481,7 +560,7 @@ class ConfigurationService:
         except ValueError as e:
             raise ConfigurationError(f'Invalid date format in scenario configuration: {e}') from e
 
-    def _validate_train_dates_in_range(self, trains: List[Train], scenario_start: date, scenario_end: date) -> None:
+    def _validate_train_dates_in_range(self, trains: list[Train], scenario_start: date, scenario_end: date) -> None:
         """Validate that all train arrivals fall within scenario date range."""
         out_of_range_trains = []
         for train in trains:
@@ -495,7 +574,7 @@ class ConfigurationService:
                 f'{", ".join(out_of_range_trains)}'
             )
 
-    def _load_workshop_and_routes(self, config_dir: Path) -> tuple[Workshop, List]:
+    def _load_workshop_and_routes(self, config_dir: Path) -> tuple[Workshop, list]:
         """Load workshop tracks and routes configuration."""
         workshop_tracks_file = 'workshop_tracks.csv'
         workshop = self.load_workshop_tracks(config_dir / workshop_tracks_file)
@@ -511,7 +590,7 @@ class ConfigurationService:
         self,
         scenario_data: dict[str, Any],
         scenario_dates: tuple[date, date],
-        components: tuple[str, Workshop, List[Train], List],  # train_schedule_file, workshop, trains, routes
+        components: tuple[str, Workshop, list[Train], list],  # train_schedule_file, workshop, trains, routes
     ) -> ScenarioConfig:
         """Build and validate ScenarioConfig object."""
         scenario_id = scenario_data.get('scenario_id')
@@ -533,13 +612,23 @@ class ConfigurationService:
             routes=routes,
         )
 
-    def load_complete_scenario(self, path: Union[str, Path]) -> tuple[ScenarioConfig, ValidationResult]:
-        """
-        Load scenario configuration and train schedule data.
-        Args:
-            path: Directory path containing configuration files
-        Returns:
-            ScenarioConfig: Loaded and validated scenario configuration
+    def load_complete_scenario(self, path: str | Path) -> tuple[ScenarioConfig, ValidationResult]:
+        """Load scenario configuration and train schedule data.
+
+        Parameters
+        ----------
+        path : str | Path
+            Directory path containing configuration files.
+
+        Returns
+        -------
+        tuple[ScenarioConfig, ValidationResult]
+            Loaded and validated scenario configuration with validation results.
+
+        Raises
+        ------
+        ConfigurationError
+            If loading or validation fails.
         """
         scenario_data = self.load_and_validate_scenario(path)
         config_dir = Path(path) if isinstance(path, str) else path

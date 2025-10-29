@@ -6,7 +6,6 @@ property calculations, and edge case handling.
 """
 
 from typing import Any
-from typing import Dict
 
 from pydantic import ValidationError
 import pytest
@@ -258,7 +257,7 @@ class TestWagon:
 
     def test_wagon_from_dict(self) -> None:
         """Test creating wagon from dictionary data."""
-        wagon_data: Dict[str, Any] = {
+        wagon_data: dict[str, Any] = {
             'wagon_id': 'W015',
             'train_id': 'T015',
             'length': 22.0,

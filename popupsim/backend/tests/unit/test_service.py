@@ -15,7 +15,6 @@ import json
 from pathlib import Path
 import tempfile
 from typing import Any
-from typing import Dict
 
 import pandas as pd
 import pytest
@@ -41,7 +40,7 @@ class TestConfigurationService:
         return Path(__file__).parent.parent / 'fixtures' / 'config'
 
     @pytest.fixture
-    def scenario_data(self) -> Dict[str, Any]:
+    def scenario_data(self) -> dict[str, Any]:
         """Sample scenario configuration data."""
         return {
             'scenario_id': 'scenario_001',

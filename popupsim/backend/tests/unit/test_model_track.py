@@ -388,7 +388,7 @@ class TestWorkshopTrack:
         csv_file_path = Path(__file__).parent.parent / 'fixtures' / 'config' / 'test_workshop_tracks.csv'
 
         # Read CSV file
-        with open(csv_file_path, 'r') as f:
+        with open(csv_file_path) as f:
             csv_content = f.read()
 
         # Parse CSV manually (simulating pandas behavior)

@@ -1,0 +1,1 @@
+"""Configuration context of PopUpSim."""

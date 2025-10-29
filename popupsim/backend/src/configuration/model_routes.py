@@ -1,17 +1,12 @@
-"""
-Routes loader module for the simulation.
+"""Routes loader module for the simulation.
 
 This module provides functionality to load route configurations from CSV files,
 validate them using the Route model, and make them available to the simulation.
 """
 
+from collections.abc import Iterator
 import logging
 from pathlib import Path
-from typing import Dict
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import Union
 
 import pandas as pd
 
@@ -22,37 +17,42 @@ logger = logging.getLogger(__name__)
 
 
 class RoutesConfig:
-    """
-    Routes configuration manager that loads and provides access to route data.
+    """Routes configuration manager that loads and provides access to route data.
 
     This class is responsible for loading route configurations from a CSV file,
     validating them through the Route model, and providing convenient access
     to route information for the simulation.
     """
 
-    def __init__(self, routes_file: Optional[Union[str, Path]] = None):
-        """
-        Initialize the routes configuration manager.
+    def __init__(self, routes_file: str | Path | None = None) -> None:
+        """Initialize the routes configuration manager.
 
-        Args:
-            routes_file: Path to the CSV file containing route data. If None, no routes are loaded initially.
+        Parameters
+        ----------
+        routes_file : str | Path | None, optional
+            Path to the CSV file containing route data, by default None.
+            If None, no routes are loaded initially.
         """
-        self.routes: List[Route] = []
-        self.routes_by_id: Dict[str, Route] = {}
+        self.routes: list[Route] = []
+        self.routes_by_id: dict[str, Route] = {}
 
         if routes_file:
             self.load_routes(routes_file)
 
-    def load_routes(self, csv_path: Union[str, Path]) -> None:
-        """
-        Load routes from a CSV file.
+    def load_routes(self, csv_path: str | Path) -> None:
+        """Load routes from a CSV file.
 
-        Args:
-            csv_path: Path to the CSV file containing route data
+        Parameters
+        ----------
+        csv_path : str | Path
+            Path to the CSV file containing route data.
 
-        Raises:
-            FileNotFoundError: If the CSV file does not exist
-            ValueError: If the CSV file contains invalid route data
+        Raises
+        ------
+        FileNotFoundError
+            If the CSV file does not exist.
+        ValueError
+            If the CSV file contains invalid route data.
         """
         path = Path(csv_path)
         if not path.exists():
@@ -103,33 +103,42 @@ class RoutesConfig:
             raise
 
     def get_route(self, route_id: str) -> Route:
-        """
-        Get a route by its ID.
+        """Get a route by its ID.
 
-        Args:
-            route_id: The ID of the route to retrieve
+        Parameters
+        ----------
+        route_id : str
+            The ID of the route to retrieve.
 
-        Returns:
-            The Route object with the specified ID
+        Returns
+        -------
+        Route
+            The Route object with the specified ID.
 
-        Raises:
-            KeyError: If no route with the specified ID exists
+        Raises
+        ------
+        KeyError
+            If no route with the specified ID exists.
         """
         if route_id not in self.routes_by_id:
             raise KeyError(f'Route not found: {route_id}')
 
         return self.routes_by_id[route_id]
 
-    def get_route_between_tracks(self, from_track: str, to_track: str) -> Optional[Route]:
-        """
-        Find a route between two tracks.
+    def get_route_between_tracks(self, from_track: str, to_track: str) -> Route | None:
+        """Find a route between two tracks.
 
-        Args:
-            from_track: The starting track ID
-            to_track: The destination track ID
+        Parameters
+        ----------
+        from_track : str
+            The starting track ID.
+        to_track : str
+            The destination track ID.
 
-        Returns:
-            The Route object connecting the tracks, or None if no route exists
+        Returns
+        -------
+        Route | None
+            The Route object connecting the tracks, or None if no route exists.
         """
         for route in self.routes:
             if route.from_track == from_track and route.to_track == to_track:
@@ -138,30 +147,48 @@ class RoutesConfig:
         return None
 
     def __len__(self) -> int:
-        """Return the number of loaded routes."""
+        """Return the number of loaded routes.
+
+        Returns
+        -------
+        int
+            Number of loaded routes.
+        """
         return len(self.routes)
 
     def __iter__(self) -> Iterator[Route]:
-        """Iterate through all routes."""
+        """Iterate through all routes.
+
+        Returns
+        -------
+        Iterator[Route]
+            Iterator over all loaded routes.
+        """
         return iter(self.routes)
 
 
-def load_routes_from_csv(csv_path: Union[str, Path]) -> List[Route]:
-    """
-    Load routes from a CSV file and return as a list of Route objects.
+def load_routes_from_csv(csv_path: str | Path) -> list[Route]:
+    """Load routes from a CSV file and return as a list of Route objects.
 
     This is a convenience function that creates a RoutesConfig instance,
     loads the routes, and returns the list of Route objects.
 
-    Args:
-        csv_path: Path to the CSV file containing route data
+    Parameters
+    ----------
+    csv_path : str | Path
+        Path to the CSV file containing route data.
 
-    Returns:
-        List of validated Route objects
+    Returns
+    -------
+    list[Route]
+        List of validated Route objects.
 
-    Raises:
-        FileNotFoundError: If the CSV file does not exist
-        ValueError: If the CSV file contains invalid route data
+    Raises
+    ------
+    FileNotFoundError
+        If the CSV file does not exist.
+    ValueError
+        If the CSV file contains invalid route data.
     """
     routes_config = RoutesConfig(csv_path)
     return routes_config.routes

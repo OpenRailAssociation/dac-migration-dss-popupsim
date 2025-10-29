@@ -1,9 +1,10 @@
 """Unit tests for the main entry point module."""
 
+from collections.abc import Generator
 from pathlib import Path
 import tempfile
-from typing import Generator
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 import typer
@@ -22,7 +23,7 @@ def runner() -> CliRunner:
 
 
 @pytest.fixture
-def temp_scenario_file() -> Generator[Path, None, None]:
+def temp_scenario_file() -> Generator[Path]:
     """Create a temporary scenario file for testing."""
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
         f.write('{"test": "data"}')
@@ -31,7 +32,7 @@ def temp_scenario_file() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def temp_output_dir() -> Generator[Path, None, None]:
+def temp_output_dir() -> Generator[Path]:
     """Create a temporary output directory for testing."""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)

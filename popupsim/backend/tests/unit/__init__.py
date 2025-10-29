@@ -1,1 +1,1 @@
-# This file marks the unit directory as a Python package.
+"""Unit tests for PopUp-Sim backend components."""
