@@ -7,8 +7,6 @@ runtime usage.
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 # The configuration.* modules are available at runtime but currently ship without
 # library stubs / a py.typed marker which makes mypy emit noise. Suppress the
 # import-not-found error for now and keep a NOTE for future cleanup.
@@ -22,20 +20,21 @@ from configuration.model_wagon import Wagon  # type: ignore[import-not-found,imp
 class Scenario:
     """Container for simulation scenario data.
 
-    Attributes:
+    Attributes
+    ----------
         routes: A Routes collection (or empty list when not set).
         wagons: A list of Wagon instances.
     """
 
-    def __init__(self, routes: Optional[Routes] = None, wagons: Optional[List[Wagon]] = None) -> None:
+    def __init__(self, routes: Routes | None = None, wagons: list[Wagon] | None = None) -> None:
         """Create a Scenario.
 
         Args:
             routes: Optional Routes collection to use for the scenario.
             wagons: Optional list of Wagon instances.
         """
-        self.routes: Optional[Routes] = routes or []
-        self.wagons: List[Wagon] = wagons or []
+        self.routes: Routes | None = routes or []
+        self.wagons: list[Wagon] = wagons or []
 
     def __str__(self) -> str:
         """Return a short human-readable description of the scenario."""
@@ -63,25 +62,27 @@ class ScenarioBuilder:
         """Initialize an empty builder with a default Scenario."""
         self.scenario: Scenario = Scenario()
 
-    def add_routes(self, routes: Routes) -> 'ScenarioBuilder':
+    def add_routes(self, routes: Routes) -> ScenarioBuilder:
         """Assign a Routes collection to the Scenario and return the builder.
 
         Args:
             routes: Routes collection to assign.
 
-        Returns:
+        Returns
+        -------
             The same ScenarioBuilder instance for chaining.
         """
         self.scenario.routes = routes
         return self
 
-    def add_route(self, route: Route) -> 'ScenarioBuilder':
+    def add_route(self, route: Route) -> ScenarioBuilder:
         """Append a Route to the Scenario's Routes collection.
 
         Args:
             route: Route to append.
 
-        Returns:
+        Returns
+        -------
             The same ScenarioBuilder instance for chaining.
         """
         if self.scenario.routes is None:
@@ -89,25 +90,27 @@ class ScenarioBuilder:
         self.scenario.routes.append(route)
         return self
 
-    def add_wagon(self, wagon: Wagon) -> 'ScenarioBuilder':
+    def add_wagon(self, wagon: Wagon) -> ScenarioBuilder:
         """Append a Wagon to the Scenario's wagon list.
 
         Args:
             wagon: Wagon to append.
 
-        Returns:
+        Returns
+        -------
             The same ScenarioBuilder instance for chaining.
         """
         self.scenario.wagons.append(wagon)
         return self
 
-    def add_wagons(self, wagons: List[Wagon]) -> 'ScenarioBuilder':
+    def add_wagons(self, wagons: list[Wagon]) -> ScenarioBuilder:
         """Extend the Scenario's wagon list with multiple wagons.
 
         Args:
             wagons: List of Wagon instances to add.
 
-        Returns:
+        Returns
+        -------
             The same ScenarioBuilder instance for chaining.
         """
         self.scenario.wagons.extend(wagons)
@@ -116,7 +119,8 @@ class ScenarioBuilder:
     def build(self) -> Scenario:
         """Return the constructed Scenario instance.
 
-        Returns:
+        Returns
+        -------
             The built Scenario.
         """
         return self.scenario

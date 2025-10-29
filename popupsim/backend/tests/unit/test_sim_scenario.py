@@ -1,6 +1,10 @@
-import sys
+"""Unit tests for Scenario and ScenarioBuilder.
+
+Simple pytest tests validating Scenario string output and builder behavior.
+"""
+
 from pathlib import Path
-from typing import List
+import sys
 
 import pytest
 
@@ -10,46 +14,130 @@ SRC: Path = ROOT / 'popupsim' / 'backend' / 'src'
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from simulation.scenario import Scenario, ScenarioBuilder  # type: ignore
+from simulation.scenario import Scenario, ScenarioBuilder  # type: ignore  # noqa: E402, I001
 
 
 class FakeRoute:
+    """Fake route used in tests.
+
+    Parameters
+    ----------
+    route_id : str
+        Route identifier.
+    """
+
     def __init__(self, route_id: str) -> None:
+        """Initialize FakeRoute.
+
+        Parameters
+        ----------
+        route_id : str
+            Route identifier.
+        """
         self.route_id: str = route_id
 
     def __repr__(self) -> str:  # pragma: no cover - tiny helper
+        """Return compact representation.
+
+        Returns
+        -------
+        str
+            Short textual representation.
+        """
         return f'<FakeRoute {self.route_id}>'
 
 
 class FakeWagon:
+    """Fake wagon used in tests.
+
+    Parameters
+    ----------
+    wagon_id : str
+        Wagon identifier.
+    """
+
     def __init__(self, wagon_id: str) -> None:
+        """Initialize FakeWagon.
+
+        Parameters
+        ----------
+        wagon_id : str
+            Wagon identifier.
+        """
         self.wagon_id: str = wagon_id
 
     def __repr__(self) -> str:  # pragma: no cover - tiny helper
+        """Return compact representation.
+
+        Returns
+        -------
+        str
+            Short textual representation.
+        """
         return f'<FakeWagon {self.wagon_id}>'
 
 
 class FakeRoutes:
+    """Minimal routes container used in tests.
+
+    Provides append and length introspection.
+    """
+
     def __init__(self) -> None:
-        self._routes: List[FakeRoute] = []
+        """Create empty FakeRoutes container."""
+        self._routes: list[FakeRoute] = []
 
     def append(self, route: FakeRoute) -> None:
+        """Append a route.
+
+        Parameters
+        ----------
+        route : FakeRoute
+            Route to append.
+        """
         self._routes.append(route)
 
     @property
     def length(self) -> int:
+        """Number of stored routes.
+
+        Returns
+        -------
+        int
+            Count of routes.
+        """
         return len(self._routes)
 
     def __len__(self) -> int:
+        """Sequence length.
+
+        Returns
+        -------
+        int
+            Count of routes.
+        """
         return len(self._routes)
 
 
 @pytest.mark.unit
 def test_scenario_str_with_routes_and_wagons() -> None:
+    """
+    Test Scenario string representation with routes and wagons.
+
+    Ensures that the string output of Scenario includes route and wagon information.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     routes: FakeRoutes = FakeRoutes()
     routes.append(FakeRoute('r1'))
     routes.append(FakeRoute('r2'))
-    wagons: List[FakeWagon] = [FakeWagon('w1')]
+    wagons: list[FakeWagon] = [FakeWagon('w1')]
 
     scenario: Scenario = Scenario(routes=routes, wagons=wagons)
     result: str = str(scenario)
@@ -63,6 +151,15 @@ def test_scenario_str_with_routes_and_wagons() -> None:
 
 @pytest.mark.unit
 def test_scenario_default_routes_and_wagons_are_empty() -> None:
+    """
+    Test that the Scenario class initializes with empty routes and wagons by default.
+
+    Notes
+    -----
+    - Verifies that the `routes` and `wagons` attributes of a newly created Scenario instance are empty lists.
+    - Ensures correct default behavior for Scenario initialization.
+    """
+    """Test that Scenario initializes with empty routes and wagons by default."""
     scenario: Scenario = Scenario()
     # default constructor currently sets routes to [] and wagons to []
     assert isinstance(scenario.routes, list)
@@ -72,6 +169,21 @@ def test_scenario_default_routes_and_wagons_are_empty() -> None:
 
 @pytest.mark.unit
 def test_scenario_builder_chain_and_modifications() -> None:
+    """
+    Test ScenarioBuilder chaining and modifications.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Verifies that routes and wagons are correctly added and referenced in the built Scenario.
+    """
     builder: ScenarioBuilder = ScenarioBuilder()
     # Prepare a FakeRoutes instance and some domain objects
     routes: FakeRoutes = FakeRoutes()
