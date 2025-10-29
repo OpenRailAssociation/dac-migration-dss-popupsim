@@ -17,7 +17,7 @@ from typing import Any
 import pandas as pd
 from pydantic import ValidationError
 
-from .model_routes import RoutesConfig
+from .model_routes import Routes
 from .model_scenario import ScenarioConfig
 from .model_track import TrackFunction
 from .model_track import WorkshopTrack
@@ -581,7 +581,7 @@ class ConfigurationService:
 
         routes_file_name = 'routes.csv'
         routes_file = config_dir / routes_file_name
-        routes_config = RoutesConfig(routes_file)
+        routes_config = Routes(routes_file)
         routes = routes_config.routes
 
         return workshop, routes
