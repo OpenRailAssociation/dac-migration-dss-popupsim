@@ -310,20 +310,22 @@ class ConfigurationValidator:
         if config.workshop is None:
             return issues  # Workshop validation already handles this case
 
-        # Collect track IDs
+        # Collect track IDs and function names
         track_ids = {t.id for t in config.workshop.tracks}
+        function_names = {t.function.value for t in config.workshop.tracks}
+        valid_identifiers = track_ids | function_names
 
         # Collect functions
         functions = {t.function for t in config.workshop.tracks}
 
         for route in config.routes or []:
-            # Track IDs exist?
-            for track_id in route.track_sequence:
-                if track_id not in track_ids:
+            # Track IDs or function names exist?
+            for track_identifier in route.track_sequence:
+                if track_identifier not in valid_identifiers:
                     issues.append(
                         ValidationIssue(
                             level=ValidationLevel.ERROR,
-                            message=f"Route {route.route_id}: Track '{track_id}' does not exist",
+                            message=f"Route {route.route_id}: Track '{track_identifier}' does not exist",
                             field=f'routes[{route.route_id}].track_sequence',
                             suggestion=f'Use one of the IDs: {", ".join(sorted(track_ids))}',
                         )
@@ -333,7 +335,7 @@ class ConfigurationValidator:
             # Get the function of the from_track
             from_track = next((t for t in config.workshop.tracks if t.id == route.from_track), None)
             if from_track and from_track.function not in functions:
-                function_names = [str(f) for f in functions]
+                func_names_list = [str(f) for f in functions]
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
@@ -342,14 +344,14 @@ class ConfigurationValidator:
                             f"has function '{from_track.function}' which does not exist"
                         ),
                         field=f'routes[{route.route_id}].from_track',
-                        suggestion=f'Use one of the functions: {", ".join(sorted(function_names))}',
+                        suggestion=f'Use one of the functions: {", ".join(sorted(func_names_list))}',
                     )
                 )
 
             # Get the function of the to_track
             to_track = next((t for t in config.workshop.tracks if t.id == route.to_track), None)
             if to_track and to_track.function not in functions:
-                function_names = [str(f) for f in functions]
+                func_names_list = [str(f) for f in functions]
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
@@ -358,7 +360,7 @@ class ConfigurationValidator:
                             f"has function '{to_track.function}' which does not exist"
                         ),
                         field=f'routes[{route.route_id}].to_track',
-                        suggestion=f'Use one of the functions: {", ".join(sorted(function_names))}',
+                        suggestion=f'Use one of the functions: {", ".join(sorted(func_names_list))}',
                     )
                 )
 

@@ -6,6 +6,11 @@ from typing import Optional
 import typer  # type: ignore[import-not-found] # pylint: disable=import-error
 from typing_extensions import Annotated
 
+from configuration.service import (  # type: ignore[import-not-found,import-untyped] # pylint: disable=import-error
+    ConfigurationError,
+    ConfigurationService,
+)
+
 APP_NAME = 'popupsim'
 
 app = typer.Typer(
@@ -15,7 +20,7 @@ app = typer.Typer(
 )
 
 
-def validate_scenario_path(scenario_path: Optional[Path]) -> Path | None:
+def validate_scenario_path(scenario_path: Optional[Path]) -> Path:
     """Validate that the scenario path is provided, exists, is a file, and is readable."""
     if scenario_path is None:
         typer.echo('Error: Scenario path is required but not provided')
@@ -36,7 +41,7 @@ def validate_scenario_path(scenario_path: Optional[Path]) -> Path | None:
     return scenario_path
 
 
-def validate_output_path(output_path: Optional[Path]) -> Path | None:
+def validate_output_path(output_path: Optional[Path]) -> Path:
     """Validate that the output path is provided, exists, is a directory, and is writable."""
     if output_path is None:
         typer.echo('Error: Output path is required but not provided')
@@ -97,9 +102,8 @@ def main(
     # Show help if no required parameters are provided
     if scenario_path is None and output_path is None:
         typer.echo('No required parameters provided. Showing help:\n')
-        ctx = typer.Context(app)
         typer.echo(ctx.get_help(), color=ctx.color)
-        raise typer.Exit(0)
+        raise typer.Exit(1)
 
     # Validate debug level
     if debug not in ['ERROR', 'WARNING', 'INFO', 'DEBUG']:
@@ -119,10 +123,35 @@ def main(
 
     typer.echo(f'✓ Debug level set to: {debug}')
 
+    # Load and validate scenario using ConfigurationService ---
+    try:
+        # Import here to avoid circular import at module level
+        service = ConfigurationService()
+        # scenario_path is guaranteed to be Path here (validated above)
+        if scenario_path is None:  # pragma: no cover
+            raise typer.Exit(1)
+        config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
+        typer.echo('\nScenario loaded and validated successfully.')
+        typer.echo(f'Scenario ID: {config.scenario_id}')
+        typer.echo(f'Start Date: {config.start_date}')
+        typer.echo(f'End Date: {config.end_date}')
+        typer.echo(f'Number of Trains: {len(config.train)}')
+        typer.echo(f'Number of Workshop Tracks: {len(config.workshop.tracks)}')
+        typer.echo(f'Number of Routes: {len(config.routes)}')
+        typer.echo('\nValidation Summary:')
+        validation_result.print_summary()
+    except ConfigurationError as e:
+        typer.echo(f'Configuration error: {e}')
+        raise typer.Exit(1) from e
+    except Exception as e:
+        typer.echo(f'Unexpected error: {e}')
+        raise typer.Exit(1) from e
+
     # Main application logic would go here
     typer.echo('\n🚀 Starting popupsim processing...')
     typer.echo('Application would start processing here...')
 
 
 if __name__ == '__main__':
+    # Run the Typer CLI app, but provide no arguments so Typer parses from sys.argv
     app()
