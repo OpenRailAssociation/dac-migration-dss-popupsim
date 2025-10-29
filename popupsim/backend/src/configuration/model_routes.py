@@ -7,7 +7,6 @@ validate them using the Route model, and make them available to the simulation.
 from collections.abc import Iterator
 import logging
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Union
 
 import pandas as pd
 
@@ -26,7 +25,7 @@ class Routes:
     to route information for the simulation.
     """
 
-    def __init__(self, routes_file: Optional[Union[str, Path]] = None, routes: Optional[List[Route]] = None) -> None:
+    def __init__(self, routes_file: str | Path | None = None, routes: list[Route] | None = None) -> None:
         """
         Initialize the routes configuration manager.
 
@@ -40,21 +39,22 @@ class Routes:
 
         if routes_file is None:
             self.routes: list[Route] = []  # type: ignore[no-redef]  # for now: suppress mypy no-redef false positive
-            self.routes_by_id: Dict[str, Route] = {}  # type: ignore[no-redef]
+            self.routes_by_id: dict[str, Route] = {}  # type: ignore[no-redef]
             return
 
         if routes_file:
             self.load_routes(routes_file)
             return
 
-    def load_routes(self, csv_path: Union[str, Path]) -> None:
+    def load_routes(self, csv_path: str | Path) -> None:
         """
         Load routes from a CSV file.
 
         Args:
             csv_path: Path to the CSV file containing route data
 
-        Raises:
+        Raises
+        ------
             FileNotFoundError: If the CSV file does not exist
             ValueError: If the CSV file contains invalid route data
         """
@@ -157,7 +157,8 @@ class Routes:
         Args:
             route: Route instance to add
 
-        Raises:
+        Raises
+        ------
             ValueError: If a route with the same route_id already exists
         """
         if route.route_id in self.routes_by_id:
