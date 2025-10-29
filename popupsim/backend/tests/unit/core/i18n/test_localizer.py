@@ -17,23 +17,23 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def empty_locales_dir() -> Generator[Path, None, None]:
+def empty_locales_dir() -> Generator[Path]:
     """Create an empty temporary locales directory."""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
 
 
 @pytest.fixture
-def test_locales_dir() -> Generator[Path, None, None]:
+def test_locales_dir() -> Generator[Path]:
     """Create a test locales directory without .mo files for basic testing."""
     with tempfile.TemporaryDirectory() as temp_dir:
         locales_dir = Path(temp_dir)
-        
+
         # Create German locale directory structure but no .mo files
         # This allows testing the localizer without actual translation files
         de_dir = locales_dir / 'de' / 'LC_MESSAGES'
         de_dir.mkdir(parents=True)
-            
+
         yield locales_dir
 
 

@@ -394,7 +394,8 @@ TRAIN001,2024-01-15,25:30,WAGON001,15.5,true,true"""
             config_service.load_train_schedule(invalid_time_csv)
 
         error_msg = str(exc_info.value)
-        assert 'arrival_time' in error_msg and 'HH:MM format' in error_msg
+        assert 'arrival_time' in error_msg
+        assert 'HH:MM format' in error_msg
 
     def test_load_train_schedule_csv_invalid_date_format(
         self, config_service: ConfigurationService, tmp_path: Path
@@ -409,7 +410,9 @@ TRAIN001,2024-13-45,08:30,WAGON001,15.5,true,true"""
             config_service.load_train_schedule(invalid_date_csv)
 
         # The actual error message for invalid date format
-        assert 'arrival_date' in str(exc_info.value) and 'YYYY-MM-DD format' in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert 'arrival_date' in error_msg
+        assert 'YYYY-MM-DD format' in error_msg
 
     def test_load_train_schedule_csv_duplicate_wagon_ids(
         self, config_service: ConfigurationService, tmp_path: Path
@@ -479,11 +482,15 @@ TRAIN001,2024-01-15,08:00,WAGON001_04,15.5,1,0"""
 
         # Verify boolean conversions - corrected expectations based on actual behavior
         wagons = train_arrivals[0].wagons
-        assert wagons[0].is_loaded is True and wagons[0].needs_retrofit is True
-        assert wagons[1].is_loaded is False and wagons[1].needs_retrofit is False
-        assert wagons[2].is_loaded is True and wagons[2].needs_retrofit is False
+        assert wagons[0].is_loaded is True
+        assert wagons[0].needs_retrofit is True
+        assert wagons[1].is_loaded is False
+        assert wagons[1].needs_retrofit is False
+        assert wagons[2].is_loaded is True
+        assert wagons[2].needs_retrofit is False
         # Note: 1 and 0 as strings are converted differently than expected
-        assert wagons[3].is_loaded is False and wagons[3].needs_retrofit is False
+        assert wagons[3].is_loaded is False
+        assert wagons[3].needs_retrofit is False
 
     def test_load_train_schedule_csv_missing_wagon_data(
         self, config_service: ConfigurationService, tmp_path: Path

@@ -76,7 +76,9 @@ class TestWorkshop:
         with pytest.raises(ValidationError) as exc_info:
             Workshop(tracks=tracks)
         # The validation catches this with the required functions message
-        assert 'required functions' in str(exc_info.value) and 'werkstattgleis' in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert 'required functions' in error_msg
+        assert 'werkstattgleis' in error_msg
 
     def test_workshop_validation_werkstattgleis_invalid_retrofit_time(self):
         """Test validation error when werkstattgleis has invalid retrofit_time_min."""
@@ -239,7 +241,9 @@ class TestWorkshop:
         with pytest.raises(ValidationError) as exc_info:
             Workshop(tracks=tracks)
 
-        assert 'required functions' in str(exc_info.value) and 'werkstattgleis' in str(exc_info.value)
+        error_msg = str(exc_info.value)
+        assert 'required functions' in error_msg
+        assert 'werkstattgleis' in error_msg
 
     def test_workshop_enhanced_retrofit_time_error_messages(self):
         """Test enhanced German error messages for retrofit time validation."""

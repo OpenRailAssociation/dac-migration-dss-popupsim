@@ -94,10 +94,14 @@ max-complexity = 10
 "tests/**/*.py" = [
     "S101",    # Allow use of assert in tests
     "PLR2004", # Allow magic values in tests (common in assertions)
+    "ANN201",  # Missing return type annotation for test methods (always None)
 ]
 "src/main.py" = [
     "D401",    # Allow descriptive docstrings in main entry point
     "TID251", # Allow relative imports in main entry point
+]
+"src/core/i18n/decorators.py" = [
+    "B010",    # Allow setattr for type safety with generic types
 ]
 
 [tool.ruff.lint.pylint]
