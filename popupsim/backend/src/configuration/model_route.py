@@ -7,7 +7,7 @@ and travel times.
 """
 
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -29,9 +29,8 @@ class Route(BaseModel):
 
     @model_validator(mode='before')
     @classmethod
-    def parse_track_sequence(cls, data: Union[Dict[str, Any], List[str], str]) -> Dict[str, Any]:
+    def parse_track_sequence(cls, data: dict[str, Any] | list[str] | str) -> dict[str, Any]:
         """Parse track_sequence from string to list if needed."""
-
         # If data is already a list, wrap it in a dict
         if isinstance(data, list):
             return {'track_sequence': data}

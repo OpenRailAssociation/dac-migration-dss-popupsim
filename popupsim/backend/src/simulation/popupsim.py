@@ -11,7 +11,7 @@ remains agnostic of the underlying simulation framework.
 """
 
 # pylint: disable=relative-beyond-top-level,E0402  # for now: make linters pass until install/editable is used
-from typing import Any, Optional
+from typing import Any
 
 # pylint: disable=relative-beyond-top-level,E0402  # for now: make linters pass until install/editable is used
 from .sim_adapter import SimulationAdapter
@@ -39,7 +39,7 @@ class PopupSim:
         self.adapter: SimulationAdapter = adapter
         self.scenario: Any = scenario
 
-    def run(self, until: Optional[float] = None) -> None:
+    def run(self, until: float | None = None) -> None:
         """Run the simulation until an optional time.
 
         The method delegates execution to the configured SimulationAdapter.

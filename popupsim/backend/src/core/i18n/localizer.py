@@ -24,7 +24,7 @@ from pathlib import Path
 import threading
 from typing import Any
 
-from babel.support import Translations
+from babel.support import Translations  # type: ignore[import-not-found]  # pylint: disable=import-error
 
 _thread_local = threading.local()
 _global_config: dict[str, Any] = {}

@@ -49,8 +49,9 @@ class SimulationAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def run(self, until: Optional[float] = None) -> Any:
-        """Run the simulation
+    def run(self, until: float | None = None) -> Any:
+        """Run the simulation.
+
         Parameters
         ----------
         until : float | None, optional
@@ -64,7 +65,7 @@ class SimulationAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:
+    def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule and run a domain callable in the simulation context.
 
         Parameters
@@ -153,11 +154,9 @@ class SimPyAdapter(SimulationAdapter):
         Any
             Result from SimPy environment run.
         """
-        if until is None:
-            until = self.run_until
         return self._env.run(until)
 
-    def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:
+    def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule a callable in the SimPy environment.
 
         Accepts three types of callables:
@@ -169,7 +168,7 @@ class SimPyAdapter(SimulationAdapter):
 
         Parameters
         ----------
-        fn : Union[Callable[..., Any], Generator[Any, Any, Any]]
+        fn : Callable[..., Any]
             Callable to execute (generator function, regular function, or generator object).
         *args : Any
             Positional arguments to pass to the callable.
@@ -192,7 +191,7 @@ class SimPyAdapter(SimulationAdapter):
             return self._env.process(fn(*args, **kwargs))
 
         # Otherwise fn is a normal callable; wrap it in a tiny generator so SimPy can schedule it
-        def _wrap() -> Generator[None, None, None]:
+        def _wrap() -> Generator[None]:
             fn(*args, **kwargs)
             yield from ()
 
