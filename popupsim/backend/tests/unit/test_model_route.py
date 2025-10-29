@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.configuration.model_route import Route
+from configuration.model_route import Route
 
 
 @pytest.mark.unit
