@@ -1,15 +1,12 @@
 """PopUp-Sim main entry point for freight rail DAC migration simulation tool."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Annotated
 
-import typer  # type: ignore[import-not-found] # pylint: disable=import-error
-from typing_extensions import Annotated
+import typer
 
-from configuration.service import (  # type: ignore[import-not-found,import-untyped] # pylint: disable=import-error
-    ConfigurationError,
-    ConfigurationService,
-)
+from configuration.service import ConfigurationError
+from configuration.service import ConfigurationService
 
 APP_NAME = 'popupsim'
 
@@ -20,8 +17,24 @@ app = typer.Typer(
 )
 
 
-def validate_scenario_path(scenario_path: Optional[Path]) -> Path:
-    """Validate that the scenario path is provided, exists, is a file, and is readable."""
+def validate_scenario_path(scenario_path: Path | None) -> Path:
+    """Validate that the scenario path is provided, exists, is a file, and is readable.
+
+    Parameters
+    ----------
+    scenario_path : Path | None
+        Path to the scenario file to validate.
+
+    Returns
+    -------
+    Path
+        Validated scenario path.
+
+    Raises
+    ------
+    typer.Exit
+        If validation fails.
+    """
     if scenario_path is None:
         typer.echo('Error: Scenario path is required but not provided')
         raise typer.Exit(1)
@@ -41,8 +54,24 @@ def validate_scenario_path(scenario_path: Optional[Path]) -> Path:
     return scenario_path
 
 
-def validate_output_path(output_path: Optional[Path]) -> Path:
-    """Validate that the output path is provided, exists, is a directory, and is writable."""
+def validate_output_path(output_path: Path | None) -> Path:
+    """Validate that the output path is provided, exists, is a directory, and is writable.
+
+    Parameters
+    ----------
+    output_path : Path | None
+        Path to the output directory to validate.
+
+    Returns
+    -------
+    Path
+        Validated output path.
+
+    Raises
+    ------
+    typer.Exit
+        If validation fails.
+    """
     if output_path is None:
         typer.echo('Error: Output path is required but not provided')
         raise typer.Exit(1)
@@ -67,13 +96,13 @@ def validate_output_path(output_path: Optional[Path]) -> Path:
 def main(
     ctx: typer.Context,
     scenario_path: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             '--scenarioPath', help='Path to the scenario file (required).', rich_help_panel='Required Parameters'
         ),
     ] = None,
     output_path: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             '--outputPath', help='Path to the output directory (required).', rich_help_panel='Required Parameters'
         ),
@@ -88,17 +117,29 @@ def main(
         ),
     ] = 'INFO',
 ) -> None:
-    """
-    Main entry point for the popupsim application.
+    """Main entry point for the popupsim application.
 
     This tool performs freight rail DAC migration simulation processing.
     Both scenario file and output directory paths are required.
 
-    Examples:
-        popupsim --scenarioPath ./scenario.json --outputPath ./output
-        popupsim --scenarioPath ./scenario.json --outputPath ./output --verbose --debug DEBUG
-    """
+    Parameters
+    ----------
+    ctx : typer.Context
+        Typer context for help display.
+    scenario_path : Path | None, optional
+        Path to the scenario file, by default None.
+    output_path : Path | None, optional
+        Path to the output directory, by default None.
+    verbose : bool, optional
+        Enable verbose output, by default False.
+    debug : str, optional
+        Debug level (ERROR, WARNING, INFO, DEBUG), by default 'INFO'.
 
+    Examples
+    --------
+    >>> popupsim --scenarioPath ./scenario.json --outputPath ./output
+    >>> popupsim --scenarioPath ./scenario.json --outputPath ./output --verbose --debug DEBUG
+    """
     # Show help if no required parameters are provided
     if scenario_path is None and output_path is None:
         typer.echo('No required parameters provided. Showing help:\n')
@@ -135,9 +176,9 @@ def main(
         typer.echo(f'Scenario ID: {config.scenario_id}')
         typer.echo(f'Start Date: {config.start_date}')
         typer.echo(f'End Date: {config.end_date}')
-        typer.echo(f'Number of Trains: {len(config.train)}')
-        typer.echo(f'Number of Workshop Tracks: {len(config.workshop.tracks)}')
-        typer.echo(f'Number of Routes: {len(config.routes)}')
+        typer.echo(f'Number of Trains: {len(config.train) if config.train else 0}')
+        typer.echo(f'Number of Workshop Tracks: {len(config.workshop.tracks) if config.workshop else 0}')
+        typer.echo(f'Number of Routes: {len(config.routes) if config.routes else 0}')
         typer.echo('\nValidation Summary:')
         validation_result.print_summary()
     except ConfigurationError as e:

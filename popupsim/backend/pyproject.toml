@@ -40,8 +40,51 @@ quote-style = "single"
 indent-style = "space"
 docstring-code-format = true
 
+[tool.ruff.lint.isort]
+force-single-line = true
+force-sort-within-sections = true
+known-first-party = ["configuration"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
 [tool.ruff.lint]
-select = ["F", "B", "S", "C4", "DTZ", "ARG", "I", "SIM", "N", "C90", "PLR09", "RUF"]
+select = [
+"A",     # flake8-builtins
+"ANN",   # flake8-annotations
+"ARG",   # flake8-unused-arguments
+"B",     # flake8-bugbear
+"C4",    # flake8-comprehensions
+"C90",   # mccabe complexity
+"D",     # pydocstyle
+"DTZ",   # flake8-datetimez
+"E",     # pycodestyle errors
+"F",     # pyflakes
+"FIX",   # flake8-fixme
+"G",     # flake8-logging-format
+"I",     # isort
+"N",     # pep8-naming
+"NPY",   # numpy-specific rules
+"PLR09", # pylint refactor rules
+"PT",    # flake8-pytest-style
+"Q",     # flake8-quotes
+"RUF",   # ruff-specific rules
+"S",     # flake8-bandit
+"SIM",   # flake8-simplify
+"TID251", # flake8-tidy-imports
+"UP",    # pyupgrade
+]
+ignore = [
+"D203",   # incompatible with D211
+"D213",   # incompatible with D212
+"Q000",   # incompatible with single quote format
+"Q003",   # incompatible with single quote format
+"ANN001", # missing type annotation for function argument (Pydantic validators)
+"ANN204", # missing return type annotation for __init__ (always None)
+"ANN206", # missing return type annotation for classmethod (Pydantic validators)
+"ANN401", # dynamically typed expressions (pandas/Any types)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -50,7 +93,10 @@ max-complexity = 10
 "tests/**/*.py" = [
     "S101",    # Allow use of assert in tests
     "PLR2004", # Allow magic values in tests (common in assertions)
-    "E501",    # Allow long lines in test assertions
+]
+"src/main.py" = [
+    "D401",    # Allow descriptive docstrings in main entry point
+    "TID251", # Allow relative imports in main entry point
 ]
 
 [tool.ruff.lint.pylint]
@@ -71,24 +117,33 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 files = ["src", "tests"]
-disable_error_code = ["annotation-unchecked"]
 namespace_packages = true
 explicit_package_bases = true
 show_column_numbers = true
 show_error_codes = true
 plugins = ['pydantic.mypy']
 
+
+# Third-party libraries without stubs
 [[tool.mypy.overrides]]
 module = ["typer.*", "simpy.*", "matplotlib.*", "pytest.*"]
 ignore_missing_imports = true
+disallow_untyped_defs = false
 
+# Libraries with stubs
 [[tool.mypy.overrides]]
 module = ["pandas.*", "pydantic.*"]
 ignore_missing_imports = false
 
+# Relaxed checking for tests
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 ignore_missing_imports = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+warn_return_any = false
+disable_error_code = ["var-annotated", "call-arg", "union-attr", "assignment"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

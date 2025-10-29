@@ -1,5 +1,4 @@
-"""
-Models and validation logic for train arrivals in train simulations.
+"""Models and validation logic for train arrivals in train simulations.
 
 This module provides the data models and validation rules for handling
 train arrivals within the simulation. It includes functionality to manage
@@ -7,12 +6,16 @@ arrival dates, times, and associated wagons, ensuring data integrity
 through validation methods.
 """
 
+from datetime import UTC
+from datetime import date
+from datetime import datetime
+from datetime import time
 import logging
 import re
-from datetime import date, datetime, time, timezone
-from typing import List
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import model_validator
 
 from .model_wagon import Wagon
 
@@ -26,24 +29,57 @@ class Train(BaseModel):
     train_id: str = Field(description='Unique identifier for the train')
     arrival_date: date = Field(description='Date of arrival')
     arrival_time: time = Field(description='Time of arrival')
-    wagons: List[Wagon] = Field(description='List of wagons in the train')
+    wagons: list[Wagon] = Field(description='List of wagons in the train')
 
     @property
     def arrival_datetime(self) -> datetime:
-        """Combined arrival date and time."""
-        return datetime.combine(self.arrival_date, self.arrival_time, tzinfo=timezone.utc)
+        """Combined arrival date and time.
+
+        Returns
+        -------
+        datetime
+            Combined arrival date and time with UTC timezone.
+        """
+        return datetime.combine(self.arrival_date, self.arrival_time, tzinfo=UTC)
 
     @model_validator(mode='after')
     def validate_wagons(self) -> 'Train':
-        """Ensure train has at least one wagon."""
+        """Ensure train has at least one wagon.
+
+        Returns
+        -------
+        Train
+            Validated train instance.
+
+        Raises
+        ------
+        ValueError
+            If train has no wagons.
+        """
         if not self.wagons:
             raise ValueError(f'Train {self.train_id} must have at least one wagon')
         return self
 
     @model_validator(mode='before')
     @classmethod
-    def validate_and_parse_arrival_time(cls, values) -> dict:
-        """Parse and validate arrival_time field, ensuring correct format and type."""
+    def validate_and_parse_arrival_time(cls, values: dict) -> dict:
+        """Parse and validate arrival_time field, ensuring correct format and type.
+
+        Parameters
+        ----------
+        values : dict
+            Raw field values from validation.
+
+        Returns
+        -------
+        dict
+            Processed values with parsed arrival_time.
+
+        Raises
+        ------
+        ValueError
+            If arrival_time format is invalid.
+        """
         data = dict(values)
         arrival_time_value = data.get('arrival_time')
 

@@ -1,5 +1,4 @@
-"""
-Module defining track configuration models and validation logic.
+"""Module defining track configuration models and validation logic.
 
 Key Features:
 - **Track Configuration**: Defines the structure of workshop tracks with properties like capacity and function.
@@ -13,14 +12,16 @@ Key Features:
 """
 
 from enum import Enum
-from typing import Annotated, List, Self
+from typing import Annotated
+from typing import Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import model_validator
 
 
 class TrackFunction(Enum):
-    """
-    Enumeration of track functions in the workshop.
+    """Enumeration of track functions in the workshop.
 
     Each track serves a specific purpose in the workshop operations.
     """
@@ -34,8 +35,7 @@ class TrackFunction(Enum):
 
 
 class WorkshopTrack(BaseModel):
-    """
-    Configuration model for individual workshop tracks.
+    """Configuration model for individual workshop tracks.
 
     Defines track properties including ID, function, capacity, and retrofit timing.
     """
@@ -48,7 +48,7 @@ class WorkshopTrack(BaseModel):
 
     capacity: int = Field(gt=0, description='Maximum number of wagons/trains the track can hold')
 
-    current_wagons: List[Annotated[int, Field(ge=0)]] = Field(
+    current_wagons: list[Annotated[int, Field(ge=0)]] = Field(
         default=[], description='List of wagon IDs currently on the track'
     )
 
@@ -56,8 +56,7 @@ class WorkshopTrack(BaseModel):
 
     @model_validator(mode='after')
     def validate_retrofit_time_by_function(self) -> Self:
-        """
-        Validate retrofit time based on track function.
+        """Validate retrofit time based on track function.
 
         Business Rules:
         - Werkstattgleis tracks must have retrofit_time_min > 0 (actual retrofit work)
@@ -73,14 +72,15 @@ class WorkshopTrack(BaseModel):
         return self
 
     def is_available(self) -> bool:
-        """
-        Determine if the track has available capacity for additional wagons/trains.
+        """Determine if the track has available capacity for additional wagons/trains.
 
         This method checks whether the current number of wagons on the track
         is less than the track's maximum capacity. Uses len() of the wagon list
         to determine current occupancy.
 
-        Returns:
+        Returns
+        -------
             bool: True if the track has available capacity, False otherwise.
+
         """
         return len(self.current_wagons) < self.capacity

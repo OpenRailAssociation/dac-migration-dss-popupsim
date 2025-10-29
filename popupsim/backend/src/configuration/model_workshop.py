@@ -1,5 +1,4 @@
-"""
-Module defining the Workshop model and its validation logic.
+"""Module defining the Workshop model and its validation logic.
 
 Key Features:
 - **Workshop Configuration**: Defines the structure of the workshop, including tracks and their properties.
@@ -12,39 +11,72 @@ Key Features:
 """
 
 import logging
-from typing import List
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import field_validator
 
-from .model_track import TrackFunction, WorkshopTrack
+from .model_track import TrackFunction
+from .model_track import WorkshopTrack
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
 class Workshop(BaseModel):
-    """
-    Model representing the workshop configuration.
+    """Model representing the workshop configuration.
 
     Contains all available tracks for train processing.
     """
 
-    tracks: List[WorkshopTrack] = Field(min_length=1, description='List of available tracks in the workshop')
+    tracks: list[WorkshopTrack] = Field(min_length=1, description='List of available tracks in the workshop')
 
     @field_validator('tracks')
     @classmethod
-    def validate_unique_track_ids(cls, v: List[WorkshopTrack]) -> List[WorkshopTrack]:
-        """Ensure all track IDs are unique."""
+    def validate_unique_track_ids(cls, v: list[WorkshopTrack]) -> list[WorkshopTrack]:
+        """Ensure all track IDs are unique.
+
+        Parameters
+        ----------
+        v : list[WorkshopTrack]
+            List of workshop tracks to validate.
+
+        Returns
+        -------
+        list[WorkshopTrack]
+            Validated list of tracks.
+
+        Raises
+        ------
+        ValueError
+            If duplicate track IDs are found.
+        """
         track_ids = [track.id for track in v]
         if len(track_ids) != len(set(track_ids)):
-            duplicates = [id for id in track_ids if track_ids.count(id) > 1]
+            duplicates = [track_id for track_id in track_ids if track_ids.count(track_id) > 1]
             raise ValueError(f'Duplicate track IDs found: {list(set(duplicates))}')
         return v
 
     @field_validator('tracks')
     @classmethod
-    def validate_track_functions(cls, v: List[WorkshopTrack]) -> List[WorkshopTrack]:
-        """Validate track functions for workshop operation requirements."""
+    def validate_track_functions(cls, v: list[WorkshopTrack]) -> list[WorkshopTrack]:
+        """Validate track functions for workshop operation requirements.
+
+        Parameters
+        ----------
+        v : list[WorkshopTrack]
+            List of workshop tracks to validate.
+
+        Returns
+        -------
+        list[WorkshopTrack]
+            Validated list of tracks.
+
+        Raises
+        ------
+        ValueError
+            If required functions are missing or retrofit times are invalid.
+        """
         # Get all functions present in the workshop
         functions_present = {track.function for track in v}
 
@@ -75,8 +107,24 @@ class Workshop(BaseModel):
 
     @field_validator('tracks')
     @classmethod
-    def validate_workshop_capacity(cls, v: List[WorkshopTrack]) -> List[WorkshopTrack]:
-        """Validate workshop capacity and configuration."""
+    def validate_workshop_capacity(cls, v: list[WorkshopTrack]) -> list[WorkshopTrack]:
+        """Validate workshop capacity and configuration.
+
+        Parameters
+        ----------
+        v : list[WorkshopTrack]
+            List of workshop tracks to validate.
+
+        Returns
+        -------
+        list[WorkshopTrack]
+            Validated list of tracks.
+
+        Raises
+        ------
+        ValueError
+            If feeder/exit tracks are unbalanced.
+        """
         # Calculate total capacity by function
         function_capacities = {}
         for track in v:
@@ -103,10 +151,14 @@ class Workshop(BaseModel):
         return v
 
     def get_werkstatt_throughput_info(self) -> dict:
-        """
-        Calculate and return werkstatt throughput information.
+        """Calculate and return werkstatt throughput information.
 
-        Returns dictionary with capacity metrics for external validation use.
+        Returns
+        -------
+        dict
+            Dictionary with capacity metrics including total_capacity,
+            avg_retrofit_time_min, max_throughput_per_day, and werkstatt_track_count.
+            Returns error message if no werkstattgleis tracks found.
         """
         werkstatt_tracks = [track for track in self.tracks if track.function == TrackFunction.WERKSTATTGLEIS]
 
@@ -124,11 +176,18 @@ class Workshop(BaseModel):
             'werkstatt_track_count': len(werkstatt_tracks),
         }
 
-    def validate_capacity_utilization(self, wagons_needing_retrofit_per_day: int) -> List[str]:
-        """
-        Validate capacity utilization against expected workload.
+    def validate_capacity_utilization(self, wagons_needing_retrofit_per_day: int) -> list[str]:
+        """Validate capacity utilization against expected workload.
 
-        Returns list of validation messages (warnings/errors).
+        Parameters
+        ----------
+        wagons_needing_retrofit_per_day : int
+            Expected number of wagons requiring retrofit per day.
+
+        Returns
+        -------
+        list[str]
+            List of validation messages (INFO/WARNING/ERROR) about capacity utilization.
         """
         throughput_info = self.get_werkstatt_throughput_info()
 

@@ -1,5 +1,4 @@
-"""
-Models and validation logic for railway route configurations.
+"""Models and validation logic for railway route configurations.
 
 This module provides data models and validation rules for handling
 railway routes within the simulation. It includes functionality to manage
@@ -8,9 +7,10 @@ and travel times.
 """
 
 import logging
-from typing import List
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import model_validator
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -22,14 +22,25 @@ class Route(BaseModel):
     route_id: str = Field(description='Unique identifier for the route')
     from_track: str = Field(description='Track ID where the route starts')
     to_track: str = Field(description='Track ID where the route ends')
-    track_sequence: List[str] = Field(description='Sequence of tracks forming the complete route')
+    track_sequence: list[str] = Field(description='Sequence of tracks forming the complete route')
     distance_m: float = Field(gt=0, description='Total distance of the route in meters')
     time_min: int = Field(gt=0, description='Time required to travel the route in minutes')
 
     @model_validator(mode='before')
     @classmethod
-    def parse_track_sequence(cls, values):
-        """Parse track_sequence from string to list if needed."""
+    def parse_track_sequence(cls, values: dict) -> dict:
+        """Parse track_sequence from string to list if needed.
+
+        Parameters
+        ----------
+        values : dict
+            Raw field values from validation.
+
+        Returns
+        -------
+        dict
+            Processed values with parsed track_sequence.
+        """
         data = dict(values)
         track_sequence = data.get('track_sequence')
 
@@ -47,7 +58,18 @@ class Route(BaseModel):
 
     @model_validator(mode='after')
     def validate_route(self) -> 'Route':
-        """Validate route integrity."""
+        """Validate route integrity.
+
+        Returns
+        -------
+        Route
+            Validated route instance.
+
+        Raises
+        ------
+        ValueError
+            If route validation fails.
+        """
         # Ensure track_sequence contains at least from_track and to_track
         first_track = self.track_sequence[0] if self.track_sequence else None
         last_track = self.track_sequence[-1] if self.track_sequence else None

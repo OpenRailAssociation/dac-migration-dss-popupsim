@@ -7,10 +7,11 @@ and error handling for workshop track configurations.
 
 from pathlib import Path
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
-from configuration.model_track import TrackFunction, WorkshopTrack
+from configuration.model_track import TrackFunction
+from configuration.model_track import WorkshopTrack
 
 
 class TestWorkshopTrack:
@@ -387,7 +388,7 @@ class TestWorkshopTrack:
         csv_file_path = Path(__file__).parent.parent / 'fixtures' / 'config' / 'test_workshop_tracks.csv'
 
         # Read CSV file
-        with open(csv_file_path, 'r') as f:
+        with open(csv_file_path) as f:
             csv_content = f.read()
 
         # Parse CSV manually (simulating pandas behavior)

@@ -5,10 +5,11 @@ Tests the Workshop model validation logic, track collection management,
 duplicate track ID validation, and TrackFunction validation for workshop configurations.
 """
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
-from src.configuration.model_track import TrackFunction, WorkshopTrack
+from src.configuration.model_track import TrackFunction
+from src.configuration.model_track import WorkshopTrack
 from src.configuration.model_workshop import Workshop
 
 

@@ -9,11 +9,12 @@ This module tests the ConfigurationService class which handles:
 - Comprehensive error handling and logging for configuration issues
 """
 
+from datetime import date
+from datetime import time
 import json
-import tempfile
-from datetime import date, time
 from pathlib import Path
-from typing import Any, Dict
+import tempfile
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -21,7 +22,8 @@ import pytest
 from configuration.model_track import TrackFunction
 from configuration.model_wagon import Wagon
 from configuration.model_workshop import Workshop
-from configuration.service import ConfigurationError, ConfigurationService
+from configuration.service import ConfigurationError
+from configuration.service import ConfigurationService
 
 
 class TestConfigurationService:
@@ -38,7 +40,7 @@ class TestConfigurationService:
         return Path(__file__).parent.parent / 'fixtures' / 'config'
 
     @pytest.fixture
-    def scenario_data(self) -> Dict[str, Any]:
+    def scenario_data(self) -> dict[str, Any]:
         """Sample scenario configuration data."""
         return {
             'scenario_id': 'scenario_001',

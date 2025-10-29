@@ -1,16 +1,17 @@
-"""
-Models and validation logic for train simulation configuration and arrivals.
+"""Models and validation logic for train simulation configuration and arrivals.
 
 This module defines the data models and validation logic for configuring
 train simulation scenarios. It includes validation for scenario parameters
 such as date ranges, random seeds, workshop configurations, and file references.
 """
 
-import logging
 from datetime import date
-from typing import List, Optional
+import logging
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import field_validator
+from pydantic import model_validator
 
 from .model_route import Route
 from .model_train import Train
@@ -21,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class ScenarioConfig(BaseModel):
-    """
-    Configuration model for simulation scenarios.
+    """Configuration model for simulation scenarios.
 
     Validates scenario parameters including date ranges, random seeds,
     workshop configuration, and required file references.
@@ -33,13 +33,13 @@ class ScenarioConfig(BaseModel):
     )
     start_date: date = Field(description='Simulation start date')
     end_date: date = Field(description='Simulation end date')
-    random_seed: Optional[int] = Field(default=None, ge=0, description='Random seed for reproducible simulations')
-    workshop: Optional[Workshop] = Field(default=None, description='Workshop configuration with available tracks')
-    train_schedule_file: Optional[str] = Field(
+    random_seed: int | None = Field(default=None, ge=0, description='Random seed for reproducible simulations')
+    workshop: Workshop | None = Field(default=None, description='Workshop configuration with available tracks')
+    train_schedule_file: str | None = Field(
         pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to the train schedule file', min_length=1, max_length=50
     )
-    train: Optional[List[Train]] = Field(default=None, description='Train configuration')
-    routes: Optional[List[Route]] = Field(default=None, description='Route configuration')
+    train: list[Train] | None = Field(default=None, description='Train configuration')
+    routes: list[Route] | None = Field(default=None, description='Route configuration')
 
     @field_validator('train_schedule_file')
     @classmethod

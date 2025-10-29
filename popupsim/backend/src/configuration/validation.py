@@ -1,5 +1,4 @@
-"""
-Configuration validation module for train simulation scenarios.
+"""Configuration validation module for train simulation scenarios.
 
 This module provides validation logic for scenario configurations, including
 workshop tracks, capacity validation, route validation, train schedule validation,
@@ -7,7 +6,8 @@ and simulation duration checks. It ensures that loaded configurations are
 logically consistent and meet business requirements.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from enum import Enum
 
 from .model_scenario import ScenarioConfig
@@ -15,7 +15,7 @@ from .model_track import TrackFunction
 
 
 class ValidationLevel(Enum):
-    """Enumeration representing the severity level of a validation message."""
+    """Severity level of a validation message."""
 
     ERROR = 'ERROR'  # Indicates a critical issue; simulation cannot start
     WARNING = 'WARNING'  # Indicates a non-critical issue; simulation can start but may be suboptimal
@@ -24,14 +24,15 @@ class ValidationLevel(Enum):
 
 @dataclass
 class ValidationIssue:
-    """
-    Represents a single validation issue encountered during configuration validation.
+    """Single validation issue encountered during configuration validation.
 
-    Attributes:
+    Attributes
+    ----------
         level (ValidationLevel): The severity level of the issue.
         message (str): A descriptive message explaining the issue.
         field (str | None): The specific field affected by the issue, if applicable.
         suggestion (str | None): A suggested resolution for the issue, if available.
+
     """
 
     level: ValidationLevel
@@ -40,12 +41,13 @@ class ValidationIssue:
     suggestion: str | None = None
 
     def __str__(self) -> str:
-        """
-        Returns a formatted string representation of the validation issue.
+        """Return a formatted string representation of the validation issue.
 
-        Returns:
-            str: A string describing the issue, including its severity, message,
-                 affected field (if any), and suggestion (if any).
+        Returns
+        -------
+        str
+            A string describing the issue, including its severity, message,
+            affected field (if any), and suggestion (if any).
         """
         result = f'[{self.level.value}] {self.message}'
         if self.field:
@@ -57,57 +59,63 @@ class ValidationIssue:
 
 @dataclass
 class ValidationResult:
-    """
-    Represents the result of a configuration validation process.
+    """Result of a configuration validation process.
 
-    Attributes:
+    Attributes
+    ----------
         is_valid (bool): Indicates whether the configuration is valid.
         issues (list[ValidationIssue]): A list of validation issues encountered.
+
     """
 
     is_valid: bool
     issues: list[ValidationIssue] = field(default_factory=list)
 
     def has_errors(self) -> bool:
-        """
-        Checks if there are any validation issues with the ERROR severity level.
+        """Check if there are any validation issues with the ERROR severity level.
 
-        Returns:
-            bool: True if there are ERROR-level issues, False otherwise.
+        Returns
+        -------
+        bool
+            True if there are ERROR-level issues, False otherwise.
         """
         return any(i.level == ValidationLevel.ERROR for i in self.issues)
 
     def has_warnings(self) -> bool:
-        """
-        Checks if there are any validation issues with the WARNING severity level.
+        """Check if there are any validation issues with the WARNING severity level.
 
-        Returns:
-            bool: True if there are WARNING-level issues, False otherwise.
+        Returns
+        -------
+        bool
+            True if there are WARNING-level issues, False otherwise.
         """
         return any(i.level == ValidationLevel.WARNING for i in self.issues)
 
     def get_errors(self) -> list[ValidationIssue]:
-        """
-        Retrieves all validation issues with the ERROR severity level.
+        """Retrieve all validation issues with the ERROR severity level.
 
-        Returns:
-            list[ValidationIssue]: A list of ERROR-level validation issues.
+        Returns
+        -------
+        list[ValidationIssue]
+            A list of ERROR-level validation issues.
         """
         return [i for i in self.issues if i.level == ValidationLevel.ERROR]
 
     def get_warnings(self) -> list[ValidationIssue]:
-        """
-        Retrieves all validation issues with the WARNING severity level.
+        """Retrieve all validation issues with the WARNING severity level.
 
-        Returns:
-            list[ValidationIssue]: A list of WARNING-level validation issues.
+        Returns
+        -------
+        list[ValidationIssue]
+            A list of WARNING-level validation issues.
         """
         return [i for i in self.issues if i.level == ValidationLevel.WARNING]
 
     def print_summary(self) -> None:
-        """
-        Prints a formatted summary of the validation results, including errors and warnings.
+        """Print a formatted summary of the validation results, including errors and warnings.
 
+        Notes
+        -----
         If there are errors, they are displayed first. Warnings are displayed next.
         If no issues are found, a success message is printed.
         """
@@ -127,9 +135,7 @@ class ValidationResult:
 
 # pylint: disable=too-few-public-methods
 class ConfigurationValidator:
-    """
-    Validates loaded configurations for logical consistency
-    and business rules.
+    """Validate configurations for logical consistency and business rules.
 
     Checks:
     - Cross-field validation (capacity vs. arrival rate)
@@ -139,14 +145,17 @@ class ConfigurationValidator:
     """
 
     def validate(self, config: ScenarioConfig) -> ValidationResult:
-        """
-        Performs all validations and returns result.
+        """Perform all validations and return result.
 
-        Args:
-            config: Loaded scenario configuration
+        Parameters
+        ----------
+        config : ScenarioConfig
+            Loaded scenario configuration.
 
-        Returns:
-            ValidationResult with all found issues
+        Returns
+        -------
+        ValidationResult
+            Validation result with all found issues.
         """
         issues: list[ValidationIssue] = []
 
@@ -163,8 +172,7 @@ class ConfigurationValidator:
         return ValidationResult(is_valid=is_valid, issues=issues)
 
     def _validate_workshop_tracks(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """
-        Validates workshop tracks.
+        """Validate workshop tracks.
 
         Checks:
         - At least one workshop track available
@@ -229,8 +237,7 @@ class ConfigurationValidator:
         return issues
 
     def _validate_capacity(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """
-        Validates whether workshop capacity is sufficient for train arrivals.
+        """Validate whether workshop capacity is sufficient for train arrivals.
 
         Calculates theoretical throughput and compares with arrival rate.
         """
@@ -295,8 +302,7 @@ class ConfigurationValidator:
         return issues
 
     def _validate_routes(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """
-        Validates routes.
+        """Validate routes.
 
         Checks:
         - Track IDs in track_sequence exist
@@ -377,8 +383,7 @@ class ConfigurationValidator:
         return issues
 
     def _validate_train_schedule(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """
-        Validates train schedule.
+        """Validate train schedule.
 
         Checks:
         - Wagon IDs are unique
@@ -420,9 +425,7 @@ class ConfigurationValidator:
         return issues
 
     def _validate_simulation_duration(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """
-        Validates whether all trains arrive within simulation time.
-        """
+        """Validate whether all trains arrive within simulation time."""
         issues: list[ValidationIssue] = []
 
         sim_start = config.start_date

@@ -5,15 +5,19 @@ Tests the Train model validation logic, time parsing,
 wagon validation, and datetime combination functionality.
 """
 
-from datetime import date, datetime, time, timezone
+from datetime import UTC
+from datetime import date
+from datetime import datetime
+from datetime import time
 from pathlib import Path
 
-import pytest
 from pydantic import ValidationError
+import pytest
 
 from configuration.model_train import Train
 from configuration.model_wagon import Wagon
-from configuration.service import ConfigurationError, ConfigurationService
+from configuration.service import ConfigurationError
+from configuration.service import ConfigurationService
 
 
 class TestTrain:
@@ -40,7 +44,7 @@ class TestTrain:
 
         train = Train(train_id='TRAIN001', arrival_date=date(2024, 1, 15), arrival_time=time(14, 30, 45), wagons=wagons)
 
-        expected_datetime = datetime(2024, 1, 15, 14, 30, 45, tzinfo=timezone.utc)
+        expected_datetime = datetime(2024, 1, 15, 14, 30, 45, tzinfo=UTC)
         assert train.arrival_datetime == expected_datetime
 
     def test_train_arrival_time_string_parsing_valid_formats(self) -> None:
@@ -103,7 +107,7 @@ class TestTrain:
             14.30,  # Float
             [],  # List
             {},  # Dict
-            datetime.now(tz=timezone.utc),  # DateTime object
+            datetime.now(tz=UTC),  # DateTime object
         ]
 
         for time_val in invalid_time_values:
@@ -282,7 +286,7 @@ class TestTrain:
         )
 
         assert maint_train.train_id == 'MAINT_SPECIAL'
-        assert maint_train.arrival_datetime == datetime(2024, 1, 16, 23, 45, tzinfo=timezone.utc)
+        assert maint_train.arrival_datetime == datetime(2024, 1, 16, 23, 45, tzinfo=UTC)
         assert maint_train.wagons[0].needs_retrofit is True
 
 
