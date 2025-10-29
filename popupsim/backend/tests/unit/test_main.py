@@ -224,13 +224,6 @@ def test_validate_output_path_valid(temp_output_dir: Path) -> None:
 
 
 @pytest.mark.unit
-def test_validate_output_path_valid(temp_output_dir: Path) -> None:
-    """Test validate_output_path with valid directory."""
-    result = validate_output_path(temp_output_dir)
-    assert result == temp_output_dir
-
-
-@pytest.mark.unit
 def test_validate_output_path_write_permission() -> None:
     """Test validate_output_path write permission check."""
     # Test with a read-only directory (if possible to create)
@@ -245,4 +238,5 @@ def test_validate_output_path_write_permission() -> None:
 def test_app_configuration() -> None:
     """Test that the Typer app is configured correctly."""
     assert app.info.name == APP_NAME
-    assert 'freight rail DAC migration simulation tool' in app.info.help
+    help_text = app.info.help or ''
+    assert 'freight rail DAC migration simulation tool' in help_text
