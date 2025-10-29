@@ -5,7 +5,7 @@
   "random_seed": 1,
   "workshop": {
     "tracks": [
-      {"id": "TRACK01", "function": "werkstattgleis", "capacity": 3, "retrofit_time_min": 30}
+      {"track_id": "TRACK01", "function": "werkstattgleis", "capacity": 3, "retrofit_time_min": 30}
     ]
   },
   "train_schedule_file": "train_schedule.csv"

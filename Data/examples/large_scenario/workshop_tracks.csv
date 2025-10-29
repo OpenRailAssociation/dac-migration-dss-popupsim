@@ -1,3 +1,8 @@
 track_id,function,capacity,retrofit_time_min
 TRACK01,werkstattgleis,5,30
 TRACK02,werkstattgleis,5,30
+TRACK03,sammelgleis,10,0
+TRACK04,parkgleis,8,0
+TRACK05,werkstattzufuehrung,2,0
+TRACK06,werkstattabfuehrung,2,0
+TRACK07,bahnhofskopf,3,0
