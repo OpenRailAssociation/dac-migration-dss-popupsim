@@ -55,15 +55,8 @@ class Scenario:
 class ScenarioBuilder:
     """Fluent builder for Scenario instances.
 
-    Usage:
-        builder = ScenarioBuilder()
-        scenario = (
-            builder
-            .add_routes(routes_obj)
-            .add_route(route)
-            .add_wagon(wagon)
-            .build()
-        )
+    Example:
+        scenario = ScenarioBuilder().add_routes(routes).add_wagon(wagon).build()
     """
 
     def __init__(self) -> None:

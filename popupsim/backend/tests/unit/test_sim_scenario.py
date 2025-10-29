@@ -10,7 +10,7 @@ SRC: Path = ROOT / 'popupsim' / 'backend' / 'src'
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from simulation.scenariosim import Scenario, ScenarioBuilder  # type: ignore
+from simulation.scenario import Scenario, ScenarioBuilder  # type: ignore
 
 
 class FakeRoute:

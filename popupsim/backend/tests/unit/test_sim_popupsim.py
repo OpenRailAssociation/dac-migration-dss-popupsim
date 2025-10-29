@@ -5,7 +5,7 @@ import pytest
 from configuration.model_route import Route  # type: ignore[import-not-found,import-untyped]
 from configuration.model_routes import Routes  # type: ignore[import-not-found,import-untyped]
 from configuration.model_wagon import Wagon  # type: ignore[import-not-found,import-untyped]
-from simulation.scenariosim import ScenarioBuilder  # type: ignore[import-not-found,import-untyped]
+from simulation.scenario import ScenarioBuilder  # type: ignore[import-not-found,import-untyped]
 from simulation.sim_adapter import SimPyAdapter  # type: ignore[import-not-found,import-untyped]
 from src.simulation.popupsim import PopupSim  # type: ignore[import-not-found,import-untyped]
 
