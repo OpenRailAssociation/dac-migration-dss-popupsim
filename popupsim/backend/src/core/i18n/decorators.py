@@ -5,8 +5,8 @@ containing translatable content for documentation and future tooling
 integration.
 """
 
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
 from typing import TypeVar
 
 F = TypeVar('F', bound=Callable[..., Any])

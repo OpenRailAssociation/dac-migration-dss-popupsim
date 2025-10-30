@@ -22,12 +22,13 @@ auto-initializes using the stored configuration.
 
 from pathlib import Path
 import threading
-from typing import Any, Dict
+from typing import Any
 
 from babel.support import Translations
 
 _thread_local = threading.local()
-_global_config: Dict[str, Any] = {}
+_global_config: dict[str, Any] = {}
+
 
 class Localizer:
     """Babel-based localizer for gettext translations.
@@ -195,7 +196,7 @@ class Localizer:
 
 def init_i18n(locale_dir: Path, domain: str = 'messages', default_locale: str = 'en') -> Localizer:
     """Initialize internationalization system.
-    
+
     Sets up thread-safe translation system with compiled .mo files.
     This function must be called before using any translation functions.
 
@@ -219,18 +220,19 @@ def init_i18n(locale_dir: Path, domain: str = 'messages', default_locale: str = 
     <Localizer ...>
     >>> init_i18n(Path('translations'), domain='myapp', default_locale='de')
     <Localizer ...>
-    
+
     Notes
     -----
     This is the main entry point for i18n setup. After calling this function,
     you can use translation functions like _() and ngettext().
     """
-
-    _global_config.update({
-        'locale_dir': locale_dir,
-        'domain': domain,
-        'default_locale': default_locale,
-    })
+    _global_config.update(
+        {
+            'locale_dir': locale_dir,
+            'domain': domain,
+            'default_locale': default_locale,
+        }
+    )
     localizer = Localizer(locale_dir, domain, default_locale)
     _thread_local.localizer = localizer
     return localizer

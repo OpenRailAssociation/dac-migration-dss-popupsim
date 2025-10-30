@@ -187,7 +187,9 @@ class TestWagon:
 
         assert wagon.length == length_value
 
-    @pytest.mark.parametrize('is_loaded,needs_retrofit', [(True, True), (True, False), (False, True), (False, False)])
+    @pytest.mark.parametrize(
+        ('is_loaded', 'needs_retrofit'), [(True, True), (True, False), (False, True), (False, False)]
+    )
     def test_wagon_boolean_combinations(self, is_loaded: bool, needs_retrofit: bool) -> None:
         """Test all combinations of boolean fields."""
         wagon = Wagon(

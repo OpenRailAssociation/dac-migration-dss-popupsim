@@ -169,7 +169,9 @@ class TestScenarioConfig:
                     end_date=end_date,
                     train_schedule_file='schedule.csv',
                 )
-            assert 'end_date' in str(exc_info.value) and 'after start_date' in str(exc_info.value)
+            error_msg = str(exc_info.value)
+            assert 'end_date' in error_msg
+            assert 'after start_date' in error_msg
 
     def test_date_validation_too_long_duration(self):
         """Test that very long simulation duration is handled properly."""

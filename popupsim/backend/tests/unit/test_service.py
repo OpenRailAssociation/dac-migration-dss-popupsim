@@ -420,14 +420,13 @@ TRACK01,werkstattgleis,3,45"""
         """Test CSV reading when result is not a DataFrame."""
         # This is a bit tricky to test as pd.read_csv almost always returns DataFrame
         # We'll mock the pandas function to return something else
-        import unittest.mock
-
         with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
             f.write('train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n')
             f.write('T001,2024-01-15,08:30,W001,15.5,true,false\n')
             test_file = Path(f.name)
 
         try:
+            import unittest.mock
             with unittest.mock.patch('pandas.read_csv') as mock_read_csv:
                 # Mock pandas.read_csv to return something that's not a DataFrame
                 mock_read_csv.return_value = 'not a dataframe'
@@ -513,22 +512,20 @@ TRACK01,werkstattgleis,3,45"""
         assert len(trains) == 1
         assert trains[0].arrival_date == date(2024, 1, 15)
 
-    def test_read_and_validate_workshop_tracks_csv_not_dataframe(self, service: ConfigurationService) -> None:
+    def test_read_and_validate_workshop_tracks_csv_not_dataframe(self, service: ConfigurationService, mocker) -> None:
         """Test workshop tracks CSV reading when result is not a DataFrame."""
-        import unittest.mock
-
         with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
             f.write('track_id,function,capacity,retrofit_time_min\n')
             f.write('TRACK01,werkstattgleis,5,30\n')
             test_file = Path(f.name)
 
         try:
-            with unittest.mock.patch('pandas.read_csv') as mock_read_csv:
-                # Mock pandas.read_csv to return something that's not a DataFrame
-                mock_read_csv.return_value = 'not a dataframe'
+            mock_read_csv = mocker.patch('pandas.read_csv')
+            # Mock pandas.read_csv to return something that's not a DataFrame
+            mock_read_csv.return_value = 'not a dataframe'
 
-                with pytest.raises(ConfigurationError, match='Loaded object is not a pandas DataFrame'):
-                    service._read_and_validate_workshop_tracks_csv(test_file)
+            with pytest.raises(ConfigurationError, match='Loaded object is not a pandas DataFrame'):
+                service._read_and_validate_workshop_tracks_csv(test_file)
         finally:
             test_file.unlink()
 
@@ -581,22 +578,20 @@ TRACK01,werkstattgleis,3,45"""
         with pytest.raises(ConfigurationError, match='Validation failed for workshop configuration'):
             service._create_workshop_from_tracks(tracks)
 
-    def test_create_workshop_from_tracks_unexpected_error(self, service: ConfigurationService) -> None:
+    def test_create_workshop_from_tracks_unexpected_error(self, service: ConfigurationService, mocker) -> None:
         """Test workshop creation with unexpected errors."""
-        import unittest.mock
-
         from configuration.model_track import WorkshopTrack
 
         # Create valid tracks
         track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
         tracks = [track]
 
-        with unittest.mock.patch('configuration.service.Workshop') as mock_workshop:
-            # Mock Workshop to raise an unexpected error
-            mock_workshop.side_effect = RuntimeError('Unexpected error')
+        mock_workshop = mocker.patch('configuration.service.Workshop')
+        # Mock Workshop to raise an unexpected error
+        mock_workshop.side_effect = RuntimeError('Unexpected error')
 
-            with pytest.raises(ConfigurationError, match='Unexpected error creating workshop'):
-                service._create_workshop_from_tracks(tracks)
+        with pytest.raises(ConfigurationError, match='Unexpected error creating workshop'):
+            service._create_workshop_from_tracks(tracks)
 
     def test_load_complete_scenario_missing_train_schedule_file(self, service: ConfigurationService) -> None:
         """Test complete scenario loading with missing train_schedule_file."""
@@ -804,10 +799,8 @@ T001,2024-01-15,08:30,W001,15.5,true,false"""
         finally:
             empty_csv_file.unlink()
 
-    def test_unexpected_error_in_load_scenario(self, service: ConfigurationService) -> None:
+    def test_unexpected_error_in_load_scenario(self, service: ConfigurationService, mocker) -> None:
         """Test unexpected error handling in load_scenario."""
-        import unittest.mock
-
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
 
@@ -824,11 +817,11 @@ T001,2024-01-15,08:30,W001,15.5,true,false"""
                 json.dump(scenario_data, f)
 
             # Mock file operations to raise unexpected error
-            with unittest.mock.patch('builtins.open') as mock_open:
-                mock_open.side_effect = RuntimeError('Unexpected file system error')
+            mock_open = mocker.patch('builtins.open')
+            mock_open.side_effect = RuntimeError('Unexpected file system error')
 
-                with pytest.raises(ConfigurationError, match='Unexpected error loading'):
-                    service.load_scenario(scenario_file)
+            with pytest.raises(ConfigurationError, match='Unexpected error loading'):
+                service.load_scenario(scenario_file)
 
     def test_workshop_tracks_different_data_types(self, service: ConfigurationService) -> None:
         """Test workshop tracks with different data type conversion scenarios."""
