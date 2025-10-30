@@ -1,0 +1,1 @@
+"""Hexagonal architecture implementation for simulation layer."""
