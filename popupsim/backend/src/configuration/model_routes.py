@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class Routes:
-    """
-    Routes configuration manager that loads and provides access to route data.
+    """Routes configuration manager that loads and provides access to route data.
 
     This class is responsible for loading route configurations from a CSV file,
     validating them through the Route model, and providing convenient access
@@ -26,11 +25,14 @@ class Routes:
     """
 
     def __init__(self, routes_file: str | Path | None = None, routes: list[Route] | None = None) -> None:
-        """
-        Initialize the routes configuration manager.
+        """Initialize the routes configuration manager.
 
-        Args:
-            routes_file: Path to the CSV file containing route data. If None, no routes are loaded initially.
+        Parameters
+        ----------
+        routes_file : str or Path or None, optional
+            Path to the CSV file containing route data. If None, no routes are loaded initially.
+        routes : list[Route] or None, optional
+            List of Route objects to initialize with. If provided, takes precedence over routes_file.
         """
         if routes is not None and len(routes or []) > 0:
             self.routes = routes
@@ -47,16 +49,19 @@ class Routes:
             return
 
     def load_routes(self, csv_path: str | Path) -> None:
-        """
-        Load routes from a CSV file.
+        """Load routes from a CSV file.
 
-        Args:
-            csv_path: Path to the CSV file containing route data
+        Parameters
+        ----------
+        csv_path : str or Path
+            Path to the CSV file containing route data.
 
         Raises
         ------
-            FileNotFoundError: If the CSV file does not exist
-            ValueError: If the CSV file contains invalid route data
+        FileNotFoundError
+            If the CSV file does not exist.
+        ValueError
+            If the CSV file contains invalid route data.
         """
         path = Path(csv_path)
         if not path.exists():
@@ -151,15 +156,17 @@ class Routes:
         return None
 
     def append(self, route: Route) -> None:
-        """
-        Append a Route to the collection.
+        """Append a Route to the collection.
 
-        Args:
-            route: Route instance to add
+        Parameters
+        ----------
+        route : Route
+            Route instance to add.
 
         Raises
         ------
-            ValueError: If a route with the same route_id already exists
+        ValueError
+            If a route with the same route_id already exists.
         """
         if route.route_id in self.routes_by_id:
             raise ValueError(f'Route already exists: {route.route_id}')
@@ -168,7 +175,13 @@ class Routes:
 
     @property
     def length(self) -> int:
-        """Return the number of loaded routes."""
+        """Return the number of loaded routes.
+
+        Returns
+        -------
+        int
+            Number of loaded routes.
+        """
         return len(self.routes)
 
     def __len__(self) -> int:

@@ -29,11 +29,14 @@ class PopupSim:
     def __init__(self, adapter: SimulationAdapter, scenario: Any) -> None:
         """Initialize the PopupSim orchestrator.
 
-        Args:
-            adapter: SimulationAdapter instance used to drive the underlying
-                simulation environment (e.g., SimPy).
-            scenario: Domain scenario object containing routes, wagons and other
-                configuration consumed by the simulation.
+        Parameters
+        ----------
+        adapter : SimulationAdapter
+            SimulationAdapter instance used to drive the underlying
+            simulation environment (e.g., SimPy).
+        scenario : Any
+            Domain scenario object containing routes, wagons and other
+            configuration consumed by the simulation.
         """
         self.name: str = 'PopUpSim'
         self.adapter: SimulationAdapter = adapter
@@ -44,9 +47,11 @@ class PopupSim:
 
         The method delegates execution to the configured SimulationAdapter.
 
-        Args:
-            until: Optional simulation time (float) indicating when to stop the
-                simulation. If None, the adapter runs until its own completion.
+        Parameters
+        ----------
+        until : float or None, optional
+            Simulation time indicating when to stop the simulation.
+            If None, the adapter runs until its own completion.
         """
         print(f'Starting {self.name} for: {self.scenario}')
         self.adapter.run(until)
