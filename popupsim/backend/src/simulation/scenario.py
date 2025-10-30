@@ -22,40 +22,64 @@ class Scenario:
 
     Attributes
     ----------
-        routes: A Routes collection (or empty list when not set).
-        wagons: A list of Wagon instances.
+    routes : Routes or None
+        A Routes collection (or empty list when not set).
+    wagons : list[Wagon]
+        A list of Wagon instances.
     """
 
     def __init__(self, routes: Routes | None = None, wagons: list[Wagon] | None = None) -> None:
         """Create a Scenario.
 
-        Args:
-            routes: Optional Routes collection to use for the scenario.
-            wagons: Optional list of Wagon instances.
+        Parameters
+        ----------
+        routes : Routes or None, optional
+            Optional Routes collection to use for the scenario.
+        wagons : list[Wagon] or None, optional
+            Optional list of Wagon instances.
         """
         self.routes: Routes | None = routes or []
         self.wagons: list[Wagon] = wagons or []
 
     def __str__(self) -> str:
-        """Return a short human-readable description of the scenario."""
+        """Return a short human-readable description of the scenario.
+
+        Returns
+        -------
+        str
+            String representation with route and wagon counts.
+        """
         route_count: int = 0 if self.routes is None else self.routes.length
         return f'Scenario with {route_count!s} Routes and {len(self.wagons)!s} Wagons'
 
     @property
     def route_count(self) -> int:
-        """Number of routes in the scenario (public helper to satisfy linters)."""
+        """Number of routes in the scenario (public helper to satisfy linters).
+
+        Returns
+        -------
+        int
+            Count of routes in the scenario.
+        """
         return 0 if self.routes is None else self.routes.length
 
     def __len__(self) -> int:
-        """Return the number of wagons (makes Scenario usable with len())."""
+        """Return the number of wagons (makes Scenario usable with len()).
+
+        Returns
+        -------
+        int
+            Number of wagons in the scenario.
+        """
         return len(self.wagons)
 
 
 class ScenarioBuilder:
     """Fluent builder for Scenario instances.
 
-    Example:
-        scenario = ScenarioBuilder().add_routes(routes).add_wagon(wagon).build()
+    Examples
+    --------
+    >>> scenario = ScenarioBuilder().add_routes(routes).add_wagon(wagon).build()
     """
 
     def __init__(self) -> None:
@@ -65,11 +89,14 @@ class ScenarioBuilder:
     def add_routes(self, routes: Routes) -> ScenarioBuilder:
         """Assign a Routes collection to the Scenario and return the builder.
 
-        Args:
-            routes: Routes collection to assign.
+        Parameters
+        ----------
+        routes : Routes
+            Routes collection to assign.
 
         Returns
         -------
+        ScenarioBuilder
             The same ScenarioBuilder instance for chaining.
         """
         self.scenario.routes = routes
@@ -78,11 +105,14 @@ class ScenarioBuilder:
     def add_route(self, route: Route) -> ScenarioBuilder:
         """Append a Route to the Scenario's Routes collection.
 
-        Args:
-            route: Route to append.
+        Parameters
+        ----------
+        route : Route
+            Route to append.
 
         Returns
         -------
+        ScenarioBuilder
             The same ScenarioBuilder instance for chaining.
         """
         if self.scenario.routes is None:
@@ -93,11 +123,14 @@ class ScenarioBuilder:
     def add_wagon(self, wagon: Wagon) -> ScenarioBuilder:
         """Append a Wagon to the Scenario's wagon list.
 
-        Args:
-            wagon: Wagon to append.
+        Parameters
+        ----------
+        wagon : Wagon
+            Wagon to append.
 
         Returns
         -------
+        ScenarioBuilder
             The same ScenarioBuilder instance for chaining.
         """
         self.scenario.wagons.append(wagon)
@@ -106,11 +139,14 @@ class ScenarioBuilder:
     def add_wagons(self, wagons: list[Wagon]) -> ScenarioBuilder:
         """Extend the Scenario's wagon list with multiple wagons.
 
-        Args:
-            wagons: List of Wagon instances to add.
+        Parameters
+        ----------
+        wagons : list[Wagon]
+            List of Wagon instances to add.
 
         Returns
         -------
+        ScenarioBuilder
             The same ScenarioBuilder instance for chaining.
         """
         self.scenario.wagons.extend(wagons)
@@ -121,6 +157,7 @@ class ScenarioBuilder:
 
         Returns
         -------
+        Scenario
             The built Scenario.
         """
         return self.scenario
