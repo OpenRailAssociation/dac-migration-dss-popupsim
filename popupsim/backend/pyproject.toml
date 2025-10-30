@@ -170,6 +170,7 @@ markers = [
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (external APIs)",
     "pending: Tests written before implementation (TDD)",
+    "asyncio: Async tests",
 ]
 
 [tool.coverage.run]
@@ -197,4 +198,5 @@ dev = [
     "pytest-mock>=3.15.1",
     "ruff>=0.14.1",
     "pandas-stubs>=2.3.2.240528",
+    "pytest-asyncio>=1.2.0",
 ]
