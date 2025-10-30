@@ -10,14 +10,11 @@ All waiting and scheduling is expressed via the adapter interface, so the domain
 remains agnostic of the underlying simulation framework.
 """
 
-# pylint: disable=relative-beyond-top-level,E0402  # for now: make linters pass until install/editable is used
 from typing import Any
 
-# pylint: disable=relative-beyond-top-level,E0402  # for now: make linters pass until install/editable is used
 from .sim_adapter import SimulationAdapter
 
 
-# pylint: disable=relative-beyond-top-level,R0903  # for now: make linters pass until install/editable is used
 class PopupSim:
     """High-level simulation orchestrator for PopUp-Sim.
 

@@ -7,14 +7,9 @@ runtime usage.
 
 from __future__ import annotations
 
-# The configuration.* modules are available at runtime but currently ship without
-# library stubs / a py.typed marker which makes mypy emit noise. Suppress the
-# import-not-found error for now and keep a NOTE for future cleanup.
-# for now: missing stubs / py.typed
-# pylint: disable=import-error  # local/dev import layout may differ until editable install is used
-from configuration.model_route import Route  # type: ignore[import-not-found,import-untyped]
-from configuration.model_routes import Routes  # type: ignore[import-not-found,import-untyped]
-from configuration.model_wagon import Wagon  # type: ignore[import-not-found,import-untyped]
+from configuration.model_route import Route
+from configuration.model_routes import Routes
+from configuration.model_wagon import Wagon
 
 
 class Scenario:
@@ -22,23 +17,23 @@ class Scenario:
 
     Attributes
     ----------
-    routes : Routes or None
-        A Routes collection (or empty list when not set).
+    routes : Routes
+        A Routes collection.
     wagons : list[Wagon]
         A list of Wagon instances.
     """
 
-    def __init__(self, routes: Routes | None = None, wagons: list[Wagon] | None = None) -> None:
+    def __init__(self, routes: Routes, wagons: list[Wagon] | None = None) -> None:
         """Create a Scenario.
 
         Parameters
         ----------
-        routes : Routes or None, optional
-            Optional Routes collection to use for the scenario.
+        routes : Routes
+            Routes collection to use for the scenario.
         wagons : list[Wagon] or None, optional
             Optional list of Wagon instances.
         """
-        self.routes: Routes | None = routes or []
+        self.routes: Routes = routes
         self.wagons: list[Wagon] = wagons or []
 
     def __str__(self) -> str:
@@ -49,7 +44,7 @@ class Scenario:
         str
             String representation with route and wagon counts.
         """
-        route_count: int = 0 if self.routes is None else self.routes.length
+        route_count: int = self.routes.length
         return f'Scenario with {route_count!s} Routes and {len(self.wagons)!s} Wagons'
 
     @property
@@ -61,7 +56,7 @@ class Scenario:
         int
             Count of routes in the scenario.
         """
-        return 0 if self.routes is None else self.routes.length
+        return self.routes.length
 
     def __len__(self) -> int:
         """Return the number of wagons (makes Scenario usable with len()).
@@ -84,7 +79,7 @@ class ScenarioBuilder:
 
     def __init__(self) -> None:
         """Initialize an empty builder with a default Scenario."""
-        self.scenario: Scenario = Scenario()
+        self.scenario: Scenario = Scenario(Routes())
 
     def add_routes(self, routes: Routes) -> ScenarioBuilder:
         """Assign a Routes collection to the Scenario and return the builder.
@@ -115,8 +110,6 @@ class ScenarioBuilder:
         ScenarioBuilder
             The same ScenarioBuilder instance for chaining.
         """
-        if self.scenario.routes is None:
-            self.scenario.routes = Routes()
         self.scenario.routes.append(route)
         return self
 
