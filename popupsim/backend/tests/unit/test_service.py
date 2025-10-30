@@ -427,6 +427,7 @@ TRACK01,werkstattgleis,3,45"""
 
         try:
             import unittest.mock
+
             with unittest.mock.patch('pandas.read_csv') as mock_read_csv:
                 # Mock pandas.read_csv to return something that's not a DataFrame
                 mock_read_csv.return_value = 'not a dataframe'
