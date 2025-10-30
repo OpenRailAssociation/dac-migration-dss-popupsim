@@ -416,7 +416,7 @@ TRACK01,werkstattgleis,3,45"""
             result = service.load_scenario(json_file)
             assert result['scenario_id'] == 'direct'
 
-    def test_read_and_validate_train_schedule_csv_not_dataframe(self, service: ConfigurationService) -> None:
+    def test_read_and_validate_train_schedule_csv_not_dataframe(self, service: ConfigurationService, mocker) -> None:
         """Test CSV reading when result is not a DataFrame."""
         # This is a bit tricky to test as pd.read_csv almost always returns DataFrame
         # We'll mock the pandas function to return something else
@@ -426,14 +426,12 @@ TRACK01,werkstattgleis,3,45"""
             test_file = Path(f.name)
 
         try:
-            import unittest.mock
+            mock_read_csv = mocker.patch('pandas.read_csv')
+            # Mock pandas.read_csv to return something that's not a DataFrame
+            mock_read_csv.return_value = 'not a dataframe'
 
-            with unittest.mock.patch('pandas.read_csv') as mock_read_csv:
-                # Mock pandas.read_csv to return something that's not a DataFrame
-                mock_read_csv.return_value = 'not a dataframe'
-
-                with pytest.raises(ConfigurationError, match='Loaded object is not a pandas DataFrame'):
-                    service._read_and_validate_train_schedule_csv(test_file)
+            with pytest.raises(ConfigurationError, match='Loaded object is not a pandas DataFrame'):
+                service._read_and_validate_train_schedule_csv(test_file)
         finally:
             test_file.unlink()
 
