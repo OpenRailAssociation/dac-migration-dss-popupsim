@@ -28,13 +28,15 @@ repos:
     hooks:
       - id: mypy
         files: ^popupsim/backend/src/
-        args: [--show-error-codes, --no-error-summary, --show-column-numbers]
-        additional_dependencies: [pandas, pydantic, pandas-stubs]
+        args: [--show-error-codes, --no-error-summary, --show-column-numbers, --python-executable, popupsim/backend/.venv/bin/python]
+        additional_dependencies: [pandas, pydantic, pandas-stubs, typer, babel]
+        pass_filenames: false
+        entry: bash -c 'cd popupsim/backend && mypy src/'
 
   - repo: https://github.com/pycqa/pylint
     rev: v3.3.8
     hooks:
       - id: pylint
         files: ^popupsim/backend/src/
-        args: [--output-format=colorized, --max-line-length=120]
-        additional_dependencies: [pandas, pydantic, pandas-stubs]
+        args: [--output-format=colorized, --max-line-length=120, --init-hook, "import sys; sys.path.insert(0, 'popupsim/backend/src')"]
+        additional_dependencies: [pandas, pydantic, pandas-stubs, typer, babel, pylint-pydantic]

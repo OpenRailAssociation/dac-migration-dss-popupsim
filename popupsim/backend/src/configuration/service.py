@@ -574,14 +574,16 @@ class ConfigurationService:
                 f'{", ".join(out_of_range_trains)}'
             )
 
-    def _load_workshop_and_routes(self, config_dir: Path) -> tuple[Workshop, list]:
+    def _load_workshop_and_routes(
+        self, config_dir: Path, workshop_tracks_file: str | None, routes_file: str | None
+    ) -> tuple[Workshop, list]:
         """Load workshop tracks and routes configuration."""
-        workshop_tracks_file = 'workshop_tracks.csv'
-        workshop = self.load_workshop_tracks(config_dir / workshop_tracks_file)
+        workshop_tracks_filename = workshop_tracks_file or 'workshop_tracks.csv'
+        workshop = self.load_workshop_tracks(config_dir / workshop_tracks_filename)
 
-        routes_file_name = 'routes.csv'
-        routes_file = config_dir / routes_file_name
-        routes_config = RoutesConfig(routes_file)
+        routes_filename = routes_file or 'routes.csv'
+        routes_path = config_dir / routes_filename
+        routes_config = RoutesConfig(routes_path)
         routes = routes_config.routes
 
         return workshop, routes
@@ -649,7 +651,9 @@ class ConfigurationService:
         self._validate_train_dates_in_range(trains, scenario_dates[0], scenario_dates[1])
 
         # 3. Load workshop and routes configuration
-        workshop, routes = self._load_workshop_and_routes(config_dir)
+        workshop_tracks_file = scenario_data.get('workshop_tracks_file')
+        routes_file = scenario_data.get('routes_file')
+        workshop, routes = self._load_workshop_and_routes(config_dir, workshop_tracks_file, routes_file)
 
         # 4. Build ScenarioConfig
         components = (train_schedule_file, workshop, trains, routes)

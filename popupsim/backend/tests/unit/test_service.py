@@ -54,6 +54,8 @@ class TestConfigurationService:
                 ]
             },
             'train_schedule_file': 'test_train_schedule.csv',
+            'routes_file': 'routes.csv',
+            'workshop_tracks_file': 'test_workshop_tracks.csv',
         }
 
     def test_init_default_path(self) -> None:
@@ -77,6 +79,8 @@ class TestConfigurationService:
         assert scenario_data['end_date'] == '2024-01-16'
         assert scenario_data['random_seed'] == 42
         assert scenario_data['train_schedule_file'] == 'test_train_schedule.csv'
+        assert scenario_data['routes_file'] == 'routes.csv'
+        assert scenario_data['workshop_tracks_file'] == 'test_workshop_tracks.csv'
         assert 'workshop' in scenario_data
 
     def test_load_scenario_missing_file(self, service: ConfigurationService) -> None:
@@ -427,6 +431,7 @@ TRACK01,werkstattgleis,3,45"""
 
         try:
             import unittest.mock
+
             with unittest.mock.patch('pandas.read_csv') as mock_read_csv:
                 # Mock pandas.read_csv to return something that's not a DataFrame
                 mock_read_csv.return_value = 'not a dataframe'
