@@ -136,6 +136,21 @@ graph TD
 
 ```
 
+## Example Scenarios
+
+The project includes example scenarios to help you get started:
+
+- **[Small Scenario](../../Data/examples/small_scenario/README.md)** - Minimal simulation with 2 trains (20 wagons) and 1 workshop track for quick testing
+- **[Medium Scenario](../../Data/examples/medium_scenario/README.md)** - Medium-scale simulation with 4 trains (160 wagons) and 2 workshop tracks
+- **[Large Scenario](../../Data/examples/large_scenario/README.md)** - Large-scale simulation with 10 trains (500 wagons) and 2 workshop tracks, demonstrating high operational complexity
+
+Each example scenario includes:
+- `scenario.json` - Main configuration file
+- `train_schedule.csv` - Train arrival schedule and wagon details
+- `workshop_tracks.csv` - Workshop track configuration
+- `routes.csv` - Route network between tracks
+- `README.md` - Detailed scenario documentation
+
 ## Contributing
 
 1. Fork the repository

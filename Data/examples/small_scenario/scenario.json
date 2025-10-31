@@ -8,5 +8,7 @@
       {"track_id": "TRACK01", "function": "werkstattgleis", "capacity": 3, "retrofit_time_min": 30}
     ]
   },
-  "train_schedule_file": "train_schedule.csv"
+  "train_schedule_file": "train_schedule.csv",
+  "routes_file": "routes.csv",
+  "workshop_tracks_file": "workshop_tracks.csv"
 }

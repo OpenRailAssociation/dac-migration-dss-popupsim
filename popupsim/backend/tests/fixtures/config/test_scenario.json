@@ -25,5 +25,7 @@
       }
     ]
   },
-  "train_schedule_file": "test_train_schedule.csv"
+  "train_schedule_file": "test_train_schedule.csv",
+  "routes_file": "routes.csv",
+  "workshop_tracks_file": "test_workshop_tracks.csv"
 }

@@ -35,8 +35,18 @@ class ScenarioConfig(BaseModel):
     end_date: date = Field(description='Simulation end date')
     random_seed: int | None = Field(default=None, ge=0, description='Random seed for reproducible simulations')
     workshop: Workshop | None = Field(default=None, description='Workshop configuration with available tracks')
-    train_schedule_file: str | None = Field(
+    train_schedule_file: str = Field(
         pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to the train schedule file', min_length=1, max_length=50
+    )
+    routes_file: str | None = Field(
+        default=None, pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to routes file', min_length=1, max_length=50
+    )
+    workshop_tracks_file: str | None = Field(
+        default=None,
+        pattern=r'^[a-zA-Z0-9_.-]+$',
+        description='File path to workshop tracks file',
+        min_length=1,
+        max_length=50,
     )
     train: list[Train] | None = Field(default=None, description='Train configuration')
     routes: list[Route] | None = Field(default=None, description='Route configuration')

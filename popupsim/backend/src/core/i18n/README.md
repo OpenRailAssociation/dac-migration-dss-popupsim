@@ -157,7 +157,7 @@ from core.i18n import translatable
 def validate_workshop_capacity(config):
     """Validate workshop capacity limits."""
     if config.utilization > 100:
-        return _("Workshop capacity exceeded: %(utilization)s%% utilization", 
+        return _("Workshop capacity exceeded: %(utilization)s%% utilization",
                 utilization=config.utilization)
     return None
 

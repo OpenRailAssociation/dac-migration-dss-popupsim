@@ -177,7 +177,9 @@ def main(
         typer.echo(f'Start Date: {config.start_date}')
         typer.echo(f'End Date: {config.end_date}')
         typer.echo(f'Number of Trains: {len(config.train) if config.train else 0}')
-        typer.echo(f'Number of Workshop Tracks: {len(config.workshop.tracks) if config.workshop else 0}')
+        typer.echo(
+            f'Number of Workshop Tracks: {len(config.workshop.tracks) if config.workshop else 0}'  # pylint: disable=no-member
+        )
         typer.echo(f'Number of Routes: {len(config.routes) if config.routes else 0}')
         typer.echo('\nValidation Summary:')
         validation_result.print_summary()

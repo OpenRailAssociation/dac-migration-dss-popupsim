@@ -35,6 +35,8 @@ class TestScenarioConfig:
         assert config.random_seed == 42
         assert config.train_schedule_file == 'schedule.csv'
         assert config.workshop is None
+        assert config.routes_file is None
+        assert config.workshop_tracks_file is None
 
     def test_scenario_config_creation_valid_data_with_workshop(self):
         """Test successful scenario config creation with workshop."""
@@ -427,6 +429,8 @@ class TestScenarioConfig:
                 ]
             },
             'train_schedule_file': 'train_schedule.csv',
+            'routes_file': 'routes.csv',
+            'workshop_tracks_file': 'workshop_tracks.csv',
         }
 
         config = ScenarioConfig(**config_data)
@@ -437,6 +441,8 @@ class TestScenarioConfig:
         assert config.end_date == date(2024, 1, 16)
         assert config.random_seed == 42
         assert config.train_schedule_file == 'train_schedule.csv'
+        assert config.routes_file == 'routes.csv'
+        assert config.workshop_tracks_file == 'workshop_tracks.csv'
 
         # Verify workshop structure
         assert config.workshop is not None
@@ -457,3 +463,17 @@ class TestScenarioConfig:
         assert track03.id == 'TRACK03'
         assert track03.capacity == 4
         assert track03.retrofit_time_min == 35
+
+    def test_scenario_config_with_file_references(self) -> None:
+        """Test scenario config with external file references."""
+        config = ScenarioConfig(
+            scenario_id='test_scenario',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 1, 10),
+            train_schedule_file='schedule.csv',
+            routes_file='routes.csv',
+            workshop_tracks_file='workshop_tracks.csv',
+        )
+
+        assert config.routes_file == 'routes.csv'
+        assert config.workshop_tracks_file == 'workshop_tracks.csv'
