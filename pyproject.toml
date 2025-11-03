@@ -171,7 +171,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--verbose",
-    "--cov=src",
+    "--cov=popupsim/backend/src",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -184,8 +184,8 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src"]
-omit = ["tests/*"]
+source = ["popupsim/backend/src"]
+omit = ["tests/*", "popupsim/backend/tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
