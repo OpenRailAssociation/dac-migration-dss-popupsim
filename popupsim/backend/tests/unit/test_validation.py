@@ -8,7 +8,6 @@ ValidationResult, and ConfigurationValidator classes.
 from datetime import date
 from datetime import time
 from io import StringIO
-from unittest.mock import patch
 
 from configuration.model_route import Route
 from configuration.model_scenario import ScenarioConfig
@@ -191,18 +190,18 @@ class TestValidationResult:
         assert warnings[0].message == 'Warning 1'
         assert warnings[1].message == 'Warning 2'
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_print_summary_valid_config(self, mock_stdout: StringIO) -> None:
+    def test_print_summary_valid_config(self, mocker) -> None:
         """Test print_summary for valid configuration."""
+        mock_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
         result = ValidationResult(is_valid=True, issues=[])
         result.print_summary()
 
         output = mock_stdout.getvalue()
         assert '✅ Configuration valid - No issues found' in output
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_print_summary_with_errors(self, mock_stdout: StringIO) -> None:
+    def test_print_summary_with_errors(self, mocker) -> None:
         """Test print_summary with errors."""
+        mock_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
         issues = [
             ValidationIssue(ValidationLevel.ERROR, 'Critical error'),
             ValidationIssue(ValidationLevel.WARNING, 'Minor warning'),
@@ -216,9 +215,9 @@ class TestValidationResult:
         assert '⚠️  Warnings:' in output
         assert 'Minor warning' in output
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_print_summary_warnings_only(self, mock_stdout: StringIO) -> None:
+    def test_print_summary_warnings_only(self, mocker) -> None:
         """Test print_summary with warnings only."""
+        mock_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
         issues = [
             ValidationIssue(ValidationLevel.WARNING, 'Warning message'),
             ValidationIssue(ValidationLevel.INFO, 'Info message'),

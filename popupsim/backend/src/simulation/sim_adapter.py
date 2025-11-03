@@ -12,6 +12,7 @@ from abc import abstractmethod
 from collections.abc import Callable
 from collections.abc import Generator
 from typing import Any
+from typing import cast
 
 
 class SimulationAdapter(ABC):
@@ -68,7 +69,7 @@ class SimulationAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule and run a domain callable in the simulation context.
 
         Parameters
@@ -158,7 +159,7 @@ class SimPyAdapter(SimulationAdapter):
         """
         return self._env.run(until)
 
-    def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule a callable in the SimPy environment.
 
         Accepts three types of callables:
@@ -170,7 +171,7 @@ class SimPyAdapter(SimulationAdapter):
 
         Parameters
         ----------
-        fn : Callable[..., Any]
+        fn : Union[Callable[..., Any], Generator[Any, Any, Any]]
             Callable to execute (generator function, regular function, or generator object).
         *args : Any
             Positional arguments to pass to the callable.
@@ -190,11 +191,15 @@ class SimPyAdapter(SimulationAdapter):
 
         # If fn is a generator-function, call it inside the sim context and schedule its generator
         if inspect.isgeneratorfunction(fn):
-            return self._env.process(fn(*args, **kwargs))
+            # Type checker knows fn is callable here
+            callable_fn = cast(Callable[..., Any], fn)
+            return self._env.process(callable_fn(*args, **kwargs))
 
         # Otherwise fn is a normal callable; wrap it in a tiny generator so SimPy can schedule it
         def _wrap() -> Generator[None]:
-            fn(*args, **kwargs)
+            # Type checker knows fn is callable here
+            callable_fn = cast(Callable[..., Any], fn)
+            callable_fn(*args, **kwargs)
             yield from ()
 
         return self._env.process(_wrap())

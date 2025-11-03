@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'backend/**'
+      - 'popupsim/backend/**'
       - '.github/workflows/python-backend.yaml'
       - '.github/actions/setup-python-**/**'
       - 'pyproject.toml'
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'backend/**'
+      - 'popupsim/backend/**'
       - '.github/actions/setup-python-**/**'
       - 'pyproject.toml'
       - 'uv.lock'
@@ -32,7 +32,6 @@ jobs:
       - name: Setup Python development environment
         uses: ./.github/actions/setup-python-dev
       - name: Check code formatting with ruff
-        working-directory: ./popupsim/backend
         run: uv run ruff format --check --diff .
       - name: Summary
         run: echo "✅ Code formatting check completed" >> $GITHUB_STEP_SUMMARY
@@ -56,16 +55,14 @@ jobs:
       - name: Setup Python development environment
         uses: ./.github/actions/setup-python-dev
       - name: Lint with ruff (annotations)
-        working-directory: ./popupsim/backend
         run: uv run ruff check --output-format=github .
       - name: Generate SARIF report
-        working-directory: ./popupsim/backend
         run: uv run ruff check --output-format=sarif --exit-zero -o ruff-results.sarif .
         if: always()
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@4e94bd11f71e507f7f87df81788dff88d1dacbfb # v4.31.0
         with:
-          sarif_file: ./popupsim/backend/ruff-results.sarif
+          sarif_file: ruff-results.sarif
         if: always()
       - name: Summary
         run: echo "✅ Ruff linting completed successfully" >> $GITHUB_STEP_SUMMARY
@@ -88,14 +85,13 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Setup Python development environment
         uses: ./.github/actions/setup-python-dev
-      - name: Lint with pylint
-        working-directory: ./popupsim/backend
-        run: uv run pylint ./src/ --output-format=github,json:pylint-report.json
+      - name: Lint with pylint (src only)
+        run: uv run pylint popupsim/backend/src/ --output-format=github,json:pylint-report.json
       - name: Upload pylint report
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: pylint-report
-          path: ./popupsim/backend/pylint-report.json
+          path: pylint-report.json
         if: always()
       - name: Summary
         run: echo "✅ Pylint analysis completed successfully" >> $GITHUB_STEP_SUMMARY
@@ -121,20 +117,18 @@ jobs:
       - name: Add mypy problem matcher
         run: echo "::add-matcher::.github/problem-matchers/mypy.json"
       - name: Type check with mypy
-        working-directory: ./popupsim/backend
-        run: uv run mypy ./src/ --show-error-codes --no-error-summary --show-column-numbers
+        run: uv run mypy --show-error-codes --no-error-summary --show-column-numbers
       - name: Remove mypy problem matcher
         run: echo "::remove-matcher owner=mypy::"
         if: always()
       - name: Generate mypy JSON report
-        working-directory: ./popupsim/backend
-        run: uv run mypy ./src/ --show-error-codes --no-error-summary --output json > mypy-report.json || true
+        run: uv run mypy --show-error-codes --no-error-summary --output json > mypy-report.json || true
         if: always()
       - name: Upload mypy report
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: mypy-report
-          path: ./popupsim/backend/mypy-report.json
+          path: mypy-report.json
         if: always()
       - name: Summary
         run: echo "✅ Type checking completed successfully" >> $GITHUB_STEP_SUMMARY
@@ -223,7 +217,7 @@ jobs:
         uses: ./.github/actions/setup-python-dev
       - name: Test with pytest
         run: |
-          if [ -d "backend/tests" ] && [ "$(find backend/tests -name '*.py' -type f | wc -l)" -gt 0 ]; then
+          if [ -d "popupsim/backend/tests" ] && [ "$(find popupsim/backend/tests -name '*.py' -type f | wc -l)" -gt 0 ]; then
             uv run pytest --tb=short
           else
             echo "No tests found, skipping pytest"
@@ -234,7 +228,7 @@ jobs:
         uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         if: hashFiles('coverage.xml') != ''
         with:
-          file: ./coverage.xml
+          files: coverage.xml
           fail_ci_if_error: false
           flags: backend
           name: backend-coverage

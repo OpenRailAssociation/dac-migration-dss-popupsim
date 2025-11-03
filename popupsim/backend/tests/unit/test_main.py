@@ -3,17 +3,14 @@
 from collections.abc import Generator
 from pathlib import Path
 import tempfile
-from unittest.mock import MagicMock
-from unittest.mock import patch
-
-import pytest
-import typer
-from typer.testing import CliRunner
 
 from main import APP_NAME
 from main import app
 from main import validate_output_path
 from main import validate_scenario_path
+import pytest
+import typer
+from typer.testing import CliRunner
 
 
 @pytest.fixture
@@ -85,20 +82,18 @@ def test_main_with_invalid_debug_level(runner: CliRunner, temp_scenario_file: Pa
 
 
 @pytest.mark.unit
-@patch('main.ConfigurationService')
-def test_main_with_valid_parameters(
-    mock_config_service: MagicMock, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
-) -> None:
+def test_main_with_valid_parameters(mocker, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
     """Test main function succeeds with valid parameters."""
-    mock_service = MagicMock()
-    mock_config = MagicMock()
+    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_service = mocker.MagicMock()
+    mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
     mock_config.start_date = '2024-01-01'
     mock_config.end_date = '2024-12-31'
     mock_config.train = []
     mock_config.workshop.tracks = []
     mock_config.routes = []
-    mock_validation = MagicMock()
+    mock_validation = mocker.MagicMock()
     mock_service.load_complete_scenario.return_value = (mock_config, mock_validation)
     mock_config_service.return_value = mock_service
 
@@ -112,20 +107,18 @@ def test_main_with_valid_parameters(
 
 
 @pytest.mark.unit
-@patch('main.ConfigurationService')
-def test_main_with_verbose_flag(
-    mock_config_service: MagicMock, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
-) -> None:
+def test_main_with_verbose_flag(mocker, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
     """Test main function with verbose flag enabled."""
-    mock_service = MagicMock()
-    mock_config = MagicMock()
+    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_service = mocker.MagicMock()
+    mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
     mock_config.start_date = '2024-01-01'
     mock_config.end_date = '2024-12-31'
     mock_config.train = []
     mock_config.workshop.tracks = []
     mock_config.routes = []
-    mock_validation = MagicMock()
+    mock_validation = mocker.MagicMock()
     mock_service.load_complete_scenario.return_value = (mock_config, mock_validation)
     mock_config_service.return_value = mock_service
 
@@ -138,20 +131,20 @@ def test_main_with_verbose_flag(
 
 
 @pytest.mark.unit
-@patch('main.ConfigurationService')
 def test_main_with_custom_debug_level(
-    mock_config_service: MagicMock, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
+    mocker, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function with custom debug level."""
-    mock_service = MagicMock()
-    mock_config = MagicMock()
+    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_service = mocker.MagicMock()
+    mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
     mock_config.start_date = '2024-01-01'
     mock_config.end_date = '2024-12-31'
     mock_config.train = []
     mock_config.workshop.tracks = []
     mock_config.routes = []
-    mock_validation = MagicMock()
+    mock_validation = mocker.MagicMock()
     mock_service.load_complete_scenario.return_value = (mock_config, mock_validation)
     mock_config_service.return_value = mock_service
 

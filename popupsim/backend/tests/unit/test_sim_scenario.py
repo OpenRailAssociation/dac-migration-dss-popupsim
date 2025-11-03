@@ -4,12 +4,12 @@ Simple pytest tests validating Scenario string output and builder behavior.
 """
 
 import pytest
+from simulation.scenario import Scenario
+from simulation.scenario import ScenarioBuilder
 
 from configuration.model_route import Route
 from configuration.model_routes import Routes
 from configuration.model_wagon import Wagon
-from simulation.scenario import Scenario
-from simulation.scenario import ScenarioBuilder
 
 
 @pytest.mark.unit
@@ -21,9 +21,9 @@ def test_scenario_str_with_routes_and_wagons(mocker) -> None:
     """
     routes = mocker.MagicMock(spec=Routes)
     routes.length = 2
-    
+
     wagon = mocker.MagicMock(spec=Wagon)
-    wagons: list[Wagon] = [wagon]  # type: ignore[list-item]
+    wagons: list[Wagon] = [wagon]
 
     scenario: Scenario = Scenario(routes=routes, wagons=wagons)
     result: str = str(scenario)
@@ -62,7 +62,7 @@ def test_scenario_builder_chain_and_modifications(mocker) -> None:
     Verifies that routes and wagons are correctly added and referenced in the built Scenario.
     """
     builder: ScenarioBuilder = ScenarioBuilder()
-    
+
     # Create mock objects
     routes = mocker.MagicMock(spec=Routes)
     route_a = mocker.MagicMock(spec=Route)
