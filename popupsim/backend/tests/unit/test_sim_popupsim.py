@@ -24,13 +24,13 @@ Run only popup-sim related tests:
 from typing import Any
 
 import pytest
+from simulation.popupsim import PopupSim
+from simulation.scenario import ScenarioBuilder
+from simulation.sim_adapter import SimPyAdapter
 
-from configuration.model_route import Route  # type: ignore[import-not-found,import-untyped]
-from configuration.model_routes import Routes  # type: ignore[import-not-found,import-untyped]
-from configuration.model_wagon import Wagon  # type: ignore[import-not-found,import-untyped]
-from simulation.popupsim import PopupSim  # type: ignore[import-not-found,import-untyped]
-from simulation.scenario import ScenarioBuilder  # type: ignore[import-not-found,import-untyped]
-from simulation.sim_adapter import SimPyAdapter  # type: ignore[import-not-found,import-untyped]
+from configuration.model_route import Route
+from configuration.model_routes import Routes
+from configuration.model_wagon import Wagon
 
 
 class FakeAdapter:

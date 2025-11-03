@@ -15,7 +15,7 @@ from typing import Any
 from .sim_adapter import SimulationAdapter
 
 
-class PopupSim:
+class PopupSim:  # pylint: disable=too-few-public-methods
     """High-level simulation orchestrator for PopUp-Sim.
 
     This facade coordinates simulation execution using a SimulationAdapter and a

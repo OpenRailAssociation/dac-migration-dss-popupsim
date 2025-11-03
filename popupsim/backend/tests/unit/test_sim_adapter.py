@@ -8,18 +8,9 @@ sys.modules.
 """
 
 from collections.abc import Generator
-from pathlib import Path
-import sys
 
 import pytest
-
-# Ensure src is on path for imports when tests are executed from repository root
-ROOT: Path = Path(__file__).resolve().parents[4]  # repo root
-SRC: Path = ROOT / 'popupsim' / 'backend' / 'src'
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
-from simulation.sim_adapter import SimPyAdapter  # noqa: E402
+from simulation.sim_adapter import SimPyAdapter
 
 
 @pytest.mark.unit

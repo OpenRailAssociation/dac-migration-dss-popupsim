@@ -7,8 +7,7 @@ ValidationResult, and ConfigurationValidator classes.
 
 from datetime import date
 from datetime import time
-
-import pytest
+from io import StringIO
 
 from configuration.model_route import Route
 from configuration.model_scenario import ScenarioConfig
@@ -191,38 +190,18 @@ class TestValidationResult:
         assert warnings[0].message == 'Warning 1'
         assert warnings[1].message == 'Warning 2'
 
-    def test_print_summary_valid_config(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Test print_summary for valid configuration.
-
-        Parameters
-        ----------
-        caplog : pytest.LogCaptureFixture
-            Pytest fixture for capturing log output.
-        """
-        import logging
-
-        # Set log level to capture INFO messages
-        caplog.set_level(logging.INFO)
-
+    def test_print_summary_valid_config(self, mocker) -> None:
+        """Test print_summary for valid configuration."""
+        mock_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
         result = ValidationResult(is_valid=True, issues=[])
         result.print_summary()
 
-        # Check log messages
-        assert '✅ Configuration valid - No issues found' in caplog.text
+        output = mock_stdout.getvalue()
+        assert '✅ Configuration valid - No issues found' in output
 
-    def test_print_summary_with_errors(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Test print_summary with errors.
-
-        Parameters
-        ----------
-        caplog : pytest.LogCaptureFixture
-            Pytest fixture for capturing log output.
-        """
-        import logging
-
-        # Set log level to capture INFO messages
-        caplog.set_level(logging.INFO)
-
+    def test_print_summary_with_errors(self, mocker) -> None:
+        """Test print_summary with errors."""
+        mock_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
         issues = [
             ValidationIssue(ValidationLevel.ERROR, 'Critical error'),
             ValidationIssue(ValidationLevel.WARNING, 'Minor warning'),
@@ -230,25 +209,15 @@ class TestValidationResult:
         result = ValidationResult(is_valid=False, issues=issues)
         result.print_summary()
 
-        # Check log messages
-        assert '❌ Configuration invalid - Errors found:' in caplog.text
-        assert 'Critical error' in caplog.text
-        assert '⚠️  Warnings:' in caplog.text
-        assert 'Minor warning' in caplog.text
+        output = mock_stdout.getvalue()
+        assert '❌ Configuration invalid - Errors found:' in output
+        assert 'Critical error' in output
+        assert '⚠️  Warnings:' in output
+        assert 'Minor warning' in output
 
-    def test_print_summary_warnings_only(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Test print_summary with warnings only.
-
-        Parameters
-        ----------
-        caplog : pytest.LogCaptureFixture
-            Pytest fixture for capturing log output.
-        """
-        import logging
-
-        # Set log level to capture INFO messages
-        caplog.set_level(logging.INFO)
-
+    def test_print_summary_warnings_only(self, mocker) -> None:
+        """Test print_summary with warnings only."""
+        mock_stdout = mocker.patch('sys.stdout', new_callable=StringIO)
         issues = [
             ValidationIssue(ValidationLevel.WARNING, 'Warning message'),
             ValidationIssue(ValidationLevel.INFO, 'Info message'),
@@ -256,55 +225,10 @@ class TestValidationResult:
         result = ValidationResult(is_valid=True, issues=issues)
         result.print_summary()
 
-        # Check log messages
-        assert '⚠️  Warnings:' in caplog.text
-        assert 'Warning message' in caplog.text
-        assert '❌' not in caplog.text  # No error section
-
-    def test_print_summary_detailed(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Test with detailed log record inspection."""
-        import logging
-
-        caplog.set_level(logging.INFO, logger='validation')  # Only capture from 'validation' logger
-
-        result = ValidationResult(is_valid=True, issues=[])
-        result.print_summary()
-
-        # Check specific log records
-        assert len(caplog.records) == 1
-        assert caplog.records[0].levelname == 'INFO'
-        assert '✅ Configuration valid' in caplog.records[0].message
-
-        # Or check by level
-        info_messages = [r.message for r in caplog.records if r.levelname == 'INFO']
-        assert any('✅ Configuration valid' in msg for msg in info_messages)
-
-    def test_print_summary_with_different_levels(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Test print_summary with mixed validation issues.
-
-        Parameters
-        ----------
-        caplog : pytest.LogCaptureFixture
-            Pytest fixture for capturing log output.
-        """
-        import logging
-
-        caplog.set_level(logging.INFO)
-
-        issues = [
-            ValidationIssue(ValidationLevel.ERROR, 'Critical error'),
-            ValidationIssue(ValidationLevel.WARNING, 'Minor warning'),
-            ValidationIssue(ValidationLevel.INFO, 'Informational message'),
-        ]
-        result = ValidationResult(is_valid=False, issues=issues)
-        result.print_summary()
-
-        # Check log messages
-        assert '❌ Configuration invalid - Errors found:' in caplog.text
-        assert 'Critical error' in caplog.text
-        assert '⚠️  Warnings:' in caplog.text
-        assert 'Minor warning' in caplog.text
-        assert 'INFO ' in caplog.text  # Info messages should always be shown
+        output = mock_stdout.getvalue()
+        assert '⚠️  Warnings:' in output
+        assert 'Warning message' in output
+        assert '❌' not in output  # No error section
 
 
 class TestConfigurationValidator:

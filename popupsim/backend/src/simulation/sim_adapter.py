@@ -7,8 +7,11 @@ to obtain an adapter when SimPy is available; the import is performed lazily to
 avoid a hard dependency.
 """
 
-from abc import ABC, abstractmethod
-from typing import Any, Callable, Generator, Optional
+from abc import ABC
+from abc import abstractmethod
+from collections.abc import Callable
+from collections.abc import Generator
+from typing import Any
 
 
 class SimulationAdapter(ABC):
