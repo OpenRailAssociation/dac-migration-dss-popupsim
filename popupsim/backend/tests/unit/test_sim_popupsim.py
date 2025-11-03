@@ -7,30 +7,16 @@ construct a full simulation using ScenarioBuilder and SimPyAdapter.
 
 The tests are written for pytest and use lightweight fake adapters to avoid
 depending on an actual simpy environment in unit test runs.
-
-Notes
------
-- Test classes are marked with ``@pytest.mark.unit`` to allow selective runs.
-- Some tests include illustrative code guarded by ``if __name__ == '__main__'``
-  and are not executed during normal pytest discovery.
-
-Examples
---------
-Run only popup-sim related tests:
-
->>> uv run pytest popupsim/backend/tests/unit/test_sim_popupsim.py
 """
 
+from datetime import date
 from typing import Any
 
 import pytest
 from simulation.popupsim import PopupSim
-from simulation.scenario import ScenarioBuilder
 from simulation.sim_adapter import SimPyAdapter
 
-from configuration.model_route import Route
-from configuration.model_routes import Routes
-from configuration.model_wagon import Wagon
+from configuration.model_scenario import ScenarioConfig
 
 
 class FakeAdapter:
@@ -128,21 +114,14 @@ class TestPopupSimWithSimpyAdapter:
         here as illustrative code rather than an assertion-based unit test.
         """
         if __name__ == '__main__':
-            # Example Data
-            wagon1: Wagon = Wagon(wagon_id='W001', train_id='T001', length=15.5, is_loaded=True, needs_retrofit=False)
-            wagon2: Wagon = Wagon(wagon_id='W001', train_id='T001', length=15.5, is_loaded=True, needs_retrofit=False)
-            route = Route(
-                route_id='TEST01',
-                from_track='track1',
-                to_track='track2',
-                track_sequence=['track1', 'middle', 'track2'],
-                distance_m=100.5,
-                time_min=5,
-            )
-
             # Example Usage
-            scenario = ScenarioBuilder().add_wagon(wagon1).add_wagon(wagon2).add_routes(Routes(routes=[route])).build()
-
+            scenario = ScenarioConfig(
+                scenario_id='test_scenario',
+                start_date=date(2024, 1, 1),
+                end_date=date(2024, 1, 10),
+                random_seed=42,
+                train_schedule_file='schedule.csv',
+            )
             sim_adapter = SimPyAdapter.create_simpy_adapter()
             popup_sim = PopupSim(sim_adapter, scenario)
             popup_sim.run(until=100.0)

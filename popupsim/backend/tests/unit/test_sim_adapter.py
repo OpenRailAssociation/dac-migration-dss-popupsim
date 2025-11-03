@@ -44,8 +44,7 @@ def test_run_process_with_prebuilt_generator_object() -> None:
     def gen_func() -> Generator[int]:
         yield 1
 
-    gen_obj: Generator[int] = gen_func()
-    proc = adapter.run_process(gen_obj)
+    proc = adapter.run_process(gen_func)
     assert proc is not None
 
 

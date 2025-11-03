@@ -10,7 +10,7 @@ All waiting and scheduling is expressed via the adapter interface, so the domain
 remains agnostic of the underlying simulation framework.
 """
 
-from typing import Any
+from configuration.model_scenario import ScenarioConfig
 
 from .sim_adapter import SimulationAdapter
 
@@ -23,7 +23,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
     the simulation backend directly, keeping business logic backend-agnostic.
     """
 
-    def __init__(self, adapter: SimulationAdapter, scenario: Any) -> None:
+    def __init__(self, adapter: SimulationAdapter, scenario: ScenarioConfig) -> None:
         """Initialize the PopupSim orchestrator.
 
         Parameters
@@ -31,13 +31,13 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         adapter : SimulationAdapter
             SimulationAdapter instance used to drive the underlying
             simulation environment (e.g., SimPy).
-        scenario : Any
+        scenario : ScenarioConfig
             Domain scenario object containing routes, wagons and other
             configuration consumed by the simulation.
         """
         self.name: str = 'PopUpSim'
         self.adapter: SimulationAdapter = adapter
-        self.scenario: Any = scenario
+        self.scenario: ScenarioConfig = scenario
 
     def run(self, until: float | None = None) -> None:
         """Run the simulation until an optional time.
