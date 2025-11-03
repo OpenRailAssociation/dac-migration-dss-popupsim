@@ -24,7 +24,6 @@ Defines the scenario parameters and references to other data files:
   "start_date": "2025-01-15",
   "end_date": "2025-01-16",
   "random_seed": 42,
-  "workshop": { ... },
   "train_schedule_file": "train_schedule.csv",
   "routes_file": "routes.csv",
   "workshop_tracks_file": "workshop_tracks.csv"
