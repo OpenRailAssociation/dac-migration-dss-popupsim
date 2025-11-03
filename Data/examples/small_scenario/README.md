@@ -81,8 +81,7 @@ python popupsim/backend/src/main.py --scenarioPath Data/examples/small_scenario/
 
 ## Notes
 
-- All CSV files must be in the same directory as `scenario.json`
-- File references in `scenario.json` are relative to the scenario directory
+- All CSV files must be in the same directory as `scenario.json` with relative file references
 - This scenario is intended for quick tests and as a template for creating more complex cases
 - The modular file structure allows easy modification of individual components
 

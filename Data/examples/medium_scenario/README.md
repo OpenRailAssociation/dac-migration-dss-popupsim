@@ -24,22 +24,6 @@ Defines the scenario parameters and references to other data files:
   "start_date": "2025-01-15",
   "end_date": "2025-01-17",
   "random_seed": 42,
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "function": "werkstattgleis",
-        "capacity": 5,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK02",
-        "function": "werkstattgleis",
-        "capacity": 5,
-        "retrofit_time_min": 30
-      }
-    ]
-  },
   "train_schedule_file": "train_schedule.csv",
   "routes_file": "routes.csv",
   "workshop_tracks_file": "workshop_tracks.csv"
@@ -98,8 +82,7 @@ python popupsim/backend/src/main.py --scenarioPath Data/examples/medium_scenario
 
 ## Notes
 
-- All CSV files must be in the same directory as `scenario.json`
-- File references in `scenario.json` are relative to the scenario directory
+- All CSV files must be in the same directory as `scenario.json` with relative file references
 - This scenario is intended for medium-scale tests and as a template for creating more complex cases
 - The modular file structure allows easy modification of individual components
 

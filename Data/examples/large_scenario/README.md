@@ -24,7 +24,6 @@ Defines the scenario parameters and references to other data files:
   "start_date": "2025-01-15",
   "end_date": "2025-01-20",
   "random_seed": 42,
-  "workshop": { ... },
   "train_schedule_file": "train_schedule.csv",
   "routes_file": "routes.csv",
   "workshop_tracks_file": "workshop_tracks.csv"
@@ -82,8 +81,7 @@ python popupsim/backend/src/main.py --scenarioPath Data/examples/large_scenario/
 
 ## Notes
 
-- All CSV files must be in the same directory as `scenario.json`
-- File references in `scenario.json` are relative to the scenario directory
+- All CSV files must be in the same directory as `scenario.json` with relative file references
 - This scenario is intended for large-scale tests and performance evaluation
 - The modular file structure allows easy modification of individual components
 
