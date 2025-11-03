@@ -169,7 +169,7 @@ def main(
         # Import here to avoid circular import at module level
         service = ConfigurationService()
         # scenario_path is guaranteed to be Path here (validated above)
-        if scenario_path is None:  # pragma: no cover
+        if scenario_path is None:
             raise typer.Exit(1)
         config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
         typer.echo('\nScenario loaded and validated successfully.')
@@ -177,9 +177,10 @@ def main(
         typer.echo(f'Start Date: {config.start_date}')
         typer.echo(f'End Date: {config.end_date}')
         typer.echo(f'Number of Trains: {len(config.train) if config.train else 0}')
-        typer.echo(
-            f'Number of Workshop Tracks: {len(config.workshop.tracks) if config.workshop else 0}'  # pylint: disable=no-member
-        )
+        workshop_track_count = 0
+        if config.workshop is not None:
+            workshop_track_count = len(getattr(config.workshop, 'tracks', []))
+        typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
         typer.echo(f'Number of Routes: {len(config.routes) if config.routes else 0}')
         typer.echo('\nValidation Summary:')
         validation_result.print_summary()
