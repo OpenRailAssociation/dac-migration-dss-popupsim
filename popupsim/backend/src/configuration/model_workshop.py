@@ -10,17 +10,18 @@ Key Features:
   - Adequate workshop capacity for train arrivals.
 """
 
-import logging
-
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
+from core.i18n import _
+from core.logging import Logger
+from core.logging import get_logger
+
 from .model_track import TrackFunction
 from .model_track import WorkshopTrack
 
-# Configure logging
-logger = logging.getLogger(__name__)
+logger: Logger = get_logger(__name__)
 
 
 class Workshop(BaseModel):
@@ -54,7 +55,7 @@ class Workshop(BaseModel):
         track_ids = [track.id for track in v]
         if len(track_ids) != len(set(track_ids)):
             duplicates = [track_id for track_id in track_ids if track_ids.count(track_id) > 1]
-            raise ValueError(f'Duplicate track IDs found: {list(set(duplicates))}')
+            raise ValueError(_('Duplicate track IDs found: %(ids)s', ids=str(list(set(duplicates)))))
         return v
 
     @field_validator('tracks')
@@ -87,20 +88,31 @@ class Workshop(BaseModel):
         missing_required = required_functions - functions_present
         if missing_required:
             missing_names = [f.value for f in missing_required]
-            raise ValueError(f'Workshop must have at least one track with required functions: {missing_names}')
+            raise ValueError(
+                _(
+                    'Workshop must have at least one track with required functions: %(functions)s',
+                    functions=str(missing_names),
+                )
+            )
 
         # Business rule: Verify werkstattgleis tracks have proper retrofit times
         werkstatt_tracks = [track for track in v if track.function == TrackFunction.WERKSTATTGLEIS]
         for track in werkstatt_tracks:
             if track.retrofit_time_min <= 0:
-                raise ValueError(f'Werkstattgleis track {track.id} must have retrofit_time_min > 0')
+                raise ValueError(
+                    _('Werkstattgleis track %(track_id)s must have retrofit_time_min > 0', track_id=track.id)
+                )
 
         # Business rule: Non-werkstattgleis tracks should have retrofit_time_min = 0
         non_werkstatt_tracks = [track for track in v if track.function != TrackFunction.WERKSTATTGLEIS]
         for track in non_werkstatt_tracks:
             if track.retrofit_time_min != 0:
                 raise ValueError(
-                    f'Non-werkstattgleis track {track.id} ({track.function.value}) must have retrofit_time_min = 0'
+                    _(
+                        'Non-werkstattgleis track %(track_id)s (%(function)s) must have retrofit_time_min = 0',
+                        track_id=track.id,
+                        function=track.function.value,
+                    )
                 )
 
         return v
@@ -136,7 +148,9 @@ class Workshop(BaseModel):
         werkstatt_capacity = function_capacities.get(TrackFunction.WERKSTATTGLEIS, 0)
         if werkstatt_capacity < 3:
             logger.warning(
-                'Low werkstattgleis capacity: %s. Consider adding more retrofit capacity.', werkstatt_capacity
+                'Low werkstattgleis capacity',
+                translate=True,
+                capacity=werkstatt_capacity,
             )
 
         # Business rule: If feeder/exit tracks exist, they should be balanced
@@ -144,9 +158,9 @@ class Workshop(BaseModel):
         abfuehrung_capacity = function_capacities.get(TrackFunction.WERKSTATTABFUEHRUNG, 0)
 
         if zufuehrung_capacity > 0 and abfuehrung_capacity == 0:
-            raise ValueError('Workshop has werkstattzufuehrung tracks but no werkstattabfuehrung tracks')
+            raise ValueError(_('Workshop has werkstattzufuehrung tracks but no werkstattabfuehrung tracks'))
         if abfuehrung_capacity > 0 and zufuehrung_capacity == 0:
-            raise ValueError('Workshop has werkstattabfuehrung tracks but no werkstattzufuehrung tracks')
+            raise ValueError(_('Workshop has werkstattabfuehrung tracks but no werkstattzufuehrung tracks'))
 
         return v
 
@@ -163,7 +177,7 @@ class Workshop(BaseModel):
         werkstatt_tracks = [track for track in self.tracks if track.function == TrackFunction.WERKSTATTGLEIS]
 
         if not werkstatt_tracks:
-            return {'error': 'No werkstattgleis tracks found'}
+            return {'error': _('No werkstattgleis tracks found')}
 
         total_capacity = sum(t.capacity for t in werkstatt_tracks)
         avg_retrofit_time = sum(t.retrofit_time_min for t in werkstatt_tracks) / len(werkstatt_tracks)
@@ -192,7 +206,7 @@ class Workshop(BaseModel):
         throughput_info = self.get_werkstatt_throughput_info()
 
         if 'error' in throughput_info:
-            return [throughput_info['error']]
+            return [str(throughput_info['error'])]
 
         max_throughput = throughput_info['max_throughput_per_day']
         utilization = wagons_needing_retrofit_per_day / max_throughput
@@ -201,20 +215,33 @@ class Workshop(BaseModel):
 
         if utilization > 1.0:
             messages.append(
-                f'ERROR: Kapazität überschritten: {wagons_needing_retrofit_per_day} Wagen/Tag '
-                f'bei max. {max_throughput:.0f} Durchsatz ({utilization * 100:.0f}% Auslastung). '
-                f'Erhöhen Sie Kapazität oder reduzieren Sie Zugankünfte'
+                _(
+                    'ERROR: Capacity exceeded: %(wagons)d wagons/day at max. %(throughput).0f throughput '
+                    '(%(utilization).0f%% utilization). Increase capacity or reduce train arrivals',
+                    wagons=wagons_needing_retrofit_per_day,
+                    throughput=max_throughput,
+                    utilization=utilization * 100,
+                )
             )
         elif utilization > 0.8:
             messages.append(
-                f'WARNING: Hohe Auslastung: {wagons_needing_retrofit_per_day} Wagen/Tag '
-                f'bei max. {max_throughput:.0f} Durchsatz ({utilization * 100:.0f}% Auslastung). '
-                f'Erwägen Sie höhere Kapazität für bessere Performance'
+                _(
+                    'WARNING: High utilization: %(wagons)d wagons/day at max. %(throughput).0f throughput '
+                    '(%(utilization).0f%% utilization). Consider higher capacity for better performance',
+                    wagons=wagons_needing_retrofit_per_day,
+                    throughput=max_throughput,
+                    utilization=utilization * 100,
+                )
             )
         else:
             messages.append(
-                f'INFO: Kapazität ausreichend: {wagons_needing_retrofit_per_day} Wagen/Tag '
-                f'bei max. {max_throughput:.0f} Durchsatz ({utilization * 100:.0f}% Auslastung)'
+                _(
+                    'INFO: Capacity sufficient: %(wagons)d wagons/day at max. %(throughput).0f throughput '
+                    '(%(utilization).0f%% utilization)',
+                    wagons=wagons_needing_retrofit_per_day,
+                    throughput=max_throughput,
+                    utilization=utilization * 100,
+                )
             )
 
         return messages

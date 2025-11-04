@@ -6,19 +6,21 @@ such as date ranges, random seeds, workshop configurations, and file references.
 """
 
 from datetime import date
-import logging
 
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
 
+from core.i18n import _
+from core.logging import Logger
+from core.logging import get_logger
+
 from .model_route import Route
 from .model_train import Train
 from .model_workshop import Workshop
 
-# Configure logging
-logger = logging.getLogger(__name__)
+logger: Logger = get_logger(__name__)
 
 
 class ScenarioConfig(BaseModel):
@@ -47,7 +49,10 @@ class ScenarioConfig(BaseModel):
         """Validate that the train schedule file has a valid extension."""
         if not v.endswith(('.json', '.csv')):
             raise ValueError(
-                f"Invalid file extension for train_schedule_file: '{v}'. Expected one of: .json, .csv, .xlsx"
+                _(
+                    "Invalid file extension for train_schedule_file: '%(file)s'. Expected one of: .json, .csv, .xlsx",
+                    file=v,
+                )
             )
         return v
 
@@ -56,14 +61,23 @@ class ScenarioConfig(BaseModel):
         """Ensure end_date is after start_date and duration is reasonable."""
         if self.end_date <= self.start_date:
             raise ValueError(
-                f'Invalid date range: end_date ({self.end_date}) must be after start_date ({self.start_date}).'
+                _(
+                    'Invalid date range: end_date (%(end_date)s) must be after start_date (%(start_date)s).',
+                    end_date=str(self.end_date),
+                    start_date=str(self.start_date),
+                )
             )
         duration = (self.end_date - self.start_date).days
 
         if duration > 365:
             logger.warning(
-                "Simulation duration of %d days for scenario '%s' may impact performance.", duration, self.scenario_id
+                'Simulation duration may impact performance',
+                translate=True,
+                duration=duration,
+                scenario_id=self.scenario_id,
             )
         elif duration < 1:
-            raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
+            raise ValueError(
+                _('Simulation duration must be at least 1 day. Current duration: %(duration)d days.', duration=duration)
+            )
         return self

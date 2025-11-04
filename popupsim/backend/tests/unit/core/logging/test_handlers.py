@@ -4,6 +4,7 @@ from collections.abc import Generator
 import logging
 from pathlib import Path
 import tempfile
+
 import pytest
 
 from core.logging.handlers import FileHandler
@@ -13,12 +14,14 @@ from core.logging.handlers import StructuredHandler
 
 class MockSeverity:
     """Mock severity for testing."""
+
     def __init__(self, value: str) -> None:
         self.value = value
 
 
 class MockCategory:
     """Mock category for testing."""
+
     def __init__(self, value: str) -> None:
         self.value = value
 

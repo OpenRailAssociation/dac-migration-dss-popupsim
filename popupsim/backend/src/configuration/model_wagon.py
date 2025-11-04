@@ -6,13 +6,13 @@ individual wagons, including their unique identifiers, physical attributes,
 and specific requirements such as loading status and retrofit needs.
 """
 
-import logging
-
 from pydantic import BaseModel
 from pydantic import Field
 
-# Configure logging
-logger = logging.getLogger(__name__)
+from core.logging import Logger
+from core.logging import get_logger
+
+logger: Logger = get_logger(__name__)
 
 
 class Wagon(BaseModel):

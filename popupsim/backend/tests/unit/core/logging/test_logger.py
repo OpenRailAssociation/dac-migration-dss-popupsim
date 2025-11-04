@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 import tempfile
 from typing import Any
+
 import pytest
 
 from core.logging import FileConfig
@@ -298,7 +299,7 @@ class TestLoggerEdgeCases:
         class MockSeverity:
             def __init__(self, value: str) -> None:
                 self.value = value
-        
+
         class MockIssue:
             def __init__(self) -> None:
                 self.severity = MockSeverity('HIGH')

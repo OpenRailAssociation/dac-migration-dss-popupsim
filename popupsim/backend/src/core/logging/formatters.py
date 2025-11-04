@@ -115,6 +115,9 @@ class JsonFormatter(logging.Formatter):
                 'exc_info',
                 'exc_text',
                 'stack_info',
+                'taskName',
+                'translate',
+                'msg_args',
             ):
                 log_entry[key] = value
 
@@ -181,6 +184,9 @@ class StructuredFormatter(logging.Formatter):
                 'exc_info',
                 'exc_text',
                 'stack_info',
+                'taskName',
+                'translate',
+                'msg_args',
             ):
                 extra_data[key] = value
 

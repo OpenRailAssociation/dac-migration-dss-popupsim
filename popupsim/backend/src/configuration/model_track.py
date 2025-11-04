@@ -19,6 +19,12 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import model_validator
 
+from core.i18n import _
+from core.logging import Logger
+from core.logging import get_logger
+
+logger: Logger = get_logger(__name__)
+
 
 class TrackFunction(Enum):
     """Enumeration of track functions in the workshop.
@@ -64,10 +70,17 @@ class WorkshopTrack(BaseModel):
         """
         if self.function == TrackFunction.WERKSTATTGLEIS:
             if self.retrofit_time_min <= 0:
-                raise ValueError(f'Track {self.id}: retrofit_time_min must be > 0 for werkstattgleis tracks')
+                raise ValueError(
+                    _('Track %(track_id)s: retrofit_time_min must be > 0 for werkstattgleis tracks', track_id=self.id)
+                )
         else:
             if self.retrofit_time_min != 0:
-                raise ValueError(f'Track {self.id}: retrofit_time_min must be 0 unless function is werkstattgleis')
+                raise ValueError(
+                    _(
+                        'Track %(track_id)s: retrofit_time_min must be 0 unless function is werkstattgleis',
+                        track_id=self.id,
+                    )
+                )
 
         return self
 
