@@ -157,6 +157,8 @@ class SimPyAdapter(SimulationAdapter):
         Any
             Result from SimPy environment run.
         """
+        if until is None:
+            until = self.run_until
         return self._env.run(until)
 
     def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:

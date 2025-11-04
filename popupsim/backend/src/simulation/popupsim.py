@@ -10,9 +10,13 @@ All waiting and scheduling is expressed via the adapter interface, so the domain
 remains agnostic of the underlying simulation framework.
 """
 
+import logging
+
 from configuration.model_scenario import ScenarioConfig
 
 from .sim_adapter import SimulationAdapter
+
+logger = logging.getLogger('PopupSim')
 
 
 class PopupSim:  # pylint: disable=too-few-public-methods
@@ -50,6 +54,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             Simulation time indicating when to stop the simulation.
             If None, the adapter runs until its own completion.
         """
-        print(f'Starting {self.name} for: {self.scenario}')
+        runinfo = f'Starting {self.name} for: {self.scenario}'
+        logger.info(runinfo)
         self.adapter.run(until)
-        print('Simulation completed.')
+        logger.info('Simulation completed.')
