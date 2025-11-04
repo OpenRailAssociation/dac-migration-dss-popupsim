@@ -82,6 +82,7 @@ ignore = [
 "ANN204", # missing return type annotation for __init__ (always None)
 "ANN206", # missing return type annotation for classmethod (Pydantic validators)
 "ANN401", # dynamically typed expressions (pandas/Any types)
+"G201",   # Allow .error(..., exc_info=True) for custom Logger class
 ]
 
 [tool.ruff.lint.pydocstyle]

@@ -319,24 +319,24 @@ class TestWorkshop:
         low_load = int(max_throughput * 0.5)  # 50% utilization
         messages = workshop.validate_capacity_utilization(low_load)
         assert len(messages) == 1
-        assert 'INFO: Kapazität ausreichend' in messages[0]
-        assert '50% Auslastung' in messages[0]
+        assert 'INFO: Capacity sufficient' in messages[0]
+        assert '50% utilization' in messages[0]
 
         # 2. High utilization (> 80%, < 100%)
         high_load = int(max_throughput * 0.9)  # 90% utilization
         messages = workshop.validate_capacity_utilization(high_load)
         assert len(messages) == 1
-        assert 'WARNING: Hohe Auslastung' in messages[0]
-        assert '90% Auslastung' in messages[0]
-        assert 'Erwägen Sie höhere Kapazität' in messages[0]
+        assert 'WARNING: High utilization' in messages[0]
+        assert '90% utilization' in messages[0]
+        assert 'Consider higher capacity' in messages[0]
 
         # 3. Overutilization (> 100%)
         over_load = int(max_throughput * 1.2)  # 120% utilization
         messages = workshop.validate_capacity_utilization(over_load)
         assert len(messages) == 1
-        assert 'ERROR: Kapazität überschritten' in messages[0]
-        assert '120% Auslastung' in messages[0]
-        assert 'Erhöhen Sie Kapazität oder reduzieren Sie Zugankünfte' in messages[0]
+        assert 'ERROR: Capacity exceeded' in messages[0]
+        assert '120% utilization' in messages[0]
+        assert 'Increase capacity or reduce train arrivals' in messages[0]
 
     def test_workshop_capacity_utilization_no_werkstatt_error(self):
         """Test capacity utilization validation when no werkstattgleis exists."""

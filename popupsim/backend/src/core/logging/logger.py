@@ -112,12 +112,15 @@ class Logger:
             Whether to translate the message using i18n.
         **kwargs : Any
             Additional context data to include in log record and issue tracker.
+            Supports exc_info=True for exception stack traces.
         """
+        # Extract exc_info before creating extra dict
+        exc_info = kwargs.pop('exc_info', False)
         extra = kwargs.copy() if kwargs else {}
         if translate:
             extra['translate'] = True
             extra['msg_args'] = kwargs
-        self._logger.error(message, extra=extra if extra else None)
+        self._logger.error(message, exc_info=exc_info, extra=extra if extra else None)
         if self._issue_tracker:
             self._issue_tracker.track_error(message, **kwargs)
 

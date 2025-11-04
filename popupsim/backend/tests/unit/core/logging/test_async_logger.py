@@ -24,7 +24,7 @@ class MockIssueTracker:
     def track_error(self, message: str, **context: Any) -> None:
         """Track error."""
         self.errors.append((message, context))
-    
+
     def track_structured_error(self, error_dict: dict[str, Any]) -> None:
         """Track structured error."""
         pass  # Not used in async tests
@@ -108,17 +108,17 @@ class TestGetAsyncLogger:
         assert logger._logger._issue_tracker is mock_issue_tracker
 
 
-@pytest.mark.asyncio
 class TestAsyncIntegration:
     """Integration tests for async logging."""
 
+    @pytest.mark.asyncio
     async def test_concurrent_async_logging(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test concurrent async logging operations."""
         logger = AsyncLogger('test.concurrent')
 
         async def log_messages(prefix: str) -> None:
-            await logger.info(f'{prefix} message 1')
-            await logger.info(f'{prefix} message 2')
+            await logger.info('Task message', task=prefix, message_id=1)
+            await logger.info('Task message', task=prefix, message_id=2)
 
         with caplog.at_level(logging.INFO):
             # Run concurrent logging tasks
@@ -126,6 +126,6 @@ class TestAsyncIntegration:
 
         # Should have 6 messages total
         assert len(caplog.records) == 6
-        assert 'Task1 message 1' in caplog.text
-        assert 'Task2 message 1' in caplog.text
-        assert 'Task3 message 1' in caplog.text
+        assert any(getattr(r, 'task', None) == 'Task1' and getattr(r, 'message_id', None) == 1 for r in caplog.records)
+        assert any(getattr(r, 'task', None) == 'Task2' and getattr(r, 'message_id', None) == 1 for r in caplog.records)
+        assert any(getattr(r, 'task', None) == 'Task3' and getattr(r, 'message_id', None) == 1 for r in caplog.records)
