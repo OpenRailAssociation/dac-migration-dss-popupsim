@@ -100,6 +100,7 @@ class SimPyAdapter(SimulationAdapter):
 
     def __init__(self, env: Any) -> None:
         self._env: Any = env
+        self.run_until: float = 500.0  # default run time
 
     @classmethod
     def create_simpy_adapter(cls: type['SimPyAdapter']) -> 'SimPyAdapter':
@@ -157,6 +158,8 @@ class SimPyAdapter(SimulationAdapter):
         Any
             Result from SimPy environment run.
         """
+        if until is None:
+            until = self.run_until
         return self._env.run(until)
 
     def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:

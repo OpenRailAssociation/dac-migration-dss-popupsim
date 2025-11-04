@@ -28,7 +28,7 @@ from .validation import ConfigurationValidator
 from .validation import ValidationResult
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('ConfigurationService')
 
 
 # pylint: disable=too-few-public-methods
@@ -97,8 +97,8 @@ class ConfigurationService:
 
             if missing_fields:
                 raise ConfigurationError(
-                    f'Missing required fields in {file_path}: '
-                    f'{", ".join(missing_fields)}. Found fields: {", ".join(data.keys())}'
+                    f'Missing required fields {", ".join(missing_fields)} in {file_path}: '
+                    f'Found fields: {", ".join(data.keys())}'
                 )
 
             logger.info('Successfully loaded scenario: %s', data.get('scenario_id'))
@@ -111,23 +111,8 @@ class ConfigurationService:
             )
             logger.error('%s', error_msg)
             raise ConfigurationError(error_msg) from e
-        except ValidationError as e:
-            error_details = []
-            for error in e.errors():
-                field_path = ' -> '.join(str(loc) for loc in error['loc'])
-                error_details.append(f"Field '{field_path}': {error['msg']} (input: {error.get('input', 'N/A')})")
-            error_msg = (
-                f'Validation failed for scenario configuration in {file_path}:\n'
-                f'  • {chr(10).join("  • " + detail for detail in error_details)}'
-            )
-            logger.error('%s', error_msg)
-            raise ConfigurationError(error_msg) from e
-        except Exception as e:
-            error_msg = f'Unexpected error loading {file_path}: {e}'
-            logger.error('%s', error_msg)
-            raise ConfigurationError(error_msg) from e
 
-    def load_and_validate_scenario(self, path: str | Path) -> dict[str, Any]:
+    def load_and_validate_scenario_data(self, path: str | Path) -> dict[str, Any]:
         """Load scenario configuration and validate all referenced files exist.
 
         Parameters
@@ -162,6 +147,41 @@ class ConfigurationService:
 
         logger.info('All referenced files validated for json scenario data: %s', scenario_data.get('scenario_id'))
         return scenario_data
+
+    def load_scenario_config(self, path: str | Path) -> ScenarioConfig:
+        """Load and validate scenario configuration from a JSON file.
+
+        Parameters
+        ----------
+        path : str | Path
+            Directory path containing scenario.json or direct path to JSON file.
+
+        Returns
+        -------
+        ScenarioConfig
+            Validated ScenarioConfig object.
+
+        Raises
+        ------
+        ConfigurationError
+            If loading or validation fails.
+        """
+        data = self.load_and_validate_scenario_data(path)
+        try:
+            scenario = ScenarioConfig(**data)
+            logger.info('ScenarioConfig created successfully for: %s', scenario.scenario_id)
+            return scenario
+        except ValidationError as e:
+            error_details = []
+            for error in e.errors():
+                field_path = ' -> '.join(str(loc) for loc in error['loc'])
+                error_details.append(f"Field '{field_path}': {error['msg']} (input: {error.get('input', 'N/A')})")
+            error_msg = (
+                f'Validation failed for scenario configuration in {path}:\n'
+                f'  • {chr(10).join("  • " + detail for detail in error_details)}'
+            )
+            logger.error('%s', error_msg)
+            raise ConfigurationError(error_msg) from e
 
     def _read_and_validate_train_schedule_csv(self, file_path: Path) -> pd.DataFrame:
         """Read CSV and validate required columns and emptiness.
@@ -632,7 +652,7 @@ class ConfigurationService:
         ConfigurationError
             If loading or validation fails.
         """
-        scenario_data = self.load_and_validate_scenario(path)
+        scenario_data = self.load_and_validate_scenario_data(path)
         config_dir = Path(path) if isinstance(path, str) else path
 
         if config_dir.is_file():

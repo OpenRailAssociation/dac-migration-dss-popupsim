@@ -3,6 +3,8 @@
 from pathlib import Path
 from typing import Annotated
 
+from simulation.popupsim import PopupSim
+from simulation.sim_adapter import SimPyAdapter
 import typer
 
 from configuration.service import ConfigurationError
@@ -171,29 +173,37 @@ def main(
         # scenario_path is guaranteed to be Path here (validated above)
         if scenario_path is None:
             raise typer.Exit(1)
-        config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
+        scenario_config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
         typer.echo('\nScenario loaded and validated successfully.')
-        typer.echo(f'Scenario ID: {config.scenario_id}')
-        typer.echo(f'Start Date: {config.start_date}')
-        typer.echo(f'End Date: {config.end_date}')
-        typer.echo(f'Number of Trains: {len(config.train) if config.train else 0}')
+        typer.echo(f'Scenario ID: {scenario_config.scenario_id}')
+        typer.echo(f'Start Date: {scenario_config.start_date}')
+        typer.echo(f'End Date: {scenario_config.end_date}')
+        typer.echo(f'Number of Trains: {len(scenario_config.train) if scenario_config.train else 0}')
         workshop_track_count = 0
-        if config.workshop is not None:
-            workshop_track_count = len(getattr(config.workshop, 'tracks', []))
+        if scenario_config.workshop is not None:
+            workshop_track_count = len(getattr(scenario_config.workshop, 'tracks', []))
         typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
-        typer.echo(f'Number of Routes: {len(config.routes) if config.routes else 0}')
+        typer.echo(f'Number of Routes: {len(scenario_config.routes) if scenario_config.routes else 0}')
         typer.echo('\nValidation Summary:')
         validation_result.print_summary()
+
+        if not validation_result.is_valid:
+            typer.echo('\nErrors detected in scenario configuration. Exiting.')
+            raise typer.Exit(1)
+        # Main application logic would go here
+        typer.echo('\n🚀 Starting popupsim processing...')
+        sim_adapter = SimPyAdapter.create_simpy_adapter()
+        popup_sim = PopupSim(sim_adapter, scenario_config)
+        # pylint: disable=fixme
+        # Todo make sure run_until is set appropriately from scenario config  # noqa: FIX002
+        popup_sim.run()
+
     except ConfigurationError as e:
         typer.echo(f'Configuration error: {e}')
         raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f'Unexpected error: {e}')
         raise typer.Exit(1) from e
-
-    # Main application logic would go here
-    typer.echo('\n🚀 Starting popupsim processing...')
-    typer.echo('Application would start processing here...')
 
 
 if __name__ == '__main__':
