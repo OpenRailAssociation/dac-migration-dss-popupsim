@@ -32,7 +32,7 @@ This documentation describes the **MVP (Minimum Viable Product) architecture** o
 ## Quick Links
 
 - **[Quality Goals](01-introduction-goals.md#12-quality-goals)** - Top 5 quality priorities
-- **[Use Cases](01-introduction-goals.md#13-requirements-overview)** - 4 MVP use cases
+- **[Use Cases](01-introduction-goals.md#14-mvp-scope)** - 4 MVP use cases
 - **[Technology Decisions](09-architecture-decisions.md)** - 7 key ADRs
 - **[Building Blocks](05-building-blocks.md)** - System structure
 - **[Glossary](12-glossary.md)** - 95+ terms

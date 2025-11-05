@@ -2,9 +2,9 @@
 
 ## Primary Sources
 
-**[1]** Schäfer, F. (2025). *Konzept PopUpSim zur Simulation der schlagartigen Umrüstung auf DAK*. DB Cargo AG. Available: [konzept.md](../requirements/250321_KonzeptPopUpSim_Entwurf.md)
+**[1]** Schäfer, F. (2025). *Konzept PopUpSim zur Simulation der schlagartigen Umrüstung auf DAK*. DB Cargo AG. Available: [konzept.md](../../requirements/250321_KonzeptPopUpSim_Entwurf.md)
 
-**[2]** PopUpSim User Stories. (2025). *User Stories - PopUpSim: 8 user stories across migration phases*. Available: [use-cases.md](../requirements/use-cases.md)
+**[2]** PopUpSim User Stories. (2025). *User Stories - PopUpSim: 8 user stories across migration phases*. Available: [use-cases.md](../../requirements/use-cases.md)
 
 ## Technical Resources
 
@@ -25,5 +25,3 @@
 **[8]** Brown, S. (2018). *The C4 model for visualising software architecture*. Available: https://c4model.com/
 
 ---
-
-**Navigation:** [← Risks and technical debt](11-technical-risks.md)

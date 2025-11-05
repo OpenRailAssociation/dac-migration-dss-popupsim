@@ -217,7 +217,7 @@ graph TB
 
 ## 8.4 Logging Concept
 
-Logging configuration is defined in [Section 7.7](07-deployment.md#77-error-handling--logging).
+Logging configuration is defined in [Section 7.7](07-deployment.md#77-error-handling-logging).
 
 ### MVP Logging Levels
 
@@ -245,7 +245,7 @@ LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 ## 8.5 Configuration Management
 
-Configuration management supports **Usability & Accessibility** (Priority 3) through file-based configuration. See [Section 5.1](05-building-blocks.md#51-configuration-context) for Configuration Context details.
+Configuration management supports **Usability & Accessibility** (Priority 3) through file-based configuration. See [Section 5.2](05-building-blocks.md#52-level-2-configuration-context) for Configuration Context details.
 
 ### MVP Configuration Loading
 

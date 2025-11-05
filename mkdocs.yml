@@ -49,6 +49,7 @@ nav:
       - Quality Requirements: mvp/architecture/10-quality-requirements.md
       - Risks & Technical Debt: mvp/architecture/11-risks-technical-debt.md
       - Glossary: mvp/architecture/12-glossary.md
+      - Bibliography: mvp/architecture/13-bibliography.md
   - CI/CD: ci-cd.md
 
 plugins:

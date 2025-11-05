@@ -43,12 +43,12 @@ PopUpSim is developed as open source software under the Apache 2.0 license [[5]]
 PopUpSim MVP focuses on **4 priority use cases** to validate the simulation approach:
 
 **Strategic Phase:**
-- [US-001](../../requirements/use-cases.md#us-001-standardisierte-pop-up-werkstatten-entwickeln): Develop standardized Pop-Up workshops
-- [US-002](../../requirements/use-cases.md#us-002-durchsatz-abschatzung-fur-werkstatt-layouts): Estimate throughput for workshop layouts
+- [US-001](../../requirements/use-cases.md#us-001): Develop standardized Pop-Up workshops
+- [US-002](../../requirements/use-cases.md#us-002): Estimate throughput for workshop layouts
 
 **Detail Planning Phase:**
-- [US-003](../../requirements/use-cases.md#us-003-infrastrukturdaten-importieren): Import infrastructure data
-- [US-004](../../requirements/use-cases.md#us-004-kapazitatsabschatzung-fur-geplante-werkstatt): Assess capacity for planned workshop
+- [US-003](../../requirements/use-cases.md#us-003): Import infrastructure data
+- [US-004](../../requirements/use-cases.md#us-004): Assess capacity for planned workshop
 
 **Complete requirements:** [requirements/use-cases.md](../../requirements/use-cases.md) (8 use cases total)
 

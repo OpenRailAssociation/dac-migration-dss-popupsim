@@ -2,7 +2,7 @@
 
 ## 6.1 Runtime Scenario: Develop Standardized Pop-Up Workshop (US-001)
 
-**Use Case:** [US-001](../../requirements/use-cases.md#us-001-standardisierte-pop-up-werkstatten-entwickeln) - Strategic Migration Planner develops standardized workshop designs
+**Use Case:** [US-001](../../requirements/use-cases.md#us-001) - Strategic Migration Planner develops standardized workshop designs
 
 **Goal:** Test different workshop configurations to find optimal standardized design
 
@@ -73,7 +73,7 @@ sequenceDiagram
 
 ## 6.2 Runtime Scenario: Estimate Workshop Throughput (US-002)
 
-**Use Case:** [US-002](../../requirements/use-cases.md#us-002-durchsatz-abschatzung-fur-werkstatt-layouts) - Strategic planner estimates throughput capacity
+**Use Case:** [US-002](../../requirements/use-cases.md#us-002) - Strategic planner estimates throughput capacity
 
 **Goal:** Determine maximum wagon throughput for a given workshop layout
 
@@ -180,7 +180,7 @@ stateDiagram-v2
 
 ## 6.3 Runtime Scenario: Import Infrastructure Data (US-003)
 
-**Use Case:** [US-003](../../requirements/use-cases.md#us-003-infrastrukturdaten-importieren) - Company Planner imports existing infrastructure data
+**Use Case:** [US-003](../../requirements/use-cases.md#us-003) - Company Planner imports existing infrastructure data
 
 **Goal:** Import track topology and workshop layout from existing railway infrastructure data
 
@@ -266,7 +266,7 @@ sequenceDiagram
 
 ## 6.4 Runtime Scenario: Assess Planned Workshop Capacity (US-004)
 
-**Use Case:** [US-004](../../requirements/use-cases.md#us-004-kapazitatsabschatzung-fur-geplante-werkstatt) - Company Planner assesses capacity for planned workshop
+**Use Case:** [US-004](../../requirements/use-cases.md#us-004) - Company Planner assesses capacity for planned workshop
 
 **Goal:** Evaluate if planned workshop layout meets company's retrofit capacity requirements
 
