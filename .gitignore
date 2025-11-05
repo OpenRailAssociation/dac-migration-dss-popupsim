@@ -85,6 +85,7 @@ complexity-report.*
 # Documentation builds
 docs/_build/
 docs/build/
+site/
 
 # Temporary files
 *.tmp

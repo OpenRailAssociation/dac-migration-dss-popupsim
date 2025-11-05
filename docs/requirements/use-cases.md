@@ -1,8 +1,6 @@
 # User Stories - PopUpSim
 
-Die hier aufgelisteten User Stories basieren auf der Quelle:
-
-*Konzept PopUpSim (Frederik Schäfer, DB Cargo AG, April 2025)*
+Die hier aufgelisteten User Stories basieren auf [1].
 
 ## Strategische Phase
 
@@ -64,4 +62,6 @@ Vorübergehend eingerichtete Werkstätten, in denen vorgerüstete Wagen in groß
 
 
 ## Referenzen
-- **[Konzept](konzept.md)** - Konzept PopUpSim (Frederik Schäfer, DB Cargo AG, April 2025)
+
+[1] Schäfer, Frederik (2025). *Konzept PopUpSim: Entwurf*. DB Cargo AG.
+    [PDF](250321_KonzeptPopUpSim_Entwurf.pdf) | [Markdown](250321_KonzeptPopUpSim_Entwurf.md)
