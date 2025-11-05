@@ -64,13 +64,33 @@ jobs:
           script: |
             const prNumber = context.issue.number;
             const previewUrl = `https://openrailassociation.github.io/dac-migration-dss-popupsim/pr-preview/pr-${prNumber}/`;
+            const commentBody = `📚 **Documentation Preview**\n\nThe documentation for this PR is available at:\n${previewUrl}\n\n_This preview will be automatically updated when you push new commits._`;
             
-            github.rest.issues.createComment({
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `📚 **Documentation Preview**\n\nThe documentation for this PR is available at:\n${previewUrl}\n\n_This preview will be automatically updated when you push new commits._`
             });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('Documentation Preview')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            }
 
   deploy-production:
     needs: build
