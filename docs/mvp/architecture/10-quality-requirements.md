@@ -33,7 +33,7 @@ graph TB
         subgraph "Resource Usage"
             Memory[Memory usage<br/>To be measured]
             CPU[CPU utilization<br/>Single-threaded]
-            Disk[Disk space<br/>~100 MB + results]
+            Disk[Disk space<br/>Estimated: ~100 MB + results]
         end
 
         subgraph "Scalability"
@@ -101,7 +101,7 @@ graph TB
 
 | Aspect | MVP Requirement | Measurement Criterion |
 |--------|----------------|----------------------|
-| **Installation** | < 5 minutes setup | Documented steps |
+| **Installation** | Simple setup | Documented steps |
 | **Configuration** | Example files available | Template files in `Data/examples/` |
 | **Execution** | One command starts simulation | `uv run python main.py` |
 | **Error messages** | Understandable descriptions | Pydantic comprehensive error summary |
@@ -147,7 +147,7 @@ graph TB
 | Category | MVP Goal | Measurement Method |
 |----------|----------|-------------------|
 | **Crash rate** | < 1% with valid inputs | Automated tests |
-| **Determinism** | 100% identical results | Repeated execution with same seed |
+| **Determinism** | 100% identical results | Repeated execution with same inputs |
 | **Error handling** | Graceful handling of all input errors | Negative tests |
 | **Memory leaks** | No memory leaks | Memory profiling |
 
@@ -161,7 +161,7 @@ class CodeQualityMetrics:
     MAX_FUNCTION_LENGTH = 50      # Lines per function
     MAX_CLASS_LENGTH = 200        # Lines per class
     MAX_COMPLEXITY = 10           # Cyclomatic complexity
-    MIN_TEST_COVERAGE = 70        # Percent
+    MIN_TEST_COVERAGE = 90        # Percent
     MAX_DEPENDENCIES = 5          # Per module
 ```
 
@@ -169,7 +169,7 @@ class CodeQualityMetrics:
 
 | Aspect | MVP Goal | Measurement Method |
 |--------|----------|-------------------|
-| **Code coverage** | > 70% for business logic | pytest-cov |
+| **Code coverage** | > 90% for business logic | pytest-cov |
 | **Documentation** | All public APIs documented | Docstring coverage |
 | **Complexity** | Cyclomatic complexity < 10 | radon |
 | **Dependencies** | < 10 external packages | pyproject.toml |
@@ -193,8 +193,8 @@ graph TB
         end
 
         subgraph "Hardware"
-            Laptop[Standard laptop<br/>To be measured]
-            Desktop[Desktop PC<br/>To be measured]
+            Laptop[Standard laptop<br/>Estimated: 4GB RAM minimum]
+            Desktop[Desktop PC<br/>Estimated: 4GB RAM minimum]
         end
     end
 

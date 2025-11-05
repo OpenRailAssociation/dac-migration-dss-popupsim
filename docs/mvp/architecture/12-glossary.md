@@ -8,12 +8,14 @@
 |---------|----------------|----------|
 | **DAC** | Digital Automatic Coupler - New coupling technology | Replaces screw coupling |
 | **Pop-Up Workshop** | Temporary retrofit workshop for DAC migration | Multiple retrofit stations on workshop track, 3 weeks operation |
-| **Retrofit** | Conversion from screw coupling to DAC | 40-50 minutes per wagon |
+| **Retrofit** | Conversion from screw coupling to DAC | ~30 minutes per wagon |
 | **Parking Track** | Track where wagons are parked | Capacity: Total length - 25m |
-| **Workshop Track** | Track where wagons are retrofitted (WERKSTATTGLEIS) | Capacity: Number of retrofit stations + one locomotive |
-| **Feeder Track** | Track feeding wagons into workshop (WERKSTATTZUFUEHRUNG) | Capacity: Varies by layout |
-| **Exit Track** | Track for retrofitted wagons leaving workshop (WERKSTATTABFUEHRUNG) | Capacity: Varies by layout |
-| **Collection Track** | Track for intermediate wagon storage | Capacity: 20-50 wagons |
+| **Workshop Track** | Track where wagons are retrofitted (`werkstattgleis`) | Capacity: Number of retrofit stations + one locomotive |
+| **Feeder Track** | Track feeding wagons into workshop (`werkstattzufuehrung`) | Capacity: Varies by layout |
+| **Exit Track** | Track for retrofitted wagons leaving workshop (`werkstattabfuehrung`) | Capacity: Varies by layout |
+| **Collection Track** | Track for intermediate wagon storage (`sammelgleis`) | Capacity: Varies (synthetic examples: 20-50 wagons) |
+| **Parking Track** | Track for temporary wagon storage (`parkgleis`) | Capacity: Varies by layout |
+| **Station Head Track** | Station head tracks (`bahnhofskopf`) | Capacity: Varies by layout |
 | **Retrofit Station** | Workplace for DAC retrofit | 1-2 workers per station |
 | **Wagon** | Freight wagon (railway vehicle) | Various types, different retrofit times |
 | **Wagon Group** | Multiple coupled freight wagons | Wagon group of 3 wagons |
@@ -28,7 +30,7 @@
 | **Event** | Simulation event (arrival, start, end) | `TrainArrival`, `RetrofitComplete` |
 | **Process** | SimPy process for business logic | `retrofit_process()` |
 | **Environment** | SimPy simulation environment | Time control and event queue |
-| **Determinism** | Reproducible simulation results | Same random seed → same results |
+| **Determinism** | Reproducible simulation results | Same inputs → same results |
 
 ## 12.2 MVP Architecture Terms
 

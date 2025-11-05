@@ -60,7 +60,7 @@ PopUpSim MVP focuses on **4 priority use cases** to validate the simulation appr
 **Scope Reductions vs. Full Version:**
 The scope is reduced compared to the full version:
 - **Use Cases**: 4 priority use cases (vs. 8 total)
-- **Architecture**: Simplified context design. (vs. 7 contexts with event-driven architecture)
+- **Architecture**: 3 simplified contexts (vs. more specialized contexts with event-driven architecture)
 - **UI**: Matplotlib charts (vs. web interface)
 - **Data**: File-based (vs. web interface)
 - **Integration**: Direct service calls (vs. event-driven messaging)

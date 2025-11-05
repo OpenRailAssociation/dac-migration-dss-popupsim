@@ -1,542 +1,424 @@
-# PopUpSim MVP - Migration Path zur Vollversion
+# 10. MVP Migration Path
 
-## Übersicht
+## Overview
 
-Diese Datei beschreibt den Weg vom MVP zur vollständigen Architektur mit Aufwandsschätzungen und Prioritäten.
+**Note:** See [Architecture Section 9](../architecture/09-architecture-decisions.md) for architecture decisions.
 
----
+This document describes the evolution from MVP to full version.
 
-## MVP vs. Vollversion - Übersicht
+## MVP vs Full Version
 
-| Aspekt | MVP | Vollversion | Aufwand |
-|--------|-----|-------------|---------|
-| **Bounded Contexts** | 3 Contexts | 7 Contexts | 2-3 Wochen |
-| **Architektur** | Layered | Hexagonal + Event-Driven | 1-2 Wochen |
-| **Domain Model** | Track-basiert | Station-basiert | 1 Woche |
-| **Wagon Types** | Alle gleich | Verschiedene Typen | 3-5 Tage |
-| **Workers** | Implizit | Explizit modelliert | 3-5 Tage |
-| **Error Handling** | Standard Exceptions | Custom Hierarchy | 2-3 Tage |
-| **API** | CLI only | REST API (FastAPI) | 1 Woche |
-| **Frontend** | Keine | Vue.js SPA | 3-4 Wochen |
-| **Monitoring** | Logs | Prometheus + Grafana | 1 Woche |
+| Aspect | MVP | Full Version |
+|--------|-----|--------------|
+| **Contexts** | 3 simplified | More specialized (TBD) |
+| **UI** | CLI only | Web interface |
+| **Data** | File-based | Database + Files |
+| **Integration** | Direct calls | Event-driven |
+| **Deployment** | Desktop | Cloud-ready |
+| **Use Cases** | 4 priority | 8 complete |
+| **Visualization** | Matplotlib PNG | Interactive web charts |
+| **API** | Python only | REST API |
 
-**Gesamt-Aufwand:** 10-15 Wochen (2.5-4 Monate)
+## Migration Phases
 
----
+### Phase 1: MVP Foundation (5 weeks)
+**Goal**: Working prototype with core functionality
 
-## Phase 1: Domain Model Erweiterung (1-2 Wochen)
+**Deliverables**:
+- 3 bounded contexts implemented
+- File-based configuration
+- SimPy simulation engine
+- CSV/PNG output
+- 4 priority use cases working
 
-### 1.1 Station-basiertes Model
+**Success Criteria**:
+- Simulation runs without errors
+- Results are plausible
+- Code passes all quality checks
 
-**Aufwand:** 1 Woche | **Priorität:** High
+### Phase 2: Context Refinement (TBD)
+**Goal**: Split MVP contexts into specialized contexts
 
-**Änderungen:**
+**Changes**: To be determined based on MVP learnings
+
+**Possible evolution**:
+- Configuration Context → May remain as-is
+- Simulation Domain Context → May split into specialized contexts (Infrastructure, Resource Management, Train Operations, Workshop)
+- Simulation Control Context → May split into Simulation Control + Analytics
+
+**Effort**: To be estimated after MVP
+
+### Phase 3: Event-Driven Architecture (3-4 weeks)
+**Goal**: Replace direct calls with event-driven communication
+
+**Changes**:
+- Implement event bus
+- Define domain events
+- Add event handlers
+- Implement saga pattern for complex workflows
+
+**Benefits**:
+- Loose coupling between contexts
+- Better scalability
+- Easier testing
+- Audit trail
+
+**Effort**: Estimated 3-4 weeks (to be validated)
+
+### Phase 4: Web Interface (4-6 weeks)
+**Goal**: Add web-based UI
+
+**Changes**:
+- FastAPI backend
+- Vue.js frontend
+- REST API endpoints
+- Interactive charts (Plotly)
+- Real-time updates (WebSockets)
+
+**Effort**: Estimated 4-6 weeks (to be validated)
+
+### Phase 5: Database Integration (2-3 weeks)
+**Goal**: Add persistent storage
+
+**Changes**:
+- PostgreSQL database
+- SQLAlchemy ORM
+- Repository pattern
+- Migration scripts
+
+**Effort**: Estimated 2-3 weeks (to be validated)
+
+### Phase 6: Cloud Deployment (2-3 weeks)
+**Goal**: Enable cloud deployment
+
+**Changes**:
+- Docker containers
+- Kubernetes manifests
+- CI/CD pipelines
+- Monitoring and logging
+
+**Effort**: Estimated 2-3 weeks (to be validated)
+
+## Context Evolution
+
+### Configuration Context
+
+**MVP**:
 ```python
-# MVP: Track-basiert
-class WorkshopTrack(BaseModel):
-    id: str
-    capacity: int
-    retrofit_time_min: int
-
-# Vollversion: Station-basiert
-class WorkshopTrack(BaseModel):
-    id: str
-    stations: list[Station]
-
-class Station(BaseModel):
-    id: str
-    position: int
-    capacity: int
-    workers: list[Worker]
-    retrofit_time_min: int
-```
-
-**Migration Steps:**
-1. Erstelle `Station` Model
-2. Refactore `WorkshopTrack` zu Container für Stations
-3. Update SimPy Adapter für Station-Resources
-4. Migriere Tests
-5. Update Konfigurationsformat
-
-**Breaking Changes:**
-- Configuration Format ändert sich
-- SimPy Adapter muss angepasst werden
-- KPI Calculation muss Station-Metriken berücksichtigen
-
----
-
-### 1.2 Wagon Types
-
-**Aufwand:** 3-5 Tage | **Priorität:** Medium
-
-**Änderungen:**
-```python
-# MVP: Alle Wagen gleich
-class Wagon(BaseModel):
-    id: str
-    train_id: str
-    needs_retrofit: bool
-
-# Vollversion: Verschiedene Typen
-class WagonType(str, Enum):
-    STANDARD = "standard"
-    REFRIGERATED = "refrigerated"
-    TANK = "tank"
-    FLATBED = "flatbed"
-
-class Wagon(BaseModel):
-    id: str
-    train_id: str
-    wagon_type: WagonType
-    needs_retrofit: bool
-
-    def get_retrofit_time_multiplier(self) -> float:
-        multipliers = {
-            WagonType.STANDARD: 1.0,
-            WagonType.REFRIGERATED: 1.2,
-            WagonType.TANK: 1.5,
-            WagonType.FLATBED: 0.8
-        }
-        return multipliers[self.wagon_type]
-```
-
-**Migration Steps:**
-1. Erstelle `WagonType` Enum
-2. Füge `wagon_type` zu `Wagon` hinzu
-3. Update Retrofit-Zeit-Berechnung
-4. Migriere bestehende Daten (alle → STANDARD)
-5. Update Tests
-
----
-
-### 1.3 Explizite Workers
-
-**Aufwand:** 3-5 Tage | **Priorität:** Medium
-
-**Änderungen:**
-```python
-# MVP: Workers implizit in capacity
-class WorkshopTrack(BaseModel):
-    capacity: int  # Implizit: capacity = workers
-
-# Vollversion: Workers explizit
-class Worker(BaseModel):
-    id: str
-    name: str
-    skill_level: float  # 0.5 - 2.0
-    shift_start: int
-    shift_end: int
-
-class Station(BaseModel):
-    id: str
-    workers: list[Worker]
-
-    @property
-    def capacity(self) -> int:
-        return len(self.workers)
-```
-
-**Migration Steps:**
-1. Erstelle `Worker` Model
-2. Füge `workers` zu `Station` hinzu
-3. Update Capacity-Berechnung
-4. Implementiere Skill-Level-Multiplikator
-5. Update Tests
-
----
-
-## Phase 2: Architektur-Erweiterung (2-3 Wochen)
-
-### 2.1 Bounded Contexts Expansion
-
-**Aufwand:** 2-3 Wochen | **Priorität:** High
-
-**MVP (3 Contexts):**
-- Configuration
-- Workshop
-- Simulation Control
-
-**Vollversion (7 Contexts):**
-- Configuration Management
-- Workshop Management
-- Train Scheduling
-- Simulation Engine
-- Analytics & Reporting
-- User Management
-- System Administration
-
-**Migration Steps:**
-1. **Woche 1:** Splitte Workshop Context
-   - Workshop Management (Domain Logic)
-   - Simulation Engine (SimPy Integration)
-2. **Woche 2:** Erstelle neue Contexts
-   - Train Scheduling (aus Configuration)
-   - Analytics & Reporting (aus Simulation Control)
-3. **Woche 3:** Infrastruktur Contexts
-   - User Management
-   - System Administration
-
----
-
-### 2.2 Event-Driven Architecture
-
-**Aufwand:** 1-2 Wochen | **Priorität:** High
-
-**MVP: Direct Calls**
-```python
-# Direct method calls
-config = config_service.load_scenario(path)
-workshop = workshop_service.setup_workshop(config.workshop)
-results = simulation_service.run(workshop)
-```
-
-**Vollversion: Event-Driven**
-```python
-# Event Bus
-class EventBus:
-    def publish(self, event: DomainEvent):
-        for handler in self._handlers[type(event)]:
-            handler.handle(event)
-
-# Events
-class ConfigurationLoadedEvent(DomainEvent):
-    config: ScenarioConfig
-
-class WorkshopSetupCompletedEvent(DomainEvent):
-    workshop: Workshop
-
-# Handlers
-class WorkshopSetupHandler:
-    def handle(self, event: ConfigurationLoadedEvent):
-        workshop = self.workshop_service.setup_workshop(event.config.workshop)
-        self.event_bus.publish(WorkshopSetupCompletedEvent(workshop=workshop))
-```
-
-**Migration Steps:**
-1. Implementiere Event Bus
-2. Definiere Domain Events
-3. Erstelle Event Handlers
-4. Refactore Services zu Event-basiert
-5. Update Tests
-
----
-
-### 2.3 Hexagonal Architecture
-
-**Aufwand:** 1 Woche | **Priorität:** Medium
-
-**MVP: Layered**
-```
-Presentation → Application → Domain → Infrastructure
-```
-
-**Vollversion: Hexagonal**
-```
-         ┌─────────────────┐
-         │   Application   │
-         │      Core       │
-         │    (Domain)     │
-         └─────────────────┘
-                 │
-    ┌────────────┼────────────┐
-    │            │            │
-┌───▼───┐   ┌───▼───┐   ┌───▼───┐
-│ REST  │   │ SimPy │   │  DB   │
-│  API  │   │Adapter│   │Adapter│
-└───────┘   └───────┘   └───────┘
-```
-
-**Migration Steps:**
-1. Definiere Port Interfaces
-2. Implementiere Adapter
-3. Dependency Injection Setup
-4. Refactore Services
-5. Update Tests
-
----
-
-## Phase 3: Infrastruktur-Erweiterung (3-4 Wochen)
-
-### 3.1 Database Integration
-
-**Aufwand:** 1 Woche | **Priorität:** High
-
-**MVP: File-based**
-```python
-# JSON/CSV Files
-config = json.load(open("scenario.json"))
-results.to_csv("results.csv")
-```
----
-
-### 3.2 REST API
-
-**Aufwand:** 1 Woche | **Priorität:** High
-
-**MVP: CLI only**
-```bash
-python main.py --config config/ --output results/
-```
-
-**Vollversion: FastAPI**
-```python
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-
-app = FastAPI()
-
-@app.post("/api/v1/scenarios")
-async def create_scenario(scenario: ScenarioConfig):
-    scenario_id = scenario_service.create(scenario)
-    return {"scenario_id": scenario_id}
-
-@app.post("/api/v1/simulations")
-async def run_simulation(request: SimulationRequest):
-    run_id = simulation_service.start(request.scenario_id)
-    return {"run_id": run_id, "status": "started"}
-
-@app.get("/api/v1/simulations/{run_id}")
-async def get_simulation_status(run_id: str):
-    status = simulation_service.get_status(run_id)
-    return {"run_id": run_id, "status": status}
-
-@app.get("/api/v1/simulations/{run_id}/results")
-async def get_simulation_results(run_id: str):
-    results = simulation_service.get_results(run_id)
-    return results
-```
-
-**Migration Steps:**
-1. Setup FastAPI
-2. Definiere API Endpoints
-3. Implementiere Request/Response Models
-4. Add API Documentation (OpenAPI)
-5. Integration Tests
-
----
-
-### 3.3 Frontend (Vue.js)
-
-**Aufwand:** 3-4 Wochen | **Priorität:** Medium
-
-**Features:**
-- Scenario Management (CRUD)
-- Simulation Control (Start/Stop/Monitor)
-- Real-time Progress Tracking
-- Interactive Charts (Plotly.js)
-- Results Comparison
-- Export Functionality
-
-**Tech Stack:**
-- Vue.js 3 + TypeScript
-- Pinia (State Management)
-- Vue Router
-- Axios (HTTP Client)
-- Plotly.js (Charts)
-- Tailwind CSS (Styling)
-
-**Migration Steps:**
-1. **Woche 1:** Setup + Scenario Management
-2. **Woche 2:** Simulation Control + Monitoring
-3. **Woche 3:** Charts + Visualisierung
-4. **Woche 4:** Polish + Testing
-
----
-
-### 3.4 Monitoring & Observability
-
-**Aufwand:** 1 Woche | **Priorität:** Low
-
-**MVP: Logs only**
-
-**Vollversion: Prometheus + Grafana**
-```python
-from prometheus_client import Counter, Histogram, Gauge
-
-# Metrics
-simulations_total = Counter('simulations_total', 'Total simulations run')
-simulation_duration = Histogram('simulation_duration_seconds', 'Simulation duration')
-active_simulations = Gauge('active_simulations', 'Currently running simulations')
-
-# Instrumentation
-@simulation_duration.time()
-def run_simulation(scenario_id: str):
-    simulations_total.inc()
-    active_simulations.inc()
-    try:
-        # Run simulation
+class ConfigurationService:
+    def load_scenario_from_file(self, file_path: str) -> ScenarioConfig:
+        # Direct file loading
         pass
-    finally:
-        active_simulations.dec()
 ```
 
-**Dashboards:**
-- Simulation Throughput
-- Average Duration
-- Error Rate
-- Resource Usage (CPU, Memory)
-
----
-
-## Phase 4: Error Handling & Resilience (1 Woche)
-
-### 4.1 Custom Error Hierarchy
-
-**Aufwand:** 2-3 Tage | **Priorität:** Medium
-
-**MVP: Standard Exceptions**
+**Full Version**:
 ```python
-raise ValueError("Invalid configuration")
-raise RuntimeError("Simulation failed")
+class ConfigurationService:
+    def __init__(self, repository: ConfigRepository, event_bus: EventBus):
+        self.repository = repository
+        self.event_bus = event_bus
+    
+    async def load_scenario(self, scenario_id: str) -> ScenarioConfig:
+        # Load from database
+        config = await self.repository.get_by_id(scenario_id)
+        
+        # Publish event
+        await self.event_bus.publish(ScenarioLoadedEvent(config))
+        
+        return config
 ```
 
-**Vollversion: Custom Hierarchy**
+### Simulation Domain Context
+
+**MVP**: Single context with all domain logic
+
+**Full Version**: Split into 4 specialized contexts
+
 ```python
-class PopUpSimError(Exception):
-    """Base exception"""
+# Infrastructure Context
+class InfrastructureService:
+    async def get_track_topology(self) -> TrackTopology:
+        pass
+
+# Resource Management Context
+class ResourceService:
+    async def allocate_locomotive(self, route: Route) -> Locomotive:
+        pass
+
+# Train Operations Context
+class TrainOperationsService:
+    async def process_train_arrival(self, train: Train) -> None:
+        pass
+
+# Workshop Context
+class WorkshopService:
+    async def start_retrofit(self, wagon: Wagon, track: WorkshopTrack) -> None:
+        pass
+```
+
+### Simulation Control Context
+
+**MVP**: Orchestration + KPI calculation
+
+**Full Version**: Split into Simulation Control + Analytics
+
+```python
+# Simulation Control Context
+class SimulationControlService:
+    async def start_simulation(self, scenario_id: str) -> SimulationRun:
+        pass
+
+# Analytics Context
+class AnalyticsService:
+    async def calculate_kpis(self, simulation_id: str) -> KPIReport:
+        pass
+    
+    async def generate_insights(self, simulation_id: str) -> list[Insight]:
+        pass
+```
+
+## Technology Evolution
+
+### Backend
+
+**MVP**:
+- Python 3.13+
+- SimPy
+- Pydantic
+- Matplotlib
+
+**Full Version**:
+- FastAPI (web framework)
+- PostgreSQL (database)
+- SQLAlchemy (ORM)
+- Celery (async tasks)
+- Redis (caching)
+- Plotly (interactive charts)
+
+### Frontend
+
+**MVP**: None (CLI only)
+
+**Full Version**:
+- Vue.js 3
+- TypeScript
+- Vite (build tool)
+- Pinia (state management)
+- Chart.js or Plotly.js
+
+### Infrastructure
+
+**MVP**: Desktop application
+
+**Full Version**:
+- Docker
+- Kubernetes
+- GitHub Actions (CI/CD)
+- Prometheus (monitoring)
+- Grafana (dashboards)
+
+## API Evolution
+
+### MVP: Python API
+
+```python
+from popupsim.application import PopUpSimApplication
+
+app = PopUpSimApplication()
+results = app.run_complete_analysis("scenario.json")
+```
+
+### Full Version: REST API
+
+```python
+# FastAPI endpoints
+@app.post("/api/scenarios")
+async def create_scenario(scenario: ScenarioCreate) -> Scenario:
     pass
 
-class ConfigurationError(PopUpSimError):
-    """Configuration-related errors"""
+@app.post("/api/simulations")
+async def start_simulation(request: SimulationRequest) -> SimulationRun:
     pass
 
-class InvalidScenarioError(ConfigurationError):
-    """Invalid scenario configuration"""
-    def __init__(self, scenario_id: str, reason: str):
-        self.scenario_id = scenario_id
-        self.reason = reason
-        super().__init__(f"Invalid scenario {scenario_id}: {reason}")
+@app.get("/api/simulations/{simulation_id}/results")
+async def get_results(simulation_id: str) -> SimulationResults:
+    pass
+```
 
-class SimulationError(PopUpSimError):
-    """Simulation-related errors"""
+## Data Storage Evolution
+
+### MVP: Files
+
+```
+config/
+├── scenario.json
+└── train_schedule.csv
+
+results/
+├── summary.csv
+├── wagons.csv
+└── charts/
+```
+
+### Full Version: Database + Files
+
+```sql
+-- PostgreSQL schema
+CREATE TABLE scenarios (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255),
+    config JSONB,
+    created_at TIMESTAMP
+);
+
+CREATE TABLE simulation_runs (
+    id UUID PRIMARY KEY,
+    scenario_id UUID REFERENCES scenarios(id),
+    status VARCHAR(50),
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+CREATE TABLE simulation_results (
+    id UUID PRIMARY KEY,
+    simulation_run_id UUID REFERENCES simulation_runs(id),
+    kpis JSONB,
+    created_at TIMESTAMP
+);
+```
+
+## Testing Evolution
+
+### MVP: Unit + Integration Tests
+
+```python
+def test_simulation() -> None:
+    config = load_config("test_scenario.json")
+    results = run_simulation(config)
+    assert results.total_wagons_processed > 0
+```
+
+### Full Version: Comprehensive Testing
+
+```python
+# Unit tests
+def test_domain_logic() -> None:
     pass
 
-class TrackCapacityExceededError(SimulationError):
-    """Track capacity exceeded"""
-    def __init__(self, track_id: str, capacity: int, requested: int):
-        self.track_id = track_id
-        self.capacity = capacity
-        self.requested = requested
-        super().__init__(
-            f"Track {track_id} capacity {capacity} exceeded (requested: {requested})"
-        )
+# Integration tests
+async def test_api_endpoint() -> None:
+    async with AsyncClient(app=app) as client:
+        response = await client.post("/api/scenarios", json=scenario_data)
+        assert response.status_code == 201
+
+# E2E tests
+async def test_complete_workflow() -> None:
+    # Create scenario → Run simulation → Get results
+    pass
+
+# Performance tests
+def test_simulation_performance() -> None:
+    # Benchmark with 1000 wagons
+    pass
 ```
 
----
+## Deployment Evolution
 
-### 4.2 Retry Logic & Circuit Breaker
+### MVP: Local Installation
 
-**Aufwand:** 2-3 Tage | **Priorität:** Low
-
-```python
-from tenacity import retry, stop_after_attempt, wait_exponential
-
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=4, max=10)
-)
-def run_simulation_with_retry(scenario_id: str):
-    return simulation_service.run(scenario_id)
+```bash
+git clone <repo>
+uv sync
+uv run python main.py
 ```
 
----
+### Full Version: Cloud Deployment
 
-## Migration Roadmap
+```bash
+# Build Docker image
+docker build -t popupsim:latest .
 
-### Timeline
+# Deploy to Kubernetes
+kubectl apply -f k8s/
 
-```
-Monat 1: Domain Model + Architektur
-├── Woche 1-2: Station-basiertes Model
-├── Woche 3: Wagon Types + Workers
-└── Woche 4: Event-Driven Architecture
-
-Monat 2: Infrastruktur
-├── Woche 5-6: Database + Repository Pattern
-├── Woche 7: REST API
-└── Woche 8: Authentication
-
-Monat 3-4: Frontend + Polish
-├── Woche 9-12: Vue.js Frontend
-├── Woche 13: Monitoring
-├── Woche 14: Error Handling
-└── Woche 15: Testing + Documentation
+# Access via URL
+https://popupsim.example.com
 ```
 
----
+## Migration Checklist
 
-## Prioritäten
+### Phase 2: Context Refinement
+- [ ] Define bounded context boundaries
+- [ ] Create context interfaces
+- [ ] Implement context services
+- [ ] Update tests
+- [ ] Update documentation
 
-### Must-Have (Monat 1-2)
-1. Station-basiertes Model
-2. Event-Driven Architecture
-3. Database Integration
-4. REST API
+### Phase 3: Event-Driven Architecture
+- [ ] Implement event bus
+- [ ] Define domain events
+- [ ] Create event handlers
+- [ ] Add event sourcing (optional)
+- [ ] Update integration tests
 
-### Should-Have (Monat 3)
-5. Frontend (Basic)
-6. Wagon Types
-7. Workers
+### Phase 4: Web Interface
+- [ ] Design API endpoints
+- [ ] Implement FastAPI backend
+- [ ] Create Vue.js frontend
+- [ ] Add authentication
+- [ ] Deploy web application
 
-### Nice-to-Have (Monat 4)
-8. Monitoring
-9. Advanced Frontend Features
-10. Custom Error Hierarchy
-11. Performance Optimizations
+### Phase 5: Database Integration
+- [ ] Design database schema
+- [ ] Implement repositories
+- [ ] Add migrations
+- [ ] Update services
+- [ ] Add database tests
 
----
+### Phase 6: Cloud Deployment
+- [ ] Create Dockerfiles
+- [ ] Write Kubernetes manifests
+- [ ] Setup CI/CD pipelines
+- [ ] Configure monitoring
+- [ ] Deploy to cloud
 
-## Backward Compatibility
+## Risk Mitigation
 
-### Configuration Migration Tool
+### Technical Risks
+- **SimPy Replacement**: Thin adapter pattern allows easy replacement
+- **Database Migration**: Repository pattern isolates data access
+- **API Changes**: Versioned API endpoints prevent breaking changes
 
-```python
-# migrate_config.py
-def migrate_mvp_to_v1(mvp_config: dict) -> dict:
-    """Migriere MVP Config zu Vollversion"""
+### Business Risks
+- **Feature Creep**: Stick to defined phases
+- **Timeline Slippage**: Regular checkpoints and adjustments
+- **Resource Constraints**: Prioritize critical features
 
-    # Track → Stations
-    tracks = []
-    for track in mvp_config["workshop"]["tracks"]:
-        tracks.append({
-            "id": track["id"],
-            "stations": [
-                {
-                    "id": f"{track['id']}_S{i:02d}",
-                    "position": i,
-                    "capacity": 1,
-                    "workers": [
-                        {
-                            "id": f"W{i:03d}",
-                            "name": f"Worker {i}",
-                            "skill_level": 1.0
-                        }
-                    ],
-                    "retrofit_time_min": track["retrofit_time_min"]
-                }
-                for i in range(track["capacity"])
-            ]
-        })
+## Success Metrics
 
-    return {
-        "version": "1.0",
-        "duration_hours": mvp_config["duration_hours"],
-        "workshop": {"tracks": tracks},
-        "trains": mvp_config["trains"]
-    }
-```
+### MVP Success
+- ✅ 4 use cases working
+- ✅ Simulation accuracy validated
+- ✅ Code quality standards met
+- ✅ Documentation complete
 
----
+### Full Version Success
+- ✅ 8 use cases working
+- ✅ Web interface deployed
+- ✅ Multi-user support
+- ✅ Cloud deployment operational
+- ✅ Performance targets met
 
-## Risk Management
+## Timeline Estimate
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| **Breaking Changes** | High | High | Versioned API, Migration Tools |
-| **Performance Degradation** | Medium | High | Performance Tests, Profiling |
-| **Timeline Overrun** | Medium | Medium | Phased Rollout, MVP First |
-| **Team Capacity** | Medium | Medium | Prioritization, External Help |
+| Phase | Duration | Dependencies |
+|-------|----------|--------------|
+| Phase 1: MVP | 5 weeks | None |
+| Phase 2: Contexts | 2-3 weeks | Phase 1 |
+| Phase 3: Events | 3-4 weeks | Phase 2 |
+| Phase 4: Web UI | 4-6 weeks | Phase 3 |
+| Phase 5: Database | 2-3 weeks | Phase 4 |
+| Phase 6: Cloud | 2-3 weeks | Phase 5 |
+| **Total** | **18-24 weeks** | Sequential |
 
----
-
-**Navigation:** [← Deployment](09-mvp-deployment.md) | [Domain Models →](domain-models.md)
+**Note**: All estimates are to be validated during implementation.

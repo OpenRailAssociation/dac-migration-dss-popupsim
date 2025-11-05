@@ -1,593 +1,295 @@
-# PopUpSim MVP - Deployment
+# 9. MVP Deployment
 
-## Übersicht
+## Overview
 
-Diese Datei beschreibt Installation, Deployment und Betrieb des MVP.
+**Note:** See [Architecture Section 7](../architecture/07-deployment.md) for detailed deployment view.
 
----
-
-## System Requirements
-
-### Minimum Requirements
-- **OS:** Windows 10/11, Linux (Ubuntu 20.04+), macOS 12+
-- **Python:** 3.13
-- **RAM:** 2 GB
-- **Disk:** 500 MB
-- **CPU:** 2 Cores
-
-### Recommended Requirements
-- **OS:** Windows 11, Linux (Ubuntu 22.04+), macOS 13+
-- **Python:** 3.13
-- **RAM:** 4 GB
-- **Disk:** 1 GB
-- **CPU:** 4 Cores
-
----
+This document describes deployment and installation for the MVP.
 
 ## Installation
 
-### 1. Python Installation
+### Prerequisites
+- **Python 3.13+**
+- **uv** package manager
+- **Git**
 
-#### Windows
-```powershell
-# Download Python 3.13 von python.org
-# Oder via winget:
-winget install Python.Python.3.13
-
-# Verify
-python --version
-```
-
-#### Linux (Ubuntu/Debian)
-```bash
-sudo apt update
-sudo apt install python3.13 python3.13-venv python3-pip
-python3.13 --version
-```
-
-#### macOS
-```bash
-# Via Homebrew
-brew install python@3.13
-python3.13 --version
-```
-
----
-
-### 2. uv Installation
-
-#### Windows
-```powershell
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-#### Linux/macOS
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-#### Verify
-```bash
-uv --version
-```
-
----
-
-### 3. Project Setup
+### Quick Start
 
 ```bash
-# 1. Clone Repository
-git clone https://github.com/your-org/popupsim-mvp.git
-cd popupsim-mvp
+# Clone repository
+git clone https://github.com/OpenRailAssociation/dac-migration-dss-popupsim.git
+cd dac-migration-dss-popupsim
 
-# 2. Install Dependencies
+# Install dependencies
 uv sync
 
-# 3. Activate Virtual Environment
-# Windows
-.venv\Scripts\activate
-
-# Linux/macOS
-source .venv/bin/activate
-
-# 4. Verify Installation
-uv run pytest
+# Run example simulation
+uv run python popupsim/backend/src/main.py --config config/examples/small_scenario/scenario.json
 ```
 
----
+### Development Setup
 
-## Configuration
+```bash
+# Install with dev dependencies
+uv sync --group dev
+
+# Install pre-commit hooks
+uv run python setup/dev/set_commit_msg_hooks.py
+
+# Run all checks
+uv run ruff format . && uv run ruff check . && uv run mypy backend/src/ && uv run pylint backend/src/ && uv run pytest
+```
+
+## Deployment Architecture
+
+### Desktop Application
+
+```
+┌─────────────────────────────────────┐
+│       Developer Laptop              │
+│  ┌───────────────────────────────┐  │
+│  │   PopUpSim MVP                │  │
+│  │   Python 3.13+ + SimPy        │  │
+│  └───────────────────────────────┘  │
+│                                     │
+│  ┌───────────────────────────────┐  │
+│  │   File System                 │  │
+│  │   config/ → results/          │  │
+│  └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+```
+
+### Runtime Requirements
+- **RAM**: To be measured during implementation
+- **Disk**: ~500MB for installation and data
+- **CPU**: Standard business laptop
+- **OS**: Windows, macOS, Linux
+
+## Configuration Management
+
+### Configuration Files
+
+```
+config/
+├── scenario.json          # Main scenario configuration
+├── train_schedule.csv     # Train arrival schedule
+├── workshop_tracks.csv    # Workshop track definitions (optional)
+└── routes.csv            # Route definitions (optional)
+```
 
 ### Environment Variables
 
 ```bash
-# .env (optional)
-POPUPSIM_LOG_LEVEL=INFO
-POPUPSIM_OUTPUT_DIR=results
-POPUPSIM_CONFIG_DIR=config
+# Optional: Set custom config path
+export POPUPSIM_CONFIG_PATH=/path/to/config
+
+# Optional: Set custom output path
+export POPUPSIM_OUTPUT_PATH=/path/to/results
+
+# Optional: Enable debug logging
+export POPUPSIM_LOG_LEVEL=DEBUG
 ```
 
-### Logging Configuration
+## Execution
+
+### Command Line Interface
+
+```bash
+# Basic execution
+uv run python popupsim/backend/src/main.py --config scenario.json
+
+# With custom output path
+uv run python popupsim/backend/src/main.py --config scenario.json --output results/
+
+# With verbose logging
+uv run python popupsim/backend/src/main.py --config scenario.json --verbose
+
+# Dry run (validate config only)
+uv run python popupsim/backend/src/main.py --config scenario.json --dry-run
+```
+
+### Python API
 
 ```python
-# src/logging_config.py
-import logging
-import os
+from popupsim.application import PopUpSimApplication
 
-LOG_LEVEL = os.getenv("POPUPSIM_LOG_LEVEL", "INFO")
+# Create application
+app = PopUpSimApplication()
+
+# Run simulation
+results = app.run_complete_analysis("config/scenario.json")
+
+# Access results
+print(f"Wagons processed: {results.simulation_results.total_wagons_processed}")
+print(f"Throughput: {results.simulation_results.throughput_per_hour} wagons/hour")
+```
+
+## Output Management
+
+### Result Files
+
+```
+results/
+├── summary.csv           # KPI summary
+├── wagons.csv           # Detailed wagon data
+├── track_metrics.csv    # Track utilization metrics
+├── events.csv           # Event log
+├── results.json         # Complete results (JSON)
+└── charts/              # Visualizations
+    ├── throughput.png
+    ├── waiting_times.png
+    └── utilization.png
+```
+
+### Output Locations
+
+Default: `results/` in current directory
+
+Custom: Use `--output` flag or `POPUPSIM_OUTPUT_PATH` environment variable
+
+## Logging
+
+### Log Configuration
+
+```python
+# Default logging configuration
+import logging
 
 logging.basicConfig(
-    level=LOG_LEVEL,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("popupsim.log"),
+        logging.FileHandler('popupsim.log'),
         logging.StreamHandler()
     ]
 )
 ```
 
----
+### Log Levels
+- **DEBUG**: Detailed simulation events
+- **INFO**: Normal execution flow
+- **WARNING**: Potential issues
+- **ERROR**: Errors with recovery
+- **CRITICAL**: Fatal errors
 
-## Usage
+## Error Handling
 
-### Command Line Interface
+### Common Errors
 
+**Configuration Error**:
 ```bash
-# Basic Usage
-uv run python src/main.py --config config/examples/small_scenario --output results/
-
-# With Options
-uv run python src/main.py \
-    --config config/examples/medium_scenario \
-    --output results/medium_run_001 \
-    --log-level DEBUG \
-    --no-charts
-
-# Help
-uv run python src/main.py --help
+ERROR - Configuration validation failed: end_date must be after start_date
 ```
+**Solution**: Fix dates in scenario.json
 
-### CLI Arguments
-
-```python
-# src/main.py
-import argparse
-
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="PopUpSim MVP - Werkstatt Simulation"
-    )
-
-    parser.add_argument(
-        "--config",
-        type=str,
-        required=True,
-        help="Path to configuration directory"
-    )
-
-    parser.add_argument(
-        "--output",
-        type=str,
-        default="results",
-        help="Output directory for results (default: results)"
-    )
-
-    parser.add_argument(
-        "--log-level",
-        type=str,
-        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        default="INFO",
-        help="Logging level (default: INFO)"
-    )
-
-    parser.add_argument(
-        "--no-charts",
-        action="store_true",
-        help="Skip chart generation"
-    )
-
-    return parser.parse_args()
-```
-
----
-
-## Deployment Scenarios
-
-### Scenario 1: Local Development
-
+**File Not Found**:
 ```bash
-# 1. Setup
+ERROR - Train schedule file not found: train_schedule.csv
+```
+**Solution**: Ensure file exists in config directory
+
+**Simulation Error**:
+```bash
+ERROR - Simulation failed: Insufficient track capacity
+```
+**Solution**: Increase track capacity or reduce wagon count
+
+## Distribution
+
+### Packaging Options
+
+**Option 1: Source Distribution**
+```bash
+# Users install from source
 git clone <repo>
-cd popupsim-mvp
 uv sync
-
-# 2. Run Tests
-uv run pytest
-
-# 3. Run Simulation
-uv run python src/main.py --config config/examples/small_scenario --output results/
-
-# 4. View Results
-# Windows
-start results/charts/throughput.png
-
-# Linux
-xdg-open results/charts/throughput.png
-
-# macOS
-open results/charts/throughput.png
 ```
 
----
-
-### Scenario 2: Batch Processing
-
+**Option 2: Wheel Distribution**
 ```bash
-# run_batch.sh
-#!/bin/bash
+# Build wheel
+uv build
 
-SCENARIOS=("small_scenario" "medium_scenario" "large_scenario")
-
-for scenario in "${SCENARIOS[@]}"; do
-    echo "Running $scenario..."
-    uv run python src/main.py \
-        --config "config/examples/$scenario" \
-        --output "results/$scenario/$(date +%Y%m%d_%H%M%S)"
-done
-
-echo "All scenarios completed!"
+# Install wheel
+uv pip install dist/popupsim-0.1.0-py3-none-any.whl
 ```
 
-**Windows (PowerShell):**
-```powershell
-# run_batch.ps1
-$scenarios = @("small_scenario", "medium_scenario", "large_scenario")
-
-foreach ($scenario in $scenarios) {
-    Write-Host "Running $scenario..."
-    uv run python src/main.py `
-        --config "config/examples/$scenario" `
-        --output "results/$scenario/$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-}
-
-Write-Host "All scenarios completed!"
-```
-
----
-
-### Scenario 3: Server Deployment
-
+**Option 3: Executable (Post-MVP)**
 ```bash
-# 1. Setup auf Server
-ssh user@server
-git clone <repo>
-cd popupsim-mvp
-uv sync
-
-# 2. Erstelle Service (systemd)
-sudo nano /etc/systemd/system/popupsim.service
+# Create standalone executable with PyInstaller
+pyinstaller --onefile popupsim/backend/src/main.py
 ```
 
-```ini
-[Unit]
-Description=PopUpSim Simulation Service
-After=network.target
+## Platform-Specific Notes
 
-[Service]
-Type=simple
-User=popupsim
-WorkingDirectory=/opt/popupsim-mvp
-Environment="PATH=/opt/popupsim-mvp/.venv/bin"
-ExecStart=/opt/popupsim-mvp/.venv/bin/python src/main.py --config /etc/popupsim/config --output /var/popupsim/results
-Restart=on-failure
+### Windows
+- Use backslashes in paths: `config\scenario.json`
+- PowerShell recommended over CMD
 
-[Install]
-WantedBy=multi-user.target
-```
+### macOS
+- May need to allow Python in Security & Privacy settings
+- Use forward slashes in paths: `config/scenario.json`
 
-```bash
-# 3. Service aktivieren
-sudo systemctl daemon-reload
-sudo systemctl enable popupsim
-sudo systemctl start popupsim
-
-# 4. Status prüfen
-sudo systemctl status popupsim
-
-# 5. Logs anzeigen
-sudo journalctl -u popupsim -f
-```
-
----
-
-### Scenario 4: Docker Deployment
-
-```dockerfile
-# Dockerfile
-FROM python:3.13-slim
-
-# Install uv
-RUN pip install uv
-
-# Set working directory
-WORKDIR /app
-
-# Copy project files
-COPY pyproject.toml uv.lock ./
-COPY src/ ./src/
-COPY config/ ./config/
-
-# Install dependencies
-RUN uv sync --frozen
-
-# Create output directory
-RUN mkdir -p /app/results
-
-# Set entrypoint
-ENTRYPOINT ["uv", "run", "python", "src/main.py"]
-CMD ["--config", "config/examples/small_scenario", "--output", "results"]
-```
-
-```bash
-# Build
-docker build -t popupsim-mvp:latest .
-
-# Run
-docker run -v $(pwd)/results:/app/results popupsim-mvp:latest \
-    --config config/examples/medium_scenario \
-    --output results
-
-# Run with custom config
-docker run \
-    -v $(pwd)/my_config:/app/my_config \
-    -v $(pwd)/results:/app/results \
-    popupsim-mvp:latest \
-    --config /app/my_config \
-    --output /app/results
-```
-
-**docker-compose.yml:**
-```yaml
-version: '3.8'
-
-services:
-  popupsim:
-    build: .
-    volumes:
-      - ./config:/app/config
-      - ./results:/app/results
-    command: --config config/examples/medium_scenario --output results
-    environment:
-      - POPUPSIM_LOG_LEVEL=INFO
-```
-
-```bash
-# Run with docker-compose
-docker-compose up
-```
-
----
-
-## Monitoring
-
-### Log Files
-
-```bash
-# Application Log
-tail -f popupsim.log
-
-# Filter by level
-grep "ERROR" popupsim.log
-grep "WARNING" popupsim.log
-
-# Last 100 lines
-tail -n 100 popupsim.log
-```
-
-### Progress Monitoring
-
-```python
-# src/simulation/service.py
-import logging
-
-logger = logging.getLogger(__name__)
-
-class SimulationService:
-    def run(self) -> SimulationResults:
-        logger.info("Starting simulation...")
-        logger.info(f"Duration: {self.config.duration_hours} hours")
-        logger.info(f"Tracks: {len(self.config.workshop.tracks)}")
-
-        # Run simulation
-        env.run(until=duration_minutes)
-
-        logger.info(f"Simulation completed. Processed {len(wagons)} wagons")
-        logger.info("Calculating KPIs...")
-
-        results = self._collect_results()
-
-        logger.info(f"Throughput: {results.throughput_per_hour:.2f} wagons/hour")
-        logger.info(f"Utilization: {results.track_utilization:.2%}")
-
-        return results
-```
-
----
+### Linux
+- Ensure Python 3.13+ is installed
+- May need to install system dependencies for Matplotlib
 
 ## Troubleshooting
 
-### Common Issues
-
-#### Issue 1: Python Version
+### Python Version Issues
 ```bash
-# Error: Python 3.13 required
-python --version
+# Check Python version
+python --version  # Should be 3.13+
 
-# Solution: Install Python 3.13
-# Windows: winget install Python.Python.3.13
-# Linux: sudo apt install python3.13
-# macOS: brew install python@3.13
+# If wrong version, use uv to install correct version
+uv python install 3.13
 ```
 
-#### Issue 2: uv not found
+### Dependency Issues
 ```bash
-# Error: uv: command not found
-
-# Solution: Install uv
-# Windows: powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-# Linux/macOS: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Add to PATH
-export PATH="$HOME/.cargo/bin:$PATH"
+# Clear cache and reinstall
+uv cache clean
+uv sync --reinstall
 ```
 
-#### Issue 3: Dependencies not installed
+### Permission Issues
 ```bash
-# Error: ModuleNotFoundError: No module named 'pydantic'
-
-# Solution: Install dependencies
-uv sync
-
-# Or reinstall
-rm -rf .venv
-uv sync
+# Ensure write permissions for output directory
+chmod +w results/
 ```
 
-#### Issue 4: Configuration file not found
+## Performance Monitoring
+
+### Resource Usage
+
+Monitor during execution:
 ```bash
-# Error: FileNotFoundError: config/scenario.json
+# Linux/macOS
+top -p $(pgrep -f popupsim)
 
-# Solution: Check path
-ls -la config/
-
-# Use absolute path
-uv run python src/main.py --config /absolute/path/to/config --output results/
+# Windows
+tasklist | findstr python
 ```
 
-#### Issue 5: Permission denied (Linux/macOS)
-```bash
-# Error: PermissionError: [Errno 13] Permission denied: 'results/'
+### Profiling
 
-# Solution: Create directory with correct permissions
-mkdir -p results
-chmod 755 results
+```python
+import cProfile
+import pstats
 
-# Or run with sudo (not recommended)
-sudo uv run python src/main.py ...
+# Profile simulation
+cProfile.run('app.run_complete_analysis("scenario.json")', 'profile_stats')
+
+# View results
+stats = pstats.Stats('profile_stats')
+stats.sort_stats('cumulative')
+stats.print_stats(20)
 ```
 
-#### Issue 6: Out of memory
-```bash
-# Error: MemoryError
+## Migration Path
 
-# Solution 1: Reduce scenario size
-# Edit config/scenario.json: reduce duration_hours or wagons_per_train
-
-# Solution 2: Increase system memory
-# Add swap space (Linux)
-sudo fallocate -l 2G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-```
-
----
-
-## Performance Tuning
-
-### Configuration Optimization
-
-```json
-{
-  "duration_hours": 8,
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "capacity": 5,
-        "retrofit_time_min": 30
-      }
-    ]
-  },
-  "trains": {
-    "arrival_interval_minutes": 60,
-    "wagons_per_train": 10
-  }
-}
-```
-
-**Tipps:**
-- Kleinere `duration_hours` für schnellere Tests
-- Weniger Tracks für einfachere Szenarien
-- Größere `arrival_interval_minutes` für weniger Events
-
-### Python Optimization
-
-```bash
-# Use PyPy for better performance (optional)
-pypy3.11 -m pip install uv
-pypy3.11 -m uv sync
-pypy3.11 src/main.py --config config/examples/medium_scenario --output results/
-```
-
----
-
-## Backup & Recovery
-
-### Backup Configuration
-
-```bash
-# Backup config
-tar -czf config_backup_$(date +%Y%m%d).tar.gz config/
-
-# Backup results
-tar -czf results_backup_$(date +%Y%m%d).tar.gz results/
-```
-
-### Recovery
-
-```bash
-# Restore config
-tar -xzf config_backup_20240115.tar.gz
-
-# Restore results
-tar -xzf results_backup_20240115.tar.gz
-```
-
----
-
-## Uninstallation
-
-```bash
-# 1. Deactivate virtual environment
-deactivate
-
-# 2. Remove project directory
-cd ..
-rm -rf popupsim-mvp
-
-# 3. Remove uv (optional)
-# Windows: Remove from PATH
-# Linux/macOS: rm ~/.cargo/bin/uv
-```
-
----
-
-## Support
-
-### Documentation
-- README.md: Quick Start Guide
-- docs/: Detailed Documentation
-- examples/: Example Configurations
-
-### Logs
-- popupsim.log: Application logs
-- results/: Simulation results
-
-### Contact
-- GitHub Issues: https://github.com/your-org/popupsim-mvp/issues
-- Email: support@example.com
-
----
-
-**Navigation:** [← Testing Strategy](08-mvp-testing-strategy.md) | [Migration Path →](10-mvp-migration-path.md)
+### Post-MVP Deployment Options
+- **Docker**: Containerized deployment
+- **Web Service**: FastAPI + Uvicorn
+- **Cloud**: AWS/Azure/GCP deployment
+- **CI/CD**: Automated testing and deployment

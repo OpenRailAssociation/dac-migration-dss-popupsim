@@ -203,9 +203,9 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 |-----------|-------------|-------|
 | **Python** | 3.13+ | Latest stable version (October 2024) |
 | **OS** | Windows 10+, macOS 10.15+, Ubuntu 20.04+ | Cross-platform support |
-| **RAM** | To be measured | Depends on scenario size (wagon count, simulation duration) |
+| **RAM** | To be measured | Depends on scenario size (wagon count, simulation duration). Estimated minimum: 4GB |
 | **CPU** | To be measured | Single-threaded SimPy execution |
-| **Storage** | ~100 MB + results | Dependencies ~50 MB, code ~10 MB, results vary by scenario |
+| **Storage** | To be measured | Estimated: ~100 MB + results (dependencies ~50 MB, code ~10 MB, results vary by scenario) |
 
 ### Command Line Interface
 

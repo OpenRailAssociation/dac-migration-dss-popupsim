@@ -1,16 +1,16 @@
-# PopUpSim MVP - SimPy Integration
+# 4. MVP SimPy Integration
 
-## Übersicht
+## Overview
 
-Diese Datei beschreibt die Integration von SimPy als Discrete Event Simulation Engine für den MVP. Der Fokus liegt auf einem **Thin Adapter Pattern**, um die Domain Logic von SimPy zu entkoppeln und zukünftige Austauschbarkeit zu ermöglichen.
+**Note:** See [Architecture Section 4.2](../architecture/04-solution-strategy.md#42-technology-decisions) for SimPy decision rationale.
 
----
+This document describes SimPy integration as discrete event simulation engine for MVP. Focus is on **thin adapter pattern** to decouple domain logic from SimPy and enable future replaceability.
 
-## Architektur-Prinzip: Thin Adapter
+## Architecture Principle: Thin Adapter
 
 ```
 ┌─────────────────────────────────────────┐
-│     Domain Logic (Framework-frei)      │
+│     Domain Logic (Framework-free)      │
 │  Workshop, Wagon, Train, Track          │
 └─────────────────┬───────────────────────┘
                   │
@@ -30,9 +30,7 @@ Diese Datei beschreibt die Integration von SimPy als Discrete Event Simulation E
 └─────────────────────────────────────────┘
 ```
 
-**Ziel:** Domain Logic kann ohne SimPy getestet werden, SimPy kann später ausgetauscht werden.
-
----
+**Goal:** Domain logic can be tested without SimPy, SimPy can be replaced later.
 
 ## SimPy Core Concepts
 
@@ -40,121 +38,107 @@ Diese Datei beschreibt die Integration von SimPy als Discrete Event Simulation E
 ```python
 import simpy
 
-# SimPy Environment = Simulationsuhr
+# SimPy Environment = Simulation clock
 env = simpy.Environment()
 
-# Zeit in Minuten (MVP Konvention)
-env.run(until=480)  # 8 Stunden = 480 Minuten
+# Time in minutes (MVP convention)
+env.run(until=480)  # 8 hours = 480 minutes
 ```
 
 ### Resource
 ```python
-# Resource = Begrenzte Kapazität (z.B. Werkstattgleis)
+# Resource = Limited capacity (e.g. workshop track)
 track_resource = simpy.Resource(env, capacity=5)
 
-# Request = Ressource anfordern
+# Request = Request resource
 with track_resource.request() as req:
-    yield req  # Warten bis verfügbar
-    # Ressource ist jetzt belegt
-    yield env.timeout(30)  # 30 Minuten arbeiten
-    # Ressource wird automatisch freigegeben
+    yield req  # Wait until available
+    # Resource is now occupied
+    yield env.timeout(30)  # Work for 30 minutes
+    # Resource is automatically released
 ```
 
 ### Process
 ```python
-# Process = Generator-Funktion
-def train_arrival_process(env):
+# Process = Generator function
+def train_arrival_process(env: simpy.Environment) -> Generator:
     while True:
-        yield env.timeout(60)  # Alle 60 Minuten
-        print(f"Zug kommt an bei t={env.now}")
+        yield env.timeout(60)  # Every 60 minutes
+        print(f"Train arrives at t={env.now}")
 
-# Process registrieren
+# Register process
 env.process(train_arrival_process(env))
 ```
-
----
 
 ## MVP SimPy Adapter
 
 ### 1. Environment Wrapper
 
 ```python
-from typing import Protocol
+from typing import Protocol, Generator, Any
 import simpy
 
 class SimulationEnvironment(Protocol):
-    """Interface für Simulation Environment (SimPy-unabhängig)"""
+    """Interface for simulation environment (SimPy-independent)"""
 
     @property
     def now(self) -> float:
-        """Aktuelle Simulationszeit"""
+        """Current simulation time"""
         ...
 
-    def timeout(self, delay: float):
-        """Warte für delay Zeiteinheiten"""
+    def timeout(self, delay: float) -> Any:
+        """Wait for delay time units"""
         ...
 
-    def process(self, generator):
-        """Registriere einen Process"""
+    def process(self, generator: Generator) -> Any:
+        """Register a process"""
         ...
 
-    def run(self, until: float):
-        """Führe Simulation aus bis Zeit 'until'"""
+    def run(self, until: float) -> None:
+        """Run simulation until time 'until'"""
         ...
 
 
 class SimPyEnvironmentAdapter:
-    """Thin Adapter für SimPy Environment"""
+    """Thin adapter for SimPy environment"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._env = simpy.Environment()
 
     @property
     def now(self) -> float:
         return self._env.now
 
-    def timeout(self, delay: float):
+    def timeout(self, delay: float) -> Any:
         return self._env.timeout(delay)
 
-    def process(self, generator):
+    def process(self, generator: Generator) -> Any:
         return self._env.process(generator)
 
-    def run(self, until: float):
+    def run(self, until: float) -> None:
         self._env.run(until=until)
 
     @property
     def simpy_env(self) -> simpy.Environment:
-        """Zugriff auf natives SimPy Environment (für Resources)"""
+        """Access to native SimPy environment (for resources)"""
         return self._env
 ```
-
-**Verwendung:**
-```python
-# Domain Logic nutzt Interface
-env = SimPyEnvironmentAdapter()
-
-# SimPy-spezifisch nur im Adapter
-track_resource = simpy.Resource(env.simpy_env, capacity=5)
-```
-
----
 
 ### 2. Workshop SimPy Adapter
 
 ```python
 from dataclasses import dataclass
-import simpy
 from typing import Generator
 
 @dataclass
 class WorkshopSimPyAdapter:
-    """Adapter zwischen Workshop Domain und SimPy"""
+    """Adapter between workshop domain and SimPy"""
 
     workshop: Workshop
     env: SimPyEnvironmentAdapter
 
-    def __post_init__(self):
-        """Initialisiere SimPy Resources für alle Tracks"""
+    def __post_init__(self) -> None:
+        """Initialize SimPy resources for all tracks"""
         for track in self.workshop.tracks:
             track.resource = simpy.Resource(
                 self.env.simpy_env,
@@ -166,14 +150,14 @@ class WorkshopSimPyAdapter:
         interval_minutes: int,
         wagons_per_train: int
     ) -> Generator:
-        """SimPy Process: Züge kommen an"""
+        """SimPy process: Trains arrive"""
         train_counter = 0
 
         while True:
-            # Warte bis nächster Zug
+            # Wait for next train
             yield self.env.timeout(interval_minutes)
 
-            # Erstelle Zug mit Wagen
+            # Create train with wagons
             train_counter += 1
             train = Train(
                 id=f"TRAIN{train_counter:04d}",
@@ -188,58 +172,58 @@ class WorkshopSimPyAdapter:
                 ]
             )
 
-            # Starte Retrofit für alle Wagen
+            # Start retrofit for all wagons
             for wagon in train.wagons:
                 self.env.process(self.retrofit_process(wagon))
 
     def retrofit_process(self, wagon: Wagon) -> Generator:
-        """SimPy Process: Wagen wird umgerüstet"""
+        """SimPy process: Wagon is retrofitted"""
         wagon.arrival_time = self.env.now
 
-        # Wähle Track (MVP: Einfache Strategie - erster verfügbarer)
+        # Select track (MVP: Simple strategy - first available)
         track = self._select_track()
 
-        # Fordere Track-Ressource an
+        # Request track resource
         with track.resource.request() as req:
-            yield req  # Warten bis Track verfügbar
+            yield req  # Wait until track available
 
-            # Umrüstung beginnt
+            # Retrofit starts
             wagon.retrofit_start_time = self.env.now
             wagon.track_id = track.id
             track.current_wagons += 1
 
-            # Umrüstung durchführen
+            # Perform retrofit
             yield self.env.timeout(track.retrofit_time_min)
 
-            # Umrüstung abgeschlossen
+            # Retrofit completed
             wagon.retrofit_end_time = self.env.now
             wagon.needs_retrofit = False
             track.current_wagons -= 1
 
     def _select_track(self) -> WorkshopTrack:
-        """Wähle verfügbares Track (MVP: Round-Robin)"""
-        # MVP: Einfach erstes verfügbares Track
+        """Select available track (MVP: Round-robin)"""
+        # MVP: Simply first available track
         for track in self.workshop.tracks:
             if track.is_available():
                 return track
-        # Fallback: Erstes Track (wird dann warten)
+        # Fallback: First track (will wait)
         return self.workshop.tracks[0]
 ```
-
----
 
 ### 3. Event Logging Adapter
 
 ```python
-from typing import List
-
 class EventLogger:
-    """Loggt Simulation Events für spätere Analyse"""
+    """Logs simulation events for later analysis"""
 
-    def __init__(self):
-        self.events: List[SimulationEvent] = []
+    def __init__(self) -> None:
+        self.events: list[SimulationEvent] = []
 
-    def log_train_arrival(self, env: SimulationEnvironment, train: Train):
+    def log_train_arrival(
+        self, 
+        env: SimulationEnvironment, 
+        train: Train
+    ) -> None:
         event = TrainArrivalEvent(
             timestamp=env.now,
             train_id=train.id,
@@ -252,12 +236,11 @@ class EventLogger:
         env: SimulationEnvironment,
         wagon: Wagon,
         track: WorkshopTrack
-    ):
+    ) -> None:
         event = RetrofitStartEvent(
             timestamp=env.now,
             wagon_id=wagon.id,
-            track_id=track.id,
-            waiting_time=wagon.waiting_time or 0.0
+            track_id=track.id
         )
         self.events.append(event)
 
@@ -266,75 +249,40 @@ class EventLogger:
         env: SimulationEnvironment,
         wagon: Wagon,
         track: WorkshopTrack
-    ):
+    ) -> None:
         event = RetrofitCompleteEvent(
             timestamp=env.now,
             wagon_id=wagon.id,
-            track_id=track.id,
-            retrofit_duration=wagon.retrofit_duration or 0.0
+            track_id=track.id
         )
         self.events.append(event)
-
-
-# Integration in Adapter
-@dataclass
-class WorkshopSimPyAdapter:
-    workshop: Workshop
-    env: SimPyEnvironmentAdapter
-    event_logger: EventLogger
-
-    def retrofit_process(self, wagon: Wagon) -> Generator:
-        wagon.arrival_time = self.env.now
-        track = self._select_track()
-
-        with track.resource.request() as req:
-            yield req
-
-            wagon.retrofit_start_time = self.env.now
-            wagon.track_id = track.id
-            track.current_wagons += 1
-
-            # Event loggen
-            self.event_logger.log_retrofit_start(self.env, wagon, track)
-
-            yield self.env.timeout(track.retrofit_time_min)
-
-            wagon.retrofit_end_time = self.env.now
-            wagon.needs_retrofit = False
-            track.current_wagons -= 1
-
-            # Event loggen
-            self.event_logger.log_retrofit_complete(self.env, wagon, track)
 ```
-
----
 
 ## Simulation Orchestration
 
 ```python
 class SimulationService:
-    """Orchestriert die gesamte Simulation"""
+    """Orchestrates complete simulation"""
 
-    def __init__(self, config: ScenarioConfig):
+    def __init__(self, config: ScenarioConfig) -> None:
         self.config = config
         self.env = SimPyEnvironmentAdapter()
         self.event_logger = EventLogger()
-        self.all_wagons: List[Wagon] = []
 
     def run(self) -> SimulationResults:
-        """Führe Simulation aus"""
+        """Run simulation"""
 
-        # 1. Setup Workshop
+        # 1. Setup workshop
         workshop = self._setup_workshop()
 
-        # 2. Erstelle Adapter
+        # 2. Create adapter
         adapter = WorkshopSimPyAdapter(
             workshop=workshop,
             env=self.env,
             event_logger=self.event_logger
         )
 
-        # 3. Registriere Processes
+        # 3. Register processes
         self.env.process(
             adapter.train_arrival_process(
                 interval_minutes=self.config.trains.arrival_interval_minutes,
@@ -342,42 +290,40 @@ class SimulationService:
             )
         )
 
-        # 4. Führe Simulation aus
+        # 4. Run simulation
         duration_minutes = self.config.duration_hours * 60
         self.env.run(until=duration_minutes)
 
-        # 5. Sammle Ergebnisse
+        # 5. Collect results
         return self._collect_results(workshop)
 
     def _setup_workshop(self) -> Workshop:
-        """Erstelle Workshop aus Config"""
+        """Create workshop from config"""
         tracks = [
             WorkshopTrack(
                 id=track_config.id,
                 capacity=track_config.capacity,
                 retrofit_time_min=track_config.retrofit_time_min,
                 current_wagons=0,
-                resource=None  # Wird vom Adapter gesetzt
+                resource=None  # Set by adapter
             )
             for track_config in self.config.workshop.tracks
         ]
         return Workshop(id="workshop_001", tracks=tracks)
 
     def _collect_results(self, workshop: Workshop) -> SimulationResults:
-        """Sammle Ergebnisse aus Events und Wagons"""
-        # Implementierung siehe KPI Service
+        """Collect results from events and wagons"""
+        # Implementation see KPI service
         pass
 ```
 
----
-
 ## Testing Strategy
 
-### Unit Tests (ohne SimPy)
+### Unit Tests (without SimPy)
 
 ```python
-# Domain Logic kann ohne SimPy getestet werden
-def test_wagon_waiting_time():
+# Domain logic can be tested without SimPy
+def test_wagon_waiting_time() -> None:
     wagon = Wagon(
         id="W001",
         train_id="T001",
@@ -386,7 +332,7 @@ def test_wagon_waiting_time():
     )
     assert wagon.waiting_time == 5.0
 
-def test_track_availability():
+def test_track_availability() -> None:
     track = WorkshopTrack(
         id="TRACK01",
         capacity=5,
@@ -399,11 +345,11 @@ def test_track_availability():
     assert track.is_available() == False
 ```
 
-### Integration Tests (mit SimPy)
+### Integration Tests (with SimPy)
 
 ```python
-def test_simple_simulation():
-    """Test mit SimPy Environment"""
+def test_simple_simulation() -> None:
+    """Test with SimPy environment"""
     env = SimPyEnvironmentAdapter()
 
     workshop = Workshop(
@@ -424,13 +370,13 @@ def test_simple_simulation():
         event_logger=EventLogger()
     )
 
-    # Erstelle Test-Wagon
+    # Create test wagon
     wagon = Wagon(id="W001", train_id="T001")
 
-    # Starte Retrofit Process
+    # Start retrofit process
     env.process(adapter.retrofit_process(wagon))
 
-    # Führe Simulation aus
+    # Run simulation
     env.run(until=60)
 
     # Assertions
@@ -438,99 +384,43 @@ def test_simple_simulation():
     assert wagon.needs_retrofit == False
 ```
 
----
+## Best Practices
 
-## Performance Considerations
+### ✅ Do's
+- Domain logic in separate classes (without SimPy imports)
+- Use thin adapter pattern
+- Log events for traceability
+- Keep generator functions small
+- Type hints for better IDE support
 
-### MVP Optimierungen
-
-```python
-# 1. Batch Processing von Wagen
-def retrofit_batch_process(self, wagons: List[Wagon]) -> Generator:
-    """Verarbeite mehrere Wagen gleichzeitig"""
-    for wagon in wagons:
-        self.env.process(self.retrofit_process(wagon))
-    yield self.env.timeout(0)  # Yield control
-
-# 2. Resource Pooling
-class ResourcePool:
-    """Pool von Tracks für effiziente Auswahl"""
-
-    def __init__(self, tracks: List[WorkshopTrack]):
-        self.tracks = tracks
-        self._index = 0
-
-    def get_next_available(self) -> WorkshopTrack:
-        """Round-Robin Selection"""
-        track = self.tracks[self._index]
-        self._index = (self._index + 1) % len(self.tracks)
-        return track
-```
-
-### Monitoring
-
-```python
-class SimulationMonitor:
-    """Überwacht Simulation Performance"""
-
-    def __init__(self, env: SimulationEnvironment):
-        self.env = env
-        self.checkpoints: List[float] = []
-
-    def checkpoint(self):
-        """Speichere aktuellen Zeitpunkt"""
-        self.checkpoints.append(self.env.now)
-
-    def progress_percentage(self, total_duration: float) -> float:
-        """Berechne Fortschritt in %"""
-        return (self.env.now / total_duration) * 100
-```
-
----
+### ❌ Don'ts
+- Don't import SimPy directly in domain logic
+- No complex logic in generator functions
+- No global SimPy resources
+- No direct `yield` statements in domain models
 
 ## Migration Path (Post-MVP)
 
-### Vollversion: Austausch von SimPy
+### Full Version: Replace SimPy
 
 ```python
 # Alternative: Salabim
 class SalabimEnvironmentAdapter(SimulationEnvironment):
-    def __init__(self):
+    def __init__(self) -> None:
         import salabim as sim
         self._env = sim.Environment()
 
-    # Implementiere gleiche Interface
+    # Implement same interface
     ...
 
-# Alternative: Custom Discrete Event Engine
+# Alternative: Custom discrete event engine
 class CustomDESAdapter(SimulationEnvironment):
-    def __init__(self):
-        self._event_queue = PriorityQueue()
-        self._current_time = 0.0
+    def __init__(self) -> None:
+        self._event_queue: PriorityQueue = PriorityQueue()
+        self._current_time: float = 0.0
 
-    # Implementiere gleiche Interface
+    # Implement same interface
     ...
 ```
 
-**Aufwand:** 2-3 Tage, da Domain Logic unverändert bleibt.
-
----
-
-## Best Practices
-
-### ✅ Do's
-- Domain Logic in separaten Klassen (ohne SimPy Imports)
-- Thin Adapter Pattern verwenden
-- Events für Nachvollziehbarkeit loggen
-- Generator-Funktionen klein halten
-- Type Hints für bessere IDE-Unterstützung
-
-### ❌ Don'ts
-- SimPy nicht direkt in Domain Logic importieren
-- Keine komplexe Logik in Generator-Funktionen
-- Keine globalen SimPy Resources
-- Keine direkten `yield` Statements in Domain Models
-
----
-
-**Navigation:** [← 3 Domain model](03-mvp-domain-model.md) | [Data flow →](05-mvp-data-flow.md)
+**Effort:** Estimated 2-3 days (to be validated), as domain logic remains unchanged.

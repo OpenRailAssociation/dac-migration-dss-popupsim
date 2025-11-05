@@ -124,7 +124,6 @@ class ScenarioConfig(BaseModel):
     scenario_id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
     start_date: date
     end_date: date
-    random_seed: int | None = Field(default=None, ge=0)  # Optional for reproducibility
     workshop: Workshop | None = None
     train_schedule_file: str
     routes_file: str | None = None

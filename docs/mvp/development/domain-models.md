@@ -1,456 +1,417 @@
-# PopUpSim MVP - Domain Models & Entities
+# Domain Models Reference
 
-## Übersicht
+## Overview
 
-Diese Datei definiert alle Domain Models und Entities für die MVP-Implementierung. Alle Klassen verwenden **Pydantic** für Type Safety und Validierung.
+**Note:** See actual implementation in `popupsim/backend/src/domain/` and `popupsim/backend/src/configuration/`
 
----
+This document provides a quick reference for all domain models in the MVP.
 
-## Configuration Context
+## Configuration Models
 
 ### ScenarioConfig
 
 ```python
 from pydantic import BaseModel, Field
-from typing import Optional
+from datetime import date
 
 class ScenarioConfig(BaseModel):
-    """Hauptkonfiguration für ein Simulationsszenario"""
-    duration_hours: int = Field(gt=0, description="Simulationsdauer in Stunden")
-    random_seed: int = Field(default=42, description="Seed für Reproduzierbarkeit")
-
-    workshop: "WorkshopConfig"
-    trains: "TrainConfig"
-
-class WorkshopConfig(BaseModel):
-    """Werkstatt-Konfiguration (MVP: Vereinfacht)"""
-    tracks: list["WorkshopTrackConfig"] = Field(min_length=1)
-
-class WorkshopTrackConfig(BaseModel):
-    """Werkstattgleis mit Gesamtkapazität (MVP: Vereinfacht)"""
-    id: str = Field(pattern=r"^TRACK\d{2}$", description="Track ID (z.B. TRACK01)")
-    capacity: int = Field(gt=0, le=20, description="Gesamtkapazität des Gleises")
-    retrofit_time_min: int = Field(ge=10, le=300, description="Umrüstzeit in Minuten")
-
-    # Hinweis für Vollversion:
-    # In Vollversion wird dies zu list[StationConfig] mit einzelnen Stationen
-
-class TrainConfig(BaseModel):
-    """Zug-Ankunfts-Konfiguration"""
-    arrival_interval_minutes: int = Field(gt=0, description="Intervall zwischen Zügen")
-    wagons_per_train: int = Field(gt=0, le=50, description="Wagen pro Zug")
+    """Main scenario configuration"""
+    scenario_id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
+    start_date: date
+    end_date: date
+    workshop: Workshop | None = None
+    train_schedule_file: str
+    routes_file: str | None = None
+    workshop_tracks_file: str | None = None
 ```
 
----
-
-## Workshop Context
-
-### Workshop Domain
+### Workshop
 
 ```python
-from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
-import simpy
-
 class Workshop(BaseModel):
-    """Werkstatt mit mehreren Gleisen (MVP: Vereinfacht)"""
-    id: str
-    tracks: list["WorkshopTrack"]
+    """Workshop with tracks"""
+    tracks: list[WorkshopTrack] = Field(min_length=1)
+```
 
-    class Config:
-        arbitrary_types_allowed = True  # Für SimPy Resources
+### WorkshopTrack
+
+```python
+from enum import Enum
+
+class TrackFunction(str, Enum):
+    WERKSTATTGLEIS = "werkstattgleis"
+    SAMMELGLEIS = "sammelgleis"
+    PARKGLEIS = "parkgleis"
+    WERKSTATTZUFUEHRUNG = "werkstattzufuehrung"
+    WERKSTATTABFUEHRUNG = "werkstattabfuehrung"
+    BAHNHOFSKOPF = "bahnhofskopf"
 
 class WorkshopTrack(BaseModel):
-    """Werkstattgleis mit SimPy Resource (MVP: Vereinfacht)"""
+    """Individual workshop track"""
     id: str
-    capacity: int
-    retrofit_time_min: int
-    current_wagons: int = 0
+    function: TrackFunction
+    capacity: int = Field(ge=1)
+    retrofit_time_min: int = Field(ge=0)
+```
 
-    # SimPy Resource (wird zur Laufzeit gesetzt)
-    resource: Optional[simpy.Resource] = None
+## Domain Entities
 
-    class Config:
-        arbitrary_types_allowed = True
+### Train
 
-    def is_available(self) -> bool:
-        """Prüft ob Gleis verfügbar ist"""
-        return self.current_wagons < self.capacity
+```python
+from dataclasses import dataclass
+from datetime import datetime
 
-class Wagon(BaseModel):
-    """Güterwagen zur Umrüstung (MVP: Vereinfacht - alle Wagen gleich)"""
+@dataclass
+class Train:
+    """Train with multiple wagons"""
+    id: str
+    arrival_time: datetime
+    wagons: list[Wagon]
+    origin: str
+    destination: str
+
+    def get_total_length(self) -> float:
+        return sum(wagon.length for wagon in self.wagons)
+
+    def get_retrofit_wagons(self) -> list[Wagon]:
+        return [w for w in self.wagons if w.needs_retrofit]
+```
+
+### Wagon
+
+```python
+@dataclass
+class Wagon:
+    """Individual freight wagon"""
     id: str
     train_id: str
-    needs_retrofit: bool = True  # Bestimmt ob Wagen umgerüstet werden muss
-
-    # Zeitstempel
-    arrival_time: Optional[float] = None
-    retrofit_start_time: Optional[float] = None
-    retrofit_end_time: Optional[float] = None
-
-    # MVP: Welches Gleis hat den Wagen bearbeitet
-    track_id: Optional[str] = None
+    length: float
+    needs_retrofit: bool
+    status: str = "arriving"
+    arrival_time: float | None = None
+    retrofit_start_time: float | None = None
+    retrofit_end_time: float | None = None
+    track_id: str | None = None
 
     @property
-    def waiting_time(self) -> Optional[float]:
-        """Wartezeit bis Umrüstung beginnt"""
+    def waiting_time(self) -> float | None:
         if self.arrival_time and self.retrofit_start_time:
             return self.retrofit_start_time - self.arrival_time
         return None
 
     @property
-    def retrofit_duration(self) -> Optional[float]:
-        """Tatsächliche Umrüstdauer"""
+    def retrofit_duration(self) -> float | None:
         if self.retrofit_start_time and self.retrofit_end_time:
             return self.retrofit_end_time - self.retrofit_start_time
         return None
+```
 
-class Train(BaseModel):
-    """Zug mit mehreren Wagen"""
+### Track
+
+```python
+@dataclass
+class Track:
+    """Track with capacity management"""
     id: str
-    wagons: list[Wagon]
-    arrival_time: float
+    name: str
+    length: float
+    track_type: str
+    capacity: int
+    current_occupancy: float = 0.0
+    current_wagon_count: int = 0
 
-    @property
-    def wagon_count(self) -> int:
-        return len(self.wagons)
+    def can_accommodate(self, length: float) -> bool:
+        return self.current_occupancy + length <= self.length
+
+    def can_accommodate_wagon(self) -> bool:
+        return self.current_wagon_count < self.capacity
+
+    def occupy_space(self, length: float) -> None:
+        if not self.can_accommodate(length):
+            raise InsufficientCapacityError(
+                f"Track {self.id} cannot accommodate {length}m"
+            )
+        self.current_occupancy += length
+        self.current_wagon_count += 1
+
+    def free_space(self, length: float) -> None:
+        self.current_occupancy = max(0, self.current_occupancy - length)
+        self.current_wagon_count = max(0, self.current_wagon_count - 1)
+
+    def get_utilization_percent(self) -> float:
+        return (self.current_occupancy / self.length) * 100
 ```
 
----
+## Value Objects
 
-## Simulation Control Context
-
-### Simulation Results
+### ValidationResult
 
 ```python
-from pydantic import BaseModel, Field
-from typing import Optional
+@dataclass(frozen=True)
+class ValidationResult:
+    """Result of validation"""
+    is_valid: bool
+    errors: list[str]
+    warnings: list[str]
 
-class SimulationResults(BaseModel):
-    """Ergebnisse einer Simulation"""
+    def has_errors(self) -> bool:
+        return len(self.errors) > 0
+
+    def has_warnings(self) -> bool:
+        return len(self.warnings) > 0
+```
+
+### SimulationResult
+
+```python
+@dataclass(frozen=True)
+class SimulationResult:
+    """Result of simulation"""
     scenario_id: str
-    duration_hours: float
-
-    # Durchsatz
-    total_wagons_processed: int = Field(ge=0)
-    throughput_per_hour: float = Field(ge=0.0)
-
-    # Wartezeiten
-    average_waiting_time: float = Field(ge=0.0, description="Durchschnittliche Wartezeit in Minuten")
-    max_waiting_time: float = Field(ge=0.0)
-    min_waiting_time: float = Field(ge=0.0)
-
-    # Auslastung
-    track_utilization: float = Field(ge=0.0, le=1.0, description="Durchschnittliche Gleisauslastung (MVP)")
-
-    # Warteschlange
-    average_queue_length: float = Field(ge=0.0)
-    max_queue_length: int = Field(ge=0)
-
-    # Zeitstempel
-    simulation_start: datetime
-    simulation_end: datetime
-
-class KPIData(BaseModel):
-    """KPI-Datenpunkt für Zeitreihen"""
-    timestamp: float = Field(description="Simulationszeit in Stunden")
-
-    # Momentane Werte
-    throughput: float = Field(ge=0.0, description="Wagen/Stunde")
-    utilization: float = Field(ge=0.0, le=1.0, description="Auslastung 0-1")
-    queue_length: int = Field(ge=0, description="Wartende Wagen")
-    waiting_time: float = Field(ge=0.0, description="Aktuelle Wartezeit")
-
-    # Kumulative Werte
-    total_processed: int = Field(ge=0, description="Gesamt verarbeitete Wagen")
-
-class TrackMetrics(BaseModel):
-    """Metriken pro Werkstattgleis (MVP: Vereinfacht)"""
-    track_id: str
-    wagons_processed: int = Field(ge=0)
-    utilization: float = Field(ge=0.0, le=1.0)
-    average_retrofit_time: float = Field(ge=0.0)
-    idle_time: float = Field(ge=0.0, description="Leerlaufzeit in Stunden")
-
-    # Hinweis für Vollversion:
-    # In Vollversion wird dies zu StationMetrics mit Pro-Station-Details
+    duration_hours: int
+    total_trains_processed: int
+    total_wagons_processed: int
+    average_processing_time_minutes: float
+    throughput_per_hour: float
+    track_utilization: dict[str, float]
+    bottlenecks: list[str]
 ```
 
----
-
-## Simulation Events
+### ThroughputEstimate
 
 ```python
-from pydantic import BaseModel
-from enum import Enum
-from datetime import datetime
+@dataclass(frozen=True)
+class ThroughputEstimate:
+    """Throughput estimation"""
+    wagons_per_hour: float
+    wagons_per_day: float
+    efficiency_factor: float
+    bottleneck: str | None = None
 
-class EventType(str, Enum):
-    """Typen von Simulationsereignissen"""
-    TRAIN_ARRIVAL = "train_arrival"
-    WAGON_QUEUED = "wagon_queued"
-    RETROFIT_START = "retrofit_start"
-    RETROFIT_COMPLETE = "retrofit_complete"
-    TRACK_OCCUPIED = "track_occupied"  # MVP: Gleis statt Station
-    TRACK_FREE = "track_free"  # MVP: Gleis statt Station
+    def with_efficiency(self, factor: float) -> 'ThroughputEstimate':
+        return ThroughputEstimate(
+            wagons_per_hour=self.wagons_per_hour * factor,
+            wagons_per_day=self.wagons_per_day * factor,
+            efficiency_factor=factor,
+            bottleneck=self.bottleneck
+        )
+```
 
-class SimulationEvent(BaseModel):
-    """Basis-Event für alle Simulationsereignisse"""
-    timestamp: float = Field(description="Simulationszeit in Stunden")
-    event_type: EventType
-    data: dict
+## Events
 
-class TrainArrivalEvent(BaseModel):
-    """Zug kommt an"""
+### SimulationEvent
+
+```python
+@dataclass
+class SimulationEvent:
+    """Base simulation event"""
     timestamp: float
+    event_type: str
+```
+
+### TrainArrivalEvent
+
+```python
+@dataclass
+class TrainArrivalEvent(SimulationEvent):
+    """Train arrival event"""
     train_id: str
     wagon_count: int
+    event_type: str = "train_arrival"
+```
 
-class RetrofitStartEvent(BaseModel):
-    """Umrüstung beginnt"""
-    timestamp: float
+### RetrofitStartEvent
+
+```python
+@dataclass
+class RetrofitStartEvent(SimulationEvent):
+    """Retrofit start event"""
     wagon_id: str
-    track_id: str  # MVP: Gleis statt Station
+    track_id: str
     waiting_time: float
+    event_type: str = "retrofit_start"
+```
 
-class RetrofitCompleteEvent(BaseModel):
-    """Umrüstung abgeschlossen"""
-    timestamp: float
+### RetrofitCompleteEvent
+
+```python
+@dataclass
+class RetrofitCompleteEvent(SimulationEvent):
+    """Retrofit complete event"""
     wagon_id: str
-    track_id: str  # MVP: Gleis statt Station
+    track_id: str
     retrofit_duration: float
-
-class TrackOccupiedEvent(BaseModel):
-    """Gleis wird belegt (MVP)"""
-    timestamp: float
-    track_id: str
-    current_occupancy: int
-    capacity: int
-
-class TrackFreeEvent(BaseModel):
-    """Gleis wird frei (MVP)"""
-    timestamp: float
-    track_id: str
-    current_occupancy: int
+    event_type: str = "retrofit_complete"
 ```
 
----
-
-## Validation Models
+## Exceptions
 
 ```python
-from pydantic import BaseModel, validator
+class PopUpSimDomainError(Exception):
+    """Base domain error"""
+    pass
 
-class ValidationResult(BaseModel):
-    """Ergebnis einer Validierung"""
-    is_valid: bool
-    errors: list[str] = []
-    warnings: list[str] = []
+class ValidationError(PopUpSimDomainError):
+    """Configuration validation error"""
+    pass
 
-    def add_error(self, message: str):
-        self.errors.append(message)
-        self.is_valid = False
+class SimulationRuntimeError(PopUpSimDomainError):
+    """Simulation runtime error"""
+    pass
 
-    def add_warning(self, message: str):
-        self.warnings.append(message)
+class InsufficientCapacityError(PopUpSimDomainError):
+    """Insufficient track/workshop capacity"""
+    pass
 
-class ConfigValidation(BaseModel):
-    """Validierung für Konfigurationsdaten"""
-    scenario: ValidationResult
-    workshop: ValidationResult
-    trains: ValidationResult
+class TrackNotFoundError(PopUpSimDomainError):
+    """Track not found"""
+    pass
 
-    @property
-    def is_valid(self) -> bool:
-        return all([
-            self.scenario.is_valid,
-            self.workshop.is_valid,
-            self.trains.is_valid
-        ])
-```
-
----
-
-## Error Handling (MVP: Vereinfacht)
-
-```python
-# MVP nutzt Standard Python Exceptions
-# Keine komplexe Error-Hierarchie
-
-# Konfigurationsfehler
-raise ValueError(f"Ungültige Konfiguration: {message}")
-
-# Simulationsfehler
-raise RuntimeError(f"Simulationsfehler bei t={time}: {message}")
-
-# Ausgabefehler
-raise IOError(f"Ausgabefehler für {file_path}: {message}")
-
-# Validierungsfehler werden von Pydantic automatisch geworfen
-```
-
----
-
-## Verwendungsbeispiele
-
-### Configuration Context (Dev 1)
-
-```python
-# Laden und Validieren
-from pathlib import Path
-import json
-
-def load_scenario(config_path: Path) -> ScenarioConfig:
-    with open(config_path / "scenario.json") as f:
-        data = json.load(f)
-
-    # Pydantic validiert automatisch
-    scenario = ScenarioConfig(**data)
-    return scenario
-
-# Beispiel-Nutzung
-scenario = load_scenario(Path("config/"))
-print(f"Simulation läuft {scenario.duration_hours} Stunden")
-print(f"Werkstatt hat {len(scenario.workshop.tracks)} Gleise")
-```
-
-### Workshop Context (Dev 2)
-
-```python
-# Workshop erstellen (MVP: Vereinfacht)
-def setup_workshop(config: WorkshopConfig, env: simpy.Environment) -> Workshop:
-    tracks = []
-    for track_config in config.tracks:
-        track = WorkshopTrack(
-            id=track_config.id,
-            capacity=track_config.capacity,
-            workers=track_config.workers,
-            retrofit_time_min=track_config.retrofit_time_min,
-            resource=simpy.Resource(env, capacity=track_config.capacity)
-        )
-        tracks.append(track)
-
-    return Workshop(id="workshop_001", tracks=tracks)
-
-# Wagen verarbeiten (MVP: Vereinfacht)
-def process_wagon(env: simpy.Environment, wagon: Wagon, track: WorkshopTrack):
-    wagon.arrival_time = env.now
-
-    with track.resource.request() as req:
-        yield req
-
-        wagon.retrofit_start_time = env.now
-        wagon.track_id = track.id
-        track.current_wagons += 1
-
-        yield env.timeout(track.retrofit_time_min / 60)  # Minuten → Stunden
-
-        wagon.retrofit_end_time = env.now
-        track.current_wagons -= 1
-
-    return Workshop(id="workshop_001", stations=stations)
-
-# Wagen verarbeiten
-def process_wagon(env: simpy.Environment, wagon: Wagon, station: Station):
-    wagon.arrival_time = env.now
-
-    with station.resource.request() as req:
-        yield req
-
-        wagon.retrofit_start_time = env.now
-        station.current_wagons += 1
-
-        yield env.timeout(station.retrofit_time_min / 60)  # Minuten → Stunden
-
-        wagon.retrofit_end_time = env.now
-        station.current_wagons -= 1
-```
-
-### Simulation Control Context (Dev 3)
-
-```python
-# KPIs berechnen
-def calculate_kpis(wagons: list[Wagon], duration_hours: float) -> SimulationResults:
-    processed = [w for w in wagons if w.retrofit_end_time is not None]
-
-    waiting_times = [w.waiting_time for w in processed if w.waiting_time]
-
-    return SimulationResults(
-        scenario_id="scenario_001",
-        duration_hours=duration_hours,
-        total_wagons_processed=len(processed),
-        throughput_per_hour=len(processed) / duration_hours,
-        average_waiting_time=sum(waiting_times) / len(waiting_times) if waiting_times else 0,
-        max_waiting_time=max(waiting_times) if waiting_times else 0,
-        min_waiting_time=min(waiting_times) if waiting_times else 0,
-        station_utilization=0.75,  # Berechnung basierend auf Events
-        average_queue_length=5.2,
-        max_queue_length=15,
-        simulation_start=datetime.now(),
-        simulation_end=datetime.now()
-    )
-```
-
----
-
-## Pydantic Validierungs-Features
-
-### Automatische Validierung
-
-```python
-# Fehler bei ungültigen Werten
-try:
-    station = StationConfig(
-        id="INVALID",  # Muss WS\d{3} sein
-        capacity=0,     # Muss > 0 sein
-        workers=-1,     # Muss > 0 sein
-        retrofit_time_min=500  # Muss <= 300 sein
-    )
-except ValidationError as e:
-    print(e.json())
-```
-
-### Custom Validators
-
-```python
-class ScenarioConfig(BaseModel):
-    duration_hours: int
-    workshop: WorkshopConfig
-
-    @validator('duration_hours')
-    def duration_must_be_reasonable(cls, v):
-        if v > 168:  # 1 Woche
-            raise ValueError('Simulation länger als 1 Woche nicht sinnvoll')
-        return v
-
-    @validator('workshop')
-    def workshop_must_have_capacity(cls, v):
-        total_capacity = sum(s.capacity for s in v.stations)
-        if total_capacity < 2:
-            raise ValueError('Werkstatt muss mindestens Kapazität 2 haben')
-        return v
-```
-
----
-
-## Type Hints für IDE Support
-
-```python
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from simpy import Environment, Resource
-
-# Ermöglicht Type Hints ohne zirkuläre Imports
-def setup_simulation(env: "Environment") -> Workshop:
+class InvalidRouteError(PopUpSimDomainError):
+    """Invalid route definition"""
     pass
 ```
 
----
+## Type Aliases
 
-**Status:** ✅ Bereit für Implementierung | **Pydantic Version:** 2.0+ | **Python:** 3.13
+```python
+from typing import TypeAlias
 
----
+# Common type aliases
+WagonId: TypeAlias = str
+TrainId: TypeAlias = str
+TrackId: TypeAlias = str
+ScenarioId: TypeAlias = str
+SimulationTime: TypeAlias = float  # Minutes since start
 
-**Navigation:** [← Migration Path](10-mvp-migration-path.md) | [← MVP Overview](01-mvp-overview.md)
+# Collection types
+WagonList: TypeAlias = list[Wagon]
+TrackList: TypeAlias = list[Track]
+EventList: TypeAlias = list[SimulationEvent]
+```
+
+## Model Relationships
+
+```
+ScenarioConfig
+├── Workshop
+│   └── WorkshopTrack[]
+└── train_schedule_file → Train[]
+                          └── Wagon[]
+
+Simulation Runtime:
+Train → Wagon[] → WorkshopTrack → SimulationEvent[]
+```
+
+## Usage Examples
+
+### Creating a Scenario
+
+```python
+scenario = ScenarioConfig(
+    scenario_id="demo",
+    start_date=date(2025, 1, 1),
+    end_date=date(2025, 1, 2),
+    workshop=Workshop(
+        tracks=[
+            WorkshopTrack(
+                id="TRACK01",
+                function=TrackFunction.WERKSTATTGLEIS,
+                capacity=5,
+                retrofit_time_min=30
+            )
+        ]
+    ),
+    train_schedule_file="schedule.csv"
+)
+```
+
+### Processing a Wagon
+
+```python
+wagon = Wagon(
+    id="W001",
+    train_id="T001",
+    length=15.5,
+    needs_retrofit=True
+)
+
+# Wagon arrives
+wagon.arrival_time = env.now
+
+# Start retrofit
+wagon.retrofit_start_time = env.now
+wagon.track_id = "TRACK01"
+
+# Complete retrofit
+wagon.retrofit_end_time = env.now
+wagon.needs_retrofit = False
+
+# Calculate metrics
+print(f"Waiting time: {wagon.waiting_time} minutes")
+print(f"Retrofit duration: {wagon.retrofit_duration} minutes")
+```
+
+### Calculating Throughput
+
+```python
+estimate = ThroughputEstimate(
+    wagons_per_hour=10.0,
+    wagons_per_day=240.0,
+    efficiency_factor=0.85
+)
+
+# Adjust for different efficiency
+realistic_estimate = estimate.with_efficiency(0.75)
+print(f"Realistic throughput: {realistic_estimate.wagons_per_day} wagons/day")
+```
+
+## Model Validation
+
+All Pydantic models are automatically validated:
+
+```python
+# Valid
+track = WorkshopTrack(
+    id="TRACK01",
+    function=TrackFunction.WERKSTATTGLEIS,
+    capacity=5,
+    retrofit_time_min=30
+)
+
+# Invalid - raises ValidationError
+track = WorkshopTrack(
+    id="TRACK01",
+    function=TrackFunction.WERKSTATTGLEIS,
+    capacity=0,  # Must be >= 1
+    retrofit_time_min=30
+)
+```
+
+## Immutability
+
+Value objects are immutable (frozen dataclasses):
+
+```python
+result = SimulationResult(
+    scenario_id="demo",
+    duration_hours=8,
+    ...
+)
+
+# This raises an error
+result.duration_hours = 10  # ❌ FrozenInstanceError
+```
+
+## Type Checking
+
+All models include type hints for MyPy:
+
+```bash
+# Type check passes
+uv run mypy backend/src/
+
+# Type error example
+wagon: Wagon = "not a wagon"  # ❌ Type error
+```

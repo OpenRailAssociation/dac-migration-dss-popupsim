@@ -30,7 +30,7 @@ Use **SimPy** as the simulation engine.
 - **Proven in POC**: Successfully validated during 3-Länderhack 2024 hackathon
 - **Python native**: Integrates seamlessly with Python ecosystem
 - **Discrete event paradigm**: Perfect fit for workshop operations simulation
-- **Deterministic**: Supports reproducible results with random seeds
+- **Deterministic**: Supports reproducible results
 - **Well-documented**: Mature library with good community support
 - **Lightweight**: No heavy infrastructure requirements
 
@@ -199,7 +199,7 @@ Use **3 bounded contexts**:
 **Alternatives Considered:**
 - **3 contexts** ✅ Chosen
 - **1 monolith**: No domain separation
-- **7+ contexts**: Too complex for MVP timeline
+- **More specialized contexts**: Too complex for MVP timeline
 - **2 contexts**: Insufficient separation
 
 **Consequences:**

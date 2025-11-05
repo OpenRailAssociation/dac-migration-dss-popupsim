@@ -6,7 +6,7 @@
 |------------|-------------|------------|
 | **Open Source License** | Apache 2.0 license under Open Rail Association | All code publicly available and transparent |
 | **License Compatibility** | All third-party dependencies must be compatible with Apache 2.0 | Limits choice of libraries and frameworks |
-| **Development Timeline** | Maximum 5 weeks development time | Simplified 3-context architecture instead of 7 contexts |
+| **Development Timeline** | Maximum 5 weeks development time | Simplified 3-context architecture instead of more specialized contexts |
 | **Team Size** | 3 backend developers | No frontend developer, file-based UI only |
 | **Multi-Company Collaboration** | European railway companies (DB, SBB, ÖBB) might use PopUpSim | Architecture must be adaptable to different requirements |
 | **Big Bang Timeline Support** | Must simulate 3-week Big Bang conversion periods | Performance requirements for time-critical operations |

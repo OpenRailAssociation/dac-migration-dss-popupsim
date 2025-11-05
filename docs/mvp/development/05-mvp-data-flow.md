@@ -1,10 +1,10 @@
-# PopUpSim MVP - Data Flow
+# 5. MVP Data Flow
 
-## Übersicht
+## Overview
 
-Diese Datei beschreibt den Datenfluss durch die 3 MVP Bounded Contexts: Configuration, Workshop, und Simulation Control.
+**Note:** See [Architecture Section 6](../architecture/06-runtime.md) for runtime scenarios.
 
----
+This document describes data flow through the 3 MVP bounded contexts: Configuration, Simulation Domain, and Simulation Control.
 
 ## End-to-End Data Flow
 
@@ -23,11 +23,11 @@ Diese Datei beschreibt den Datenfluss durch die 3 MVP Bounded Contexts: Configur
                           ScenarioConfig (Pydantic)
                                    │
 ┌──────────────────────────────────▼──────────────────────────────┐
-│                     2. WORKSHOP CONTEXT                         │
+│                2. SIMULATION DOMAIN CONTEXT                     │
 └─────────────────────────────────────────────────────────────────┘
                                    │
                           ┌────────▼────────┐
-                          │  Workshop       │
+                          │  Simulation     │
                           │  Service        │
                           └────────┬────────┘
                                    │
@@ -41,7 +41,7 @@ Diese Datei beschreibt den Datenfluss durch die 3 MVP Bounded Contexts: Configur
                           Events + Wagons
                                    │
 ┌──────────────────────────────────▼──────────────────────────────┐
-│                  3. SIMULATION CONTROL CONTEXT                  │
+│                3. SIMULATION CONTROL CONTEXT                    │
 └─────────────────────────────────────────────────────────────────┘
                                    │
                           ┌────────▼────────┐
@@ -54,13 +54,11 @@ Diese Datei beschreibt den Datenfluss durch die 3 MVP Bounded Contexts: Configur
                           │ Output Service  │
                           └────────┬────────┘
                                    │
-                          CSV + Charts + JSON
+                          CSV + Charts
                                    │
                                    ▼
                           results/ Directory
 ```
-
----
 
 ## Phase 1: Configuration Loading
 
@@ -75,31 +73,34 @@ config/
 ### Process: Configuration Service
 
 ```python
+from pathlib import Path
+
 class ConfigurationService:
     def load_scenario(self, config_path: Path) -> ScenarioConfig:
-        # 1. Lade scenario.json
+        # 1. Load scenario.json
         scenario_data = self._load_json(config_path / "scenario.json")
 
-        # 2. Lade workshop_tracks.csv
+        # 2. Load workshop_tracks.csv
         tracks_data = self._load_csv(config_path / "workshop_tracks.csv")
 
-        # 3. Lade train_schedule.csv
+        # 3. Load train_schedule.csv
         trains_data = self._load_csv(config_path / "train_schedule.csv")
 
-        # 4. Validiere und erstelle Pydantic Models
+        # 4. Validate and create Pydantic models
         config = ScenarioConfig(
-            duration_hours=scenario_data["duration_hours"],
-            random_seed=scenario_data["random_seed"],
-            workshop=WorkshopConfig(
+            scenario_id=scenario_data["scenario_id"],
+            start_date=scenario_data["start_date"],
+            end_date=scenario_data["end_date"],
+            workshop=Workshop(
                 tracks=[
-                    WorkshopTrackConfig(**track)
+                    WorkshopTrack(**track)
                     for track in tracks_data
                 ]
             ),
-            trains=TrainConfig(**trains_data)
+            train_schedule_file=str(config_path / "train_schedule.csv")
         )
 
-        # 5. Validiere Business Rules
+        # 5. Validate business rules
         self._validate_config(config)
 
         return config
@@ -108,61 +109,50 @@ class ConfigurationService:
 ### Output: ScenarioConfig
 ```python
 ScenarioConfig(
-    duration_hours=8,
-    random_seed=42,
-    workshop=WorkshopConfig(
+    scenario_id="demo_scenario",
+    start_date=date(2025, 1, 1),
+    end_date=date(2025, 1, 2),
+    workshop=Workshop(
         tracks=[
-            WorkshopTrackConfig(
+            WorkshopTrack(
                 id="TRACK01",
+                function=TrackFunction.WERKSTATTGLEIS,
                 capacity=5,
                 retrofit_time_min=30
-            ),
-            WorkshopTrackConfig(
-                id="TRACK02",
-                capacity=3,
-                retrofit_time_min=45
             )
         ]
     ),
-    trains=TrainConfig(
-        arrival_interval_minutes=60,
-        wagons_per_train=10
-    )
+    train_schedule_file="config/train_schedule.csv"
 )
 ```
 
----
-
-## Phase 2: Workshop Setup
+## Phase 2: Simulation Setup
 
 ### Input: ScenarioConfig
 
-### Process: Workshop Service
+### Process: Simulation Service
 
 ```python
-class WorkshopService:
-    def setup_workshop(
+class SimulationService:
+    def setup_simulation(
         self,
-        config: WorkshopConfig,
+        config: ScenarioConfig,
         env: SimPyEnvironmentAdapter
     ) -> Workshop:
-        # 1. Erstelle Tracks aus Config
-        tracks = []
-        for track_config in config.tracks:
+        # 1. Create tracks from config
+        tracks: list[WorkshopTrack] = []
+        for track_config in config.workshop.tracks:
             track = WorkshopTrack(
                 id=track_config.id,
+                function=track_config.function,
                 capacity=track_config.capacity,
                 retrofit_time_min=track_config.retrofit_time_min,
-                current_wagons=0,
-                resource=None  # Wird von Adapter gesetzt
+                current_wagons=0
             )
             tracks.append(track)
 
-        # 2. Erstelle Workshop
-        workshop = Workshop(
-            id="workshop_001",
-            tracks=tracks
-        )
+        # 2. Create workshop
+        workshop = Workshop(tracks=tracks)
 
         return workshop
 ```
@@ -170,27 +160,17 @@ class WorkshopService:
 ### Output: Workshop Domain Model
 ```python
 Workshop(
-    id="workshop_001",
     tracks=[
         WorkshopTrack(
             id="TRACK01",
+            function=TrackFunction.WERKSTATTGLEIS,
             capacity=5,
             retrofit_time_min=30,
-            current_wagons=0,
-            resource=None
-        ),
-        WorkshopTrack(
-            id="TRACK02",
-            capacity=3,
-            retrofit_time_min=45,
-            current_wagons=0,
-            resource=None
+            current_wagons=0
         )
     ]
 )
 ```
-
----
 
 ## Phase 3: Simulation Execution
 
@@ -199,40 +179,36 @@ Workshop(
 ### Process: SimPy Adapter
 
 ```python
+from typing import Generator
+
 class WorkshopSimPyAdapter:
-    def __init__(self, workshop: Workshop, env: SimPyEnvironmentAdapter):
+    def __init__(
+        self, 
+        workshop: Workshop, 
+        env: SimPyEnvironmentAdapter
+    ) -> None:
         self.workshop = workshop
         self.env = env
         self.event_logger = EventLogger()
-        self.all_wagons: List[Wagon] = []
+        self.all_wagons: list[Wagon] = []
 
-        # Initialisiere SimPy Resources
+        # Initialize SimPy resources
         for track in self.workshop.tracks:
             track.resource = simpy.Resource(
                 self.env.simpy_env,
                 capacity=track.capacity
             )
 
-    def train_arrival_process(self, train_schedule: List[TrainArrival]):
-        """Verarbeitet explizite Zugankünfte aus Fahrplan"""
-        # Sortiere Züge nach Ankunftszeit
-        sorted_trains = sorted(
-            train_schedule,
-            key=lambda t: datetime.combine(t.arrival_date, t.arrival_time)
-        )
+    def train_arrival_process(
+        self, 
+        train_schedule: list[TrainArrival]
+    ) -> Generator:
+        """Process explicit train arrivals from schedule"""
+        for train_arrival in train_schedule:
+            # Wait until arrival time
+            yield self.env.timeout(train_arrival.arrival_minutes)
 
-        for train_arrival in sorted_trains:
-            # Berechne Wartezeit bis Ankunft
-            arrival_datetime = datetime.combine(
-                train_arrival.arrival_date,
-                train_arrival.arrival_time
-            )
-            wait_minutes = (arrival_datetime - self.env.start_datetime).total_seconds() / 60
-
-            if wait_minutes > 0:
-                yield self.env.timeout(wait_minutes)
-
-            # Erstelle Train mit Wagons aus Fahrplan
+            # Create train with wagons
             train = Train(
                 id=train_arrival.train_id,
                 arrival_time=self.env.now,
@@ -241,42 +217,41 @@ class WorkshopSimPyAdapter:
                         id=wagon_info.wagon_id,
                         train_id=train_arrival.train_id,
                         length=wagon_info.length,
-                        is_loaded=wagon_info.is_loaded,
                         needs_retrofit=wagon_info.needs_retrofit
                     )
                     for wagon_info in train_arrival.wagons
                 ]
             )
 
-            # Log Event
+            # Log event
             self.event_logger.log_train_arrival(self.env, train)
 
-            # Starte Retrofit nur für Wagons die es brauchen
+            # Start retrofit for wagons needing it
             for wagon in train.wagons:
                 self.all_wagons.append(wagon)
                 if wagon.needs_retrofit:
                     self.env.process(self.retrofit_process(wagon))
 
-    def retrofit_process(self, wagon: Wagon):
+    def retrofit_process(self, wagon: Wagon) -> Generator:
         wagon.arrival_time = self.env.now
 
-        # Wähle Track
+        # Select track
         track = self._select_track()
 
-        # Fordere Resource an
+        # Request resource
         with track.resource.request() as req:
             yield req
 
-            # Start Retrofit
+            # Start retrofit
             wagon.retrofit_start_time = self.env.now
             wagon.track_id = track.id
             track.current_wagons += 1
             self.event_logger.log_retrofit_start(self.env, wagon, track)
 
-            # Retrofit Duration
+            # Retrofit duration
             yield self.env.timeout(track.retrofit_time_min)
 
-            # Complete Retrofit
+            # Complete retrofit
             wagon.retrofit_end_time = self.env.now
             wagon.needs_retrofit = False
             track.current_wagons -= 1
@@ -288,10 +263,21 @@ class WorkshopSimPyAdapter:
 **Events:**
 ```python
 [
-    TrainArrivalEvent(timestamp=60.0, train_id="TRAIN0001", wagon_count=10),
-    RetrofitStartEvent(timestamp=60.0, wagon_id="WAGON0001_00", track_id="TRACK01", waiting_time=0.0),
-    RetrofitCompleteEvent(timestamp=90.0, wagon_id="WAGON0001_00", track_id="TRACK01", retrofit_duration=30.0),
-    ...
+    TrainArrivalEvent(
+        timestamp=60.0, 
+        train_id="TRAIN0001", 
+        wagon_count=10
+    ),
+    RetrofitStartEvent(
+        timestamp=60.0, 
+        wagon_id="WAGON0001_00", 
+        track_id="TRACK01"
+    ),
+    RetrofitCompleteEvent(
+        timestamp=90.0, 
+        wagon_id="WAGON0001_00", 
+        track_id="TRACK01"
+    ),
 ]
 ```
 
@@ -307,11 +293,8 @@ class WorkshopSimPyAdapter:
         track_id="TRACK01",
         needs_retrofit=False
     ),
-    ...
 ]
 ```
-
----
 
 ## Phase 4: KPI Calculation
 
@@ -320,13 +303,15 @@ class WorkshopSimPyAdapter:
 ### Process: KPI Service
 
 ```python
+import statistics
+
 class KPIService:
     def calculate_kpis(
         self,
-        wagons: List[Wagon],
-        events: List[SimulationEvent],
+        wagons: list[Wagon],
+        events: list[SimulationEvent],
         duration_hours: float
-    ) -> SimulationResults:
+    ) -> SimulationResult:
 
         # 1. Filter processed wagons
         processed = [w for w in wagons if w.retrofit_end_time is not None]
@@ -341,178 +326,96 @@ class KPIService:
         # 3. Calculate throughput
         throughput = len(processed) / duration_hours
 
-        # 4. Calculate utilization from events
+        # 4. Calculate utilization
         utilization = self._calculate_utilization(events, duration_hours)
 
-        # 5. Calculate queue metrics
-        queue_metrics = self._calculate_queue_metrics(events)
-
-        # 6. Create results
-        return SimulationResults(
+        # 5. Create results
+        return SimulationResult(
             scenario_id="scenario_001",
             duration_hours=duration_hours,
             total_wagons_processed=len(processed),
             throughput_per_hour=throughput,
-            average_waiting_time=statistics.mean(waiting_times) if waiting_times else 0,
-            max_waiting_time=max(waiting_times) if waiting_times else 0,
-            min_waiting_time=min(waiting_times) if waiting_times else 0,
-            track_utilization=utilization,
-            average_queue_length=queue_metrics["avg"],
-            max_queue_length=queue_metrics["max"],
-            simulation_start=datetime.now(),
-            simulation_end=datetime.now()
+            average_waiting_time=statistics.mean(waiting_times) if waiting_times else 0.0,
+            track_utilization=utilization
         )
 
     def _calculate_utilization(
         self,
-        events: List[SimulationEvent],
+        events: list[SimulationEvent],
         duration_hours: float
     ) -> float:
-        """Berechne durchschnittliche Track-Auslastung"""
-        # Track occupancy over time
-        occupancy_timeline = []
-
-        for event in events:
-            if isinstance(event, TrackOccupiedEvent):
-                occupancy_timeline.append((event.timestamp, event.current_occupancy))
-            elif isinstance(event, TrackFreeEvent):
-                occupancy_timeline.append((event.timestamp, event.current_occupancy))
-
-        # Calculate weighted average
-        if not occupancy_timeline:
-            return 0.0
-
-        total_capacity_time = 0.0
-        for i in range(len(occupancy_timeline) - 1):
-            time_delta = occupancy_timeline[i+1][0] - occupancy_timeline[i][0]
-            occupancy = occupancy_timeline[i][1]
-            total_capacity_time += occupancy * time_delta
-
-        return total_capacity_time / (duration_hours * 60)  # Normalize
-
-    def _calculate_queue_metrics(
-        self,
-        events: List[SimulationEvent]
-    ) -> dict:
-        """Berechne Queue-Metriken"""
-        queue_lengths = []
-        current_queue = 0
-
-        for event in events:
-            if isinstance(event, WagonQueuedEvent):
-                current_queue += 1
-            elif isinstance(event, RetrofitStartEvent):
-                current_queue = max(0, current_queue - 1)
-
-            queue_lengths.append(current_queue)
-
-        return {
-            "avg": statistics.mean(queue_lengths) if queue_lengths else 0,
-            "max": max(queue_lengths) if queue_lengths else 0
-        }
+        """Calculate average track utilization"""
+        # Implementation details
+        return 0.78  # Example
 ```
 
-### Output: SimulationResults
+### Output: SimulationResult
 
 ```python
-SimulationResults(
+SimulationResult(
     scenario_id="scenario_001",
     duration_hours=8.0,
     total_wagons_processed=75,
     throughput_per_hour=9.375,
     average_waiting_time=12.5,
-    max_waiting_time=45.0,
-    min_waiting_time=0.0,
-    track_utilization=0.78,
-    average_queue_length=3.2,
-    max_queue_length=12,
-    simulation_start=datetime(2024, 1, 15, 10, 0, 0),
-    simulation_end=datetime(2024, 1, 15, 10, 5, 30)
+    track_utilization=0.78
 )
 ```
 
----
-
 ## Phase 5: Output Generation
 
-### Input: SimulationResults + Events + Wagons
+### Input: SimulationResult + Events + Wagons
 
 ### Process: Output Service
 
 ```python
+import csv
+from pathlib import Path
+
 class OutputService:
     def export_results(
         self,
-        results: SimulationResults,
-        wagons: List[Wagon],
-        events: List[SimulationEvent],
+        results: SimulationResult,
+        wagons: list[Wagon],
+        events: list[SimulationEvent],
         output_path: Path
-    ):
-        # 1. CSV Exports
+    ) -> None:
+        # 1. CSV exports
         self._export_summary_csv(results, output_path / "summary.csv")
         self._export_wagons_csv(wagons, output_path / "wagons.csv")
         self._export_events_csv(events, output_path / "events.csv")
 
-        # 2. JSON Export
-        self._export_json(results, output_path / "results.json")
+        # 2. Charts
+        self._generate_charts(results, wagons, output_path / "charts")
 
-        # 3. Charts
-        self._generate_charts(results, wagons, events, output_path / "charts")
-
-    def _export_summary_csv(self, results: SimulationResults, path: Path):
-        import csv
-
+    def _export_summary_csv(
+        self, 
+        results: SimulationResult, 
+        path: Path
+    ) -> None:
         with open(path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['Metric', 'Value'])
-            writer.writerow(['Total Wagons Processed', results.total_wagons_processed])
-            writer.writerow(['Throughput (wagons/hour)', results.throughput_per_hour])
-            writer.writerow(['Avg Waiting Time (min)', results.average_waiting_time])
-            writer.writerow(['Track Utilization', results.track_utilization])
-            writer.writerow(['Avg Queue Length', results.average_queue_length])
-
-    def _export_wagons_csv(self, wagons: List[Wagon], path: Path):
-        import csv
-
-        with open(path, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                'wagon_id', 'train_id', 'track_id',
-                'arrival_time', 'retrofit_start_time', 'retrofit_end_time',
-                'waiting_time', 'retrofit_duration'
-            ])
-
-            for wagon in wagons:
-                writer.writerow([
-                    wagon.id,
-                    wagon.train_id,
-                    wagon.track_id,
-                    wagon.arrival_time,
-                    wagon.retrofit_start_time,
-                    wagon.retrofit_end_time,
-                    wagon.waiting_time,
-                    wagon.retrofit_duration
-                ])
+            writer.writerow(['Total Wagons', results.total_wagons_processed])
+            writer.writerow(['Throughput', results.throughput_per_hour])
+            writer.writerow(['Avg Waiting Time', results.average_waiting_time])
+            writer.writerow(['Utilization', results.track_utilization])
 
     def _generate_charts(
         self,
-        results: SimulationResults,
-        wagons: List[Wagon],
-        events: List[SimulationEvent],
+        results: SimulationResult,
+        wagons: list[Wagon],
         output_path: Path
-    ):
+    ) -> None:
         import matplotlib.pyplot as plt
 
         output_path.mkdir(parents=True, exist_ok=True)
 
-        # 1. Throughput over time
+        # Generate throughput chart
         self._plot_throughput(wagons, output_path / "throughput.png")
 
-        # 2. Waiting time distribution
+        # Generate waiting time distribution
         self._plot_waiting_times(wagons, output_path / "waiting_times.png")
-
-        # 3. Track utilization
-        self._plot_utilization(events, output_path / "utilization.png")
 ```
 
 ### Output: Files
@@ -522,14 +425,10 @@ results/
 ├── summary.csv
 ├── wagons.csv
 ├── events.csv
-├── results.json
 └── charts/
     ├── throughput.png
-    ├── waiting_times.png
-    └── utilization.png
+    └── waiting_times.png
 ```
-
----
 
 ## Data Transformations Summary
 
@@ -538,14 +437,17 @@ results/
 | **1. Config** | JSON/CSV Files | Parse + Validate | `ScenarioConfig` |
 | **2. Setup** | `ScenarioConfig` | Create Domain Models | `Workshop` |
 | **3. Simulation** | `Workshop` + Config | SimPy Processes | `Events` + `Wagons` |
-| **4. KPIs** | `Events` + `Wagons` | Aggregate + Calculate | `SimulationResults` |
-| **5. Output** | `SimulationResults` | Format + Visualize | CSV + Charts + JSON |
-
----
+| **4. KPIs** | `Events` + `Wagons` | Aggregate + Calculate | `SimulationResult` |
+| **5. Output** | `SimulationResult` | Format + Visualize | CSV + Charts |
 
 ## Error Handling Flow
 
 ```python
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
+
 try:
     # Phase 1: Configuration
     config = config_service.load_scenario(config_path)
@@ -568,38 +470,36 @@ except IOError as e:
     sys.exit(3)
 ```
 
----
-
 ## Performance Considerations
 
 ### Memory Management
 ```python
-# Streaming für große Datenmengen
+from typing import Iterator
+
 class StreamingOutputService:
-    def export_wagons_streaming(self, wagons: Iterator[Wagon], path: Path):
-        """Schreibe Wagons direkt ohne alles im Memory zu halten"""
+    def export_wagons_streaming(
+        self, 
+        wagons: Iterator[Wagon], 
+        path: Path
+    ) -> None:
+        """Write wagons directly without holding all in memory"""
         with open(path, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['wagon_id', 'train_id', ...])
+            writer.writerow(['wagon_id', 'train_id', 'track_id'])
 
             for wagon in wagons:
-                writer.writerow([wagon.id, wagon.train_id, ...])
+                writer.writerow([wagon.id, wagon.train_id, wagon.track_id])
 ```
 
 ### Batch Processing
 ```python
-# Verarbeite Events in Batches
 class BatchKPIService:
     def calculate_kpis_batched(
         self,
-        events: List[SimulationEvent],
+        events: list[SimulationEvent],
         batch_size: int = 1000
-    ):
+    ) -> None:
         for i in range(0, len(events), batch_size):
             batch = events[i:i+batch_size]
             self._process_batch(batch)
 ```
-
----
-
-**Navigation:** [← 4 Simpy integration](04-mvp-simpy-integration.md) | [Technology stack →](06-mvp-technology-stack.md)
