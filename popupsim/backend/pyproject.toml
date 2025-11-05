@@ -82,6 +82,7 @@ ignore = [
 "ANN204", # missing return type annotation for __init__ (always None)
 "ANN206", # missing return type annotation for classmethod (Pydantic validators)
 "ANN401", # dynamically typed expressions (pandas/Any types)
+"G201",   # Allow .error(..., exc_info=True) for custom Logger class
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -170,6 +171,7 @@ markers = [
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (external APIs)",
     "pending: Tests written before implementation (TDD)",
+    "asyncio: Async tests",
 ]
 
 [tool.coverage.run]
@@ -197,4 +199,5 @@ dev = [
     "pytest-mock>=3.15.1",
     "ruff>=0.14.1",
     "pandas-stubs>=2.3.2.240528",
+    "pytest-asyncio>=1.2.0",
 ]

@@ -5,15 +5,17 @@ validate them using the Route model, and make them available to the simulation.
 """
 
 from collections.abc import Iterator
-import logging
 from pathlib import Path
 
 import pandas as pd
 
+from core.i18n import _
+from core.logging import Logger
+from core.logging import get_logger
+
 from .model_route import Route
 
-# Configure logging
-logger = logging.getLogger(__name__)
+logger: Logger = get_logger(__name__)
 
 
 class RoutesConfig:
@@ -56,24 +58,24 @@ class RoutesConfig:
         """
         path = Path(csv_path)
         if not path.exists():
-            raise FileNotFoundError(f'Routes file not found: {path}')
+            raise FileNotFoundError(_('Routes file not found: %(path)s', path=str(path)))
 
         try:
-            logger.info('Loading routes from CSV file: %s', path)
+            logger.info('Loading routes from CSV file', translate=True, path=str(path))
             df = pd.read_csv(path, sep=';')
 
             # Validate required columns
             required_columns = ['route_id', 'from_track', 'to_track', 'track_sequence', 'distance_m', 'time_min']
             missing_columns = [col for col in required_columns if col not in df.columns]
             if missing_columns:
-                raise ValueError(f'Missing required columns in CSV: {", ".join(missing_columns)}')
+                raise ValueError(_('Missing required columns in CSV: %(columns)s', columns=', '.join(missing_columns)))
 
             # Clear existing routes
             self.routes = []
             self.routes_by_id = {}
 
             # Convert DataFrame to list of Route objects
-            for _, row in df.iterrows():
+            for _idx, row in df.iterrows():
                 try:
                     track_sequence = row['track_sequence']
                     track_sequence = track_sequence.replace('"', '').replace("'", '')
@@ -91,15 +93,17 @@ class RoutesConfig:
                     self.routes_by_id[route.route_id] = route
                 except Exception as e:
                     route_id = row.get('route_id', 'unknown')
-                    logger.error('Error parsing route %s: %s', route_id, str(e))
-                    raise ValueError(f'Error parsing route {route_id}: {e!s}') from e
+                    logger.error('Error parsing route', translate=True, route_id=route_id, error=str(e), exc_info=True)
+                    raise ValueError(
+                        _('Error parsing route %(route_id)s: %(error)s', route_id=route_id, error=str(e))
+                    ) from e
 
-            logger.info('Successfully loaded %d routes from %s', len(self.routes), path)
+            logger.info('Successfully loaded routes', translate=True, route_count=len(self.routes), path=str(path))
 
         except Exception as e:
             if not isinstance(e, (FileNotFoundError, ValueError)):
-                logger.error('Failed to load routes from CSV: %s', str(e))
-                raise ValueError(f'Failed to load routes from CSV: {e!r}') from e
+                logger.error('Failed to load routes from CSV', translate=True, error=str(e), exc_info=True)
+                raise ValueError(_('Failed to load routes from CSV: %(error)s', error=str(e))) from e
             raise
 
     def get_route(self, route_id: str) -> Route:
@@ -121,7 +125,7 @@ class RoutesConfig:
             If no route with the specified ID exists.
         """
         if route_id not in self.routes_by_id:
-            raise KeyError(f'Route not found: {route_id}')
+            raise KeyError(_('Route not found: %(route_id)s', route_id=route_id))
 
         return self.routes_by_id[route_id]
 

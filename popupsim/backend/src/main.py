@@ -1,14 +1,26 @@
 """PopUp-Sim main entry point for freight rail DAC migration simulation tool."""
 
+import logging
 from pathlib import Path
 from typing import Annotated
+from typing import Any
 
 import typer
 
 from configuration.service import ConfigurationError
 from configuration.service import ConfigurationService
+from core.i18n import _
+from core.i18n import init_i18n
+from core.i18n import set_locale
+from core.logging import FileConfig
+from core.logging import FormatType
+from core.logging import Logger
+from core.logging import LoggingConfig
+from core.logging import configure_logging
+from core.logging import get_logger
 
 APP_NAME = 'popupsim'
+logger: Logger = get_logger(__name__)
 
 app = typer.Typer(
     name=APP_NAME,
@@ -36,22 +48,74 @@ def validate_scenario_path(scenario_path: Path | None) -> Path:
         If validation fails.
     """
     if scenario_path is None:
-        typer.echo('Error: Scenario path is required but not provided')
+        logger.error('Scenario path validation failed', translate=True, reason='not_provided')
+        typer.echo(_('Error: Scenario path is required but not provided'))
         raise typer.Exit(1)
 
     if not scenario_path.exists():
-        typer.echo(f'Error: Scenario file does not exist: {scenario_path}')
+        logger.error('Scenario file not found', translate=True, path=str(scenario_path))
+        typer.echo(_('Error: Scenario file does not exist: %(path)s', path=scenario_path))
         raise typer.Exit(1)
     if not scenario_path.is_file():
-        typer.echo(f'Error: Scenario path is not a file: {scenario_path}')
+        logger.error('Scenario path is not a file', translate=True, path=str(scenario_path))
+        typer.echo(_('Error: Scenario path is not a file: %(path)s', path=scenario_path))
         raise typer.Exit(1)
     try:
         with scenario_path.open('r'):
             pass
     except (PermissionError, OSError) as e:
-        typer.echo(f'Error: Scenario file is not readable: {scenario_path} ({e})')
+        logger.error('Scenario file not readable', translate=True, path=str(scenario_path), error=str(e))
+        typer.echo(_('Error: Scenario file is not readable: %(path)s (%(error)s)', path=scenario_path, error=str(e)))
         raise typer.Exit(1) from None
+
+    logger.info('Scenario path validated', translate=True, path=str(scenario_path))
     return scenario_path
+
+
+def display_scenario_info(config: Any, validation_result: Any) -> None:
+    """Display loaded scenario information.
+
+    Parameters
+    ----------
+    config : ScenarioConfig
+        Loaded scenario configuration.
+    validation_result : ValidationResult
+        Validation results.
+    """
+    typer.echo(_('\nScenario loaded and validated successfully.'))
+    typer.echo(_('Scenario ID: %(id)s', id=config.scenario_id))
+    typer.echo(_('Start Date: %(date)s', date=config.start_date))
+    typer.echo(_('End Date: %(date)s', date=config.end_date))
+    typer.echo(_('Number of Trains: %(count)d', count=len(config.train) if config.train else 0))
+    workshop_track_count = len(getattr(config.workshop, 'tracks', [])) if config.workshop else 0
+    typer.echo(_('Number of Workshop Tracks: %(count)d', count=workshop_track_count))
+    typer.echo(_('Number of Routes: %(count)d', count=len(config.routes) if config.routes else 0))
+    typer.echo(_('\nValidation Summary:'))
+    validation_result.print_summary()
+
+
+def setup_logging_and_i18n(debug: str) -> None:
+    """Initialize i18n and configure logging system.
+
+    Parameters
+    ----------
+    debug : str
+        Debug level (ERROR, WARNING, INFO, DEBUG).
+    """
+    localizer = init_i18n(Path('popupsim/backend/src/core/i18n/locales'))
+    set_locale('de')
+    log_level = getattr(logging, debug.upper(), logging.INFO)
+    log_dir = Path('logs')
+    log_dir.mkdir(exist_ok=True)
+    configure_logging(
+        LoggingConfig(
+            level=log_level,
+            format_type=FormatType.STRUCTURED,
+            console_output=True,
+            file=FileConfig(path=log_dir / 'simulation.log', max_bytes=50 * 1024 * 1024, backup_count=5),
+            translator=localizer,
+        )
+    )
 
 
 def validate_output_path(output_path: Path | None) -> Path:
@@ -73,22 +137,28 @@ def validate_output_path(output_path: Path | None) -> Path:
         If validation fails.
     """
     if output_path is None:
-        typer.echo('Error: Output path is required but not provided')
+        logger.error('Output path validation failed', translate=True, reason='not_provided')
+        typer.echo(_('Error: Output path is required but not provided'))
         raise typer.Exit(1)
 
     if not output_path.exists():
-        typer.echo(f'Error: Output directory does not exist: {output_path}')
+        logger.error('Output directory not found', translate=True, path=str(output_path))
+        typer.echo(_('Error: Output directory does not exist: %(path)s', path=output_path))
         raise typer.Exit(1)
     if not output_path.is_dir():
-        typer.echo(f'Error: Output path is not a directory: {output_path}')
+        logger.error('Output path is not a directory', translate=True, path=str(output_path))
+        typer.echo(_('Error: Output path is not a directory: %(path)s', path=output_path))
         raise typer.Exit(1)
     try:
         test_file = output_path / '.write_test'
         test_file.touch()
         test_file.unlink()
     except (PermissionError, OSError) as e:
-        typer.echo(f'Error: Output directory is not writable: {output_path} ({e})')
+        logger.error('Output directory not writable', translate=True, path=str(output_path), error=str(e))
+        typer.echo(_('Error: Output directory is not writable: %(path)s (%(error)s)', path=output_path, error=str(e)))
         raise typer.Exit(1) from None
+
+    logger.info('Output path validated', translate=True, path=str(output_path))
     return output_path
 
 
@@ -140,60 +210,83 @@ def main(
     >>> popupsim --scenarioPath ./scenario.json --outputPath ./output
     >>> popupsim --scenarioPath ./scenario.json --outputPath ./output --verbose --debug DEBUG
     """
+    setup_logging_and_i18n(debug)
+
+    logger.info('Application started', translate=True, app_name=APP_NAME, debug_level=debug)
+
     # Show help if no required parameters are provided
     if scenario_path is None and output_path is None:
-        typer.echo('No required parameters provided. Showing help:\n')
+        logger.warning('No required parameters provided', translate=True)
+        typer.echo(_('No required parameters provided. Showing help:\n'))
         typer.echo(ctx.get_help(), color=ctx.color)
         raise typer.Exit(1)
 
     # Validate debug level
     if debug not in ['ERROR', 'WARNING', 'INFO', 'DEBUG']:
-        typer.echo(f'Error: Invalid debug level: {debug}. Must be one of: ERROR, WARNING, INFO, DEBUG')
+        logger.error('Invalid debug level', translate=True, debug_level=debug)
+        typer.echo(_('Error: Invalid debug level: %(level)s. Must be one of: ERROR, WARNING, INFO, DEBUG', level=debug))
         raise typer.Exit(1)
 
     # Validate scenarioPath
     scenario_path = validate_scenario_path(scenario_path)
-    typer.echo(f'✓ Using scenario file at: {scenario_path}')
+    typer.echo(_('✓ Using scenario file at: %(path)s', path=scenario_path))
 
     # Validate outputPath
     output_path = validate_output_path(output_path)
-    typer.echo(f'✓ Output will be saved to: {output_path}')
+    typer.echo(_('✓ Output will be saved to: %(path)s', path=output_path))
 
     if verbose:
-        typer.echo('✓ Verbose mode enabled.')
+        logger.info('Verbose mode enabled', translate=True)
+        typer.echo(_('✓ Verbose mode enabled.'))
 
-    typer.echo(f'✓ Debug level set to: {debug}')
+    typer.echo(_('✓ Debug level set to: %(level)s', level=debug))
 
-    # Load and validate scenario using ConfigurationService ---
+    # Load and validate scenario using ConfigurationService
     try:
-        # Import here to avoid circular import at module level
+        logger.info('Loading scenario configuration', translate=True, scenario_dir=str(scenario_path.parent))
         service = ConfigurationService()
         # scenario_path is guaranteed to be Path here (validated above)
-        if scenario_path is None:
+        if scenario_path is None:  # pragma: no cover
             raise typer.Exit(1)
         config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
-        typer.echo('\nScenario loaded and validated successfully.')
-        typer.echo(f'Scenario ID: {config.scenario_id}')
-        typer.echo(f'Start Date: {config.start_date}')
-        typer.echo(f'End Date: {config.end_date}')
-        typer.echo(f'Number of Trains: {len(config.train) if config.train else 0}')
-        workshop_track_count = 0
-        if config.workshop is not None:
-            workshop_track_count = len(getattr(config.workshop, 'tracks', []))
-        typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
-        typer.echo(f'Number of Routes: {len(config.routes) if config.routes else 0}')
-        typer.echo('\nValidation Summary:')
-        validation_result.print_summary()
+
+        workshop_tracks = len(getattr(config.workshop, 'tracks', [])) if config.workshop else 0
+        logger.info(
+            'Scenario loaded successfully',
+            translate=True,
+            scenario_id=config.scenario_id,
+            train_count=len(config.train) if config.train else 0,
+            workshop_tracks=workshop_tracks,
+            routes_count=len(config.routes) if config.routes else 0,
+        )
+
+        display_scenario_info(config, validation_result)
+
+        # Check for critical errors that prevent simulation
+        if not validation_result.is_valid:
+            logger.error(
+                'Critical validation errors found', translate=True, error_count=len(validation_result.get_errors())
+            )
+            typer.echo(_('\nCritical errors found. Simulation cannot proceed.'))
+            raise typer.Exit(1)
+
     except ConfigurationError as e:
-        typer.echo(f'Configuration error: {e}')
+        logger.error('Configuration error occurred', translate=True, error=str(e), exc_info=True)
+        typer.echo(_('Configuration error: %(error)s', error=str(e)))
         raise typer.Exit(1) from e
     except Exception as e:
-        typer.echo(f'Unexpected error: {e}')
+        logger.error(
+            'Unexpected error occurred', translate=True, error=str(e), error_type=type(e).__name__, exc_info=True
+        )
+        typer.echo(_('Unexpected error: %(error)s', error=str(e)))
         raise typer.Exit(1) from e
 
     # Main application logic would go here
-    typer.echo('\n🚀 Starting popupsim processing...')
-    typer.echo('Application would start processing here...')
+    logger.info('Starting simulation processing', translate=True)
+    typer.echo(_('\n🚀 Starting popupsim processing...'))
+    typer.echo(_('Application would start processing here...'))
+
+    logger.info('Application completed successfully', translate=True)
 
 
 if __name__ == '__main__':

@@ -10,17 +10,19 @@ from datetime import UTC
 from datetime import date
 from datetime import datetime
 from datetime import time
-import logging
 import re
 
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import model_validator
 
+from core.i18n import _
+from core.logging import Logger
+from core.logging import get_logger
+
 from .model_wagon import Wagon
 
-# Configure logging
-logger = logging.getLogger(__name__)
+logger: Logger = get_logger(__name__)
 
 
 class Train(BaseModel):
@@ -57,7 +59,7 @@ class Train(BaseModel):
             If train has no wagons.
         """
         if not self.wagons:
-            raise ValueError(f'Train {self.train_id} must have at least one wagon')
+            raise ValueError(_('Train %(train_id)s must have at least one wagon', train_id=self.train_id))
         return self
 
     @model_validator(mode='before')
@@ -87,10 +89,10 @@ class Train(BaseModel):
             data['arrival_time'] = arrival_time_value
         elif isinstance(arrival_time_value, str):
             if not re.match(r'^([01]\d|2[0-3]):([0-5]\d)$', arrival_time_value):
-                raise ValueError('arrival_time must be in HH:MM format (00:00-23:59)')
+                raise ValueError(_('arrival_time must be in HH:MM format (00:00-23:59)'))
             hour_str, minute_str = arrival_time_value.split(':')
             data['arrival_time'] = time(int(hour_str), int(minute_str))
         else:
-            raise ValueError('arrival_time must be a string in HH:MM format or a time object')
+            raise ValueError(_('arrival_time must be a string in HH:MM format or a time object'))
 
         return data

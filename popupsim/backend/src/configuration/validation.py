@@ -10,8 +10,14 @@ from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
 
+from core.i18n import _
+from core.logging import Logger
+from core.logging import get_logger
+
 from .model_scenario import ScenarioConfig
 from .model_track import TrackFunction
+
+logger: Logger = get_logger(__name__)
 
 
 class ValidationLevel(Enum):
@@ -120,17 +126,17 @@ class ValidationResult:
         If no issues are found, a success message is printed.
         """
         if self.has_errors():
-            print('❌ Configuration invalid - Errors found:')
+            print(_('❌ Configuration invalid - Errors found:'))
             for issue in self.get_errors():
                 print(f'  {issue}')
 
         if self.has_warnings():
-            print('\n⚠️  Warnings:')
+            print(_('\n⚠️  Warnings:'))
             for issue in self.get_warnings():
                 print(f'  {issue}')
 
         if not self.has_errors() and not self.has_warnings():
-            print('✅ Configuration valid - No issues found')
+            print(_('✅ Configuration valid - No issues found'))
 
 
 # pylint: disable=too-few-public-methods
@@ -157,6 +163,7 @@ class ConfigurationValidator:
         ValidationResult
             Validation result with all found issues.
         """
+        logger.info('Starting configuration validation', translate=True, scenario_id=config.scenario_id)
         issues: list[ValidationIssue] = []
 
         # Perform all validations
@@ -168,6 +175,24 @@ class ConfigurationValidator:
 
         # is_valid = True when no errors
         is_valid = not any(i.level == ValidationLevel.ERROR for i in issues)
+
+        if is_valid:
+            warning_count = len([i for i in issues if i.level == ValidationLevel.WARNING])
+            logger.info(
+                'Validation completed successfully',
+                translate=True,
+                scenario_id=config.scenario_id,
+                warning_count=warning_count,
+            )
+        else:
+            error_count = len([i for i in issues if i.level == ValidationLevel.ERROR])
+            logger.error(
+                'Validation failed',
+                translate=True,
+                scenario_id=config.scenario_id,
+                error_count=error_count,
+                exc_info=True,
+            )
 
         return ValidationResult(is_valid=is_valid, issues=issues)
 
@@ -186,9 +211,9 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message='Workshop configuration is missing',
+                    message=_('Workshop configuration is missing'),
                     field='workshop',
-                    suggestion='Add workshop configuration with tracks',
+                    suggestion=_('Add workshop configuration with tracks'),
                 )
             )
             return issues
@@ -200,9 +225,9 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message="At least one track with function='werkstattgleis' required",
+                    message=_("At least one track with function='werkstattgleis' required"),
                     field='workshop.tracks',
-                    suggestion="Add a track with function='werkstattgleis' and retrofit_time_min > 0",
+                    suggestion=_("Add a track with function='werkstattgleis' and retrofit_time_min > 0"),
                 )
             )
 
@@ -216,9 +241,9 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.WARNING,
-                    message=f'Missing track functions: {", ".join(missing_names)}',
+                    message=_('Missing track functions: %(functions)s', functions=', '.join(missing_names)),
                     field='workshop.tracks',
-                    suggestion='Complete workflow needed: sammelgleis → werkstattgleis → parkgleis',
+                    suggestion=_('Complete workflow needed: sammelgleis → werkstattgleis → parkgleis'),
                 )
             )
 
@@ -228,9 +253,13 @@ class ConfigurationValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=f'Track {track.id}: retrofit_time_min must be 0 for function={track.function}',
+                        message=_(
+                            'Track %(track_id)s: retrofit_time_min must be 0 for function=%(function)s',
+                            track_id=track.id,
+                            function=track.function.value,
+                        ),
                         field=f'workshop.tracks[{track.id}].retrofit_time_min',
-                        suggestion='Set retrofit_time_min=0 for non-workshop tracks',
+                        suggestion=_('Set retrofit_time_min=0 for non-workshop tracks'),
                     )
                 )
 
@@ -278,24 +307,30 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message=(
-                        f'Capacity exceeded: {wagons_per_day} wagons/day at max. '
-                        f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
+                    message=_(
+                        'Capacity exceeded: %(wagons)d wagons/day at max. '
+                        '%(throughput).0f throughput (%(utilization).0f%% utilization)',
+                        wagons=wagons_per_day,
+                        throughput=max_throughput_per_day,
+                        utilization=utilization * 100,
                     ),
                     field='workshop.tracks',
-                    suggestion='Increase capacity or reduce train arrivals',
+                    suggestion=_('Increase capacity or reduce train arrivals'),
                 )
             )
         elif utilization > 0.8:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.WARNING,
-                    message=(
-                        f'High utilization: {wagons_per_day} wagons/day at max. '
-                        f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
+                    message=_(
+                        'High utilization: %(wagons)d wagons/day at max. '
+                        '%(throughput).0f throughput (%(utilization).0f%% utilization)',
+                        wagons=wagons_per_day,
+                        throughput=max_throughput_per_day,
+                        utilization=utilization * 100,
                     ),
                     field='workshop.tracks',
-                    suggestion='Consider higher capacity for better performance',
+                    suggestion=_('Consider higher capacity for better performance'),
                 )
             )
 
@@ -330,9 +365,13 @@ class ConfigurationValidator:
                     issues.append(
                         ValidationIssue(
                             level=ValidationLevel.ERROR,
-                            message=f"Route {route.route_id}: Track '{track_identifier}' does not exist",
+                            message=_(
+                                "Route %(route_id)s: Track '%(track)s' does not exist",
+                                route_id=route.route_id,
+                                track=track_identifier,
+                            ),
                             field=f'routes[{route.route_id}].track_sequence',
-                            suggestion=f'Use one of the IDs: {", ".join(sorted(track_ids))}',
+                            suggestion=_('Use one of the IDs: %(ids)s', ids=', '.join(sorted(track_ids))),
                         )
                     )
 
@@ -344,12 +383,18 @@ class ConfigurationValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=(
-                            f"Route {route.route_id}: from_track '{route.from_track}' "
-                            f"has function '{from_track.function}' which does not exist"
+                        message=_(
+                            "Route %(route_id)s: from_track '%(track)s' "
+                            "has function '%(function)s' which does not exist",
+                            route_id=route.route_id,
+                            track=route.from_track,
+                            function=from_track.function.value,
                         ),
                         field=f'routes[{route.route_id}].from_track',
-                        suggestion=f'Use one of the functions: {", ".join(sorted(func_names_list))}',
+                        suggestion=_(
+                            'Use one of the functions: %(functions)s',
+                            functions=', '.join(sorted(func_names_list)),
+                        ),
                     )
                 )
 
@@ -360,12 +405,17 @@ class ConfigurationValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=(
-                            f"Route {route.route_id}: to_track '{route.to_track}' "
-                            f"has function '{to_track.function}' which does not exist"
+                        message=_(
+                            "Route %(route_id)s: to_track '%(track)s' has function '%(function)s' which does not exist",
+                            route_id=route.route_id,
+                            track=route.to_track,
+                            function=to_track.function.value,
                         ),
                         field=f'routes[{route.route_id}].to_track',
-                        suggestion=f'Use one of the functions: {", ".join(sorted(func_names_list))}',
+                        suggestion=_(
+                            'Use one of the functions: %(functions)s',
+                            functions=', '.join(sorted(func_names_list)),
+                        ),
                     )
                 )
 
@@ -374,9 +424,9 @@ class ConfigurationValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=f'Route {route.route_id}: time_min must be > 0',
+                        message=_('Route %(route_id)s: time_min must be > 0', route_id=route.route_id),
                         field=f'routes[{route.route_id}].time_min',
-                        suggestion='Set a realistic travel time in minutes',
+                        suggestion=_('Set a realistic travel time in minutes'),
                     )
                 )
 
@@ -396,9 +446,9 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message='Train schedule is empty - at least one train required',
+                    message=_('Train schedule is empty - at least one train required'),
                     field='train',
-                    suggestion='Add trains in train configuration',
+                    suggestion=_('Add trains in train configuration'),
                 )
             )
             return issues
@@ -416,9 +466,13 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message=f'Duplicate wagon IDs found: {", ".join(duplicate_list)}{ellipsis}',
+                    message=_(
+                        'Duplicate wagon IDs found: %(ids)s%(ellipsis)s',
+                        ids=', '.join(duplicate_list),
+                        ellipsis=ellipsis,
+                    ),
                     field='train',
-                    suggestion='Ensure each wagon_id is unique',
+                    suggestion=_('Ensure each wagon_id is unique'),
                 )
             )
 
@@ -438,9 +492,13 @@ class ConfigurationValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.WARNING,
-                        message=f'Train {train.train_id} arrives before simulation start ({arrival_date})',
+                        message=_(
+                            'Train %(train_id)s arrives before simulation start (%(date)s)',
+                            train_id=train.train_id,
+                            date=str(arrival_date),
+                        ),
                         field=f'train[{train.train_id}].arrival_date',
-                        suggestion='Adjust start_date or arrival_date',
+                        suggestion=_('Adjust start_date or arrival_date'),
                     )
                 )
 
@@ -448,9 +506,13 @@ class ConfigurationValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.WARNING,
-                        message=f'Train {train.train_id} arrives after simulation end ({arrival_date})',
+                        message=_(
+                            'Train %(train_id)s arrives after simulation end (%(date)s)',
+                            train_id=train.train_id,
+                            date=str(arrival_date),
+                        ),
                         field=f'train[{train.train_id}].arrival_date',
-                        suggestion='Adjust end_date or arrival_date',
+                        suggestion=_('Adjust end_date or arrival_date'),
                     )
                 )
 

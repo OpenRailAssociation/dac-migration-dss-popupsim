@@ -12,6 +12,8 @@ from typer.testing import CliRunner
 
 from main import APP_NAME
 from main import app
+from main import display_scenario_info
+from main import setup_logging_and_i18n
 from main import validate_output_path
 from main import validate_scenario_path
 
@@ -240,3 +242,81 @@ def test_app_configuration() -> None:
     assert app.info.name == APP_NAME
     help_text = app.info.help or ''
     assert 'freight rail DAC migration simulation tool' in help_text
+
+
+@pytest.mark.unit
+@patch('main.set_locale')
+@patch('main.init_i18n')
+@patch('main.configure_logging')
+def test_setup_logging_and_i18n(
+    mock_configure_logging: MagicMock, mock_init_i18n: MagicMock, mock_set_locale: MagicMock
+) -> None:
+    """Test setup_logging_and_i18n configures logging with correct parameters."""
+    mock_localizer = MagicMock()
+    mock_init_i18n.return_value = mock_localizer
+
+    setup_logging_and_i18n('INFO')
+
+    mock_set_locale.assert_called_once_with('de')
+    config = mock_configure_logging.call_args[0][0]
+    assert config.level == 20
+    assert config.console_output is True
+    assert config.translator is mock_localizer
+    assert config.file.path == Path('logs/simulation.log')
+    assert config.file.max_bytes == 50 * 1024 * 1024
+    assert config.file.backup_count == 5
+
+
+@pytest.mark.unit
+@patch('main.set_locale')
+@patch('main.init_i18n')
+@patch('main.configure_logging')
+def test_setup_logging_and_i18n_debug_levels(
+    mock_configure_logging: MagicMock, mock_init_i18n: MagicMock, mock_set_locale: MagicMock
+) -> None:
+    """Test setup_logging_and_i18n with different debug levels."""
+    mock_init_i18n.return_value = MagicMock()
+
+    setup_logging_and_i18n('DEBUG')
+    mock_set_locale.assert_called_with('de')
+    assert mock_configure_logging.call_args[0][0].level == 10
+
+    setup_logging_and_i18n('WARNING')
+    assert mock_configure_logging.call_args[0][0].level == 30
+
+    setup_logging_and_i18n('ERROR')
+    assert mock_configure_logging.call_args[0][0].level == 40
+
+
+@pytest.mark.unit
+def test_display_scenario_info() -> None:
+    """Test display_scenario_info with populated config."""
+    mock_config = MagicMock()
+    mock_config.scenario_id = 'SC-001'
+    mock_config.start_date = '2024-01-01'
+    mock_config.end_date = '2024-12-31'
+    mock_config.train = ['t1', 't2', 't3']
+    mock_config.workshop.tracks = ['tr1', 'tr2']
+    mock_config.routes = ['r1']
+    mock_validation = MagicMock()
+
+    display_scenario_info(mock_config, mock_validation)
+
+    mock_validation.print_summary.assert_called_once()
+
+
+@pytest.mark.unit
+def test_display_scenario_info_empty() -> None:
+    """Test display_scenario_info with empty config."""
+    mock_config = MagicMock()
+    mock_config.scenario_id = 'SC-002'
+    mock_config.start_date = '2024-01-01'
+    mock_config.end_date = '2024-01-01'
+    mock_config.train = None
+    mock_config.workshop = None
+    mock_config.routes = None
+    mock_validation = MagicMock()
+
+    display_scenario_info(mock_config, mock_validation)
+
+    mock_validation.print_summary.assert_called_once()
