@@ -57,6 +57,20 @@ jobs:
           source-dir: site/
           preview-branch: gh-pages
           umbrella-dir: pr-preview
+      
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const previewUrl = `https://openrailassociation.github.io/dac-migration-dss-popupsim/pr-preview/pr-${prNumber}/`;
+            
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📚 **Documentation Preview**\n\nThe documentation for this PR is available at:\n${previewUrl}\n\n_This preview will be automatically updated when you push new commits._`
+            });
 
   deploy-production:
     needs: build
