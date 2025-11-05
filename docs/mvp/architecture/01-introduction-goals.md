@@ -1,107 +1,69 @@
-# 1. Einführung und Ziele (MVP)
+# 1. Introduction and Goals
 
-## 1.1 MVP Aufgabenstellung
+## 1.1 Task Description
 
-PopUpSim MVP simuliert die schlagartige Umrüstung von Güterwagen von Schraubkupplung auf Digitale Automatische Kupplung (DAK) in einer **vereinfachten, dateibasierten Implementierung** für schnelle Prototypenerstellung.
+PopUpSim is a microscopic simulation system for optimizing Pop-Up retrofitting sites during the DAC (Digital Automatic Coupling) "Big Bang" migration phase.
+The DAC migration involves retrofitting approximately 500,000 freight wagons across Europe (2029-2034) using the "DAC-Ready" method as describen in [[1]](13-bibliography.md). This two-phase approach first pre-equips wagons over 4 years while maintaining screw couplings, then performs rapid final conversion during a critical 3-week "Big Bang" period. PopUpSim focuses specifically on this three week period optimizing temporary Pop-Up workshops that handle the time-critical "Big Bang" conversions without disrupting regular railway operations.
 
-### MVP Kernfunktionen
-- **Mikroskopische Simulation** von Umrüstungsprozessen (vereinfacht)
-- **Deterministische, diskrete ereignisorientierte Simulation** unter Nutzung des *SimPy* Frameworks
-- **Matplotlib-basierte Visualisierung** (keine Web-Interface)
-- **Szenario-basierte Kapazitätsplanung** für Pop-Up-Werkstätten
-- **Zentrale KPI-Berechnung** im Backend mit CSV/JSON Ausgabe
-- **Automatische Engpass-Identifikation** (grundlegend)
+PopUpSim focuses on individual Pop-Up site simulation rather than modeling the entire 500,000 wagon migration. The system uses microscopic modeling to track individual wagons and resources as they move through workshop layouts, enabling iterative testing of different configurations to optimize throughput and identify bottlenecks. This approach supports all migration phases from strategic planning through implementation.
 
-### MVP Vereinfachungen
-- **3 Bounded Contexts** statt 7 (Configuration, Workshop, Simulation Control)
-- **Dateibasierte Datenhaltung** (CSV/JSON) statt Datenbank
-- **Matplotlib Plots** statt Web-Frontend
-- **Direkte Service-Aufrufe** statt Event-driven Architecture
-- **Single-User Desktop-Anwendung**
+The system consists of three main components working together to provide comprehensive simulation capabilities. The scenario setup component handles infrastructure and parameter configuration, allowing users to define track topology, allocate resources, set timing parameters, and establish operational rules. The simulation engine performs microscopic wagon movement simulation, tracking individual wagons through their journey while managing resource utilization, queue dynamics, and processing workflows. Finally, the analysis and visualization component processes simulation results to generate throughput metrics, utilization statistics, and bottleneck analysis, presenting findings through interactive charts and "film" playback of the simulation process.
 
-## 1.2 MVP Qualitätsziele
+PopUpSim is developed as open source software under the Apache 2.0 license [[5]](13-bibliography.md) to ensure transparency and enable cross-company collaboration across the European railway industry. The project is hosted at GitHub [[3]](13-bibliography.md) under the umbrella of the Open Rail Association [[6]](13-bibliography.md), facilitating cooperation between railway companies and supporting the development of a shared solution for the DAC migration challenge. This community-driven approach allows individual railway companies to adapt and extend the system for their specific requirements while contributing improvements back to the broader community. The development builds upon a successful prototype created during the 3-Länderhack 2024 hackathon [[4]](13-bibliography.md), demonstrating the feasibility of the core simulation concepts.
 
-| Priorität | Qualitätsziel | MVP Szenario | Messbarkeit |
-|-----------|---------------|--------------|-------------|
-| 1 | **Schnelle Entwicklung** | MVP in 4-5 Wochen entwickelbar | Funktionsfähiger Prototyp |
-| 2 | **Determinismus** | Gleiche Eingaben führen zu identischen Ergebnissen | Reproduzierbare Simulationsläufe |
-| 3 | **Einfachheit** | Keine komplexe Installation erforderlich | Single Executable |
-| 4 | **Testbarkeit** | Domänen-Logik testbar | Unit Tests für Geschäftslogik |
-| 5 | **Erweiterbarkeit** | Ausbau zur Vollversion möglich | Saubere Architektur-Basis |
+## 1.2 Quality Goals
 
-## 1.3 MVP Stakeholder
+| Priority | Quality Goal | Scenario | Stakeholder |
+|----------|--------------|----------|-------------|
+| 1 | **Rapid development** | MVP can be developend in 5 weeks | PopUpSim team |
+| 2 | **Simulation Accuracy & Reliability** | Simulation results are accurate and reliable for layout optimization decisions | Strategic Migration Planner, Company Planner |
+| 3 | **Usability & Accessibility** | Users can import infrastructure data, configure Pop-Up layouts, and run simulations efficiently | Company Planner, Dispatcher |
+| 4 | **Simple installation** | PopUpSim can be easily installed on hardware like laptops | All users |
+| 5 | **Testability** | The domain logic is testable | Software Developers |
 
-### Primäre MVP Stakeholder
+## 1.3 Stakeholders
 
-| Rolle | MVP Erwartungshaltung | Kontakt |
-|-------|----------------------|---------|
-| **Entwicklungsteam** | Schneller Prototyp, Machbarkeitsbeweis | 3 Senior Backend Entwickler |
-| **Fachexperten** | Erste Simulationsergebnisse, Feedback-Möglichkeit | DB Cargo Team |
-| **Projektleitung** | Demonstrierbare Ergebnisse, Risiko-Minimierung | Projektmanagement |
+| Role | Contact | Expectations |
+|------|---------|--------------|
+| Strategic Migration Planner | DB Cargo Migration Team | Develop standardized Pop-Up workshop designs, estimate workshop throughput capacity, validate migration strategies |
+| Company Planner | Railway Undertakings (e.g. DB, SBB, ÖBB) | Import infrastructure data easily, assess workshop capacity , get clear graphical/tabular output for internal planning |
+| Deployment Manager | European Migration Coordination | Validate company plans fit together, monitor implementation progress, ensure Big Bang timeline (2029-2034) is achievable |
+| Dispatcher | Pop-Up Workshop Operations | Get recommendations for next wagon assignments, support operational disposition decisions during 3-week Big Bang windows |
+| Open Rail Association | Project Governance | Ensure open source transparency, coordinate cross-company collaboration, maintain Apache 2.0 licensing compliance |
+| Open Rail Association Members | e.g SNCF, SBB, ÖBB | Possible contacts to other migration teams in other railway companies |
+| Software Developers | Open Source Community | Understand system architecture, contribute enhancements, adapt for company-specific DAC migration requirements |
+| Skydeck Accelarator | DB Systel GmbH | Demonstatration of results|
 
-## 1.4 MVP User Stories (Reduziert)
-
-PopUpSim MVP unterstützt **4 Hauptanwendungsfälle**:
-
-### MVP Phase 1: Grundfunktionen
-- **US-001**: Einfache Werkstatt-Konfiguration laden
-- **US-002**: Grundlegende Simulation durchführen
-
-### MVP Phase 2: Auswertung
-- **US-003**: KPI-Berechnung und CSV-Export
-- **US-004**: Matplotlib-Visualisierung generieren
-
-**Vollständige User Stories:** [requirements/use-cases.md](../../requirements/use-cases.md)
-
-## 1.5 MVP Abgrenzung
-
-### Was MVP PopUpSim IST
-- ✅ **Proof of Concept** für Simulationslogik
-- ✅ **Dateibasierte Konfiguration** (JSON/CSV)
-- ✅ **Matplotlib-Ausgabe** für Visualisierung
-- ✅ **3-Context Architektur** (vereinfacht)
-- ✅ **Desktop-Anwendung** (Single User)
-
-### Was MVP PopUpSim NICHT ist
-- ❌ **Web-Anwendung** (kommt in Vollversion)
-- ❌ **Event-driven Architecture** (direkte Aufrufe)
-- ❌ **Datenbank-Integration** (nur Dateien)
-- ❌ **Real-time Updates** (Batch-Verarbeitung)
-
-## 1.6 MVP Erfolgsmetriken
-
-### MVP Technische Metriken
-- **Entwicklungszeit:** 4-5 Wochen mit 3 Entwicklern
-- **Simulationsgeschwindigkeit:** 1 Simulationsstunde in < 60 Sekunden
-- **Skalierbarkeit:** Bis zu 1.000 Wagen pro Simulation
-- **Portabilität:** Läuft auf Windows/Mac/Linux mit uv
-
-### MVP Fachliche Metriken
-- **Funktionalität:** Grundlegende Umrüstungssimulation funktioniert
-- **Ausgabe:** KPIs werden korrekt berechnet und ausgegeben
-- **Visualisierung:** Matplotlib-Charts zeigen Simulationsergebnisse
-- **Erweiterbarkeit:** Architektur-Basis für Vollversion geschaffen
-
-## 1.7 MVP Entwicklungsstrategie
-
-### Team-Aufteilung (3 Entwickler)
-- **Developer 1**: Configuration Context + File I/O
-- **Developer 2**: Workshop Context + SimPy Integration
-- **Developer 3**: Simulation Control + Analytics/Matplotlib
-
-### MVP Timeline (4-5 Wochen)
-- **Woche 1-2**: Grundarchitektur + Configuration Context
-- **Woche 2-3**: Workshop Context + Simulation Logic
-- **Woche 3-4**: Simulation Control + Integration
-- **Woche 4-5**: Analytics + Matplotlib + Testing
-
-### Migration zur Vollversion
-```
-MVP (3 Contexts) → Vollversion (7 Contexts)
-Matplotlib → Web-Frontend
-Direkte Aufrufe → Event-driven
-```
+> [!NOTE]
+> Harmonize with Stakeholder list.
 
 ---
+## 1.4 MVP Scope
 
-**Navigation:** [← README](README.md) | [MVP Randbedingungen →](02-constraints.md)
+PopUpSim MVP focuses on **4 priority use cases** to validate the simulation approach:
+
+**Strategic Phase:**
+- [US-001](../../requirements/use-cases.md#us-001-standardisierte-pop-up-werkstatten-entwickeln): Develop standardized Pop-Up workshops
+- [US-002](../../requirements/use-cases.md#us-002-durchsatz-abschatzung-fur-werkstatt-layouts): Estimate throughput for workshop layouts
+
+**Detail Planning Phase:**
+- [US-003](../../requirements/use-cases.md#us-003-infrastrukturdaten-importieren): Import infrastructure data
+- [US-004](../../requirements/use-cases.md#us-004-kapazitatsabschatzung-fur-geplante-werkstatt): Assess capacity for planned workshop
+
+**Complete requirements:** [requirements/use-cases.md](../../requirements/use-cases.md) (8 use cases total)
+
+**MVP Implementation:**
+- File-based configuration (JSON/CSV)
+- SimPy discrete event simulation
+- CSV export + Matplotlib visualization
+
+**Scope Reductions vs. Full Version:**
+The scope is reduced compared to the full version:
+- **Use Cases**: 4 priority use cases (vs. 8 total)
+- **Architecture**: Simplified context design. (vs. 7 contexts with event-driven architecture)
+- **UI**: Matplotlib charts (vs. web interface)
+- **Data**: File-based (vs. web interface)
+- **Integration**: Direct service calls (vs. event-driven messaging)
+- **Deployment**: Desktop only (vs. cloud-ready)
+
+

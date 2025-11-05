@@ -10,19 +10,25 @@ The PopUp-Sim project uses GitHub Actions for continuous integration and deploym
 graph TD
     A[Pull Request/Push to main] --> B[Format Job]
     B --> C[Lint Jobs]
-    B --> D[Test Jobs]
+    B --> D[Security Scan]
+    B --> E[Test Job]
 
-    C --> E[Ruff Lint]
-    C --> F[Pylint]
-    C --> G[MyPy]
+    C --> F[Ruff Lint]
+    C --> G[Pylint]
+    C --> H[MyPy]
 
-    D --> H[Pytest + Coverage]
-    H --> I[Upload Coverage]
+    D --> I[Syft SBOM]
+    I --> J[Grype Scan]
+    J --> K[Upload SARIF]
+
+    E --> L[Pytest + Coverage]
+    L --> M[Upload Coverage]
 
     style B fill:#e1f5fe
     style C fill:#f3e5f5
-    style D fill:#e8f5e8
-    style I fill:#fff3e0
+    style D fill:#ffebee
+    style E fill:#e8f5e8
+    style M fill:#fff3e0
 ```
 
 ## Jobs Description
@@ -30,7 +36,6 @@ graph TD
 ### 1. Format Job
 **Purpose:** Ensures code formatting consistency across the codebase.
 
-**Matrix:** Python 3.11, 3.12
 
 **Steps:**
 - Checkout code
@@ -43,7 +48,7 @@ graph TD
 ### 2. Lint Jobs (Parallel)
 **Purpose:** Code quality analysis through multiple linters.
 
-**Matrix:** Python 3.11, 3.12 × 3 linters (ruff, pylint, mypy)
+**Matrix:** 3 linters (ruff, pylint, mypy)
 
 **Dependencies:** Requires format job to pass first
 
@@ -62,16 +67,37 @@ graph TD
 - **Focus:** Static type analysis
 - **Output:** Type errors with specific error codes
 
-### 3. Test Jobs (Parallel)
-**Purpose:** Run test suite with coverage reporting.
+### 3. Security Scan Job
+**Purpose:** Software Bill of Materials (SBOM) generation and vulnerability scanning.
 
-**Matrix:** Python 3.11, 3.12
+**Dependencies:** Requires format job to pass first
+
+**Tools:**
+- **Syft:** Generates SBOM in SPDX-JSON format
+- **Grype:** Scans SBOM for known vulnerabilities
+
+**Steps:**
+- Check if dependencies exist in `pyproject.toml`
+- Generate SBOM with Syft (if dependencies exist)
+- Scan vulnerabilities with Grype
+- Upload SARIF results to GitHub Security tab
+- Upload security reports as artifacts
+
+**Output:**
+- SBOM file (`sbom.spdx.json`)
+- Vulnerability report (SARIF format)
+- GitHub Security alerts for found vulnerabilities
+
+**Note:** Scan is skipped if no dependencies are present. Vulnerabilities do not fail the build (`fail-build: false`).
+
+### 4. Test Jobs (Parallel)
+**Purpose:** Run test suite with coverage reporting.
 
 **Dependencies:** Requires format job to pass first
 
 **Steps:**
 - Run `uv run pytest --tb=short`
-- Upload coverage to Codecov (Python 3.11 only)
+- Upload coverage to Codecov
 
 ## Execution Flow
 
@@ -88,12 +114,14 @@ sequenceDiagram
     CI->>CI: Format check (2 jobs)
 
     par Parallel execution after format
-        CI->>CI: Lint jobs (6 jobs)
+        CI->>CI: Lint jobs (3 jobs)
     and
-        CI->>CI: Test jobs (2 jobs)
+        CI->>CI: Security scan (1 job)
+    and
+        CI->>CI: Test job (1 job)
     end
 
-    CI->>CC: Upload coverage (Python 3.11)
+    CI->>CC: Upload coverage
     CI->>GH: Report results
     GH->>Dev: Show status + annotations
 ```
@@ -105,8 +133,7 @@ sequenceDiagram
 - **Push Events:** Direct pushes to `main` branch
 
 ### Matrix Strategy
-- **Python Versions:** 3.11, 3.12
-- **Total Jobs:** 10 (2 format + 6 lint + 2 test)
+- **Total Jobs:** 6 (1 format + 3 lint + 1 security + 1 test)
 
 ### Dependencies
 - Uses `uv.lock` file for reproducible builds
@@ -150,10 +177,15 @@ sequenceDiagram
 - **Solution:** Fix issues shown in GitHub annotations
 - **Impact:** Independent failures, doesn't block tests
 
+### Security Scan Failures
+- **Cause:** Known vulnerabilities in dependencies
+- **Solution:** Update vulnerable dependencies or review risk
+- **Impact:** Does not fail build, creates GitHub Security alerts
+
 ### Test Failures
-- **Cause:** Failing tests or coverage below 90%
+- **Cause:** Failing tests or coverage below threshold
 - **Solution:** Fix tests or improve coverage
-- **Impact:** Independent of linting jobs
+- **Impact:** Independent of linting and security jobs
 
 ## Local Development
 
@@ -165,11 +197,15 @@ uv run ruff format --check --diff .
 
 # Linting
 uv run ruff check .
-uv run pylint backend/src/
-uv run mypy backend/src/
+uv run pylint popupsim/backend/src/
+uv run mypy
 
 # Testing
 uv run pytest
+
+# Security scanning (requires Syft and Grype installed)
+syft popupsim/backend/src -o spdx-json=sbom.spdx.json
+grype sbom:sbom.spdx.json
 ```
 
 ## Performance Optimization
@@ -179,9 +215,30 @@ uv run pytest
 - **Caching:** uv cache reduces dependency installation time
 - **Locked dependencies:** Faster installs, no resolution needed
 
+## Security Scanning Details
+
+### Syft (SBOM Generation)
+- **Purpose:** Creates Software Bill of Materials
+- **Format:** SPDX-JSON (industry standard)
+- **Scope:** Scans `popupsim/backend/src` directory
+- **Output:** `sbom.spdx.json` artifact
+
+### Grype (Vulnerability Scanning)
+- **Purpose:** Identifies known vulnerabilities in dependencies
+- **Input:** SBOM from Syft
+- **Database:** CVE and security advisory databases
+- **Output:** SARIF format for GitHub Security integration
+- **Behavior:** Non-blocking (does not fail build)
+
+### Security Reports
+- **GitHub Security Tab:** View vulnerability alerts
+- **SARIF Upload:** Integrates with GitHub Advanced Security
+- **Artifacts:** SBOM and vulnerability reports downloadable
+
 ## Monitoring
 
 - **GitHub Actions tab:** View detailed logs and job status
 - **PR annotations:** Inline code quality feedback
+- **GitHub Security tab:** Vulnerability alerts and SBOM
 - **Codecov dashboard:** Coverage trends and reports
 - **Status checks:** Required checks before merge

@@ -1,184 +1,202 @@
-# 12. Glossar (MVP)
+# 12. Glossary (MVP)
 
-## 12.1 MVP Fachbegriffe
+## 12.1 MVP Domain Terms
 
-### Bahnbetrieb (MVP)
+### Railway Operations (MVP)
 
-| Begriff | MVP Definition | Beispiel |
+| Term | MVP Definition | Example |
 |---------|----------------|----------|
-| **DAK** | Digitale Automatische Kupplung - Neue Kupplungstechnologie | Ersetzt Schraubkupplung |
-| **Pop-Up-Werkstatt** | Temporäre Umrüstungswerkstatt für DAK-Migration | Mehrere Umrüstplätze auf einem Werkstattgleis, 3 Wochen Betrieb |
-| **Retrofit** | Umrüstung von Schraubkupplung auf DAK | 40-50 Minuten pro Wagen |
-| **Parkgleis** | Gleis auf denen Wagen geparkt werden| Kapazität: Gesamtlänge-25m |
-| **Werkstattgleis** | Gleis auf denen die Wagen umgerüstet werden| Kapazität: Entspricht Anzahl Umrüststationen und eine Lok |
-| **Werkstattgleis** | Gleis auf denen die Wagen umgerüstet werden| Kapazität: Entspricht Anzahl Umrüststationen und eine Lok |
-| **Sammelgleis** | Gleis zur Zwischenlagerung von Wagen | Kapazität: 20-50 Wagen |
-| **Umrüststation** | Arbeitsplatz für DAK-Umrüstung | 1-2 Arbeiter pro Station |
-| **Wagen** | Güterwagen (Eisenbahnfahrzeug) | Verschiedene Typen, unterschiedliche Umrüstzeiten |
-| **Wagengruppe** | Mehrere gekuppelte Güterwagen (Eisenbahnfahrzeug) | Wagengruppe aus 3 Wagen |
-| **Zug** | Zusammenstellung mehrerer Wagen | 10-30 oder mehr Wagen pro Zug |
+| **DAC** | Digital Automatic Coupler - New coupling technology | Replaces screw coupling |
+| **Pop-Up Workshop** | Temporary retrofit workshop for DAC migration | Multiple retrofit stations on workshop track, 3 weeks operation |
+| **Retrofit** | Conversion from screw coupling to DAC | 40-50 minutes per wagon |
+| **Parking Track** | Track where wagons are parked | Capacity: Total length - 25m |
+| **Workshop Track** | Track where wagons are retrofitted (WERKSTATTGLEIS) | Capacity: Number of retrofit stations + one locomotive |
+| **Feeder Track** | Track feeding wagons into workshop (WERKSTATTZUFUEHRUNG) | Capacity: Varies by layout |
+| **Exit Track** | Track for retrofitted wagons leaving workshop (WERKSTATTABFUEHRUNG) | Capacity: Varies by layout |
+| **Collection Track** | Track for intermediate wagon storage | Capacity: 20-50 wagons |
+| **Retrofit Station** | Workplace for DAC retrofit | 1-2 workers per station |
+| **Wagon** | Freight wagon (railway vehicle) | Various types, different retrofit times |
+| **Wagon Group** | Multiple coupled freight wagons | Wagon group of 3 wagons |
+| **Train** | Composition of multiple wagons | 10-30 or more wagons per train |
 
 ### Simulation (MVP)
 
-| Begriff | MVP Definition | Verwendung |
-|---------|----------------|------------|
-| **Discrete Event Simulation** | Ereignisgesteuerte Simulation mit SimPy | Zeitsprünge zwischen Events |
-| **SimPy** | Python-Framework für Discrete Event Simulation | Kern der MVP-Simulation |
-| **Event** | Simulationsereignis (Ankunft, Start, Ende) | `TrainArrival`, `RetrofitComplete` |
-| **Process** | SimPy-Prozess für Geschäftslogik | `retrofit_process()` |
-| **Environment** | SimPy-Simulationsumgebung | Zeitsteuerung und Event-Queue |
-| **Determinismus** | Reproduzierbare Simulationsergebnisse | Gleicher Random-Seed → gleiche Ergebnisse |
+| Term | MVP Definition | Usage |
+|------|----------------|-------|
+| **Discrete Event Simulation** | Event-driven simulation with SimPy | Time jumps between events |
+| **SimPy** | Python framework for discrete event simulation | Core of MVP simulation |
+| **Event** | Simulation event (arrival, start, end) | `TrainArrival`, `RetrofitComplete` |
+| **Process** | SimPy process for business logic | `retrofit_process()` |
+| **Environment** | SimPy simulation environment | Time control and event queue |
+| **Determinism** | Reproducible simulation results | Same random seed → same results |
 
-## 12.2 MVP Architektur-Begriffe
+## 12.2 MVP Architecture Terms
 
 ### Layered Architecture (MVP)
 
-| Begriff | MVP Definition | Layer |
+| Term | MVP Definition | Layer |
 |---------|----------------|-------|
-| **Presentation Layer** | CLI und File Output | Oberste Schicht |
-| **Business Logic Layer** | Domain Services und Geschäftslogik | Kern-Schicht |
-| **Data Access Layer** | File I/O (JSON/CSV) | Daten-Schicht |
-| **Infrastructure Layer** | SimPy, Matplotlib, File System | Unterste Schicht |
-| **Service** | Geschäftslogik-Komponente | `ConfigurationService`, `WorkshopService` |
-| **Model** | Datenmodell/Entity | `Workshop`, `Station`, `Wagon` |
+| **Presentation Layer** | CLI and file output | Top layer |
+| **Business Logic Layer** | Domain services and business logic | Core layer |
+| **Data Access Layer** | File I/O (JSON/CSV) | Data layer |
+| **Infrastructure Layer** | SimPy, Matplotlib, file system | Bottom layer |
+| **Service** | Business logic component | `ConfigurationService`, `SimulationDomainService` |
+| **Model** | Data model/entity | `Workshop`, `Station`, `Wagon` |
 
 ### Bounded Context (MVP)
 
-| Begriff | MVP Definition | Verantwortung |
+| Term | MVP Definition | Responsibility |
 |---------|----------------|---------------|
-| **Configuration Context** | JSON/CSV Import und Validierung | Szenario-Setup |
-| **Workshop Context** | DAK-Umrüstung und SimPy-Integration | Kern-Geschäftslogik |
-| **Simulation Control Context** | Orchestrierung und Output-Generierung | Gesamtsteuerung |
-| **Context** | Fachlicher Abschnitt mit klaren Grenzen | Bounded Context nach DDD |
-| **Domain Model** | Fachliches Datenmodell eines Context | Entities, Value Objects |
+| **Configuration Context** | JSON/CSV import and validation | Scenario setup |
+| **Simulation Domain Context** | DAC retrofit and SimPy integration | Core business logic |
+| **Simulation Control Context** | Orchestration and output generation | Overall control |
+| **Context** | Domain section with clear boundaries | Bounded context per DDD |
+| **Domain Model** | Domain data model of a context | Entities, value objects |
 
-## 12.3 MVP Technische Begriffe
+### Architecture Patterns (MVP)
+
+| Term | MVP Definition | Usage |
+|------|----------------|-------|
+| **Repository Pattern** | Abstraction layer for data access | Planned for database migration |
+| **Adapter Pattern** | Interface between incompatible interfaces | SimPy adapter for simulation engine |
+| **Port** | Interface defining external dependency | Part of hexagonal architecture (future) |
+| **Dependency Injection** | Passing dependencies to components | Prepared for hexagonal migration |
+| **Service Layer** | Business logic orchestration | Current MVP architecture |
+
+## 12.3 MVP Technical Terms
 
 ### Python/SimPy (MVP)
 
-| Begriff | MVP Definition | Verwendung |
+| Term | MVP Definition | Usage |
 |---------|----------------|------------|
-| **Pydantic** | Python-Library für Datenvalidierung | Configuration Models |
-| **Matplotlib** | Python-Library für Diagramme | Chart-Generierung |
-| **Pandas** | Python-Library für Datenverarbeitung | CSV-Verarbeitung (optional) |
-| **Type Hints** | Python-Typisierung | Code-Dokumentation und IDE-Support |
-| **Dataclass** | Python-Decorator für Datenklassen | Domain Models |
-| **Virtual Environment** | Isolierte Python-Umgebung | Dependency Management |
+| **Pydantic** | Python library for data validation | Configuration models |
+| **Matplotlib** | Python library for charts | Chart generation |
+| **Pandas** | Python library for data processing | CSV processing (optional) |
+| **Type Hints** | Python typing | Code documentation and IDE support |
+| **Dataclass** | Python decorator for data classes | Domain models |
+| **Virtual Environment** | Isolated Python environment | Dependency management |
+
+### Development Tools (MVP)
+
+| Term | MVP Definition | Purpose |
+|------|----------------|----------|
+| **uv** | Fast Python package manager | Dependency management and virtual environments |
+| **Ruff** | Fast Python linter and formatter | Code formatting and linting |
+| **MyPy** | Static type checker for Python | Type checking with `disallow_untyped_defs = true` |
+| **Pylint** | Python code analysis tool | Static code analysis |
+| **pytest** | Python testing framework | Unit and integration testing |
+| **pytest-cov** | Coverage plugin for pytest | Test coverage measurement |
 
 ### File Formats (MVP)
 
-| Begriff | MVP Definition | Struktur |
+| Term | MVP Definition | Structure |
 |---------|----------------|----------|
-| **JSON** | JavaScript Object Notation | Konfigurationsdateien |
-| **CSV** | Comma-Separated Values | Tabellarische Daten |
-| **PNG** | Portable Network Graphics | Matplotlib-Charts |
-| **uv.lock** | Python uv Lockfile | Lockfile |
+| **JSON** | JavaScript Object Notation | Configuration files |
+| **CSV** | Comma-Separated Values | Tabular data |
+| **PNG** | Portable Network Graphics | Matplotlib charts |
+| **uv.lock** | Python uv lockfile | Dependency lockfile |
 
-## 12.4 MVP Qualitätsbegriffe
+## 12.4 MVP Quality Terms
 
 ### Performance (MVP)
 
-| Begriff | MVP Definition | Zielwert |
+| Term | MVP Definition | Target Value |
 |---------|----------------|----------|
-| **Durchsatz** | Verarbeitete Wagen pro Stunde | 20-40 Wagen/h |
-| **Latenz** | Zeit bis Simulationsstart | < 2 Sekunden |
-| **Speicherverbrauch** | Speicherverbrauch der Anwendung | < 100 MB |
-| **Ausführungszeit** | Gesamte Simulationsdauer | < 30 Sekunden für 1000 Wagen |
-| **Skalierbarkeit** | Maximale Szenario-Größe | 5000 Wagen |
+| **Throughput** | Processed wagons per hour | To be measured |
+| **Latency** | Time until simulation start | To be measured |
+| **Memory usage** | Application memory consumption | To be measured |
+| **Execution time** | Total simulation duration | To be measured |
+| **Scalability** | Maximum scenario size | To be measured |
 
 ### Testing (MVP)
 
-| Begriff | MVP Definition | Tool |
+| Term | MVP Definition | Tool |
 |---------|----------------|------|
-| **Unit Test** | Test einzelner Funktionen/Klassen | pytest |
-| **Integration Test** | Test von Komponenten-Zusammenspiel | pytest |
-| **End-to-End Test** | Test kompletter Simulationsläufe | Manual |
-| **Test Coverage** | Prozent getesteter Code-Zeilen | pytest-cov |
-| **Mock** | Simulierte Abhängigkeit für Tests | unittest.mock |
+| **Unit Test** | Test of individual functions/classes | pytest |
+| **Integration Test** | Test of component interaction | pytest |
+| **End-to-End Test** | Test of complete simulation runs | Manual |
+| **Test Coverage** | Percentage of tested code lines | pytest-cov |
+| **Mock** | Simulated dependency for tests | unittest.mock |
 
-## 12.5 MVP Prozess-Begriffe
+## 12.5 MVP Process Terms
 
-### Entwicklung (MVP)
+### Development (MVP)
 
-| Begriff | MVP Definition | Dauer |
+| Term | MVP Definition | Duration |
 |---------|----------------|-------|
-| **MVP** | Minimum Viable Product | 4-5 Wochen |
-| **Sprint** | Entwicklungsiteration | 1 Woche |
-| **Milestone** | Wichtiger Entwicklungsschritt | Ende jeder Woche |
-| **Code Review** | Peer-Review von Code-Änderungen | Kontinuierlich |
-| **Refactoring** | Code-Verbesserung ohne Funktionsänderung | Bei Bedarf |
+| **MVP** | Minimum Viable Product | 5 weeks |
+| **Sprint** | Development iteration | 1 week |
+| **Milestone** | Important development step | End of each week |
+| **Code Review** | Peer review of code changes | Continuous |
+| **Refactoring** | Code improvement without functional change | As needed |
 
 ### Migration (MVP)
 
-| Begriff | MVP Definition | Aufwand |
+| Term | MVP Definition | Effort |
 |---------|----------------|---------|
-| **Technische Schulden** | Bewusste Vereinfachungen für Geschwindigkeit | Dokumentiert |
-| **Migration Pfad** | Weg von MVP zur Vollversion | Geplant |
-| **Interface-Vorbereitung** | Vorbereitung für Architektur-Migration | Während MVP |
-| **Hexagonal Architecture** | Ziel-Architektur der Vollversion | Post-MVP |
-| **Event-driven Architecture** | Ziel-Integration der Vollversion | Post-MVP |
+| **Technical Debt** | Deliberate simplifications for speed | Documented |
+| **Migration Path** | Path from MVP to full version | Planned |
+| **Interface Preparation** | Preparation for architecture migration | During MVP |
+| **Hexagonal Architecture** | Target architecture of full version | Post-MVP |
+| **Event-driven Architecture** | Target integration of full version | Post-MVP |
 
-## 12.6 MVP KPI-Begriffe
+## 12.6 MVP KPI Terms
 
 ### Simulation KPIs (MVP)
 
-| Begriff | MVP Definition | Berechnung |
+| Term | MVP Definition | Calculation |
 |---------|----------------|------------|
-| **Durchsatz** | Umgerüstete Wagen pro Zeiteinheit | `wagons_processed / simulation_hours` |
-| **Auslastung** | Prozentuale Nutzung der Stationen | `busy_time / total_time * 100` |
-| **Wartezeit** | Durchschnittliche Wartezeit der Wagen | `sum(waiting_times) / wagon_count` |
-| **Warteschlangenlänge** | Anzahl wartender Wagen | `wagons_in_queue` |
-| **Engpass** | Ressource mit höchster Auslastung | Station mit `max(utilization)` |
+| **Throughput** | Retrofitted wagons per time unit | `wagons_processed / simulation_hours` |
+| **Utilization** | Percentage usage of stations | `busy_time / total_time * 100` |
+| **Waiting Time** | Average waiting time of wagons | `sum(waiting_times) / wagon_count` |
+| **Queue Length** | Number of waiting wagons | `wagons_in_queue` |
+| **Bottleneck** | Resource with highest utilization | Station with `max(utilization)` |
 
 ### Output KPIs (MVP)
 
-| Begriff | MVP Definition | Format |
+| Term | MVP Definition | Format |
 |---------|----------------|--------|
-| **CSV Export** | Strukturierte KPI-Daten | `simulation_results.csv` |
-| **Chart** | Visualisierte KPI-Daten | `kpi_charts.png` |
-| **Log** | Ereignis-Timeline | `simulation_log.json` |
-| **Summary** | Zusammenfassung der Ergebnisse | Console Output |
+| **CSV Export** | Structured KPI data | `simulation_results.csv` |
+| **Chart** | Visualized KPI data | `kpi_charts.png` |
+| **Log** | Event timeline | `simulation_log.json` |
+| **Summary** | Results summary | Console output |
 
-## 12.7 MVP Fehler-Begriffe
+## 12.7 MVP Error Terms
 
 ### Error Handling (MVP)
 
-| Begriff | MVP Definition | Behandlung |
+| Term | MVP Definition | Handling |
 |---------|----------------|------------|
-| **Configuration Error** | Fehler beim Laden der Konfiguration | Sofortiger Exit mit Fehlermeldung |
-| **Validation Error** | Ungültige Eingabedaten | Liste aller Validierungsfehler |
-| **Simulation Error** | Laufzeitfehler während Simulation | Graceful Degradation |
-| **Output Error** | Fehler bei Ergebnis-Generierung | Weiter ohne fehlgeschlagene Ausgabe |
-| **Graceful Degradation** | Teilweise Funktionalität bei Fehlern | Partial Results |
+| **Configuration Error** | Error loading configuration | Immediate exit with error message |
+| **Validation Error** | Invalid input data | List of all validation errors |
+| **Simulation Error** | Runtime error during simulation | Graceful degradation |
+| **Output Error** | Error during result generation | Continue without failed output |
+| **Graceful Degradation** | Partial functionality on errors | Partial results |
 
-## 12.8 MVP Abkürzungen
+## 12.8 MVP Abbreviations
 
-### Technische Abkürzungen
+### Technical Abbreviations
 
-| Abkürzung | Vollform | Kontext |
+| Abbreviation | Full Form | Context |
 |-----------|----------|---------|
-| **MVP** | Minimum Viable Product | Entwicklungsphase |
-| **DDD** | Domain-Driven Design | Architektur-Ansatz |
-| **CLI** | Command Line Interface | Benutzeroberfläche |
-| **I/O** | Input/Output | Datei-Operationen |
-| **API** | Application Programming Interface | Schnittstelle |
-| **JSON** | JavaScript Object Notation | Datenformat |
-| **CSV** | Comma-Separated Values | Datenformat |
-| **PNG** | Portable Network Graphics | Bildformat |
+| **MVP** | Minimum Viable Product | Development phase |
+| **DDD** | Domain-Driven Design | Architecture approach |
+| **CLI** | Command Line Interface | User interface |
+| **I/O** | Input/Output | File operations |
+| **API** | Application Programming Interface | Interface |
+| **JSON** | JavaScript Object Notation | Data format |
+| **CSV** | Comma-Separated Values | Data format |
+| **PNG** | Portable Network Graphics | Image format |
 
-### Fachliche Abkürzungen
+### Domain Abbreviations
 
-| Abkürzung | Vollform | Kontext |
+| Abbreviation | Full Form | Context |
 |-----------|----------|---------|
-| **DAK** | Digitale Automatische Kupplung | Bahntechnik |
-| **KPI** | Key Performance Indicator | Leistungskennzahl |
-| **SLA** | Service Level Agreement | Qualitätsziel |
-| **ROI** | Return on Investment | Wirtschaftlichkeit |
+| **DAC** | Digital Automatic Coupler | Railway technology |
+| **KPI** | Key Performance Indicator | Performance metric |
+| **SLA** | Service Level Agreement | Quality target |
+| **ROI** | Return on Investment | Economic efficiency |
 
 ---
 
-**Navigation:** [← MVP Risiken](11-risks-technical-debt.md) | [MVP README ↑](README.md)
 
----
-
-**MVP Glossar Status:** ✅ Vollständig | **Begriffe:** 80+ | **Kategorien:** 8

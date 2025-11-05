@@ -1,27 +1,27 @@
-# 11. Risiken und technische Schulden (MVP)
+# 11. Risks and Technical Debt (MVP)
 
-## 11.1 MVP Risiko-Überblick
+## 11.1 MVP Risk Overview
 
-### MVP Risiko-Matrix
+### MVP Risk Matrix
 
 ```mermaid
 graph TB
-    subgraph "MVP Riskikobewertung"
-        subgraph "Hohe Auswirkung"
-            HH[Hohe Wahrscheinlichkeit<br/>Hohe Auswirkung]
-            LH[Niedrige Wahrscheinlichkeit<br/>Hohe Auswirkung]
+    subgraph "MVP Risk Assessment"
+        subgraph "High Impact"
+            HH[High Probability<br/>High Impact]
+            LH[Low Probability<br/>High Impact]
         end
 
-        subgraph "Geringe Auswirkung"
-            HL[Hohe Wahrscheinlichkeit<br/>Geringe Auswirkung]
-            LL[Geringe Wahrscheinlichkeit<br/>Geringe Auswirkung]
+        subgraph "Low Impact"
+            HL[High Probability<br/>Low Impact]
+            LL[Low Probability<br/>Low Impact]
         end
     end
 
-    HH --> |Kritisch| R1[SimPy Integration versagt]
-    LH --> |Schwerwiegend| R2[Performance Engpässe]
-    HL --> |Gering| R3[Plattformkompatibilität]
-    LL --> |Vernachlässigbar| R4[Probleme mit Ausgabeformat]
+    HH --> |Critical| R1[SimPy integration fails]
+    LH --> |Major| R2[Performance bottlenecks]
+    HL --> |Minor| R3[Platform compatibility]
+    LL --> |Negligible| R4[Output format issues]
 
     classDef critical fill:#d32f2f,stroke:#b71c1c,color:#fff
     classDef major fill:#ff9800,stroke:#e65100,color:#fff
@@ -34,150 +34,153 @@ graph TB
     class R4 negligible
 ```
 
-## 11.2 MVP Technische Risiken
+## 11.2 MVP Technical Risks
 
-### Risiko 1: SimPy Integration Komplexität
+### Risk 1: SimPy Integration Complexity
 
-| Aspekt | Details |
-|--------|---------|
-| **Beschreibung** | Direkte SimPy-Integration könnte zu komplex werden |
-| **Wahrscheinlichkeit** | Mittel (40%) |
-| **Auswirkung** | Hoch - Simulation funktioniert nicht |
-| **Symptome** | Unerwartetes SimPy-Verhalten, schwer debugbare Prozesse |
-
-**Mitigation:**
-- ✅ **Einfache SimPy-Prozesse**: Nur grundlegende Events verwenden
-- ✅ **Frühes Prototyping**: SimPy-Integration zuerst implementieren
-- ✅ **Dokumentation**: SimPy-Patterns dokumentieren
-- ✅ **Fallback**: Vereinfachte Simulation ohne SimPy als Backup
-
-### Risiko 2: Performance-Probleme bei größeren Szenarien
-
-| Aspekt | Details |
-|--------|---------|
-| **Beschreibung** | MVP könnte bei > 1000 Wagen zu langsam werden |
-| **Wahrscheinlichkeit** | Mittel (30%) |
-| **Auswirkung** | Mittel - Begrenzte Szenario-Größe |
-| **Symptome** | Lange Ausführungszeiten, hoher Speicherverbrauch |
+| Aspect | Details |
+|--------|----------|
+| **Description** | Direct SimPy integration could become too complex |
+| **Probability** | Medium (40%) |
+| **Impact** | High - Simulation doesn't work |
+| **Symptoms** | Unexpected SimPy behavior, hard-to-debug processes |
 
 **Mitigation:**
-- ✅ **Profiling**: Frühe Performance-Messungen
-- ✅ **Optimierung**: Algorithmus-Verbesserungen
-- ✅ **Limits**: Akzeptierte Szenario-Größen definieren
-- ✅ **Monitoring**: Memory/CPU-Überwachung
+- ✅ **Simple SimPy processes**: Use only basic events
+- ✅ **Early prototyping**: Implement SimPy integration first (validated in 3-Länderhack POC)
+- ✅ **Documentation**: Document SimPy patterns
+- ✅ **Team expertise**: Leverage POC experience from hackathon
 
-### Risiko 3: Zeitplan-Überschreitung
+### Risk 2: Performance Issues with Larger Scenarios
 
-| Aspekt | Details |
-|--------|---------|
-| **Beschreibung** | 4-5 Wochen Entwicklungszeit könnte nicht ausreichen |
-| **Wahrscheinlichkeit** | Hoch (60%) |
-| **Auswirkung** | Hoch - MVP-Ziele nicht erreicht |
-| **Symptome** | Verzögerungen in Meilensteinen, unfertige Features |
+| Aspect | Details |
+|--------|----------|
+| **Description** | MVP could become too slow with > 1000 wagons |
+| **Probability** | Medium (30%) |
+| **Impact** | Medium - Limited scenario size |
+| **Symptoms** | Long execution times, high memory usage |
 
 **Mitigation:**
-- ✅ **Scope-Reduktion**: Weitere Features streichen wenn nötig
-- ✅ **Parallele Entwicklung**: Team-Koordination optimieren
-- ✅ **Wöchentliche Reviews**: Frühe Risiko-Erkennung
-- ✅ **Minimum-MVP**: Absolut minimale Funktionalität definieren
+- ✅ **Profiling**: Early performance measurements
+- ✅ **Optimization**: Algorithm improvements
+- ✅ **Limits**: Define accepted scenario sizes
+- ✅ **Monitoring**: Memory/CPU monitoring
 
-## 11.3 MVP Technische Schulden
+### Risk 3: Schedule Overrun
 
-### Schuld 1: Direkte Framework-Abhängigkeiten
+| Aspect | Details |
+|--------|----------|
+| **Description** | 5-week development time might not be sufficient |
+| **Probability** | High (60%) |
+| **Impact** | High - MVP goals not achieved |
+| **Symptoms** | Milestone delays, unfinished features |
+
+**Mitigation:**
+- ✅ **Scope reduction**: Cut additional features if necessary
+- ✅ **Parallel development**: Optimize team coordination
+- ✅ **Weekly reviews**: Early risk detection
+- ✅ **Minimum MVP**: Define absolutely minimal functionality
+
+## 11.3 MVP Technical Debt
+
+### Debt 1: Direct Framework Dependencies
 
 ```python
-# MVP: Direkte SimPy-Nutzung (Technical Debt)
+# MVP: Direct SimPy usage (Technical Debt)
 import simpy
 
 class WorkshopService:
     def __init__(self):
-        self.env = simpy.Environment()  # Direkte Abhängigkeit
+        self.env = simpy.Environment()  # Direct dependency
 
     def run_process(self):
-        self.env.process(self.retrofit_process())  # Enge Kopplung
+        self.env.process(self.retrofit_process())  # Tight coupling
 
-# Zukunft: Abstrahiertes Interface
+# Future: Abstracted interface
 class WorkshopService:
     def __init__(self, simulation_engine: SimulationEnginePort):
-        self._sim_engine = simulation_engine  # Dependency Injection
+        self._sim_engine = simulation_engine  # Dependency injection
 ```
 
-**Schuld-Details:**
-- **Typ**: Architektur-Schuld
-- **Priorität**: Hoch
-- **Aufwand**: 2-3 Tage Refactoring
-- **Vollversion-Lösung**: Hexagonal Architecture mit Ports
+**Debt Details:**
+- **Type**: Architecture debt
+- **Priority**: High
+- **Effort**: Estimated 2-3 days refactoring (to be validated)
+- **Created by**: [ADR MVP-001](09-architecture-decisions.md#adr-mvp-001-simpy-for-discrete-event-simulation) (SimPy decision)
+- **Full version solution**: Hexagonal architecture with ports
 
-### Schuld 2: Fehlende Event-Architektur
+### Debt 2: Missing Event Architecture
 
 ```python
-# MVP: Direkte Service-Aufrufe (Technical Debt)
+# MVP: Direct service calls (Technical Debt)
 class SimulationService:
     def run(self):
-        config = self.config_service.load()  # Direkter Aufruf
-        workshop = self.workshop_service.setup(config)  # Direkter Aufruf
-        results = self.workshop_service.run(workshop)  # Direkter Aufruf
+        config = self.config_service.load()  # Direct call
+        workshop = self.workshop_service.setup(config)  # Direct call
+        results = self.workshop_service.run(workshop)  # Direct call
 
-# Zukunft: Event-Driven
+# Future: Event-driven
 class SimulationService:
     def run(self):
         self.event_bus.publish(ConfigurationRequested())
-        # Asynchrone Event-Behandlung
+        # Asynchronous event handling
 ```
 
-**Schuld-Details:**
-- **Typ**: Integration-Schuld
-- **Priorität**: Mittel
-- **Aufwand**: 1-2 Wochen Refactoring
-- **Vollversion-Lösung**: Event-driven Architecture
+**Debt Details:**
+- **Type**: Integration debt
+- **Priority**: Medium
+- **Effort**: Estimated 1-2 weeks refactoring (to be validated)
+- **Created by**: [ADR MVP-007](09-architecture-decisions.md#adr-mvp-007-direct-method-calls-between-contexts) (Direct calls decision)
+- **Full version solution**: Event-driven architecture
 
-### Schuld 3: Dateibasierte Persistierung
+### Debt 3: File-Based Persistence
 
 ```python
-# MVP: Dateibasierte Speicherung (Technical Debt)
+# MVP: File-based storage (Technical Debt)
 class ConfigurationService:
     def load_scenario(self, path: str):
-        with open(f"{path}/scenario.json") as f:  # Direkter Dateizugriff
+        with open(f"{path}/scenario.json") as f:  # Direct file access
             return json.load(f)
 
-# Zukunft: Repository Pattern
+# Future: Repository pattern
 class ConfigurationService:
     def __init__(self, repo: ConfigurationRepository):
-        self._repo = repo  # Abstrahierte Speicherung
+        self._repo = repo  # Abstracted storage
 
     def load_scenario(self, id: str):
-        return self._repo.find_by_id(id)  # Speicher-agnostisch
+        return self._repo.find_by_id(id)  # Storage-agnostic
 ```
 
-**Schuld-Details:**
-- **Typ**: Persistierung-Schuld
-- **Priorität**: Niedrig
-- **Aufwand**: 3-5 Tage Refactoring
-- **Vollversion-Lösung**: Database + Repository Pattern
+**Debt Details:**
+- **Type**: Persistence debt
+- **Priority**: Low
+- **Effort**: Estimated 3-5 days refactoring (to be validated)
+- **Created by**: [ADR MVP-002](09-architecture-decisions.md#adr-mvp-002-file-based-data-storage) (File storage decision)
+- **Full version solution**: Database + Repository pattern
 
-## 11.4 MVP Qualitäts-Risiken
+## 11.4 MVP Quality Risks
 
-### Code-Qualitäts-Risiken
+### Code Quality Risks
 
 ```mermaid
 graph TB
-    subgraph "MVP Qualitäts Risiken"
-        subgraph "Codequalität"
-            Complexity[Hohe Komplexität<br/>Monolithische Funktionen]
-            Coverage[Geringe Testabdeckung<br/>< 70% Abdeckung]
-            Documentation[Fehlende Dokumentation<br/>Undokumentierte APIs]
+    subgraph "MVP Quality Risks"
+        subgraph "Code Quality"
+            Complexity[High complexity<br/>Monolithic functions]
+            Coverage[Low test coverage<br/>< 70% coverage]
+            Documentation[Missing documentation<br/>Undocumented APIs]
         end
 
-        subgraph "Architekturqualität"
-            Coupling[Hohe Kopplung<br/>Direkte Abhängigkeiten]
-            Cohesion[Geringe Kohäsion<br/>Gemischte Verantwortungen]
-            Flexibility[Geringe Flexibilität<br/>Schwer zu erweitern]
+        subgraph "Architecture Quality"
+            Coupling[High coupling<br/>Direct dependencies]
+            Cohesion[Low cohesion<br/>Mixed responsibilities]
+            Flexibility[Low flexibility<br/>Hard to extend]
         end
 
-        subgraph "Wartbarkeit"
-            Understanding[Schwer zu verstehen<br/>Komplexe Geschäftslogik]
-            Changes[Schwer zu ändern<br/>Ripple effects]
-            Testing[Schwer zu testen<br/>Integrierte Komponenten]
+        subgraph "Maintainability"
+            Understanding[Hard to understand<br/>Complex business logic]
+            Changes[Hard to change<br/>Ripple effects]
+            Testing[Hard to test<br/>Integrated components]
         end
     end
 
@@ -190,36 +193,36 @@ graph TB
     class Understanding,Changes,Testing maintainability
 ```
 
-### Qualitäts-Metriken Überwachung
+### Quality Metrics Monitoring
 
-| Metrik | MVP Ziel | Aktueller Status | Risiko |
-|--------|----------|------------------|--------|
-| **Zyklomatische Komplexität** | < 10 | TBD | Mittel |
-| **Testabdeckung** | > 70% | TBD | Hoch |
-| **Dokumentationsabdeckung** | > 80% | TBD | Niedrig |
-| **Anzahl Abhängigkeiten** | < 10 | 4 | Niedrig |
+| Metric | MVP Goal | Current Status | Risk |
+|--------|----------|----------------|------|
+| **Cyclomatic complexity** | < 10 | TBD | Medium |
+| **Test coverage** | > 70% | TBD | High |
+| **Documentation coverage** | > 80% | TBD | Low |
+| **Number of dependencies** | < 10 | 7 | Low |
 
-## 11.5 MVP Migrations-Risiken
+## 11.5 MVP Migration Risks
 
-### Migration zur Vollversion
+### Migration to Full Version
 
 ```mermaid
 graph TB
-    subgraph "Migration Risiken"
-        subgraph "Architekturmigration"
-            LayerToHex[Layered → Hexagonal<br/>Großes Refactoring]
-            DirectToEvent[Direct Calls → Events<br/>Integrationsanpassung]
-            FileToDb[Dateien → Datenbank<br/>Datenmigration]
+    subgraph "Migration Risks"
+        subgraph "Architecture Migration"
+            LayerToHex[Layered → Hexagonal<br/>Major refactoring]
+            DirectToEvent[Direct calls → Events<br/>Integration changes]
+            FileToDb[Files → Database<br/>Data migration]
         end
 
-        subgraph "Technologiemigration"
-            MatplotlibToWeb[Matplotlib → Web UI<br/>Komplett neu schreiben]
-            MonolithToServices[Monolith → Services<br/>Deployment anpassen]
+        subgraph "Technology Migration"
+            MatplotlibToWeb[Matplotlib → Web UI<br/>Complete rewrite]
+            MonolithToServices[Monolith → Services<br/>Deployment changes]
         end
 
-        subgraph "Teammigration"
-            SkillGap[Skill Gaps<br/>Neue Technologien]
-            TimeEstimation[Zeitschätzung<br/>Unbekannte Komplexität]
+        subgraph "Team Migration"
+            SkillGap[Skill gaps<br/>New technologies]
+            TimeEstimation[Time estimation<br/>Unknown complexity]
         end
     end
 
@@ -232,65 +235,67 @@ graph TB
     class SkillGap,TimeEstimation team
 ```
 
-### Migrations-Aufwand Schätzung
+### Migration Effort Estimation
 
-| Migration | Aufwand | Risiko | Mitigation |
-|-----------|---------|--------|------------|
-| **Layered → Hexagonal** | 2-3 Wochen | Hoch | Interface-Vorbereitung |
-| **Direct → Event-driven** | 1-2 Wochen | Mittel | Event-Interface definieren |
-| **Dateien → Datenbank** | 3-5 Tage | Niedrig | Repository Pattern |
-| **Matplotlib → Web** | 4-6 Wochen | Hoch | JSON-API vorbereiten |
+> **Note:** Effort estimates are preliminary and will be refined during MVP implementation based on actual complexity.
 
-## 11.6 MVP Risiko-Mitigation
+| Migration | Estimated Effort | Risk | Mitigation |
+|-----------|-----------------|------|------------|
+| **Layered → Hexagonal** | 2-3 weeks | High | Interface preparation |
+| **Direct → Event-driven** | 1-2 weeks | Medium | Define event interfaces |
+| **Files → Database** | 3-5 days | Low | Repository pattern |
+| **Matplotlib → Web** | 4-6 weeks | High | Prepare JSON API |
 
-### Risiko-Monitoring
+## 11.6 MVP Risk Mitigation
+
+### Risk Monitoring
 
 ```python
 # MVP Risk Monitoring
 class RiskMonitor:
     def check_performance_risk(self, execution_time: float):
-        if execution_time > 60:  # Sekunden
-            logging.warning(f"Performance-Risiko: {execution_time}s Ausführung")
+        if execution_time > 60:  # seconds
+            logging.warning(f"Performance risk: {execution_time}s execution")
 
     def check_memory_risk(self, memory_mb: float):
         if memory_mb > 100:  # MB
-            logging.warning(f"Speicher-Risiko: {memory_mb}MB Nutzung")
+            logging.warning(f"Memory risk: {memory_mb}MB usage")
 
     def check_complexity_risk(self, function_lines: int):
         if function_lines > 50:
-            logging.warning(f"Komplexitäts-Risiko: {function_lines} Zeilen")
+            logging.warning(f"Complexity risk: {function_lines} lines")
 ```
 
-### Kontinuierliche Risiko-Bewertung
+### Continuous Risk Assessment
 
-| Woche | Risiko-Review | Maßnahmen |
-|-------|---------------|-----------|
-| **Woche 1** | SimPy Integration | Prototyp erstellen |
-| **Woche 2** | Performance Tests | Erste Benchmarks |
-| **Woche 3** | Code Qualität | Refactoring wenn nötig |
-| **Woche 4** | Migration Vorbereitungen | Interface-Vorbereitung |
-| **Woche 5** | Final Review | Schulden dokumentieren |
+| Week | Risk Review | Actions |
+|------|-------------|----------|
+| **Week 1** | SimPy integration | Create prototype |
+| **Week 2** | Performance tests | Initial benchmarks |
+| **Week 3** | Code quality | Refactoring if needed |
+| **Week 4** | Migration preparation | Interface preparation |
+| **Week 5** | Final review | Document debt |
 
-## 11.7 MVP Schulden-Rückzahlung
+## 11.7 MVP Debt Repayment
 
-### Schulden-Priorisierung
+### Debt Prioritization
 
 ```mermaid
 graph TB
-    subgraph "Technische Schulden Priorisierung"
-        subgraph "Hohe Priorität"
-            HP1[SimPy Abstraktion<br/>Blockiert Hexagonale Migration]
-            HP2[Service Interfaces<br/>Blockiert Event-Architektur]
+    subgraph "Technical Debt Prioritization"
+        subgraph "High Priority"
+            HP1[SimPy abstraction<br/>Blocks hexagonal migration]
+            HP2[Service interfaces<br/>Blocks event architecture]
         end
 
-        subgraph "Mittlere Priorität"
-            MP1[Repository Pattern<br/>Blockiert Datenbankmigration]
-            MP2[Fehlerbehandlung<br/>Blockiert Produktivnutzung]
+        subgraph "Medium Priority"
+            MP1[Repository pattern<br/>Blocks database migration]
+            MP2[Error handling<br/>Blocks production use]
         end
 
-        subgraph "Niedrige Priorität"
-            LP1[Code-Dokumentation<br/>Wartbarkeit]
-            LP2[Testabdeckung<br/>Qualitätssicherung]
+        subgraph "Low Priority"
+            LP1[Code documentation<br/>Maintainability]
+            LP2[Test coverage<br/>Quality assurance]
         end
     end
 
@@ -303,15 +308,17 @@ graph TB
     class LP1,LP2 low
 ```
 
-### Schulden-Rückzahlungsplan
+### Debt Repayment Plan
 
-| Phase | Schulden | Aufwand | Nutzen |
-|-------|----------|---------|--------|
-| **Post-MVP** | SimPy Abstraktion | ca. 3 Tage | Hexagonal Architecture möglich |
-| **Pre-Full** | Service Interfaces | ca. 5 Tage | Event-driven Architecture möglich |
-| **Full-Dev** | Repository Pattern | ca. 3 Tage | Database Integration möglich |
-| **Produktion** | Error Handling | ca. 2 Tage | Produktionstauglichkeit |
+> **Note:** Effort estimates are preliminary and will be refined after MVP completion based on actual codebase complexity.
+
+| Phase | Debt | Estimated Effort | Benefit |
+|-------|------|-----------------|----------|
+| **Post-MVP** | SimPy abstraction | ~3 days | Hexagonal architecture possible |
+| **Pre-Full** | Service interfaces | ~5 days | Event-driven architecture possible |
+| **Full-Dev** | Repository pattern | ~3 days | Database integration possible |
+| **Production** | Error handling | ~2 days | Production readiness |
 
 ---
 
-**Navigation:** [← MVP Qualitätsanforderungen](10-quality-requirements.md) | [MVP Glossar →](12-glossary.md)
+

@@ -35,41 +35,20 @@ nav:
   - Requirements:
       - Use Cases: requirements/use-cases.md
       - Konzept: requirements/250321_KonzeptPopUpSim_Entwurf.md
-  - Architecture:
-      - Full:
-          - Introduction & Goals: architecture/01-introduction-and-goals.md
-          - Constraints: architecture/02-architecture-constraints.md
-          - System Scope & Context: architecture/03-system-scope-and-context.md
-          - Technical Risks: architecture/11-technical-risks.md
-          - Bibliography: architecture/13-bibliography.md
-      - MVP:
-          - Architecture:
-              - Overview: mvp/architecture/README.md
-              - Introduction & Goals: mvp/architecture/01-introduction-goals.md
-              - Constraints: mvp/architecture/02-constraints.md
-              - Context: mvp/architecture/03-context.md
-              - Solution Strategy: mvp/architecture/04-solution-strategy.md
-              - Building Blocks: mvp/architecture/05-building-blocks.md
-              - Runtime: mvp/architecture/06-runtime.md
-              - Deployment: mvp/architecture/07-deployment.md
-              - Concepts: mvp/architecture/08-concepts.md
-              - Architecture Decisions: mvp/architecture/09-architecture-decisions.md
-              - Quality Requirements: mvp/architecture/10-quality-requirements.md
-              - Risks & Technical Debt: mvp/architecture/11-risks-technical-debt.md
-              - Glossary: mvp/architecture/12-glossary.md
-          - Development Plan:
-              - Overview: mvp/development/01-mvp-overview.md
-              - Contexts: mvp/development/02-mvp-contexts.md
-              - Domain Model: mvp/development/03-mvp-domain-model.md
-              - SimPy Integration: mvp/development/04-mvp-simpy-integration.md
-              - Data Flow: mvp/development/05-mvp-data-flow.md
-              - Technology Stack: mvp/development/06-mvp-technology-stack.md
-              - File Formats: mvp/development/07-mvp-file-formats.md
-              - Testing Strategy: mvp/development/08-mvp-testing-strategy.md
-              - Deployment: mvp/development/09-mvp-deployment.md
-              - Migration Path: mvp/development/10-mvp-migration-path.md
-              - Configuration Validation: mvp/development/configuration-validation.md
-              - Domain Models: mvp/development/domain-models.md
+  - MVP Architecture:
+      - Overview: mvp/architecture/README.md
+      - Introduction & Goals: mvp/architecture/01-introduction-goals.md
+      - Constraints: mvp/architecture/02-constraints.md
+      - Context: mvp/architecture/03-context.md
+      - Solution Strategy: mvp/architecture/04-solution-strategy.md
+      - Building Blocks: mvp/architecture/05-building-blocks.md
+      - Runtime: mvp/architecture/06-runtime.md
+      - Deployment: mvp/architecture/07-deployment.md
+      - Concepts: mvp/architecture/08-concepts.md
+      - Architecture Decisions: mvp/architecture/09-architecture-decisions.md
+      - Quality Requirements: mvp/architecture/10-quality-requirements.md
+      - Risks & Technical Debt: mvp/architecture/11-risks-technical-debt.md
+      - Glossary: mvp/architecture/12-glossary.md
   - CI/CD: ci-cd.md
 
 plugins:

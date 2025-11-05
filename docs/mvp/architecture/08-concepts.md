@@ -1,8 +1,77 @@
-# 8. Querschnittliche Konzepte (MVP)
+# 8. Cross-Cutting Concepts (MVP)
 
-## 8.1 MVP Domain Model
+This section describes architectural concepts and patterns that apply across multiple building blocks. Code examples illustrate these concepts but are **not production code**.
 
-### MVP Kern-Entitäten
+## 8.1 Layered Architecture
+
+**Note:** Each bounded context follows a layered architecture pattern ([ADR MVP-005](09-architecture-decisions.md#adr-mvp-005-layered-architecture)).
+
+### Layer Structure (Applied to Each Context)
+
+```mermaid
+graph TB
+    subgraph "MVP Layers"
+        subgraph "Presentation"
+            CLI[CLI Interface]
+        end
+
+        subgraph "Business Logic"
+            ConfigService[Configuration Service]
+            DomainService[Simulation Domain Service]
+            SimulationService[Simulation Service]
+        end
+
+        subgraph "Data Access"
+            JSONReader[JSON Reader]
+            CSVWriter[CSV Writer]
+        end
+
+        subgraph "Infrastructure"
+            SimPy[SimPy Framework]
+            Matplotlib[Matplotlib]
+        end
+    end
+
+    CLI --> ConfigService
+    CLI --> SimulationService
+    ConfigService --> JSONReader
+    DomainService --> SimPy
+    SimulationService --> CSVWriter
+    SimulationService --> Matplotlib
+
+    classDef presentation fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#fff
+    classDef business fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
+    classDef data fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
+    classDef infrastructure fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#fff
+
+    class CLI presentation
+    class ConfigService,DomainService,SimulationService business
+    class JSONReader,CSVWriter data
+    class SimPy,Matplotlib infrastructure
+```
+
+| Layer | Responsibility | Components |
+|-------|----------------|------------|
+| **Presentation** | User interaction, file I/O | CLI, File readers/writers |
+| **Business Logic** | Domain logic, services | Configuration validator, Simulation engine, Orchestrator |
+| **Domain** | Domain entities and models | Wagon, Track, Workshop, ScenarioConfig |
+| **Infrastructure** | External frameworks | SimPy, Matplotlib, Pydantic, Pandas |
+
+**Rationale:** Layered architecture provides clear separation of concerns within each bounded context, enabling rapid MVP development while maintaining code organization. See [Section 4.3](04-solution-strategy.md#43-technical-architecture-pattern) for architectural pattern decision.
+
+---
+
+## 8.2 Domain Model
+
+> **WARNING:** Code examples in this section are **simplified illustrations for architecture documentation only**. They are **NOT production-ready** and lack:
+> - Complete validation logic
+> - Full type hints and error handling
+> - Business rules and edge cases
+> - Comprehensive docstrings
+>
+> **DO NOT copy-paste these examples into production code.**
+
+### MVP Core Entities
 
 ```mermaid
 classDiagram
@@ -41,37 +110,52 @@ classDiagram
     Station --o Wagon
 ```
 
-## 8.2 MVP Datenmodell
-
 ### MVP Configuration Models
 
+**Actual implementation:** `popupsim/backend/src/configuration/model_*.py`
+
 ```python
-from pydantic import BaseModel
-from typing import List
+# SIMPLIFIED EXAMPLE - See actual files for complete implementation
+from datetime import date
+from pydantic import BaseModel, Field
 
 class ScenarioConfig(BaseModel):
-    duration_hours: int = 24
-    random_seed: int = 42
+    """Configuration model for simulation scenarios."""
+    scenario_id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
+    start_date: date
+    end_date: date
+    random_seed: int | None = Field(default=None, ge=0)  # Optional for reproducibility
+    workshop: Workshop | None = None
+    train_schedule_file: str
+    routes_file: str | None = None
+    workshop_tracks_file: str | None = None
+    # ... additional fields and validators in actual implementation
 
-class WorkshopConfig(BaseModel):
-    stations: int = 4
-    workers_per_station: int = 2
-    retrofit_time_minutes: int = 45
+class Workshop(BaseModel):
+    """Workshop configuration with available tracks."""
+    tracks: list[WorkshopTrack] = Field(min_length=1)
+    # ... additional validators in actual implementation
 
-class TrainConfig(BaseModel):
-    arrival_interval_minutes: int = 60
-    wagons_per_train: int = 20
+class WorkshopTrack(BaseModel):
+    """Individual track within workshop."""
+    id: str
+    function: TrackFunction
+    capacity: int = Field(ge=1)
+    retrofit_time_min: int = Field(ge=0)
+    # ... additional fields in actual implementation
 ```
 
 ### MVP Result Models
 
 ```python
+# SIMPLIFIED EXAMPLE - Actual structure to be defined during implementation
 class SimulationResults(BaseModel):
     total_wagons_processed: int
     simulation_duration_hours: float
     throughput_per_hour: float
     average_waiting_time: float
     station_utilization: float
+    # ... additional KPIs to be determined
 
 class KPIData(BaseModel):
     timestamp: str
@@ -79,13 +163,17 @@ class KPIData(BaseModel):
     utilization: float
     queue_length: int
     waiting_time: float
+    # ... additional metrics to be determined
 ```
 
-## 8.3 MVP Fehlerbehandlung
+## 8.3 Error Handling
+
+Error handling strategy supports the quality goals defined in [Section 1.2](01-introduction-goals.md#12-quality-goals), particularly **Simulation Accuracy & Reliability** (Priority 2). See [Section 6](06-runtime.md) for error scenarios in runtime view.
 
 ### MVP Exception Hierarchy
 
 ```python
+# CONCEPTUAL EXAMPLE - Illustrates exception hierarchy pattern
 class PopUpSimError(Exception):
     """Base exception for PopUpSim MVP"""
     pass
@@ -127,22 +215,24 @@ graph TB
     class Recover,Fail recovery
 ```
 
-## 8.4 MVP Logging Konzept
+## 8.4 Logging Concept
+
+Logging configuration is defined in [Section 7.7](07-deployment.md#77-error-handling--logging).
 
 ### MVP Logging Levels
 
-| Level | MVP Verwendung | Beispiel |
-|-------|----------------|----------|
-| **DEBUG** | Detaillierte Entwicklungsinfos | SimPy event details |
-| **INFO** | Normale Programmausführung | "Simulation started" |
-| **WARNING** | Potentielle Probleme | "High queue length detected" |
-| **ERROR** | Fehler mit Recovery | "Config file not found, using defaults" |
-| **CRITICAL** | Schwere Fehler | "Simulation failed completely" |
+| Level | MVP Usage | Example |
+|-------|-----------|----------|
+| **DEBUG** | Detailed development info | SimPy event details |
+| **INFO** | Normal program execution | "Simulation started" |
+| **WARNING** | Potential problems | "High queue length detected" |
+| **ERROR** | Errors with recovery | "Config file not found, using defaults" |
+| **CRITICAL** | Severe errors | "Simulation failed completely" |
 
 ### MVP Log Format
 
 ```python
-# MVP Log Configuration
+# CONCEPTUAL EXAMPLE - Illustrates logging pattern
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 # Example log output:
@@ -153,7 +243,9 @@ LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 # 2025-10-15 10:10:45,345 - OutputService - INFO - Generated results.csv
 ```
 
-## 8.5 MVP Konfigurationsmanagement
+## 8.5 Configuration Management
+
+Configuration management supports **Usability & Accessibility** (Priority 3) through file-based configuration. See [Section 5.1](05-building-blocks.md#51-configuration-context) for Configuration Context details.
 
 ### MVP Configuration Loading
 
@@ -177,6 +269,7 @@ sequenceDiagram
 ### MVP Configuration Validation
 
 ```python
+# CONCEPTUAL EXAMPLE - Illustrates validation pattern
 def validate_scenario_config(config: dict) -> List[str]:
     """MVP Configuration Validation"""
     errors = []
@@ -194,7 +287,9 @@ def validate_scenario_config(config: dict) -> List[str]:
     return errors
 ```
 
-## 8.6 MVP Testing Konzept
+## 8.6 Testing Concept
+
+Testing strategy supports **Testability** (Priority 5) quality goal. See [Section 7.10](07-deployment.md#710-technology-stack-summary) for testing tools (Pytest, MyPy, Ruff).
 
 ### MVP Test Strategy
 
@@ -233,7 +328,9 @@ graph TB
 ### MVP Test Examples
 
 ```python
-# Unit Test Beispiel
+# CONCEPTUAL EXAMPLES - Illustrate testing patterns
+
+# Unit Test Example
 def test_workshop_station_availability():
     station = Station(id="WS001", capacity=2, workers=[], current_wagons=1)
     assert station.is_available() == True
@@ -241,7 +338,7 @@ def test_workshop_station_availability():
     station.current_wagons = 2
     assert station.is_available() == False
 
-# Integrationstest Beispiel
+# Integration Test Example
 def test_configuration_loading():
     config_service = ConfigurationService()
     config = config_service.load_scenario("test_data/")
@@ -249,18 +346,24 @@ def test_configuration_loading():
     assert len(config.workshop.stations) > 0
 ```
 
-## 8.7 MVP Performance Konzept
+## 8.7 Performance Concept
+
+Performance monitoring will measure actual resource usage during MVP implementation. See [Section 7.8](07-deployment.md#78-performance-monitoring) for performance metrics.
 
 ### MVP Performance Monitoring
 
 ```python
+# CONCEPTUAL EXAMPLE - Illustrates performance monitoring pattern
 import time
 from functools import wraps
+from typing import Any, Callable, TypeVar
 
-def measure_time(func):
+T = TypeVar('T')
+
+def measure_time(func: Callable[..., T]) -> Callable[..., T]:
     """MVP Performance Decorator"""
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> T:
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
@@ -273,19 +376,20 @@ def measure_time(func):
 
 # Usage
 @measure_time
-def run_simulation(duration_hours: int):
-    # Simulationslogik
+def run_simulation(duration_hours: int) -> None:
+    # Simulation logic
     pass
 ```
 
 ### MVP Memory Management
 
 ```python
+# CONCEPTUAL EXAMPLE - Illustrates memory monitoring pattern
 import gc
 import psutil
 import os
 
-def log_memory_usage(phase: str):
+def log_memory_usage(phase: str) -> None:
     """MVP Memory Monitoring"""
     process = psutil.Process(os.getpid())
     memory_mb = process.memory_info().rss / 1024 / 1024
@@ -296,12 +400,15 @@ def log_memory_usage(phase: str):
     gc.collect()
 ```
 
-## 8.8 MVP Datenvalidierung
+## 8.8 Data Validation
+
+Data validation uses Pydantic 2.0+ ([ADR MVP-003](09-architecture-decisions.md#adr-mvp-003-pydantic-for-data-validation)) to ensure **Simulation Accuracy & Reliability** (Priority 2).
 
 ### MVP Input Validation
 
 ```python
-from pydantic import BaseModel, validator
+# CONCEPTUAL EXAMPLE - Illustrates Pydantic validation pattern
+from pydantic import BaseModel, field_validator
 
 class WorkshopStation(BaseModel):
     id: str
@@ -309,14 +416,16 @@ class WorkshopStation(BaseModel):
     workers: int
     retrofit_time_min: int
 
-    @validator('capacity')
-    def capacity_must_be_positive(cls, v):
+    @field_validator('capacity')
+    @classmethod
+    def capacity_must_be_positive(cls, v: int) -> int:
         if v <= 0:
             raise ValueError('Capacity must be positive')
         return v
 
-    @validator('retrofit_time_min')
-    def retrofit_time_reasonable(cls, v):
+    @field_validator('retrofit_time_min')
+    @classmethod
+    def retrofit_time_reasonable(cls, v: int) -> int:
         if v < 10 or v > 300:
             raise ValueError('Retrofit time must be between 10-300 minutes')
         return v
@@ -325,38 +434,42 @@ class WorkshopStation(BaseModel):
 ### MVP Output Validation
 
 ```python
+# CONCEPTUAL EXAMPLE - Illustrates result validation pattern
 def validate_simulation_results(results: SimulationResults) -> bool:
     """MVP Result Validation"""
 
-    # Plausibilitätsprüfungen für MVP
+    # Plausibility checks for MVP
     if results.throughput_per_hour < 0:
-        logging.error("Negativer Durchsatz erkannt")
+        logging.error("Negative throughput detected")
         return False
 
     if results.station_utilization > 1.0:
-        logging.warning("Stationsauslastung > 100%")
+        logging.warning("Station utilization > 100%")
 
     if results.total_wagons_processed == 0:
-        logging.error("Keine Wagen verarbeitet")
+        logging.error("No wagons processed")
         return False
 
     return True
 ```
 
-## 8.9 MVP Sicherheitskonzept
+## 8.9 Security Concept
+
+Security measures for MVP desktop application focus on input validation and safe file handling.
 
 ### MVP Security Considerations
 
-| Bereich | MVP Maßnahme | Begründung |
-|---------|--------------|------------|
-| **Input Validation** | Pydantic Models | Verhindert ungültige Daten |
-| **File Access** | Relative Paths Only | Verhindert Directory Traversal |
-| **Error Messages** | Keine Systempfade | Verhindert Information Disclosure |
-| **Logging** | Keine Credentials | Verhindert Credential Leakage |
+| Area | MVP Measure | Rationale |
+|------|-------------|------------|
+| **Input Validation** | Pydantic Models | Prevents invalid data |
+| **File Access** | Relative Paths Only | Prevents directory traversal |
+| **Error Messages** | No system paths | Prevents information disclosure |
+| **Logging** | No credentials | Prevents credential leakage |
 
 ### MVP File Security
 
 ```python
+# CONCEPTUAL EXAMPLE - Illustrates path traversal prevention pattern
 import os
 from pathlib import Path
 
@@ -365,13 +478,13 @@ def safe_file_path(base_dir: str, filename: str) -> Path:
     base_path = Path(base_dir).resolve()
     file_path = (base_path / filename).resolve()
 
-    # Sicherstellen, dass Datei innerhalb des Basisverzeichnisses liegt
+    # Ensure file is within base directory
     if not str(file_path).startswith(str(base_path)):
-        raise ValueError(f"Ungültiger Dateipfad: {filename}")
+        raise ValueError(f"Invalid file path: {filename}")
 
     return file_path
 ```
 
 ---
 
-**Navigation:** [← MVP Verteilungssicht](07-deployment.md) | [MVP Architekturentscheidungen →](09-architecture-decisions.md)
+

@@ -221,22 +221,27 @@ graph TB
 
 ## 1.9 Success Criteria
 
-### Erfolgskriterien
-- ✅ **Template Creation**: Standardisierte Werkstatt-Templates erstellbar
-- ✅ **Throughput Estimation**: Plausible Durchsatz-Berechnungen
-- ✅ **Data Import**: CSV/JSON Import funktioniert fehlerfrei
-- ✅ **Capacity Analysis**: Kapazitätsengpässe werden identifiziert
+### Technical Metrics
+- **Development Time:** 4-5 weeks with 3 developers
+- **Simulation Speed:** 1 simulation hour in < 60 seconds
+- **Scalability:** Up to 1,000 wagons per simulation
+- **Portability:** Runs on Windows/Mac/Linux with uv
 
-### Technische Kriterien
-- ✅ **Performance**: 1.000 Wagen Szenario in < 30 Sekunden
-- ✅ **Stability**: Mehrere Simulationen hintereinander ohne Crash
-- ✅ **Usability**: Entwickler erstellt Szenario in < 30 Minuten
-- ✅ **Extensibility**: Neue Werkstatt-Typen einfach hinzufügbar
+### Functional Metrics
+- **Functionality:** Basic retrofitting simulation works
+- **Output:** KPIs are correctly calculated and exported
+- **Visualization:** Matplotlib charts display simulation results
+- **Extensibility:** Architecture foundation for full version established
 
-### Business Kriterien
-- ✅ **Expert Validation**: Positive Bewertung durch Fachexperten
-- ✅ **Real Usage**: Mindestens 1 echtes Planungsszenario
-- ✅ **Next Steps**: Klarer Plan für Post-MVP Entwicklung
+### Acceptance Criteria
+- ✅ **Template Creation**: Standardized workshop templates can be created
+- ✅ **Throughput Estimation**: Plausible throughput calculations
+- ✅ **Data Import**: CSV/JSON import works without errors
+- ✅ **Capacity Analysis**: Capacity bottlenecks are identified
+- ✅ **Performance**: 1,000 wagon scenario in < 30 seconds
+- ✅ **Stability**: Multiple simulations run consecutively without crashes
+- ✅ **Usability**: Developer creates scenario in < 30 minutes
+- ✅ **Expert Validation**: Positive evaluation by domain experts
 
 ---
 

@@ -30,6 +30,7 @@
 | **Prototype Foundation** | Should reuse suitable technologies, code, components, and design from existing PopUpSim prototype from 3-Länderhack 2024 | Leverage proven approaches while maintaining freedom to redesign unsuitable parts |
 | **Versioning** | Git with [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) | Commit message format and version control workflow |
 | **Documentation Format** | Markdown for all documentation | Documentation toolchain and format standards |
+| **Architecture Documentation** | Must use arc42 template | Standardized architecture documentation structure |
 | **Architecture Decision Records** | Must document significant architectural decisions using ADRs | Maintains decision history and rationale for future reference |
 | **Code Review Requirement** | All pull requests must be reviewed and approved before merging | Ensures code quality and knowledge sharing across team |
 | **Test Coverage Requirement** | Must maintain minimum 90% code coverage for all modules | Comprehensive testing requirements and quality assurance |
@@ -97,9 +98,6 @@
 | **Cross-Company Data Privacy** | Data handling must respect company confidentiality requirements | Data isolation and anonymization capabilities might become necessary|
 | **No External Dependencies** | Core functionality must work offline without internet connectivity | Self-contained operation with optional online features |
 | **Data Format Evolution** | Must support schema evolution without breaking existing configurations | Backward compatibility and migration strategy requirements |
-
-
-
 
 ---
 

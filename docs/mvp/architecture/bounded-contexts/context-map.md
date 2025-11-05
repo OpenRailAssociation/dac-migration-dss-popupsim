@@ -10,13 +10,13 @@ Die PopUpSim MVP-Version besteht aus **3 Bounded Contexts** für schnelle Protot
 graph TB
     %% MVP Bounded Contexts
     CONFIG[Configuration Context]
-    WORKSHOP[Workshop Context]
+    DOMAIN[Simulation Domain Context]
     SIMCTRL[Simulation Control Context]
 
     %% Direct Service Calls (Monolith)
-    CONFIG -->|Direct Call| WORKSHOP
+    CONFIG -->|Direct Call| DOMAIN
     CONFIG -->|Direct Call| SIMCTRL
-    WORKSHOP -->|Direct Call| SIMCTRL
+    DOMAIN -->|Direct Call| SIMCTRL
 
     %% File System Integration
     FILES[File System<br/>JSON/CSV]
@@ -31,7 +31,7 @@ graph TB
     classDef genericDomain fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
     classDef external fill:#9e9e9e,stroke:#616161,stroke-width:2px
 
-    class WORKSHOP coreDomain
+    class DOMAIN coreDomain
     class CONFIG supportingDomain
     class SIMCTRL genericDomain
     class FILES,OUTPUT external
@@ -41,17 +41,19 @@ graph TB
 
 ### **Core Domain** (Geschäftskritisch)
 
-#### **Workshop Context**
+#### **Simulation Domain Context**
 - **DDD-Klassifikation**: Core Domain
 - **Rolle**: Kern-Geschäftslogik
 - **Verantwortung**:
-  - DAK-Umrüstungsprozesse
-  - SimPy-Integration für Werkstatt-Simulation
-  - Arbeitsplanung und Ressourcenzuweisung
+  - DAK-Umrüstungsprozesse (Workshop-Operationen)
+  - Zugbewegungen und Rangieroperationen (Train Operations)
+  - Infrastruktur (Gleise, Weichen, Topologie)
+  - Ressourcenverwaltung (Lokomotiven, Personal)
+  - SimPy-Integration für gesamte Simulation
 - **Abhängigkeiten**: Configuration Context (für Setup-Daten)
 - **Integration**: Direkte Service-Aufrufe
-- **SimPy**: Workshop Processes, Worker Scheduling, Station Resources
-- **Vereinfachung**: Kombiniert Workshop + Train Operations + Resource Management aus Vollversion
+- **SimPy**: Domain Processes, Event Scheduling, Resource Management
+- **Vereinfachung**: Kombiniert Workshop + Train Operations + Resource Management + Infrastructure aus Vollversion
 
 ### **Supporting Subdomain** (Notwendig)
 
@@ -86,17 +88,17 @@ graph TB
 ## DDD Context Map Patterns (MVP)
 
 ### **1. Customer/Supplier Development** ✅
-**Angewendet zwischen**: Configuration → Workshop, Configuration → Simulation Control
+**Angewendet zwischen**: Configuration → Simulation Domain, Configuration → Simulation Control
 - **Upstream**: Configuration Context
-- **Downstream**: Workshop Context, Simulation Control Context
+- **Downstream**: Simulation Domain Context, Simulation Control Context
 - **Implementierung**: Direkte Python-Methodenaufrufe
 - **Charakteristik**: Configuration stellt Setup-Daten bereit
 
 ### **2. Conformist** ✅
-**Angewendet zwischen**: Workshop → Configuration
-- **Downstream**: Workshop Context
+**Angewendet zwischen**: Simulation Domain → Configuration
+- **Downstream**: Simulation Domain Context
 - **Upstream**: Configuration Context
-- **Charakteristik**: Workshop akzeptiert Configuration-Modelle ohne Anpassung
+- **Charakteristik**: Simulation Domain akzeptiert Configuration-Modelle ohne Anpassung
 - **Grund**: Einfachheit für MVP
 
 ### **3. Published Language** ✅
@@ -127,14 +129,15 @@ graph TB
   - File I/O Utilities
 
 #### **Developer 2: Core Simulation Team**
-**Verantwortung**: Workshop Context
+**Verantwortung**: Simulation Domain Context
 - **Team-Beziehung**: **Downstream** von Dev 1, **Upstream** von Dev 3
 - **Kern-Rolle**: SimPy-Integration und Geschäftslogik
 - **Deliverables**:
-  - Workshop Domain Models
+  - Domain Models (Wagon, Loco, Track, Workshop)
   - SimPy Processes
   - Umrüstungslogik
-  - Worker Scheduling
+  - Zugbewegungen
+  - Ressourcenverwaltung
 
 #### **Developer 3: Control & Output Team**
 **Verantwortung**: Simulation Control Context
@@ -151,24 +154,24 @@ graph TB
 | Team Pair | Beziehung | Koordinationsaufwand | Kritische Interfaces |
 |-----------|-----------|---------------------|---------------------|
 | Dev 1 ↔ Dev 2 | Upstream/Downstream | Hoch | Pydantic Models, Configuration DTOs |
-| Dev 2 ↔ Dev 3 | Upstream/Downstream | Mittel | SimPy State, Workshop Results |
+| Dev 2 ↔ Dev 3 | Upstream/Downstream | Mittel | SimPy State, Simulation Results |
 | Dev 1 ↔ Dev 3 | Upstream/Downstream | Niedrig | Configuration DTOs |
 
 ### **Entwicklungsreihenfolge**
 
 #### **Woche 1-2: Foundation (Dev 1 führt)**
 - **Dev 1**: Configuration Context (JSON/CSV Import, Validation)
-- **Dev 2**: Workshop Domain Models, SimPy Setup
+- **Dev 2**: Simulation Domain Models, SimPy Setup
 - **Dev 3**: Simulation Control Framework, Output-Design
 
 #### **Woche 2-3: Core Implementation (Dev 2 führt)**
 - **Dev 1**: Configuration finalisieren, Test-Daten
-- **Dev 2**: Workshop Context, SimPy Integration
+- **Dev 2**: Simulation Domain Context, SimPy Integration
 - **Dev 3**: KPI-Berechnung, Matplotlib Setup
 
 #### **Woche 3-4: Integration (Dev 3 führt)**
 - **Dev 1**: Validierung erweitern
-- **Dev 2**: Workshop-Logik finalisieren
+- **Dev 2**: Domain-Logik finalisieren
 - **Dev 3**: Orchestrierung, Output-Generierung
 
 #### **Woche 4-5: Testing & Polish (Alle parallel)**
@@ -178,23 +181,23 @@ graph TB
 
 ### **Direkte Service-Aufrufe**
 ```python
-# Configuration → Workshop
-class WorkshopService:
+# Configuration → Simulation Domain
+class SimulationDomainService:
     def __init__(self, config_service: ConfigurationService):
         self._config = config_service
 
-    def setup_workshop(self):
+    def setup_domain(self):
         scenario = self._config.load_scenario()  # Direkter Aufruf
-        return self._create_workshop(scenario)
+        return self._create_domain(scenario)
 
-# Workshop → Simulation Control
+# Simulation Domain → Simulation Control
 class SimulationService:
-    def __init__(self, workshop_service: WorkshopService):
-        self._workshop = workshop_service
+    def __init__(self, domain_service: SimulationDomainService):
+        self._domain = domain_service
 
     def run_simulation(self):
-        workshop = self._workshop.setup_workshop()  # Direkter Aufruf
-        return self._execute_simulation(workshop)
+        domain = self._domain.setup_domain()  # Direkter Aufruf
+        return self._execute_simulation(domain)
 ```
 
 ### **Pydantic Models als Shared Language**
@@ -224,8 +227,8 @@ class SimulationResults(BaseModel):
 - **Innerhalb**: JSON/CSV Import, Datenvalidierung, Szenario-Setup
 - **Außerhalb**: Geschäftslogik, Simulation, Visualisierung
 
-#### **Workshop Context**
-- **Innerhalb**: DAK-Umrüstung, SimPy Processes, Arbeitsplanung
+#### **Simulation Domain Context**
+- **Innerhalb**: DAK-Umrüstung, Zugbewegungen, Infrastruktur, Ressourcen, SimPy Processes
 - **Außerhalb**: Datenimport, Orchestrierung, Output-Generierung
 
 #### **Simulation Control Context**
@@ -244,11 +247,12 @@ class SimulationResults(BaseModel):
 | Vollversion (7 Contexts) | MVP (3 Contexts) | Begründung |
 |--------------------------|------------------|------------|
 | Infrastructure Context | → Configuration Context | Einfache Topologie in Config-Dateien |
-| Resource Management Context | → Workshop Context | Ressourcen direkt in Workshop verwaltet |
-| Train Operations Context | → Workshop Context | Vereinfachte Zugabfertigung |
+| Resource Management Context | → Simulation Domain Context | Ressourcen direkt in Domain verwaltet |
+| Train Operations Context | → Simulation Domain Context | Vereinfachte Zugabfertigung |
+| Workshop Context | → Simulation Domain Context | Workshop-Operationen |
 | Analytics Context | → Simulation Control Context | KPIs direkt berechnen |
 | Configuration Context | ✅ Configuration Context | Beibehalten |
-| Workshop Context | ✅ Workshop Context | Beibehalten (Core Domain) |
+| Simulation Domain Context | ✅ Simulation Domain Context | Neu (kombiniert 4 Contexts) |
 | Simulation Control Context | ✅ Simulation Control Context | Beibehalten |
 
 ## Migration zur Vollversion
@@ -259,7 +263,7 @@ class SimulationResults(BaseModel):
 graph LR
     subgraph "MVP (3 Contexts)"
         MVPC[Configuration]
-        MVPW[Workshop]
+        MVPD[Simulation Domain]
         MVPS[Simulation Control]
     end
 
@@ -275,16 +279,16 @@ graph LR
 
     MVPC --> FC
     MVPC --> FI
-    MVPW --> FR
-    MVPW --> FT
-    MVPW --> FW
+    MVPD --> FR
+    MVPD --> FT
+    MVPD --> FW
     MVPS --> FS
     MVPS --> FA
 ```
 
 ### **Migration Path**
 1. **Phase 1**: Configuration Context aufteilen → Configuration + Infrastructure
-2. **Phase 2**: Workshop Context aufteilen → Workshop + Train Operations + Resource Management
+2. **Phase 2**: Simulation Domain Context aufteilen → Workshop + Train Operations + Resource Management
 3. **Phase 3**: Simulation Control aufteilen → Simulation Control + Analytics
 4. **Phase 4**: Event-driven Architecture einführen
 5. **Phase 5**: Hexagonal Architecture implementieren
@@ -314,7 +318,7 @@ graph LR
 1. ✅ **MVP Context Map erstellt**
 2. **Python-Projekt** Setup mit 3 Modulen
 3. **Configuration Context** implementieren (Dev 1)
-4. **Workshop Context** implementieren (Dev 2)
+4. **Simulation Domain Context** implementieren (Dev 2)
 5. **Simulation Control Context** implementieren (Dev 3)
 6. **Integration Testing** (Alle)
 7. **Dokumentation** finalisieren

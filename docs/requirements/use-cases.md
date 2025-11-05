@@ -1,67 +1,67 @@
 # User Stories - PopUpSim
 
-Die hier aufgelisteten User Stories basieren auf [1].
+The user stories listed here are based on [1].
 
-## Strategische Phase
+## Strategic Phase
 
-### US-001: Standardisierte Pop-Up-Werkstätten entwickeln
-**Als** strategische:r Migrationsplaner:in
-**möchte ich** standardisierte Entwürfe für Pop-Up Werkstätten entwickeln,
-**um** diese dem Projekt zur Verfügung zu stellen.
+### <a id="us-001"></a>US-001: Develop Standardized Pop-Up Workshops
+**As a** Strategic Migration Planner
+**I want to** develop standardized designs for Pop-Up workshops,
+**so that** I can provide them to the project.
 
-### US-002: Durchsatz-Abschätzung für Werkstatt-Layouts
-**Als** strategische:r Migrationsplaner:in
-**möchte ich** abschätzen, welcher Durchsatz von Wagen in einer Pop-Up-Werkstatt mit bestimmten Layout möglich ist,
-**um** zu sehen, wie viele Werkstätten benötigt werden.
+### <a id="us-002"></a>US-002: Estimate Throughput for Workshop Layouts
+**As a** Strategic Migration Planner
+**I want to** estimate what throughput of wagons is possible in a Pop-Up workshop with a specific layout,
+**so that** I can see how many workshops are needed.
 
-## Detailplanungsphase
+## Detail Planning Phase
 
-### US-003: Infrastrukturdaten importieren
-**Als** Planer:in in einem Unternehmen
-**möchte ich** einfach Infrastrukturdaten importieren und den Gleisen komfortabel Funktionen zuweisen,
-**um** schnell weiter arbeiten zu können.
+### <a id="us-003"></a>US-003: Import Infrastructure Data
+**As a** Company Planner
+**I want to** easily import infrastructure data and conveniently assign functions to tracks,
+**so that** I can continue working quickly.
 
-### US-004: Kapazitätsabschätzung für geplante Werkstatt
-**Als** Planer:in im Unternehmen
-**möchte ich** eine Abschätzung, wie viele Wagen die von mir geplante Werkstatt umrüsten kann,
-**um** zu sehen, ob die Kapazität ausreichend ist oder weiter erhöht werden muss.
+### <a id="us-004"></a>US-004: Assess Capacity for Planned Workshop
+**As a** Company Planner
+**I want to** get an estimate of how many wagons my planned workshop can retrofit,
+**so that** I can see if the capacity is sufficient or needs to be increased.
 
-### US-005: Übersichtliche Ergebnisdarstellung
-**Als** Planer:in im Unternehmen
-**möchte ich** den Output grafisch und tabellarisch übersichtlich dargestellt bekommen,
-**damit** ich die Ergebnisse schnell verstehe.
+### US-005: Clear Results Presentation
+**As a** Company Planner
+**I want to** get the output presented clearly in graphical and tabular form,
+**so that** I can quickly understand the results.
 
-### US-006: Europäische Planungsvalidierung
-**Als** Deployment Manager:in
-**möchte ich** sehen, ob die Planungen der einzelnen Unternehmen zusammenpassen,
-**um** zu erkennen, ob auf europäischer Ebene das strategische Ziel erreichbar ist.
+### US-006: European Planning Validation
+**As a** Deployment Manager
+**I want to** see if the plans of individual companies fit together,
+**so that** I can determine if the strategic goal is achievable at the European level.
 
-## Umsetzungsphase
+## Implementation Phase
 
-### US-007: Dispositionsentscheidungen unterstützen
-**Als** Disponent:in
-**möchte ich** wissen, welche Wagen als nächstes der Werkstatt zugeführt werden sollen,
-**damit** ich Dispositionsentscheidungen treffen kann.
+### US-007: Support Dispatch Decisions
+**As a** Dispatcher
+**I want to** know which wagons should be fed to the workshop next,
+**so that** I can make dispatch decisions.
 
-### US-008: Fortschrittsüberwachung
-**Als** Deployment Manager:in
-**möchte ich** den Fortschritt überwachen,
-**um** ggf. Gegenmaßnahmen einleiten zu können.
+### US-008: Progress Monitoring
+**As a** Deployment Manager
+**I want to** monitor progress,
+**so that** I can initiate countermeasures if necessary.
 
-## Fachlicher Kontext
+## Domain Context
 
-### Big-Bang Szenario
-Die User Stories beziehen sich auf die schlagartige Umrüstung von ca. 500.000 Güterwagen von Schraubkupplung auf Digitale Automatische Kupplung (DAK) in einem kurzen Zeitraum (ca. 3 Wochen).
+### Big Bang Scenario
+The user stories refer to the rapid retrofit of approximately 500,000 freight wagons from screw coupling to Digital Automatic Coupling (DAC) in a short period (approximately 3 weeks).
 
-### Pop-Up-Werkstätten
-Vorübergehend eingerichtete Werkstätten, in denen vorgerüstete Wagen in großer Anzahl final von Schraubkupplung auf DAK umgerüstet werden.
+### Pop-Up Workshops
+Temporarily established workshops where pre-equipped wagons are finally retrofitted from screw coupling to DAC in large numbers.
 
-### Simulationsumfang
-- **Mikroskopische Simulation** einzelner Wagen und Ressourcen
-- **Fokus auf Werkstattbetrieb**, nicht auf allgemeine Eisenbahnbetriebssimulation
+### Simulation Scope
+- **Microscopic simulation** of individual wagons and resources
+- **Focus on workshop operations**, not on general railway operations simulation
 
 
-## Referenzen
+## References
 
-[1] Schäfer, Frederik (2025). *Konzept PopUpSim: Entwurf*. DB Cargo AG.
+[1] Schäfer, Frederik (2025). *Concept PopUpSim: Draft*. DB Cargo AG.
     [PDF](250321_KonzeptPopUpSim_Entwurf.pdf) | [Markdown](250321_KonzeptPopUpSim_Entwurf.md)

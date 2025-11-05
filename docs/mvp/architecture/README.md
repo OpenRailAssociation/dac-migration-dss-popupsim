@@ -1,107 +1,42 @@
-# PopUpSim MVP - arc42 Dokumentation
+# PopUpSim MVP - arc42 Architecture Documentation
 
-## Übersicht
+## Overview
 
-Diese Dokumentation beschreibt die **MVP (Minimum Viable Product) Version** von PopUpSim - eine vereinfachte, dateibasierte Implementierung für schnelle Prototypenerstellung.
+This documentation describes the **MVP (Minimum Viable Product) architecture** of PopUpSim using the arc42 template.
 
-## MVP vs. Vollversion
+**MVP Scope:** Desktop application with file-based configuration, SimPy simulation engine, and Matplotlib visualization.
 
-| Aspekt | MVP | Vollversion |
-|--------|-----|-------------|
-| **Entwicklungszeit** | 4-5 Wochen | 3-6 Monate |
-| **Team** | 3 Backend Entwickler | Full-Stack Team |
-| **Architektur** | 3 Bounded Contexts | 7 Bounded Contexts |
-| **UI** | Matplotlib Charts | Vue.js Web-App |
-| **Datenhaltung** | CSV/JSON Dateien | Database + Event Store |
-| **Integration** | Direkte Service-Aufrufe | Event-driven Architecture |
+## Architecture Documentation
 
-## MVP Dokumentation
+1. **[Introduction and Goals](01-introduction-goals.md)** - Stakeholders, quality goals, requirements overview
+2. **[Constraints](02-constraints.md)** - Technical and organizational constraints
+3. **[Context and Scope](03-context.md)** - System boundaries and external interfaces
+4. **[Solution Strategy](04-solution-strategy.md)** - Technology decisions and architecture approach
+5. **[Building Blocks](05-building-blocks.md)** - System decomposition (3 bounded contexts)
+6. **[Runtime View](06-runtime.md)** - Key scenarios and use case flows
+7. **[Deployment View](07-deployment.md)** - Infrastructure and deployment
+8. **[Cross-Cutting Concepts](08-concepts.md)** - Domain model, error handling, logging
+9. **[Architecture Decisions](09-architecture-decisions.md)** - ADRs for key technology choices
+10. **[Quality Requirements](10-quality-requirements.md)** - Quality scenarios and metrics
+11. **[Risks and Technical Debt](11-risks-technical-debt.md)** - Known risks and debt
+12. **[Glossary](12-glossary.md)** - Domain and technical terms
 
-### Kern-Kapitel
-1. **[Einführung und Ziele](01-introduction-goals.md)** - MVP Scope und Vereinfachungen
-2. **[Randbedingungen](02-constraints.md)** - MVP Technische Beschränkungen
-3. **[Kontextabgrenzung](03-context.md)** - MVP System-Grenzen
-4. **[Lösungsstrategie](04-solution-strategy.md)** - MVP Architektur-Entscheidungen
-5. **[Bausteinsicht](05-building-blocks.md)** - MVP 3-Context Architektur
+## Key Architecture Characteristics
 
-### Ergänzende Kapitel
-6. **[Laufzeitsicht](06-runtime.md)** - MVP Simulation Flow
-7. **[Verteilungssicht](07-deployment.md)** - MVP Desktop Deployment
-8. **[Querschnittliche Konzepte](08-concepts.md)** - MVP Design Patterns
-9. **[Architekturentscheidungen](09-architecture-decisions.md)** - MVP ADRs
-10. **[Qualitätsanforderungen](10-quality-requirements.md)** - MVP Qualitätsziele
-11. **[Risiken und technische Schulden](11-risks-technical-debt.md)** - MVP Risiken
-12. **[Glossar](12-glossary.md)** - MVP Begriffe
+- **3 Bounded Contexts:** Configuration, Simulation Domain, Simulation Control
+- **Technology Stack:** Python 3.13+, SimPy, Pydantic, Matplotlib
+- **Deployment:** Desktop application (local execution)
+- **Data Storage:** File-based (JSON/CSV)
+- **Integration:** Direct method calls (synchronous)
 
-## MVP Architektur-Überblick
+## Quick Links
 
-```mermaid
-graph TB
-    subgraph "MVP PopUpSim (3 Contexts)"
-        CC[Configuration Context<br/>JSON/CSV Import]
-        WS[Workshop Context<br/>DAK Simulation]
-        SC[Simulation Control<br/>SimPy + Matplotlib]
-    end
-
-    subgraph "MVP Output"
-        CSV[CSV Export<br/>KPI Data]
-        PNG[Matplotlib Charts<br/>Visualizations]
-    end
-
-    CC --> WS
-    WS --> SC
-    SC --> CSV
-    SC --> PNG
-
-    classDef mvp fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#fff
-    classDef output fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
-
-    class CC,WS,SC mvp
-    class CSV,PNG output
-```
-
-## MVP Entwicklungsstrategie
-
-### Phase 1: Foundation
-- **Configuration Context**: JSON/CSV Import und Validierung
-- **Grundarchitektur**: Domain Models und Services
-- **File I/O**: Dateibasierte Repositories
-
-### Phase 2: Core Logic
-- **Workshop Context**: DAK-Umrüstungslogik
-- **SimPy Integration**: Discrete Event Simulation
-- **Domain Services**: Geschäftslogik-Implementierung
-
-### Phase 3: Integration
-- **Simulation Control**: Orchestrierung aller Contexts
-- **Event Flow**: Simulation von Ankunft bis Abfahrt
-- **Integration Testing**: End-to-End Tests
-
-### Phase 4: Analytics
-- **KPI Calculation**: Performance-Metriken
-- **Matplotlib Output**: Charts und Visualisierungen
-- **CSV Export**: Strukturierte Datenausgabe
-
-## Migration zur Vollversion
-
-```mermaid
-graph LR
-    A[MVP<br/>3 Contexts] --> B[Vollversion<br/>7 Contexts]
-    A1[Direct Calls] --> B1[Event-driven]
-    A2[Files] --> B2[Database]
-    A3[Matplotlib] --> B3[Web-UI]
-
-    classDef mvp fill:#4caf50,stroke:#2e7d32
-    classDef full fill:#2196f3,stroke:#1565c0
-
-    class A,A1,A2,A3 mvp
-    class B,B1,B2,B3 full
-```
-
-## Referenzen
-
-- **[Vollversion Dokumentation](../../architecture/01-introduction-and-goals.md)** - Komplette arc42 Dokumentation
+- **[Quality Goals](01-introduction-goals.md#12-quality-goals)** - Top 5 quality priorities
+- **[Use Cases](01-introduction-goals.md#13-requirements-overview)** - 4 MVP use cases
+- **[Technology Decisions](09-architecture-decisions.md)** - 7 key ADRs
+- **[Building Blocks](05-building-blocks.md)** - System structure
+- **[Glossary](12-glossary.md)** - 95+ terms
 
 ---
 
-**Status:** 🚧 In Entwicklung | **Version:** MVP 1.0 | **Team:** 3 Backend Entwickler
+**arc42 Version:** 8.1 | **Documentation Status:** ✅ Complete

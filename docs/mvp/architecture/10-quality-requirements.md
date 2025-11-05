@@ -1,41 +1,45 @@
-# 10. Qualitätsanforderungen (MVP)
+# 10. Quality Requirements (MVP)
 
-## 10.1 MVP Qualitätsziele
+## 10.1 MVP Quality Goals
 
-### MVP Qualitäts-Prioritäten
+Quality goals are defined in [Section 1.2](01-introduction-goals.md#12-quality-goals). This section details how they are measured and implemented.
 
-| Priorität | Qualitätsziel | MVP Szenario | Messbarkeit |
-|-----------|---------------|--------------|-------------|
-| **1** | **Schnelle Entwicklung** | MVP in 4-5 Wochen entwickelbar | Funktionsfähiger Prototyp |
-| **2** | **Determinismus** | Gleiche Eingaben → identische Ergebnisse | Reproduzierbare Simulationsläufe |
-| **3** | **Einfachheit** | Keine komplexe Installation | Single Python Script |
-| **4** | **Testbarkeit** | Business Logic isoliert testbar | Unit Tests möglich |
-| **5** | **Erweiterbarkeit** | Migration zur Vollversion | Saubere Architektur-Basis |
+### MVP Quality Priorities
 
-## 10.2 MVP Performance-Anforderungen
+| Priority | Quality Goal | MVP Scenario | Measurability |
+|----------|--------------|--------------|---------------|
+| **1** | **Rapid Development** | MVP deliverable in 5 weeks | Functional prototype |
+| **2** | **Simulation Accuracy & Reliability** | Same inputs → identical results | Reproducible simulation runs |
+| **3** | **Usability & Accessibility** | No complex installation | File-based configuration |
+| **4** | **Simple Installation** | One-command setup | `uv sync` |
+| **5** | **Testability** | Business logic isolated | Unit tests possible |
 
-### MVP Performance-Ziele
+## 10.2 MVP Performance Requirements
+
+> **Note:** Performance targets will be measured during MVP implementation. See [Section 7.8](07-deployment.md#78-performance-monitoring) for monitoring approach.
+
+### MVP Performance Goals
 
 ```mermaid
 graph TB
-    subgraph "MVP Performance Ziele"
-        subgraph "Ausführungszeit"
-            Config[Konfiguration laden<br/>< 1 Sekunde]
-            Setup[Werkstatt konfigurieren<br/>< 1 Sekunde]
-            Sim[Simulationsausführung<br/>< 60 Sekunden für 1000 Wagen]
-            Output[Ausgabe generieren<br/>< 5 Sekunden]
+    subgraph "MVP Performance Goals"
+        subgraph "Execution Time"
+            Config[Load configuration<br/>To be measured]
+            Setup[Configure workshop<br/>To be measured]
+            Sim[Simulation execution<br/>To be measured]
+            Output[Generate output<br/>To be measured]
         end
 
-        subgraph "Ressourcennutzung"
-            Memory[Speicherverbrauch<br/>< 100 MB]
-            CPU[CPU Auslastung<br/>< 80% während Simulation]
-            Disk[Speicherplatz<br/>< 50 MB gesamt]
+        subgraph "Resource Usage"
+            Memory[Memory usage<br/>To be measured]
+            CPU[CPU utilization<br/>Single-threaded]
+            Disk[Disk space<br/>~100 MB + results]
         end
 
-        subgraph "Skalierbarkeit"
-            Small[100 Wagen<br/>< 5 Sekunden]
-            Medium[1000 Wagen<br/>< 30 Sekunden]
-            Large[5000 Wagen<br/>< 2 Minuten]
+        subgraph "Scalability"
+            Small[100 wagons<br/>To be measured]
+            Medium[1000 wagons<br/>To be measured]
+            Large[5000 wagons<br/>To be measured]
         end
     end
 
@@ -48,39 +52,39 @@ graph TB
     class Small,Medium,Large scale
 ```
 
-### MVP Performance-Messungen
+### MVP Performance Measurements
 
-| Metrik | MVP Ziel | Messmethode | Akzeptanzkriterium |
-|--------|----------|-------------|-------------------|
-| **Startzeit** | < 2 Sekunden | `time python main.py --help` | Unter 2s auf Standard-Laptop |
-| **Konfiguration laden** | < 1 Sekunde | Logging-Timestamps | JSON/CSV Parsing |
-| **Simulationsgeschwindigkeit** | 1000 Wagen < 30s | SimPy-Profiling | Discrete Event Processing |
-| **Arbeitsspeicherverbrauch** | < 100 MB | `psutil` Monitoring | Maximaler Speicherverbrauch |
-| **Ausgabegenerierung** | < 5 Sekunden | Dateierstellungszeit | CSV + PNG Generierung |
+| Metric | Measurement Method | Acceptance Criterion |
+|--------|-------------------|---------------------|
+| **Startup time** | `time python main.py --help` | To be measured on standard laptop |
+| **Configuration loading** | Logging timestamps | JSON/CSV parsing |
+| **Simulation speed** | SimPy profiling | Discrete event processing |
+| **Memory usage** | `psutil` monitoring | To be measured |
+| **Output generation** | File creation time | CSV + PNG generation |
 
-## 10.3 MVP Usability-Anforderungen
+## 10.3 MVP Usability Requirements
 
-### MVP Benutzerfreundlichkeit
+### MVP Usability Goals
 
 ```mermaid
 graph TB
-    subgraph "MVP Usability Ziele"
-        subgraph "Benutzerfreundlichkeit"
-            Install[Einfache Installation<br/>uv sync]
-            Config[Einfache Konfiguration<br/>JSON/CSV Dateien]
-            Run[Einfache Ausführung<br/>uv run python main.py]
+    subgraph "MVP Usability Goals"
+        subgraph "Ease of Use"
+            Install[Simple installation<br/>uv sync]
+            Config[Simple configuration<br/>JSON/CSV files]
+            Run[Simple execution<br/>uv run python main.py]
         end
 
-        subgraph "Fehlerbehandlung"
-            Clear[Klare Fehlermeldungen<br/>Umsetzbare Rückmeldungen]
-            Recovery[Graceful Degradation<br/>Teilergebnisse bei Fehler]
-            Help[Eingebaute Hilfe<br/>--help Parameter]
+        subgraph "Error Handling"
+            Clear[Clear error messages<br/>Actionable feedback]
+            Recovery[Graceful degradation<br/>Partial results on error]
+            Help[Built-in help<br/>--help parameter]
         end
 
-        subgraph "Ausgabequalität"
-            Readable[Lesbare Ausgabe<br/>CSV Format]
-            Visual[Visualisierung<br/>Matplotlib PNG]
-            Logs[Detaillierte Logs<br/>Debugging-Informationen]
+        subgraph "Output Quality"
+            Readable[Readable output<br/>CSV format]
+            Visual[Visualization<br/>Matplotlib PNG]
+            Logs[Detailed logs<br/>Debugging information]
         end
     end
 
@@ -93,39 +97,39 @@ graph TB
     class Readable,Visual,Logs output
 ```
 
-### MVP Usability-Kriterien
+### MVP Usability Criteria
 
-| Aspekt | MVP Anforderung | Messkriterium |
-|--------|-----------------|---------------|
-| **Installation** | < 5 Minuten Einrichtung | Dokumentierte Schritte |
-| **Konfiguration** | Beispieldateien verfügbar | Template-Dateien |
-| **Ausführung** | Ein Kommando startet Simulation | `uv run python main.py` |
-| **Fehlermeldungen** | Verständliche Beschreibungen | Keine technischen Details |
-| **Hilfe** | Integrierte Dokumentation | `--help` Parameter |
+| Aspect | MVP Requirement | Measurement Criterion |
+|--------|----------------|----------------------|
+| **Installation** | < 5 minutes setup | Documented steps |
+| **Configuration** | Example files available | Template files in `Data/examples/` |
+| **Execution** | One command starts simulation | `uv run python main.py` |
+| **Error messages** | Understandable descriptions | Pydantic comprehensive error summary |
+| **Help** | Integrated documentation | `--help` parameter |
 
-## 10.4 MVP Reliability-Anforderungen
+## 10.4 MVP Reliability Requirements
 
-### MVP Zuverlässigkeit
+### MVP Reliability Goals
 
 ```mermaid
 graph TB
     subgraph "MVP Reliability"
-        subgraph "Fehlertoleranz"
-            InputErrors[Eingabevalidierung<br/>Fehlerhafte Daten abfangen]
-            RuntimeErrors[Laufzeitstabilität<br/>Keine Abstürze während Simulation]
-            OutputErrors[Ausgaberobustheit<br/>Teilergebnisse bei Fehler]
+        subgraph "Error Tolerance"
+            InputErrors[Input validation<br/>Catch invalid data]
+            RuntimeErrors[Runtime stability<br/>No crashes during simulation]
+            OutputErrors[Output robustness<br/>Partial results on error]
         end
 
-        subgraph "Determinismus"
-            Reproducible[Reproduzierbare Ergebnisse<br/>Gleiche Eingabe → gleiche Ausgabe]
-            Seeded[Seeded Random<br/>Kontrollierte Zufälligkeit]
-            Consistent[Konsistentes Verhalten<br/>Plattformübergreifend]
+        subgraph "Determinism"
+            Reproducible[Reproducible results<br/>Same input → same output]
+            Seeded[Seeded random<br/>Controlled randomness]
+            Consistent[Consistent behavior<br/>Cross-platform]
         end
 
-        subgraph "Wiederherstellung"
-            Logging[Umfassendes Logging<br/>Debug-Informationen]
-            Cleanup[Ressourcen-Bereinigung<br/>Keine Speicherlecks]
-            Restart[Einfacher Neustart<br/>Keine persistenten Zustandsprobleme]
+        subgraph "Recovery"
+            Logging[Comprehensive logging<br/>Debug information]
+            Cleanup[Resource cleanup<br/>No memory leaks]
+            Restart[Easy restart<br/>No persistent state issues]
         end
     end
 
@@ -138,60 +142,59 @@ graph TB
     class Logging,Cleanup,Restart recovery
 ```
 
-### MVP Reliability-Metriken
+### MVP Reliability Metrics
 
-| Kategorie | MVP Ziel | Messmethode |
-|-----------|----------|-------------|
-| **Absturzrate** | < 1% bei gültigen Eingaben | Automatisierte Tests |
-| **Determinismus** | 100% identische Ergebnisse | Wiederholte Ausführung |
-| **Fehlerbehandlung** | Graceful Handling aller Eingabefehler | Negative Tests |
-| **Speicherlecks** | Keine Speicherlecks | Memory Profiling |
+| Category | MVP Goal | Measurement Method |
+|----------|----------|-------------------|
+| **Crash rate** | < 1% with valid inputs | Automated tests |
+| **Determinism** | 100% identical results | Repeated execution with same seed |
+| **Error handling** | Graceful handling of all input errors | Negative tests |
+| **Memory leaks** | No memory leaks | Memory profiling |
 
-## 10.5 MVP Maintainability-Anforderungen
+## 10.5 MVP Maintainability Requirements
 
-### MVP Wartbarkeit
+### MVP Code Quality Standards
 
 ```python
 # MVP Code Quality Standards
 class CodeQualityMetrics:
-    MAX_FUNCTION_LENGTH = 50      # Zeilen pro Funktion
-    MAX_CLASS_LENGTH = 200        # Zeilen pro Klasse
-    MAX_COMPLEXITY = 10           # Zyklomatische Komplexität
-    MIN_TEST_COVERAGE = 70        # Prozent
-    MAX_DEPENDENCIES = 5          # Pro Modul
+    MAX_FUNCTION_LENGTH = 50      # Lines per function
+    MAX_CLASS_LENGTH = 200        # Lines per class
+    MAX_COMPLEXITY = 10           # Cyclomatic complexity
+    MIN_TEST_COVERAGE = 70        # Percent
+    MAX_DEPENDENCIES = 5          # Per module
 ```
 
-### MVP Wartbarkeits-Ziele
+### MVP Maintainability Metrics
 
-| Aspekt | MVP Ziel | Messmethode |
-|--------|----------|-------------|
-| **Code Coverage** | > 70% für Business Logic | pytest-cov |
-| **Dokumentation** | Alle öffentlichen APIs dokumentiert | Docstring-Coverage |
-| **Komplexität** | Zyklomatische Komplexität < 10 | radon |
-| **Abhängigkeiten** | < 10 externe Pakete | pyproject.toml |
-| **Refactoring** | Einfache Erweiterung möglich | Architektur-Review |
+| Aspect | MVP Goal | Measurement Method |
+|--------|----------|-------------------|
+| **Code coverage** | > 70% for business logic | pytest-cov |
+| **Documentation** | All public APIs documented | Docstring coverage |
+| **Complexity** | Cyclomatic complexity < 10 | radon |
+| **Dependencies** | < 10 external packages | pyproject.toml |
+| **Refactoring** | Easy extension possible | Architecture review |
 
-## 10.6 MVP Portability-Anforderungen
+## 10.6 MVP Portability Requirements
 
-### MVP Plattform-Unterstützung
+### MVP Platform Support
 
 ```mermaid
 graph TB
     subgraph "MVP Platform Support"
-        subgraph "Betriebssysteme"
-            Windows[Windows 10+<br/>Primäres Ziel]
-            MacOS[macOS 10.15+<br/>Sekundäres Ziel]
-            Linux[Ubuntu 20.04+<br/>Sekundäres Ziel]
+        subgraph "Operating Systems"
+            Windows[Windows 10+<br/>Primary target]
+            MacOS[macOS 10.15+<br/>Primary target]
+            Linux[Ubuntu 20.04+<br/>Primary target]
         end
 
-        subgraph "Python-Versionen"
-            Python311[Python 3.11<br/>Minimum]
-            Python312[Python 3.12<br/>Empfohlen]
+        subgraph "Python Versions"
+            Python313[Python 3.13+<br/>Required]
         end
 
         subgraph "Hardware"
-            Laptop[Standard Laptop<br/>4GB RAM, 2 Cores]
-            Desktop[Desktop PC<br/>8GB RAM, 4 Cores]
+            Laptop[Standard laptop<br/>To be measured]
+            Desktop[Desktop PC<br/>To be measured]
         end
     end
 
@@ -199,40 +202,40 @@ graph TB
     classDef secondary fill:#ff9800,stroke:#e65100
     classDef hardware fill:#2196f3,stroke:#1565c0
 
-    class Windows,Python312,Desktop primary
-    class MacOS,Linux,Python311,Laptop secondary
+    class Windows,MacOS,Linux,Python313 primary
+    class Laptop,Desktop hardware
 ```
 
-### MVP Portability-Tests
+### MVP Portability Tests
 
-| Plattform | Teststatus | Kritische Features |
+| Platform | Test Status | Critical Features |
 |----------|-------------|-------------------|
-| **Windows 10** | ✅ Primär | Dateipfade, CSV-Encoding |
-| **macOS** | ✅ Primär | Pfadtrenner, matplotlib |
-| **Ubuntu 20.04** | ✅ Primär | Abhängigkeiten, Dateiberechtigungen |
+| **Windows 10+** | ✅ Primary | File paths, CSV encoding |
+| **macOS 10.15+** | ✅ Primary | Path separators, matplotlib |
+| **Ubuntu 20.04+** | ✅ Primary | Dependencies, file permissions |
 
-## 10.7 MVP Security-Anforderungen
+## 10.7 MVP Security Requirements
 
-### MVP Sicherheits-Ziele
+### MVP Security Goals
 
 ```mermaid
 graph TB
     subgraph "MVP Security"
-        subgraph "Eingabesicherheit"
-            Validation[Eingabevalidierung<br/>Pydantic Models]
-            Sanitization[Pfadbereinigung<br/>Kein Directory Traversal]
-            Limits[Ressourcenlimits<br/>Dateigröße, Speicher]
+        subgraph "Input Security"
+            Validation[Input validation<br/>Pydantic models]
+            Sanitization[Path sanitization<br/>No directory traversal]
+            Limits[Resource limits<br/>File size, memory]
         end
 
-        subgraph "Datensicherheit"
-            NoCredentials[Keine Credentials<br/>Keine sensiblen Daten gespeichert]
-            LocalOnly[Lokale Verarbeitung<br/>Keine Netzwerkkommunikation]
-            TempFiles[Sichere Temp-Dateien<br/>Ordnungsgemäße Bereinigung]
+        subgraph "Data Security"
+            NoCredentials[No credentials<br/>No sensitive data stored]
+            LocalOnly[Local processing<br/>No network communication]
+            TempFiles[Safe temp files<br/>Proper cleanup]
         end
 
-        subgraph "Fehlersicherheit"
-            NoLeakage[Kein Information Leakage<br/>Sichere Fehlermeldungen]
-            Logging[Sicheres Logging<br/>Keine sensiblen Daten in Logs]
+        subgraph "Error Security"
+            NoLeakage[No information leakage<br/>Safe error messages]
+            Logging[Safe logging<br/>No sensitive data in logs]
         end
     end
 
@@ -245,39 +248,39 @@ graph TB
     class NoLeakage,Logging error
 ```
 
-### MVP Security-Maßnahmen
+### MVP Security Measures
 
-| Bereich | MVP Maßnahme | Implementierung |
-|---------|--------------|-----------------|
-| **Eingabevalidierung** | Pydantic Models | Automatische Typ-Validierung |
-| **Dateizugriff** | Nur relative Pfade | Pfadbereinigung |
-| **Fehlerbehandlung** | Sichere Fehlermeldungen | Keine Systempfade in Fehlern |
-| **Logging** | Keine sensiblen Daten | Gefiltertes Logging |
-| **Abhängigkeiten** | Nur bekannte Pakete | pyproject.toml mit Versionen |
+| Area | MVP Measure | Implementation |
+|------|-------------|----------------|
+| **Input validation** | Pydantic models | Automatic type validation |
+| **File access** | Relative paths only | Path sanitization |
+| **Error handling** | Safe error messages | No system paths in errors |
+| **Logging** | No sensitive data | Filtered logging |
+| **Dependencies** | Known packages only | pyproject.toml with versions |
 
-## 10.8 MVP Testability-Anforderungen
+## 10.8 MVP Testability Requirements
 
-### MVP Test-Strategie
+### MVP Test Strategy
 
 ```mermaid
 graph TB
     subgraph "MVP Testing Strategy"
         subgraph "Unit Tests"
             Models[Domain Models<br/>Business Logic]
-            Services[Service-Klassen<br/>Isoliertes Testen]
-            Utils[Hilfsfunktionen<br/>Pure Functions]
+            Services[Service classes<br/>Isolated testing]
+            Utils[Utility functions<br/>Pure functions]
         end
 
-        subgraph "Integrationstests"
-            FileIO[File I/O<br/>JSON/CSV-Verarbeitung]
-            SimPy[SimPy Integration<br/>Simulation Engine]
-            EndToEnd[End-to-End<br/>Vollständige Szenarien]
+        subgraph "Integration Tests"
+            FileIO[File I/O<br/>JSON/CSV processing]
+            SimPy[SimPy integration<br/>Simulation engine]
+            EndToEnd[End-to-end<br/>Complete scenarios]
         end
 
-        subgraph "Manuelle Tests"
-            Scenarios[Testszenarien<br/>Reale Konfigurationen]
-            Performance[Performance-Tests<br/>Große Datensätze]
-            Platforms[Plattformtests<br/>Plattformübergreifend]
+        subgraph "Manual Tests"
+            Scenarios[Test scenarios<br/>Real configurations]
+            Performance[Performance tests<br/>Large datasets]
+            Platforms[Platform tests<br/>Cross-platform]
         end
     end
 
@@ -290,16 +293,15 @@ graph TB
     class Scenarios,Performance,Platforms manual
 ```
 
-### MVP Test-Metriken
+### MVP Test Metrics
 
-| Test-Typ | MVP Ziel | Automatisierung |
-|----------|----------|-----------------|
-| **Unit Tests** | > 80% Coverage | ✅ pytest |
-| **Integrationstests** | Alle Hauptpfade | ✅ pytest |
-| **Performance-Tests** | Benchmark-Szenarien | ⚠️ Manuell |
-| **Plattformtests** | Windows + Linux + MacOs | ⚠️ Manuell |
-Die Plattformtests können ggf. direkt in der GitHub Pipeline automatisiert werden. Z.B. ein Matrix Job, der nicht über Python-Versionen läuft sondern über unterschiedliche Beriebssysteme.
+| Test Type | MVP Goal | Automation |
+|-----------|----------|------------|
+| **Unit tests** | > 80% coverage | ✅ pytest |
+| **Integration tests** | All main paths | ✅ pytest |
+| **Performance tests** | Benchmark scenarios | ⚠️ Manual |
+| **Platform tests** | Windows + Linux + macOS | ⚠️ Manual (can be automated via GitHub Actions matrix) |
 
 ---
 
-**Navigation:** [← MVP Architekturentscheidungen](09-architecture-decisions.md) | [MVP Risiken →](11-risks-technical-debt.md)
+
