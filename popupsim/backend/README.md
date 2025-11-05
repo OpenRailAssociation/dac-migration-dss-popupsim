@@ -64,7 +64,6 @@ uv sync --frozen
 
 - **Run tests:**
   ```bash
-  # in project root/popupsim/backend
   uv run pytest
   ```
 
@@ -80,17 +79,17 @@ uv sync --frozen
 
 - **Type checking:**
   ```bash
-  uv run mypy backend/src/
+  uv run mypy popupsim/backend/src/
   ```
 
 - **Code quality analysis:**
   ```bash
-  uv run pylint backend/src/
+  uv run pylint popupsim/backend/src/
   ```
 
 - **Run all checks (format, lint, type check, test):**
   ```bash
-  uv run ruff format . && uv run ruff check . && uv run mypy backend/src/ && uv run pylint backend/src/ && uv run pytest
+  uv run ruff format . && uv run ruff check . && uv run mypy popupsim/backend/src/ && uv run pylint popupsim/backend/src/ && uv run pytest
   ```
 
 ### Code Quality & Pre-commit Hooks

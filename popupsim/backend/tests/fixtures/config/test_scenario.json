@@ -2,29 +2,6 @@
   "scenario_id": "scenario_001",
   "start_date": "2024-01-15",
   "end_date": "2024-01-16",
-  "random_seed": 42,
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "function": "werkstattgleis",
-        "capacity": 5,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK02",
-        "function": "werkstattgleis",
-        "capacity": 3,
-        "retrofit_time_min": 45
-      },
-      {
-        "id": "TRACK03",
-        "function": "werkstattgleis",
-        "capacity": 4,
-        "retrofit_time_min": 35
-      }
-    ]
-  },
   "train_schedule_file": "test_train_schedule.csv",
   "routes_file": "routes.csv",
   "workshop_tracks_file": "test_workshop_tracks.csv"

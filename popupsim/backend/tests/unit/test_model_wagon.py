@@ -193,7 +193,11 @@ class TestWagon:
     def test_wagon_boolean_combinations(self, is_loaded: bool, needs_retrofit: bool) -> None:
         """Test all combinations of boolean fields."""
         wagon = Wagon(
-            wagon_id='W_BOOL', train_id='T_BOOL', length=15.0, is_loaded=is_loaded, needs_retrofit=needs_retrofit
+            wagon_id='W_BOOL',
+            train_id='T_BOOL',
+            length=15.0,
+            is_loaded=is_loaded,
+            needs_retrofit=needs_retrofit,
         )
 
         assert wagon.is_loaded == is_loaded

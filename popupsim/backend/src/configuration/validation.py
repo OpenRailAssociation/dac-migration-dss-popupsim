@@ -9,9 +9,12 @@ logically consistent and meet business requirements.
 from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
+import logging
 
 from .model_scenario import ScenarioConfig
 from .model_track import TrackFunction
+
+logger = logging.getLogger('validation')
 
 
 class ValidationLevel(Enum):
@@ -70,6 +73,7 @@ class ValidationResult:
 
     is_valid: bool
     issues: list[ValidationIssue] = field(default_factory=list)
+    level: ValidationLevel = ValidationLevel.INFO
 
     def has_errors(self) -> bool:
         """Check if there are any validation issues with the ERROR severity level.
@@ -120,17 +124,19 @@ class ValidationResult:
         If no issues are found, a success message is printed.
         """
         if self.has_errors():
-            print('❌ Configuration invalid - Errors found:')
-            for issue in self.get_errors():
-                print(f'  {issue}')
+            logger.info('❌ Configuration invalid - Errors found:')
+            for err in self.get_errors():
+                _error = f'error:{err}'
+                logger.info(_error)
 
         if self.has_warnings():
-            print('\n⚠️  Warnings:')
-            for issue in self.get_warnings():
-                print(f'  {issue}')
+            logger.info('\n⚠️  Warnings:')
+            for warning in self.get_warnings():
+                _warning = f'{self.level.WARNING} {warning}'
+                logger.info(_warning)
 
         if not self.has_errors() and not self.has_warnings():
-            print('✅ Configuration valid - No issues found')
+            logger.info('✅ Configuration valid - No issues found')
 
 
 # pylint: disable=too-few-public-methods

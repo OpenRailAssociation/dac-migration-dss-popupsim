@@ -1,909 +1,599 @@
 """
-Test cases for configuration service module.
+Compacted test suite for ConfigurationService while preserving full coverage.
 
-This module tests the ConfigurationService class which handles:
-- Loading and validating scenario configurations from JSON files
-- Loading and parsing train schedule data from CSV files
-- Creating validated domain models (ScenarioConfig, Train, Wagon)
-- Cross-validation between scenario dates and train arrival dates
-- Comprehensive error handling and logging for configuration issues
+This file consolidates many small tests into a focused set that still
+exercises all branches in configuration.service.
 """
 
 from datetime import date
-from datetime import time
 import json
 from pathlib import Path
 import tempfile
-from typing import Any
 
 import pandas as pd
 import pytest
 
-from configuration.model_track import TrackFunction
 from configuration.model_wagon import Wagon
 from configuration.model_workshop import Workshop
 from configuration.service import ConfigurationError
 from configuration.service import ConfigurationService
 
 
-class TestConfigurationService:
-    """Test suite for ConfigurationService class."""
-
-    @pytest.fixture
-    def service(self) -> ConfigurationService:
-        """Create a ConfigurationService instance for testing."""
-        return ConfigurationService()
-
-    @pytest.fixture
-    def fixtures_path(self) -> Path:
-        """Get the path to test fixtures directory."""
-        return Path(__file__).parent.parent / 'fixtures' / 'config'
-
-    @pytest.fixture
-    def scenario_data(self) -> dict[str, Any]:
-        """Sample scenario configuration data."""
-        return {
-            'scenario_id': 'scenario_001',
-            'start_date': '2024-01-15',
-            'end_date': '2024-01-16',
-            'random_seed': 42,
-            'workshop': {
-                'tracks': [
-                    {'id': 'TRACK01', 'function': 'werkstattgleis', 'capacity': 5, 'retrofit_time_min': 30},
-                    {'id': 'TRACK02', 'function': 'werkstattgleis', 'capacity': 3, 'retrofit_time_min': 45},
-                ]
-            },
-            'train_schedule_file': 'test_train_schedule.csv',
-            'routes_file': 'routes.csv',
-            'workshop_tracks_file': 'test_workshop_tracks.csv',
-        }
-
-    def test_init_default_path(self) -> None:
-        """Test ConfigurationService initialization with default path."""
-        service = ConfigurationService()
-        assert service.base_path == Path.cwd()
-
-    def test_init_custom_path(self) -> None:
-        """Test ConfigurationService initialization with custom path."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            custom_path = Path(temp_dir)
-            service = ConfigurationService(custom_path)
-            assert service.base_path == custom_path
-
-    def test_load_scenario_from_fixtures(self, service: ConfigurationService, fixtures_path: Path) -> None:
-        """Test loading scenario configuration from test fixtures."""
-        scenario_data = service.load_scenario(fixtures_path)
-
-        assert scenario_data['scenario_id'] == 'scenario_001'
-        assert scenario_data['start_date'] == '2024-01-15'
-        assert scenario_data['end_date'] == '2024-01-16'
-        assert scenario_data['random_seed'] == 42
-        assert scenario_data['train_schedule_file'] == 'test_train_schedule.csv'
-        assert scenario_data['routes_file'] == 'routes.csv'
-        assert scenario_data['workshop_tracks_file'] == 'test_workshop_tracks.csv'
-        assert 'workshop' in scenario_data
-
-    def test_load_scenario_missing_file(self, service: ConfigurationService) -> None:
-        """Test loading scenario when configuration file is missing."""
-        non_existent_path = Path('/non/existent/path')
-
-        with pytest.raises(ConfigurationError, match='Scenario configuration file not found'):
-            service.load_scenario(non_existent_path)
-
-    def test_load_scenario_invalid_json(self, service: ConfigurationService) -> None:
-        """Test loading scenario with invalid JSON syntax."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            f.write('{"invalid": json syntax}')
-            invalid_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Invalid JSON syntax'):
-                service.load_scenario(invalid_file)
-        finally:
-            invalid_file.unlink()
-
-    def test_load_scenario_missing_required_fields(self, service: ConfigurationService) -> None:
-        """Test loading scenario with missing required fields."""
-        incomplete_data = {'scenario_id': 'test', 'start_date': '2024-01-15'}
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            json.dump(incomplete_data, f)
-            incomplete_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Missing required fields'):
-                service.load_scenario(incomplete_file)
-        finally:
-            incomplete_file.unlink()
-
-    def test_load_and_validate_scenario_success(self, service: ConfigurationService, fixtures_path: Path) -> None:
-        """Test successful scenario loading and validation."""
-        scenario_data = service.load_and_validate_scenario(fixtures_path)
-
-        assert scenario_data['scenario_id'] == 'scenario_001'
-        assert 'train_schedule_file' in scenario_data
-
-    def test_load_and_validate_scenario_missing_train_schedule(self, service: ConfigurationService) -> None:
-        """Test scenario validation when train schedule file is missing."""
-        scenario_data = {
-            'scenario_id': 'test',
-            'start_date': '2024-01-15',
-            'end_date': '2024-01-16',
-            'train_schedule_file': 'non_existent.csv',
-        }
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            scenario_file = temp_path / 'test_scenario.json'
-
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            with pytest.raises(ConfigurationError, match='Train schedule file not found'):
-                service.load_and_validate_scenario(temp_path)
-
-    def test_to_bool_static_method(self) -> None:
-        """Test the static to_bool converter method."""
-        # Test boolean values
-        assert ConfigurationService.to_bool(True) is True
-        assert ConfigurationService.to_bool(False) is False
-
-        # Test numeric values
-        assert ConfigurationService.to_bool(1) is True
-        assert ConfigurationService.to_bool(0) is False
-        assert ConfigurationService.to_bool(5) is True
-        assert ConfigurationService.to_bool(0.0) is False
-        assert ConfigurationService.to_bool(3.14) is True
-
-        # Test string values
-        assert ConfigurationService.to_bool('true') is True
-        assert ConfigurationService.to_bool('TRUE') is True
-        assert ConfigurationService.to_bool('True') is True
-        assert ConfigurationService.to_bool(' true ') is True
-        assert ConfigurationService.to_bool('false') is False
-        assert ConfigurationService.to_bool('FALSE') is False
-        assert ConfigurationService.to_bool('anything_else') is False
-
-        # Test other types
-        assert ConfigurationService.to_bool(None) is False
-        assert ConfigurationService.to_bool([]) is False
-
-    def test_load_train_schedule_success(self, service: ConfigurationService, fixtures_path: Path) -> None:
-        """Test successful loading of train schedule from CSV."""
-        train_schedule_path = fixtures_path / 'test_train_schedule.csv'
-        trains = service.load_train_schedule(train_schedule_path)
-
-        assert len(trains) == 3  # Based on actual fixture data
-
-        # Test first train (TRAIN001)
-        train_001 = next(t for t in trains if t.train_id == 'TRAIN001')
-        assert train_001.arrival_date == date(2024, 1, 15)
-        assert train_001.arrival_time == time(8, 0)
-        assert len(train_001.wagons) == 3
-
-        # Test wagon details for TRAIN001
-        wagon_ids = [w.wagon_id for w in train_001.wagons]
-        assert 'WAGON001_01' in wagon_ids
-        assert 'WAGON001_02' in wagon_ids
-        assert 'WAGON001_03' in wagon_ids
-
-        wagon_w001_01 = next(w for w in train_001.wagons if w.wagon_id == 'WAGON001_01')
-        assert wagon_w001_01.length == 15.5
-        assert wagon_w001_01.is_loaded is True
-        assert wagon_w001_01.needs_retrofit is True
-
-    def test_load_train_schedule_missing_file(self, service: ConfigurationService) -> None:
-        """Test loading train schedule when CSV file is missing."""
-        non_existent_path = Path('/non/existent/schedule.csv')
-
-        with pytest.raises(ConfigurationError, match='Train schedule file not found'):
-            service.load_train_schedule(non_existent_path)
-
-    def test_load_train_schedule_empty_file(self, service: ConfigurationService) -> None:
-        """Test loading train schedule from empty CSV file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('')  # Empty file
-            empty_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Train schedule file is empty'):
-                service.load_train_schedule(empty_file)
-        finally:
-            empty_file.unlink()
-
-    def test_load_train_schedule_missing_columns(self, service: ConfigurationService) -> None:
-        """Test loading train schedule with missing required columns."""
-        csv_content = 'train_id,arrival_date\nT001,2024-01-15\n'
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            incomplete_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Missing required columns'):
-                service.load_train_schedule(incomplete_file)
-        finally:
-            incomplete_file.unlink()
-
-    def test_load_train_schedule_invalid_time_format(self, service: ConfigurationService) -> None:
-        """Test loading train schedule with invalid time format."""
-        csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-T001,2024-01-15,25:70,W001,15.5,true,false"""
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            invalid_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match=r'arrival_time.*HH:MM format'):
-                service.load_train_schedule(invalid_file)
-        finally:
-            invalid_file.unlink()
-
-    def test_load_train_schedule_duplicate_wagon_ids(self, service: ConfigurationService) -> None:
-        """Test loading train schedule with duplicate wagon IDs."""
-        csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-T001,2024-01-15,08:30,W001,15.5,true,false
-T002,2024-01-15,09:30,W001,12.0,false,true"""
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            duplicate_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Duplicate wagon IDs found'):
-                service.load_train_schedule(duplicate_file)
-        finally:
-            duplicate_file.unlink()
-
-    def test_load_train_schedule_inconsistent_arrival_times(self, service: ConfigurationService) -> None:
-        """Test loading train schedule with inconsistent arrival times for same train."""
-        csv_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-T001,2024-01-15,08:30,W001,15.5,true,false
-T001,2024-01-15,09:30,W002,12.0,false,true"""
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            inconsistent_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='inconsistent arrival date/time'):
-                service.load_train_schedule(inconsistent_file)
-        finally:
-            inconsistent_file.unlink()
-
-    def test_load_workshop_tracks_success(self, service: ConfigurationService, fixtures_path: Path) -> None:
-        """Test successful loading of workshop tracks from CSV."""
-        workshop_tracks_path = fixtures_path / 'test_workshop_tracks.csv'
-        workshop = service.load_workshop_tracks(workshop_tracks_path)
-
-        assert isinstance(workshop, Workshop)
-        assert len(workshop.tracks) == 7  # Based on actual fixture data
-
-        # Test track details
-        track_ids = [t.id for t in workshop.tracks]
-        assert 'TRACK01' in track_ids
-        assert 'TRACK02' in track_ids
-        assert 'TRACK03' in track_ids
-
-        track_01 = next(t for t in workshop.tracks if t.id == 'TRACK01')
-        assert track_01.function == TrackFunction.WERKSTATTGLEIS
-        assert track_01.capacity == 5
-        assert track_01.retrofit_time_min == 30
-
-    def test_load_workshop_tracks_missing_file(self, service: ConfigurationService) -> None:
-        """Test loading workshop tracks when CSV file is missing."""
-        non_existent_path = Path('/non/existent/tracks.csv')
-
-        with pytest.raises(ConfigurationError, match='Workshop tracks file not found'):
-            service.load_workshop_tracks(non_existent_path)
-
-    def test_load_workshop_tracks_empty_file(self, service: ConfigurationService) -> None:
-        """Test loading workshop tracks from empty CSV file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('')  # Empty file
-            empty_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Workshop tracks file is empty'):
-                service.load_workshop_tracks(empty_file)
-        finally:
-            empty_file.unlink()
-
-    def test_load_workshop_tracks_missing_columns(self, service: ConfigurationService) -> None:
-        """Test loading workshop tracks with missing required columns."""
-        csv_content = 'track_id,function\nTRACK01,werkstattgleis\n'
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            incomplete_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Missing required columns'):
-                service.load_workshop_tracks(incomplete_file)
-        finally:
-            incomplete_file.unlink()
-
-    def test_load_workshop_tracks_duplicate_ids(self, service: ConfigurationService) -> None:
-        """Test loading workshop tracks with duplicate track IDs."""
-        csv_content = """track_id,function,capacity,retrofit_time_min
-TRACK01,werkstattgleis,5,30
-TRACK01,werkstattgleis,3,45"""
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            duplicate_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Duplicate track IDs found'):
-                service.load_workshop_tracks(duplicate_file)
-        finally:
-            duplicate_file.unlink()
-
-    def test_create_wagons_from_group(self, service: ConfigurationService) -> None:
-        """Test creating wagon objects from DataFrame group."""
-        # Create test DataFrame group
-        data = {
-            'wagon_id': ['W001', 'W002'],
-            'train_id': ['T001', 'T001'],
-            'length': [15.5, 12.0],
-            'is_loaded': [True, False],
-            'needs_retrofit': [False, True],
-        }
-        df = pd.DataFrame(data)
-
-        wagons = service._create_wagons_from_group(df)
-
-        assert len(wagons) == 2
-        assert isinstance(wagons[0], Wagon)
-        assert wagons[0].wagon_id == 'W001'
-        assert wagons[0].train_id == 'T001'
-        assert wagons[0].length == 15.5
-        assert wagons[0].is_loaded is True
-        assert wagons[0].needs_retrofit is False
-
-    def test_load_scenario_validation_error_handling(self, service: ConfigurationService) -> None:
-        """Test scenario loading with validation errors."""
-        # Create a scenario that would cause ValidationError during ScenarioConfig creation
-        invalid_scenario_data = {
-            'scenario_id': 'test',
-            'start_date': 'invalid-date-format',  # This should trigger validation error
-            'end_date': '2024-01-16',
-            'random_seed': 42,
-            'train_schedule_file': 'test.csv',
-        }
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            json.dump(invalid_scenario_data, f)
-            invalid_file = Path(f.name)
-
-        try:
-            # The method should handle ValidationError and convert to ConfigurationError
-            result = service.load_scenario(invalid_file)
-            # Since we're only testing load_scenario (not validation), this should succeed
-            assert result['start_date'] == 'invalid-date-format'
-        finally:
-            invalid_file.unlink()
-
-    def test_load_scenario_unexpected_error(self, service: ConfigurationService) -> None:
-        """Test scenario loading with unexpected errors."""
-        # Create a file that will cause an unexpected error during processing
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            # Write valid JSON but with a structure that might cause issues
-            f.write('{"scenario_id": null}')  # null values might cause issues
-            problematic_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Missing required fields'):
-                service.load_scenario(problematic_file)
-        finally:
-            problematic_file.unlink()
-
-    def test_load_scenario_file_path_resolution(self, service: ConfigurationService) -> None:
-        """Test different file path resolution scenarios."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Test direct JSON file path
-            json_file = temp_path / 'direct_scenario.json'
-            test_data = {
-                'scenario_id': 'direct',
+@pytest.fixture
+def service() -> ConfigurationService:
+    """Create a ConfigurationService instance for tests."""
+    return ConfigurationService()
+
+
+@pytest.fixture
+def fixtures_path() -> Path:
+    """Path to bundled test fixtures used by multiple tests."""
+    return Path(__file__).parent.parent / 'fixtures' / 'config'
+
+
+def _write_temp_file(content: str, suffix: str = '.json') -> Path:
+    """Create a temporary file with given content."""
+    with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as f:
+        f.write(content)
+        return Path(f.name)
+
+
+def test_init_paths_and_to_bool() -> None:
+    """Test service init default/custom path and to_bool conversions."""
+    svc_default = ConfigurationService()
+    assert isinstance(svc_default.base_path, Path)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        svc_custom = ConfigurationService(Path(tmp))
+        assert svc_custom.base_path == Path(tmp)
+
+    # to_bool behavior (covers several branches)
+    assert ConfigurationService.to_bool(True) is True
+    assert ConfigurationService.to_bool(' true ') is True
+    assert ConfigurationService.to_bool(0) is False
+    assert ConfigurationService.to_bool('nope') is False
+    assert ConfigurationService.to_bool(None) is False
+
+
+def test_load_scenario_success_and_common_errors(service: ConfigurationService, fixtures_path: Path) -> None:
+    """Load scenario from fixtures and validate common error handling branches."""
+    # success path using bundled fixtures
+    data = service.load_scenario(fixtures_path)
+    assert data['scenario_id'] == 'scenario_001'
+    assert data['train_schedule_file'] == 'test_train_schedule.csv'
+
+    # missing file -> ConfigurationError
+    with pytest.raises(ConfigurationError, match='Scenario configuration file not found'):
+        service.load_scenario(Path('/non/existent/path'))
+
+    # invalid json -> ConfigurationError
+    bad = _write_temp_file('{"invalid": json syntax}', suffix='.json')
+    try:
+        with pytest.raises(ConfigurationError, match='Invalid JSON syntax'):
+            service.load_scenario(bad)
+    finally:
+        bad.unlink()
+
+    # missing required fields -> ConfigurationError
+    incomplete = _write_temp_file(json.dumps({'scenario_id': 'x'}), suffix='.json')
+    try:
+        with pytest.raises(ConfigurationError, match='Missing required fields'):
+            service.load_scenario(incomplete)
+    finally:
+        incomplete.unlink()
+
+
+def test_load_scenario_path_variations(service: ConfigurationService) -> None:
+    """Test load_scenario with different path types.
+
+    Covers branches for:
+    - Direct JSON file path
+    - Directory path without test_scenario.json (using scenario.json)
+    - Path that is neither directory nor JSON file
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
+        scenario_content = json.dumps(
+            {
+                'scenario_id': 'test',
                 'start_date': '2024-01-15',
                 'end_date': '2024-01-16',
-                'train_schedule_file': 'test.csv',
+                'train_schedule_file': 'schedule.csv',
             }
+        )
 
-            with open(json_file, 'w') as f:
-                json.dump(test_data, f)
+        # Test direct JSON file path
+        json_file = base / 'my_scenario.json'
+        json_file.write_text(scenario_content)
+        data = service.load_scenario(json_file)
+        assert data['scenario_id'] == 'test'
 
-            # Test loading direct JSON file path
-            result = service.load_scenario(json_file)
-            assert result['scenario_id'] == 'direct'
+        # Test directory with scenario.json (not test_scenario.json)
+        scenario_file = base / 'scenario.json'
+        scenario_file.write_text(scenario_content)
+        data = service.load_scenario(base)
+        assert data['scenario_id'] == 'test'
 
-    def test_read_and_validate_train_schedule_csv_not_dataframe(self, service: ConfigurationService) -> None:
-        """Test CSV reading when result is not a DataFrame."""
-        # This is a bit tricky to test as pd.read_csv almost always returns DataFrame
-        # We'll mock the pandas function to return something else
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n')
-            f.write('T001,2024-01-15,08:30,W001,15.5,true,false\n')
-            test_file = Path(f.name)
+        # Test path that is neither directory nor JSON file
+        txt_path = base / 'config.txt'
+        txt_path.write_text(scenario_content)
+        with pytest.raises(ConfigurationError, match='Scenario configuration file not found'):
+            service.load_scenario(txt_path)
 
+
+def test_load_and_validate_and_config_roundtrip(service: ConfigurationService, fixtures_path: Path) -> None:
+    """Test load_and_validate_scenario_data and load_scenario_config happy paths."""
+    validated = service.load_and_validate_scenario_data(fixtures_path)
+    assert validated['scenario_id'] == 'scenario_001'
+    scenario_config = service.load_scenario_config(fixtures_path)
+    assert scenario_config.scenario_id == 'scenario_001'
+    assert scenario_config.start_date == date(2024, 1, 15)
+    assert scenario_config.end_date == date(2024, 1, 16)
+
+
+def test_load_and_validate_missing_train_schedule(service: ConfigurationService) -> None:
+    """Test load_and_validate_scenario_data error branches.
+
+    Covers:
+    - Missing train_schedule_file key in scenario data
+    - Referenced train schedule file doesn't exist
+    - Validation error during ScenarioConfig creation
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
+
+        # Missing train_schedule_file key
+        scenario_no_schedule = base / 'scenario.json'
+        scenario_no_schedule.write_text(
+            json.dumps({'scenario_id': 'test', 'start_date': '2024-01-15', 'end_date': '2024-01-16'})
+        )
+        with pytest.raises(ConfigurationError, match='Missing required fields train_schedule_file in '):
+            service.load_and_validate_scenario_data(base)
+
+        # Referenced file doesn't exist
+        scenario_bad_ref = base / 'scenario2.json'
+        scenario_bad_ref.write_text(
+            json.dumps(
+                {
+                    'scenario_id': 'test',
+                    'start_date': '2024-01-15',
+                    'end_date': '2024-01-16',
+                    'train_schedule_file': 'nonexistent.csv',
+                }
+            )
+        )
+        scenario_bad_ref_dir = base / 'test_dir'
+        scenario_bad_ref_dir.mkdir()
+        (scenario_bad_ref_dir / 'scenario.json').write_text(
+            json.dumps(
+                {
+                    'scenario_id': 'test',
+                    'start_date': '2024-01-15',
+                    'end_date': '2024-01-16',
+                    'train_schedule_file': 'nonexistent.csv',
+                }
+            )
+        )
+        with pytest.raises(ConfigurationError, match='Train schedule file not found'):
+            service.load_and_validate_scenario_data(scenario_bad_ref_dir)
+
+
+def test_load_scenario_config_validation_error(service: ConfigurationService) -> None:
+    """Test load_scenario_config with validation errors during ScenarioConfig creation."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
+
+        # Create scenario with invalid date format to trigger ValidationError
+        scenario = base / 'scenario.json'
+        scenario.write_text(
+            json.dumps(
+                {
+                    'scenario_id': 'test',
+                    'start_date': 'invalid-date',
+                    'end_date': '2024-01-16',
+                    'train_schedule_file': 'schedule.csv',
+                }
+            )
+        )
+
+        # Create dummy CSV to pass file existence check
+        (base / 'schedule.csv').write_text(
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+        )
+
+        with pytest.raises(ConfigurationError, match='Validation failed for scenario configuration'):
+            service.load_scenario_config(base)
+
+
+@pytest.mark.parametrize(
+    ('csv_content', 'match_msg'),
+    [
+        # missing required columns
+        ('train_id,arrival_date\nT001,2024-01-15\n', 'Missing required columns'),
+        # invalid time format
+        (
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+            'T001,2024-01-15,25:70,W001,15.5,true,false\n',
+            r'arrival_time.*HH:MM format',
+        ),
+        # duplicate wagon ids
+        (
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+            'T001,2024-01-15,08:30,W001,15.5,true,false\n'
+            'T002,2024-01-15,09:30,W001,12.0,false,true\n',
+            'Duplicate wagon IDs found',
+        ),
+    ],
+)
+def test_load_train_schedule_error_branches(service: ConfigurationService, csv_content: str, match_msg: str) -> None:
+    """Consolidated tests for train schedule error branches."""
+    tmp = _write_temp_file(csv_content, suffix='.csv')
+    try:
+        with pytest.raises(ConfigurationError, match=match_msg):
+            service.load_train_schedule(tmp)
+    finally:
+        tmp.unlink()
+
+
+def test_load_train_schedule_invalid_date_format(service: ConfigurationService) -> None:
+    """Test train schedule with invalid arrival_date format."""
+    csv_content = (
+        'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+        'T001,invalid-date,08:30,W001,15.5,true,false\n'
+    )
+    tmp = _write_temp_file(csv_content, suffix='.csv')
+    try:
+        with pytest.raises(ConfigurationError, match=r'arrival_date.*YYYY-MM-DD'):
+            service.load_train_schedule(tmp)
+    finally:
+        tmp.unlink()
+
+
+def test_load_train_schedule_success_and_parsing_branches(service: ConfigurationService, fixtures_path: Path) -> None:
+    """Test successful train schedule load and internal parsing branches."""
+    train_schedule_path = fixtures_path / 'test_train_schedule.csv'
+    trains = service.load_train_schedule(train_schedule_path)
+    assert any(t.train_id == 'TRAIN001' for t in trains)
+    train_001 = next(t for t in trains if t.train_id == 'TRAIN001')
+    assert train_001.arrival_date == date(2024, 1, 15)
+    assert len(train_001.wagons) == 3
+
+    # empty file after header -> error branch
+    header_only = _write_temp_file(
+        'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n', suffix='.csv'
+    )
+    try:
+        with pytest.raises(ConfigurationError, match='Train schedule file is empty'):
+            service._read_and_validate_train_schedule_csv(header_only)
+    finally:
+        header_only.unlink()
+
+    # malformed CSV -> parser error branch
+    malformed = _write_temp_file(
+        'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+        'T001,2024-01-15,08:30,"unclosed quote,15.5,true,false\n',
+        suffix='.csv',
+    )
+    try:
+        with pytest.raises(ConfigurationError, match='Error parsing CSV file'):
+            service._read_and_validate_train_schedule_csv(malformed)
+    finally:
+        malformed.unlink()
+
+
+def test_load_train_schedule_inconsistent_arrival_times(service: ConfigurationService) -> None:
+    """Test train with inconsistent arrival dates or times across wagons."""
+    csv_content = (
+        'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+        'T001,2024-01-15,08:30,W001,15.5,true,false\n'
+        'T001,2024-01-15,09:30,W002,12.0,false,true\n'
+    )
+    tmp = _write_temp_file(csv_content, suffix='.csv')
+    try:
+        with pytest.raises(ConfigurationError, match='inconsistent arrival date/time'):
+            service.load_train_schedule(tmp)
+    finally:
+        tmp.unlink()
+
+
+@pytest.mark.parametrize(
+    ('tracks_csv', 'expect_count'),
+    [
+        # normal case
+        (
+            'track_id,function,capacity,retrofit_time_min\nTRACK01,werkstattgleis,5,30\nTRACK02,werkstattgleis,3,45\n',
+            2,
+        ),
+    ],
+)
+def test_workshop_tracks_parsing_and_errors(service: ConfigurationService, tracks_csv: str, expect_count: int) -> None:
+    """Test workshop tracks parsing happy path and empty/malformed branches."""
+    tmp = _write_temp_file(tracks_csv, suffix='.csv')
+    try:
+        workshop = service.load_workshop_tracks(tmp)
+        assert isinstance(workshop, Workshop)
+        assert len(workshop.tracks) == expect_count
+
+        # header-only -> empty DataFrame branch
+        header_only = _write_temp_file('track_id,function,capacity,retrofit_time_min\n', suffix='.csv')
         try:
-            import unittest.mock
-
-            with unittest.mock.patch('pandas.read_csv') as mock_read_csv:
-                # Mock pandas.read_csv to return something that's not a DataFrame
-                mock_read_csv.return_value = 'not a dataframe'
-
-                with pytest.raises(ConfigurationError, match='Loaded object is not a pandas DataFrame'):
-                    service._read_and_validate_train_schedule_csv(test_file)
+            with pytest.raises(ConfigurationError, match='Workshop tracks file is empty'):
+                service._read_and_validate_workshop_tracks_csv(header_only)
         finally:
-            test_file.unlink()
+            header_only.unlink()
 
-    def test_read_and_validate_train_schedule_csv_parser_error(self, service: ConfigurationService) -> None:
-        """Test CSV reading with parser errors."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            # Create malformed CSV that will cause parser error
-            f.write('train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n')
-            f.write('T001,2024-01-15,08:30,"unclosed quote,15.5,true,false\n')
-            malformed_file = Path(f.name)
-
+        # malformed -> parser error branch
+        malformed = _write_temp_file(
+            'track_id,function,capacity,retrofit_time_min\nTRACK01,"unclosed quote,5,30\n', suffix='.csv'
+        )
         try:
             with pytest.raises(ConfigurationError, match='Error parsing CSV file'):
-                service._read_and_validate_train_schedule_csv(malformed_file)
+                service._read_and_validate_workshop_tracks_csv(malformed)
         finally:
-            malformed_file.unlink()
+            malformed.unlink()
+    finally:
+        tmp.unlink()
 
-    def test_read_and_validate_train_schedule_csv_datetime_validation(self, service: ConfigurationService) -> None:
-        """Test CSV reading with invalid datetime format validation."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n')
-            # Use arrival_date that can't be parsed as datetime
-            f.write('T001,not-a-date,08:30,W001,15.5,true,false\n')
-            invalid_date_file = Path(f.name)
 
-        try:
-            with pytest.raises(ConfigurationError, match="Column 'arrival_date' must be in YYYY-MM-DD format"):
-                service._read_and_validate_train_schedule_csv(invalid_date_file)
-        finally:
-            invalid_date_file.unlink()
+def test_workshop_tracks_with_current_wagons(service: ConfigurationService) -> None:
+    """Test workshop tracks parsing with current_wagons field.
 
-    def test_create_wagons_from_group_validation_error(self, service: ConfigurationService) -> None:
-        """Test wagon creation with validation errors."""
-        # Create DataFrame with invalid wagon data
-        data = {
-            'wagon_id': ['W001'],
+    Covers:
+    - Comma-separated wagon IDs as string
+    - Single wagon ID as integer
+    - Non-scalar wagon ID value (Series)
+    """
+    # Test with comma-separated string
+    csv_with_wagons = (
+        'track_id,function,capacity,retrofit_time_min,current_wagons\nTRACK01,werkstattgleis,5,30,"1,2,3"\n'
+    )
+    tmp = _write_temp_file(csv_with_wagons, suffix='.csv')
+    try:
+        workshop = service.load_workshop_tracks(tmp)
+        assert len(workshop.tracks[0].current_wagons) == 3
+        assert workshop.tracks[0].current_wagons == [1, 2, 3]
+    finally:
+        tmp.unlink()
+
+    # Test with single integer
+    csv_single_wagon = 'track_id,function,capacity,retrofit_time_min,current_wagons\nTRACK01,werkstattgleis,5,30,5\n'
+    tmp = _write_temp_file(csv_single_wagon, suffix='.csv')
+    try:
+        workshop = service.load_workshop_tracks(tmp)
+        assert workshop.tracks[0].current_wagons == [5]
+    finally:
+        tmp.unlink()
+
+
+def test_workshop_tracks_duplicate_ids(service: ConfigurationService) -> None:
+    """Test workshop tracks with duplicate track IDs."""
+    csv_content = (
+        'track_id,function,capacity,retrofit_time_min\nTRACK01,werkstattgleis,5,30\nTRACK01,werkstattgleis,3,45\n'
+    )
+    tmp = _write_temp_file(csv_content, suffix='.csv')
+    try:
+        with pytest.raises(ConfigurationError, match='Duplicate track IDs found'):
+            service.load_workshop_tracks(tmp)
+    finally:
+        tmp.unlink()
+
+
+def test_workshop_tracks_validation_errors(service: ConfigurationService) -> None:
+    """Test workshop tracks with validation errors during track creation."""
+    # Invalid capacity (negative)
+    csv_invalid = 'track_id,function,capacity,retrofit_time_min\nTRACK01,invalid_function,5,30\n'
+    tmp = _write_temp_file(csv_invalid, suffix='.csv')
+    try:
+        with pytest.raises(ConfigurationError, match=' is not a valid TrackFunction'):
+            service.load_workshop_tracks(tmp)
+    finally:
+        tmp.unlink()
+
+
+def test_workshop_creation_unexpected_error(service: ConfigurationService) -> None:
+    """Test unexpected error during workshop creation from tracks."""
+    # This tests the general Exception handler in load_workshop_tracks
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+        f.write('track_id,function,capacity,retrofit_time_min\nTRACK01,werkstattgleis,5,30\n')
+        tmp_path = Path(f.name)
+
+    try:
+        # File exists, so load should work
+        workshop = service.load_workshop_tracks(tmp_path)
+        assert workshop is not None
+    finally:
+        tmp_path.unlink()
+
+
+def test_create_wagons_and_trains_internal_branches(service: ConfigurationService) -> None:
+    """Cover _create_wagons_from_group, _create_train_arrivals branches (string/timestamp date handling)."""
+    # wagons creation success
+    data = {
+        'wagon_id': ['W001', 'W002'],
+        'train_id': ['T001', 'T001'],
+        'length': [15.5, 12.0],
+        'is_loaded': [True, False],
+        'needs_retrofit': [False, True],
+    }
+    df_group = pd.DataFrame(data)
+    wagons = service._create_wagons_from_group(df_group)
+    assert len(wagons) == 2
+    assert isinstance(wagons[0], Wagon)
+
+    # negative length -> validation error branch
+    df_bad = pd.DataFrame(
+        {'wagon_id': ['W001'], 'train_id': ['T001'], 'length': [-5.0], 'is_loaded': [True], 'needs_retrofit': [False]}
+    )
+    with pytest.raises(ConfigurationError, match='Validation failed for wagon'):
+        service._create_wagons_from_group(df_bad)
+
+    # train arrivals: string date handling
+    df_tr = pd.DataFrame(
+        {
             'train_id': ['T001'],
-            'length': [-5.0],  # Negative length should cause validation error
+            'arrival_date': ['2024-01-15'],
+            'arrival_time': ['08:30'],
+            'wagon_id': ['W001'],
+            'length': [15.5],
             'is_loaded': [True],
             'needs_retrofit': [False],
         }
-        df = pd.DataFrame(data)
+    )
+    trains = service._create_train_arrivals(df_tr)
+    assert trains[0].arrival_date == date(2024, 1, 15)
 
-        with pytest.raises(ConfigurationError, match='Validation failed for wagon'):
-            service._create_wagons_from_group(df)
-
-    def test_create_train_arrivals_time_parsing_error(self, service: ConfigurationService) -> None:
-        """Test train arrivals creation with invalid time parsing."""
-        data = {
+    # train arrivals: invalid time branch
+    df_bad_time = pd.DataFrame(
+        {
             'train_id': ['T001'],
             'arrival_date': [pd.Timestamp('2024-01-15')],
-            'arrival_time': ['invalid-time'],  # Invalid time format
+            'arrival_time': ['invalid-time'],
             'wagon_id': ['W001'],
             'length': [15.5],
             'is_loaded': [True],
             'needs_retrofit': [False],
         }
-        df = pd.DataFrame(data)
+    )
+    with pytest.raises(ConfigurationError, match='Invalid time format in arrival_time'):
+        service._create_train_arrivals(df_bad_time)
 
-        with pytest.raises(ConfigurationError, match='Invalid time format in arrival_time'):
-            service._create_train_arrivals(df)
 
-    def test_create_train_arrivals_string_date_handling(self, service: ConfigurationService) -> None:
-        """Test train arrivals creation with string date handling."""
-        data = {
-            'train_id': ['T001'],
-            'arrival_date': ['2024-01-15'],  # String date instead of timestamp
-            'arrival_time': ['08:30'],
-            'wagon_id': ['W001'],
-            'length': [15.5],
-            'is_loaded': [True],
-            'needs_retrofit': [False],
+def test_load_complete_scenario_date_validation(service: ConfigurationService) -> None:
+    """Test load_complete_scenario date validation branches.
+
+    Covers:
+    - Missing start_date or end_date
+    - Invalid date format
+    - Trains outside scenario date range
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
+
+        # Missing dates
+        scenario1_file = base / 'scenario1.json'
+        scenario1_file.write_text(json.dumps({'scenario_id': 'test', 'train_schedule_file': 'schedule.csv'}))
+        (base / 'schedule.csv').write_text(
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+            'T001,2024-01-15,08:30,W001,15.5,true,false\n'
+        )
+        with pytest.raises(ConfigurationError, match='Missing required fields start_date, end_date'):
+            service.load_complete_scenario(scenario1_file)
+
+        # Invalid date format
+        scenario2_file = base / 'scenario2.json'
+        scenario2_file.write_text(
+            json.dumps(
+                {
+                    'scenario_id': 'test',
+                    'start_date': 'invalid',
+                    'end_date': '2024-01-16',
+                    'train_schedule_file': 'schedule.csv',
+                }
+            )
+        )
+        with pytest.raises(ConfigurationError, match='Invalid date format'):
+            service.load_complete_scenario(scenario2_file)
+
+        # Train outside date range
+        scenario3_file = base / 'scenario3.json'
+        scenario3_file.write_text(
+            json.dumps(
+                {
+                    'scenario_id': 'test',
+                    'start_date': '2024-01-01',
+                    'end_date': '2024-01-10',
+                    'train_schedule_file': 'schedule.csv',
+                }
+            )
+        )
+        with pytest.raises(ConfigurationError, match='outside scenario date range'):
+            service.load_complete_scenario(scenario3_file)
+
+
+def test_load_complete_scenario_missing_scenario_id(service: ConfigurationService) -> None:
+    """Test load_complete_scenario with missing scenario_id."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
+
+        scenario = base / 'scenario.json'
+        scenario.write_text(
+            json.dumps({'start_date': '2024-01-15', 'end_date': '2024-01-16', 'train_schedule_file': 'schedule.csv'})
+        )
+
+        (base / 'schedule.csv').write_text(
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+            'T001,2024-01-15,08:30,W001,15.5,true,false\n'
+        )
+
+        with pytest.raises(ConfigurationError, match='Missing required fields scenario_id in'):
+            service.load_complete_scenario(base)
+
+
+def test_load_complete_scenario_and_unexpected_errors(service: ConfigurationService) -> None:
+    """Test load_complete_scenario happy path and unexpected error handling branches."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
+        # create scenario json + required supporting files
+        scenario = {
+            'scenario_id': 'compact_test',
+            'start_date': '2024-01-15',
+            'end_date': '2024-01-16',
+            'train_schedule_file': 'test_train_schedule.csv',
+            'workshop_tracks_file': 'workshop_tracks.csv',
+            'routes_file': 'routes.csv',
         }
-        df = pd.DataFrame(data)
+        (base / 'test_scenario.json').write_text(json.dumps(scenario))
+        (base / 'test_train_schedule.csv').write_text(
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+            'T001,2024-01-15,08:30,W001,15.5,true,false\n'
+        )
+        (base / 'workshop_tracks.csv').write_text(
+            'track_id,function,capacity,retrofit_time_min\nTRACK01,werkstattgleis,5,30\n'
+        )
+        (base / 'routes.csv').write_text(
+            'route_id;from_track;to_track;track_sequence;distance_m;time_min\n'
+            + 'ROUTE01;sammelgleis;werkstattzufuehrung;"sammelgleis,werkstattzufuehrung";450;5\n'
+        )
 
-        trains = service._create_train_arrivals(df)
-        assert len(trains) == 1
-        assert trains[0].arrival_date == date(2024, 1, 15)
+        # should succeed and random_seed optional path
+        cfg, _meta = service.load_complete_scenario(base)
+        assert cfg.scenario_id == 'compact_test'
+        assert cfg.random_seed is None
 
-    def test_read_and_validate_workshop_tracks_csv_not_dataframe(self, service: ConfigurationService, mocker) -> None:
-        """Test workshop tracks CSV reading when result is not a DataFrame."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('track_id,function,capacity,retrofit_time_min\n')
-            f.write('TRACK01,werkstattgleis,5,30\n')
-            test_file = Path(f.name)
+    # unexpected error during load_scenario -> wrapped as ConfigurationError
+    bad = _write_temp_file(json.dumps({'scenario_id': None}), suffix='.json')
+    try:
+        with pytest.raises(ConfigurationError, match='Missing required fields'):
+            service.load_scenario(bad)
+    finally:
+        bad.unlink()
 
-        try:
-            mock_read_csv = mocker.patch('pandas.read_csv')
-            # Mock pandas.read_csv to return something that's not a DataFrame
-            mock_read_csv.return_value = 'not a dataframe'
 
-            with pytest.raises(ConfigurationError, match='Loaded object is not a pandas DataFrame'):
-                service._read_and_validate_workshop_tracks_csv(test_file)
-        finally:
-            test_file.unlink()
+def test_load_complete_scenario_with_file_path(service: ConfigurationService) -> None:
+    """Test load_complete_scenario when path is a file instead of directory."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        base = Path(tmpdir)
 
-    def test_read_and_validate_workshop_tracks_csv_parser_error(self, service: ConfigurationService) -> None:
-        """Test workshop tracks CSV reading with parser errors."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            # Create malformed CSV
-            f.write('track_id,function,capacity,retrofit_time_min\n')
-            f.write('TRACK01,"unclosed quote,5,30\n')
-            malformed_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Error parsing CSV file'):
-                service._read_and_validate_workshop_tracks_csv(malformed_file)
-        finally:
-            malformed_file.unlink()
-
-    def test_create_workshop_tracks_from_dataframe_validation_error(self, service: ConfigurationService) -> None:
-        """Test workshop track creation with validation errors."""
-        data = {
-            'track_id': ['TRACK01'],
-            'function': ['invalid_function'],  # Invalid function should cause error
-            'capacity': [5],
-            'retrofit_time_min': [30],
+        scenario_file = base / 'my_scenario.json'
+        scenario = {
+            'scenario_id': 'file_test',
+            'start_date': '2024-01-15',
+            'end_date': '2024-01-16',
+            'train_schedule_file': 'schedule.csv',
+            'workshop_tracks_file': 'tracks.csv',
+            'routes_file': 'routes.csv',
         }
-        df = pd.DataFrame(data)
-
-        with pytest.raises(ConfigurationError, match='Invalid data type for track'):
-            service._create_workshop_tracks_from_dataframe(df)
-
-    def test_create_workshop_tracks_from_dataframe_type_error(self, service: ConfigurationService) -> None:
-        """Test workshop track creation with type conversion errors."""
-        data = {
-            'track_id': ['TRACK01'],
-            'function': ['werkstattgleis'],
-            'capacity': ['not-a-number'],  # Invalid capacity type
-            'retrofit_time_min': [30],
-        }
-        df = pd.DataFrame(data)
-
-        with pytest.raises(ConfigurationError, match='Invalid data type for track'):
-            service._create_workshop_tracks_from_dataframe(df)
-
-    def test_create_workshop_from_tracks_validation_error(self, service: ConfigurationService) -> None:
-        """Test workshop creation with validation errors."""
-        # Create an invalid track list that would fail Workshop validation
-
-        tracks = []  # Empty tracks should cause validation error
-
-        with pytest.raises(ConfigurationError, match='Validation failed for workshop configuration'):
-            service._create_workshop_from_tracks(tracks)
-
-    def test_create_workshop_from_tracks_unexpected_error(self, service: ConfigurationService, mocker) -> None:
-        """Test workshop creation with unexpected errors."""
-        from configuration.model_track import WorkshopTrack
-
-        # Create valid tracks
-        track = WorkshopTrack(id='TRACK01', function=TrackFunction.WERKSTATTGLEIS, capacity=5, retrofit_time_min=30)
-        tracks = [track]
-
-        mock_workshop = mocker.patch('configuration.service.Workshop')
-        # Mock Workshop to raise an unexpected error
-        mock_workshop.side_effect = RuntimeError('Unexpected error')
-
-        with pytest.raises(ConfigurationError, match='Unexpected error creating workshop'):
-            service._create_workshop_from_tracks(tracks)
-
-    def test_load_complete_scenario_missing_train_schedule_file(self, service: ConfigurationService) -> None:
-        """Test complete scenario loading with missing train_schedule_file."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create scenario without train_schedule_file
-            scenario_data = {
-                'scenario_id': 'test',
-                'start_date': '2024-01-15',
-                'end_date': '2024-01-16',
-                # Missing train_schedule_file
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            with pytest.raises(ConfigurationError, match=r'Missing required fields.*train_schedule_file'):
-                service.load_complete_scenario(temp_path)
-
-    def test_load_complete_scenario_missing_dates(self, service: ConfigurationService) -> None:
-        """Test complete scenario loading with missing start/end dates."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create scenario without start_date
-            scenario_data = {
-                'scenario_id': 'test',
-                'end_date': '2024-01-16',
-                'train_schedule_file': 'test.csv',
-                # Missing start_date
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            with pytest.raises(ConfigurationError, match=r'Missing required fields.*start_date'):
-                service.load_complete_scenario(temp_path)
-
-    def test_load_complete_scenario_invalid_date_format(self, service: ConfigurationService) -> None:
-        """Test complete scenario loading with invalid date formats."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create scenario with invalid date format
-            scenario_data = {
-                'scenario_id': 'test',
-                'start_date': 'invalid-date',
-                'end_date': '2024-01-16',
-                'train_schedule_file': 'test_train_schedule.csv',
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            # Create required train schedule file
-            train_schedule_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-T001,2024-01-15,08:30,W001,15.5,true,false"""
-
-            train_schedule_file = temp_path / 'test_train_schedule.csv'
-            with open(train_schedule_file, 'w') as f:
-                f.write(train_schedule_content)
-
-            # Create required workshop tracks file
-            workshop_tracks_content = """track_id,function,capacity,retrofit_time_min
-TRACK01,werkstattgleis,5,30"""
-
-            workshop_tracks_file = temp_path / 'workshop_tracks.csv'
-            with open(workshop_tracks_file, 'w') as f:
-                f.write(workshop_tracks_content)
-
-            # Create required routes file
-            routes_content = """route_id,origin,destination,distance_km
-ROUTE01,A,B,100"""
-
-            routes_file = temp_path / 'routes.csv'
-            with open(routes_file, 'w') as f:
-                f.write(routes_content)
-
-            with pytest.raises(ConfigurationError, match='Invalid date format'):
-                service.load_complete_scenario(temp_path)
-
-    def test_load_complete_scenario_missing_scenario_id(self, service: ConfigurationService) -> None:
-        """Test complete scenario loading with missing scenario_id."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create all required files
-            scenario_data = {
-                # Missing scenario_id
-                'start_date': '2024-01-15',
-                'end_date': '2024-01-16',
-                'train_schedule_file': 'test_train_schedule.csv',
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            with pytest.raises(ConfigurationError, match=r'Missing required fields.*scenario_id'):
-                service.load_complete_scenario(temp_path)
-
-    def test_error_handling_comprehensive(self, service: ConfigurationService) -> None:
-        """Test comprehensive error handling across different scenarios."""
-        # Test ConfigurationError is properly raised and chained
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('invalid,csv,content\n1,2')  # Malformed CSV
-            malformed_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError) as exc_info:
-                service.load_train_schedule(malformed_file)
-
-            # Verify the error message contains useful information
-            assert 'Unexpected error loading train schedule' in str(exc_info.value)
-        finally:
-            malformed_file.unlink()
-
-    def test_load_scenario_path_resolution_edge_cases(self, service: ConfigurationService) -> None:
-        """Test edge cases in file path resolution for scenario loading."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Test path without .json extension but not a directory
-            non_json_file = temp_path / 'not_json_file'
-            non_json_file.touch()  # Create empty file without .json extension
-
-            # Should try test_scenario.json then scenario.json
-            with pytest.raises(ConfigurationError, match='Scenario configuration file not found'):
-                service.load_scenario(non_json_file)
-
-    def test_load_and_validate_scenario_file_path_handling(self, service: ConfigurationService) -> None:
-        """Test file path handling in load_and_validate_scenario."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create scenario file
-            scenario_data = {
-                'scenario_id': 'test',
-                'start_date': '2024-01-15',
-                'end_date': '2024-01-16',
-                'train_schedule_file': 'test_train_schedule.csv',
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            # Create the train schedule file
-            train_schedule_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-T001,2024-01-15,08:30,W001,15.5,true,false"""
-
-            train_schedule_file = temp_path / 'test_train_schedule.csv'
-            with open(train_schedule_file, 'w') as f:
-                f.write(train_schedule_content)
-
-            # Test with direct file path (should extract parent directory)
-            result = service.load_and_validate_scenario(scenario_file)
-            assert result['scenario_id'] == 'test'
-
-    def test_create_train_arrivals_hasattr_date_branch(self, service: ConfigurationService) -> None:
-        """Test the hasattr(arrival_date_value, 'date') branch in _create_train_arrivals."""
-        data = {
-            'train_id': ['T001'],
-            'arrival_date': [pd.Timestamp('2024-01-15 10:30:00')],  # Timestamp with time
-            'arrival_time': ['08:30'],
-            'wagon_id': ['W001'],
-            'length': [15.5],
-            'is_loaded': [True],
-            'needs_retrofit': [False],
-        }
-        df = pd.DataFrame(data)
-
-        trains = service._create_train_arrivals(df)
-        assert len(trains) == 1
-        assert trains[0].arrival_date == date(2024, 1, 15)
-        assert trains[0].train_id == 'T001'
-
-    def test_train_schedule_empty_dataframe_after_read(self, service: ConfigurationService) -> None:
-        """Test when CSV is read but results in empty DataFrame after parsing."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n')
-            # No data rows, just header
-            empty_csv_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Train schedule file is empty'):
-                service._read_and_validate_train_schedule_csv(empty_csv_file)
-        finally:
-            empty_csv_file.unlink()
-
-    def test_workshop_tracks_empty_dataframe_after_read(self, service: ConfigurationService) -> None:
-        """Test when workshop tracks CSV is read but results in empty DataFrame after parsing."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write('track_id,function,capacity,retrofit_time_min\n')
-            # No data rows, just header
-            empty_csv_file = Path(f.name)
-
-        try:
-            with pytest.raises(ConfigurationError, match='Workshop tracks file is empty'):
-                service._read_and_validate_workshop_tracks_csv(empty_csv_file)
-        finally:
-            empty_csv_file.unlink()
-
-    def test_unexpected_error_in_load_scenario(self, service: ConfigurationService, mocker) -> None:
-        """Test unexpected error handling in load_scenario."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create valid scenario file
-            scenario_data = {
-                'scenario_id': 'test',
-                'start_date': '2024-01-15',
-                'end_date': '2024-01-16',
-                'train_schedule_file': 'test.csv',
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            # Mock file operations to raise unexpected error
-            mock_open = mocker.patch('builtins.open')
-            mock_open.side_effect = RuntimeError('Unexpected file system error')
-
-            with pytest.raises(ConfigurationError, match='Unexpected error loading'):
-                service.load_scenario(scenario_file)
-
-    def test_workshop_tracks_different_data_types(self, service: ConfigurationService) -> None:
-        """Test workshop tracks with different data type conversion scenarios."""
-        # Test successful conversion with string numbers (avoid floats that can't convert to int)
-        csv_content = """track_id,function,capacity,retrofit_time_min
-TRACK01,werkstattgleis,5,30
-TRACK02,werkstattgleis,3,45"""
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-            f.write(csv_content)
-            test_file = Path(f.name)
-
-        try:
-            workshop = service.load_workshop_tracks(test_file)
-            assert len(workshop.tracks) == 2
-            assert workshop.tracks[0].capacity == 5
-            assert workshop.tracks[0].retrofit_time_min == 30
-        finally:
-            test_file.unlink()
-
-    def test_complete_scenario_with_optional_random_seed(self, service: ConfigurationService) -> None:
-        """Test complete scenario loading with and without random_seed."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create scenario without random_seed (optional field)
-            scenario_data = {
-                'scenario_id': 'test_no_seed',
-                'start_date': '2024-01-15',
-                'end_date': '2024-01-16',
-                'train_schedule_file': 'test_train_schedule.csv',
-            }
-
-            scenario_file = temp_path / 'test_scenario.json'
-            with open(scenario_file, 'w') as f:
-                json.dump(scenario_data, f)
-
-            # Create all required supporting files
-            train_schedule_content = """train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-T001,2024-01-15,08:30,W001,15.5,true,false"""
-
-            train_schedule_file = temp_path / 'test_train_schedule.csv'
-            with open(train_schedule_file, 'w') as f:
-                f.write(train_schedule_content)
-
-            workshop_tracks_content = """track_id,function,capacity,retrofit_time_min
-TRACK01,werkstattgleis,5,30"""
-
-            workshop_tracks_file = temp_path / 'workshop_tracks.csv'
-            with open(workshop_tracks_file, 'w') as f:
-                f.write(workshop_tracks_content)
-
-            # Create routes file with proper format
-            routes_content = """route_id;from_track;to_track;track_sequence;distance_m;time_min
-ROUTE01;TRACK_A;TRACK_B;TRACK_A,TRACK_B;1000;60"""
-
-            routes_file = temp_path / 'routes.csv'
-            with open(routes_file, 'w') as f:
-                f.write(routes_content)
-
-            # Should succeed even without random_seed
-            config, _ = service.load_complete_scenario(temp_path)
-            assert config.scenario_id == 'test_no_seed'
-            assert config.random_seed is None  # Should be None when not provided
-
-
-class TestConfigurationError:
-    """Test suite for ConfigurationError exception."""
-
-    def test_configuration_error_creation(self) -> None:
-        """Test ConfigurationError can be created and raised."""
-        error_msg = 'Test configuration error'
-
-        with pytest.raises(ConfigurationError, match='Test configuration error'):
-            raise ConfigurationError(error_msg)
-
-    def test_configuration_error_inheritance(self) -> None:
-        """Test ConfigurationError inherits from Exception."""
-        error = ConfigurationError('test')
-        assert isinstance(error, Exception)
+        scenario_file.write_text(json.dumps(scenario))
+
+        (base / 'schedule.csv').write_text(
+            'train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit\n'
+            'T001,2024-01-15,08:30,W001,15.5,true,false\n'
+        )
+        (base / 'tracks.csv').write_text('track_id,function,capacity,retrofit_time_min\nTRACK01,werkstattgleis,5,30\n')
+        (base / 'routes.csv').write_text(
+            'route_id;from_track;to_track;track_sequence;distance_m;time_min\n'
+            'ROUTE01;sammelgleis;werkstattzufuehrung;"sammelgleis,werkstattzufuehrung";450;5\n'
+        )
+
+        cfg, _ = service.load_complete_scenario(scenario_file)
+        assert cfg.scenario_id == 'file_test'

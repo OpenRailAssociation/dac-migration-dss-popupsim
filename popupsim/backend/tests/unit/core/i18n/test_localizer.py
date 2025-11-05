@@ -4,14 +4,13 @@ from collections.abc import Generator
 from pathlib import Path
 import tempfile
 
-import pytest
-
 from core.i18n.localizer import Localizer
 from core.i18n.localizer import _
 from core.i18n.localizer import get_localizer
 from core.i18n.localizer import init_i18n
 from core.i18n.localizer import ngettext
 from core.i18n.localizer import set_locale
+import pytest
 
 pytestmark = pytest.mark.unit
 
