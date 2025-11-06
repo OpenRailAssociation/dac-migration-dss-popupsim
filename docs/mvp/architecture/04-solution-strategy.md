@@ -137,7 +137,7 @@ graph LR
     B --> C[Full Version:<br/>Hexagonal + Events]
 
     A1[3 Contexts<br/>Direct Calls] --> B1[Interface Preparation]
-    B1 --> C1[Multiple Contexts<br/>Event-driven<br/>(number TBD)]
+    B1 --> C1[Multiple Contexts<br/>Event-driven<br/>Number contexts tbd]
 
     A2[File System<br/>CSV/JSON] --> B2[Repository Pattern]
     B2 --> C2[Event Store]
