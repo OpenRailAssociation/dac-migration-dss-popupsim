@@ -52,7 +52,7 @@ For complete architecture documentation, see:
 - **Pytest** for testing
 
 ### Project Rules
-See [Project Rules](../../../.amazonq/rules/project-rules.md) for complete coding standards.
+See `.amazonq/rules/project-rules.md` in the repository root for complete coding standards.
 
 ## Quick Start for Developers
 
