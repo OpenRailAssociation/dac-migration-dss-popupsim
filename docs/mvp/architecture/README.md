@@ -2,7 +2,7 @@
 
 ## Overview
 
-This documentation describes the **MVP (Minimum Viable Product) architecture** of PopUpSim using the arc42 template.
+This documentation describes the **MVP (Minimum Viable Product) architecture** of PopUpSim.
 
 **MVP Scope:** Desktop application with file-based configuration, SimPy simulation engine, and Matplotlib visualization.
 
@@ -36,7 +36,3 @@ This documentation describes the **MVP (Minimum Viable Product) architecture** o
 - **[Technology Decisions](09-architecture-decisions.md)** - 7 key ADRs
 - **[Building Blocks](05-building-blocks.md)** - System structure
 - **[Glossary](12-glossary.md)** - 95+ terms
-
----
-
-**arc42 Version:** 8.1 | **Documentation Status:** ✅ Complete
