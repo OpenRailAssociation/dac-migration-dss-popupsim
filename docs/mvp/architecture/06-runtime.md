@@ -24,34 +24,34 @@ sequenceDiagram
     Planner->>Files: Create workshop_2stations.json
     Planner->>Files: Create workshop_4stations.json
     Planner->>Files: Create workshop_6stations.json
-    
+
     loop For each configuration
         Planner->>CLI: python main.py --config workshop_Xstations.json
         CLI->>Config: load_configuration()
         Config->>Files: Read JSON/CSV
         Config->>Config: Validate with Pydantic
         Config-->>CLI: Validated config objects
-        
+
         CLI->>Domain: setup_domain(config)
         Domain->>Domain: Create stations, tracks, resources
         Domain-->>CLI: Domain ready
-        
+
         CLI->>Control: run_simulation(domain, 24h)
         Control->>Domain: Start SimPy environment
-        
+
         loop Simulation time (24h)
             Domain->>Domain: Train arrivals (hourly)
             Domain->>Domain: Wagon processing
             Domain->>Domain: Calculate KPIs (real-time)
         end
-        
+
         Control->>Control: Aggregate results
         Control->>Files: Write simulation_results_Xstations.csv
         Control->>Files: Write kpi_charts_Xstations.png
         Control-->>CLI: Simulation complete
         CLI-->>Planner: Results available
     end
-    
+
     Planner->>Files: Compare CSV results
     Planner->>Planner: Select optimal configuration
 ```
@@ -95,21 +95,21 @@ sequenceDiagram
 
     Planner->>Files: Create scenario_high_load.json
     Note over Files: 30 wagons/hour arrival rate
-    
+
     Planner->>CLI: python main.py --config scenario_high_load.json
     CLI->>Config: load_configuration()
     Config-->>CLI: Validated config
-    
+
     CLI->>Domain: setup_domain(config)
     Domain-->>CLI: Domain ready
-    
+
     CLI->>Control: run_simulation(domain, 24h)
     Control->>Domain: Start SimPy environment
-    
+
     loop Every simulation hour
         Domain->>Domain: Train arrives (30 wagons)
         Domain->>Domain: Assign wagons to stations
-        
+
         alt Station available
             Domain->>Domain: Start retrofit process
             Domain->>Analysis: Record: wagon_processing_started
@@ -118,24 +118,24 @@ sequenceDiagram
             Domain->>Analysis: Record: wagon_queued
             Analysis->>Analysis: Calculate queue length
         end
-        
+
         Domain->>Domain: Complete retrofits
         Domain->>Analysis: Record: wagon_completed
         Analysis->>Analysis: Calculate throughput
         Analysis->>Analysis: Calculate utilization
-        
+
         alt Queue length > threshold
             Analysis->>Analysis: Flag: bottleneck detected
         end
     end
-    
+
     Control->>Analysis: Get aggregated KPIs
     Analysis-->>Control: Throughput, utilization, bottlenecks
-    
+
     Control->>Files: Write throughput_analysis.csv
     Control->>Files: Write bottleneck_chart.png
     Control-->>CLI: Analysis complete
-    
+
     CLI-->>Planner: Results with bottleneck identification
     Planner->>Files: Review bottleneck_chart.png
     Planner->>Planner: Decide: Add stations or optimize layout
@@ -160,17 +160,18 @@ stateDiagram-v2
     Queued --> InRetrofit: Station becomes available
     InRetrofit --> Completed: Retrofit finished
     Completed --> [*]
-    
+
     note right of Queued
         Analysis Engine tracks
         queue length here
     end note
-    
+
     note right of InRetrofit
         Analysis Engine calculates
         utilization here
     end note
 ```
+> **Note:** This needs to be updated since it does not reflect the process correctly.
 
 ### Performance Characteristics
 
@@ -203,27 +204,27 @@ sequenceDiagram
     Note over Files: Contains: track_id, length, connections
     Planner->>Files: Prepare workshop_layout.csv
     Note over Files: Contains: station_id, location, capacity
-    
+
     Planner->>CLI: python main.py --import-infra infrastructure_topology.csv workshop_layout.csv
     CLI->>Config: import_infrastructure()
-    
+
     Config->>Files: Read infrastructure_topology.csv
     Files-->>Config: CSV data (tracks)
     Config->>Parser: Parse track data
     Parser->>Parser: Convert to Track objects
     Parser-->>Config: Parsed tracks
-    
+
     Config->>Files: Read workshop_layout.csv
     Files-->>Config: CSV data (workshops)
     Config->>Parser: Parse workshop data
     Parser->>Parser: Convert to Workshop objects
     Parser-->>Config: Parsed workshops
-    
+
     Config->>Validator: Validate infrastructure consistency
     Validator->>Validator: Check track connections valid
     Validator->>Validator: Check workshop locations on tracks
     Validator->>Validator: Check capacity constraints
-    
+
     alt Validation successful
         Validator-->>Config: Infrastructure valid
         Config->>Files: Write validated_scenario.json
@@ -287,37 +288,37 @@ sequenceDiagram
     participant Files as File System
 
     Note over Planner: Has imported infrastructure (US-003)
-    
+
     Planner->>Files: Create company_wagon_schedule.csv
     Note over Files: Company-specific arrival patterns
     Planner->>Files: Update validated_scenario.json
     Note over Files: Add capacity target: 500 wagons/week
-    
+
     Planner->>CLI: python main.py --config validated_scenario.json --schedule company_wagon_schedule.csv
     CLI->>Config: load_configuration()
     Config->>Files: Read validated_scenario.json
     Config->>Files: Read company_wagon_schedule.csv
     Config-->>CLI: Configuration with capacity target
-    
+
     CLI->>Domain: setup_domain(config)
     Domain->>Domain: Create imported infrastructure
     Domain->>Domain: Load company wagon schedule
     Domain-->>CLI: Domain ready
-    
+
     CLI->>Control: run_simulation(domain, 168h)
     Note over Control: 1 week simulation
     Control->>Domain: Start SimPy environment
-    
+
     loop Every hour (168 hours)
         Domain->>Domain: Process scheduled arrivals
         Domain->>Domain: Wagon processing
         Domain->>Analysis: Record wagon events
-        Analysis->>Analysis: Track weekly throughput
+        Analysis->>Analysis: Track throughput
     end
-    
-    Control->>Analysis: Get weekly capacity
+
+    Control->>Analysis: Get capacity
     Analysis->>Analysis: Calculate: actual vs target
-    
+
     alt Capacity target met
         Analysis-->>Control: Throughput: 520 wagons (target: 500)
         Control->>Files: Write capacity_assessment_PASS.csv
@@ -349,22 +350,22 @@ sequenceDiagram
 stateDiagram-v2
     [*] --> RunSimulation: Load config + schedule
     RunSimulation --> CalculateCapacity: Simulation complete
-    CalculateCapacity --> CompareTarget: Weekly throughput calculated
-    
+    CalculateCapacity --> CompareTarget: Throughput calculated
+
     CompareTarget --> CapacityMet: Actual >= Target
     CompareTarget --> CapacityMissed: Actual < Target
-    
+
     CapacityMet --> GenerateReport: PASS
     CapacityMissed --> AnalyzeBottlenecks: FAIL
     AnalyzeBottlenecks --> GenerateReport: With recommendations
-    
+
     GenerateReport --> [*]
-    
+
     note right of CompareTarget
         Target from company requirements
         Actual from simulation results
     end note
-    
+
     note right of AnalyzeBottlenecks
         Identify limiting factors:
         - Station capacity
@@ -375,7 +376,7 @@ stateDiagram-v2
 
 ### Performance Characteristics
 
-> **Note:** Week-long simulations (168h) will take longer than 24h scenarios. Performance will be measured during MVP implementation.
+> **Note:**  Performance will be measured during MVP implementation.
 
 ---
 
@@ -397,7 +398,7 @@ sequenceDiagram
     CLI->>Config: load_configuration()
     Config->>Files: Read invalid.json
     Files-->>Config: JSON data
-    
+
     Config->>Validator: Validate all fields
     Validator->>Validator: Collect all validation errors
     Note over Validator: Does NOT stop at first error
@@ -405,13 +406,13 @@ sequenceDiagram
     Validator->>Validator: Check workers_per_station > 10
     Validator->>Validator: Check retrofit_time < 0
     Validator-->>Config: ValidationError with 3 errors
-    
+
     Config->>Config: Format error summary
     Config--xCLI: ValidationError with error list
-    
+
     CLI->>CLI: Print validation summary:
     Note over CLI: Configuration validation failed (3 errors):<br/>1. station_count must be > 0 (got: -1)<br/>2. workers_per_station must be <= 10 (got: 15)<br/>3. retrofit_time must be > 0 (got: -5)
-    
+
     CLI-->>User: Complete error summary + example config
     Note over User: User fixes all errors at once
 ```
@@ -463,9 +464,9 @@ sequenceDiagram
 ### Scalability Testing Plan
 
 **Test scenarios to evaluate:**
-- Small workshop (2-4 stations, low wagon volume)
-- Standard workshop (4-6 stations, medium wagon volume)
-- High-load scenario (6+ stations, high wagon volume)
+- Small workshop (one Workshop with two retrofit stations, low wagon volume)
+- Standard workshop (two workshops with three retrofit stations, medium wagon volume)
+- High-load scenario (four workshops with three, high wagon volume)
 
 **Success criteria:**
 - Simulation completes without errors
