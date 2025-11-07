@@ -4,7 +4,7 @@
 
 **Note:** See [Architecture Section 6](../architecture/06-runtime.md) for runtime scenarios.
 
-This document describes data flow through the 3 MVP bounded contexts: Configuration, Simulation Domain, and Simulation Control.
+This document describes data flow through the 3 MVP bounded contexts: Configuration, Workshop Operations, and Analysis & Reporting.
 
 ## End-to-End Data Flow
 
@@ -23,7 +23,7 @@ This document describes data flow through the 3 MVP bounded contexts: Configurat
                           ScenarioConfig (Pydantic)
                                    │
 ┌──────────────────────────────────▼──────────────────────────────┐
-│                2. SIMULATION DOMAIN CONTEXT                     │
+│                2. WORKSHOP OPERATIONS CONTEXT                   │
 └─────────────────────────────────────────────────────────────────┘
                                    │
                           ┌────────▼────────┐
@@ -41,7 +41,7 @@ This document describes data flow through the 3 MVP bounded contexts: Configurat
                           Events + Wagons
                                    │
 ┌──────────────────────────────────▼──────────────────────────────┐
-│                3. SIMULATION CONTROL CONTEXT                    │
+│                3. ANALYSIS & REPORTING CONTEXT                  │
 └─────────────────────────────────────────────────────────────────┘
                                    │
                           ┌────────▼────────┐

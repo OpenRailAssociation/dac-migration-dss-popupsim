@@ -10,8 +10,8 @@ The MVP uses **3 bounded contexts** that cover core functionality:
 graph TB
     subgraph "MVP PopUpSim - 3 Contexts"
         CC[Configuration Context<br/>File Import, Validation]
-        SDC[Simulation Domain Context<br/>Domain Logic, SimPy Integration]
-        SCC[Simulation Control Context<br/>Orchestration, KPI Calculation]
+        SDC[Workshop Operations Context<br/>Domain Logic, SimPy Integration]
+        SCC[Analysis & Reporting Context<br/>Orchestration, KPI Calculation]
     end
 
     subgraph "External"
@@ -84,7 +84,7 @@ class ConfigurationService:
         pass
 ```
 
-## 2.3 Simulation Domain Context
+## 2.3 Workshop Operations Context
 
 ### Responsibilities
 - **Domain Logic**: Business rules for Pop-Up workshop simulation
@@ -143,7 +143,7 @@ class SimulationService:
         pass
 ```
 
-## 2.4 Simulation Control Context
+## 2.4 Analysis & Reporting Context
 
 ### Responsibilities
 - **Simulation Orchestration**: Start, run, complete simulation
@@ -154,8 +154,8 @@ class SimulationService:
 ### Key Components
 
 ```python
-class SimulationControlService:
-    """Service for simulation control"""
+class AnalysisReportingService:
+    """Service for analysis and reporting"""
 
     def start_simulation(self, scenario_id: str) -> str:
         """Starts simulation"""
@@ -193,7 +193,7 @@ class PopUpSimApplication:
     def __init__(self):
         self.config_service = ConfigurationService()
         self.simulation_service = SimulationService(SimPyAdapter())
-        self.control_service = SimulationControlService()
+        self.control_service = AnalysisReportingService()
 
     def run_complete_analysis(self, config_file: str) -> AnalysisResult:
         # 1. Configuration Context
@@ -208,7 +208,7 @@ class PopUpSimApplication:
             scenario, duration_hours=24
         )
 
-        # 3. Simulation Control Context
+        # 3. Analysis & Reporting Context
         self.control_service.export_results(sim_results)
         self.control_service.generate_charts(sim_results)
 
@@ -228,8 +228,8 @@ After MVP, the 3 contexts can be split into more specialized contexts. The exact
 graph LR
     subgraph "MVP (3 Contexts)"
         CC_MVP[Configuration Context]
-        SDC_MVP[Simulation Domain Context]
-        SCC_MVP[Simulation Control Context]
+        SDC_MVP[Workshop Operations Context]
+        SCC_MVP[Analysis & Reporting Context]
     end
 
     subgraph "Full Version (Example: More Specialized Contexts)"

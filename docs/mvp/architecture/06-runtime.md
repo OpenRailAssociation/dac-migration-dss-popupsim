@@ -17,8 +17,8 @@ sequenceDiagram
     participant Planner as Strategic Planner
     participant CLI as CLI
     participant Config as Configuration Context
-    participant Domain as Simulation Domain Context
-    participant Control as Simulation Control Context
+    participant Domain as Workshop Operations Context
+    participant Control as Analysis & Reporting Context
     participant Files as File System
 
     Planner->>Files: Create workshop_2stations.json
@@ -88,9 +88,9 @@ sequenceDiagram
     participant Planner as Strategic Planner
     participant CLI as CLI
     participant Config as Configuration Context
-    participant Domain as Simulation Domain Context
+    participant Domain as Workshop Operations Context
     participant Analysis as Analysis Engine
-    participant Control as Simulation Control Context
+    participant Control as Analysis & Reporting Context
     participant Files as File System
 
     Planner->>Files: Create scenario_high_load.json
@@ -282,9 +282,9 @@ sequenceDiagram
     participant Planner as Company Planner
     participant CLI as CLI
     participant Config as Configuration Context
-    participant Domain as Simulation Domain Context
+    participant Domain as Workshop Operations Context
     participant Analysis as Analysis Engine
-    participant Control as Simulation Control Context
+    participant Control as Analysis & Reporting Context
     participant Files as File System
 
     Note over Planner: Has imported infrastructure (US-003)
@@ -431,8 +431,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant CLI
-    participant Control as Simulation Control Context
-    participant Domain as Simulation Domain Context
+    participant Control as Analysis & Reporting Context
+    participant Domain as Workshop Operations Context
     participant Files as File System
 
     CLI->>Control: run_simulation()

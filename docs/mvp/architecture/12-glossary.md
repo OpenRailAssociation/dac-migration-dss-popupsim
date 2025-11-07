@@ -42,7 +42,7 @@
 | **Business Logic Layer** | Domain services and business logic | Core layer |
 | **Data Access Layer** | File I/O (JSON/CSV) | Data layer |
 | **Infrastructure Layer** | SimPy, Matplotlib, file system | Bottom layer |
-| **Service** | Business logic component | `ConfigurationService`, `SimulationDomainService` |
+| **Service** | Business logic component | `ConfigurationService`, `WorkshopOperationsService` |
 | **Model** | Data model/entity | `Workshop`, `Station`, `Wagon` |
 
 ### Bounded Context (MVP)
@@ -50,8 +50,8 @@
 | Term | MVP Definition | Responsibility |
 |---------|----------------|---------------|
 | **Configuration Context** | JSON/CSV import and validation | Scenario setup |
-| **Simulation Domain Context** | DAC retrofit and SimPy integration | Core business logic |
-| **Simulation Control Context** | Orchestration and output generation | Overall control |
+| **Workshop Operations Context** | DAC retrofit and SimPy integration | Core business logic |
+| **Analysis & Reporting Context** | Orchestration and output generation | Overall control |
 | **Context** | Domain section with clear boundaries | Bounded context per DDD |
 | **Domain Model** | Domain data model of a context | Entities, value objects |
 

@@ -8,8 +8,8 @@
 graph TB
     subgraph "PopUpSim MVP System"
         CC["<b>Configuration Context</b><br/>Input validation & parsing<br/>Pydantic + Pandas"]
-        SD["<b>Simulation Domain Context</b><br/>Simulation execution & analysis<br/>SimPy + Analysis Engine"]
-        SC["<b>Simulation Control Context</b><br/>Orchestration & output<br/>Matplotlib + CSV export"]
+        SD["<b>Workshop Operations Context</b><br/>Simulation execution & analysis<br/>SimPy + Analysis Engine"]
+        SC["<b>Analysis & Reporting Context</b><br/>Orchestration & output<br/>Matplotlib + CSV export"]
     end
 
     subgraph "External"
@@ -34,15 +34,15 @@ graph TB
 | Building Block | Responsibility | Reference |
 |----------------|----------------|----------|
 | **Configuration Context** | Parse and validate input files (JSON/CSV) | [Section 5.2](#52-level-2-configuration-context) |
-| **Simulation Domain Context** | Execute discrete event simulation with SimPy and real-time analysis | [Section 5.3](#53-level-2-simulation-domain-context) |
-| **Simulation Control Context** | Orchestrate simulation execution and generate aggregated output | [Section 5.4](#54-level-2-simulation-control-context) |
+| **Workshop Operations Context** | Execute discrete event simulation with SimPy and real-time analysis | [Section 5.3](#53-level-2-workshop-operations-context) |
+| **Analysis & Reporting Context** | Orchestrate simulation execution and generate aggregated output | [Section 5.4](#54-level-2-analysis--reporting-context) |
 
 ### Important Interfaces
 
 | Interface | Source | Target | Description |
 |-----------|--------|--------|-------------|
-| **Validated Configuration** | Configuration Context | Simulation Domain Context | Pydantic-validated domain objects (scenario, workshop, topology, routes, schedules) |
-| **Simulation Results** | Simulation Domain Context | Simulation Control Context | Simulation events and KPI data from analysis engine |
+| **Validated Configuration** | Configuration Context | Workshop Operations Context | Pydantic-validated domain objects (scenario, workshop, topology, routes, schedules) |
+| **Simulation Results** | Workshop Operations Context | Analysis & Reporting Context | Simulation events and KPI data from analysis engine |
 | **File I/O** | All Contexts | File System | JSON/CSV read/write operations |
 
 ---
@@ -115,9 +115,9 @@ class WorkshopConfig(BaseModel):
 
 ---
 
-## 5.3 Level 2: Simulation Domain Context
+## 5.3 Level 2: Workshop Operations Context
 
-### Whitebox: Simulation Domain Context
+### Whitebox: Workshop Operations Context
 
 **Responsibility:** Execute discrete event simulation and perform real-time analysis.
 
@@ -125,7 +125,7 @@ class WorkshopConfig(BaseModel):
 
 ```mermaid
 graph TB
-    subgraph "Simulation Domain Context"
+    subgraph "Workshop Operations Context"
         DomainLogic["Domain Logic<br/>Workshop & rail operations"]
         Entities["Domain Entities<br/>Wagon, Loco, Track, Workshop"]
         SimEngine["Simulation Engine<br/>SimPy processes"]
@@ -185,9 +185,9 @@ class Workshop:
 
 ---
 
-## 5.4 Level 2: Simulation Control Context
+## 5.4 Level 2: Analysis & Reporting Context
 
-### Whitebox: Simulation Control Context
+### Whitebox: Analysis & Reporting Context
 
 **Responsibility:** Orchestrate simulation execution and generate aggregated output.
 
@@ -195,7 +195,7 @@ class Workshop:
 
 ```mermaid
 graph TB
-    subgraph "Simulation Control Context"
+    subgraph "Analysis & Reporting Context"
         Orchestrator["Simulation Orchestrator<br/>Coordinates contexts"]
         Aggregator["KPI Aggregator<br/>Aggregate simulation data"]
         OutputFormatter["Output Formatter<br/>CSV/JSON export"]
@@ -223,7 +223,7 @@ graph TB
 
 | Component | Responsibility | Layer | Technology |
 |-----------|----------------|-------|------------|
-| **Simulation Orchestrator** | Coordinate Configuration → Simulation Domain → Output flow | Business Logic | Pure Python |
+| **Simulation Orchestrator** | Coordinate Configuration → Workshop Operations → Output flow | Business Logic | Pure Python |
 | **KPI Aggregator** | Aggregate simulation events into summary KPIs | Business Logic | Python, Pandas |
 | **Output Formatter** | Format data for CSV/JSON export | Presentation | Python, Pandas |
 | **Chart Generator** | Generate visualization charts | Presentation | Matplotlib |

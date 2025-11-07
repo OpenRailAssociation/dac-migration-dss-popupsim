@@ -187,8 +187,8 @@ Full version will have multiple bounded contexts. MVP needs minimal viable domai
 **Decision:**
 Use **3 bounded contexts**:
 1. **Configuration Context**: Input validation & parsing
-2. **Simulation Domain Context**: Simulation execution & analysis (workshops, tracks, trains)
-3. **Simulation Control Context**: Orchestration & output
+2. **Workshop Operations Context**: Simulation execution & analysis (workshops, tracks, trains)
+3. **Analysis & Reporting Context**: Orchestration & output
 
 **Rationale:**
 - **Time constraint**: 5-week development with 3 developers

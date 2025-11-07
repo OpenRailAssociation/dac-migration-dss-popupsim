@@ -23,7 +23,7 @@ This documentation describes the **MVP (Minimum Viable Product) architecture** o
 
 ## Key Architecture Characteristics
 
-- **3 Bounded Contexts:** Configuration, Simulation Domain, Simulation Control
+- **3 Bounded Contexts:** Configuration, Workshop Operations, Analysis & Reporting
 - **Technology Stack:** Python 3.13+, SimPy, Pydantic, Matplotlib
 - **Deployment:** Desktop application (local execution)
 - **Data Storage:** File-based (JSON/CSV)
@@ -34,5 +34,5 @@ This documentation describes the **MVP (Minimum Viable Product) architecture** o
 - **[Quality Goals](01-introduction-goals.md#12-quality-goals)** - Top 5 quality priorities
 - **[Use Cases](01-introduction-goals.md#14-mvp-scope)** - 4 MVP use cases
 - **[Technology Decisions](09-architecture-decisions.md)** - 7 key ADRs
-- **[Building Blocks](05-building-blocks.md)** - System structure
+- **[Building Blocks](05-building-blocks.md)** - System structure (3 contexts)
 - **[Glossary](12-glossary.md)** - 95+ terms

@@ -91,7 +91,7 @@ dac-migration-dss-popupsim/
 │   │   │   │   ├── model_routes.py    # Routes collection
 │   │   │   │   ├── model_train.py     # Train model
 │   │   │   │   └── model_wagon.py     # Wagon model
-│   │   │   ├── simulation/        # Simulation Control Context
+│   │   │   ├── simulation/        # Analysis & Reporting Context
 │   │   │   │   ├── __init__.py
 │   │   │   │   ├── popupsim.py        # Main simulation orchestrator
 │   │   │   │   └── sim_adapter.py     # SimPy adapter
@@ -151,12 +151,12 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 | └─ Data Parser | Python class | `configuration/service.py` | Main process memory | N/A |
 | └─ Configuration Validator | Pydantic models | `configuration/validation.py` | Main process memory | N/A |
 | └─ Domain Models | Pydantic classes | `configuration/model_*.py` | Main process memory | N/A |
-| **Simulation Domain Context** | Python module | `popupsim/backend/src/domain/` (planned) | Main process memory | N/A |
+| **Workshop Operations Context** | Python module | `popupsim/backend/src/domain/` (planned) | Main process memory | N/A |
 | └─ Simulation Engine | Python class | `domain/service.py` (planned) | Main process memory | N/A |
 | └─ Analysis Engine | Python class | `domain/analysis/` (planned) | Main process memory | N/A |
 | └─ Domain Logic | Python classes | `domain/processes/` (planned) | Main process memory | N/A |
 | └─ Domain Entities | Python classes | `domain/entities/` (planned) | Main process memory | N/A |
-| **Simulation Control Context** | Python module | `popupsim/backend/src/simulation/` | Main process memory | N/A |
+| **Analysis & Reporting Context** | Python module | `popupsim/backend/src/simulation/` | Main process memory | N/A |
 | └─ Simulation Orchestrator | Python class | `simulation/popupsim.py` | Main process memory | N/A |
 | └─ KPI Aggregator | Python class | `simulation/popupsim.py` | Main process memory | N/A |
 | └─ Output Formatter | Python class | `simulation/output/` (planned) | Main process memory | N/A |
@@ -182,7 +182,7 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 
 | Component | Status | Directory | Purpose |
 |-----------|--------|-----------|----------|
-| **Simulation Domain Context** | Planned | `popupsim/backend/src/domain/` | Core simulation logic |
+| **Workshop Operations Context** | Planned | `popupsim/backend/src/domain/` | Core simulation logic |
 | └─ Domain Entities | Planned | `domain/entities/` | Wagon, Track, Workshop, Route models |
 | └─ SimPy Processes | Planned | `domain/processes/` | Discrete event simulation processes |
 | └─ Analysis Engine | Planned | `domain/analysis/` | Real-time KPI calculation |

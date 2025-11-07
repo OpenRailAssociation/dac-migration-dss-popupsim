@@ -15,9 +15,9 @@ graph TB
     subgraph "PopUpSim MVP - 3 Bounded Contexts"
         CC["<b>Configuration Context</b><br/>Responsibility: Input validation & parsing<br/>Technology: Pydantic + Pandas<br/>Input: JSON/CSV files<br/>Output: Validated domain objects"]
 
-        SD["<b>Simulation Domain Context</b><br/>Responsibility: Simulation execution & analysis<br/>Technology: SimPy + Analysis Engine<br/>Input: Configuration objects<br/>Output: Simulation events & KPI data"]
+        SD["<b>Workshop Operations Context</b><br/>Responsibility: Simulation execution & analysis<br/>Technology: SimPy + Analysis Engine<br/>Input: Configuration objects<br/>Output: Simulation events & KPI data"]
 
-        SC["<b>Simulation Control Context</b><br/>Responsibility: Orchestration & output formatting<br/>Technology: Matplotlib + CSV export<br/>Input: Simulation events & KPI data<br/>Output: Aggregated reports & charts"]
+        SC["<b>Analysis & Reporting Context</b><br/>Responsibility: Orchestration & output formatting<br/>Technology: Matplotlib + CSV export<br/>Input: Simulation events & KPI data<br/>Output: Aggregated reports & charts"]
     end
 
     CC -->|"Direct method calls<br/>(validated config objects)"| SD
@@ -32,8 +32,8 @@ graph TB
 | Context | Core Responsibility | Key Components | MVP Simplification |
 |---------|-------------------|----------------|--------------------|
 | **Configuration** | Parse and validate input files | File readers, Pydantic models, validators | Single context vs. multiple specialized contexts in full version (under analysis) |
-| **Simulation Domain** | Execute discrete event simulation and real-time analysis | SimPy processes, analysis engine, domain entities (wagons, tracks, workshops), business rules | Simplified domain model, direct calls vs. event-driven |
-| **Simulation Control** | Orchestrate simulation and aggregate output | KPI aggregators, output formatters, chart generators | File-based output vs. web interface in full version |
+| **Workshop Operations** | Execute discrete event simulation and real-time analysis | SimPy processes, analysis engine, domain entities (wagons, tracks, workshops), business rules | Simplified domain model, direct calls vs. event-driven |
+| **Analysis & Reporting** | Orchestrate simulation and aggregate output | KPI aggregators, output formatters, chart generators | File-based output vs. web interface in full version |
 
 ## 4.2 Technology Decisions
 
@@ -116,7 +116,7 @@ graph TB
 **Rationale:**
 - Simplest integration for MVP (no message bus, no events)
 - Synchronous execution matches file-based workflow
-- Clear call chain: Configuration → Simulation Domain → Simulation Control
+- Clear call chain: Configuration → Workshop Operations → Analysis & Reporting
 - Easy to refactor to event-driven in full version
 
 **Benefits:**

@@ -51,9 +51,9 @@ C4Context
 
     System_Boundary(mvp_boundary, "PopUpSim MVP") {
         Container(main, "Main Application", "Python Script", "Entry point, orchestrates simulation")
-        Container(config_reader, "Configuration Reader", "Python + Pydantic", "Parses and validates JSON/CSV")
-        Container(sim_engine, "Simulation Engine", "Python + SimPy", "Discrete event simulation")
-        Container(output_gen, "Output Generator", "Python + Matplotlib", "Creates CSV and PNG outputs")
+        Container(config_reader, "Configuration Context", "Python + Pydantic", "Parses and validates JSON/CSV")
+        Container(sim_engine, "Workshop Operations Context", "Python + SimPy", "Discrete event simulation")
+        Container(output_gen, "Analysis & Reporting Context", "Python + Matplotlib", "Creates CSV and PNG outputs")
     }
 
     SystemDb_Ext(config_files, "Configuration Files", "JSON/CSV on Local FS")

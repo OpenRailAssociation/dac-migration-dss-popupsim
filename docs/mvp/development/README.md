@@ -78,8 +78,8 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 | Component | Status | Location |
 |-----------|--------|----------|
 | Configuration Context | ✅ Implemented | `popupsim/backend/src/configuration/` |
-| Simulation Domain Context | 🚧 In Progress | `popupsim/backend/src/domain/` |
-| Simulation Control Context | 📋 Planned | `popupsim/backend/src/control/` |
+| Workshop Operations Context | 🚧 In Progress | `popupsim/backend/src/domain/` |
+| Analysis & Reporting Context | 📋 Planned | `popupsim/backend/src/control/` |
 | SimPy Integration | 🚧 In Progress | `popupsim/backend/src/simulation/` |
 | Testing | 🚧 In Progress | `popupsim/backend/tests/` |
 

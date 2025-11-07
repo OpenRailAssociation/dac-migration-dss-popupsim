@@ -43,8 +43,8 @@ This document describes the evolution from MVP to full version.
 
 **Possible evolution**:
 - Configuration Context → May remain as-is
-- Simulation Domain Context → May split into specialized contexts (Infrastructure, Resource Management, Train Operations, Workshop)
-- Simulation Control Context → May split into Simulation Control + Analytics
+- Workshop Operations Context → May split into specialized contexts (Infrastructure, Resource Management, Train Operations, Workshop)
+- Analysis & Reporting Context → May split into Simulation Control + Analytics
 
 **Effort**: To be estimated after MVP
 
@@ -128,7 +128,7 @@ class ConfigurationService:
         return config
 ```
 
-### Simulation Domain Context
+### Workshop Operations Context
 
 **MVP**: Single context with all domain logic
 
@@ -156,14 +156,14 @@ class WorkshopService:
         pass
 ```
 
-### Simulation Control Context
+### Analysis & Reporting Context
 
 **MVP**: Orchestration + KPI calculation
 
 **Full Version**: Split into Simulation Control + Analytics
 
 ```python
-# Simulation Control Context
+# Analysis & Reporting Context
 class SimulationControlService:
     async def start_simulation(self, scenario_id: str) -> SimulationRun:
         pass

@@ -17,8 +17,8 @@ graph TB
 
         subgraph "Business Logic"
             ConfigService[Configuration Service]
-            DomainService[Simulation Domain Service]
-            SimulationService[Simulation Service]
+            DomainService[Workshop Operations Service]
+            SimulationService[Analysis & Reporting Service]
         end
 
         subgraph "Data Access"
@@ -53,7 +53,7 @@ graph TB
 | Layer | Responsibility | Components |
 |-------|----------------|------------|
 | **Presentation** | User interaction, file I/O | CLI, File readers/writers |
-| **Business Logic** | Domain logic, services | Configuration validator, Simulation engine, Orchestrator |
+| **Business Logic** | Domain logic, services | Configuration validator, Workshop operations, Analysis orchestrator |
 | **Domain** | Domain entities and models | Wagon, Track, Workshop, ScenarioConfig |
 | **Infrastructure** | External frameworks | SimPy, Matplotlib, Pydantic, Pandas |
 

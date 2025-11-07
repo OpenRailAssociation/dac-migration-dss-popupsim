@@ -63,8 +63,8 @@ graph TB
     subgraph "PopUpSim MVP - Desktop Application"
         subgraph "Python Application"
             Setup[Configuration Context<br/>JSON/CSV Reader<br/>CONTAINER]
-            Core[Simulation Domain Context<br/>SimPy Integration<br/>CONTAINER]
-            Control[Simulation Control Context<br/>KPI Calculation<br/>CONTAINER]
+            Core[Workshop Operations Context<br/>SimPy Integration<br/>CONTAINER]
+            Control[Analysis & Reporting Context<br/>KPI Calculation<br/>CONTAINER]
         end
 
         subgraph "Data (File System)"
