@@ -103,8 +103,7 @@ uv run pylint popupsim/backend/src/    # Code quality analysis
 - **MyPy strict mode** - `disallow_untyped_defs = true`
 - **Ruff formatting** - Consistent code style
 - **Pytest** - Comprehensive test coverage
-
-See [.amazonq/rules/project-rules.md](.amazonq/rules/project-rules.md) for complete coding standards.
+- **Pylint** - Static code analysis and linting
 
 ## Technology Stack
 
