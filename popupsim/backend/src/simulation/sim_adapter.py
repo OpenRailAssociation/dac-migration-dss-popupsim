@@ -22,7 +22,7 @@ class SimulationAdapter(ABC):
     """
 
     @abstractmethod
-    def current_time(self) -> float:
+    def current_time(self) -> str:
         """Get current simulation time.
 
         Returns
@@ -119,15 +119,15 @@ class SimPyAdapter(SimulationAdapter):
         env = simpy.Environment()
         return cls(env)
 
-    def current_time(self) -> float:
+    def current_time(self) -> str:
         """Get current simulation time.
 
         Returns
         -------
-        float
-            Current time in the SimPy environment.
+        str
+            Current time in the SimPy environment formatted to two decimal places.
         """
-        return float(self._env.now)
+        return f'{float(self._env.now):8.2f}'
 
     def delay(self, duration: float) -> Any:
         """Create a SimPy timeout event.

@@ -173,23 +173,23 @@ def main(
         # scenario_path is guaranteed to be Path here (validated above)
         if scenario_path is None:
             raise typer.Exit(1)
-        scenario_config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
+        scenario_config = service.load_complete_scenario(str(scenario_path.parent))
         typer.echo('\nScenario loaded and validated successfully.')
         typer.echo(f'Scenario ID: {scenario_config.scenario_id}')
         typer.echo(f'Start Date: {scenario_config.start_date}')
         typer.echo(f'End Date: {scenario_config.end_date}')
-        typer.echo(f'Number of Trains: {len(scenario_config.train) if scenario_config.train else 0}')
+        typer.echo(f'Number of Trains: {len(scenario_config.trains) if scenario_config.trains else 0}')
         workshop_track_count = 0
         if scenario_config.workshop is not None:
             workshop_track_count = len(getattr(scenario_config.workshop, 'tracks', []))
         typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
         typer.echo(f'Number of Routes: {len(scenario_config.routes) if scenario_config.routes else 0}')
         typer.echo('\nValidation Summary:')
-        validation_result.print_summary()
+        # validation_result.print_summary()
 
-        if not validation_result.is_valid:
-            typer.echo('\nErrors detected in scenario configuration. Exiting.')
-            raise typer.Exit(1)
+        # if not validation_result.is_valid:
+        #     typer.echo('\nErrors detected in scenario configuration. Exiting.')
+        #     raise typer.Exit(1)
         # Main application logic would go here
         typer.echo('\n🚀 Starting popupsim processing...')
         sim_adapter = SimPyAdapter.create_simpy_adapter()

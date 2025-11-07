@@ -11,12 +11,6 @@ from configuration.model_routes import load_routes_from_csv
 
 
 @pytest.fixture
-def routes_csv_path() -> Path:
-    """Return the path to the test routes CSV file."""
-    return Path(__file__).parent.parent / 'fixtures' / 'config' / 'routes.csv'
-
-
-@pytest.fixture
 def routes(routes_csv_path: Path) -> Routes:
     """Return a Routes instance with test data loaded."""
     return Routes(routes_csv_path)

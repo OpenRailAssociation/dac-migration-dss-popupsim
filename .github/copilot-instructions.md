@@ -47,6 +47,8 @@ When generating or modifying code, **ALWAYS**:
 3. Add type hints for class attributes and variables where type inference isn't clear
 4. Import required types from `typing` or `typing_extensions`
 5. Follow the project's MyPy configuration which enforces `disallow_untyped_defs = true`
+6. Always try to find the most concise solution that meets type hinting requirements
+7. Never import in functions or methods; all imports must be at the module level
 
 ## Type Hint Examples
 ```python

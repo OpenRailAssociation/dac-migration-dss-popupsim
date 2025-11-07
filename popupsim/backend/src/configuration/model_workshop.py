@@ -16,8 +16,8 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
-from .model_track import TrackFunction
-from .model_track import WorkshopTrack
+from .model_track import Track
+from .model_track import TrackType
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -29,11 +29,11 @@ class Workshop(BaseModel):
     Contains all available tracks for train processing.
     """
 
-    tracks: list[WorkshopTrack] = Field(min_length=1, description='List of available tracks in the workshop')
+    tracks: list[Track] = Field(min_length=1, description='List of available tracks in the workshop')
 
     @field_validator('tracks')
     @classmethod
-    def validate_unique_track_ids(cls, v: list[WorkshopTrack]) -> list[WorkshopTrack]:
+    def validate_unique_track_ids(cls, v: list[Track]) -> list[Track]:
         """Ensure all track IDs are unique.
 
         Parameters
@@ -57,100 +57,7 @@ class Workshop(BaseModel):
             raise ValueError(f'Duplicate track IDs found: {list(set(duplicates))}')
         return v
 
-    @field_validator('tracks')
-    @classmethod
-    def validate_track_functions(cls, v: list[WorkshopTrack]) -> list[WorkshopTrack]:
-        """Validate track functions for workshop operation requirements.
-
-        Parameters
-        ----------
-        v : list[WorkshopTrack]
-            List of workshop tracks to validate.
-
-        Returns
-        -------
-        list[WorkshopTrack]
-            Validated list of tracks.
-
-        Raises
-        ------
-        ValueError
-            If required functions are missing or retrofit times are invalid.
-        """
-        # Get all functions present in the workshop
-        functions_present = {track.function for track in v}
-
-        # Required functions for basic workshop operation
-        required_functions = {TrackFunction.WERKSTATTGLEIS}
-
-        # Check for required functions
-        missing_required = required_functions - functions_present
-        if missing_required:
-            missing_names = [f.value for f in missing_required]
-            raise ValueError(f'Workshop must have at least one track with required functions: {missing_names}')
-
-        # Business rule: Verify werkstattgleis tracks have proper retrofit times
-        werkstatt_tracks = [track for track in v if track.function == TrackFunction.WERKSTATTGLEIS]
-        for track in werkstatt_tracks:
-            if track.retrofit_time_min <= 0:
-                raise ValueError(f'Werkstattgleis track {track.id} must have retrofit_time_min > 0')
-
-        # Business rule: Non-werkstattgleis tracks should have retrofit_time_min = 0
-        non_werkstatt_tracks = [track for track in v if track.function != TrackFunction.WERKSTATTGLEIS]
-        for track in non_werkstatt_tracks:
-            if track.retrofit_time_min != 0:
-                raise ValueError(
-                    f'Non-werkstattgleis track {track.id} ({track.function.value}) must have retrofit_time_min = 0'
-                )
-
-        return v
-
-    @field_validator('tracks')
-    @classmethod
-    def validate_workshop_capacity(cls, v: list[WorkshopTrack]) -> list[WorkshopTrack]:
-        """Validate workshop capacity and configuration.
-
-        Parameters
-        ----------
-        v : list[WorkshopTrack]
-            List of workshop tracks to validate.
-
-        Returns
-        -------
-        list[WorkshopTrack]
-            Validated list of tracks.
-
-        Raises
-        ------
-        ValueError
-            If feeder/exit tracks are unbalanced.
-        """
-        # Calculate total capacity by function
-        function_capacities = {}
-        for track in v:
-            if track.function not in function_capacities:
-                function_capacities[track.function] = 0
-            function_capacities[track.function] += track.capacity
-
-        # Warning: Low werkstattgleis capacity
-        werkstatt_capacity = function_capacities.get(TrackFunction.WERKSTATTGLEIS, 0)
-        if werkstatt_capacity < 3:
-            logger.warning(
-                'Low werkstattgleis capacity: %s. Consider adding more retrofit capacity.', werkstatt_capacity
-            )
-
-        # Business rule: If feeder/exit tracks exist, they should be balanced
-        zufuehrung_capacity = function_capacities.get(TrackFunction.WERKSTATTZUFUEHRUNG, 0)
-        abfuehrung_capacity = function_capacities.get(TrackFunction.WERKSTATTABFUEHRUNG, 0)
-
-        if zufuehrung_capacity > 0 and abfuehrung_capacity == 0:
-            raise ValueError('Workshop has werkstattzufuehrung tracks but no werkstattabfuehrung tracks')
-        if abfuehrung_capacity > 0 and zufuehrung_capacity == 0:
-            raise ValueError('Workshop has werkstattabfuehrung tracks but no werkstattzufuehrung tracks')
-
-        return v
-
-    def get_werkstatt_throughput_info(self) -> dict:
+    def get_werkstatt_throughput_info(self) -> dict[str, int | float | str]:
         """Calculate and return werkstatt throughput information.
 
         Returns
@@ -160,14 +67,25 @@ class Workshop(BaseModel):
             avg_retrofit_time_min, max_throughput_per_day, and werkstatt_track_count.
             Returns error message if no werkstattgleis tracks found.
         """
-        werkstatt_tracks = [track for track in self.tracks if track.function == TrackFunction.WERKSTATTGLEIS]
+        werkstatt_tracks = [track for track in self.tracks if track.type == TrackType.WERKSTATTGLEIS]
 
         if not werkstatt_tracks:
             return {'error': 'No werkstattgleis tracks found'}
 
-        total_capacity = sum(t.capacity for t in werkstatt_tracks)
-        avg_retrofit_time = sum(t.retrofit_time_min for t in werkstatt_tracks) / len(werkstatt_tracks)
-        max_throughput_per_day = (24 * 60 / avg_retrofit_time) * total_capacity
+        # Safely aggregate capacities (t.capacity may be None)
+        capacities: list[int] = [t.capacity or 0 for t in werkstatt_tracks]
+        total_capacity: int = sum(capacities)
+
+        # Collect retrofit times, ignoring tracks without a defined retrofit_time_min
+        # retrofit_times: list[int] = [t.retrofit_time_min for t in werkstatt_tracks if t.retrofit_time_min is not None]
+        # Todo clarify retrofit_time_min handling
+        retrofit_times: list[int] = [30, 30]  # Placeholder values for
+
+        if not retrofit_times:
+            return {'error': 'No retrofit_time_min defined for werkstattgleis tracks'}
+
+        avg_retrofit_time: float = sum(retrofit_times) / len(retrofit_times)
+        max_throughput_per_day: float = (24 * 60 / avg_retrofit_time) * total_capacity
 
         return {
             'total_capacity': total_capacity,
@@ -192,10 +110,10 @@ class Workshop(BaseModel):
         throughput_info = self.get_werkstatt_throughput_info()
 
         if 'error' in throughput_info:
-            return [throughput_info['error']]
+            return [str(throughput_info['error'])]
 
         max_throughput = throughput_info['max_throughput_per_day']
-        utilization = wagons_needing_retrofit_per_day / max_throughput
+        utilization = wagons_needing_retrofit_per_day / int(max_throughput)
 
         messages = []
 

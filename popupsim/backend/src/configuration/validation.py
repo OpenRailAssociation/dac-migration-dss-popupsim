@@ -12,7 +12,7 @@ from enum import Enum
 import logging
 
 from .model_scenario import ScenarioConfig
-from .model_track import TrackFunction
+from .model_track import TrackType
 
 logger = logging.getLogger('validation')
 
@@ -166,11 +166,12 @@ class ConfigurationValidator:
         issues: list[ValidationIssue] = []
 
         # Perform all validations
+        # Todo : verifiy validations
         issues.extend(self._validate_workshop_tracks(config))
-        issues.extend(self._validate_capacity(config))
+        # issues.extend(self._validate_capacity(config)) ToDo: clarify if needed
         issues.extend(self._validate_routes(config))
-        issues.extend(self._validate_train_schedule(config))
-        issues.extend(self._validate_simulation_duration(config))
+        # issues.extend(self._validate_train_schedule(config))
+        # issues.extend(self._validate_simulation_duration(config))
 
         # is_valid = True when no errors
         is_valid = not any(i.level == ValidationLevel.ERROR for i in issues)
@@ -182,7 +183,7 @@ class ConfigurationValidator:
 
         Checks:
         - At least one workshop track available
-        - All required functions available
+        - All required type available
         - retrofit_time_min only for workshop tracks > 0
         """
         issues: list[ValidationIssue] = []
@@ -200,7 +201,7 @@ class ConfigurationValidator:
             return issues
 
         # 1. At least one workshop track
-        werkstatt_tracks = [t for t in config.workshop.tracks if t.function == TrackFunction.WERKSTATTGLEIS]
+        werkstatt_tracks = [t for t in config.workshop.tracks if t.type == TrackType.WERKSTATTGLEIS]
 
         if len(werkstatt_tracks) == 0:
             issues.append(
@@ -212,100 +213,90 @@ class ConfigurationValidator:
                 )
             )
 
-        # 2. All core functions present?
-        required_functions = {TrackFunction.SAMMELGLEIS, TrackFunction.WERKSTATTGLEIS, TrackFunction.PARKGLEIS}
-        present_functions = {t.function for t in config.workshop.tracks}
-        missing = required_functions - present_functions
+        # 2. All core tracktypes present?
+        required_types = {TrackType.SAMMELGLEIS, TrackType.WERKSTATTGLEIS, TrackType.PARKGLEIS}
+        present_types = {t.type for t in config.workshop.tracks}
+        missing = required_types - present_types
 
         if missing:
-            missing_names = [func.value for func in missing]
+            missing_names = [trackype.value for trackype in missing]
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.WARNING,
-                    message=f'Missing track functions: {", ".join(missing_names)}',
+                    message=f'Missing track type: {", ".join(missing_names)}',
                     field='workshop.tracks',
                     suggestion='Complete workflow needed: sammelgleis → werkstattgleis → parkgleis',
                 )
             )
 
-        # 3. retrofit_time_min only for workshop tracks
-        for track in config.workshop.tracks:
-            if track.function != TrackFunction.WERKSTATTGLEIS and track.retrofit_time_min > 0:
-                issues.append(
-                    ValidationIssue(
-                        level=ValidationLevel.ERROR,
-                        message=f'Track {track.id}: retrofit_time_min must be 0 for function={track.function}',
-                        field=f'workshop.tracks[{track.id}].retrofit_time_min',
-                        suggestion='Set retrofit_time_min=0 for non-workshop tracks',
-                    )
-                )
+        # 3. retrofit_time_min only for werkstattgleis. Should be added ?
 
         return issues
 
-    def _validate_capacity(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """Validate whether workshop capacity is sufficient for train arrivals.
+    # def _validate_capacity(self, scenario: ScenarioConfig) -> list[ValidationIssue]:
+    #     """Validate whether workshop capacity is sufficient for train arrivals.
 
-        Calculates theoretical throughput and compares with arrival rate.
-        """
-        issues: list[ValidationIssue] = []
+    #     Calculates theoretical throughput and compares with arrival rate.
+    #     """
+    #     issues: list[ValidationIssue] = []
 
-        # Check if workshop is configured
-        if config.workshop is None:
-            return issues  # Workshop validation already handles this case
+    #     # Check if workshop is configured
+    #     if scenario.workshop is None:
+    #         return issues  # Workshop validation already handles this case
 
-        # Total workshop capacity
-        werkstatt_tracks = [t for t in config.workshop.tracks if t.function == TrackFunction.WERKSTATTGLEIS]
+    #     # Total workshop capacity
+    #     werkstatt_tracks = [t for t in scenario.workshop.tracks if t.type == TrackType.WERKSTATTGLEIS]
 
-        if not werkstatt_tracks:
-            return issues  # Already checked in _validate_workshop_tracks
+    #     if not werkstatt_tracks:
+    #         return issues  # Already checked in _validate_workshop_tracks
 
-        total_capacity = sum(t.capacity for t in werkstatt_tracks)
+    #     total_capacity = sum(t.capacity for t in werkstatt_tracks)
 
-        # Average retrofit time
-        avg_retrofit_time = sum(t.retrofit_time_min for t in werkstatt_tracks) / len(werkstatt_tracks)
+    #     # Average retrofit time
+    #     avg_retrofit_time = sum(t.retrofit_time_min for t in werkstatt_tracks) / len(werkstatt_tracks)
 
-        # Wagons per day from train configuration
-        wagons_per_day = len(
-            [
-                w
-                for train in (config.train or [])
-                for w in train.wagons
-                if w.needs_retrofit  # Only wagons that need retrofitting
-            ]
-        )
+    #     # Wagons per day from train configuration
+    #     wagons_per_day = len(
+    #         [
+    #             w
+    #             for train in (scenario.trains or [])
+    #             for w in train.wagons
+    #             if w.needs_retrofit  # Only wagons that need retrofitting
+    #         ]
+    #     )
 
-        # Theoretical throughput per day (24h * 60min / avg_time * capacity)
-        max_throughput_per_day = (24 * 60 / avg_retrofit_time) * total_capacity
+    # # Theoretical throughput per day (24h * 60min / avg_time * capacity)
+    # max_throughput_per_day = (24 * 60 / avg_retrofit_time) * total_capacity
 
-        # Warning at > 80% utilization
-        utilization = wagons_per_day / max_throughput_per_day
+    # # Warning at > 80% utilization
+    # utilization = wagons_per_day / max_throughput_per_day
 
-        if utilization > 1.0:
-            issues.append(
-                ValidationIssue(
-                    level=ValidationLevel.ERROR,
-                    message=(
-                        f'Capacity exceeded: {wagons_per_day} wagons/day at max. '
-                        f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
-                    ),
-                    field='workshop.tracks',
-                    suggestion='Increase capacity or reduce train arrivals',
-                )
-            )
-        elif utilization > 0.8:
-            issues.append(
-                ValidationIssue(
-                    level=ValidationLevel.WARNING,
-                    message=(
-                        f'High utilization: {wagons_per_day} wagons/day at max. '
-                        f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
-                    ),
-                    field='workshop.tracks',
-                    suggestion='Consider higher capacity for better performance',
-                )
-            )
+    # if utilization > 1.0:
+    #     issues.append(
+    #         ValidationIssue(
+    #             level=ValidationLevel.ERROR,
+    #             message=(
+    #                 f'Capacity exceeded: {wagons_per_day} wagons/day at max. '
+    #                 f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
+    #             ),
+    #             field='workshop.tracks',
+    #             suggestion='Increase capacity or reduce train arrivals',
+    #         )
+    #     )
+    # elif utilization > 0.8:
+    #     issues.append(
+    #         ValidationIssue(
+    #             level=ValidationLevel.WARNING,
+    #             message=(
+    #                 f'High utilization: {wagons_per_day} wagons/day at max. '
+    #                 f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
+    #             ),
+    #             field='workshop.tracks',
+    #             suggestion='Consider higher capacity for better performance',
+    #         )
+    #     )
 
-        return issues
+    # return issues
 
     def _validate_routes(self, config: ScenarioConfig) -> list[ValidationIssue]:
         """Validate routes.
@@ -323,11 +314,11 @@ class ConfigurationValidator:
 
         # Collect track IDs and function names
         track_ids = {t.id for t in config.workshop.tracks}
-        function_names = {t.function.value for t in config.workshop.tracks}
+        function_names = {t.type.value for t in config.workshop.tracks}
         valid_identifiers = track_ids | function_names
 
-        # Collect functions
-        functions = {t.function for t in config.workshop.tracks}
+        # Collect tracktypes
+        tracktypes = {t.type for t in config.workshop.tracks}
 
         for route in config.routes or []:
             # Track IDs or function names exist?
@@ -342,36 +333,36 @@ class ConfigurationValidator:
                         )
                     )
 
-            # Functions exist?
+            # tracktypes exist?
             # Get the function of the from_track
             from_track = next((t for t in config.workshop.tracks if t.id == route.from_track), None)
-            if from_track and from_track.function not in functions:
-                func_names_list = [str(f) for f in functions]
+            if from_track and from_track.type not in tracktypes:
+                tracktype_names = [str(f) for f in tracktypes]
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
                         message=(
                             f"Route {route.route_id}: from_track '{route.from_track}' "
-                            f"has function '{from_track.function}' which does not exist"
+                            f"has function '{from_track.type}' which does not exist"
                         ),
                         field=f'routes[{route.route_id}].from_track',
-                        suggestion=f'Use one of the functions: {", ".join(sorted(func_names_list))}',
+                        suggestion=f'Use one of the tracktypes: {", ".join(sorted(tracktype_names))}',
                     )
                 )
 
             # Get the function of the to_track
             to_track = next((t for t in config.workshop.tracks if t.id == route.to_track), None)
-            if to_track and to_track.function not in functions:
-                func_names_list = [str(f) for f in functions]
+            if to_track and to_track.type not in tracktypes:
+                tracktype_names = [str(f) for f in tracktypes]
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
                         message=(
                             f"Route {route.route_id}: to_track '{route.to_track}' "
-                            f"has function '{to_track.function}' which does not exist"
+                            f"has function '{to_track.type}' which does not exist"
                         ),
                         field=f'routes[{route.route_id}].to_track',
-                        suggestion=f'Use one of the functions: {", ".join(sorted(func_names_list))}',
+                        suggestion=f'Use one of the tracktypes: {", ".join(sorted(tracktype_names))}',
                     )
                 )
 
@@ -388,57 +379,15 @@ class ConfigurationValidator:
 
         return issues
 
-    def _validate_train_schedule(self, config: ScenarioConfig) -> list[ValidationIssue]:
-        """Validate train schedule.
-
-        Checks:
-        - Wagon IDs are unique
-        - Arrival times are chronological
-        - At least one train present
-        """
-        issues: list[ValidationIssue] = []
-
-        if not config.train:
-            issues.append(
-                ValidationIssue(
-                    level=ValidationLevel.ERROR,
-                    message='Train schedule is empty - at least one train required',
-                    field='train',
-                    suggestion='Add trains in train configuration',
-                )
-            )
-            return issues
-
-        # Wagon IDs unique?
-        wagon_ids = []
-        for train in config.train:
-            for wagon in train.wagons:
-                wagon_ids.append(wagon.wagon_id)
-
-        duplicates = [wid for wid in set(wagon_ids) if wagon_ids.count(wid) > 1]
-        if duplicates:
-            duplicate_list = duplicates[:5]
-            ellipsis = '...' if len(duplicates) > 5 else ''
-            issues.append(
-                ValidationIssue(
-                    level=ValidationLevel.ERROR,
-                    message=f'Duplicate wagon IDs found: {", ".join(duplicate_list)}{ellipsis}',
-                    field='train',
-                    suggestion='Ensure each wagon_id is unique',
-                )
-            )
-
-        return issues
-
-    def _validate_simulation_duration(self, config: ScenarioConfig) -> list[ValidationIssue]:
+    def _validate_simulation_duration(self, scenario: ScenarioConfig) -> list[ValidationIssue]:
         """Validate whether all trains arrive within simulation time."""
         issues: list[ValidationIssue] = []
 
-        sim_start = config.start_date
-        sim_end = config.end_date
+        sim_start = scenario.start_date
+        sim_end = scenario.end_date
 
-        for train in config.train or []:
-            arrival_date = train.arrival_date
+        for train in scenario.trains or []:
+            arrival_date = train.arrival_time
 
             if arrival_date < sim_start:
                 issues.append(

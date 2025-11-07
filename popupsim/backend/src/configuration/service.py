@@ -8,7 +8,8 @@ This module provides the ConfigurationService class that handles:
 - Comprehensive error handling and logging for configuration issues
 """
 
-from datetime import date
+from datetime import UTC
+from datetime import datetime
 import json
 import logging
 from pathlib import Path
@@ -17,15 +18,14 @@ from typing import Any
 import pandas as pd
 from pydantic import ValidationError
 
+from .model_routes import Route
 from .model_routes import Routes
 from .model_scenario import ScenarioConfig
-from .model_track import TrackFunction
-from .model_track import WorkshopTrack
+from .model_track import Track
+from .model_track import TrackType
 from .model_train import Train
 from .model_wagon import Wagon
-from .model_workshop import Workshop
 from .validation import ConfigurationValidator
-from .validation import ValidationResult
 
 # Configure logging
 logger = logging.getLogger('ConfigurationService')
@@ -46,6 +46,7 @@ class ConfigurationService:
         ----------
         base_path : Path | None, optional
             Base directory for configuration files, by default None (uses current directory).
+            # Todo Clarify why we need that
         """
         self.base_path = base_path or Path.cwd()
         self.validator = ConfigurationValidator()
@@ -204,31 +205,30 @@ class ConfigurationService:
         try:
             df = pd.read_csv(
                 file_path,
-                dtype={'train_id': str, 'wagon_id': str, 'length': float, 'arrival_time': str},
-                converters={
-                    'is_loaded': self.to_bool,
-                    'needs_retrofit': self.to_bool,
-                },
-                parse_dates=['arrival_date'],
-                date_format='%Y-%m-%d',
+                sep=';',
+                dtype={'train_id': str, 'wagon_id': str},
+                parse_dates=['arrival_time'],
+                date_format={'arrival_time': '%Y-%m-%d %H:%M'},
             )
-        except pd.errors.EmptyDataError as err:
-            raise ConfigurationError('Train schedule file is empty') from err
+            # Replace empty train_id with "AnoTrain"
+            df['train_id'] = df['train_id'].fillna('AnoTrain')
+            df.loc[df['train_id'].str.strip() == '', 'train_id'] = 'AnoTrain'
+            if len(df) < 1:
+                raise ConfigurationError('Train schedule file is empty')
         except (pd.errors.ParserError, TypeError) as err:
             raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
-
-        # Validate that the result is actually a DataFrame
-        if not isinstance(df, pd.DataFrame):
-            raise ConfigurationError('Loaded object is not a pandas DataFrame')
+        except Exception as err:
+            # ToDo avoid unexpected ! Files can be empty, have missing columns, wrong formats, ...
+            raise ConfigurationError(f'Unexpected error reading CSV file {file_path}: {err}') from err
 
         if df.empty:
             raise ConfigurationError('Train schedule file is empty')
         required_columns = [
             'train_id',
-            'arrival_date',
-            'arrival_time',
             'wagon_id',
             'length',
+            'selector',
+            'arrival_time',
             'is_loaded',
             'needs_retrofit',
         ]
@@ -238,48 +238,15 @@ class ConfigurationService:
                 f'Missing required columns in {file_path}: '
                 f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
             )
-        # Validate arrival_date format
-        if not pd.api.types.is_datetime64_any_dtype(df['arrival_date']):
-            raise ConfigurationError("Column 'arrival_date' must be in YYYY-MM-DD format.")
-
-        # Validate arrival_time format
-        invalid_times = df[~df['arrival_time'].astype(str).str.match(r'^[0-2][0-9]:[0-5][0-9]$')]
-        if not invalid_times.empty:
-            raise ConfigurationError(
-                f"Column 'arrival_time' must be in HH:MM format. Invalid values:"
-                f' {", ".join(map(str, invalid_times["arrival_time"].unique()))}'
-            )
         return df
 
-    @staticmethod
-    def to_bool(value: Any) -> bool:
-        """Robustly convert a value to boolean for CSV converters.
-
-        Parameters
-        ----------
-        value : Any
-            Value to convert to boolean.
-
-        Returns
-        -------
-        bool
-            Converted boolean value.
-        """
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() == 'true'
-        return False
-
     def _create_wagons_from_group(self, group: pd.DataFrame) -> list[Wagon]:
-        """Create Wagon objects from a train group.
+        """Create Wagon objects from a DataFrame group.
 
         Parameters
         ----------
         group : pd.DataFrame
-            DataFrame group containing wagon data for a single train.
+            DataFrame containing wagon data for a single train.
 
         Returns
         -------
@@ -288,96 +255,122 @@ class ConfigurationService:
 
         Raises
         ------
-        ConfigurationError
+        ValidationError
             If wagon validation fails.
         """
-        wagons = []
+        wagons: list[Wagon] = []
+
         for _, row in group.iterrows():
             try:
-                wagon = Wagon(
-                    wagon_id=str(row['wagon_id']),  # Use wagon_id directly
+                wagon: Wagon = Wagon(
+                    wagon_id=str(row['wagon_id']),
                     train_id=str(row['train_id']),
-                    length=float(row['length'])
-                    if pd.api.types.is_scalar(row['length'])
-                    else float(row['length'].iloc[0]),
-                    is_loaded=bool(row['is_loaded']),
-                    needs_retrofit=bool(row['needs_retrofit']),
+                    length=float(row['length']),
+                    is_loaded=self._to_bool(row['is_loaded']),
+                    needs_retrofit=self._to_bool(row['needs_retrofit']),
+                    arrival_time=None,  # Set later if needed
+                    retrofit_start_time=None,
+                    retrofit_end_time=None,
+                    track_id=None,
                 )
                 wagons.append(wagon)
             except ValidationError as err:
-                error_details = []
-                for error in err.errors():
-                    field_path = ' -> '.join(str(loc) for loc in error['loc'])
-                    error_details.append(f"Field '{field_path}': {error['msg']}")
-                raise ConfigurationError(
-                    f'Validation failed for wagon in train {row["train_id"]} in {row["wagon_id"]}:\n'
-                    f'  • {chr(10).join("  • " + detail for detail in error_details)}'
-                ) from err
+                logger.error('Failed to create wagon %s for train %s: %s', row['wagon_id'], row['train_id'], err)
+                raise
+
         return wagons
 
-    def _parse_arrival_time(self, df: pd.DataFrame) -> None:
-        """Parse arrival time column in DataFrame."""
-        try:
-            df['arrival_time'] = pd.to_datetime(df['arrival_time'], format='%H:%M').dt.time
-        except ValueError as err:
-            raise ConfigurationError(f'Invalid time format in arrival_time. Expected HH:MM format: {err}') from err
+    def _create_trains_from_dataframe(self, df: pd.DataFrame) -> list[Train]:
+        """Create Train objects from DataFrame grouped by train_id.
 
-    def _check_duplicate_wagons(self, df: pd.DataFrame) -> None:
-        """Check for duplicate wagon IDs in DataFrame."""
-        duplicate_wagons = df[df.duplicated(subset=['wagon_id'], keep=False)]['wagon_id'].unique()
-        if len(duplicate_wagons) > 0:
-            raise ConfigurationError(f'Duplicate wagon IDs found: {", ".join(duplicate_wagons)}')
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame with all train schedule data.
 
-    def _validate_train_consistency(self, train_id: str, group: pd.DataFrame) -> None:
-        """Validate that train has consistent arrival date/time across wagons."""
-        unique_dates = group['arrival_date'].nunique()
-        unique_times = group['arrival_time'].nunique()
-        if unique_dates > 1 or unique_times > 1:
-            raise ConfigurationError(f'Train {train_id} has inconsistent arrival date/time across wagons')
+        Returns
+        -------
+        list[Train]
+            List of validated Train objects with their wagons.
 
-    def _convert_arrival_date(self, arrival_date_value: Any) -> date:
-        """Convert pandas Timestamp or string to Python date object."""
-        if hasattr(arrival_date_value, 'date'):
-            return arrival_date_value.date()  # type: ignore[no-any-return]
-        if isinstance(arrival_date_value, str):
-            return date.fromisoformat(arrival_date_value)
-        return arrival_date_value  # type: ignore[no-any-return]
+        Raises
+        ------
+        ConfigurationError
+            If train creation or validation fails.
+        """
+        trains: list[Train] = []
 
-    def _handle_train_validation_error(self, train_id: str, err: ValidationError) -> None:
-        """Handle validation errors when creating Train objects."""
-        error_details = []
-        for error in err.errors():
-            field_path = ' -> '.join(str(loc) for loc in error['loc'])
-            error_details.append(f"Field '{field_path}': {error['msg']}")
-        raise ConfigurationError(
-            f'Validation failed for train arrival {train_id}:\n'
-            f'  • {chr(10).join("  • " + detail for detail in error_details)}'
-        ) from err
+        # Group by train_id to process each train's wagons together
+        grouped: pd.core.groupby.DataFrameGroupBy = df.groupby('train_id')
 
-    def _create_train_arrivals(self, df: pd.DataFrame) -> list[Train]:
-        """Group by train and create Train objects."""
-        self._parse_arrival_time(df)
-        self._check_duplicate_wagons(df)
-
-        trains = []
-        for train_id, group in df.groupby('train_id'):
-            self._validate_train_consistency(str(train_id), group)
-            wagons = self._create_wagons_from_group(group)
-
+        for train_id, group_df in grouped:
             try:
-                arrival_date = self._convert_arrival_date(group.iloc[0]['arrival_date'])
-                # Get scalar value using .iloc[0] which returns the actual value, not Series
-                arrival_time_value = group['arrival_time'].iloc[0]
-                train = Train(
+                # Get first row for train-level data (all rows have same arrival_time per train)
+                first_row: pd.Series[Any] = group_df.iloc[0]
+
+                # Parse arrival_time from pd.Timestamp to datetime with UTC timezone
+                arrival_timestamp: pd.Timestamp = first_row['arrival_time']
+                arrival_datetime: datetime = datetime.strptime(str(arrival_timestamp), '%Y-%m-%d %H:%M:%S').replace(
+                    tzinfo=UTC
+                )
+                # Create wagons for this train
+                wagons: list[Wagon] = self._create_wagons_from_group(group_df)
+
+                # Create Train object
+                train: Train = Train(
                     train_id=str(train_id),
-                    arrival_date=arrival_date,
-                    arrival_time=arrival_time_value,
+                    arrival_time=arrival_datetime,  # Pass datetime, not time
                     wagons=wagons,
                 )
                 trains.append(train)
+
+                logger.debug(
+                    'Created train %s with %d wagons, arrival time: %s', train_id, len(wagons), arrival_datetime
+                )
+
             except ValidationError as err:
-                self._handle_train_validation_error(str(train_id), err)
+                error_msg: str = f'Failed to create train {train_id}: {err}'
+                logger.error(error_msg)
+                raise ConfigurationError(error_msg) from err
+            except Exception as err:
+                error_msg = f'Unexpected error creating train {train_id}: {err}'
+                logger.error(error_msg)
+                raise ConfigurationError(error_msg) from err
+
+        logger.info('Successfully created %d trains from DataFrame', len(trains))
         return trains
+
+    @staticmethod
+    def _to_bool(value: Any) -> bool:
+        """Convert various representations to boolean.
+
+        Parameters
+        ----------
+        value : Any
+            Value to convert (string, bool, int).
+
+        Returns
+        -------
+        bool
+            Converted boolean value.
+
+        Raises
+        ------
+        ValueError
+            If value cannot be converted to boolean.
+        """
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            value_lower: str = value.lower().strip()
+            if value_lower in ('true', '1', 'yes', 'y'):
+                return True
+            if value_lower in ('false', '0', 'no', 'n'):
+                return False
+            raise ValueError(f'Cannot convert string "{value}" to boolean')
+        if isinstance(value, int):
+            return bool(value)
+        raise ValueError(f'Cannot convert {type(value).__name__} to boolean')
 
     def load_train_schedule(self, file_path: str | Path) -> list[Train]:
         """Load train schedule from CSV file and validate data.
@@ -390,42 +383,48 @@ class ConfigurationService:
         Returns
         -------
         list[Train]
-            Validated train arrivals with wagon information.
+            List of validated Train objects with their wagons.
 
         Raises
         ------
         ConfigurationError
             If file not found, CSV parsing fails, or validation fails.
         """
-        file_path = Path(file_path)
-        if not file_path.exists():
-            raise ConfigurationError(f'Train schedule file not found: {file_path}')
-        logger.info('Loading train schedule from %s', file_path)
-        try:
-            df = self._read_and_validate_train_schedule_csv(file_path)
-            train_arrivals = self._create_train_arrivals(df)
-            logger.info('Successfully loaded %d trains with %d wagons from %s', len(train_arrivals), len(df), file_path)
-            return train_arrivals
-        except ConfigurationError as err:
-            raise err
-        except Exception as err:
-            raise ConfigurationError(f'Unexpected error loading train schedule from {file_path}: {err}') from err
+        file_path_obj: Path = Path(file_path)
+        if not file_path_obj.exists():
+            raise ConfigurationError(f'Train schedule file not found: {file_path_obj}')
 
-    def _create_workshop_tracks_from_dataframe(self, df: pd.DataFrame) -> list[WorkshopTrack]:
+        logger.info('Loading train schedule from %s', file_path_obj)
+
+        try:
+            # Read and validate CSV
+            df: pd.DataFrame = self._read_and_validate_train_schedule_csv(file_path_obj)
+
+            # Create Train objects from DataFrame
+            trains: list[Train] = self._create_trains_from_dataframe(df)
+
+            # Log summary
+            total_wagons: int = sum(len(train.wagons) for train in trains)
+            logger.info(
+                'Successfully loaded %d trains with %d total wagons from %s', len(trains), total_wagons, file_path_obj
+            )
+            return trains
+
+        except Exception as err:
+            raise ConfigurationError(f'Unexpected error loading train schedule from {file_path_obj}: {err}') from err
+
+    def _create_workshop_tracks_from_dataframe(self, df: pd.DataFrame) -> list[Track]:
         """Create WorkshopTrack objects from DataFrame rows."""
         tracks = []
         for _, row in df.iterrows():
             try:
-                current_wagons = self._parse_current_wagons(row, df)
                 capacity = self._extract_scalar_int(row['capacity'])
-                retrofit_time = self._extract_scalar_int(row['retrofit_time_min'])
 
-                track = WorkshopTrack(
+                track = Track(
                     id=str(row['track_id']).strip(),
-                    function=TrackFunction(str(row['function']).strip()),
+                    length=float(row['length']),
+                    type=TrackType(str(row['function']).strip()),
                     capacity=capacity,
-                    current_wagons=current_wagons,
-                    retrofit_time_min=retrofit_time,
                 )
                 tracks.append(track)
             except ValidationError as err:
@@ -507,66 +506,141 @@ class ConfigurationService:
 
         return df
 
-    def _create_workshop_from_tracks(self, tracks: list[WorkshopTrack]) -> Workshop:
-        """Create Workshop object from tracks with validation."""
-        try:
-            return Workshop(tracks=tracks)
-        except ValidationError as err:
-            error_details = []
-            for error in err.errors():
-                field_path = ' -> '.join(str(loc) for loc in error['loc'])
-                error_details.append(f"Field '{field_path}': {error['msg']}")
-            raise ConfigurationError(
-                f'Validation failed for workshop configuration:\n'
-                f'  • {chr(10).join("  • " + detail for detail in error_details)}'
-            ) from err
-        except Exception as err:
-            raise ConfigurationError(f'Unexpected error creating workshop from tracks: {err}') from err
-
-    def load_workshop_tracks(self, file_path: str | Path) -> Workshop:
-        """Load workshop tracks from CSV file and validate data.
+    def _load_tracks(self, file_path: Path) -> list[Track]:
+        """Load track configuration from CSV file.
 
         Parameters
         ----------
-        file_path : str | Path
-            Path to the workshop_tracks.csv file.
+        file_path : Path
+            Path to the tracks CSV file.
 
         Returns
         -------
-        Workshop
-            Validated workshop configuration with tracks.
+        list[Track]
+            List of validated Track objects.
 
         Raises
         ------
         ConfigurationError
             If file not found, CSV parsing fails, or validation fails.
         """
-        file_path = Path(file_path)
-        if not file_path.exists():
-            raise ConfigurationError(f'Workshop tracks file not found: {file_path}')
-
-        logger.info('Loading workshop tracks from %s', file_path)
-
         try:
-            # Read and validate CSV data
-            df = self._read_and_validate_workshop_tracks_csv(file_path)
+            df: pd.DataFrame = pd.read_csv(
+                file_path,
+                sep=';',
+                dtype={
+                    'track_id': str,
+                    'length': float,
+                    'type': str,
+                    'capacity': 'Int64',  # Nullable integer type
+                    'sh_1': 'Int64',  # Nullable integer type
+                    'sh_n': 'Int64',  # Nullable integer type
+                    'valid_from': str,
+                    'valid_to': str,
+                },
+                keep_default_na=True,
+            )
 
-            # Create WorkshopTrack objects
-            tracks = self._create_workshop_tracks_from_dataframe(df)
+            # Parse dates with error handling
+            df['valid_from'] = pd.to_datetime(df['valid_from'], errors='coerce')
+            df['valid_to'] = pd.to_datetime(df['valid_to'], errors='coerce')
+            if df.empty:
+                raise ConfigurationError(f'Track configuration file is empty: {file_path}')
 
-            # Create Workshop with validation
-            workshop = self._create_workshop_from_tracks(tracks)
+            # Validate required columns
+            required_columns: list[str] = ['id', 'length', 'type']
+            missing_columns: list[str] = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                raise ConfigurationError(f'Missing columns in {file_path}: {", ".join(missing_columns)}')
 
-            logger.info('Successfully loaded %d workshop tracks from %s', len(tracks), file_path)
-            return workshop
+            # Convert DataFrame to Track objects
+            tracks: list[Track] = []
+            for _, row in df.iterrows():
+                try:
+                    track: Track = Track(
+                        id=str(row['id']).strip(),
+                        length=float(row['length']),
+                        type=TrackType(str(row['type']).strip()),
+                        capacity=int(row['capacity']) if pd.notna(row.get('capacity')) else None,
+                        sh_1=int(row['sh_1']) if pd.notna(row.get('sh_1')) else 0,
+                        sh_n=int(row['sh_n']) if pd.notna(row.get('sh_n')) else 0,
+                        valid_from=row['valid_from'].to_pydatetime() if pd.notna(row.get('valid_from')) else None,
+                        valid_to=row['valid_to'].to_pydatetime() if pd.notna(row.get('valid_to')) else None,
+                    )
+                    tracks.append(track)
+                except ValidationError as err:
+                    error_details: str = '; '.join(
+                        f'{".".join(str(loc) for loc in e["loc"])}: {e["msg"]}' for e in err.errors()
+                    )
+                    raise ConfigurationError(f'Invalid track {row["track_id"]}: {error_details}') from err
 
-        except ConfigurationError as err:
-            raise err
+            logger.info('Loaded %d tracks from %s', len(tracks), file_path)
+            return tracks
+
         except Exception as err:
-            raise ConfigurationError(f'Unexpected error loading workshop tracks from {file_path}: {err}') from err
+            raise ConfigurationError(f'File not found: {file_path}') from err
 
-    def _validate_scenario_dates(self, scenario_data: dict[str, Any]) -> tuple[date, date]:
-        """Validate and convert scenario start/end dates."""
+    # Todo Workshop handling
+    # def load_workshop_tracks(self, file_path: str | Path) -> Workshop:
+    #     """Load workshop tracks from CSV file and validate data.
+
+    #     Parameters
+    #     ----------
+    #     file_path : str | Path
+    #         Path to the workshop_tracks.csv file.
+
+    #     Returns
+    #     -------
+    #     Workshop
+    #         Validated workshop configuration with tracks.
+
+    #     Raises
+    #     ------
+    #     ConfigurationError
+    #         If file not found, CSV parsing fails, or validation fails.
+    #     """
+    #     file_path = Path(file_path)
+    #     if not file_path.exists():
+    #         raise ConfigurationError(f'Workshop tracks file not found: {file_path}')
+
+    #     logger.info('Loading workshop tracks from %s', file_path)
+
+    #     try:
+    #         # Read and validate CSV data
+    #         df = self._read_and_validate_workshop_tracks_csv(file_path)
+
+    #         # Create WorkshopTrack objects
+    #         tracks = self._create_workshop_tracks_from_dataframe(df)
+
+    #         # Create Workshop with validation
+    #         workshop = self._create_workshop_from_tracks(tracks)
+
+    #         logger.info('Successfully loaded %d workshop tracks from %s', len(tracks), file_path)
+    #         return workshop
+
+    #     except ConfigurationError as err:
+    #         raise err
+    #     except Exception as err:
+    #         raise ConfigurationError(f'Unexpected error loading workshop tracks from {file_path}: {err}') from err
+
+    def _validate_scenario_dates(self, scenario_data: dict[str, Any]) -> tuple[datetime, datetime]:
+        """Validate and convert scenario start/end dates to UTC timezone-aware datetimes.
+
+        Parameters
+        ----------
+        scenario_data : dict[str, Any]
+            Scenario configuration dictionary.
+
+        Returns
+        -------
+        tuple[datetime, datetime]
+            Start and end datetime with UTC timezone.
+
+        Raises
+        ------
+        ConfigurationError
+            If dates are missing or have invalid format.
+        """
         scenario_start_str = scenario_data.get('start_date')
         scenario_end_str = scenario_data.get('end_date')
 
@@ -574,45 +648,79 @@ class ConfigurationService:
             raise ConfigurationError('Missing start_date or end_date in scenario configuration')
 
         try:
-            scenario_start = date.fromisoformat(scenario_start_str)
-            scenario_end = date.fromisoformat(scenario_end_str)
+            scenario_start = datetime.fromisoformat(scenario_start_str)
+            scenario_end = datetime.fromisoformat(scenario_end_str)
+
+            # Ensure both datetimes are timezone-aware (UTC)
+            if scenario_start.tzinfo is None:
+                scenario_start = scenario_start.replace(tzinfo=UTC)
+            if scenario_end.tzinfo is None:
+                scenario_end = scenario_end.replace(tzinfo=UTC)
+
             return scenario_start, scenario_end
         except ValueError as e:
             raise ConfigurationError(f'Invalid date format in scenario configuration: {e}') from e
 
-    def _validate_train_dates_in_range(self, trains: list[Train], scenario_start: date, scenario_end: date) -> None:
-        """Validate that all train arrivals fall within scenario date range."""
-        out_of_range_trains = []
+    def _validate_train_dates_in_range(
+        self, trains: list[Train], scenario_start: datetime, scenario_end: datetime
+    ) -> list[Train]:
+        """Validate train arrivals and filter out those outside scenario date range.
+
+        Parameters
+        ----------
+        trains : list[Train]
+            List of Train objects to validate.
+        scenario_start : date
+            Scenario start date.
+        scenario_end : date
+            Scenario end date.
+
+        Returns
+        -------
+        list[Train]
+            Filtered list containing only trains within scenario date range.
+        """
+        out_of_range_trains: list[str] = []
+        valid_trains: list[Train] = []
+
         for train in trains:
-            if train.arrival_date < scenario_start or train.arrival_date > scenario_end:
-                out_of_range_trains.append(f'{train.train_id} ({train.arrival_date})')
+            if train.arrival_time < scenario_start or train.arrival_time > scenario_end:
+                out_of_range_trains.append(f'{train.train_id} ({train.arrival_time})')
+            else:
+                valid_trains.append(train)
 
         if out_of_range_trains:
-            raise ConfigurationError(
-                f'Train arrivals outside scenario date range '
-                f'({scenario_start} to {scenario_end}): '
-                f'{", ".join(out_of_range_trains)}'
+            info: str = (
+                f'Filtered out {len(out_of_range_trains)} train(s) with arrivals outside scenario date range '
+                f'({scenario_start} to {scenario_end}): {", ".join(out_of_range_trains)}'
             )
+            logger.warning('%s', info)
 
-    def _load_workshop_and_routes(
-        self, config_dir: Path, workshop_tracks_file: str | None, routes_file: str | None
-    ) -> tuple[Workshop, list]:
-        """Load workshop tracks and routes configuration."""
-        workshop_tracks_filename = workshop_tracks_file or 'workshop_tracks.csv'
-        workshop = self.load_workshop_tracks(config_dir / workshop_tracks_filename)
+        logger.info(
+            'Train validation complete: %d valid trains, %d filtered out', len(valid_trains), len(out_of_range_trains)
+        )
 
-        routes_filename = routes_file or 'routes.csv'
-        routes_path = config_dir / routes_filename
-        routes_config = Routes(routes_path)
-        routes = routes_config.routes
+        return valid_trains
 
-        return workshop, routes
+    # def _load_workshop_and_routes(
+    #     self, config_dir: Path, tracks_file: str | None, routes_file: str | None
+    # ) -> tuple[Workshop, list]:
+    #     """Load workshop tracks and routes configuration."""
+    #     tracks_filename = tracks_file or 'workshop_tracks.csv'
+    #     #workshop = self.load_workshop_tracks(config_dir / tracks_filename)
+    #     routes_filename = routes_file or 'routes.csv'
+    #     routes_path = config_dir / routes_filename
+    #     routes_config = Routes(routes_path)
+    #     routes = routes_config.routes
+
+    #     return workshop, routes
 
     def _build_scenario_config(
         self,
         scenario_data: dict[str, Any],
-        scenario_dates: tuple[date, date],
-        components: tuple[str, Workshop, list[Train], list],  # train_schedule_file, workshop, trains, routes
+        scenario_dates: tuple[datetime, datetime],
+        train_schedule_file: str,  # Todo make it a path
+        components: dict[str, Any],
     ) -> ScenarioConfig:
         """Build and validate ScenarioConfig object."""
         scenario_id = scenario_data.get('scenario_id')
@@ -622,19 +730,19 @@ class ConfigurationService:
             raise ConfigurationError('Missing scenario_id in scenario configuration')
 
         scenario_start, scenario_end = scenario_dates
-        train_schedule_file, workshop, trains, routes = components
+        # Todo add Workshops
         return ScenarioConfig(
             scenario_id=scenario_id,
             start_date=scenario_start,
             end_date=scenario_end,
             random_seed=random_seed,
+            routes=components.get('routes'),
             train_schedule_file=train_schedule_file,
-            workshop=workshop,
-            train=trains,
-            routes=routes,
+            trains=components.get('trains'),
+            tracks=components.get('tracks'),
         )
 
-    def load_complete_scenario(self, path: str | Path) -> tuple[ScenarioConfig, ValidationResult]:
+    def load_complete_scenario(self, path: str | Path) -> ScenarioConfig:
         """Load scenario configuration and train schedule data.
 
         Parameters
@@ -652,8 +760,8 @@ class ConfigurationService:
         ConfigurationError
             If loading or validation fails.
         """
-        scenario_data = self.load_and_validate_scenario_data(path)
-        config_dir = Path(path) if isinstance(path, str) else path
+        scenario_data: dict[str, Any] = self.load_and_validate_scenario_data(path)
+        config_dir: Path = Path(path) if isinstance(path, str) else path
 
         if config_dir.is_file():
             config_dir = config_dir.parent
@@ -663,40 +771,60 @@ class ConfigurationService:
         if not train_schedule_file:
             raise ConfigurationError('Missing train_schedule_file in scenario configuration')
 
-        train_schedule_path = config_dir / train_schedule_file
-        trains = self.load_train_schedule(train_schedule_path)
+        train_schedule_path: Path = config_dir / train_schedule_file
+        trains: list[Train] = self.load_train_schedule(train_schedule_path)
 
-        # 2. Validate scenario dates and train arrivals
-        scenario_dates = self._validate_scenario_dates(scenario_data)
-        self._validate_train_dates_in_range(trains, scenario_dates[0], scenario_dates[1])
+        # 2. Validate scenario dates and filter trains by arrival date
+        scenario_dates: tuple[datetime, datetime] = self._validate_scenario_dates(scenario_data)
+        trains = self._validate_train_dates_in_range(trains, scenario_dates[0], scenario_dates[1])
 
-        # 3. Load workshop and routes configuration
-        workshop_tracks_file = scenario_data.get('workshop_tracks_file')
-        routes_file = scenario_data.get('routes_file')
-        workshop, routes = self._load_workshop_and_routes(config_dir, workshop_tracks_file, routes_file)
+        # load tracks
+        tracks_path = config_dir / scenario_data.get('tracks_file', 'tracks.csv')
+        tracks: list[Track] = self._load_tracks(tracks_path)
 
-        # 4. Build ScenarioConfig
-        components = (train_schedule_file, workshop, trains, routes)
-        config = self._build_scenario_config(
+        # Load routes if specified
+        # Todo use only routes eithere here or in sim to hanlde occupation
+        routes: list[Route] = []
+        routes_file_name: str | None = scenario_data.get('routes_file')
+        if routes_file_name:
+            routes_path: Path = config_dir / routes_file_name
+            if routes_path.exists():
+                routes_config: Routes = Routes(routes_path)
+                routes = routes_config.routes
+                logger.info('Loaded %d routes from %s', len(routes), routes_path)
+            else:
+                logger.warning('Routes file specified but not found: %s', routes_path)
+        else:
+            logger.info('No routes file specified in scenario configuration')
+
+        # 4. Build Scenario
+        componenents = {
+            'routes': routes,
+            'trains': trains,
+            'tracks': tracks,
+        }
+        scenario: ScenarioConfig = self._build_scenario_config(
             scenario_data=scenario_data,
             scenario_dates=scenario_dates,
-            components=components,
+            train_schedule_file=train_schedule_file,
+            components=componenents,
         )
 
-        logger.info('Successfully loaded complete scenario: %s', config.scenario_id)
+        logger.info('Successfully loaded complete scenario: %s', scenario.scenario_id)
 
         # 5. Validate configuration
-        logger.info('Starting configuration validation for scenario: %s', config.scenario_id)
-        validation_result = self.validator.validate(config)
+        # Todo enable validations
+        # logger.info('Starting configuration validation for scenario: %s', scenario.scenario_id)
+        # validation_result: ValidationResult = self.validator.validate(scenario)
 
         # 6. Output validation results
-        logger.info(
-            'Configuration validation completed for scenario: %s. Valid: %s, Errors: %d, Warnings: %d',
-            config.scenario_id,
-            validation_result.is_valid,
-            len(validation_result.get_errors()),
-            len(validation_result.get_warnings()),
-        )
-        validation_result.print_summary()
+        # logger.info(
+        #     'Configuration validation completed for scenario: %s. Valid: %s, Errors: %d, Warnings: %d',
+        #     scenario.scenario_id,
+        #     validation_result.is_valid,
+        #     len(validation_result.get_errors()),
+        #     len(validation_result.get_warnings()),
+        # )
+        # validation_result.print_summary()
 
-        return config, validation_result
+        return scenario
