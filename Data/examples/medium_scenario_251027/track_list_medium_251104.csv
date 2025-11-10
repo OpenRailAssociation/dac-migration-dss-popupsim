@@ -1,4 +1,4 @@
-id;location_code;name;lenth;type;con_1;con_1_id;con_1_orientation;con_n;con_n_id;con_n_orientation;vaild_from;valid_to
+id;location_code;name;length;type;con_1;con_1_id;con_1_orientation;con_n;con_n_id;con_n_orientation;vaild_from;valid_to
 1;XYZ;Z1;260;workshop;;;;1;3;1;;
 2;XYZ;10;260;workshop;;;;1;3;1;;
 3;XYZ;6;426;to_be_retroffitted;1;2;n;1;3;1;;
