@@ -68,7 +68,7 @@ jobs:
           umbrella-dir: pr-preview
       
       - name: Create deployment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = context.issue.number;
