@@ -9,7 +9,6 @@ from pathlib import Path
 import platform
 import stat
 import sys
-from pathlib import Path
 
 
 def create_validation_script() -> str:
@@ -21,10 +20,10 @@ def create_validation_script() -> str:
         Path to the created validation script.
     """
     # Add shebang only for Unix-like systems
-    shebang = "#!/usr/bin/env python3\n" if platform.system() != "Windows" else ""
+    shebang = '#!/usr/bin/env python3\n' if platform.system() != 'Windows' else ''
 
     # Define commit types
-    commit_types = "feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert"
+    commit_types = 'feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert'
 
     script_content = f"""{shebang}import sys
 import re
@@ -55,8 +54,8 @@ if __name__ == "__main__":
         sys.exit(1)
 """
 
-    script_path = Path(".git") / "hooks" / "validate_commit_msg.py"
-    script_path.write_text(script_content, encoding="utf-8")
+    script_path = Path('.git') / 'hooks' / 'validate_commit_msg.py'
+    script_path.write_text(script_content, encoding='utf-8')
     return str(script_path)
 
 
@@ -75,7 +74,7 @@ def get_commit_msg_hook(script_path: str) -> str:
     """
     python_exe = sys.executable
 
-    if platform.system() == "Windows":
+    if platform.system() == 'Windows':
         return f'@echo off\n"{python_exe}" "{script_path}" %1\n'
     return f'#!/bin/bash\n"{python_exe}" "{script_path}" "$1"\n'
 
@@ -88,30 +87,30 @@ def setup_commit_msg_hook() -> bool:
     bool
         True if installation succeeded, False otherwise.
     """
-    hooks_dir = Path(".git") / "hooks"
+    hooks_dir = Path('.git') / 'hooks'
 
     if not hooks_dir.exists():
-        print("ERROR: Not a git repository")
+        print('ERROR: Not a git repository')
         return False
 
     # Create validation script
     script_path = create_validation_script()
 
     # Create hook file
-    hook_name = "commit-msg.bat" if platform.system() == "Windows" else "commit-msg"
+    hook_name = 'commit-msg.bat' if platform.system() == 'Windows' else 'commit-msg'
     hook_path = hooks_dir / hook_name
 
     commit_msg_hook = get_commit_msg_hook(script_path)
-    hook_path.write_text(commit_msg_hook, encoding="utf-8")
+    hook_path.write_text(commit_msg_hook, encoding='utf-8')
 
     # Make executable (Unix/Linux/macOS only)
-    if platform.system() != "Windows":
+    if platform.system() != 'Windows':
         st = hook_path.stat()
         hook_path.chmod(st.st_mode | stat.S_IEXEC)
 
-    print("SUCCESS: Commit message hook installed successfully!")
+    print('SUCCESS: Commit message hook installed successfully!')
     return True
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     setup_commit_msg_hook()

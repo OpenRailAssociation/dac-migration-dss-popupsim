@@ -195,7 +195,7 @@ def main(
         sim_adapter = SimPyAdapter.create_simpy_adapter()
         popup_sim = PopupSim(sim_adapter, scenario_config)
         # pylint: disable=fixme
-        # Todo make sure run_until is set appropriately from scenario config  # noqa: FIX002
+        # Todo make sure run_until is set appropriately from scenario config
         popup_sim.run()
 
     except ConfigurationError as e:
