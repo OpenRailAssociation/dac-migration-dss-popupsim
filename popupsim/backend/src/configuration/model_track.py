@@ -26,18 +26,20 @@ class TrackType(Enum):
     Each track serves a specific purpose in the workshop operations.
     """
 
-    WERKSTATTGLEIS = 'workshop'  # Main retrofit tracks where DAC installation happens (werkstattgleis in German)
-    SAMMELGLEIS = 'collection'  # Collection tracks for grouping trains
-    PARKGLEIS = 'parking'  # Parking tracks for temporary storage
-    WERKSTATTZUFUEHRUNG = 'to_be_retroffitted'  # Feeder tracks leading to workshop (awaiting retrofit)
-    WERKSTATTABFUEHRUNG = 'retrofitted'  # Exit tracks leaving workshop (retrofit completed)
     BAHNHOFSKOPF_1 = 'station_head_1'  # Station head track 1
     BAHNHOFSKOPF_N = 'station_head_n'  # Station head track n
     CIRCULATING_TRACK = 'circulating_track'  # Circulating/loop tracks
+    CONNECTION_TRACK = 'connection_track'  # Connection tracks between main tracks
     DISPENSER = 'dispenser'  # Dispenser tracks for wagon distribution
     DISPENSER_2_CONTROL = 'dispenser_2_control'  # Dispenser with 2-way control
-    TO_PARKING_CONTROL = 'to_parking_control'  # Control tracks to parking areas
+    PARKGLEIS = 'parking'  # Parking tracks for temporary storage
+    RESOURCE_PARKING = 'shunting_parking'  # Track designated for parking shunting locomotives (resources)
+    SAMMELGLEIS = 'collection'  # Collection tracks for grouping trains
     SELECTOR = 'selector'  # Selector/hump tracks for sorting
+    TO_PARKING_CONTROL = 'to_parking_control'  # Control tracks to parking areas
+    WERKSTATTGLEIS = 'workshop'  # Main retrofit tracks where DAC installation happens (werkstattgleis in German)
+    WERKSTATTZUFUEHRUNG = 'to_be_retroffitted'  # Feeder tracks leading to workshop (awaiting retrofit)
+    WERKSTATTABFUEHRUNG = 'retrofitted'  # Exit tracks leaving workshop (retrofit completed)
 
 
 class Track(BaseModel):
