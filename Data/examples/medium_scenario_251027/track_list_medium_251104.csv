@@ -26,7 +26,7 @@ id;location_code;name;lenth;type;con_1;con_1_id;con_1_orientation;con_n;con_n_id
 25;Hafen;Track_C2;400;circulating_track;1;7;n;1;8;1;;
 26;Hafen;Track_C3;400;parking;1;7;n;1;8;1;;
 27;Hafen;Track_D;100;circulating_track;1;8;n;1;9;1;;
-28;Hafee;Track_E;600;parking;1;9;n;1;10;1;;
+28;Hafen;Track_E;600;parking;1;9;n;1;10;1;;
 29;Hafen;Track_1;400;parking;1;10;n;;;; ; 
 30;Hafen;Track_2;400;parking;1;10;n;;;;;
 31;Hafen;Track_3;400;parking;1;10;n;;;;;
