@@ -124,8 +124,8 @@ max-line-length = 120
 [tool.pylint]
 load-plugins = "pylint_pydantic"
 init-hook = "import sys; sys.path.append('popupsim/backend/src')"
-# Default to src folder only
-source-roots = ["popupsim/backend/src"]
+source-roots = ["popupsim/backend/src"] # Default to src folder only
+disable = ["W0511"]  # Disable fixme warnings (TODO/FIXME comments)
 
 [tool.mypy]
 python_version = "3.13"

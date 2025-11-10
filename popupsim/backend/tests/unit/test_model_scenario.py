@@ -56,10 +56,11 @@ class TestScenarioConfig:
         -----
         Tests backward compatibility for scenarios without workshop configuration.
         Validates that all required fields are correctly assigned.
+        Date fields can be set from strings and datetime objects.
         """
         scenario = ScenarioConfig(
             scenario_id='test_scenario',
-            start_date=datetime(2024, 1, 1, tzinfo=UTC),
+            start_date='2024-01-01',
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             random_seed=42,
             train_schedule_file='schedule.csv',
@@ -407,10 +408,12 @@ class TestScenarioConfig:
         Validates that ScenarioConfig can be serialized to JSON and that
         the resulting JSON string contains expected field values.
         """
+        start_date = '2024-01-01 08:00+00:00'
+        end_date = '2024-01-10 20:00+00:00'
         config = ScenarioConfig(
             scenario_id='test_scenario',
-            start_date=datetime(2024, 1, 1, tzinfo=UTC),
-            end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            start_date=start_date,
+            end_date=end_date,
             train_schedule_file='schedule.csv',
         )
 
@@ -420,8 +423,12 @@ class TestScenarioConfig:
         parsed = json.loads(json_str)
 
         assert parsed['scenario_id'] == 'test_scenario'
+        # Verify date fields in parsed JSON match original date values
+        assert str(parsed['start_date']).startswith((start_date).split(' ')[0])
+        assert str(parsed['end_date']).startswith((end_date).split(' ')[0])
         assert str(parsed['start_date']).startswith(str(datetime(2024, 1, 1, tzinfo=UTC)).split(' ')[0])
         assert str(parsed['end_date']).startswith(str(datetime(2024, 1, 10, tzinfo=UTC)).split(' ')[0])
+        assert datetime.fromisoformat(parsed.get('start_date')) == datetime.fromisoformat(start_date)
 
     def test_scenario_config_realistic_complete_scenario(self) -> None:
         """

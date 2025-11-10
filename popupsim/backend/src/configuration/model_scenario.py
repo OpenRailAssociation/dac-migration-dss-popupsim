@@ -28,16 +28,19 @@ class ScenarioConfig(BaseModel):
 
     Validates scenario parameters including date ranges, random seeds,
     workshop configuration, and required file references.
+    Timezone for start_date and end_date is enforced to be UTC in the validators.
     """
 
     scenario_id: str = Field(
         pattern=r'^[a-zA-Z0-9_-]+$', description='Unique identifier for the scenario', min_length=1, max_length=50
     )
-    start_date: datetime = Field(description='Simulation start date (UTC)')
-    end_date: datetime = Field(description='Simulation end date (UTC)')
+    start_date: datetime = Field(description='Simulation start date')
+    end_date: datetime = Field(description='Simulation end date')
     # Make model attribute an int (always set) but allow None during input via the before validator
     random_seed: int = Field(default=0, ge=0, description='Random seed for reproducible simulations')
+    # Todo should be a list
     workshop: Workshop | None = Field(default=None, description='Workshop configuration with available tracks')
+    # Todo: should be a wagons list
     train_schedule_file: str = Field(
         pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to the train schedule file', min_length=1, max_length=50
     )  # Todo make it a Path
