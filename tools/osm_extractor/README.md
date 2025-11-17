@@ -20,51 +20,6 @@ From the project root:
 uv sync --group osm-extractor
 ```
 
-## Testing
-
-Run the test suite:
-
-```bash
-# From project root
-uv run pytest tools/osm_extractor/tests/ -v
-
-# Or from osm_extractor directory
-cd tools/osm_extractor
-uv run pytest tests/ -v
-```
-
-### Coverage
-
-Run tests with coverage reporting:
-
-```bash
-# Manual (from project root)
-uv run pytest tools/osm_extractor/tests/ \
-    --cov=tools/osm_extractor/src/osm_extractor \
-    --cov-report=term-missing \
-    --cov-report=html:tools/osm_extractor/htmlcov \
-    -v
-```
-
-Coverage reports:
-- **Terminal**: Shows coverage summary with missing lines
-- **HTML**: `tools/osm_extractor/htmlcov/index.html`
-- **XML**: `tools/osm_extractor/coverage.xml`
-
-### Test Structure
-
-- **Unit tests**: Fast, isolated tests for individual functions
-  - `test_models.py`: Data model validation
-  - `test_projection.py`: Coordinate projection
-  - `test_geometry.py`: Geometry operations
-  - `test_exceptions.py`: Exception hierarchy
-  - `test_projector.py`: Projector class
-- **Integration tests**: Tests with mocked external dependencies
-  - `test_extractor_integration.py`: OSM extraction with mocked API
-  - `test_clipper_integration.py`: Data clipping operations
-  - `test_plotter_integration.py`: Visualization generation
-  - `test_cli_integration.py`: CLI commands end-to-end
-
 ## CLI Usage
 
 The tool provides a clean command-line interface with two main commands:
@@ -75,7 +30,7 @@ Extract railway data from OSM within a specified boundary.
 
 **Bounding Box:**
 ```bash
-uv run --group osm-extractor osm-extractor extract \
+uv run osm-extractor extract \
   "47.37,8.54,47.39,8.56" \
   -t bbox \
   -o railway_data.json
@@ -83,7 +38,7 @@ uv run --group osm-extractor osm-extractor extract \
 
 **Polygon:**
 ```bash
-uv run --group osm-extractor osm-extractor extract \
+uv run osm-extractor extract \
   "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
   -t polygon \
   -o railway_data.json
@@ -91,7 +46,7 @@ uv run --group osm-extractor osm-extractor extract \
 
 **With projection and clipping:**
 ```bash
-uv run --group osm-extractor osm-extractor extract \
+uv run osm-extractor extract \
   "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
   -t polygon \
   -o railway_data.json \
@@ -119,17 +74,17 @@ Visualize railway data with automatic coordinate system detection and customizab
 
 **Basic plot:**
 ```bash
-uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map.png
+uv run osm-extractor plot railway_data.json -o railway_map.png
 ```
 
 **With track labels:**
 ```bash
-uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map.png --labels
+uv run osm-extractor plot railway_data.json -o railway_map.png --labels
 ```
 
 **With switch labels:**
 ```bash
-uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map.png --switch-labels
+uv run osm-extractor plot railway_data.json -o railway_map.png --switch-labels
 ```
 
 **Options:**
@@ -150,7 +105,7 @@ uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map
 
 ```bash
 # Extract, project, and clip in one command
-uv run --group osm-extractor osm-extractor extract \
+uv run osm-extractor extract \
   "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
   -t polygon \
   -o railway_data.json \
@@ -158,7 +113,7 @@ uv run --group osm-extractor osm-extractor extract \
   --clip
 
 # Visualize with labels
-uv run --group osm-extractor osm-extractor plot railway_data.json \
+uv run osm-extractor plot railway_data.json \
   -o network.png \
   --labels \
   --switch-labels

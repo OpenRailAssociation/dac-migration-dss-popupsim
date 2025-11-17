@@ -69,20 +69,6 @@ uv run osm2popupsim animate sequence.yaml topology.yaml tracks.yaml routes.yaml 
 
 # Create Matplotlib GIF animation
 uv run osm2popupsim animate-matplotlib sequence.yaml topology.yaml tracks.yaml routes.yaml -o animation.gif --fps 10
-```
-
-## Testing
-
-Run the test suite:
-
-```bash
-# From project root
-uv run pytest tools/osm2popupsim/tests/ -v
-
-# From osm2popupsim directory
-cd tools/osm2popupsim
-uv run pytest tests/ -v
-```
 
 ## Format
 
@@ -230,7 +216,7 @@ nodes:
       stem: "edge_1"  # Main line (detected by angle analysis)
       branches: ["edge_2", "edge_3"]  # Other edges
       switch_type: "default"  # From OSM
-  
+
   node_entry:
     type: "boundary"  # Entry/exit points for mesoscopic connections
     boundary_type: "entry"  # entry, exit, or both
@@ -322,11 +308,11 @@ sequence:
     train_id: "train_1"
     route_id: "route_1"
     duration: 120  # seconds
-  
+
   - type: "wait"
     train_id: "train_1"
     duration: 30  # seconds
-  
+
   - type: "route"
     train_id: "train_1"
     route_id: "route_2"

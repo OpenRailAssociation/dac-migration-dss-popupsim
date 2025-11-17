@@ -115,28 +115,21 @@ uv run pre-commit run --all-files
 
 ### Testing
 
-Both tools include pytest test suites:
-
 **osm_extractor:**
 - Comprehensive unit and integration tests
 - High test coverage
 - Mocked external dependencies
 
 **osm2popupsim:**
-- CLI command tests
-- Conversion and plotting tests
+- CLI command tests available in `tools/osm2popupsim/tests/`
 
 **Run tests:**
 ```bash
-# All tests
-uv run pytest
-
-# Specific tool
+# osm_extractor tests
 uv run pytest tools/osm_extractor/tests/ -v
-uv run pytest tools/osm2popupsim/tests/ -v
 
-# With coverage
-uv run pytest --cov=tools/osm_extractor/src --cov=tools/osm2popupsim/src
+# osm2popupsim tests
+uv run pytest tools/osm2popupsim/tests/ -v
 ```
 
 ### Project Structure
@@ -188,11 +181,11 @@ A comprehensive tool for extracting, processing, and visualizing railway infrast
 uv sync --group osm-extractor
 
 # Extract railway data with projection and clipping
-uv run --group osm-extractor osm-extractor extract \
+uv run osm-extractor extract \
   "47.37,8.54,47.39,8.56" -t bbox -o railway_data.json --project --clip
 
 # Visualize with labels
-uv run --group osm-extractor osm-extractor plot railway_data.json \
+uv run osm-extractor plot railway_data.json \
   -o network.png --labels --switch-labels
 ```
 
@@ -228,7 +221,7 @@ uv run osm2popupsim plot topology.yaml -t tracks.yaml -o network.png
 
 ```bash
 # 1. Extract from OSM with projection
-uv run --group osm-extractor osm-extractor extract \
+uv run osm-extractor extract \
   "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
   -t polygon -o railway_data.json --project --clip
 
