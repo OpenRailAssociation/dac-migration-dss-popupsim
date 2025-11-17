@@ -73,14 +73,14 @@ class WorkshopTrack(BaseModel):
 
 ```python
 class ConfigurationService:
-    """Main service for configuration"""
+    """Main service for models"""
 
     def load_scenario_from_file(self, file_path: str) -> ScenarioConfig:
         """Loads scenario from JSON/CSV file"""
         pass
 
     def validate_scenario(self, config: ScenarioConfig) -> ValidationResult:
-        """Validates scenario configuration"""
+        """Validates scenario models"""
         pass
 ```
 
@@ -133,7 +133,7 @@ class SimulationService:
     def __init__(self, sim_engine: SimPyAdapter):
         self.sim_engine = sim_engine
 
-    def run_simulation(self, scenario: ScenarioConfig, 
+    def run_simulation(self, scenario: ScenarioConfig,
                       duration_hours: int) -> SimulationResult:
         """Runs complete simulation"""
         pass
@@ -175,7 +175,7 @@ class VisualizationService:
 class ExportService:
     """Service for data export"""
 
-    def export_results_csv(self, results: SimulationResult, 
+    def export_results_csv(self, results: SimulationResult,
                           file_path: str) -> None:
         """Exports results as CSV"""
         pass

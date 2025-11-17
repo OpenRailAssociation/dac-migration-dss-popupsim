@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "name": "Haldensleben Yard",
+    "description": "Haldensleben yard configuration with retrofit workshops",
+    "version": "1.0.0",
+    "location": "LHL"
+  },
+  "references": {
+    "routes": "routes.yaml",
+    "topology": "topology.yaml",
+    "tracks": "tracks.yaml"
+  },
+  "workshops": [
+    null
+  ],
+  "handover_gates": [
+    {
+      "id": "Haldensleben_to_Glindenberg",
+      "description": "Track 6409 from Haldensleben to Glindenberg",
+      "node": "node_1877303900",
+      "switch_ref": 5
+    },
+    {
+      "id": "Haldensleben_to_Oebisfelde",
+      "description": "Track",
+      "node": "node_1877304067",
+      "switch_ref": 48
+    }
+  ]
+}

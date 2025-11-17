@@ -1,4 +1,4 @@
-"""Models and validation logic for train simulation configuration and arrivals.
+"""Models and validation logic for train simulation models and arrivals.
 
 This module defines the data models and validation logic for configuring
 train simulation scenarios. It includes validation for scenario parameters
@@ -14,10 +14,10 @@ from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
 
-from .model_route import Route
-from .model_track import Track
-from .model_train import Train
-from .model_workshop import Workshop
+from .route import Route
+from .track import Track
+from .train import Train
+from .workshop import Workshop
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ class ScenarioConfig(BaseModel):
     """Configuration model for simulation scenarios.
 
     Validates scenario parameters including date ranges, random seeds,
-    workshop configuration, and required file references.
+    workshop models, and required file references.
     Timezone for start_date and end_date is enforced to be UTC in the validators.
     """
 
@@ -39,7 +39,7 @@ class ScenarioConfig(BaseModel):
     # Make model attribute an int (always set) but allow None during input via the before validator
     random_seed: int = Field(default=0, ge=0, description='Random seed for reproducible simulations')
     # Todo should be a list
-    workshop: Workshop | None = Field(default=None, description='Workshop configuration with available tracks')
+    workshop: Workshop | None = Field(default=None, description='Workshop models with available tracks')
     # Todo: should be a wagons list
     train_schedule_file: str = Field(
         pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to the train schedule file', min_length=1, max_length=50
@@ -54,9 +54,9 @@ class ScenarioConfig(BaseModel):
         min_length=1,
         max_length=50,
     )  # Todo make it a Path
-    routes: list[Route] | None = Field(default=None, description='Route configuration')
-    trains: list[Train] | None = Field(default=None, description='Train configuration')
-    tracks: list[Track] | None = Field(default=None, description='Track configuration')
+    routes: list[Route] | None = Field(default=None, description='Route models')
+    trains: list[Train] | None = Field(default=None, description='Train models')
+    tracks: list[Track] | None = Field(default=None, description='Track models')
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod

@@ -12,11 +12,10 @@ depending on an actual simpy environment in unit test runs.
 from datetime import date
 from typing import Any
 
+from models.scenario import ScenarioConfig
 import pytest
 from simulation.popupsim import PopupSim
 from simulation.sim_adapter import SimPyAdapter
-
-from configuration.model_scenario import ScenarioConfig
 
 
 class FakeAdapter:

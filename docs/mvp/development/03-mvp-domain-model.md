@@ -76,7 +76,7 @@ class ScenarioConfig(BaseModel):
 
 ```python
 class Workshop(BaseModel):
-    """Workshop configuration with available tracks"""
+    """Workshop models with available tracks"""
     tracks: list[WorkshopTrack] = Field(min_length=1)
 
     @field_validator('tracks')
@@ -211,7 +211,7 @@ class ValidationService:
         self,
         config: ScenarioConfig
     ) -> ValidationResult:
-        """Validates scenario configuration"""
+        """Validates scenario models"""
         errors = []
         warnings = []
 
@@ -271,7 +271,7 @@ def process_wagon(
 def validate_configuration(
     config: ScenarioConfig
 ) -> ValidationResult:
-    """Validate scenario configuration"""
+    """Validate scenario models"""
     # Implementation
     pass
 ```

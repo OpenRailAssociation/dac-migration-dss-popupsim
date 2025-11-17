@@ -4,12 +4,12 @@ from pathlib import Path
 
 import pytest
 
-# Pytest configuration - mypy_path in pyproject.toml handles module resolution
+# Pytest models - mypy_path in pyproject.toml handles module resolution
 
 
 @pytest.fixture
 def fixtures_config_path() -> Path:
-    """Provide path to test configuration fixtures directory.
+    """Provide path to test models fixtures directory.
 
     Returns
     -------

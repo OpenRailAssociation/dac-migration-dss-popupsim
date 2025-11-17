@@ -11,8 +11,8 @@ from dataclasses import field
 from enum import Enum
 import logging
 
-from .model_scenario import ScenarioConfig
-from .model_track import TrackType
+from models.scenario import ScenarioConfig
+from models.track import TrackType
 
 logger = logging.getLogger('validation')
 
@@ -27,7 +27,7 @@ class ValidationLevel(Enum):
 
 @dataclass
 class ValidationIssue:
-    """Single validation issue encountered during configuration validation.
+    """Single validation issue encountered during models validation.
 
     Attributes
     ----------
@@ -62,11 +62,11 @@ class ValidationIssue:
 
 @dataclass
 class ValidationResult:
-    """Result of a configuration validation process.
+    """Result of a models validation process.
 
     Attributes
     ----------
-        is_valid (bool): Indicates whether the configuration is valid.
+        is_valid (bool): Indicates whether the models is valid.
         issues (list[ValidationIssue]): A list of validation issues encountered.
 
     """
@@ -140,7 +140,7 @@ class ValidationResult:
 
 
 # pylint: disable=too-few-public-methods
-class ConfigurationValidator:
+class ScenarioValidator:
     """Validate configurations for logical consistency and business rules.
 
     Checks:
@@ -156,7 +156,7 @@ class ConfigurationValidator:
         Parameters
         ----------
         config : ScenarioConfig
-            Loaded scenario configuration.
+            Loaded scenario models.
 
         Returns
         -------
@@ -193,28 +193,28 @@ class ConfigurationValidator:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message='Workshop configuration is missing',
+                    message='Workshop models is missing',
                     field='workshop',
-                    suggestion='Add workshop configuration with tracks',
+                    suggestion='Add workshop models with tracks',
                 )
             )
             return issues
 
         # 1. At least one workshop track
-        werkstatt_tracks = [t for t in config.workshop.tracks if t.type == TrackType.WERKSTATTGLEIS]
+        werkstatt_tracks = [t for t in config.workshop.tracks if t.type == TrackType.WORKSHOP]
 
         if len(werkstatt_tracks) == 0:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message="At least one track with function='werkstattgleis' required",
+                    message="At least one track with function='WORKSHOP' required",
                     field='workshop.tracks',
-                    suggestion="Add a track with function='werkstattgleis' and retrofit_time_min > 0",
+                    suggestion="Add a track with function='WORKSHOP' and retrofit_time_min > 0",
                 )
             )
 
         # 2. All core tracktypes present?
-        required_types = {TrackType.SAMMELGLEIS, TrackType.WERKSTATTGLEIS, TrackType.PARKGLEIS}
+        required_types = {TrackType.RETROFITTED, TrackType.WORKSHOP, TrackType.PARKING}
         present_types = {t.type for t in config.workshop.tracks}
         missing = required_types - present_types
 
@@ -225,11 +225,11 @@ class ConfigurationValidator:
                     level=ValidationLevel.WARNING,
                     message=f'Missing track type: {", ".join(missing_names)}',
                     field='workshop.tracks',
-                    suggestion='Complete workflow needed: sammelgleis → werkstattgleis → parkgleis',
+                    suggestion='Complete workflow needed: sammelgleis → WORKSHOP → parkgleis',
                 )
             )
 
-        # 3. retrofit_time_min only for werkstattgleis. Should be added ?
+        # 3. retrofit_time_min only for WORKSHOP. Should be added ?
 
         return issues
 
@@ -245,7 +245,7 @@ class ConfigurationValidator:
     #         return issues  # Workshop validation already handles this case
 
     #     # Total workshop capacity
-    #     werkstatt_tracks = [t for t in scenario.workshop.tracks if t.type == TrackType.WERKSTATTGLEIS]
+    #     werkstatt_tracks = [t for t in scenario.workshop.tracks if t.type == TrackType.WORKSHOP]
 
     #     if not werkstatt_tracks:
     #         return issues  # Already checked in _validate_workshop_tracks
@@ -255,7 +255,7 @@ class ConfigurationValidator:
     #     # Average retrofit time
     #     avg_retrofit_time = sum(t.retrofit_time_min for t in werkstatt_tracks) / len(werkstatt_tracks)
 
-    #     # Wagons per day from train configuration
+    #     # Wagons per day from train models
     #     wagons_per_day = len(
     #         [
     #             w
@@ -366,16 +366,17 @@ class ConfigurationValidator:
                     )
                 )
 
+            # ToDo: enable time_min check or remove completely?
             # Time > 0?
-            if route.time_min <= 0:
-                issues.append(
-                    ValidationIssue(
-                        level=ValidationLevel.ERROR,
-                        message=f'Route {route.route_id}: time_min must be > 0',
-                        field=f'routes[{route.route_id}].time_min',
-                        suggestion='Set a realistic travel time in minutes',
-                    )
-                )
+            # if route.time_min <= 0:
+            #     issues.append(
+            #         ValidationIssue(
+            #             level=ValidationLevel.ERROR,
+            #             message=f'Route {route.route_id}: time_min must be > 0',
+            #             field=f'routes[{route.route_id}].time_min',
+            #             suggestion='Set a realistic travel time in minutes',
+            #         )
+            #     )
 
         return issues
 

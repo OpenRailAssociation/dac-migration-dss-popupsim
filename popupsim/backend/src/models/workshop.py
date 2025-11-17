@@ -2,7 +2,7 @@
 
 Key Features:
 - **Workshop Configuration**: Defines the structure of the workshop, including tracks and their properties.
-- **Validation Logic**: Ensures that the workshop configuration adheres to business rules, such as:
+- **Validation Logic**: Ensures that the workshop models adheres to business rules, such as:
   - Unique track IDs.
   - Presence of required track functions.
   - Proper retrofit time constraints for specific track functions.
@@ -16,15 +16,15 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 
-from .model_track import Track
-from .model_track import TrackType
+from .track import Track
+from .track import TrackType
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
 class Workshop(BaseModel):
-    """Model representing the workshop configuration.
+    """Model representing the workshop models.
 
     Contains all available tracks for train processing.
     """
@@ -65,16 +65,17 @@ class Workshop(BaseModel):
         dict
             Dictionary with capacity metrics including total_capacity,
             avg_retrofit_time_min, max_throughput_per_day, and werkstatt_track_count.
-            Returns error message if no werkstattgleis tracks found.
+            Returns error message if no WORKSHOP tracks found.
         """
-        werkstatt_tracks = [track for track in self.tracks if track.type == TrackType.WERKSTATTGLEIS]
+        werkstatt_tracks = [track for track in self.tracks if track.type == TrackType.WORKSHOP]
 
         if not werkstatt_tracks:
-            return {'error': 'No werkstattgleis tracks found'}
+            return {'error': 'No WORKSHOP tracks found'}
 
         # Safely aggregate capacities (t.capacity may be None)
-        capacities: list[int] = [t.capacity or 0 for t in werkstatt_tracks]
-        total_capacity: int = sum(capacities)
+        # Todo clarify capacity handling
+        # capacities: list[int] = [t.capacity or 0 for t in werkstatt_tracks]
+        # total_capacity: int = sum(capacities)
 
         # Collect retrofit times, ignoring tracks without a defined retrofit_time_min
         # retrofit_times: list[int] = [t.retrofit_time_min for t in werkstatt_tracks if t.retrofit_time_min is not None]
@@ -82,8 +83,9 @@ class Workshop(BaseModel):
         retrofit_times: list[int] = [30, 30]  # Placeholder values for
 
         if not retrofit_times:
-            return {'error': 'No retrofit_time_min defined for werkstattgleis tracks'}
+            return {'error': 'No retrofit_time_min defined for WORKSHOP tracks'}
 
+        total_capacity = 1
         avg_retrofit_time: float = sum(retrofit_times) / len(retrofit_times)
         max_throughput_per_day: float = (24 * 60 / avg_retrofit_time) * total_capacity
 

@@ -89,7 +89,7 @@ def test_main_with_valid_parameters(
     mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function succeeds with valid parameters."""
-    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_config_service = mocker.patch('main.ScenarioBuilder')
     mock_service = mocker.MagicMock()
     mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
@@ -117,7 +117,7 @@ def test_main_with_verbose_flag(
     mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function with verbose flag enabled."""
-    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_config_service = mocker.patch('main.ScenarioBuilder')
     mock_service = mocker.MagicMock()
     mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
@@ -144,7 +144,7 @@ def test_main_with_custom_debug_level(
     mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function with custom debug level."""
-    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_config_service = mocker.patch('main.ScenarioBuilder')
     mock_service = mocker.MagicMock()
     mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'

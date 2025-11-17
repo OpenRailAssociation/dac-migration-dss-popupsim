@@ -11,10 +11,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+from models.scenario import ScenarioConfig
 from pydantic import ValidationError
 import pytest
-
-from configuration.model_scenario import ScenarioConfig
 
 
 class TestScenarioConfig:
@@ -54,7 +53,7 @@ class TestScenarioConfig:
 
         Notes
         -----
-        Tests backward compatibility for scenarios without workshop configuration.
+        Tests backward compatibility for scenarios without workshop models.
         Validates that all required fields are correctly assigned.
         Date fields can be set from strings and datetime objects.
         """

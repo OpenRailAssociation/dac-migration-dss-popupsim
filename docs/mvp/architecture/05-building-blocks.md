@@ -99,7 +99,7 @@ class WorkshopConfig(BaseModel):
     station_count: int = Field(gt=0, description="Number of retrofit stations")
     workers_per_station: int = Field(gt=0, le=10)
     retrofit_time_minutes: int = Field(gt=0)
-    
+
     @field_validator('station_count')
     @classmethod
     def validate_station_count(cls, v: int) -> int:
@@ -170,7 +170,7 @@ class Workshop:
     def __init__(self, env: simpy.Environment, station_count: int) -> None:
         self.env = env
         self.stations = simpy.Resource(env, capacity=station_count)
-    
+
     def retrofit_wagon(self, wagon_id: str, duration: int) -> Iterator[simpy.Event]:
         """SimPy process for wagon retrofit."""
         with self.stations.request() as req:
@@ -242,18 +242,18 @@ class SimulationOrchestrator:
     def __init__(self, config_service: Any, domain_service: Any) -> None:
         self.config = config_service
         self.domain = domain_service
-    
+
     def run_simulation(self) -> Dict[str, Any]:
         """Execute full simulation pipeline."""
-        # 1. Load and validate configuration
+        # 1. Load and validate models
         scenario = self.config.load_scenario()
-        
+
         # 2. Setup simulation domain
         domain = self.domain.setup_domain(scenario)
-        
+
         # 3. Run SimPy simulation
         results = domain.run()
-        
+
         # 4. Return results for output generation
         return results
 ```
@@ -264,5 +264,3 @@ class SimulationOrchestrator:
 - Orchestrator coordinates but doesn't contain business logic
 
 ---
-
-

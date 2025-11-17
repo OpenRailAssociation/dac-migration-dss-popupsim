@@ -3,12 +3,11 @@
 from pathlib import Path
 from typing import Annotated
 
+from builders.scenario_builder import BuilderError
+from builders.scenario_builder import ScenarioBuilder
 from simulation.popupsim import PopupSim
 from simulation.sim_adapter import SimPyAdapter
 import typer
-
-from configuration.service import ConfigurationError
-from configuration.service import ConfigurationService
 
 APP_NAME = 'popupsim'
 
@@ -169,7 +168,7 @@ def main(
     # Load and validate scenario using ConfigurationService ---
     try:
         # Import here to avoid circular import at module level
-        service = ConfigurationService()
+        service = ScenarioBuilder()
         # scenario_path is guaranteed to be Path here (validated above)
         if scenario_path is None:
             raise typer.Exit(1)
@@ -188,7 +187,7 @@ def main(
         # validation_result.print_summary()
 
         # if not validation_result.is_valid:
-        #     typer.echo('\nErrors detected in scenario configuration. Exiting.')
+        #     typer.echo('\nErrors detected in scenario models. Exiting.')
         #     raise typer.Exit(1)
         # Main application logic would go here
         typer.echo('\n🚀 Starting popupsim processing...')
@@ -198,7 +197,7 @@ def main(
         # Todo make sure run_until is set appropriately from scenario config
         popup_sim.run()
 
-    except ConfigurationError as e:
+    except BuilderError as e:
         typer.echo(f'Configuration error: {e}')
         raise typer.Exit(1) from e
     except Exception as e:

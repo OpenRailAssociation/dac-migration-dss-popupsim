@@ -7,10 +7,9 @@ property calculations, and edge case handling.
 
 from typing import Any
 
+from models.wagon import Wagon
 from pydantic import ValidationError
 import pytest
-
-from configuration.model_wagon import Wagon
 
 
 class TestWagon:

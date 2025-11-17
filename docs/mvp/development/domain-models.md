@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from datetime import date
 
 class ScenarioConfig(BaseModel):
-    """Main scenario configuration"""
+    """Main scenario models"""
     scenario_id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
     start_date: date
     end_date: date

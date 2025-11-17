@@ -12,7 +12,7 @@ remains agnostic of the underlying simulation framework.
 
 import logging
 
-from configuration.model_scenario import ScenarioConfig
+from models.scenario import ScenarioConfig
 
 from .sim_adapter import SimulationAdapter
 
@@ -37,7 +37,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             simulation environment (e.g., SimPy).
         scenario : ScenarioConfig
             Domain scenario object containing routes, wagons and other
-            configuration consumed by the simulation.
+            models consumed by the simulation.
         """
         self.name: str = 'PopUpSim'
         self.adapter: SimulationAdapter = adapter

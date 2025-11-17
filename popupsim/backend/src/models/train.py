@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import model_validator
 
-from .model_wagon import Wagon
+from .wagon import Wagon
 
 # Configure logging
 logger = logging.getLogger(__name__)

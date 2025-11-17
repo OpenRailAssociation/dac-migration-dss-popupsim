@@ -5,7 +5,7 @@ This module provides the ConfigurationService class that handles:
 - Loading and parsing train schedule data from CSV files
 - Creating validated domain models (ScenarioConfig, Train, Wagon)
 - Cross-validation between scenario dates and train arrival dates
-- Comprehensive error handling and logging for configuration issues
+- Comprehensive error handling and logging for models issues
 """
 
 from datetime import UTC
@@ -15,44 +15,43 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from models.routes import Route
+from models.routes import Routes
+from models.scenario import ScenarioConfig
+from models.track import Track
+from models.track import TrackType
+from models.train import Train
+from models.wagon import Wagon
 import pandas as pd
 from pydantic import ValidationError
-
-from .model_routes import Route
-from .model_routes import Routes
-from .model_scenario import ScenarioConfig
-from .model_track import Track
-from .model_track import TrackType
-from .model_train import Train
-from .model_wagon import Wagon
-from .validation import ConfigurationValidator
+from validators.scenario_validation import ScenarioValidator
 
 # Configure logging
 logger = logging.getLogger('ConfigurationService')
 
 
 # pylint: disable=too-few-public-methods
-class ConfigurationError(Exception):
-    """Custom exception for configuration-related errors."""
+class BuilderError(Exception):
+    """Custom exception for models-related errors."""
 
 
-class ConfigurationService:
-    """Service for loading and validating configuration files."""
+class ScenarioBuilder:
+    """Service for loading and validating models files."""
 
     def __init__(self, base_path: Path | None = None):
-        """Initialize the configuration service.
+        """Initialize the models service.
 
         Parameters
         ----------
         base_path : Path | None, optional
-            Base directory for configuration files, by default None (uses current directory).
+            Base directory for models files, by default None (uses current directory).
             # Todo Clarify why we need that
         """
         self.base_path = base_path or Path.cwd()
-        self.validator = ConfigurationValidator()
+        self.validator = ScenarioValidator()
 
     def load_scenario(self, path: str | Path) -> dict[str, Any]:
-        """Load scenario configuration from a JSON file.
+        """Load scenario models from a JSON file.
 
         Parameters
         ----------
@@ -62,7 +61,7 @@ class ConfigurationService:
         Returns
         -------
         dict[str, Any]
-            Scenario configuration data.
+            Scenario models data.
 
         Raises
         ------
@@ -84,9 +83,9 @@ class ConfigurationService:
             file_path = test_file_path if test_file_path.exists() else path / 'scenario.json'
 
         if not file_path.exists():
-            raise ConfigurationError(f'Scenario configuration file not found: {file_path}')
+            raise BuilderError(f'Scenario models file not found: {file_path}')
 
-        logger.info('Loading scenario configuration from %s', file_path)
+        logger.info('Loading scenario models from %s', file_path)
 
         try:
             with open(file_path, encoding='utf-8') as f:
@@ -97,7 +96,7 @@ class ConfigurationService:
             missing_fields = [field for field in required_fields if field not in data]
 
             if missing_fields:
-                raise ConfigurationError(
+                raise BuilderError(
                     f'Missing required fields {", ".join(missing_fields)} in {file_path}: '
                     f'Found fields: {", ".join(data.keys())}'
                 )
@@ -111,10 +110,10 @@ class ConfigurationService:
                 'Please check the JSON structure and ensure all brackets and quotes are properly closed.'
             )
             logger.error('%s', error_msg)
-            raise ConfigurationError(error_msg) from e
+            raise BuilderError(error_msg) from e
 
     def load_and_validate_scenario_data(self, path: str | Path) -> dict[str, Any]:
-        """Load scenario configuration and validate all referenced files exist.
+        """Load scenario models and validate all referenced files exist.
 
         Parameters
         ----------
@@ -124,7 +123,7 @@ class ConfigurationService:
         Returns
         -------
         dict[str, Any]
-            Validated scenario configuration data.
+            Validated scenario models data.
 
         Raises
         ------
@@ -140,17 +139,17 @@ class ConfigurationService:
         # Validate referenced files exist
         train_schedule_file = scenario_data.get('train_schedule_file')
         if not train_schedule_file:
-            raise ConfigurationError('Missing train_schedule_file in scenario configuration')
+            raise BuilderError('Missing train_schedule_file in scenario models')
 
         train_schedule_path = config_dir / train_schedule_file
         if not train_schedule_path.exists():
-            raise ConfigurationError(f'Train schedule file not found: {train_schedule_path}')
+            raise BuilderError(f'Train schedule file not found: {train_schedule_path}')
 
         logger.info('All referenced files validated for json scenario data: %s', scenario_data.get('scenario_id'))
         return scenario_data
 
     def load_scenario_config(self, path: str | Path) -> ScenarioConfig:
-        """Load and validate scenario configuration from a JSON file.
+        """Load and validate scenario models from a JSON file.
 
         Parameters
         ----------
@@ -178,11 +177,11 @@ class ConfigurationService:
                 field_path = ' -> '.join(str(loc) for loc in error['loc'])
                 error_details.append(f"Field '{field_path}': {error['msg']} (input: {error.get('input', 'N/A')})")
             error_msg = (
-                f'Validation failed for scenario configuration in {path}:\n'
+                f'Validation failed for scenario models in {path}:\n'
                 f'  • {chr(10).join("  • " + detail for detail in error_details)}'
             )
             logger.error('%s', error_msg)
-            raise ConfigurationError(error_msg) from e
+            raise BuilderError(error_msg) from e
 
     def _read_and_validate_train_schedule_csv(self, file_path: Path) -> pd.DataFrame:
         """Read CSV and validate required columns and emptiness.
@@ -214,15 +213,15 @@ class ConfigurationService:
             df['train_id'] = df['train_id'].fillna('AnoTrain')
             df.loc[df['train_id'].str.strip() == '', 'train_id'] = 'AnoTrain'
             if len(df) < 1:
-                raise ConfigurationError('Train schedule file is empty')
+                raise BuilderError('Train schedule file is empty')
         except (pd.errors.ParserError, TypeError) as err:
-            raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
+            raise BuilderError(f'Error parsing CSV file {file_path}: {err}') from err
         except Exception as err:
             # ToDo avoid unexpected ! Files can be empty, have missing columns, wrong formats, ...
-            raise ConfigurationError(f'Unexpected error reading CSV file {file_path}: {err}') from err
+            raise BuilderError(f'Unexpected error reading CSV file {file_path}: {err}') from err
 
         if df.empty:
-            raise ConfigurationError('Train schedule file is empty')
+            raise BuilderError('Train schedule file is empty')
         required_columns = [
             'train_id',
             'wagon_id',
@@ -234,7 +233,7 @@ class ConfigurationService:
         ]
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
-            raise ConfigurationError(
+            raise BuilderError(
                 f'Missing required columns in {file_path}: '
                 f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
             )
@@ -306,7 +305,7 @@ class ConfigurationService:
         for train_id, group_df in grouped:
             try:
                 # Get first row for train-level data (all rows have same arrival_time per train)
-                first_row: pd.Series[Any] = group_df.iloc[0]
+                first_row: pd.Series[Any] = group_df.iloc[0]  # type: ignore[misc] # pylint: disable=unsubscriptable-object
 
                 # Parse arrival_time from pd.Timestamp to datetime with UTC timezone
                 arrival_timestamp: pd.Timestamp = first_row['arrival_time']
@@ -331,11 +330,11 @@ class ConfigurationService:
             except ValidationError as err:
                 error_msg: str = f'Failed to create train {train_id}: {err}'
                 logger.error(error_msg)
-                raise ConfigurationError(error_msg) from err
+                raise BuilderError(error_msg) from err
             except Exception as err:
                 error_msg = f'Unexpected error creating train {train_id}: {err}'
                 logger.error(error_msg)
-                raise ConfigurationError(error_msg) from err
+                raise BuilderError(error_msg) from err
 
         logger.info('Successfully created %d trains from DataFrame', len(trains))
         return trains
@@ -392,7 +391,7 @@ class ConfigurationService:
         """
         file_path_obj: Path = Path(file_path)
         if not file_path_obj.exists():
-            raise ConfigurationError(f'Train schedule file not found: {file_path_obj}')
+            raise BuilderError(f'Train schedule file not found: {file_path_obj}')
 
         logger.info('Loading train schedule from %s', file_path_obj)
 
@@ -411,20 +410,17 @@ class ConfigurationService:
             return trains
 
         except Exception as err:
-            raise ConfigurationError(f'Unexpected error loading train schedule from {file_path_obj}: {err}') from err
+            raise BuilderError(f'Unexpected error loading train schedule from {file_path_obj}: {err}') from err
 
     def _create_workshop_tracks_from_dataframe(self, df: pd.DataFrame) -> list[Track]:
         """Create WorkshopTrack objects from DataFrame rows."""
         tracks = []
         for _, row in df.iterrows():
             try:
-                capacity = self._extract_scalar_int(row['capacity'])
-
                 track = Track(
                     id=str(row['track_id']).strip(),
-                    length=float(row['length']),
                     type=TrackType(str(row['function']).strip()),
-                    capacity=capacity,
+                    edges=[],
                 )
                 tracks.append(track)
             except ValidationError as err:
@@ -432,12 +428,12 @@ class ConfigurationService:
                 for error in err.errors():
                     field_path = ' -> '.join(str(loc) for loc in error['loc'])
                     error_details.append(f"Field '{field_path}': {error['msg']}")
-                raise ConfigurationError(
+                raise BuilderError(
                     f'Validation failed for track {row["track_id"]}:\n'
                     f'  • {chr(10).join("  • " + detail for detail in error_details)}'
                 ) from err
             except (ValueError, TypeError) as err:
-                raise ConfigurationError(f'Invalid data type for track {row["track_id"]}: {err}') from err
+                raise BuilderError(f'Invalid data type for track {row["track_id"]}: {err}') from err
         return tracks
 
     def _parse_current_wagons(self, row: pd.Series, df: pd.DataFrame) -> list[int]:
@@ -479,22 +475,22 @@ class ConfigurationService:
                 },
             )
         except pd.errors.EmptyDataError as err:
-            raise ConfigurationError('Workshop tracks file is empty') from err
+            raise BuilderError('Workshop tracks file is empty') from err
         except pd.errors.ParserError as err:
-            raise ConfigurationError(f'Error parsing CSV file {file_path}: {err}') from err
+            raise BuilderError(f'Error parsing CSV file {file_path}: {err}') from err
 
         # Validate that the result is actually a DataFrame
         if not isinstance(df, pd.DataFrame):
-            raise ConfigurationError('Loaded object is not a pandas DataFrame')
+            raise BuilderError('Loaded object is not a pandas DataFrame')
 
         if df.empty:
-            raise ConfigurationError('Workshop tracks file is empty')
+            raise BuilderError('Workshop tracks file is empty')
 
         # Validate required columns - expect track_id instead of id
         required_columns = ['track_id', 'function', 'capacity', 'retrofit_time_min']
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
-            raise ConfigurationError(
+            raise BuilderError(
                 f'Missing required columns in {file_path}: '
                 f'{", ".join(missing_columns)}. Found columns: {", ".join(df.columns)}'
             )
@@ -502,12 +498,12 @@ class ConfigurationService:
         # Check for duplicate track IDs - use track_id column
         duplicate_ids = df[df.duplicated(subset=['track_id'], keep=False)]['track_id'].unique()
         if len(duplicate_ids) > 0:
-            raise ConfigurationError(f'Duplicate track IDs found: {", ".join(duplicate_ids)}')
+            raise BuilderError(f'Duplicate track IDs found: {", ".join(duplicate_ids)}')
 
         return df
 
     def _load_tracks(self, file_path: Path) -> list[Track]:
-        """Load track configuration from CSV file.
+        """Load track models from CSV file.
 
         Parameters
         ----------
@@ -545,15 +541,16 @@ class ConfigurationService:
             df['valid_from'] = pd.to_datetime(df['valid_from'], errors='coerce')
             df['valid_to'] = pd.to_datetime(df['valid_to'], errors='coerce')
             if df.empty:
-                raise ConfigurationError(f'Track configuration file is empty: {file_path}')
+                raise BuilderError(f'Track models file is empty: {file_path}')
 
             # Validate required columns
             required_columns: list[str] = ['id', 'length', 'type']
             missing_columns: list[str] = [col for col in required_columns if col not in df.columns]
             if missing_columns:
-                raise ConfigurationError(f'Missing columns in {file_path}: {", ".join(missing_columns)}')
+                raise BuilderError(f'Missing columns in {file_path}: {", ".join(missing_columns)}')
 
             # Convert DataFrame to Track objects
+            # Todo Improve data Loading or remove from here to models
             tracks: list[Track] = []
             for _, row in df.iterrows():
                 try:
@@ -561,9 +558,7 @@ class ConfigurationService:
                         id=str(row['id']).strip(),
                         length=float(row['length']),
                         type=TrackType(str(row['type']).strip()),
-                        capacity=int(row['capacity']) if pd.notna(row.get('capacity')) else None,
-                        sh_1=int(row['sh_1']) if pd.notna(row.get('sh_1')) else 0,
-                        sh_n=int(row['sh_n']) if pd.notna(row.get('sh_n')) else 0,
+                        edges=[],
                         valid_from=row['valid_from'].to_pydatetime() if pd.notna(row.get('valid_from')) else None,
                         valid_to=row['valid_to'].to_pydatetime() if pd.notna(row.get('valid_to')) else None,
                     )
@@ -572,13 +567,13 @@ class ConfigurationService:
                     error_details: str = '; '.join(
                         f'{".".join(str(loc) for loc in e["loc"])}: {e["msg"]}' for e in err.errors()
                     )
-                    raise ConfigurationError(f'Invalid track {row["track_id"]}: {error_details}') from err
+                    raise BuilderError(f'Invalid track {row["track_id"]}: {error_details}') from err
 
             logger.info('Loaded %d tracks from %s', len(tracks), file_path)
             return tracks
 
         except Exception as err:
-            raise ConfigurationError(f'File not found: {file_path}') from err
+            raise BuilderError(f'File not found: {file_path}') from err
 
     # Todo Workshop handling
     # def load_workshop_tracks(self, file_path: str | Path) -> Workshop:
@@ -592,7 +587,7 @@ class ConfigurationService:
     #     Returns
     #     -------
     #     Workshop
-    #         Validated workshop configuration with tracks.
+    #         Validated workshop models with tracks.
 
     #     Raises
     #     ------
@@ -629,7 +624,7 @@ class ConfigurationService:
         Parameters
         ----------
         scenario_data : dict[str, Any]
-            Scenario configuration dictionary.
+            Scenario models dictionary.
 
         Returns
         -------
@@ -645,7 +640,7 @@ class ConfigurationService:
         scenario_end_str = scenario_data.get('end_date')
 
         if not scenario_start_str or not scenario_end_str:
-            raise ConfigurationError('Missing start_date or end_date in scenario configuration')
+            raise BuilderError('Missing start_date or end_date in scenario models')
 
         try:
             scenario_start = datetime.fromisoformat(scenario_start_str)
@@ -659,7 +654,7 @@ class ConfigurationService:
 
             return scenario_start, scenario_end
         except ValueError as e:
-            raise ConfigurationError(f'Invalid date format in scenario configuration: {e}') from e
+            raise BuilderError(f'Invalid date format in scenario models: {e}') from e
 
     def _validate_train_dates_in_range(
         self, trains: list[Train], scenario_start: datetime, scenario_end: datetime
@@ -705,7 +700,7 @@ class ConfigurationService:
     # def _load_workshop_and_routes(
     #     self, config_dir: Path, tracks_file: str | None, routes_file: str | None
     # ) -> tuple[Workshop, list]:
-    #     """Load workshop tracks and routes configuration."""
+    #     """Load workshop tracks and routes models."""
     #     tracks_filename = tracks_file or 'workshop_tracks.csv'
     #     #workshop = self.load_workshop_tracks(config_dir / tracks_filename)
     #     routes_filename = routes_file or 'routes.csv'
@@ -727,7 +722,7 @@ class ConfigurationService:
         random_seed = scenario_data.get('random_seed')
 
         if not scenario_id:
-            raise ConfigurationError('Missing scenario_id in scenario configuration')
+            raise BuilderError('Missing scenario_id in scenario models')
 
         scenario_start, scenario_end = scenario_dates
         # Todo add Workshops
@@ -742,18 +737,18 @@ class ConfigurationService:
             tracks=components.get('tracks'),
         )
 
-    def load_complete_scenario(self, path: str | Path) -> ScenarioConfig:
-        """Load scenario configuration and train schedule data.
+    def load_complete_scenario(self, path: str | Path) -> ScenarioConfig:  # pylint: disable=too-many-locals
+        """Load scenario models and train schedule data.
 
         Parameters
         ----------
         path : str | Path
-            Directory path containing configuration files.
+            Directory path containing models files.
 
         Returns
         -------
         tuple[ScenarioConfig, ValidationResult]
-            Loaded and validated scenario configuration with validation results.
+            Loaded and validated scenario models with validation results.
 
         Raises
         ------
@@ -769,7 +764,7 @@ class ConfigurationService:
         # 1. Load train schedule
         train_schedule_file = scenario_data.get('train_schedule_file')
         if not train_schedule_file:
-            raise ConfigurationError('Missing train_schedule_file in scenario configuration')
+            raise BuilderError('Missing train_schedule_file in scenario models')
 
         train_schedule_path: Path = config_dir / train_schedule_file
         trains: list[Train] = self.load_train_schedule(train_schedule_path)
@@ -795,7 +790,7 @@ class ConfigurationService:
             else:
                 logger.warning('Routes file specified but not found: %s', routes_path)
         else:
-            logger.info('No routes file specified in scenario configuration')
+            logger.info('No routes file specified in scenario models')
 
         # 4. Build Scenario
         componenents = {
@@ -812,9 +807,9 @@ class ConfigurationService:
 
         logger.info('Successfully loaded complete scenario: %s', scenario.scenario_id)
 
-        # 5. Validate configuration
+        # 5. Validate models
         # Todo enable validations
-        # logger.info('Starting configuration validation for scenario: %s', scenario.scenario_id)
+        # logger.info('Starting models validation for scenario: %s', scenario.scenario_id)
         # validation_result: ValidationResult = self.validator.validate(scenario)
 
         # 6. Output validation results

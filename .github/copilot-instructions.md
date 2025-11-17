@@ -71,7 +71,7 @@ def temp_file() -> Generator[Path, None, None]:
 
 # Class method with type hints
 def __init__(self, config: Dict[str, Any]) -> None:
-    """Initialize with configuration."""
+    """Initialize with models."""
     self.config = config
 ```
 

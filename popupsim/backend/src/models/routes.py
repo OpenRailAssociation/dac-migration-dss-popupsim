@@ -5,19 +5,30 @@ validate them using the Route model, and make them available to the simulation.
 """
 
 from collections.abc import Iterator
+import json
 import logging
 from pathlib import Path
 
-import pandas as pd
+from pydantic import BaseModel
+from pydantic import Field
 
-from .model_route import Route
+from .route import Route
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
+class MetaData(BaseModel):
+    """Metadata for the routes configuration."""
+
+    description: str = Field(description='Description of the routes configuration')
+    version: str = Field(description='Version of the routes configuration')
+    topology_reference: str = Field(description='Reference to the topology configuration used')
+    tracks_reference: str = Field(description='Reference to the tracks configuration used')
+
+
 class Routes:
-    """Routes configuration manager that loads and provides access to route data.
+    """Routes models manager that loads and provides access to route data.
 
     This class is responsible for loading route configurations from a CSV file,
     validating them through the Route model, and providing convenient access
@@ -25,7 +36,7 @@ class Routes:
     """
 
     def __init__(self, routes_file: str | Path | None = None, routes: list[Route] | None = None) -> None:
-        """Initialize the routes configuration manager.
+        """Initialize the routes models manager.
 
         Parameters
         ----------
@@ -34,81 +45,74 @@ class Routes:
         routes : list[Route] or None, optional
             List of Route objects to initialize with. If provided, takes precedence over routes_file.
         """
+        self.metadata: MetaData | None = None
+        self.routes: list[Route] = []  # type: ignore[no-redef]  # for now: suppress mypy no-redef false positive
+        self.routes_by_id: dict[str, Route] = {}  # type: ignore[no-redef]
+
         if routes is not None and len(routes or []) > 0:
             self.routes = routes
             self.routes_by_id = {route.route_id: route for route in routes}
-            return
-
-        if routes_file is None:
-            self.routes: list[Route] = []  # type: ignore[no-redef]  # for now: suppress mypy no-redef false positive
-            self.routes_by_id: dict[str, Route] = {}  # type: ignore[no-redef]
             return
 
         if routes_file:
             self.load_routes(routes_file)
             return
 
-    def load_routes(self, csv_path: str | Path) -> None:
-        """Load routes from a CSV file.
+    def load_routes(self, file_path: str | Path) -> None:
+        """Load routes from a JSON file.
 
         Parameters
         ----------
-        csv_path : str or Path
-            Path to the CSV file containing route data.
+        file_path : str | Path
+            Path to the JSON file containing route data.
 
         Raises
         ------
         FileNotFoundError
-            If the CSV file does not exist.
+            If the JSON file does not exist.
         ValueError
-            If the CSV file contains invalid route data.
+            If the JSON file contains invalid route data or missing 'routes' key.
         """
-        path = Path(csv_path)
+        path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f'Routes file not found: {path}')
 
         try:
-            logger.info('Loading routes from CSV file: %s', path)
-            df = pd.read_csv(path, sep=';')
+            logger.info('Loading routes from JSON file: %s', path)
 
-            # Validate required columns
-            required_columns = ['route_id', 'from_track', 'to_track', 'track_sequence', 'distance_m', 'time_min']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            if missing_columns:
-                raise ValueError(f'Missing required columns in CSV: {", ".join(missing_columns)}')
+            with path.open('r', encoding='utf-8') as f:
+                data: dict[str, object] = json.load(f)
+
+            if 'metadata' not in data:
+                raise ValueError('Missing "metadata" key in JSON file')
+            self.metadata = MetaData(**data['metadata'])  # type: ignore[arg-type]
+
+            if 'routes' not in data:
+                raise ValueError('Missing "routes" key in JSON file')
+
+            routes_data: list[dict[str, object]] = data['routes']  # type: ignore[assignment]
 
             # Clear existing routes
             self.routes = []
             self.routes_by_id = {}
 
-            # Convert DataFrame to list of Route objects
-            for _, row in df.iterrows():
+            # Convert JSON data to Route objects
+            for route_dict in routes_data:
                 try:
-                    track_sequence = row['track_sequence']
-                    track_sequence = track_sequence.replace('"', '').replace("'", '')
-                    track_sequence = [item.strip() for item in track_sequence.split(',')]
-                    # Ensure track_sequence is treated as a string for parsing
-                    route = Route(
-                        route_id=row['route_id'],
-                        from_track=row['from_track'],
-                        to_track=row['to_track'],
-                        track_sequence=track_sequence,
-                        distance_m=row['distance_m'],
-                        time_min=row['time_min'],
-                    )
+                    route: Route = Route(**route_dict)  # type: ignore[arg-type]
                     self.routes.append(route)
                     self.routes_by_id[route.route_id] = route
                 except Exception as e:
-                    route_id = row.get('route_id', 'unknown')
-                    logger.error('Error parsing route %s: %s', route_id, str(e))
+                    route_id: str = str(route_dict.get('id', 'unknown'))
                     raise ValueError(f'Error parsing route {route_id}: {e!s}') from e
 
             logger.info('Successfully loaded %d routes from %s', len(self.routes), path)
 
+        except json.JSONDecodeError as e:
+            raise ValueError(f'Invalid JSON format in {path}: {e!s}') from e
         except Exception as e:
             if not isinstance(e, (FileNotFoundError, ValueError)):
-                logger.error('Failed to load routes from CSV: %s', str(e))
-                raise ValueError(f'Failed to load routes from CSV: {e!r}') from e
+                raise ValueError(f'Failed to load routes from JSON: {e!r}') from e
             raise
 
     def get_route(self, route_id: str) -> Route:
@@ -203,30 +207,3 @@ class Routes:
             Iterator over all loaded routes.
         """
         return iter(self.routes)
-
-
-def load_routes_from_csv(csv_path: str | Path) -> list[Route]:
-    """Load routes from a CSV file and return as a list of Route objects.
-
-    This is a convenience function that creates a RoutesConfig instance,
-    loads the routes, and returns the list of Route objects.
-
-    Parameters
-    ----------
-    csv_path : str or Path
-        Path to the CSV file containing route data.
-
-    Returns
-    -------
-    list[Route]
-        List of validated Route objects.
-
-    Raises
-    ------
-    FileNotFoundError
-        If the CSV file does not exist.
-    ValueError
-        If the CSV file contains invalid route data.
-    """
-    routes = Routes(csv_path)
-    return routes.routes
