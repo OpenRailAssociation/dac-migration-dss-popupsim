@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PopUpSim Routes Configuration",
+  "description": "Predefined routes for shunting movements",
+  "type": "object",
+  "required": ["metadata", "routes"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["description", "version", "topology_reference"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Schema version"
+        },
+        "topology_reference": {
+          "type": "string",
+          "description": "Path to topology YAML file"
+        },
+        "tracks_reference": {
+          "type": "string",
+          "description": "Path to tracks YAML file"
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "description": "Route definitions",
+      "items": {
+        "type": "object",
+        "oneOf": [
+          {
+            "required": ["id", "type", "waypoints"],
+            "properties": {
+              "type": {"enum": ["waypoint"]}
+            }
+          },
+          {
+            "required": ["id", "type", "from", "to", "path"],
+            "properties": {
+              "type": {"enum": ["explicit"]}
+            }
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique route identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable route name"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["waypoint", "explicit"],
+            "description": "Route type: waypoint (auto-generated path) or explicit (manual path)"
+          },
+          "waypoints": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 2,
+            "description": "Track names in order (repeat track name for reversal)"
+          },
+          "from": {
+            "type": "string",
+            "description": "Starting point (track ID or boundary node) - for explicit type"
+          },
+          "to": {
+            "type": "string",
+            "description": "Destination (track ID or boundary node) - for explicit type"
+          },
+          "path": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 2,
+            "description": "Sequence of nodes and edges (alternating) - for explicit type"
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Total route duration in seconds (optional, calculated from speed if omitted)"
+          },
+          "segment_durations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0
+            },
+            "description": "Duration per edge in seconds (optional, overrides speed calculation for specific edges)"
+          }
+        }
+      }
+    }
+  }
+}

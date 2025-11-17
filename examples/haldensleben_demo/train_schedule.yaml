@@ -1,0 +1,10 @@
+metadata:
+  description: Train schedule
+  version: "1.0.0"
+
+  schedule:
+    - id:
+      from_location:
+      to_location:
+      departure_time:
+      arrival_time:

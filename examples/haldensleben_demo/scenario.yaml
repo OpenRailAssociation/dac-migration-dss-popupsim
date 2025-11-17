@@ -1,0 +1,13 @@
+metadata:
+  name: "DAC restrofit simualation"
+  description: ""
+  version: "1.0.0"
+
+simulation:
+  start_datetime:
+  stop_datetime:
+
+yards:
+  lhl: yards/haldensleben/yards.yaml
+  lmr: yards/magdeburg_rothensee/yards.yaml
+

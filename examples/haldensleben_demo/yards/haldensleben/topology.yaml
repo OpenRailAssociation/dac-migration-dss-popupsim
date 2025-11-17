@@ -1,0 +1,4923 @@
+metadata:
+  description: Haldensleben Yard
+  version: 1.0.0
+  level: microscopic
+  projection: elliptical_mercator
+  projection_method: WGS84 elliptical mercator (a=6378137.0m, b=6356752.3142m)
+  crs: EPSG:4326
+  projected_crs: Custom elliptical mercator
+  units:
+    length: meters
+    coordinates: meters
+    geographic: degrees
+  source: OpenStreetMap
+  extracted_at: '2025-11-13T10:44:27.762947+00:00'
+nodes:
+  node_59849634:
+    type: junction
+    coords:
+    - 1271678.897370299
+    - 6816599.4850652795
+    lat: 52.2772935
+    lon: 11.4236859
+  node_191008119:
+    type: level_crossing
+    coords:
+    - 1269451.8396374888
+    - 6818203.021642041
+    lat: 52.2861283
+    lon: 11.4036799
+  node_191009860:
+    type: level_crossing
+    coords:
+    - 1271493.8843766006
+    - 6816715.163881573
+    lat: 52.2779309
+    lon: 11.4220239
+  node_332239197:
+    type: level_crossing
+    coords:
+    - 1271493.8398488045
+    - 6816685.254921608
+    lat: 52.2777661
+    lon: 11.4220235
+  node_447379843:
+    type: stop
+    coords:
+    - 1269736.160748924
+    - 6817993.313764866
+    lat: 52.284973
+    lon: 11.406234
+    name: Haldensleben
+  node_1877303856:
+    type: stop
+    coords:
+    - 1269741.5040844819
+    - 6818000.465488043
+    lat: 52.2850124
+    lon: 11.406282
+    name: Haldensleben
+  node_1877303862:
+    type: switch
+    coords:
+    - 1271559.2289176965
+    - 6816648.93964171
+    lat: 52.277566
+    lon: 11.4226109
+    name: H1
+    switch_config:
+      stem: edge_45
+      branches:
+      - edge_80
+      switch_type: default
+  node_1877303876:
+    type: junction
+    coords:
+    - 1271517.5954281397
+    - 6816673.258701475
+    lat: 52.2777
+    lon: 11.4222369
+  node_1877303878:
+    type: level_crossing
+    coords:
+    - 1271494.0290919389
+    - 6816696.32557944
+    lat: 52.2778271
+    lon: 11.4220252
+  node_1877303879:
+    type: level_crossing
+    coords:
+    - 1271455.9355621892
+    - 6816701.461643929
+    lat: 52.2778554
+    lon: 11.421683
+  node_1877303900:
+    type: switch
+    coords:
+    - 1270871.3412562883
+    - 6817159.800614015
+    lat: 52.2803808
+    lon: 11.4164315
+    name: '5'
+    switch_config:
+      stem: edge_15
+      branches:
+      - edge_241
+      - edge_16
+      switch_type: default
+  node_1877303904:
+    type: switch
+    coords:
+    - 1270764.5969965667
+    - 6817228.334110625
+    lat: 52.2807584
+    lon: 11.4154726
+    name: '6'
+    switch_config:
+      stem: edge_290
+      branches:
+      - edge_312
+      - edge_239
+      switch_type: default
+  node_1877303912:
+    type: switch
+    coords:
+    - 1270804.5050340162
+    - 6817208.6778597
+    lat: 52.2806501
+    lon: 11.4158311
+    name: '7'
+    switch_config:
+      stem: edge_16
+      branches:
+      - edge_201
+      - edge_283
+      switch_type: default
+  node_1877303913:
+    type: switch
+    coords:
+    - 1270734.2401714274
+    - 6817250.876241752
+    lat: 52.2808826
+    lon: 11.4151999
+    name: '9'
+    switch_config:
+      stem: edge_289
+      branches:
+      - edge_290
+      - edge_276
+      switch_type: default
+  node_1877303916:
+    type: switch
+    coords:
+    - 1270723.4421808205
+    - 6817277.157325041
+    lat: 52.2810274
+    lon: 11.4151029
+    name: '8'
+    switch_config:
+      stem: edge_21
+      branches:
+      - edge_285
+      - edge_223
+      switch_type: default
+  node_1877303919:
+    type: level_crossing
+    coords:
+    - 1270691.1483965414
+    - 6817276.3405773705
+    lat: 52.2810229
+    lon: 11.4148128
+  node_1877303923:
+    type: level_crossing
+    coords:
+    - 1270694.2319464362
+    - 6817280.170217177
+    lat: 52.281044
+    lon: 11.4148405
+  node_1877303926:
+    type: level_crossing
+    coords:
+    - 1270699.0854762348
+    - 6817286.341204607
+    lat: 52.281078
+    lon: 11.4148841
+  node_1877303928:
+    type: junction
+    coords:
+    - 1270653.789575431
+    - 6817297.412693986
+    lat: 52.281139
+    lon: 11.4144772
+  node_1877303930:
+    type: level_crossing
+    coords:
+    - 1270703.894478237
+    - 6817292.512196797
+    lat: 52.281112
+    lon: 11.4149273
+  node_1877303932:
+    type: switch
+    coords:
+    - 1270676.4208279094
+    - 6817293.165596248
+    lat: 52.2811156
+    lon: 11.4146805
+    name: A10
+    switch_config:
+      stem: edge_286
+      branches:
+      - edge_287
+      - edge_39
+      switch_type: default
+  node_1877303936:
+    type: junction
+    coords:
+    - 1270567.6616854044
+    - 6817328.884847444
+    lat: 52.2813124
+    lon: 11.4137035
+  node_1877303949:
+    type: switch
+    coords:
+    - 1270517.111504635
+    - 6817345.52847575
+    lat: 52.2814041
+    lon: 11.4132494
+    name: '60'
+    switch_config:
+      stem: edge_212
+      branches:
+      - edge_269
+      - edge_268
+      switch_type: double_slip
+  node_1877303950:
+    type: switch
+    coords:
+    - 1270612.6236277358
+    - 6817340.06529623
+    lat: 52.281374
+    lon: 11.4141074
+    name: '11'
+    switch_config:
+      stem: edge_58
+      branches:
+      - edge_286
+      - edge_81
+      switch_type: default
+  node_1877303951:
+    type: junction
+    coords:
+    - 1270516.4881154867
+    - 6817402.1570014255
+    lat: 52.2817161
+    lon: 11.4132438
+  node_1877303953:
+    type: switch
+    coords:
+    - 1270438.909562353
+    - 6817385.113951066
+    lat: 52.2816222
+    lon: 11.4125469
+    name: '61'
+    switch_config:
+      stem: edge_264
+      branches:
+      - edge_265
+      - edge_103
+      switch_type: default
+  node_1877303955:
+    type: switch
+    coords:
+    - 1270515.9092541344
+    - 6817393.100040432
+    lat: 52.2816662
+    lon: 11.4132386
+    name: '13'
+    switch_config:
+      stem: edge_44
+      branches:
+      - edge_301
+      - edge_292
+      switch_type: default
+  node_1877303967:
+    type: junction
+    coords:
+    - 1270094.553849533
+    - 6817596.076437184
+    lat: 52.2827845
+    lon: 11.4094535
+  node_1877303974:
+    type: junction
+    coords:
+    - 1270061.9149748324
+    - 6817619.59974336
+    lat: 52.2829141
+    lon: 11.4091603
+  node_1877303976:
+    type: junction
+    coords:
+    - 1270257.3029450728
+    - 6817583.570633578
+    lat: 52.2827156
+    lon: 11.4109155
+  node_1877303978:
+    type: junction
+    coords:
+    - 1270261.9115719916
+    - 6817589.396992478
+    lat: 52.2827477
+    lon: 11.4109569
+  node_1877303980:
+    type: junction
+    coords:
+    - 1270266.731705943
+    - 6817595.005547575
+    lat: 52.2827786
+    lon: 11.4110002
+  node_1877303982:
+    type: junction
+    coords:
+    - 1270269.681672449
+    - 6817601.848353132
+    lat: 52.2828163
+    lon: 11.4110267
+  node_1877303984:
+    type: junction
+    coords:
+    - 1270036.422811441
+    - 6817642.560444548
+    lat: 52.2830406
+    lon: 11.4089313
+  node_1877303986:
+    type: junction
+    coords:
+    - 1270275.303306734
+    - 6817607.874383026
+    lat: 52.2828495
+    lon: 11.4110772
+  node_1877303988:
+    type: switch
+    coords:
+    - 1269968.6292415475
+    - 6817710.971019116
+    lat: 52.2834175
+    lon: 11.4083223
+    name: '69'
+    switch_config:
+      stem: edge_108
+      branches:
+      - edge_114
+      - edge_115
+      switch_type: default
+  node_1877303990:
+    type: junction
+    coords:
+    - 1270161.100641129
+    - 6817681.366901933
+    lat: 52.2832544
+    lon: 11.4100513
+  node_1877304011:
+    type: junction
+    coords:
+    - 1269932.8177613593
+    - 6817757.056371047
+    lat: 52.2836714
+    lon: 11.4080006
+  node_1877304015:
+    type: junction
+    coords:
+    - 1270026.9272588762
+    - 6817790.871825663
+    lat: 52.2838577
+    lon: 11.408846
+  node_1877304018:
+    type: junction
+    coords:
+    - 1269883.1136087202
+    - 6817821.619872475
+    lat: 52.2840271
+    lon: 11.4075541
+  node_1877304022:
+    type: switch
+    coords:
+    - 1269837.906763509
+    - 6817873.986209973
+    lat: 52.2843156
+    lon: 11.407148
+    name: '34'
+    switch_config:
+      stem: edge_309
+      branches:
+      - edge_310
+      - edge_109
+      switch_type: default
+  node_1877304028:
+    type: switch
+    coords:
+    - 1269739.7786323747
+    - 6817964.634330032
+    lat: 52.284815
+    lon: 11.4062665
+    name: '41'
+    switch_config:
+      stem: edge_306
+      branches:
+      - edge_307
+      - edge_230
+      - edge_305
+      switch_type: double_slip
+  node_1877304031:
+    type: switch
+    coords:
+    - 1269692.8908628526
+    - 6818007.780582071
+    lat: 52.2850527
+    lon: 11.4058453
+    name: '42'
+    switch_config:
+      stem: edge_297
+      branches:
+      - edge_306
+      - edge_89
+      switch_type: default
+  node_1877304035:
+    type: crossing
+    coords:
+    - 1269716.078712785
+    - 6818019.397618583
+    lat: 52.2851167
+    lon: 11.4060536
+  node_1877304043:
+    type: switch
+    coords:
+    - 1269631.5760873237
+    - 6818061.455062136
+    lat: 52.2853484
+    lon: 11.4052945
+    name: '43'
+    switch_config:
+      stem: edge_53
+      branches:
+      - edge_291
+      - edge_300
+      switch_type: default
+  node_1877304045:
+    type: switch
+    coords:
+    - 1269587.983374729
+    - 6818093.874114244
+    lat: 52.285527
+    lon: 11.4049029
+    name: '44'
+    switch_config:
+      stem: edge_229
+      branches:
+      - edge_291
+      - edge_73
+      switch_type: default
+  node_1877304055:
+    type: junction
+    coords:
+    - 1269592.4250224119
+    - 6818073.398908158
+    lat: 52.2854142
+    lon: 11.4049428
+  node_1877304057:
+    type: junction
+    coords:
+    - 1269549.633810151
+    - 6818110.5011818465
+    lat: 52.2856186
+    lon: 11.4045584
+  node_1877304059:
+    type: junction
+    coords:
+    - 1269522.204687619
+    - 6818136.00455682
+    lat: 52.2857591
+    lon: 11.404312
+  node_1877304060:
+    type: switch
+    coords:
+    - 1269492.137293156
+    - 6818172.889297009
+    lat: 52.2859623
+    lon: 11.4040419
+    name: '45'
+    switch_config:
+      stem: edge_17
+      branches:
+      - edge_71
+      - edge_211
+      switch_type: default
+  node_1877304061:
+    type: switch
+    coords:
+    - 1269484.1668176153
+    - 6818170.075740463
+    lat: 52.2859468
+    lon: 11.4039703
+    name: '46'
+    switch_config:
+      stem: edge_228
+      branches:
+      - edge_229
+      - edge_238
+      switch_type: default
+  node_1877304062:
+    type: level_crossing
+    coords:
+    - 1269446.3293226946
+    - 6818198.06613413
+    lat: 52.286101
+    lon: 11.4036304
+  node_1877304063:
+    type: level_crossing
+    coords:
+    - 1269456.5373200004
+    - 6818208.957364351
+    lat: 52.286161
+    lon: 11.4037221
+  node_1877304064:
+    type: switch
+    coords:
+    - 1269404.4620622073
+    - 6818247.6576556545
+    lat: 52.2863742
+    lon: 11.4032543
+    name: '47'
+  node_1879956900:
+    type: buffer_stop
+    coords:
+    - 1270447.1917324676
+    - 6817294.073095576
+    lat: 52.2811206
+    lon: 11.4126213
+  node_1879956908:
+    type: junction
+    coords:
+    - 1270402.3411096272
+    - 6817346.907883793
+    lat: 52.2814117
+    lon: 11.4122184
+  node_1879956909:
+    type: junction
+    coords:
+    - 1270461.251384155
+    - 6817331.625507958
+    lat: 52.2813275
+    lon: 11.4127476
+  node_1879956911:
+    type: junction
+    coords:
+    - 1270455.4182428373
+    - 6817343.187112642
+    lat: 52.2813912
+    lon: 11.4126952
+  node_1879956912:
+    type: junction
+    coords:
+    - 1270494.502516055
+    - 6817332.31521075
+    lat: 52.2813313
+    lon: 11.4130463
+  node_1879956915:
+    type: junction
+    coords:
+    - 1270479.8528710667
+    - 6817346.726382722
+    lat: 52.2814107
+    lon: 11.4129147
+  node_1879956917:
+    type: junction
+    coords:
+    - 1270355.141645531
+    - 6817346.508581442
+    lat: 52.2814095
+    lon: 11.4117944
+  node_1879956918:
+    type: junction
+    coords:
+    - 1270354.2288257063
+    - 6817356.854148828
+    lat: 52.2814665
+    lon: 11.4117862
+  node_1879956921:
+    type: junction
+    coords:
+    - 1270421.2876869603
+    - 6817370.212655625
+    lat: 52.2815401
+    lon: 11.4123886
+  node_1879956925:
+    type: switch
+    coords:
+    - 1270559.9695085904
+    - 6817362.3536400935
+    lat: 52.2814968
+    lon: 11.4136344
+    name: '12'
+    switch_config:
+      stem: edge_42
+      branches:
+      - edge_70
+      - edge_43
+      switch_type: default
+  node_1879956927:
+    type: junction
+    coords:
+    - 1270407.4729381527
+    - 6817387.927231638
+    lat: 52.2816377
+    lon: 11.4122645
+  node_1879956932:
+    type: junction
+    coords:
+    - 1270395.4615650962
+    - 6817419.200088084
+    lat: 52.28181
+    lon: 11.4121566
+  node_1879956947:
+    type: junction
+    coords:
+    - 1270441.5700981827
+    - 6817430.652917507
+    lat: 52.2818731
+    lon: 11.4125708
+  node_1879956952:
+    type: junction
+    coords:
+    - 1270371.7727774554
+    - 6817437.422981278
+    lat: 52.2819104
+    lon: 11.4119438
+  node_1879956954:
+    type: junction
+    coords:
+    - 1270202.8009223803
+    - 6817445.753979138
+    lat: 52.2819563
+    lon: 11.4104259
+  node_1879956956:
+    type: junction
+    coords:
+    - 1270194.6634676033
+    - 6817461.018422559
+    lat: 52.2820404
+    lon: 11.4103528
+  node_1879956960:
+    type: junction
+    coords:
+    - 1270384.7192342347
+    - 6817463.250917913
+    lat: 52.2820527
+    lon: 11.4120601
+  node_1879956962:
+    type: junction
+    coords:
+    - 1270244.9687454929
+    - 6817475.212021519
+    lat: 52.2821186
+    lon: 11.4108047
+  node_1879956967:
+    type: junction
+    coords:
+    - 1270242.7200917788
+    - 6817493.43504226
+    lat: 52.282219
+    lon: 11.4107845
+  node_1879956971:
+    type: junction
+    coords:
+    - 1270200.6858520552
+    - 6817476.555151113
+    lat: 52.282126
+    lon: 11.4104069
+  node_1879956972:
+    type: junction
+    coords:
+    - 1270352.069227585
+    - 6817482.290680027
+    lat: 52.2821576
+    lon: 11.4117668
+  node_1879956973:
+    type: junction
+    coords:
+    - 1270126.2131127145
+    - 6817545.599576063
+    lat: 52.2825064
+    lon: 11.4097379
+  node_1879956974:
+    type: junction
+    coords:
+    - 1270169.093380568
+    - 6817480.693443716
+    lat: 52.2821488
+    lon: 11.4101231
+  node_1879956976:
+    type: junction
+    coords:
+    - 1270168.8262137903
+    - 6817472.580214185
+    lat: 52.2821041
+    lon: 11.4101207
+  node_1879956977:
+    type: junction
+    coords:
+    - 1270327.8015785923
+    - 6817497.083281478
+    lat: 52.2822391
+    lon: 11.4115488
+  node_1879956982:
+    type: junction
+    coords:
+    - 1270302.1313040152
+    - 6817514.925191756
+    lat: 52.2823374
+    lon: 11.4113182
+  node_1879956983:
+    type: switch
+    coords:
+    - 1270111.5412038278
+    - 6817533.18460399
+    lat: 52.282438
+    lon: 11.4096061
+    name: '58'
+    switch_config:
+      stem: edge_104
+      branches:
+      - edge_252
+      - edge_155
+      switch_type: default
+  node_1879956985:
+    type: junction
+    coords:
+    - 1270106.3091877606
+    - 6817543.584864374
+    lat: 52.2824953
+    lon: 11.4095591
+  node_1879957000:
+    type: switch
+    coords:
+    - 1270065.243427607
+    - 6817595.295958302
+    lat: 52.2827802
+    lon: 11.4091902
+    name: '65'
+    switch_config:
+      stem: edge_145
+      branches:
+      - edge_146
+      switch_type: default
+  node_1879957008:
+    type: switch
+    coords:
+    - 1270126.0795293255
+    - 6817562.570365832
+    lat: 52.2825999
+    lon: 11.4097367
+    name: '63'
+    switch_config:
+      stem: edge_189
+      branches:
+      - edge_277
+      - edge_200
+      switch_type: default
+  node_1879957012:
+    type: junction
+    coords:
+    - 1270187.6948674796
+    - 6817525.343578921
+    lat: 52.2823948
+    lon: 11.4102902
+  node_1879957013:
+    type: switch
+    coords:
+    - 1270077.1323492238
+    - 6817572.789158205
+    lat: 52.2826562
+    lon: 11.409297
+    name: '57'
+    switch_config:
+      stem: edge_104
+      branches:
+      - edge_105
+      - edge_133
+      switch_type: default
+  node_1879957016:
+    type: junction
+    coords:
+    - 1270137.612228572
+    - 6817584.260358087
+    lat: 52.2827194
+    lon: 11.4098403
+  node_1879957018:
+    type: switch
+    coords:
+    - 1270029.3762876734
+    - 6817631.88779422
+    lat: 52.2829818
+    lon: 11.408868
+    name: '66'
+    switch_config:
+      stem: edge_106
+      branches:
+      - edge_107
+      - edge_146
+      switch_type: default
+  node_1879957022:
+    type: junction
+    coords:
+    - 1270249.5551085135
+    - 6817553.3680186765
+    lat: 52.2825492
+    lon: 11.4108459
+  node_1879957024:
+    type: junction
+    coords:
+    - 1270099.5075668732
+    - 6817606.331573735
+    lat: 52.282841
+    lon: 11.409498
+  node_1879957025:
+    type: junction
+    coords:
+    - 1270238.7571179066
+    - 6817570.447728605
+    lat: 52.2826433
+    lon: 11.4107489
+  node_1879957029:
+    type: junction
+    coords:
+    - 1270246.1487320953
+    - 6817574.07785231
+    lat: 52.2826633
+    lon: 11.4108153
+  node_1879957030:
+    type: junction
+    coords:
+    - 1270058.0521885017
+    - 6817613.156238263
+    lat: 52.2828786
+    lon: 11.4091256
+  node_1879957032:
+    type: junction
+    coords:
+    - 1270252.5496028159
+    - 6817578.45215356
+    lat: 52.2826874
+    lon: 11.4108728
+  node_1879957033:
+    type: junction
+    coords:
+    - 1270075.7853833851
+    - 6817619.817552073
+    lat: 52.2829153
+    lon: 11.4092849
+  node_1879957036:
+    type: switch
+    coords:
+    - 1270000.1994491366
+    - 6817670.5126914345
+    lat: 52.2831946
+    lon: 11.4086059
+    name: '68'
+    switch_config:
+      stem: edge_107
+      branches:
+      - edge_108
+      - edge_282
+      switch_type: default
+  node_1879957053:
+    type: junction
+    coords:
+    - 1270040.2410699748
+    - 6817644.611482721
+    lat: 52.2830519
+    lon: 11.4089656
+  node_1879957065:
+    type: junction
+    coords:
+    - 1269905.8116528927
+    - 6817814.958390678
+    lat: 52.2839904
+    lon: 11.407758
+  node_1879957066:
+    type: junction
+    coords:
+    - 1269942.8365155307
+    - 6817779.491085048
+    lat: 52.283795
+    lon: 11.4080906
+  node_1879957067:
+    type: switch
+    coords:
+    - 1269880.2304339085
+    - 6817834.725038132
+    lat: 52.2840993
+    lon: 11.4075282
+    name: '33'
+    switch_config:
+      stem: edge_59
+      branches:
+      - edge_311
+      - edge_116
+      switch_type: default
+  node_1879957071:
+    type: junction
+    coords:
+    - 1269923.5003199799
+    - 6817820.367440867
+    lat: 52.2840202
+    lon: 11.4079169
+  node_1879957072:
+    type: junction
+    coords:
+    - 1269917.0771853614
+    - 6817816.101914406
+    lat: 52.2839967
+    lon: 11.4078592
+  node_1879957074:
+    type: switch
+    coords:
+    - 1269839.1201459586
+    - 6817882.499175558
+    lat: 52.2843625
+    lon: 11.4071589
+    name: '35'
+    switch_config:
+      stem: edge_169
+      branches:
+      - edge_294
+      - edge_156
+      switch_type: default
+  node_1879957077:
+    type: switch
+    coords:
+    - 1269780.7887327832
+    - 6817926.842978556
+    lat: 52.2846068
+    lon: 11.4066349
+    name: '40'
+    switch_config:
+      stem: edge_307
+      branches:
+      - edge_308
+      - edge_295
+      switch_type: default
+  node_3338128576:
+    type: junction
+    coords:
+    - 1271791.6194866765
+    - 6816536.310691264
+    lat: 52.2769454
+    lon: 11.4246985
+  node_3338128582:
+    type: signal
+    coords:
+    - 1271450.269400108
+    - 6816728.793547854
+    lat: 52.278006
+    lon: 11.4216321
+  node_3338129420:
+    type: buffer_stop
+    coords:
+    - 1270464.4128576936
+    - 6817295.2891448345
+    lat: 52.2811273
+    lon: 11.412776
+  node_3338129422:
+    type: buffer_stop
+    coords:
+    - 1270492.7214042023
+    - 6817300.316693733
+    lat: 52.281155
+    lon: 11.4130303
+  node_3338129423:
+    type: level_crossing
+    coords:
+    - 1270611.4547730824
+    - 6817313.9473566385
+    lat: 52.2812301
+    lon: 11.4140969
+  node_3338129424:
+    type: junction
+    coords:
+    - 1270397.8215383012
+    - 6817319.791669284
+    lat: 52.2812623
+    lon: 11.4121778
+  node_3338129425:
+    type: buffer_stop
+    coords:
+    - 1270527.8649674456
+    - 6817310.970751841
+    lat: 52.2812137
+    lon: 11.413346
+  node_3338129426:
+    type: buffer_stop
+    coords:
+    - 1270533.9986713883
+    - 6817316.851362389
+    lat: 52.2812461
+    lon: 11.4134011
+  node_3338129427:
+    type: buffer_stop
+    coords:
+    - 1270513.2598502536
+    - 6817308.647548863
+    lat: 52.2812009
+    lon: 11.4132148
+  node_3338129428:
+    type: buffer_stop
+    coords:
+    - 1270541.2344382901
+    - 6817322.278225958
+    lat: 52.281276
+    lon: 11.4134661
+  node_3338129429:
+    type: junction
+    coords:
+    - 1270406.2372918052
+    - 6817324.365482156
+    lat: 52.2812875
+    lon: 11.4122534
+  node_3338129432:
+    type: junction
+    coords:
+    - 1270335.349040068
+    - 6817389.86930332
+    lat: 52.2816484
+    lon: 11.4116166
+  node_3338129433:
+    type: junction
+    coords:
+    - 1270431.1171979972
+    - 6817356.545596624
+    lat: 52.2814648
+    lon: 11.4124769
+  node_3338129434:
+    type: junction
+    coords:
+    - 1270405.0684371518
+    - 6817363.370048133
+    lat: 52.2815024
+    lon: 11.4122429
+  node_3338129435:
+    type: junction
+    coords:
+    - 1270440.3567157332
+    - 6817367.78053452
+    lat: 52.2815267
+    lon: 11.4125599
+  node_3338129436:
+    type: junction
+    coords:
+    - 1270451.6222482014
+    - 6817353.024472323
+    lat: 52.2814454
+    lon: 11.4126611
+  node_3338129437:
+    type: junction
+    coords:
+    - 1270454.2382562351
+    - 6817368.923994351
+    lat: 52.281533
+    lon: 11.4126846
+  node_3338129438:
+    type: junction
+    coords:
+    - 1270459.9155502655
+    - 6817372.55402664
+    lat: 52.281553
+    lon: 11.4127356
+  node_3338129439:
+    type: junction
+    coords:
+    - 1270426.0855570135
+    - 6817383.698236055
+    lat: 52.2816144
+    lon: 11.4124317
+  node_3338129440:
+    type: junction
+    coords:
+    - 1270268.2790468647
+    - 6817403.173414523
+    lat: 52.2817217
+    lon: 11.4110141
+  node_3338129442:
+    type: switch
+    coords:
+    - 1270443.9078074894
+    - 6817437.586334092
+    lat: 52.2819113
+    lon: 11.4125918
+    name: '14'
+    switch_config:
+      stem: edge_293
+      branches:
+      - edge_296
+      - edge_165
+      switch_type: default
+  node_3338129446:
+    type: switch
+    coords:
+    - 1270393.9476200214
+    - 6817466.372782382
+    lat: 52.2820699
+    lon: 11.412143
+    name: B15
+    switch_config:
+      stem: edge_122
+      branches:
+      - edge_296
+      - edge_164
+      switch_type: default
+  node_3338129449:
+    type: junction
+    coords:
+    - 1270232.8349209963
+    - 6817516.467983426
+    lat: 52.2823459
+    lon: 11.4106957
+  node_3338129450:
+    type: junction
+    coords:
+    - 1270294.6172383865
+    - 6817528.737725404
+    lat: 52.2824135
+    lon: 11.4112507
+  node_3338129454:
+    type: switch
+    coords:
+    - 1270180.5370242216
+    - 6817522.475798522
+    lat: 52.282379
+    lon: 11.4102259
+    name: '62'
+    switch_config:
+      stem: edge_187
+      branches:
+      - edge_188
+      - edge_177
+      switch_type: default
+  node_3338129471:
+    type: level_crossing
+    coords:
+    - 1269909.9193421032
+    - 6817787.368661359
+    lat: 52.2838384
+    lon: 11.4077949
+  node_4731123220:
+    type: switch
+    coords:
+    - 1269952.3988597898
+    - 6817845.6883788
+    lat: 52.2841597
+    lon: 11.4081765
+    name: A27
+    switch_config:
+      stem: edge_28
+      branches:
+      - edge_29
+      switch_type: default
+  node_4731124273:
+    type: signal
+    coords:
+    - 1270881.404538256
+    - 6817143.03032446
+    lat: 52.2802884
+    lon: 11.4165219
+  node_5015579198:
+    type: junction
+    coords:
+    - 1270321.1001452464
+    - 6817574.27750916
+    lat: 52.2826644
+    lon: 11.4114886
+  node_5015579204:
+    type: junction
+    coords:
+    - 1270228.293085772
+    - 6817493.199086548
+    lat: 52.2822177
+    lon: 11.4106549
+  node_5015579205:
+    type: junction
+    coords:
+    - 1270267.566602124
+    - 6817507.955407219
+    lat: 52.282299
+    lon: 11.4110077
+  node_5015579576:
+    type: junction
+    coords:
+    - 1270255.410513729
+    - 6817493.888803266
+    lat: 52.2822215
+    lon: 11.4108985
+  node_5015579838:
+    type: junction
+    coords:
+    - 1270907.5646185924
+    - 6817133.864758983
+    lat: 52.2802379
+    lon: 11.4167569
+  node_6524196343:
+    type: signal
+    coords:
+    - 1270886.0131651748
+    - 6817149.709396609
+    lat: 52.2803252
+    lon: 11.4165633
+  node_6630116007:
+    type: junction
+    coords:
+    - 1270710.8185505646
+    - 6817265.160217613
+    lat: 52.2809613
+    lon: 11.4149895
+  node_6630116008:
+    type: junction
+    coords:
+    - 1270345.4123220355
+    - 6817494.124759001
+    lat: 52.2822228
+    lon: 11.411707
+  node_6630116009:
+    type: junction
+    coords:
+    - 1270361.9432664183
+    - 6817488.734079752
+    lat: 52.2821931
+    lon: 11.4118555
+  node_6630116010:
+    type: junction
+    coords:
+    - 1270409.5657445798
+    - 6817462.579354205
+    lat: 52.282049
+    lon: 11.4122833
+  node_6630116011:
+    type: junction
+    coords:
+    - 1270484.1609353602
+    - 6817413.863910084
+    lat: 52.2817806
+    lon: 11.4129534
+  node_6630116013:
+    type: junction
+    coords:
+    - 1270647.221725474
+    - 6817312.005303384
+    lat: 52.2812194
+    lon: 11.4144182
+  node_6630116016:
+    type: junction
+    coords:
+    - 1270108.9140638453
+    - 6817730.610352865
+    lat: 52.2835257
+    lon: 11.4095825
+  node_6630116017:
+    type: junction
+    coords:
+    - 1269499.317400312
+    - 6818157.913926774
+    lat: 52.2858798
+    lon: 11.4041064
+  node_6630116020:
+    type: junction
+    coords:
+    - 1269650.2221020316
+    - 6818045.02776504
+    lat: 52.2852579
+    lon: 11.405462
+  node_6630116021:
+    type: junction
+    coords:
+    - 1269561.6785790545
+    - 6818115.438483681
+    lat: 52.2856458
+    lon: 11.4046666
+  node_6630116022:
+    type: junction
+    coords:
+    - 1269525.8893627645
+    - 6818145.697675813
+    lat: 52.2858125
+    lon: 11.4043451
+  node_7598336888:
+    type: junction
+    coords:
+    - 1269807.2827715918
+    - 6817905.896264077
+    lat: 52.2844914
+    lon: 11.4068729
+  node_7598336894:
+    type: junction
+    coords:
+    - 1271223.0106596535
+    - 6816905.019419268
+    lat: 52.278977
+    lon: 11.4195906
+  node_7598336895:
+    type: junction
+    coords:
+    - 1271217.9344908732
+    - 6816899.465794999
+    lat: 52.2789464
+    lon: 11.419545
+  node_7598336958:
+    type: junction
+    coords:
+    - 1271294.4221129972
+    - 6816853.367232495
+    lat: 52.2786924
+    lon: 11.4202321
+  node_7598337080:
+    type: junction
+    coords:
+    - 1269918.8026374686
+    - 6817798.912773368
+    lat: 52.283902
+    lon: 11.4078747
+  node_7598337081:
+    type: junction
+    coords:
+    - 1269714.3755245758
+    - 6817991.680123412
+    lat: 52.284964
+    lon: 11.4060383
+  node_7598337082:
+    type: junction
+    coords:
+    - 1269859.8812309916
+    - 6817849.572744823
+    lat: 52.2841811
+    lon: 11.4073454
+  node_7598337083:
+    type: junction
+    coords:
+    - 1269932.4726709381
+    - 6817822.545582917
+    lat: 52.2840322
+    lon: 11.4079975
+  node_7598337084:
+    type: junction
+    coords:
+    - 1269937.8605342922
+    - 6817827.863882244
+    lat: 52.2840615
+    lon: 11.4080459
+  node_7598337085:
+    type: junction
+    coords:
+    - 1269941.9570915534
+    - 6817833.599662954
+    lat: 52.2840931
+    lon: 11.4080827
+  node_7598337086:
+    type: junction
+    coords:
+    - 1269946.2540238982
+    - 6817839.063179417
+    lat: 52.2841232
+    lon: 11.4081213
+  node_7598998615:
+    type: junction
+    coords:
+    - 1270085.1250886626
+    - 6817578.488454827
+    lat: 52.2826876
+    lon: 11.4093688
+  node_7598998616:
+    type: junction
+    coords:
+    - 1270020.604311799
+    - 6817648.350544814
+    lat: 52.2830725
+    lon: 11.4087892
+  node_7598998617:
+    type: switch
+    coords:
+    - 1270005.0641108842
+    - 6817672.690792695
+    lat: 52.2832066
+    lon: 11.4086496
+    name: '67'
+    switch_config:
+      stem: edge_115
+      branches:
+      - edge_253
+      - edge_90
+      switch_type: default
+  node_7729112193:
+    type: switch
+    coords:
+    - 1269951.2300051365
+    - 6817733.00628228
+    lat: 52.2835389
+    lon: 11.408166
+    name: '70'
+    switch_config:
+      stem: edge_113
+      branches:
+      - edge_114
+      switch_type: default
+  node_8986577250:
+    type: signal
+    coords:
+    - 1269636.4296171223
+    - 6818066.809823726
+    lat: 52.2853779
+    lon: 11.4053381
+  node_8986577251:
+    type: signal
+    coords:
+    - 1269470.8752704146
+    - 6818189.262400535
+    lat: 52.2860525
+    lon: 11.4038509
+  node_8986577252:
+    type: signal
+    coords:
+    - 1269537.4220620107
+    - 6818149.709250969
+    lat: 52.2858346
+    lon: 11.4044487
+  node_8996971070:
+    type: buffer_stop
+    coords:
+    - 1270771.8216315191
+    - 6817243.071793033
+    lat: 52.2808396
+    lon: 11.4155375
+  node_8997099871:
+    type: signal
+    coords:
+    - 1269812.4479959647
+    - 6817919.854683833
+    lat: 52.2845683
+    lon: 11.4069193
+  node_8997099872:
+    type: signal
+    coords:
+    - 1269703.221311598
+    - 6818008.4521915335
+    lat: 52.2850564
+    lon: 11.4059381
+  node_9004581435:
+    type: signal
+    coords:
+    - 1270531.0598368314
+    - 6817409.907154544
+    lat: 52.2817588
+    lon: 11.4133747
+  node_9004581437:
+    type: junction
+    coords:
+    - 1270636.5684502055
+    - 6817304.727145369
+    lat: 52.2811793
+    lon: 11.4143225
+  node_9004581438:
+    type: derail
+    coords:
+    - 1270672.0014441248
+    - 6817287.557252691
+    lat: 52.2810847
+    lon: 11.4146408
+  node_9004581439:
+    type: signal
+    coords:
+    - 1270533.0413237677
+    - 6817390.704212785
+    lat: 52.281653
+    lon: 11.4133925
+  node_9004581440:
+    type: signal
+    coords:
+    - 1270657.5076464235
+    - 6817316.688012036
+    lat: 52.2812452
+    lon: 11.4145106
+  node_9004581441:
+    type: signal
+    coords:
+    - 1270621.3844716612
+    - 6817353.278574025
+    lat: 52.2814468
+    lon: 11.4141861
+  node_9004741859:
+    type: signal
+    coords:
+    - 1270526.9855434685
+    - 6817403.354916874
+    lat: 52.2817227
+    lon: 11.4133381
+  node_9026565231:
+    type: junction
+    coords:
+    - 1270079.536850225
+    - 6817606.404176519
+    lat: 52.2828414
+    lon: 11.4093186
+  node_9026565234:
+    type: junction
+    coords:
+    - 1270395.8066555178
+    - 6817378.01722834
+    lat: 52.2815831
+    lon: 11.4121597
+  node_9026565235:
+    type: junction
+    coords:
+    - 1270336.640346161
+    - 6817415.7696875315
+    lat: 52.2817911
+    lon: 11.4116282
+  node_9026565236:
+    type: junction
+    coords:
+    - 1270474.999341268
+    - 6817333.25901467
+    lat: 52.2813365
+    lon: 11.4128711
+  node_9026565237:
+    type: junction
+    coords:
+    - 1270432.5866152756
+    - 6817329.265998848
+    lat: 52.2813145
+    lon: 11.4124901
+  node_9026565238:
+    type: junction
+    coords:
+    - 1270473.2182294154
+    - 6817365.493615351
+    lat: 52.2815141
+    lon: 11.4128551
+  node_9026565239:
+    type: junction
+    coords:
+    - 1270488.168437029
+    - 6817358.08835776
+    lat: 52.2814733
+    lon: 11.4129894
+  node_9026565240:
+    type: junction
+    coords:
+    - 1270471.759944086
+    - 6817360.919778971
+    lat: 52.2814889
+    lon: 11.412842
+  node_9026565241:
+    type: junction
+    coords:
+    - 1270490.6285977755
+    - 6817354.440181907
+    lat: 52.2814532
+    lon: 11.4130115
+  node_9026565242:
+    type: junction
+    coords:
+    - 1270439.3325764178
+    - 6817376.438163013
+    lat: 52.2815744
+    lon: 11.4125507
+  node_9026565243:
+    type: junction
+    coords:
+    - 1270415.9554833514
+    - 6817402.029949799
+    lat: 52.2817154
+    lon: 11.4123407
+  node_9026565244:
+    type: junction
+    coords:
+    - 1270405.1240968972
+    - 6817411.286573685
+    lat: 52.2817664
+    lon: 11.4122434
+  node_9026565245:
+    type: junction
+    coords:
+    - 1270383.1051016182
+    - 6817429.23719444
+    lat: 52.2818653
+    lon: 11.4120456
+  node_9026565246:
+    type: junction
+    coords:
+    - 1270396.0960861938
+    - 6817411.812931051
+    lat: 52.2817693
+    lon: 11.4121623
+  node_9026565247:
+    type: junction
+    coords:
+    - 1270333.9018866876
+    - 6817452.43330395
+    lat: 52.2819931
+    lon: 11.4116036
+  node_9026565248:
+    type: junction
+    coords:
+    - 1270182.0843651437
+    - 6817461.32697879
+    lat: 52.2820421
+    lon: 11.4102398
+  node_9026565249:
+    type: junction
+    coords:
+    - 1270134.9516927418
+    - 6817510.89578433
+    lat: 52.2823152
+    lon: 11.4098164
+  node_9026565250:
+    type: junction
+    coords:
+    - 1270153.7090269404
+    - 6817486.683081529
+    lat: 52.2821818
+    lon: 11.4099849
+  node_9026565251:
+    type: junction
+    coords:
+    - 1270139.8163544894
+    - 6817500.894876468
+    lat: 52.2822601
+    lon: 11.4098601
+  node_9026565252:
+    type: junction
+    coords:
+    - 1270310.391210232
+    - 6817374.949848853
+    lat: 52.2815662
+    lon: 11.4113924
+  node_9026565253:
+    type: junction
+    coords:
+    - 1270423.5474726234
+    - 6817305.344245792
+    lat: 52.2811827
+    lon: 11.4124089
+  node_9026565254:
+    type: junction
+    coords:
+    - 1270446.3457043378
+    - 6817303.293294571
+    lat: 52.2811714
+    lon: 11.4126137
+  node_9026565255:
+    type: junction
+    coords:
+    - 1270427.143092176
+    - 6817312.840204726
+    lat: 52.281224
+    lon: 11.4124412
+  node_9026565256:
+    type: junction
+    coords:
+    - 1270380.4668296862
+    - 6817340.028996047
+    lat: 52.2813738
+    lon: 11.4120219
+  node_9026565257:
+    type: junction
+    coords:
+    - 1270268.290178814
+    - 6817433.448063786
+    lat: 52.2818885
+    lon: 11.4110142
+  node_9026565258:
+    type: junction
+    coords:
+    - 1270172.3884374956
+    - 6817495.867201554
+    lat: 52.2822324
+    lon: 11.4101527
+  node_9026565259:
+    type: junction
+    coords:
+    - 1270122.9180557872
+    - 6817530.117165029
+    lat: 52.2824211
+    lon: 11.4097083
+  node_9026565260:
+    type: junction
+    coords:
+    - 1270144.1689465793
+    - 6817514.4532790715
+    lat: 52.2823348
+    lon: 11.4098992
+  node_9026565262:
+    type: junction
+    coords:
+    - 1270159.6312238507
+    - 6817521.69532682
+    lat: 52.2823747
+    lon: 11.4100381
+  node_9026565263:
+    type: junction
+    coords:
+    - 1270198.7154970681
+    - 6817495.921652892
+    lat: 52.2822327
+    lon: 11.4103892
+  node_9026565264:
+    type: junction
+    coords:
+    - 1270270.527700579
+    - 6817449.692602061
+    lat: 52.281978
+    lon: 11.4110343
+  node_9026565265:
+    type: junction
+    coords:
+    - 1270491.1072715858
+    - 6817325.962687267
+    lat: 52.2812963
+    lon: 11.4130158
+  node_9026565266:
+    type: junction
+    coords:
+    - 1270223.8737019876
+    - 6817489.950158592
+    lat: 52.2821998
+    lon: 11.4106152
+  node_9026565267:
+    type: junction
+    coords:
+    - 1270211.4727107133
+    - 6817499.352087801
+    lat: 52.2822516
+    lon: 11.4105038
+  node_9026565268:
+    type: junction
+    coords:
+    - 1270100.5651020359
+    - 6817584.950082653
+    lat: 52.2827232
+    lon: 11.4095075
+  node_9026565269:
+    type: junction
+    coords:
+    - 1270127.1927242335
+    - 6817568.723420422
+    lat: 52.2826338
+    lon: 11.4097467
+  node_9026565270:
+    type: junction
+    coords:
+    - 1270099.6856780585
+    - 6817582.281937947
+    lat: 52.2827085
+    lon: 11.4094996
+  node_9026565271:
+    type: switch
+    coords:
+    - 1270077.4106479508
+    - 6817599.10760007
+    lat: 52.2828012
+    lon: 11.4092995
+    name: '64'
+    switch_config:
+      stem: edge_278
+      branches:
+      - edge_279
+      - edge_222
+      switch_type: default
+  node_9026565272:
+    type: junction
+    coords:
+    - 1270145.204217844
+    - 6817550.246120272
+    lat: 52.282532
+    lon: 11.4099085
+  node_9026565273:
+    type: junction
+    coords:
+    - 1270154.8667496447
+    - 6817544.8372526625
+    lat: 52.2825022
+    lon: 11.4099953
+  node_9026565274:
+    type: junction
+    coords:
+    - 1270038.0592079554
+    - 6817630.78059832
+    lat: 52.2829757
+    lon: 11.408946
+  node_9026565275:
+    type: junction
+    coords:
+    - 1270048.968518053
+    - 6817630.580940056
+    lat: 52.2829746
+    lon: 11.409044
+  node_9026565276:
+    type: junction
+    coords:
+    - 1270056.104097413
+    - 6817633.031291788
+    lat: 52.2829881
+    lon: 11.4091081
+  node_9026565277:
+    type: junction
+    coords:
+    - 1269893.3772657712
+    - 6817835.1969697075
+    lat: 52.2841019
+    lon: 11.4076463
+  node_9026565278:
+    type: junction
+    coords:
+    - 1269903.9526173966
+    - 6817826.357332929
+    lat: 52.2840532
+    lon: 11.4077413
+  node_9026565279:
+    type: junction
+    coords:
+    - 1269881.1098578859
+    - 6817845.779134994
+    lat: 52.2841602
+    lon: 11.4075361
+  node_9026668458:
+    type: signal
+    coords:
+    - 1270411.85892609
+    - 6817469.839505398
+    lat: 52.282089
+    lon: 11.4123039
+  node_9026668459:
+    type: junction
+    coords:
+    - 1270310.1797031995
+    - 6817527.194931368
+    lat: 52.282405
+    lon: 11.4113905
+  node_9026719925:
+    type: junction
+    coords:
+    - 1271622.6810274485
+    - 6816632.9871045835
+    lat: 52.2774781
+    lon: 11.4231809
+  node_9026719926:
+    type: junction
+    coords:
+    - 1271576.995508427
+    - 6816660.953973939
+    lat: 52.2776322
+    lon: 11.4227705
+  node_9026719927:
+    type: junction
+    coords:
+    - 1271334.541657479
+    - 6816813.366962723
+    lat: 52.278472
+    lon: 11.4205925
+  node_9026719929:
+    type: junction
+    coords:
+    - 1271079.0856900068
+    - 6817001.028761799
+    lat: 52.279506
+    lon: 11.4182977
+  node_9554403134:
+    type: junction
+    coords:
+    - 1271474.30327817
+    - 6816694.456270566
+    lat: 52.2778168
+    lon: 11.421848
+  node_9554403553:
+    type: junction
+    coords:
+    - 1271438.480666033
+    - 6816707.214766015
+    lat: 52.2778871
+    lon: 11.4215262
+  node_9556839614:
+    type: junction
+    coords:
+    - 1269930.6358993398
+    - 6817788.7662966745
+    lat: 52.2838461
+    lon: 11.407981
+  node_9556839615:
+    type: junction
+    coords:
+    - 1270035.9886654264
+    - 6817710.317585549
+    lat: 52.2834139
+    lon: 11.4089274
+  node_9556839616:
+    type: junction
+    coords:
+    - 1269956.9740908616
+    - 6817777.458163389
+    lat: 52.2837838
+    lon: 11.4082176
+  node_9556871217:
+    type: junction
+    coords:
+    - 1269860.2040575151
+    - 6817853.221146407
+    lat: 52.2842012
+    lon: 11.4073483
+  node_9556871218:
+    type: junction
+    coords:
+    - 1270325.6531124199
+    - 6817507.30199023
+    lat: 52.2822954
+    lon: 11.4115295
+  node_9556871219:
+    type: junction
+    coords:
+    - 1269884.182275832
+    - 6817849.391232354
+    lat: 52.2841801
+    lon: 11.4075637
+  node_9556871220:
+    type: junction
+    coords:
+    - 1269860.8385786123
+    - 6817864.4567816295
+    lat: 52.2842631
+    lon: 11.407354
+  node_9556871221:
+    type: junction
+    coords:
+    - 1269808.5072859905
+    - 6817900.886486071
+    lat: 52.2844638
+    lon: 11.4068839
+  node_9556871222:
+    type: junction
+    coords:
+    - 1270448.6054900012
+    - 6817442.468769793
+    lat: 52.2819382
+    lon: 11.412634
+  node_9556871223:
+    type: junction
+    coords:
+    - 1270537.3939158574
+    - 6817377.581624079
+    lat: 52.2815807
+    lon: 11.4134316
+  node_9556871224:
+    type: junction
+    coords:
+    - 1270508.0389661354
+    - 6817391.6117231725
+    lat: 52.281658
+    lon: 11.4131679
+  node_9556871225:
+    type: junction
+    coords:
+    - 1270588.6342774697
+    - 6817345.7281269
+    lat: 52.2814052
+    lon: 11.4138919
+  node_9556871226:
+    type: junction
+    coords:
+    - 1270100.476046443
+    - 6817708.3754361
+    lat: 52.2834032
+    lon: 11.4095067
+  node_9556871227:
+    type: junction
+    coords:
+    - 1270588.133339761
+    - 6817356.128143663
+    lat: 52.2814625
+    lon: 11.4138874
+  node_9556871228:
+    type: junction
+    coords:
+    - 1270612.367592907
+    - 6817331.698108249
+    lat: 52.2813279
+    lon: 11.4141051
+  node_9556871229:
+    type: junction
+    coords:
+    - 1270456.631625287
+    - 6817464.194737275
+    lat: 52.2820579
+    lon: 11.4127061
+  node_9556871246:
+    type: junction
+    coords:
+    - 1269990.1250352198
+    - 6817817.935182948
+    lat: 52.2840068
+    lon: 11.4085154
+  node_9556871248:
+    type: junction
+    coords:
+    - 1269669.6807490222
+    - 6818053.577216007
+    lat: 52.285305
+    lon: 11.4056368
+  node_9556871249:
+    type: junction
+    coords:
+    - 1269642.8193558936
+    - 6818072.963266046
+    lat: 52.2854118
+    lon: 11.4053955
+  node_9556871250:
+    type: junction
+    coords:
+    - 1269709.5776545226
+    - 6818012.772275383
+    lat: 52.2850802
+    lon: 11.4059952
+  node_9556871251:
+    type: junction
+    coords:
+    - 1269664.0591147372
+    - 6818037.821547013
+    lat: 52.2852182
+    lon: 11.4055863
+  node_9556871252:
+    type: junction
+    coords:
+    - 1269680.8238300506
+    - 6818018.490037001
+    lat: 52.2851117
+    lon: 11.4057369
+  node_9556871253:
+    type: junction
+    coords:
+    - 1269665.2168374415
+    - 6818032.593866458
+    lat: 52.2851894
+    lon: 11.4055967
+  node_9556871254:
+    type: junction
+    coords:
+    - 1269675.2578555108
+    - 6818011.665026778
+    lat: 52.2850741
+    lon: 11.4056869
+  node_9556871255:
+    type: junction
+    coords:
+    - 1269613.5423298152
+    - 6818057.298317475
+    lat: 52.2853255
+    lon: 11.4051325
+  node_9556871256:
+    type: junction
+    coords:
+    - 1269580.001767239
+    - 6818083.382379759
+    lat: 52.2854692
+    lon: 11.4048312
+  node_9556871257:
+    type: junction
+    coords:
+    - 1269568.3020887568
+    - 6818093.855962442
+    lat: 52.2855269
+    lon: 11.4047261
+  node_9556871258:
+    type: junction
+    coords:
+    - 1269502.4900057998
+    - 6818175.103838985
+    lat: 52.2859745
+    lon: 11.4041349
+  node_9557593946:
+    type: junction
+    coords:
+    - 1271538.7683952886
+    - 6816661.407687745
+    lat: 52.2776347
+    lon: 11.4224271
+  node_9557593948:
+    type: junction
+    coords:
+    - 1271969.6304844038
+    - 6816441.359510702
+    lat: 52.2764222
+    lon: 11.4262976
+  node_9557593949:
+    type: junction
+    coords:
+    - 1271725.5068410942
+    - 6816572.589163385
+    lat: 52.2771453
+    lon: 11.4241046
+  node_9557597457:
+    type: junction
+    coords:
+    - 1270458.6799039177
+    - 6817316.0346106645
+    lat: 52.2812416
+    lon: 11.4127245
+  node_9557597461:
+    type: junction
+    coords:
+    - 1270482.8584973179
+    - 6817321.66112423
+    lat: 52.2812726
+    lon: 11.4129417
+  node_9557597462:
+    type: junction
+    coords:
+    - 1270444.408745198
+    - 6817340.482748355
+    lat: 52.2813763
+    lon: 11.4125963
+  node_9557597463:
+    type: junction
+    coords:
+    - 1270427.710821579
+    - 6817349.993402644
+    lat: 52.2814287
+    lon: 11.4124463
+  node_9557597464:
+    type: junction
+    coords:
+    - 1270101.9788595687
+    - 6817564.258371488
+    lat: 52.2826092
+    lon: 11.4095202
+  node_9557597465:
+    type: junction
+    coords:
+    - 1270052.0743318463
+    - 6817603.881230178
+    lat: 52.2828275
+    lon: 11.4090719
+  node_9557597466:
+    type: junction
+    coords:
+    - 1270472.884270943
+    - 6817342.134406972
+    lat: 52.2813854
+    lon: 11.4128521
+  node_9557597467:
+    type: junction
+    coords:
+    - 1270518.7479011498
+    - 6817330.845054868
+    lat: 52.2813232
+    lon: 11.4132641
+  node_9557597468:
+    type: junction
+    coords:
+    - 1270497.0628643432
+    - 6817339.067041241
+    lat: 52.2813685
+    lon: 11.4130693
+  node_9557597469:
+    type: junction
+    coords:
+    - 1270461.4294953402
+    - 6817355.928492254
+    lat: 52.2814614
+    lon: 11.4127492
+  node_9557597470:
+    type: junction
+    coords:
+    - 1270325.4304734382
+    - 6817431.977889323
+    lat: 52.2818804
+    lon: 11.4115275
+  node_9557597471:
+    type: junction
+    coords:
+    - 1270208.9346263232
+    - 6817504.52496862
+    lat: 52.2822801
+    lon: 11.410481
+  node_9557597472:
+    type: junction
+    coords:
+    - 1270148.9334207852
+    - 6817545.635877179
+    lat: 52.2825066
+    lon: 11.409942
+  node_9557597473:
+    type: junction
+    coords:
+    - 1270191.3127509304
+    - 6817531.6781101525
+    lat: 52.2824297
+    lon: 11.4103227
+  node_9557597474:
+    type: junction
+    coords:
+    - 1270342.1617929044
+    - 6817438.457549166
+    lat: 52.2819161
+    lon: 11.4116778
+  node_9557597475:
+    type: junction
+    coords:
+    - 1270284.8211231967
+    - 6817484.396128381
+    lat: 52.2821692
+    lon: 11.4111627
+  node_9557597476:
+    type: junction
+    coords:
+    - 1270188.752402642
+    - 6817542.023916928
+    lat: 52.2824867
+    lon: 11.4102997
+  node_9557597477:
+    type: junction
+    coords:
+    - 1270114.925316348
+    - 6817583.915495825
+    lat: 52.2827175
+    lon: 11.4096365
+  node_9557597478:
+    type: junction
+    coords:
+    - 1270201.8435747596
+    - 6817546.960868033
+    lat: 52.2825139
+    lon: 11.4104173
+  node_9557597479:
+    type: junction
+    coords:
+    - 1270298.9475665786
+    - 6817487.1912934305
+    lat: 52.2821846
+    lon: 11.4112896
+  node_9557606719:
+    type: junction
+    coords:
+    - 1271388.8878328842
+    - 6816786.089216463
+    lat: 52.2783217
+    lon: 11.4210807
+  node_9557606720:
+    type: junction
+    coords:
+    - 1271019.9973042938
+    - 6817053.534925364
+    lat: 52.2797953
+    lon: 11.4177669
+  node_9557606721:
+    type: junction
+    coords:
+    - 1271084.5069492084
+    - 6817006.237619184
+    lat: 52.2795347
+    lon: 11.4183464
+  node_9557606722:
+    type: junction
+    coords:
+    - 1270992.4568622715
+    - 6817063.789366684
+    lat: 52.2798518
+    lon: 11.4175195
+  node_9557606723:
+    type: junction
+    coords:
+    - 1270836.2978805867
+    - 6817182.923343613
+    lat: 52.2805082
+    lon: 11.4161167
+  node_9557606724:
+    type: junction
+    coords:
+    - 1270794.3304325575
+    - 6817208.641560112
+    lat: 52.2806499
+    lon: 11.4157397
+  node_9557606725:
+    type: junction
+    coords:
+    - 1270714.2471908808
+    - 6817265.686565368
+    lat: 52.2809642
+    lon: 11.4150203
+  node_9557606726:
+    type: junction
+    coords:
+    - 1270775.3949871736
+    - 6817232.327076083
+    lat: 52.2807804
+    lon: 11.4155696
+  node_9557606727:
+    type: junction
+    coords:
+    - 1270746.229280586
+    - 6817257.718753056
+    lat: 52.2809203
+    lon: 11.4153076
+  node_9557606728:
+    type: junction
+    coords:
+    - 1270759.4762999902
+    - 6817251.529637805
+    lat: 52.2808862
+    lon: 11.4154266
+  node_9557606729:
+    type: junction
+    coords:
+    - 1270747.4426630356
+    - 6817259.878592055
+    lat: 52.2809322
+    lon: 11.4153185
+  node_11982814549:
+    type: junction
+    coords:
+    - 1269457.3722161814
+    - 6818189.897721191
+    lat: 52.286056
+    lon: 11.4037296
+  node_11982814550:
+    type: junction
+    coords:
+    - 1269462.4929127577
+    - 6818195.325176859
+    lat: 52.2860859
+    lon: 11.4037756
+  node_11982814551:
+    type: junction
+    coords:
+    - 1269467.5579495889
+    - 6818200.843396429
+    lat: 52.2861163
+    lon: 11.4038211
+  node_11999098596:
+    type: junction
+    coords:
+    - 1269440.9859871364
+    - 6818219.7396968715
+    lat: 52.2862204
+    lon: 11.4035824
+  node_11999098597:
+    type: junction
+    coords:
+    - 1269436.1435892868
+    - 6818214.330376719
+    lat: 52.2861906
+    lon: 11.4035389
+  node_11999098598:
+    type: junction
+    coords:
+    - 1269431.646281859
+    - 6818209.284101485
+    lat: 52.2861628
+    lon: 11.4034985
+  node_12640701001:
+    type: junction
+    coords:
+    - 1271487.3833183383
+    - 6816719.555862049
+    lat: 52.2779551
+    lon: 11.4219655
+  node_12640701002:
+    type: junction
+    coords:
+    - 1271485.91390106
+    - 6816702.350927514
+    lat: 52.2778603
+    lon: 11.4219523
+  node_12640701003:
+    type: junction
+    coords:
+    - 1271483.2088374335
+    - 6816690.263938663
+    lat: 52.2777937
+    lon: 11.421928
+  node_12640701069:
+    type: junction
+    coords:
+    - 1271501.4095741783
+    - 6816681.443715077
+    lat: 52.2777451
+    lon: 11.4220915
+  node_12640701070:
+    type: junction
+    coords:
+    - 1271501.5654214656
+    - 6816690.844694468
+    lat: 52.2777969
+    lon: 11.4220929
+  node_12640701071:
+    type: junction
+    coords:
+    - 1271501.1312754513
+    - 6816710.427078885
+    lat: 52.2779048
+    lon: 11.422089
+edges:
+  edge_0:
+    nodes:
+    - node_9557593948
+    - node_3338128576
+    length: 201.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_1:
+    nodes:
+    - node_3338128576
+    - node_9557593949
+    length: 75.41
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_2:
+    nodes:
+    - node_9557593949
+    - node_59849634
+    length: 53.81
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_3:
+    nodes:
+    - node_59849634
+    - node_9026719925
+    length: 65.44
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_4:
+    nodes:
+    - node_9026719925
+    - node_9026719926
+    length: 53.57
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_5:
+    nodes:
+    - node_9026719926
+    - node_12640701071
+    length: 90.57
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_6:
+    nodes:
+    - node_12640701071
+    - node_191009860
+    length: 8.66
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_7:
+    nodes:
+    - node_191009860
+    - node_12640701001
+    length: 7.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_8:
+    nodes:
+    - node_12640701001
+    - node_9557606719
+    length: 118.86
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_9:
+    nodes:
+    - node_9557606719
+    - node_7598336958
+    length: 115.97
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_10:
+    nodes:
+    - node_7598336958
+    - node_7598336894
+    length: 88.13
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_11:
+    nodes:
+    - node_7598336894
+    - node_9557606721
+    length: 171.55
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_12:
+    nodes:
+    - node_9557606721
+    - node_9557606720
+    length: 79.99
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_13:
+    nodes:
+    - node_9557606720
+    - node_5015579838
+    length: 138.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_14:
+    nodes:
+    - node_5015579838
+    - node_6524196343
+    length: 26.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_15:
+    nodes:
+    - node_6524196343
+    - node_1877303900
+    length: 17.81
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_16:
+    nodes:
+    - node_1877303900
+    - node_1877303912
+    length: 82.8
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_17:
+    nodes:
+    - node_1877304060
+    - node_8986577251
+    length: 26.84
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_18:
+    nodes:
+    - node_8986577251
+    - node_11982814550
+    length: 10.35
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_19:
+    nodes:
+    - node_11982814550
+    - node_191008119
+    length: 13.14
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_20:
+    nodes:
+    - node_191008119
+    - node_11999098597
+    length: 19.35
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_21:
+    nodes:
+    - node_1877303916
+    - node_1877303930
+    length: 24.86
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_22:
+    nodes:
+    - node_1877303930
+    - node_9004581441
+    length: 102.47
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_23:
+    nodes:
+    - node_9004581441
+    - node_5015579198
+    length: 372.84
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_24:
+    nodes:
+    - node_5015579198
+    - node_1877303986
+    length: 56.8
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_25:
+    nodes:
+    - node_1877303986
+    - node_6630116016
+    length: 206.76
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_26:
+    nodes:
+    - node_6630116016
+    - node_1877304015
+    length: 101.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_27:
+    nodes:
+    - node_1877304015
+    - node_9556871246
+    length: 45.68
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_28:
+    nodes:
+    - node_9556871246
+    - node_4731123220
+    length: 46.83
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_29:
+    nodes:
+    - node_4731123220
+    - node_1877303856
+    length: 261.6
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_30:
+    nodes:
+    - node_1877303856
+    - node_1877304035
+    length: 31.7
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_31:
+    nodes:
+    - node_1877304035
+    - node_9556871248
+    length: 57.63
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_32:
+    nodes:
+    - node_9556871248
+    - node_9556871249
+    length: 33.13
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_33:
+    nodes:
+    - node_9556871249
+    - node_8986577252
+    length: 130.38
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_34:
+    nodes:
+    - node_8986577252
+    - node_9556871258
+    length: 43.19
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_35:
+    nodes:
+    - node_9556871258
+    - node_11982814551
+    length: 43.39
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_36:
+    nodes:
+    - node_11982814551
+    - node_1877304063
+    length: 13.69
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_37:
+    nodes:
+    - node_1877304063
+    - node_11999098596
+    length: 18.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_38:
+    nodes:
+    - node_11999098596
+    - node_1877304064
+    length: 45.97
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_39:
+    nodes:
+    - node_1877303932
+    - node_6630116013
+    length: 34.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_40:
+    nodes:
+    - node_6630116013
+    - node_9556871228
+    length: 40.03
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_41:
+    nodes:
+    - node_9556871228
+    - node_9556871225
+    length: 27.57
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_42:
+    nodes:
+    - node_9556871225
+    - node_1879956925
+    length: 33.14
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_43:
+    nodes:
+    - node_1879956925
+    - node_9556871223
+    length: 27.23
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_44:
+    nodes:
+    - node_9556871223
+    - node_1877303955
+    length: 26.5
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_45:
+    nodes:
+    - node_1877303862
+    - node_9557593946
+    length: 23.96
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_46:
+    nodes:
+    - node_9557593946
+    - node_1877303876
+    length: 24.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_47:
+    nodes:
+    - node_1877303876
+    - node_12640701069
+    length: 18.14
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_48:
+    nodes:
+    - node_12640701069
+    - node_332239197
+    length: 8.48
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_49:
+    nodes:
+    - node_332239197
+    - node_12640701003
+    length: 11.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_50:
+    nodes:
+    - node_12640701003
+    - node_9554403134
+    length: 9.84
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_51:
+    nodes:
+    - node_9554403134
+    - node_1877303879
+    length: 19.66
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_52:
+    nodes:
+    - node_1877303879
+    - node_9554403553
+    length: 18.38
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_53:
+    nodes:
+    - node_1877304043
+    - node_9556871251
+    length: 40.17
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_54:
+    nodes:
+    - node_9556871251
+    - node_8997099872
+    length: 48.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_55:
+    nodes:
+    - node_8997099872
+    - node_7598337085
+    length: 295.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_56:
+    nodes:
+    - node_7598337085
+    - node_1877303980
+    length: 403.0
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_57:
+    nodes:
+    - node_1877303980
+    - node_9004741859
+    length: 323.21
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_58:
+    nodes:
+    - node_9004741859
+    - node_1877303950
+    length: 106.49
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_59:
+    nodes:
+    - node_1879957067
+    - node_7598337080
+    length: 52.63
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_60:
+    nodes:
+    - node_7598337080
+    - node_9556839614
+    length: 15.59
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_61:
+    nodes:
+    - node_9556839614
+    - node_1879957066
+    length: 15.33
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_62:
+    nodes:
+    - node_1879957066
+    - node_9556839615
+    length: 116.03
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_63:
+    nodes:
+    - node_9556839615
+    - node_1879957022
+    length: 265.04
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_64:
+    nodes:
+    - node_1879957022
+    - node_1879956982
+    length: 65.13
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_65:
+    nodes:
+    - node_1879956982
+    - node_1879956977
+    length: 31.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_66:
+    nodes:
+    - node_1879956977
+    - node_1879956972
+    length: 28.42
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_67:
+    nodes:
+    - node_1879956972
+    - node_1879956960
+    length: 37.8
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_68:
+    nodes:
+    - node_1879956960
+    - node_1879956947
+    length: 65.53
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_69:
+    nodes:
+    - node_1879956947
+    - node_9556871224
+    length: 77.09
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_70:
+    nodes:
+    - node_9556871224
+    - node_1879956925
+    length: 59.61
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_71:
+    nodes:
+    - node_1877304060
+    - node_6630116022
+    length: 43.34
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_72:
+    nodes:
+    - node_6630116022
+    - node_6630116021
+    length: 46.87
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_73:
+    nodes:
+    - node_6630116021
+    - node_1877304045
+    length: 34.01
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_74:
+    nodes:
+    - node_9026719929
+    - node_7598336895
+    length: 172.03
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_75:
+    nodes:
+    - node_7598336895
+    - node_9026719927
+    length: 144.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_76:
+    nodes:
+    - node_9026719927
+    - node_3338128582
+    length: 143.34
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_77:
+    nodes:
+    - node_3338128582
+    - node_12640701002
+    length: 44.38
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_78:
+    nodes:
+    - node_12640701002
+    - node_1877303878
+    length: 10.11
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_79:
+    nodes:
+    - node_1877303878
+    - node_12640701070
+    length: 9.32
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_80:
+    nodes:
+    - node_12640701070
+    - node_1877303862
+    length: 71.28
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_81:
+    nodes:
+    - node_1877303950
+    - node_9556871227
+    length: 29.29
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_82:
+    nodes:
+    - node_9556871227
+    - node_9004581439
+    length: 65.04
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_83:
+    nodes:
+    - node_9004581439
+    - node_1877303951
+    length: 20.13
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_84:
+    nodes:
+    - node_1877303951
+    - node_1877303978
+    length: 316.02
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_85:
+    nodes:
+    - node_1877303978
+    - node_9556871226
+    length: 200.54
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_86:
+    nodes:
+    - node_9556871226
+    - node_7598337084
+    length: 201.8
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_87:
+    nodes:
+    - node_7598337084
+    - node_8997099871
+    length: 155.53
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_88:
+    nodes:
+    - node_8997099871
+    - node_7598337081
+    length: 121.56
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_89:
+    nodes:
+    - node_7598337081
+    - node_1877304031
+    length: 26.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_90:
+    nodes:
+    - node_7598998617
+    - node_1879957053
+    length: 45.01
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_91:
+    nodes:
+    - node_1879957053
+    - node_9026565276
+    length: 19.64
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_92:
+    nodes:
+    - node_9026565276
+    - node_1879957033
+    length: 23.71
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_93:
+    nodes:
+    - node_1879957033
+    - node_1879957024
+    length: 27.29
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_94:
+    nodes:
+    - node_1879957024
+    - node_1879957016
+    length: 44.04
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_95:
+    nodes:
+    - node_1879957016
+    - node_9557597478
+    length: 74.28
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_96:
+    nodes:
+    - node_9557597478
+    - node_5015579205
+    length: 76.43
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_97:
+    nodes:
+    - node_5015579205
+    - node_9557597479
+    length: 37.63
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_98:
+    nodes:
+    - node_9557597479
+    - node_1879956952
+    length: 88.21
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_99:
+    nodes:
+    - node_1879956952
+    - node_9026565245
+    length: 13.98
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_100:
+    nodes:
+    - node_9026565245
+    - node_1879956932
+    length: 15.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_101:
+    nodes:
+    - node_1879956932
+    - node_9026565244
+    length: 12.49
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_102:
+    nodes:
+    - node_9026565244
+    - node_9026565243
+    length: 14.25
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_103:
+    nodes:
+    - node_9026565243
+    - node_1877303953
+    length: 28.51
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_104:
+    nodes:
+    - node_1879956983
+    - node_1879957013
+    length: 52.46
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_105:
+    nodes:
+    - node_1879957013
+    - node_9557597465
+    length: 39.93
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_106:
+    nodes:
+    - node_9557597465
+    - node_1879957018
+    length: 36.05
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_107:
+    nodes:
+    - node_1879957018
+    - node_1879957036
+    length: 48.41
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_108:
+    nodes:
+    - node_1879957036
+    - node_1877303988
+    length: 51.32
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_109:
+    nodes:
+    - node_1877304022
+    - node_7598337082
+    length: 32.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_110:
+    nodes:
+    - node_7598337082
+    - node_1877304018
+    length: 36.35
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_111:
+    nodes:
+    - node_1877304018
+    - node_3338129471
+    length: 43.49
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_112:
+    nodes:
+    - node_3338129471
+    - node_1877304011
+    length: 37.99
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_113:
+    nodes:
+    - node_1877304011
+    - node_7729112193
+    length: 30.29
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_114:
+    nodes:
+    - node_7729112193
+    - node_1877303988
+    length: 28.08
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_115:
+    nodes:
+    - node_1877303988
+    - node_7598998617
+    length: 52.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_116:
+    nodes:
+    - node_1879957067
+    - node_1879957065
+    length: 32.33
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_117:
+    nodes:
+    - node_1879957065
+    - node_9556839616
+    length: 63.43
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_118:
+    nodes:
+    - node_9556839616
+    - node_1879957025
+    length: 349.65
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_119:
+    nodes:
+    - node_1879957025
+    - node_3338129450
+    length: 69.71
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_120:
+    nodes:
+    - node_3338129450
+    - node_9556871218
+    length: 37.72
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_121:
+    nodes:
+    - node_9556871218
+    - node_6630116008
+    length: 23.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_122:
+    nodes:
+    - node_6630116008
+    - node_3338129446
+    length: 55.91
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_123:
+    nodes:
+    - node_3338129422
+    - node_9557597457
+    length: 37.5
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_124:
+    nodes:
+    - node_9557597457
+    - node_9026565237
+    length: 29.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_125:
+    nodes:
+    - node_9026565237
+    - node_1879956908
+    length: 35.01
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_126:
+    nodes:
+    - node_1879956908
+    - node_3338129432
+    length: 79.58
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_127:
+    nodes:
+    - node_3338129432
+    - node_9026565257
+    length: 79.97
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_128:
+    nodes:
+    - node_9026565257
+    - node_1879956971
+    length: 80.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_129:
+    nodes:
+    - node_1879956971
+    - node_9026565258
+    length: 34.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_130:
+    nodes:
+    - node_9026565258
+    - node_9026565260
+    length: 33.79
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_131:
+    nodes:
+    - node_9026565260
+    - node_9026565259
+    length: 26.4
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_132:
+    nodes:
+    - node_9026565259
+    - node_1879956985
+    length: 21.38
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_133:
+    nodes:
+    - node_1879956985
+    - node_1879957013
+    length: 41.28
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_134:
+    nodes:
+    - node_3338129427
+    - node_9557597461
+    length: 33.07
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_135:
+    nodes:
+    - node_9557597461
+    - node_1879956909
+    length: 23.79
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_136:
+    nodes:
+    - node_1879956909
+    - node_9557597462
+    length: 19.03
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_137:
+    nodes:
+    - node_9557597462
+    - node_9557597463
+    length: 19.22
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_138:
+    nodes:
+    - node_9557597463
+    - node_3338129434
+    length: 26.3
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_139:
+    nodes:
+    - node_3338129434
+    - node_9026565264
+    length: 159.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_140:
+    nodes:
+    - node_9026565264
+    - node_9026565263
+    length: 85.41
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_141:
+    nodes:
+    - node_9026565263
+    - node_9026565262
+    length: 46.82
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_142:
+    nodes:
+    - node_9026565262
+    - node_1879956973
+    length: 41.09
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_143:
+    nodes:
+    - node_1879956973
+    - node_9557597464
+    length: 30.59
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_144:
+    nodes:
+    - node_9557597464
+    - node_7598998615
+    length: 22.06
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_145:
+    nodes:
+    - node_7598998615
+    - node_1879957000
+    length: 26.03
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_146:
+    nodes:
+    - node_1879957000
+    - node_1879957018
+    length: 51.24
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_147:
+    nodes:
+    - node_3338129420
+    - node_9026565254
+    length: 19.76
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_148:
+    nodes:
+    - node_9026565254
+    - node_9026565255
+    length: 21.44
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_149:
+    nodes:
+    - node_9026565255
+    - node_3338129429
+    length: 23.87
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_150:
+    nodes:
+    - node_3338129429
+    - node_9026565256
+    length: 30.16
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_151:
+    nodes:
+    - node_9026565256
+    - node_1879956918
+    length: 31.17
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_152:
+    nodes:
+    - node_1879956918
+    - node_1879956956
+    length: 190.56
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_153:
+    nodes:
+    - node_1879956956
+    - node_1879956974
+    length: 32.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_154:
+    nodes:
+    - node_1879956974
+    - node_9026565249
+    length: 45.58
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_155:
+    nodes:
+    - node_9026565249
+    - node_1879956983
+    length: 32.32
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_156:
+    nodes:
+    - node_1879957074
+    - node_9556871220
+    length: 28.24
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_157:
+    nodes:
+    - node_9556871220
+    - node_9026565279
+    length: 27.56
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_158:
+    nodes:
+    - node_9026565279
+    - node_9026565277
+    length: 16.2
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_159:
+    nodes:
+    - node_9026565277
+    - node_9026565278
+    length: 13.78
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_160:
+    nodes:
+    - node_9026565278
+    - node_1879957072
+    length: 16.66
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_161:
+    nodes:
+    - node_1879957072
+    - node_1879957029
+    length: 408.49
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_162:
+    nodes:
+    - node_1879957029
+    - node_9026668459
+    length: 79.36
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_163:
+    nodes:
+    - node_9026668459
+    - node_6630116009
+    length: 64.49
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_164:
+    nodes:
+    - node_6630116009
+    - node_3338129446
+    length: 39.04
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_165:
+    nodes:
+    - node_3338129442
+    - node_6630116010
+    length: 42.47
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_166:
+    nodes:
+    - node_6630116010
+    - node_1879957032
+    length: 195.14
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_167:
+    nodes:
+    - node_1879957032
+    - node_1879957071
+    length: 408.41
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_168:
+    nodes:
+    - node_1879957071
+    - node_9556871219
+    length: 48.87
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_169:
+    nodes:
+    - node_9556871219
+    - node_1879957074
+    length: 55.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_170:
+    nodes:
+    - node_3338129426
+    - node_1879956912
+    length: 42.42
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_171:
+    nodes:
+    - node_1879956912
+    - node_9557597466
+    length: 23.74
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_172:
+    nodes:
+    - node_9557597466
+    - node_3338129436
+    length: 23.89
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_173:
+    nodes:
+    - node_3338129436
+    - node_1879956921
+    length: 34.87
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_174:
+    nodes:
+    - node_1879956921
+    - node_9557597470
+    length: 114.03
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_175:
+    nodes:
+    - node_9557597470
+    - node_5015579204
+    length: 114.82
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_176:
+    nodes:
+    - node_5015579204
+    - node_9557597471
+    length: 22.43
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_177:
+    nodes:
+    - node_9557597471
+    - node_3338129454
+    length: 33.6
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_178:
+    nodes:
+    - node_3338129425
+    - node_9026565265
+    length: 39.7
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_179:
+    nodes:
+    - node_9026565265
+    - node_9026565236
+    length: 17.68
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_180:
+    nodes:
+    - node_9026565236
+    - node_1879956911
+    length: 21.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_181:
+    nodes:
+    - node_1879956911
+    - node_3338129433
+    length: 27.73
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_182:
+    nodes:
+    - node_3338129433
+    - node_9026565234
+    length: 41.33
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_183:
+    nodes:
+    - node_9026565234
+    - node_9026565235
+    length: 70.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_184:
+    nodes:
+    - node_9026565235
+    - node_1879956962
+    length: 109.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_185:
+    nodes:
+    - node_1879956962
+    - node_9026565266
+    length: 25.73
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_186:
+    nodes:
+    - node_9026565266
+    - node_9026565267
+    length: 15.56
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_187:
+    nodes:
+    - node_9026565267
+    - node_3338129454
+    length: 38.62
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_188:
+    nodes:
+    - node_3338129454
+    - node_9557597472
+    length: 39.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_189:
+    nodes:
+    - node_9557597472
+    - node_1879957008
+    length: 28.44
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_190:
+    nodes:
+    - node_3338129428
+    - node_9557597467
+    length: 24.06
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_191:
+    nodes:
+    - node_9557597467
+    - node_9557597468
+    length: 23.19
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_192:
+    nodes:
+    - node_9557597468
+    - node_1879956915
+    length: 18.84
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_193:
+    nodes:
+    - node_1879956915
+    - node_9557597469
+    length: 20.59
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_194:
+    nodes:
+    - node_9557597469
+    - node_3338129435
+    length: 24.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_195:
+    nodes:
+    - node_3338129435
+    - node_1879956927
+    length: 38.56
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_196:
+    nodes:
+    - node_1879956927
+    - node_1879956967
+    length: 195.64
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_197:
+    nodes:
+    - node_1879956967
+    - node_1879957012
+    length: 63.61
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_198:
+    nodes:
+    - node_1879957012
+    - node_9026565273
+    length: 38.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_199:
+    nodes:
+    - node_9026565273
+    - node_9026565272
+    length: 11.07
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_200:
+    nodes:
+    - node_9026565272
+    - node_1879957008
+    length: 22.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_201:
+    nodes:
+    - node_1877303912
+    - node_1877303926
+    length: 130.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_202:
+    nodes:
+    - node_1877303926
+    - node_9004581440
+    length: 51.47
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_203:
+    nodes:
+    - node_9004581440
+    - node_9004581435
+    length: 157.1
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_204:
+    nodes:
+    - node_9004581435
+    - node_9556871229
+    length: 92.12
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_205:
+    nodes:
+    - node_9556871229
+    - node_1877303982
+    length: 232.16
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_206:
+    nodes:
+    - node_1877303982
+    - node_1877303990
+    length: 134.58
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_207:
+    nodes:
+    - node_1877303990
+    - node_7598337086
+    length: 266.51
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_208:
+    nodes:
+    - node_7598337086
+    - node_447379843
+    length: 260.64
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_209:
+    nodes:
+    - node_447379843
+    - node_9556871250
+    length: 32.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_210:
+    nodes:
+    - node_9556871250
+    - node_8986577250
+    length: 90.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_211:
+    nodes:
+    - node_8986577250
+    - node_1877304060
+    length: 179.09
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_212:
+    nodes:
+    - node_1877303949
+    - node_9026565241
+    length: 27.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_213:
+    nodes:
+    - node_9026565241
+    - node_9026565240
+    length: 19.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_214:
+    nodes:
+    - node_9026565240
+    - node_3338129437
+    length: 19.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_215:
+    nodes:
+    - node_3338129437
+    - node_9026565242
+    length: 16.69
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_216:
+    nodes:
+    - node_9026565242
+    - node_3338129439
+    length: 15.11
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_217:
+    nodes:
+    - node_3338129439
+    - node_9557597474
+    length: 100.21
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_218:
+    nodes:
+    - node_9557597474
+    - node_5015579576
+    length: 102.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_219:
+    nodes:
+    - node_5015579576
+    - node_9557597473
+    length: 74.41
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_220:
+    nodes:
+    - node_9557597473
+    - node_9026565269
+    length: 74.05
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_221:
+    nodes:
+    - node_9026565269
+    - node_9026565268
+    length: 31.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_222:
+    nodes:
+    - node_9026565268
+    - node_9026565271
+    length: 27.14
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_223:
+    nodes:
+    - node_1877303916
+    - node_9557606729
+    length: 29.57
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_224:
+    nodes:
+    - node_9557606729
+    - node_9557606728
+    length: 14.65
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_225:
+    nodes:
+    - node_9557606728
+    - node_8996971070
+    length: 14.96
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_226:
+    nodes:
+    - node_11999098598
+    - node_1877304062
+    length: 18.48
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_227:
+    nodes:
+    - node_1877304062
+    - node_11982814549
+    length: 13.74
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_228:
+    nodes:
+    - node_11982814549
+    - node_1877304061
+    length: 33.33
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_229:
+    nodes:
+    - node_1877304061
+    - node_1877304045
+    length: 128.78
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_230:
+    nodes:
+    - node_1877304028
+    - node_9556871254
+    length: 79.84
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_231:
+    nodes:
+    - node_9556871254
+    - node_9556871255
+    length: 76.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_232:
+    nodes:
+    - node_9556871255
+    - node_1877304055
+    length: 26.56
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_233:
+    nodes:
+    - node_1877304055
+    - node_9556871256
+    length: 15.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_234:
+    nodes:
+    - node_9556871256
+    - node_9556871257
+    length: 15.7
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_235:
+    nodes:
+    - node_9556871257
+    - node_1877304057
+    length: 25.01
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_236:
+    nodes:
+    - node_1877304057
+    - node_1877304059
+    length: 37.45
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_237:
+    nodes:
+    - node_1877304059
+    - node_6630116017
+    length: 31.68
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_238:
+    nodes:
+    - node_6630116017
+    - node_1877304061
+    length: 19.43
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_239:
+    nodes:
+    - node_1877303904
+    - node_9557606724
+    length: 35.66
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_240:
+    nodes:
+    - node_9557606724
+    - node_9557606723
+    length: 49.22
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_241:
+    nodes:
+    - node_9557606723
+    - node_1877303900
+    length: 41.98
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_242:
+    nodes:
+    - node_1879956900
+    - node_9026565253
+    length: 26.19
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_243:
+    nodes:
+    - node_9026565253
+    - node_3338129424
+    length: 29.51
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_244:
+    nodes:
+    - node_3338129424
+    - node_1879956917
+    length: 50.35
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_245:
+    nodes:
+    - node_1879956917
+    - node_9026565252
+    length: 53.02
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_246:
+    nodes:
+    - node_9026565252
+    - node_3338129440
+    length: 50.7
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_247:
+    nodes:
+    - node_3338129440
+    - node_1879956954
+    length: 78.11
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_248:
+    nodes:
+    - node_1879956954
+    - node_9026565248
+    length: 25.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_249:
+    nodes:
+    - node_9026565248
+    - node_1879956976
+    length: 17.39
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_250:
+    nodes:
+    - node_1879956976
+    - node_9026565250
+    length: 20.67
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_251:
+    nodes:
+    - node_9026565250
+    - node_9026565251
+    length: 19.87
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_252:
+    nodes:
+    - node_9026565251
+    - node_1879956983
+    length: 42.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_253:
+    nodes:
+    - node_7598998617
+    - node_1877303984
+    length: 43.49
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_254:
+    nodes:
+    - node_1877303984
+    - node_9026565275
+    length: 17.35
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_255:
+    nodes:
+    - node_9026565275
+    - node_1877303974
+    length: 16.98
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_256:
+    nodes:
+    - node_1877303974
+    - node_9026565231
+    length: 22.01
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_257:
+    nodes:
+    - node_9026565231
+    - node_1877303967
+    length: 18.23
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_258:
+    nodes:
+    - node_1877303967
+    - node_9557597477
+    length: 23.73
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_259:
+    nodes:
+    - node_9557597477
+    - node_9557597476
+    length: 84.88
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_260:
+    nodes:
+    - node_9557597476
+    - node_3338129449
+    length: 50.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_261:
+    nodes:
+    - node_3338129449
+    - node_9557597475
+    length: 61.08
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_262:
+    nodes:
+    - node_9557597475
+    - node_9026565247
+    length: 58.57
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_263:
+    nodes:
+    - node_9026565247
+    - node_9026565246
+    length: 74.28
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_264:
+    nodes:
+    - node_9026565246
+    - node_1877303953
+    length: 50.46
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_265:
+    nodes:
+    - node_1877303953
+    - node_3338129438
+    length: 24.47
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_266:
+    nodes:
+    - node_3338129438
+    - node_9026565238
+    length: 15.06
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_267:
+    nodes:
+    - node_9026565238
+    - node_9026565239
+    length: 16.68
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_268:
+    nodes:
+    - node_9026565239
+    - node_1877303949
+    length: 31.55
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_269:
+    nodes:
+    - node_1877303949
+    - node_1877303936
+    length: 53.22
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_270:
+    nodes:
+    - node_1877303936
+    - node_3338129423
+    length: 46.27
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_271:
+    nodes:
+    - node_3338129423
+    - node_9004581437
+    length: 26.75
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_272:
+    nodes:
+    - node_9004581437
+    - node_1877303928
+    length: 18.71
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_273:
+    nodes:
+    - node_1877303928
+    - node_9004581438
+    length: 20.71
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_274:
+    nodes:
+    - node_9004581438
+    - node_1877303919
+    length: 22.19
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_275:
+    nodes:
+    - node_1877303919
+    - node_6630116007
+    length: 22.63
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_276:
+    nodes:
+    - node_6630116007
+    - node_1877303913
+    length: 27.43
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_277:
+    nodes:
+    - node_1879957008
+    - node_9026565270
+    length: 32.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_278:
+    nodes:
+    - node_9026565270
+    - node_9026565271
+    length: 27.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_279:
+    nodes:
+    - node_9026565271
+    - node_1879957030
+    length: 23.92
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_280:
+    nodes:
+    - node_1879957030
+    - node_9026565274
+    length: 26.65
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_281:
+    nodes:
+    - node_9026565274
+    - node_7598998616
+    length: 24.77
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_282:
+    nodes:
+    - node_7598998616
+    - node_1879957036
+    length: 30.13
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_283:
+    nodes:
+    - node_1877303912
+    - node_9557606726
+    length: 37.51
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_284:
+    nodes:
+    - node_9557606726
+    - node_9557606727
+    length: 38.67
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_285:
+    nodes:
+    - node_9557606727
+    - node_1877303916
+    length: 29.95
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_286:
+    nodes:
+    - node_1877303950
+    - node_1877303932
+    length: 79.18
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_287:
+    nodes:
+    - node_1877303932
+    - node_1877303923
+    length: 22.05
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_288:
+    nodes:
+    - node_1877303923
+    - node_9557606725
+    length: 24.71
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_289:
+    nodes:
+    - node_9557606725
+    - node_1877303913
+    length: 24.88
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_290:
+    nodes:
+    - node_1877303913
+    - node_1877303904
+    length: 37.81
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_291:
+    nodes:
+    - node_1877304045
+    - node_1877304043
+    length: 54.33
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_292:
+    nodes:
+    - node_1877303955
+    - node_6630116011
+    length: 37.94
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_293:
+    nodes:
+    - node_6630116011
+    - node_3338129442
+    length: 46.72
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_294:
+    nodes:
+    - node_1879957074
+    - node_7598336888
+    length: 39.51
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_295:
+    nodes:
+    - node_7598336888
+    - node_1879957077
+    length: 33.77
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_296:
+    nodes:
+    - node_3338129446
+    - node_3338129442
+    length: 57.66
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_297:
+    nodes:
+    - node_1877304031
+    - node_9556871252
+    length: 16.13
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_298:
+    nodes:
+    - node_9556871252
+    - node_9556871253
+    length: 21.04
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_299:
+    nodes:
+    - node_9556871253
+    - node_6630116020
+    length: 19.48
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_300:
+    nodes:
+    - node_6630116020
+    - node_1877304043
+    length: 24.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_301:
+    nodes:
+    - node_1877303955
+    - node_9556871222
+    length: 83.47
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_302:
+    nodes:
+    - node_9556871222
+    - node_9026668458
+    length: 45.82
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_303:
+    nodes:
+    - node_9026668458
+    - node_1877303976
+    length: 191.89
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_304:
+    nodes:
+    - node_1877303976
+    - node_7598337083
+    length: 403.27
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_305:
+    nodes:
+    - node_7598337083
+    - node_1877304028
+    length: 239.42
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_306:
+    nodes:
+    - node_1877304028
+    - node_1877304031
+    length: 63.72
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_307:
+    nodes:
+    - node_1877304028
+    - node_1879957077
+    length: 55.77
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_308:
+    nodes:
+    - node_1879957077
+    - node_9556871221
+    length: 37.97
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_309:
+    nodes:
+    - node_9556871221
+    - node_1877304022
+    length: 39.85
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_310:
+    nodes:
+    - node_1877304022
+    - node_9556871217
+    length: 30.47
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_311:
+    nodes:
+    - node_9556871217
+    - node_1879957067
+    length: 27.26
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_312:
+    nodes:
+    - node_1877303904
+    - node_4731124273
+    length: 144.64
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_313:
+    nodes:
+    - node_4731124273
+    - node_9557606722
+    length: 136.42
+    direction: bi-directional
+    type: rail
+    status: active
+  edge_314:
+    nodes:
+    - node_9557606722
+    - node_9026719929
+    length: 106.97
+    direction: bi-directional
+    type: rail
+    status: active

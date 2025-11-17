@@ -4,10 +4,11 @@ A Python tool for extracting, processing, and visualizing railway infrastructure
 
 ## Features
 
-- **Extract** railway data from OSM (tracks, switches, buffer stops)
+- **Extract** railway data from OSM (active and disused tracks, switches, buffer stops)
 - **Clip** data to precise geographic boundaries (bounding box or polygon)
 - **Project** coordinates to Cartesian system (elliptical Mercator)
-- **Visualize** railway networks with specialized node markers
+- **Visualize** railway networks with customizable display options
+- **Hierarchical output** format with nodes, edges, and ways
 - **Robust** error handling with custom exceptions
 - **Efficient** geometry operations using Shapely
 
@@ -37,12 +38,6 @@ uv run pytest tests/ -v
 Run tests with coverage reporting:
 
 ```bash
-# Unix/Linux/macOS
-./tools/osm_extractor/run_tests.sh
-
-# Windows
-tools\osm_extractor\run_tests.bat
-
 # Manual (from project root)
 uv run pytest tools/osm_extractor/tests/ \
     --cov=tools/osm_extractor/src/osm_extractor \
@@ -72,7 +67,7 @@ Coverage reports:
 
 ## CLI Usage
 
-The tool provides a clean command-line interface with four main commands:
+The tool provides a clean command-line interface with two main commands:
 
 ### 1. Extract
 
@@ -83,122 +78,90 @@ Extract railway data from OSM within a specified boundary.
 uv run --group osm-extractor osm-extractor extract \
   "47.37,8.54,47.39,8.56" \
   -t bbox \
-  -o raw_data.json
+  -o railway_data.json
 ```
 
 **Polygon:**
 ```bash
 uv run --group osm-extractor osm-extractor extract \
-  "52.286,11.404 52.281,11.416 52.280,11.416 52.281,11.413 52.282,11.409 52.284,11.407 52.286,11.404" \
+  "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
   -t polygon \
-  -o raw_data.json
+  -o railway_data.json
+```
+
+**With projection and clipping:**
+```bash
+uv run --group osm-extractor osm-extractor extract \
+  "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
+  -t polygon \
+  -o railway_data.json \
+  --project \
+  --clip
 ```
 
 **Options:**
-- `-t, --type`: Boundary type (`bbox` or `polygon`)
 - `-o, --output`: Output JSON file (default: `railway_data.json`)
+- `-t, --type`: Boundary type (`bbox` or `polygon`, default: `bbox`)
 - `-r, --railway-types`: Comma-separated railway types (default: `rail,siding,yard,spur`)
 - `-n, --node-types`: Comma-separated node types (default: `switch,buffer_stop`)
-- `--timeout`: Request timeout in seconds (default: 60)
+- `--timeout`: Request timeout in seconds (default: 180)
+- `--include-disused`: Include disused/abandoned tracks
+- `--include-razed`: Include razed (demolished) tracks
+- `--project`: Project to Cartesian coordinates (elliptical Mercator)
+- `--clip`: Clip geometry to boundary (removes segments outside)
+- `--plot`: Show plot after extraction
 
-### 2. Clip
+**Note:** By default, only active tracks are extracted. Use `--include-disused` and `--include-razed` flags to include inactive infrastructure. Orphaned nodes (not connected to any ways) are automatically removed.
 
-Clip extracted data to remove elements outside the boundary.
+### 2. Plot
 
+Visualize railway data with automatic coordinate system detection and customizable display options.
+
+**Basic plot:**
 ```bash
-uv run --group osm-extractor osm-extractor clip \
-  raw_data.json \
-  -o clipped_data.json \
-  -c "52.286,11.404 52.281,11.416 52.280,11.416" \
-  -t polygon
+uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map.png
+```
+
+**With track labels:**
+```bash
+uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map.png --labels
+```
+
+**With switch labels:**
+```bash
+uv run --group osm-extractor osm-extractor plot railway_data.json -o railway_map.png --switch-labels
 ```
 
 **Options:**
-- `-o, --output`: Output JSON file (default: `clipped.json`)
-- `-c, --coordinates`: Boundary coordinates
-- `-t, --type`: Boundary type (`bbox` or `polygon`)
+- `-o, --output`: Output image file (PNG)
+- `--labels`: Show track labels from railway:track_ref tags
+- `--switch-labels`: Show switch labels (ref or ID)
 
-### 3. Project
+**Track Colors:**
+- **Blue**: Active tracks
+- **Red**: Disused/abandoned tracks
 
-Project geographic coordinates (lat/lon) to Cartesian coordinates (x/y).
-
-```bash
-uv run --group osm-extractor osm-extractor project \
-  clipped_data.json \
-  -o projected_data.json
-```
-
-**Options:**
-- `-o, --output`: Output JSON file (default: `projected.json`)
-
-### 4. Plot
-
-Visualize railway data with automatic coordinate system detection.
-
-```bash
-uv run --group osm-extractor osm-extractor plot \
-  projected_data.json \
-  -o railway_map.png \
-  -t "Railway Network"
-```
-
-**With boundary overlay (debug):**
-```bash
-uv run --group osm-extractor osm-extractor plot \
-  clipped_data.json \
-  -o debug_map.png \
-  --show-boundary \
-  -c "52.286,11.404 52.281,11.416" \
-  --boundary-type polygon
-```
-
-**Options:**
-- `-o, --output`: Output image file (default: `railway_plot.png`)
-- `-t, --title`: Plot title
-- `--no-nodes`: Hide node markers
-- `--show-boundary`: Show boundary overlay
-- `-c, --coordinates`: Boundary coordinates (required with `--show-boundary`)
-- `--boundary-type`: Boundary type for overlay
-
-### 5. Info
-
-Show available railway and node types.
-
-```bash
-uv run --group osm-extractor osm-extractor info
-```
+**Node Markers:**
+- **Red X**: Switches
+- **Orange square**: Buffer stops
+- **Gray circle**: Other nodes
 
 ## Complete Pipeline Example
 
-Extract, clip, project, and visualize railway data for Haldensleben station:
-
 ```bash
-# Define coordinates
-COORDS="52.286,11.404 52.281,11.416 52.280,11.416 52.281,11.413 52.282,11.409 52.284,11.407 52.286,11.404"
-
-# 1. Extract
+# Extract, project, and clip in one command
 uv run --group osm-extractor osm-extractor extract \
-  "$COORDS" -t polygon -o haldensleben_raw.json
+  "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
+  -t polygon \
+  -o railway_data.json \
+  --project \
+  --clip
 
-# 2. Clip
-uv run --group osm-extractor osm-extractor clip \
-  haldensleben_raw.json -o haldensleben_clipped.json \
-  -c "$COORDS" -t polygon
-
-# 3. Project
-uv run --group osm-extractor osm-extractor project \
-  haldensleben_clipped.json -o haldensleben_projected.json
-
-# 4. Plot (geographic)
-uv run --group osm-extractor osm-extractor plot \
-  haldensleben_clipped.json -o haldensleben_geo.png \
-  -t "Haldensleben Station (Geographic)"
-
-# 5. Plot (projected with boundary)
-uv run --group osm-extractor osm-extractor plot \
-  haldensleben_projected.json -o haldensleben_proj.png \
-  -t "Haldensleben Station (Projected)" \
-  --show-boundary -c "$COORDS" --boundary-type polygon
+# Visualize with labels
+uv run --group osm-extractor osm-extractor plot railway_data.json \
+  -o network.png \
+  --labels \
+  --switch-labels
 ```
 
 ## Python API
@@ -286,11 +249,20 @@ The plotter automatically detects coordinate systems:
 - **Geographic**: Uses lat/lon, shows "Longitude" and "Latitude" labels
 - **Projected**: Uses x/y, shows "X (meters)" and "Y (meters)" labels
 
-### Node Markers
+### Display Elements
 
+**Node Markers:**
 - **Switches**: Red X (size 100)
 - **Buffer Stops**: Orange square (size 80)
 - **Other Nodes**: Gray circle (size 20)
+
+**Track Colors:**
+- **Blue**: Active tracks (railway=rail, usage=main/industrial/freight)
+- **Red**: Disused/abandoned tracks (disused:railway, abandoned:railway, usage=disused/abandoned)
+
+**Labels:**
+- **Track labels**: White boxes with track reference (railway:track_ref)
+- **Switch labels**: Yellow boxes with switch ID
 
 ## Development
 

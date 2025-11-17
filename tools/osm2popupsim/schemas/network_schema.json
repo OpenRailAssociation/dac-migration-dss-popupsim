@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PopUpSim Mesoscopic Network",
+  "description": "Mesoscopic network data format for PopUpSim multi-yard simulation",
+  "type": "object",
+  "required": ["metadata", "yards", "connections"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["description", "version", "level", "units"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the network"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Schema version (semantic versioning)"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["mesoscopic"],
+          "description": "Simulation level (mesoscopic for yard-to-yard connections)"
+        },
+        "units": {
+          "type": "string",
+          "enum": ["meters", "kilometers"],
+          "description": "Unit for length measurements"
+        }
+      }
+    },
+    "yards": {
+      "type": "array",
+      "description": "Railway yards with microscopic networks",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "microscopic_network", "entry_points", "exit_points"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique yard identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable yard name"
+          },
+          "microscopic_network": {
+            "type": "string",
+            "description": "Path to microscopic network file (relative or absolute)"
+          },
+          "entry_points": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "description": "Node IDs from microscopic network that serve as entry points"
+          },
+          "exit_points": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "description": "Node IDs from microscopic network that serve as exit points"
+          },
+          "location": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Geographic location [longitude, latitude] for visualization"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Yard capacity (number of wagons)"
+          }
+        }
+      }
+    },
+    "connections": {
+      "type": "array",
+      "description": "Inter-yard connections",
+      "items": {
+        "type": "object",
+        "required": ["from_yard", "from_exit", "to_yard", "to_entry", "length"],
+        "properties": {
+          "from_yard": {
+            "type": "string",
+            "description": "Source yard ID"
+          },
+          "from_exit": {
+            "type": "string",
+            "description": "Exit point node ID in source yard"
+          },
+          "to_yard": {
+            "type": "string",
+            "description": "Destination yard ID"
+          },
+          "to_entry": {
+            "type": "string",
+            "description": "Entry point node ID in destination yard"
+          },
+          "length": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Connection length in specified units"
+          }
+        }
+      }
+    }
+  }
+}

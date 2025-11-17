@@ -1,0 +1,50 @@
+# PopUpSim Routes Configuration
+# Predefined routes for shunting movements
+
+metadata:
+  description: "Haldensleben Yard Routes"
+  version: "1.0.0"
+  topology_reference: "haldensleben_topology.yaml"
+  tracks_reference: "haldensleben_tracks.yaml"
+
+routes:
+  # WAYPOINT FORMAT: Simple, auto-generated path
+  
+  # Simple: track to track
+  - id: "route_8_to_1a"
+    name: "Track 8 to Track 1a"
+    type: "waypoint"
+    waypoints: ["8", "1a"]
+
+  # With reversal: repeat track name
+  - id: "route_8_to_1a_reverse_to_9"
+    name: "Track 8 → 1a (reverse) → 9"
+    type: "waypoint"
+    waypoints: ["8", "1a", "1a", "9"]
+    # "1a" appears twice = enter 1a, reverse, exit 1a
+
+  # Multiple reversals
+  - id: "route_complex"
+    name: "Track 1 → 2 (reverse) → 3 (reverse) → 4"
+    type: "waypoint"
+    waypoints: ["1", "2", "2", "3", "3", "4"]
+
+  # EXPLICIT FORMAT: Full control over path
+  
+  - id: "route_explicit_example"
+    name: "Custom path"
+    type: "explicit"
+    from: "track_1"
+    to: "track_2"
+    path: ["track_1", "edge_123", "node_456", "edge_124", "track_2"]
+    duration: 120
+
+  - id: "route_explicit_with_segments"
+    name: "Custom path with segment durations"
+    type: "explicit"
+    from: "track_2"
+    to: "track_4"
+    path: ["track_2", "edge_200", "node_300", "edge_201", "track_4"]
+    segment_durations:
+      edge_200: 45
+      edge_201: 30

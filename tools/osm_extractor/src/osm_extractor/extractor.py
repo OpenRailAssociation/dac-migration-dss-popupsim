@@ -1,18 +1,13 @@
 """OSM railway data extractor."""
 
 import logging
-from typing import Any
-from typing import Dict
-from typing import Union
+from typing import Any, Dict, Union
 
 import overpy
 
-from .exceptions import InvalidQueryError
-from .exceptions import QueryTimeoutError
-from .exceptions import RateLimitError
+from .exceptions import InvalidQueryError, QueryTimeoutError, RateLimitError
 from .geometry import filter_osm_data
-from .models import BoundingBox
-from .models import Polygon
+from .models import BoundingBox, Polygon
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +39,17 @@ class OSMRailwayExtractor:
 		self,
 		overpass_url: str = 'https://overpass-api.de/api/interpreter',
 		timeout: int = 60,
-		railway_types: list = ['rail', 'siding', 'yard', 'spur'],
-		node_types: list = ['switch', 'buffer_stop'],
+		railway_types: list | None = None,
+		node_types: list | None = None,
+		include_disused: bool = False,
+		include_razed: bool = False,
 	) -> None:
 		self.api = overpy.Overpass(url=overpass_url)
 		self.timeout = timeout
-		self.railway_types = railway_types
-		self.node_types = node_types
+		self.railway_types = railway_types or ['rail', 'siding', 'yard', 'spur']
+		self.node_types = node_types or ['switch', 'buffer_stop']
+		self.include_disused = include_disused
+		self.include_razed = include_razed
 		logger.info(
 			'Initialized OSMRailwayExtractor with URL=%s, timeout=%ds',
 			overpass_url,
@@ -91,11 +90,20 @@ class OSMRailwayExtractor:
 		railway_regex = '|'.join(self.railway_types)
 		node_regex = '|'.join(self.node_types)
 
+		query_parts = [f'way["railway"~"^({railway_regex})$"]{area_filter};']
+		if self.include_disused:
+			query_parts.extend([
+				f'way["disused:railway"~"^({railway_regex})$"]{area_filter};',
+				f'way["abandoned:railway"~"^({railway_regex})$"]{area_filter};'
+			])
+		if self.include_razed:
+			query_parts.append(f'way["railway"="razed"]{area_filter};')
+		query_parts.append(f'node["railway"~"^({node_regex})$"]{area_filter};')
+		
 		query = f"""
         [out:json][timeout:{self.timeout}];
         (
-          way["railway"~"^({railway_regex})$"]{area_filter};
-          node["railway"~"^({node_regex})$"]{area_filter};
+          {chr(10).join('          ' + p for p in query_parts)}
         );
         (._;>;);
         out geom;
@@ -107,6 +115,7 @@ class OSMRailwayExtractor:
 		self,
 		boundary: Union[BoundingBox, Polygon],
 		filter_geometry: bool = True,
+		hierarchical: bool = False,
 	) -> Dict[str, Any]:
 		"""Extract railway data within specified boundary.
 
@@ -121,6 +130,9 @@ class OSMRailwayExtractor:
 		filter_geometry : bool, optional
 		    Whether to filter out geometry outside boundary. Defaults to
 		    True
+		hierarchical : bool, optional
+		    Whether to return hierarchical format (nodes, edges, ways).
+		    Defaults to False
 
 		Returns
 		-------
@@ -150,7 +162,7 @@ class OSMRailwayExtractor:
 				len(result.nodes),
 				len(result.ways),
 			)
-			data = self._convert_to_json(result)
+			data = self._convert_to_hierarchical_json(result) if hierarchical else self._convert_to_json(result)
 		except overpy.exception.OverpassTooManyRequests as e:
 			logger.error('Rate limit exceeded')
 			raise RateLimitError(
@@ -165,6 +177,10 @@ class OSMRailwayExtractor:
 			logger.error('Invalid query: %s', e)
 			raise InvalidQueryError(f'Invalid query: {e}') from e
 
+		# Filter inactive tracks
+		if not self.include_disused or not self.include_razed:
+			data = self._filter_inactive_tracks(data)
+		
 		if filter_geometry:
 			logger.debug('Filtering geometry to boundary')
 			original_count = len(data['elements'])
@@ -175,6 +191,9 @@ class OSMRailwayExtractor:
 				original_count,
 				filtered_count,
 			)
+
+		# Always remove orphaned nodes at the end
+		data = self._remove_orphaned_nodes(data)
 
 		return data
 
@@ -220,3 +239,166 @@ class OSMRailwayExtractor:
 			)
 
 		return {'elements': elements}
+
+	def _convert_to_hierarchical_json(
+		self, result: overpy.Result
+	) -> Dict[str, Any]:
+		"""Convert overpy Result to hierarchical JSON format.
+
+		Creates a hierarchical structure: nodes, edges (segments), and ways.
+		Each edge inherits the track label from its parent way.
+
+		Parameters
+		----------
+		result : overpy.Result
+			Overpy query result
+
+		Returns
+		-------
+		Dict[str, Any]
+			Hierarchical JSON with nodes, edges, and ways
+		"""
+		logger.debug('Converting to hierarchical JSON format')
+		nodes = []
+		edges = []
+		ways = []
+
+		for node in result.nodes:
+			nodes.append(
+				{
+					'type': 'node',
+					'id': node.id,
+					'lat': float(node.lat),
+					'lon': float(node.lon),
+					'tags': node.tags,
+				}
+			)
+
+		for way in result.ways:
+			track_label = way.tags.get('railway:track_ref', '')
+			way_nodes = [
+				{'lat': float(n.lat), 'lon': float(n.lon)} for n in way.nodes
+			]
+
+			# Create edges (segments) from consecutive node pairs
+			way_edges = []
+			for i in range(len(way.nodes) - 1):
+				edge_id = f'{way.id}_{i}'
+				edge = {
+					'type': 'edge',
+					'id': edge_id,
+					'way_id': way.id,
+					'start': {
+						'lat': float(way.nodes[i].lat),
+						'lon': float(way.nodes[i].lon),
+					},
+					'end': {
+						'lat': float(way.nodes[i + 1].lat),
+						'lon': float(way.nodes[i + 1].lon),
+					},
+					'track_label': track_label,
+				}
+				edges.append(edge)
+				way_edges.append(edge_id)
+
+			ways.append(
+				{
+					'type': 'way',
+					'id': way.id,
+					'geometry': way_nodes,
+					'edges': way_edges,
+					'tags': way.tags,
+				}
+			)
+
+		return {'nodes': nodes, 'edges': edges, 'ways': ways}
+	
+	def _filter_inactive_tracks(self, data: Dict[str, Any]) -> Dict[str, Any]:
+		"""Filter out disused/abandoned/razed tracks and orphaned nodes."""
+		elements = data.get('elements', [])
+		
+		# Filter ways
+		active_ways = []
+		for elem in elements:
+			if elem['type'] == 'way':
+				tags = elem.get('tags', {})
+				is_disused = 'disused:railway' in tags or 'abandoned:railway' in tags
+				is_razed = tags.get('railway') == 'razed'
+				
+				if is_razed and not self.include_razed:
+					continue
+				if is_disused and not self.include_disused:
+					continue
+				
+				active_ways.append(elem)
+		
+		# Get node IDs used by active ways
+		used_node_ids = set()
+		for way in active_ways:
+			for geom_node in way.get('geometry', []):
+				# Match by coordinates
+				for elem in elements:
+					if (elem['type'] == 'node' and 
+						abs(elem['lat'] - geom_node['lat']) < 1e-7 and 
+						abs(elem['lon'] - geom_node['lon']) < 1e-7):
+						used_node_ids.add(elem['id'])
+		
+		# Filter nodes - keep only those used by active ways
+		active_nodes = []
+		orphaned = 0
+		for elem in elements:
+			if elem['type'] == 'node':
+				if elem['id'] in used_node_ids:
+					active_nodes.append(elem)
+				else:
+					orphaned += 1
+		
+		filtered = active_nodes + active_ways
+		if len(filtered) < len(elements):
+			logger.info('Filtered %d -> %d elements (removed inactive tracks)', 
+					   len(elements), len(filtered))
+			if orphaned > 0:
+				logger.info('Removed %d orphaned nodes', orphaned)
+		return {'elements': filtered}
+	
+	def _remove_orphaned_nodes(self, data: Dict[str, Any]) -> Dict[str, Any]:
+		"""Remove nodes not connected to any ways (including orphaned switches)."""
+		elements = data.get('elements', [])
+		
+		# Build coordinate to node mapping for faster lookup
+		coord_to_node = {}
+		for elem in elements:
+			if elem['type'] == 'node':
+				key = (round(elem['lat'], 7), round(elem['lon'], 7))
+				coord_to_node[key] = elem
+		
+		# Collect all node IDs used in way geometries
+		used_node_ids = set()
+		for elem in elements:
+			if elem['type'] == 'way' and 'geometry' in elem:
+				for geom_node in elem['geometry']:
+					key = (round(geom_node['lat'], 7), round(geom_node['lon'], 7))
+					if key in coord_to_node:
+						used_node_ids.add(coord_to_node[key]['id'])
+		
+		# Keep only used nodes and all ways
+		filtered = []
+		orphaned = 0
+		orphaned_switches = []
+		for elem in elements:
+			if elem['type'] == 'way':
+				filtered.append(elem)
+			elif elem['type'] == 'node':
+				if elem['id'] in used_node_ids:
+					filtered.append(elem)
+				else:
+					orphaned += 1
+					if elem.get('tags', {}).get('railway') == 'switch':
+						switch_name = elem.get('tags', {}).get('ref') or elem.get('tags', {}).get('local_ref') or f"node_{elem['id']}"
+						orphaned_switches.append(switch_name)
+		
+		if orphaned > 0:
+			logger.info('Removed %d orphaned nodes after geometry filtering', orphaned)
+			if orphaned_switches:
+				logger.info('Orphaned switches: %s', ', '.join(orphaned_switches))
+		return {'elements': filtered}

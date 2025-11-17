@@ -1,0 +1,20 @@
+metadata:
+  name: "Magdeburg Rothensee Yard"
+  description: "Magdeburg Rothensee yard configuration used for parking"
+  version: "1.0.0"
+  location: "LMR"
+  operator: "DB Cargo"
+  topology_reference: "topology.yaml"
+  tracks_reference: "tracks.yaml"
+  routes_reference: "routes.yaml"
+
+boundaries:
+  - id: _to_Glindenberg
+    description: Track 6402 to 6409
+    node: node_1877303900
+
+
+
+resources:
+  locomotives: a
+  workshops: a

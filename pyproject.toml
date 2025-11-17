@@ -21,13 +21,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
 ]
-dependencies = []
+dependencies = [
+    "folium>=0.20.0",
+    "networkx>=3.0",
+    "pyproj>=3.7.2",
+]
 
 [project.scripts]
 osm-extractor = "osm_extractor.cli:app"
+osm2popupsim = "osm2popupsim.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["backend/src", "tools/osm_extractor/src/osm_extractor"]
+packages = ["backend/src", "tools/osm_extractor/src/osm_extractor", "tools/osm2popupsim/src/osm2popupsim"]
 
 [dependency-groups]
 dev = [
@@ -45,6 +50,10 @@ osm-extractor = [
     "numpy>=2.3.4",
     "overpy>=0.7",
     "shapely>=2.1.2",
+    "typer>=0.19.2",
+]
+osm2popupsim = [
+    "pyyaml>=6.0",
     "typer>=0.19.2",
 ]
 
@@ -78,7 +87,7 @@ python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-files = ["backend/src", "backend/tests", "tools/osm_extractor/src"]
+files = ["backend/src", "backend/tests", "tools/osm_extractor/src", "tools/osm2popupsim/src"]
 
 [[tool.mypy.overrides]]
 module = ["shapely.*", "overpy.*"]
@@ -104,8 +113,8 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["backend/src", "tools/osm_extractor/src"]
-omit = ["backend/tests/*", "tools/osm_extractor/tests/*"]
+source = ["backend/src", "tools/osm_extractor/src", "tools/osm2popupsim/src"]
+omit = ["backend/tests/*", "tools/osm_extractor/tests/*", "tools/osm2popupsim/tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -122,4 +131,5 @@ precision = 2
 source = [
     "backend/src",
     "tools/osm_extractor/src",
+    "tools/osm2popupsim/src",
 ]

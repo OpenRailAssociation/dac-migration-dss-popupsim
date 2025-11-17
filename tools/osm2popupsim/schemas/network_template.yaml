@@ -1,0 +1,46 @@
+# PopUpSim Mesoscopic Network Format
+# This template shows the structure for multi-yard network data
+
+metadata:
+  description: "DAC Migration Yard Network"
+  version: "1.0.0"
+  level: "mesoscopic"
+  units: "meters"
+
+yards:
+  - id: "haldensleben"
+    name: "Haldensleben Yard"
+    microscopic_network: "yards/haldensleben.yaml"
+    entry_points:
+      - "node_123"  # Node IDs from microscopic network
+      - "node_456"
+    exit_points:
+      - "node_789"
+      - "node_012"
+    location: [11.4, 52.3]  # [longitude, latitude] - optional for visualization
+    capacity: 50  # wagons - optional
+
+  - id: "magdeburg"
+    name: "Magdeburg Yard"
+    microscopic_network: "yards/magdeburg.yaml"
+    entry_points:
+      - "node_001"
+    exit_points:
+      - "node_002"
+    location: [11.6, 52.1]
+    capacity: 100
+
+connections:
+  # Connection from Haldensleben to Magdeburg
+  - from_yard: "haldensleben"
+    from_exit: "node_789"  # Must be in exit_points of haldensleben
+    to_yard: "magdeburg"
+    to_entry: "node_001"   # Must be in entry_points of magdeburg
+    length: 45000          # meters
+
+  # Return connection from Magdeburg to Haldensleben
+  - from_yard: "magdeburg"
+    from_exit: "node_002"
+    to_yard: "haldensleben"
+    to_entry: "node_123"
+    length: 45000

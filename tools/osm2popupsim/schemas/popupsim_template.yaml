@@ -1,0 +1,51 @@
+# PopUpSim Microscopic Railway Network Format
+# This template shows the structure for yard-level railway network data
+
+metadata:
+  description: "Railway network extracted from OpenStreetMap"
+  version: "1.0.0"
+  level: "microscopic"
+  projection: "cartesian"
+  crs: "EPSG:3857"  # Coordinate Reference System
+  units:
+    length: "meters"
+    coordinates: "meters"
+  source: "OpenStreetMap"
+  extracted_at: "2024-01-15T10:30:00Z"
+
+nodes:
+  # Node ID as key (e.g., "node_123456" or "switch_1")
+  node_123456:
+    type: "switch"  # switch, buffer_stop, crossing, signal, station, junction, boundary
+    coords: [950149.41, 5972564.69]  # [x, y] in meters (projected)
+    switch_config:  # Only for type=switch
+      stem: "edge_1"  # Main line (detected by angle analysis)
+      branches:  # Other edges (including opposite main line + diverging tracks)
+        - "edge_2"
+        - "edge_3"
+      switch_type: "default"  # From OSM: default, single_slip, double_slip, etc.
+
+  node_789012:
+    type: "buffer_stop"
+    coords: [951374.33, 5972307.86]
+
+  node_entry_1:
+    type: "boundary"  # Marks entry/exit points for mesoscopic connections
+    boundary_type: "entry"  # entry, exit, or both
+    coords: [950000.00, 5972000.00]
+
+  node_exit_1:
+    type: "boundary"
+    boundary_type: "exit"
+    coords: [952000.00, 5973000.00]
+
+edges:
+  # Edge ID as key (e.g., "edge_1" or "edge_123")
+  edge_1:
+    nodes:  # [start_node_id, end_node_id]
+      - "node_123456"
+      - "node_789012"
+    length: 245.8  # meters
+    direction: "bi-directional"  # or "one-way"
+    type: "rail"  # rail, siding, yard, spur, light_rail, subway, tram
+    status: "active"  # active, disused, abandoned

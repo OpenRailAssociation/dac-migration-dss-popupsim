@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PopUpSim Microscopic Railway Network",
+  "description": "Microscopic railway network data format for PopUpSim yard simulation",
+  "type": "object",
+  "required": ["metadata", "nodes", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["description", "version", "projection", "crs", "units"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the network"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Schema version (semantic versioning)"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["microscopic"],
+          "description": "Simulation level (microscopic for yard detail)"
+        },
+        "projection": {
+          "type": "string",
+          "enum": ["cartesian"],
+          "description": "Coordinate system (only cartesian supported)"
+        },
+        "crs": {
+          "type": "string",
+          "description": "Coordinate Reference System (e.g., EPSG:3857, EPSG:4326)"
+        },
+        "units": {
+          "type": "object",
+          "required": ["length", "coordinates"],
+          "properties": {
+            "length": {
+              "type": "string",
+              "enum": ["meters", "kilometers", "feet", "miles"],
+              "description": "Unit for length measurements"
+            },
+            "coordinates": {
+              "type": "string",
+              "enum": ["meters"],
+              "description": "Unit for coordinate values"
+            }
+          }
+        },
+        "source": {
+          "type": "string",
+          "description": "Data source (e.g., OpenStreetMap)"
+        },
+        "extracted_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Extraction timestamp"
+        }
+      }
+    },
+    "nodes": {
+      "type": "object",
+      "description": "Railway nodes (switches, buffer stops, etc.)",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["switch", "buffer_stop", "crossing", "signal", "station", "junction", "boundary"],
+              "description": "Node type from OSM railway tags or boundary for entry/exit points"
+            },
+            "boundary_type": {
+              "type": "string",
+              "enum": ["entry", "exit", "both"],
+              "description": "Boundary node type (only for type=boundary)"
+            },
+            "coords": {
+              "type": "array",
+              "items": {"type": "number"},
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Projected coordinates [x, y] in meters"
+            },
+
+            "switch_config": {
+              "type": "object",
+              "required": ["stem", "branches", "switch_type"],
+              "properties": {
+                "stem": {
+                  "type": "string",
+                  "description": "Main line edge ID"
+                },
+                "branches": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "minItems": 1,
+                  "description": "Branch edge IDs (including opposite main line)"
+                },
+                "switch_type": {
+                  "type": "string",
+                  "description": "Switch type from OSM (default, single_slip, double_slip, etc.)"
+                }
+              },
+              "description": "Switch topology (only for type=switch)"
+            }
+          },
+          "required": ["coords"]
+        }
+      }
+    },
+    "edges": {
+      "type": "object",
+      "description": "Railway edges (track segments)",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "required": ["nodes", "length", "direction", "type"],
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Start and end node IDs"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Edge length in meters"
+            },
+            "direction": {
+              "type": "string",
+              "enum": ["bi-directional", "one-way"],
+              "description": "Traffic direction"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["rail", "siding", "yard", "spur", "light_rail", "subway", "tram"],
+              "description": "Railway type from OSM"
+            },
+
+            "status": {
+              "type": "string",
+              "enum": ["active", "disused", "abandoned"],
+              "default": "active",
+              "description": "Operational status"
+            },
+
+          }
+        }
+      }
+    }
+  }
+}

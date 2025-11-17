@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PopUpSim Tracks Configuration",
+  "description": "Track definitions and throat groupings for yard simulation",
+  "type": "object",
+  "required": ["metadata", "tracks"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["description", "version", "topology_reference"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Schema version"
+        },
+        "topology_reference": {
+          "type": "string",
+          "description": "Path to topology YAML file"
+        }
+      }
+    },
+    "tracks": {
+      "type": "array",
+      "description": "Track definitions",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "edges"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique track identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Track name (from OSM or user-defined)"
+          },
+          "edges": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "description": "Edge IDs from topology file"
+          },
+          "type": {
+            "type": "string",
+            "description": "Track function (user-defined: collection, retrofit, storage, etc.)"
+          }
+        }
+      }
+    },
+    "throats": {
+      "type": "array",
+      "description": "Throat groupings (merged switches and connections)",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "nodes"],
+        "oneOf": [
+          {
+            "required": ["entries", "exits"],
+            "not": {"required": ["connections"]}
+          },
+          {
+            "required": ["connections"],
+            "not": {"anyOf": [{"required": ["entries"]}, {"required": ["exits"]}]}
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique throat identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Throat name"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "description": "Switch node IDs grouped in this throat"
+          },
+          "entries": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "description": "Entry points (track IDs or boundary nodes). Any entry can reach any exit."
+          },
+          "exits": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "description": "Exit points (track IDs or boundary nodes). Any entry can reach any exit."
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["from", "to"],
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "description": "Connection point (track ID or boundary node)"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "Connection point (track ID or boundary node)"
+                }
+              }
+            },
+            "description": "Explicit connections (for complex routing). Use instead of entries/exits."
+          }
+        }
+      }
+    }
+  }
+}

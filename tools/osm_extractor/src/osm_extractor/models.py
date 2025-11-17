@@ -1,8 +1,7 @@
 """Data models for OSM extraction."""
 
 from dataclasses import dataclass
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 
 
 @dataclass(frozen=True)

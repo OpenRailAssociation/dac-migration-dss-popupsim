@@ -1,0 +1,6034 @@
+{
+  "elements": [
+    {
+      "type": "node",
+      "id": 59849634,
+      "lat": 52.2772935,
+      "lon": 11.4236859,
+      "tags": {},
+      "x": 1271678.897370299,
+      "y": 6816599.4850652795
+    },
+    {
+      "type": "node",
+      "id": 191008119,
+      "lat": 52.2861283,
+      "lon": 11.4036799,
+      "tags": {
+        "crossing:barrier": "no",
+        "railway": "level_crossing"
+      },
+      "x": 1269451.8396374888,
+      "y": 6818203.021642041
+    },
+    {
+      "type": "node",
+      "id": 191009860,
+      "lat": 52.2779309,
+      "lon": 11.4220239,
+      "tags": {
+        "crossing:activation": "local",
+        "crossing:barrier": "full",
+        "crossing:light": "no",
+        "crossing:saltire": "yes",
+        "crossing:supervision": "camera",
+        "railway": "level_crossing"
+      },
+      "x": 1271493.8843766006,
+      "y": 6816715.163881573
+    },
+    {
+      "type": "node",
+      "id": 332239197,
+      "lat": 52.2777661,
+      "lon": 11.4220235,
+      "tags": {
+        "crossing:activation": "local",
+        "crossing:barrier": "full",
+        "crossing:light": "no",
+        "crossing:saltire": "yes",
+        "crossing:supervision": "camera",
+        "railway": "level_crossing"
+      },
+      "x": 1271493.8398488045,
+      "y": 6816685.254921608
+    },
+    {
+      "type": "node",
+      "id": 447379843,
+      "lat": 52.284973,
+      "lon": 11.406234,
+      "tags": {
+        "local_ref": "2",
+        "name": "Haldensleben",
+        "network": "marego",
+        "network:wikidata": "Q1883891",
+        "network:wikipedia": "de:Magdeburger Regionalverkehrsverbund",
+        "operator": "DB InfraGO AG",
+        "public_transport": "stop_position",
+        "railway": "stop",
+        "train": "yes",
+        "wheelchair": "yes"
+      },
+      "x": 1269736.160748924,
+      "y": 6817993.313764866
+    },
+    {
+      "type": "node",
+      "id": 1877303856,
+      "lat": 52.2850124,
+      "lon": 11.406282,
+      "tags": {
+        "local_ref": "1",
+        "name": "Haldensleben",
+        "network": "marego",
+        "network:wikidata": "Q1883891",
+        "network:wikipedia": "de:Magdeburger Regionalverkehrsverbund",
+        "operator": "DB InfraGO AG",
+        "public_transport": "stop_position",
+        "railway": "stop",
+        "train": "yes",
+        "wheelchair": "yes"
+      },
+      "x": 1269741.5040844819,
+      "y": 6818000.465488043
+    },
+    {
+      "type": "node",
+      "id": 1877303862,
+      "lat": 52.277566,
+      "lon": 11.4226109,
+      "tags": {
+        "note": "mit schwarz-wei\u00dfem Weichengewicht",
+        "railway": "switch",
+        "railway:local_operated": "yes",
+        "railway:switch": "default",
+        "railway:switch:electric": "no",
+        "railway:turnout_side": "left",
+        "ref": "H1"
+      },
+      "x": 1271559.2289176965,
+      "y": 6816648.93964171
+    },
+    {
+      "type": "node",
+      "id": 1877303876,
+      "lat": 52.2777,
+      "lon": 11.4222369,
+      "tags": {},
+      "x": 1271517.5954281397,
+      "y": 6816673.258701475
+    },
+    {
+      "type": "node",
+      "id": 1877303878,
+      "lat": 52.2778271,
+      "lon": 11.4220252,
+      "tags": {
+        "crossing:activation": "local",
+        "crossing:barrier": "full",
+        "crossing:light": "no",
+        "crossing:saltire": "yes",
+        "crossing:supervision": "camera",
+        "railway": "level_crossing"
+      },
+      "x": 1271494.0290919389,
+      "y": 6816696.32557944
+    },
+    {
+      "type": "node",
+      "id": 1877303879,
+      "lat": 52.2778554,
+      "lon": 11.421683,
+      "tags": {
+        "crossing:activation": "local",
+        "crossing:barrier": "full",
+        "crossing:light": "no",
+        "crossing:saltire": "yes",
+        "crossing:supervision": "camera",
+        "railway": "level_crossing"
+      },
+      "x": 1271455.9355621892,
+      "y": 6816701.461643929
+    },
+    {
+      "type": "node",
+      "id": 1877303900,
+      "lat": 52.2803808,
+      "lon": 11.4164315,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "5"
+      },
+      "x": 1270871.3412562883,
+      "y": 6817159.800614015
+    },
+    {
+      "type": "node",
+      "id": 1877303904,
+      "lat": 52.2807584,
+      "lon": 11.4154726,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "6"
+      },
+      "x": 1270764.5969965667,
+      "y": 6817228.334110625
+    },
+    {
+      "type": "node",
+      "id": 1877303912,
+      "lat": 52.2806501,
+      "lon": 11.4158311,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "7"
+      },
+      "x": 1270804.5050340162,
+      "y": 6817208.6778597
+    },
+    {
+      "type": "node",
+      "id": 1877303913,
+      "lat": 52.2808826,
+      "lon": 11.4151999,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "9"
+      },
+      "x": 1270734.2401714274,
+      "y": 6817250.876241752
+    },
+    {
+      "type": "node",
+      "id": 1877303916,
+      "lat": 52.2810274,
+      "lon": 11.4151029,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "8"
+      },
+      "x": 1270723.4421808205,
+      "y": 6817277.157325041
+    },
+    {
+      "type": "node",
+      "id": 1877303919,
+      "lat": 52.2810229,
+      "lon": 11.4148128,
+      "tags": {
+        "crossing:barrier": "double_half",
+        "railway": "level_crossing"
+      },
+      "x": 1270691.1483965414,
+      "y": 6817276.3405773705
+    },
+    {
+      "type": "node",
+      "id": 1877303923,
+      "lat": 52.281044,
+      "lon": 11.4148405,
+      "tags": {
+        "crossing:barrier": "double_half",
+        "railway": "level_crossing"
+      },
+      "x": 1270694.2319464362,
+      "y": 6817280.170217177
+    },
+    {
+      "type": "node",
+      "id": 1877303926,
+      "lat": 52.281078,
+      "lon": 11.4148841,
+      "tags": {
+        "crossing:barrier": "double_half",
+        "railway": "level_crossing"
+      },
+      "x": 1270699.0854762348,
+      "y": 6817286.341204607
+    },
+    {
+      "type": "node",
+      "id": 1877303928,
+      "lat": 52.281139,
+      "lon": 11.4144772,
+      "tags": {},
+      "x": 1270653.789575431,
+      "y": 6817297.412693986
+    },
+    {
+      "type": "node",
+      "id": 1877303930,
+      "lat": 52.281112,
+      "lon": 11.4149273,
+      "tags": {
+        "crossing:barrier": "double_half",
+        "railway": "level_crossing"
+      },
+      "x": 1270703.894478237,
+      "y": 6817292.512196797
+    },
+    {
+      "type": "node",
+      "id": 1877303932,
+      "lat": 52.2811156,
+      "lon": 11.4146805,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "A10"
+      },
+      "x": 1270676.4208279094,
+      "y": 6817293.165596248
+    },
+    {
+      "type": "node",
+      "id": 1877303936,
+      "lat": 52.2813124,
+      "lon": 11.4137035,
+      "tags": {},
+      "x": 1270567.6616854044,
+      "y": 6817328.884847444
+    },
+    {
+      "type": "node",
+      "id": 1877303949,
+      "lat": 52.2814041,
+      "lon": 11.4132494,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "double_slip",
+        "railway:switch:configuration": "inside",
+        "ref": "60"
+      },
+      "x": 1270517.111504635,
+      "y": 6817345.52847575
+    },
+    {
+      "type": "node",
+      "id": 1877303950,
+      "lat": 52.281374,
+      "lon": 11.4141074,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "11"
+      },
+      "x": 1270612.6236277358,
+      "y": 6817340.06529623
+    },
+    {
+      "type": "node",
+      "id": 1877303951,
+      "lat": 52.2817161,
+      "lon": 11.4132438,
+      "tags": {},
+      "x": 1270516.4881154867,
+      "y": 6817402.1570014255
+    },
+    {
+      "type": "node",
+      "id": 1877303953,
+      "lat": 52.2816222,
+      "lon": 11.4125469,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "61"
+      },
+      "x": 1270438.909562353,
+      "y": 6817385.113951066
+    },
+    {
+      "type": "node",
+      "id": 1877303955,
+      "lat": 52.2816662,
+      "lon": 11.4132386,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "13"
+      },
+      "x": 1270515.9092541344,
+      "y": 6817393.100040432
+    },
+    {
+      "type": "node",
+      "id": 1877303967,
+      "lat": 52.2827845,
+      "lon": 11.4094535,
+      "tags": {},
+      "x": 1270094.553849533,
+      "y": 6817596.076437184
+    },
+    {
+      "type": "node",
+      "id": 1877303974,
+      "lat": 52.2829141,
+      "lon": 11.4091603,
+      "tags": {},
+      "x": 1270061.9149748324,
+      "y": 6817619.59974336
+    },
+    {
+      "type": "node",
+      "id": 1877303976,
+      "lat": 52.2827156,
+      "lon": 11.4109155,
+      "tags": {},
+      "x": 1270257.3029450728,
+      "y": 6817583.570633578
+    },
+    {
+      "type": "node",
+      "id": 1877303978,
+      "lat": 52.2827477,
+      "lon": 11.4109569,
+      "tags": {},
+      "x": 1270261.9115719916,
+      "y": 6817589.396992478
+    },
+    {
+      "type": "node",
+      "id": 1877303980,
+      "lat": 52.2827786,
+      "lon": 11.4110002,
+      "tags": {},
+      "x": 1270266.731705943,
+      "y": 6817595.005547575
+    },
+    {
+      "type": "node",
+      "id": 1877303982,
+      "lat": 52.2828163,
+      "lon": 11.4110267,
+      "tags": {},
+      "x": 1270269.681672449,
+      "y": 6817601.848353132
+    },
+    {
+      "type": "node",
+      "id": 1877303984,
+      "lat": 52.2830406,
+      "lon": 11.4089313,
+      "tags": {},
+      "x": 1270036.422811441,
+      "y": 6817642.560444548
+    },
+    {
+      "type": "node",
+      "id": 1877303986,
+      "lat": 52.2828495,
+      "lon": 11.4110772,
+      "tags": {},
+      "x": 1270275.303306734,
+      "y": 6817607.874383026
+    },
+    {
+      "type": "node",
+      "id": 1877303988,
+      "lat": 52.2834175,
+      "lon": 11.4083223,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "69"
+      },
+      "x": 1269968.6292415475,
+      "y": 6817710.971019116
+    },
+    {
+      "type": "node",
+      "id": 1877303990,
+      "lat": 52.2832544,
+      "lon": 11.4100513,
+      "tags": {},
+      "x": 1270161.100641129,
+      "y": 6817681.366901933
+    },
+    {
+      "type": "node",
+      "id": 1877304011,
+      "lat": 52.2836714,
+      "lon": 11.4080006,
+      "tags": {},
+      "x": 1269932.8177613593,
+      "y": 6817757.056371047
+    },
+    {
+      "type": "node",
+      "id": 1877304015,
+      "lat": 52.2838577,
+      "lon": 11.408846,
+      "tags": {},
+      "x": 1270026.9272588762,
+      "y": 6817790.871825663
+    },
+    {
+      "type": "node",
+      "id": 1877304018,
+      "lat": 52.2840271,
+      "lon": 11.4075541,
+      "tags": {},
+      "x": 1269883.1136087202,
+      "y": 6817821.619872475
+    },
+    {
+      "type": "node",
+      "id": 1877304022,
+      "lat": 52.2843156,
+      "lon": 11.407148,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "34"
+      },
+      "x": 1269837.906763509,
+      "y": 6817873.986209973
+    },
+    {
+      "type": "node",
+      "id": 1877304028,
+      "lat": 52.284815,
+      "lon": 11.4062665,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "double_slip",
+        "railway:switch:configuration": "inside",
+        "railway:switch:electric": "yes",
+        "railway:switch:heated": "yes",
+        "ref": "41"
+      },
+      "x": 1269739.7786323747,
+      "y": 6817964.634330032
+    },
+    {
+      "type": "node",
+      "id": 1877304031,
+      "lat": 52.2850527,
+      "lon": 11.4058453,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:switch:electric": "yes",
+        "railway:switch:heated": "yes",
+        "railway:turnout_side": "left",
+        "ref": "42"
+      },
+      "x": 1269692.8908628526,
+      "y": 6818007.780582071
+    },
+    {
+      "type": "node",
+      "id": 1877304035,
+      "lat": 52.2851167,
+      "lon": 11.4060536,
+      "tags": {
+        "crossing": "controlled",
+        "crossing:barrier": "no",
+        "crossing:bell": "no",
+        "crossing:light": "no",
+        "railway": "crossing"
+      },
+      "x": 1269716.078712785,
+      "y": 6818019.397618583
+    },
+    {
+      "type": "node",
+      "id": 1877304043,
+      "lat": 52.2853484,
+      "lon": 11.4052945,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:switch:electric": "no",
+        "railway:switch:heated": "yes",
+        "railway:turnout_side": "right",
+        "ref": "43"
+      },
+      "x": 1269631.5760873237,
+      "y": 6818061.455062136
+    },
+    {
+      "type": "node",
+      "id": 1877304045,
+      "lat": 52.285527,
+      "lon": 11.4049029,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:switch:electric": "no",
+        "railway:switch:heated": "yes",
+        "railway:turnout_side": "right",
+        "ref": "44"
+      },
+      "x": 1269587.983374729,
+      "y": 6818093.874114244
+    },
+    {
+      "type": "node",
+      "id": 1877304055,
+      "lat": 52.2854142,
+      "lon": 11.4049428,
+      "tags": {},
+      "x": 1269592.4250224119,
+      "y": 6818073.398908158
+    },
+    {
+      "type": "node",
+      "id": 1877304057,
+      "lat": 52.2856186,
+      "lon": 11.4045584,
+      "tags": {},
+      "x": 1269549.633810151,
+      "y": 6818110.5011818465
+    },
+    {
+      "type": "node",
+      "id": 1877304059,
+      "lat": 52.2857591,
+      "lon": 11.404312,
+      "tags": {},
+      "x": 1269522.204687619,
+      "y": 6818136.00455682
+    },
+    {
+      "type": "node",
+      "id": 1877304060,
+      "lat": 52.2859623,
+      "lon": 11.4040419,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:switch:electric": "no",
+        "railway:switch:heated": "yes",
+        "railway:turnout_side": "right",
+        "ref": "45"
+      },
+      "x": 1269492.137293156,
+      "y": 6818172.889297009
+    },
+    {
+      "type": "node",
+      "id": 1877304061,
+      "lat": 52.2859468,
+      "lon": 11.4039703,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "46"
+      },
+      "x": 1269484.1668176153,
+      "y": 6818170.075740463
+    },
+    {
+      "type": "node",
+      "id": 1877304062,
+      "lat": 52.286101,
+      "lon": 11.4036304,
+      "tags": {
+        "crossing:barrier": "double_half",
+        "railway": "level_crossing"
+      },
+      "x": 1269446.3293226946,
+      "y": 6818198.06613413
+    },
+    {
+      "type": "node",
+      "id": 1877304063,
+      "lat": 52.286161,
+      "lon": 11.4037221,
+      "tags": {
+        "crossing:barrier": "double_half",
+        "railway": "level_crossing"
+      },
+      "x": 1269456.5373200004,
+      "y": 6818208.957364351
+    },
+    {
+      "type": "node",
+      "id": 1877304064,
+      "lat": 52.2863742,
+      "lon": 11.4032543,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "47"
+      },
+      "x": 1269404.4620622073,
+      "y": 6818247.6576556545
+    },
+    {
+      "type": "node",
+      "id": 1879956900,
+      "lat": 52.2811206,
+      "lon": 11.4126213,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270447.1917324676,
+      "y": 6817294.073095576
+    },
+    {
+      "type": "node",
+      "id": 1879956908,
+      "lat": 52.2814117,
+      "lon": 11.4122184,
+      "tags": {},
+      "x": 1270402.3411096272,
+      "y": 6817346.907883793
+    },
+    {
+      "type": "node",
+      "id": 1879956909,
+      "lat": 52.2813275,
+      "lon": 11.4127476,
+      "tags": {},
+      "x": 1270461.251384155,
+      "y": 6817331.625507958
+    },
+    {
+      "type": "node",
+      "id": 1879956911,
+      "lat": 52.2813912,
+      "lon": 11.4126952,
+      "tags": {},
+      "x": 1270455.4182428373,
+      "y": 6817343.187112642
+    },
+    {
+      "type": "node",
+      "id": 1879956912,
+      "lat": 52.2813313,
+      "lon": 11.4130463,
+      "tags": {},
+      "x": 1270494.502516055,
+      "y": 6817332.31521075
+    },
+    {
+      "type": "node",
+      "id": 1879956915,
+      "lat": 52.2814107,
+      "lon": 11.4129147,
+      "tags": {},
+      "x": 1270479.8528710667,
+      "y": 6817346.726382722
+    },
+    {
+      "type": "node",
+      "id": 1879956917,
+      "lat": 52.2814095,
+      "lon": 11.4117944,
+      "tags": {},
+      "x": 1270355.141645531,
+      "y": 6817346.508581442
+    },
+    {
+      "type": "node",
+      "id": 1879956918,
+      "lat": 52.2814665,
+      "lon": 11.4117862,
+      "tags": {},
+      "x": 1270354.2288257063,
+      "y": 6817356.854148828
+    },
+    {
+      "type": "node",
+      "id": 1879956921,
+      "lat": 52.2815401,
+      "lon": 11.4123886,
+      "tags": {},
+      "x": 1270421.2876869603,
+      "y": 6817370.212655625
+    },
+    {
+      "type": "node",
+      "id": 1879956925,
+      "lat": 52.2814968,
+      "lon": 11.4136344,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "12"
+      },
+      "x": 1270559.9695085904,
+      "y": 6817362.3536400935
+    },
+    {
+      "type": "node",
+      "id": 1879956927,
+      "lat": 52.2816377,
+      "lon": 11.4122645,
+      "tags": {},
+      "x": 1270407.4729381527,
+      "y": 6817387.927231638
+    },
+    {
+      "type": "node",
+      "id": 1879956932,
+      "lat": 52.28181,
+      "lon": 11.4121566,
+      "tags": {},
+      "x": 1270395.4615650962,
+      "y": 6817419.200088084
+    },
+    {
+      "type": "node",
+      "id": 1879956947,
+      "lat": 52.2818731,
+      "lon": 11.4125708,
+      "tags": {},
+      "x": 1270441.5700981827,
+      "y": 6817430.652917507
+    },
+    {
+      "type": "node",
+      "id": 1879956952,
+      "lat": 52.2819104,
+      "lon": 11.4119438,
+      "tags": {},
+      "x": 1270371.7727774554,
+      "y": 6817437.422981278
+    },
+    {
+      "type": "node",
+      "id": 1879956954,
+      "lat": 52.2819563,
+      "lon": 11.4104259,
+      "tags": {},
+      "x": 1270202.8009223803,
+      "y": 6817445.753979138
+    },
+    {
+      "type": "node",
+      "id": 1879956956,
+      "lat": 52.2820404,
+      "lon": 11.4103528,
+      "tags": {},
+      "x": 1270194.6634676033,
+      "y": 6817461.018422559
+    },
+    {
+      "type": "node",
+      "id": 1879956960,
+      "lat": 52.2820527,
+      "lon": 11.4120601,
+      "tags": {},
+      "x": 1270384.7192342347,
+      "y": 6817463.250917913
+    },
+    {
+      "type": "node",
+      "id": 1879956962,
+      "lat": 52.2821186,
+      "lon": 11.4108047,
+      "tags": {},
+      "x": 1270244.9687454929,
+      "y": 6817475.212021519
+    },
+    {
+      "type": "node",
+      "id": 1879956967,
+      "lat": 52.282219,
+      "lon": 11.4107845,
+      "tags": {},
+      "x": 1270242.7200917788,
+      "y": 6817493.43504226
+    },
+    {
+      "type": "node",
+      "id": 1879956971,
+      "lat": 52.282126,
+      "lon": 11.4104069,
+      "tags": {},
+      "x": 1270200.6858520552,
+      "y": 6817476.555151113
+    },
+    {
+      "type": "node",
+      "id": 1879956972,
+      "lat": 52.2821576,
+      "lon": 11.4117668,
+      "tags": {},
+      "x": 1270352.069227585,
+      "y": 6817482.290680027
+    },
+    {
+      "type": "node",
+      "id": 1879956973,
+      "lat": 52.2825064,
+      "lon": 11.4097379,
+      "tags": {},
+      "x": 1270126.2131127145,
+      "y": 6817545.599576063
+    },
+    {
+      "type": "node",
+      "id": 1879956974,
+      "lat": 52.2821488,
+      "lon": 11.4101231,
+      "tags": {},
+      "x": 1270169.093380568,
+      "y": 6817480.693443716
+    },
+    {
+      "type": "node",
+      "id": 1879956976,
+      "lat": 52.2821041,
+      "lon": 11.4101207,
+      "tags": {},
+      "x": 1270168.8262137903,
+      "y": 6817472.580214185
+    },
+    {
+      "type": "node",
+      "id": 1879956977,
+      "lat": 52.2822391,
+      "lon": 11.4115488,
+      "tags": {},
+      "x": 1270327.8015785923,
+      "y": 6817497.083281478
+    },
+    {
+      "type": "node",
+      "id": 1879956982,
+      "lat": 52.2823374,
+      "lon": 11.4113182,
+      "tags": {},
+      "x": 1270302.1313040152,
+      "y": 6817514.925191756
+    },
+    {
+      "type": "node",
+      "id": 1879956983,
+      "lat": 52.282438,
+      "lon": 11.4096061,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "58"
+      },
+      "x": 1270111.5412038278,
+      "y": 6817533.18460399
+    },
+    {
+      "type": "node",
+      "id": 1879956985,
+      "lat": 52.2824953,
+      "lon": 11.4095591,
+      "tags": {},
+      "x": 1270106.3091877606,
+      "y": 6817543.584864374
+    },
+    {
+      "type": "node",
+      "id": 1879957000,
+      "lat": 52.2827802,
+      "lon": 11.4091902,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "65"
+      },
+      "x": 1270065.243427607,
+      "y": 6817595.295958302
+    },
+    {
+      "type": "node",
+      "id": 1879957008,
+      "lat": 52.2825999,
+      "lon": 11.4097367,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "63"
+      },
+      "x": 1270126.0795293255,
+      "y": 6817562.570365832
+    },
+    {
+      "type": "node",
+      "id": 1879957012,
+      "lat": 52.2823948,
+      "lon": 11.4102902,
+      "tags": {},
+      "x": 1270187.6948674796,
+      "y": 6817525.343578921
+    },
+    {
+      "type": "node",
+      "id": 1879957013,
+      "lat": 52.2826562,
+      "lon": 11.409297,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "57"
+      },
+      "x": 1270077.1323492238,
+      "y": 6817572.789158205
+    },
+    {
+      "type": "node",
+      "id": 1879957016,
+      "lat": 52.2827194,
+      "lon": 11.4098403,
+      "tags": {},
+      "x": 1270137.612228572,
+      "y": 6817584.260358087
+    },
+    {
+      "type": "node",
+      "id": 1879957018,
+      "lat": 52.2829818,
+      "lon": 11.408868,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "66"
+      },
+      "x": 1270029.3762876734,
+      "y": 6817631.88779422
+    },
+    {
+      "type": "node",
+      "id": 1879957022,
+      "lat": 52.2825492,
+      "lon": 11.4108459,
+      "tags": {},
+      "x": 1270249.5551085135,
+      "y": 6817553.3680186765
+    },
+    {
+      "type": "node",
+      "id": 1879957024,
+      "lat": 52.282841,
+      "lon": 11.409498,
+      "tags": {},
+      "x": 1270099.5075668732,
+      "y": 6817606.331573735
+    },
+    {
+      "type": "node",
+      "id": 1879957025,
+      "lat": 52.2826433,
+      "lon": 11.4107489,
+      "tags": {},
+      "x": 1270238.7571179066,
+      "y": 6817570.447728605
+    },
+    {
+      "type": "node",
+      "id": 1879957029,
+      "lat": 52.2826633,
+      "lon": 11.4108153,
+      "tags": {},
+      "x": 1270246.1487320953,
+      "y": 6817574.07785231
+    },
+    {
+      "type": "node",
+      "id": 1879957030,
+      "lat": 52.2828786,
+      "lon": 11.4091256,
+      "tags": {},
+      "x": 1270058.0521885017,
+      "y": 6817613.156238263
+    },
+    {
+      "type": "node",
+      "id": 1879957032,
+      "lat": 52.2826874,
+      "lon": 11.4108728,
+      "tags": {},
+      "x": 1270252.5496028159,
+      "y": 6817578.45215356
+    },
+    {
+      "type": "node",
+      "id": 1879957033,
+      "lat": 52.2829153,
+      "lon": 11.4092849,
+      "tags": {},
+      "x": 1270075.7853833851,
+      "y": 6817619.817552073
+    },
+    {
+      "type": "node",
+      "id": 1879957036,
+      "lat": 52.2831946,
+      "lon": 11.4086059,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "68"
+      },
+      "x": 1270000.1994491366,
+      "y": 6817670.5126914345
+    },
+    {
+      "type": "node",
+      "id": 1879957053,
+      "lat": 52.2830519,
+      "lon": 11.4089656,
+      "tags": {},
+      "x": 1270040.2410699748,
+      "y": 6817644.611482721
+    },
+    {
+      "type": "node",
+      "id": 1879957065,
+      "lat": 52.2839904,
+      "lon": 11.407758,
+      "tags": {},
+      "x": 1269905.8116528927,
+      "y": 6817814.958390678
+    },
+    {
+      "type": "node",
+      "id": 1879957066,
+      "lat": 52.283795,
+      "lon": 11.4080906,
+      "tags": {},
+      "x": 1269942.8365155307,
+      "y": 6817779.491085048
+    },
+    {
+      "type": "node",
+      "id": 1879957067,
+      "lat": 52.2840993,
+      "lon": 11.4075282,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "33"
+      },
+      "x": 1269880.2304339085,
+      "y": 6817834.725038132
+    },
+    {
+      "type": "node",
+      "id": 1879957071,
+      "lat": 52.2840202,
+      "lon": 11.4079169,
+      "tags": {},
+      "x": 1269923.5003199799,
+      "y": 6817820.367440867
+    },
+    {
+      "type": "node",
+      "id": 1879957072,
+      "lat": 52.2839967,
+      "lon": 11.4078592,
+      "tags": {},
+      "x": 1269917.0771853614,
+      "y": 6817816.101914406
+    },
+    {
+      "type": "node",
+      "id": 1879957074,
+      "lat": 52.2843625,
+      "lon": 11.4071589,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "35"
+      },
+      "x": 1269839.1201459586,
+      "y": 6817882.499175558
+    },
+    {
+      "type": "node",
+      "id": 1879957077,
+      "lat": 52.2846068,
+      "lon": 11.4066349,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "40"
+      },
+      "x": 1269780.7887327832,
+      "y": 6817926.842978556
+    },
+    {
+      "type": "node",
+      "id": 3338128576,
+      "lat": 52.2769454,
+      "lon": 11.4246985,
+      "tags": {},
+      "x": 1271791.6194866765,
+      "y": 6816536.310691264
+    },
+    {
+      "type": "node",
+      "id": 3338128582,
+      "lat": 52.278006,
+      "lon": 11.4216321,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:position": "right",
+        "railway:signal:shunting": "DE-ESO:ra11b",
+        "railway:signal:shunting:form": "sign",
+        "railway:signal:shunting:height": "normal"
+      },
+      "x": 1271450.269400108,
+      "y": 6816728.793547854
+    },
+    {
+      "type": "node",
+      "id": 3338129420,
+      "lat": 52.2811273,
+      "lon": 11.412776,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270464.4128576936,
+      "y": 6817295.2891448345
+    },
+    {
+      "type": "node",
+      "id": 3338129422,
+      "lat": 52.281155,
+      "lon": 11.4130303,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270492.7214042023,
+      "y": 6817300.316693733
+    },
+    {
+      "type": "node",
+      "id": 3338129423,
+      "lat": 52.2812301,
+      "lon": 11.4140969,
+      "tags": {
+        "crossing:barrier": "no",
+        "crossing:bell": "no",
+        "crossing:light": "no",
+        "railway": "level_crossing",
+        "supervised": "no"
+      },
+      "x": 1270611.4547730824,
+      "y": 6817313.9473566385
+    },
+    {
+      "type": "node",
+      "id": 3338129424,
+      "lat": 52.2812623,
+      "lon": 11.4121778,
+      "tags": {},
+      "x": 1270397.8215383012,
+      "y": 6817319.791669284
+    },
+    {
+      "type": "node",
+      "id": 3338129425,
+      "lat": 52.2812137,
+      "lon": 11.413346,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270527.8649674456,
+      "y": 6817310.970751841
+    },
+    {
+      "type": "node",
+      "id": 3338129426,
+      "lat": 52.2812461,
+      "lon": 11.4134011,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270533.9986713883,
+      "y": 6817316.851362389
+    },
+    {
+      "type": "node",
+      "id": 3338129427,
+      "lat": 52.2812009,
+      "lon": 11.4132148,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270513.2598502536,
+      "y": 6817308.647548863
+    },
+    {
+      "type": "node",
+      "id": 3338129428,
+      "lat": 52.281276,
+      "lon": 11.4134661,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270541.2344382901,
+      "y": 6817322.278225958
+    },
+    {
+      "type": "node",
+      "id": 3338129429,
+      "lat": 52.2812875,
+      "lon": 11.4122534,
+      "tags": {},
+      "x": 1270406.2372918052,
+      "y": 6817324.365482156
+    },
+    {
+      "type": "node",
+      "id": 3338129432,
+      "lat": 52.2816484,
+      "lon": 11.4116166,
+      "tags": {},
+      "x": 1270335.349040068,
+      "y": 6817389.86930332
+    },
+    {
+      "type": "node",
+      "id": 3338129433,
+      "lat": 52.2814648,
+      "lon": 11.4124769,
+      "tags": {},
+      "x": 1270431.1171979972,
+      "y": 6817356.545596624
+    },
+    {
+      "type": "node",
+      "id": 3338129434,
+      "lat": 52.2815024,
+      "lon": 11.4122429,
+      "tags": {},
+      "x": 1270405.0684371518,
+      "y": 6817363.370048133
+    },
+    {
+      "type": "node",
+      "id": 3338129435,
+      "lat": 52.2815267,
+      "lon": 11.4125599,
+      "tags": {},
+      "x": 1270440.3567157332,
+      "y": 6817367.78053452
+    },
+    {
+      "type": "node",
+      "id": 3338129436,
+      "lat": 52.2814454,
+      "lon": 11.4126611,
+      "tags": {},
+      "x": 1270451.6222482014,
+      "y": 6817353.024472323
+    },
+    {
+      "type": "node",
+      "id": 3338129437,
+      "lat": 52.281533,
+      "lon": 11.4126846,
+      "tags": {},
+      "x": 1270454.2382562351,
+      "y": 6817368.923994351
+    },
+    {
+      "type": "node",
+      "id": 3338129438,
+      "lat": 52.281553,
+      "lon": 11.4127356,
+      "tags": {},
+      "x": 1270459.9155502655,
+      "y": 6817372.55402664
+    },
+    {
+      "type": "node",
+      "id": 3338129439,
+      "lat": 52.2816144,
+      "lon": 11.4124317,
+      "tags": {},
+      "x": 1270426.0855570135,
+      "y": 6817383.698236055
+    },
+    {
+      "type": "node",
+      "id": 3338129440,
+      "lat": 52.2817217,
+      "lon": 11.4110141,
+      "tags": {},
+      "x": 1270268.2790468647,
+      "y": 6817403.173414523
+    },
+    {
+      "type": "node",
+      "id": 3338129442,
+      "lat": 52.2819113,
+      "lon": 11.4125918,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "14"
+      },
+      "x": 1270443.9078074894,
+      "y": 6817437.586334092
+    },
+    {
+      "type": "node",
+      "id": 3338129446,
+      "lat": 52.2820699,
+      "lon": 11.412143,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "right",
+        "ref": "B15"
+      },
+      "x": 1270393.9476200214,
+      "y": 6817466.372782382
+    },
+    {
+      "type": "node",
+      "id": 3338129449,
+      "lat": 52.2823459,
+      "lon": 11.4106957,
+      "tags": {},
+      "x": 1270232.8349209963,
+      "y": 6817516.467983426
+    },
+    {
+      "type": "node",
+      "id": 3338129450,
+      "lat": 52.2824135,
+      "lon": 11.4112507,
+      "tags": {},
+      "x": 1270294.6172383865,
+      "y": 6817528.737725404
+    },
+    {
+      "type": "node",
+      "id": 3338129454,
+      "lat": 52.282379,
+      "lon": 11.4102259,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "62"
+      },
+      "x": 1270180.5370242216,
+      "y": 6817522.475798522
+    },
+    {
+      "type": "node",
+      "id": 3338129471,
+      "lat": 52.2838384,
+      "lon": 11.4077949,
+      "tags": {
+        "crossing:barrier": "no",
+        "crossing:bell": "no",
+        "crossing:light": "no",
+        "railway": "level_crossing",
+        "supervised": "no"
+      },
+      "x": 1269909.9193421032,
+      "y": 6817787.368661359
+    },
+    {
+      "type": "node",
+      "id": 4731123220,
+      "lat": 52.2841597,
+      "lon": 11.4081765,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "A27"
+      },
+      "x": 1269952.3988597898,
+      "y": 6817845.6883788
+    },
+    {
+      "type": "node",
+      "id": 4731124273,
+      "lat": 52.2802884,
+      "lon": 11.4165219,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:position": "right",
+        "railway:signal:speed_limit": "DE-ESO:dr:lf1/2",
+        "railway:signal:speed_limit:form": "sign",
+        "railway:signal:speed_limit:height": "normal",
+        "railway:signal:speed_limit:speed": "10"
+      },
+      "x": 1270881.404538256,
+      "y": 6817143.03032446
+    },
+    {
+      "type": "node",
+      "id": 5015579198,
+      "lat": 52.2826644,
+      "lon": 11.4114886,
+      "tags": {},
+      "x": 1270321.1001452464,
+      "y": 6817574.27750916
+    },
+    {
+      "type": "node",
+      "id": 5015579204,
+      "lat": 52.2822177,
+      "lon": 11.4106549,
+      "tags": {},
+      "x": 1270228.293085772,
+      "y": 6817493.199086548
+    },
+    {
+      "type": "node",
+      "id": 5015579205,
+      "lat": 52.282299,
+      "lon": 11.4110077,
+      "tags": {},
+      "x": 1270267.566602124,
+      "y": 6817507.955407219
+    },
+    {
+      "type": "node",
+      "id": 5015579576,
+      "lat": 52.2822215,
+      "lon": 11.4108985,
+      "tags": {},
+      "x": 1270255.410513729,
+      "y": 6817493.888803266
+    },
+    {
+      "type": "node",
+      "id": 5015579838,
+      "lat": 52.2802379,
+      "lon": 11.4167569,
+      "tags": {},
+      "x": 1270907.5646185924,
+      "y": 6817133.864758983
+    },
+    {
+      "type": "node",
+      "id": 6524196343,
+      "lat": 52.2803252,
+      "lon": 11.4165633,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "backward",
+        "railway:signal:position": "left",
+        "railway:signal:speed_limit": "DE-ESO:lf7",
+        "railway:signal:speed_limit:form": "sign",
+        "railway:signal:speed_limit:speed": "100"
+      },
+      "x": 1270886.0131651748,
+      "y": 6817149.709396609
+    },
+    {
+      "type": "node",
+      "id": 6630116007,
+      "lat": 52.2809613,
+      "lon": 11.4149895,
+      "tags": {},
+      "x": 1270710.8185505646,
+      "y": 6817265.160217613
+    },
+    {
+      "type": "node",
+      "id": 6630116008,
+      "lat": 52.2822228,
+      "lon": 11.411707,
+      "tags": {},
+      "x": 1270345.4123220355,
+      "y": 6817494.124759001
+    },
+    {
+      "type": "node",
+      "id": 6630116009,
+      "lat": 52.2821931,
+      "lon": 11.4118555,
+      "tags": {},
+      "x": 1270361.9432664183,
+      "y": 6817488.734079752
+    },
+    {
+      "type": "node",
+      "id": 6630116010,
+      "lat": 52.282049,
+      "lon": 11.4122833,
+      "tags": {},
+      "x": 1270409.5657445798,
+      "y": 6817462.579354205
+    },
+    {
+      "type": "node",
+      "id": 6630116011,
+      "lat": 52.2817806,
+      "lon": 11.4129534,
+      "tags": {},
+      "x": 1270484.1609353602,
+      "y": 6817413.863910084
+    },
+    {
+      "type": "node",
+      "id": 6630116013,
+      "lat": 52.2812194,
+      "lon": 11.4144182,
+      "tags": {},
+      "x": 1270647.221725474,
+      "y": 6817312.005303384
+    },
+    {
+      "type": "node",
+      "id": 6630116016,
+      "lat": 52.2835257,
+      "lon": 11.4095825,
+      "tags": {},
+      "x": 1270108.9140638453,
+      "y": 6817730.610352865
+    },
+    {
+      "type": "node",
+      "id": 6630116017,
+      "lat": 52.2858798,
+      "lon": 11.4041064,
+      "tags": {},
+      "x": 1269499.317400312,
+      "y": 6818157.913926774
+    },
+    {
+      "type": "node",
+      "id": 6630116020,
+      "lat": 52.2852579,
+      "lon": 11.405462,
+      "tags": {},
+      "x": 1269650.2221020316,
+      "y": 6818045.02776504
+    },
+    {
+      "type": "node",
+      "id": 6630116021,
+      "lat": 52.2856458,
+      "lon": 11.4046666,
+      "tags": {},
+      "x": 1269561.6785790545,
+      "y": 6818115.438483681
+    },
+    {
+      "type": "node",
+      "id": 6630116022,
+      "lat": 52.2858125,
+      "lon": 11.4043451,
+      "tags": {},
+      "x": 1269525.8893627645,
+      "y": 6818145.697675813
+    },
+    {
+      "type": "node",
+      "id": 7598336888,
+      "lat": 52.2844914,
+      "lon": 11.4068729,
+      "tags": {},
+      "x": 1269807.2827715918,
+      "y": 6817905.896264077
+    },
+    {
+      "type": "node",
+      "id": 7598336894,
+      "lat": 52.278977,
+      "lon": 11.4195906,
+      "tags": {},
+      "x": 1271223.0106596535,
+      "y": 6816905.019419268
+    },
+    {
+      "type": "node",
+      "id": 7598336895,
+      "lat": 52.2789464,
+      "lon": 11.419545,
+      "tags": {},
+      "x": 1271217.9344908732,
+      "y": 6816899.465794999
+    },
+    {
+      "type": "node",
+      "id": 7598336958,
+      "lat": 52.2786924,
+      "lon": 11.4202321,
+      "tags": {},
+      "x": 1271294.4221129972,
+      "y": 6816853.367232495
+    },
+    {
+      "type": "node",
+      "id": 7598337080,
+      "lat": 52.283902,
+      "lon": 11.4078747,
+      "tags": {},
+      "x": 1269918.8026374686,
+      "y": 6817798.912773368
+    },
+    {
+      "type": "node",
+      "id": 7598337081,
+      "lat": 52.284964,
+      "lon": 11.4060383,
+      "tags": {},
+      "x": 1269714.3755245758,
+      "y": 6817991.680123412
+    },
+    {
+      "type": "node",
+      "id": 7598337082,
+      "lat": 52.2841811,
+      "lon": 11.4073454,
+      "tags": {},
+      "x": 1269859.8812309916,
+      "y": 6817849.572744823
+    },
+    {
+      "type": "node",
+      "id": 7598337083,
+      "lat": 52.2840322,
+      "lon": 11.4079975,
+      "tags": {},
+      "x": 1269932.4726709381,
+      "y": 6817822.545582917
+    },
+    {
+      "type": "node",
+      "id": 7598337084,
+      "lat": 52.2840615,
+      "lon": 11.4080459,
+      "tags": {},
+      "x": 1269937.8605342922,
+      "y": 6817827.863882244
+    },
+    {
+      "type": "node",
+      "id": 7598337085,
+      "lat": 52.2840931,
+      "lon": 11.4080827,
+      "tags": {},
+      "x": 1269941.9570915534,
+      "y": 6817833.599662954
+    },
+    {
+      "type": "node",
+      "id": 7598337086,
+      "lat": 52.2841232,
+      "lon": 11.4081213,
+      "tags": {},
+      "x": 1269946.2540238982,
+      "y": 6817839.063179417
+    },
+    {
+      "type": "node",
+      "id": 7598998615,
+      "lat": 52.2826876,
+      "lon": 11.4093688,
+      "tags": {},
+      "x": 1270085.1250886626,
+      "y": 6817578.488454827
+    },
+    {
+      "type": "node",
+      "id": 7598998616,
+      "lat": 52.2830725,
+      "lon": 11.4087892,
+      "tags": {},
+      "x": 1270020.604311799,
+      "y": 6817648.350544814
+    },
+    {
+      "type": "node",
+      "id": 7598998617,
+      "lat": 52.2832066,
+      "lon": 11.4086496,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "67"
+      },
+      "x": 1270005.0641108842,
+      "y": 6817672.690792695
+    },
+    {
+      "type": "node",
+      "id": 7729112193,
+      "lat": 52.2835389,
+      "lon": 11.408166,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "70"
+      },
+      "x": 1269951.2300051365,
+      "y": 6817733.00628228
+    },
+    {
+      "type": "node",
+      "id": 8986577250,
+      "lat": 52.2853779,
+      "lon": 11.4053381,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:height": "normal",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1",
+        "railway:signal:main:substitute_signal": "DE-ESO:dr:zs1",
+        "railway:signal:position": "right",
+        "ref": "G"
+      },
+      "x": 1269636.4296171223,
+      "y": 6818066.809823726
+    },
+    {
+      "type": "node",
+      "id": 8986577251,
+      "lat": 52.2860525,
+      "lon": 11.4038509,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:position": "right",
+        "railway:signal:shunting": "DE-ESO:ra11",
+        "railway:signal:shunting:form": "light",
+        "railway:signal:shunting:height": "normal",
+        "railway:signal:shunting:states": "DE-ESO:ra11;DE-ESO:sh1"
+      },
+      "x": 1269470.8752704146,
+      "y": 6818189.262400535
+    },
+    {
+      "type": "node",
+      "id": 8986577252,
+      "lat": 52.2858346,
+      "lon": 11.4044487,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:height": "normal",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2",
+        "railway:signal:position": "right",
+        "ref": "F"
+      },
+      "x": 1269537.4220620107,
+      "y": 6818149.709250969
+    },
+    {
+      "type": "node",
+      "id": 8996971070,
+      "lat": 52.2808396,
+      "lon": 11.4155375,
+      "tags": {
+        "railway": "buffer_stop",
+        "railway:signal:direction": "forward",
+        "railway:signal:minor": "DE-ESO:sh0",
+        "railway:signal:minor:form": "sign",
+        "railway:signal:position": "in_track"
+      },
+      "x": 1270771.8216315191,
+      "y": 6817243.071793033
+    },
+    {
+      "type": "node",
+      "id": 8997099871,
+      "lat": 52.2845683,
+      "lon": 11.4069193,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "light",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:height": "dwarf",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+        "railway:signal:position": "right",
+        "ref": "K"
+      },
+      "x": 1269812.4479959647,
+      "y": 6817919.854683833
+    },
+    {
+      "type": "node",
+      "id": 8997099872,
+      "lat": 52.2850564,
+      "lon": 11.4059381,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:height": "normal",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2",
+        "railway:signal:main:substitute_signal": "DE-ESO:dr:zs1",
+        "railway:signal:minor": "DE-ESO:sh1",
+        "railway:signal:minor:form": "light",
+        "railway:signal:position": "right",
+        "ref": "H"
+      },
+      "x": 1269703.221311598,
+      "y": 6818008.4521915335
+    },
+    {
+      "type": "node",
+      "id": 9004581435,
+      "lat": 52.2817588,
+      "lon": 11.4133747,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:height": "normal",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;?",
+        "railway:signal:position": "right",
+        "ref": "D"
+      },
+      "x": 1270531.0598368314,
+      "y": 6817409.907154544
+    },
+    {
+      "type": "node",
+      "id": 9004581437,
+      "lat": 52.2811793,
+      "lon": 11.4143225,
+      "tags": {},
+      "x": 1270636.5684502055,
+      "y": 6817304.727145369
+    },
+    {
+      "type": "node",
+      "id": 9004581438,
+      "lat": 52.2810847,
+      "lon": 11.4146408,
+      "tags": {
+        "railway": "derail",
+        "railway:derail": "wedge",
+        "railway:signal:minor": "DE-ESO:sh",
+        "railway:signal:minor:form": "semaphore",
+        "railway:signal:minor:height": "dwarf"
+      },
+      "x": 1270672.0014441248,
+      "y": 6817287.557252691
+    },
+    {
+      "type": "node",
+      "id": 9004581439,
+      "lat": 52.281653,
+      "lon": 11.4133925,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+        "railway:signal:position": "right",
+        "ref": "E4"
+      },
+      "x": 1270533.0413237677,
+      "y": 6817390.704212785
+    },
+    {
+      "type": "node",
+      "id": 9004581440,
+      "lat": 52.2812452,
+      "lon": 11.4145106,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:distant": "DE-ESO:hl",
+        "railway:signal:distant:form": "light",
+        "railway:signal:distant:states": "DE-ESO:hl1;DE-ESO:hl7",
+        "railway:signal:position": "right",
+        "ref": "Vg"
+      },
+      "x": 1270657.5076464235,
+      "y": 6817316.688012036
+    },
+    {
+      "type": "node",
+      "id": 9004581441,
+      "lat": 52.2814468,
+      "lon": 11.4141861,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+        "railway:signal:position": "right",
+        "ref": "C"
+      },
+      "x": 1270621.3844716612,
+      "y": 6817353.278574025
+    },
+    {
+      "type": "node",
+      "id": 9004741859,
+      "lat": 52.2817227,
+      "lon": 11.4133381,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:minor": "DE-ESO:sh",
+        "railway:signal:minor:form": "light",
+        "railway:signal:minor:height": "dwarf",
+        "railway:signal:position": "right"
+      },
+      "x": 1270526.9855434685,
+      "y": 6817403.354916874
+    },
+    {
+      "type": "node",
+      "id": 9026565231,
+      "lat": 52.2828414,
+      "lon": 11.4093186,
+      "tags": {},
+      "x": 1270079.536850225,
+      "y": 6817606.404176519
+    },
+    {
+      "type": "node",
+      "id": 9026565234,
+      "lat": 52.2815831,
+      "lon": 11.4121597,
+      "tags": {},
+      "x": 1270395.8066555178,
+      "y": 6817378.01722834
+    },
+    {
+      "type": "node",
+      "id": 9026565235,
+      "lat": 52.2817911,
+      "lon": 11.4116282,
+      "tags": {},
+      "x": 1270336.640346161,
+      "y": 6817415.7696875315
+    },
+    {
+      "type": "node",
+      "id": 9026565236,
+      "lat": 52.2813365,
+      "lon": 11.4128711,
+      "tags": {},
+      "x": 1270474.999341268,
+      "y": 6817333.25901467
+    },
+    {
+      "type": "node",
+      "id": 9026565237,
+      "lat": 52.2813145,
+      "lon": 11.4124901,
+      "tags": {},
+      "x": 1270432.5866152756,
+      "y": 6817329.265998848
+    },
+    {
+      "type": "node",
+      "id": 9026565238,
+      "lat": 52.2815141,
+      "lon": 11.4128551,
+      "tags": {},
+      "x": 1270473.2182294154,
+      "y": 6817365.493615351
+    },
+    {
+      "type": "node",
+      "id": 9026565239,
+      "lat": 52.2814733,
+      "lon": 11.4129894,
+      "tags": {},
+      "x": 1270488.168437029,
+      "y": 6817358.08835776
+    },
+    {
+      "type": "node",
+      "id": 9026565240,
+      "lat": 52.2814889,
+      "lon": 11.412842,
+      "tags": {},
+      "x": 1270471.759944086,
+      "y": 6817360.919778971
+    },
+    {
+      "type": "node",
+      "id": 9026565241,
+      "lat": 52.2814532,
+      "lon": 11.4130115,
+      "tags": {},
+      "x": 1270490.6285977755,
+      "y": 6817354.440181907
+    },
+    {
+      "type": "node",
+      "id": 9026565242,
+      "lat": 52.2815744,
+      "lon": 11.4125507,
+      "tags": {},
+      "x": 1270439.3325764178,
+      "y": 6817376.438163013
+    },
+    {
+      "type": "node",
+      "id": 9026565243,
+      "lat": 52.2817154,
+      "lon": 11.4123407,
+      "tags": {},
+      "x": 1270415.9554833514,
+      "y": 6817402.029949799
+    },
+    {
+      "type": "node",
+      "id": 9026565244,
+      "lat": 52.2817664,
+      "lon": 11.4122434,
+      "tags": {},
+      "x": 1270405.1240968972,
+      "y": 6817411.286573685
+    },
+    {
+      "type": "node",
+      "id": 9026565245,
+      "lat": 52.2818653,
+      "lon": 11.4120456,
+      "tags": {},
+      "x": 1270383.1051016182,
+      "y": 6817429.23719444
+    },
+    {
+      "type": "node",
+      "id": 9026565246,
+      "lat": 52.2817693,
+      "lon": 11.4121623,
+      "tags": {},
+      "x": 1270396.0960861938,
+      "y": 6817411.812931051
+    },
+    {
+      "type": "node",
+      "id": 9026565247,
+      "lat": 52.2819931,
+      "lon": 11.4116036,
+      "tags": {},
+      "x": 1270333.9018866876,
+      "y": 6817452.43330395
+    },
+    {
+      "type": "node",
+      "id": 9026565248,
+      "lat": 52.2820421,
+      "lon": 11.4102398,
+      "tags": {},
+      "x": 1270182.0843651437,
+      "y": 6817461.32697879
+    },
+    {
+      "type": "node",
+      "id": 9026565249,
+      "lat": 52.2823152,
+      "lon": 11.4098164,
+      "tags": {},
+      "x": 1270134.9516927418,
+      "y": 6817510.89578433
+    },
+    {
+      "type": "node",
+      "id": 9026565250,
+      "lat": 52.2821818,
+      "lon": 11.4099849,
+      "tags": {},
+      "x": 1270153.7090269404,
+      "y": 6817486.683081529
+    },
+    {
+      "type": "node",
+      "id": 9026565251,
+      "lat": 52.2822601,
+      "lon": 11.4098601,
+      "tags": {},
+      "x": 1270139.8163544894,
+      "y": 6817500.894876468
+    },
+    {
+      "type": "node",
+      "id": 9026565252,
+      "lat": 52.2815662,
+      "lon": 11.4113924,
+      "tags": {},
+      "x": 1270310.391210232,
+      "y": 6817374.949848853
+    },
+    {
+      "type": "node",
+      "id": 9026565253,
+      "lat": 52.2811827,
+      "lon": 11.4124089,
+      "tags": {},
+      "x": 1270423.5474726234,
+      "y": 6817305.344245792
+    },
+    {
+      "type": "node",
+      "id": 9026565254,
+      "lat": 52.2811714,
+      "lon": 11.4126137,
+      "tags": {},
+      "x": 1270446.3457043378,
+      "y": 6817303.293294571
+    },
+    {
+      "type": "node",
+      "id": 9026565255,
+      "lat": 52.281224,
+      "lon": 11.4124412,
+      "tags": {},
+      "x": 1270427.143092176,
+      "y": 6817312.840204726
+    },
+    {
+      "type": "node",
+      "id": 9026565256,
+      "lat": 52.2813738,
+      "lon": 11.4120219,
+      "tags": {},
+      "x": 1270380.4668296862,
+      "y": 6817340.028996047
+    },
+    {
+      "type": "node",
+      "id": 9026565257,
+      "lat": 52.2818885,
+      "lon": 11.4110142,
+      "tags": {},
+      "x": 1270268.290178814,
+      "y": 6817433.448063786
+    },
+    {
+      "type": "node",
+      "id": 9026565258,
+      "lat": 52.2822324,
+      "lon": 11.4101527,
+      "tags": {},
+      "x": 1270172.3884374956,
+      "y": 6817495.867201554
+    },
+    {
+      "type": "node",
+      "id": 9026565259,
+      "lat": 52.2824211,
+      "lon": 11.4097083,
+      "tags": {},
+      "x": 1270122.9180557872,
+      "y": 6817530.117165029
+    },
+    {
+      "type": "node",
+      "id": 9026565260,
+      "lat": 52.2823348,
+      "lon": 11.4098992,
+      "tags": {},
+      "x": 1270144.1689465793,
+      "y": 6817514.4532790715
+    },
+    {
+      "type": "node",
+      "id": 9026565262,
+      "lat": 52.2823747,
+      "lon": 11.4100381,
+      "tags": {},
+      "x": 1270159.6312238507,
+      "y": 6817521.69532682
+    },
+    {
+      "type": "node",
+      "id": 9026565263,
+      "lat": 52.2822327,
+      "lon": 11.4103892,
+      "tags": {},
+      "x": 1270198.7154970681,
+      "y": 6817495.921652892
+    },
+    {
+      "type": "node",
+      "id": 9026565264,
+      "lat": 52.281978,
+      "lon": 11.4110343,
+      "tags": {},
+      "x": 1270270.527700579,
+      "y": 6817449.692602061
+    },
+    {
+      "type": "node",
+      "id": 9026565265,
+      "lat": 52.2812963,
+      "lon": 11.4130158,
+      "tags": {},
+      "x": 1270491.1072715858,
+      "y": 6817325.962687267
+    },
+    {
+      "type": "node",
+      "id": 9026565266,
+      "lat": 52.2821998,
+      "lon": 11.4106152,
+      "tags": {},
+      "x": 1270223.8737019876,
+      "y": 6817489.950158592
+    },
+    {
+      "type": "node",
+      "id": 9026565267,
+      "lat": 52.2822516,
+      "lon": 11.4105038,
+      "tags": {},
+      "x": 1270211.4727107133,
+      "y": 6817499.352087801
+    },
+    {
+      "type": "node",
+      "id": 9026565268,
+      "lat": 52.2827232,
+      "lon": 11.4095075,
+      "tags": {},
+      "x": 1270100.5651020359,
+      "y": 6817584.950082653
+    },
+    {
+      "type": "node",
+      "id": 9026565269,
+      "lat": 52.2826338,
+      "lon": 11.4097467,
+      "tags": {},
+      "x": 1270127.1927242335,
+      "y": 6817568.723420422
+    },
+    {
+      "type": "node",
+      "id": 9026565270,
+      "lat": 52.2827085,
+      "lon": 11.4094996,
+      "tags": {},
+      "x": 1270099.6856780585,
+      "y": 6817582.281937947
+    },
+    {
+      "type": "node",
+      "id": 9026565271,
+      "lat": 52.2828012,
+      "lon": 11.4092995,
+      "tags": {
+        "railway": "switch",
+        "railway:switch": "default",
+        "railway:turnout_side": "left",
+        "ref": "64"
+      },
+      "x": 1270077.4106479508,
+      "y": 6817599.10760007
+    },
+    {
+      "type": "node",
+      "id": 9026565272,
+      "lat": 52.282532,
+      "lon": 11.4099085,
+      "tags": {},
+      "x": 1270145.204217844,
+      "y": 6817550.246120272
+    },
+    {
+      "type": "node",
+      "id": 9026565273,
+      "lat": 52.2825022,
+      "lon": 11.4099953,
+      "tags": {},
+      "x": 1270154.8667496447,
+      "y": 6817544.8372526625
+    },
+    {
+      "type": "node",
+      "id": 9026565274,
+      "lat": 52.2829757,
+      "lon": 11.408946,
+      "tags": {},
+      "x": 1270038.0592079554,
+      "y": 6817630.78059832
+    },
+    {
+      "type": "node",
+      "id": 9026565275,
+      "lat": 52.2829746,
+      "lon": 11.409044,
+      "tags": {},
+      "x": 1270048.968518053,
+      "y": 6817630.580940056
+    },
+    {
+      "type": "node",
+      "id": 9026565276,
+      "lat": 52.2829881,
+      "lon": 11.4091081,
+      "tags": {},
+      "x": 1270056.104097413,
+      "y": 6817633.031291788
+    },
+    {
+      "type": "node",
+      "id": 9026565277,
+      "lat": 52.2841019,
+      "lon": 11.4076463,
+      "tags": {},
+      "x": 1269893.3772657712,
+      "y": 6817835.1969697075
+    },
+    {
+      "type": "node",
+      "id": 9026565278,
+      "lat": 52.2840532,
+      "lon": 11.4077413,
+      "tags": {},
+      "x": 1269903.9526173966,
+      "y": 6817826.357332929
+    },
+    {
+      "type": "node",
+      "id": 9026565279,
+      "lat": 52.2841602,
+      "lon": 11.4075361,
+      "tags": {},
+      "x": 1269881.1098578859,
+      "y": 6817845.779134994
+    },
+    {
+      "type": "node",
+      "id": 9026668458,
+      "lat": 52.282089,
+      "lon": 11.4123039,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:direction": "forward",
+        "railway:signal:main": "DE-ESO:hp",
+        "railway:signal:main:form": "semaphore",
+        "railway:signal:main:function": "exit",
+        "railway:signal:main:height": "normal",
+        "railway:signal:main:states": "DE-ESO:hp0;DE-ESO:hp1;DE-ESO:hp2;?",
+        "railway:signal:position": "right",
+        "ref": "E5"
+      },
+      "x": 1270411.85892609,
+      "y": 6817469.839505398
+    },
+    {
+      "type": "node",
+      "id": 9026668459,
+      "lat": 52.282405,
+      "lon": 11.4113905,
+      "tags": {},
+      "x": 1270310.1797031995,
+      "y": 6817527.194931368
+    },
+    {
+      "type": "node",
+      "id": 9026719925,
+      "lat": 52.2774781,
+      "lon": 11.4231809,
+      "tags": {},
+      "x": 1271622.6810274485,
+      "y": 6816632.9871045835
+    },
+    {
+      "type": "node",
+      "id": 9026719926,
+      "lat": 52.2776322,
+      "lon": 11.4227705,
+      "tags": {},
+      "x": 1271576.995508427,
+      "y": 6816660.953973939
+    },
+    {
+      "type": "node",
+      "id": 9026719927,
+      "lat": 52.278472,
+      "lon": 11.4205925,
+      "tags": {},
+      "x": 1271334.541657479,
+      "y": 6816813.366962723
+    },
+    {
+      "type": "node",
+      "id": 9026719929,
+      "lat": 52.279506,
+      "lon": 11.4182977,
+      "tags": {},
+      "x": 1271079.0856900068,
+      "y": 6817001.028761799
+    },
+    {
+      "type": "node",
+      "id": 9554403134,
+      "lat": 52.2778168,
+      "lon": 11.421848,
+      "tags": {},
+      "x": 1271474.30327817,
+      "y": 6816694.456270566
+    },
+    {
+      "type": "node",
+      "id": 9554403553,
+      "lat": 52.2778871,
+      "lon": 11.4215262,
+      "tags": {},
+      "x": 1271438.480666033,
+      "y": 6816707.214766015
+    },
+    {
+      "type": "node",
+      "id": 9556839614,
+      "lat": 52.2838461,
+      "lon": 11.407981,
+      "tags": {},
+      "x": 1269930.6358993398,
+      "y": 6817788.7662966745
+    },
+    {
+      "type": "node",
+      "id": 9556839615,
+      "lat": 52.2834139,
+      "lon": 11.4089274,
+      "tags": {},
+      "x": 1270035.9886654264,
+      "y": 6817710.317585549
+    },
+    {
+      "type": "node",
+      "id": 9556839616,
+      "lat": 52.2837838,
+      "lon": 11.4082176,
+      "tags": {},
+      "x": 1269956.9740908616,
+      "y": 6817777.458163389
+    },
+    {
+      "type": "node",
+      "id": 9556871217,
+      "lat": 52.2842012,
+      "lon": 11.4073483,
+      "tags": {},
+      "x": 1269860.2040575151,
+      "y": 6817853.221146407
+    },
+    {
+      "type": "node",
+      "id": 9556871218,
+      "lat": 52.2822954,
+      "lon": 11.4115295,
+      "tags": {},
+      "x": 1270325.6531124199,
+      "y": 6817507.30199023
+    },
+    {
+      "type": "node",
+      "id": 9556871219,
+      "lat": 52.2841801,
+      "lon": 11.4075637,
+      "tags": {},
+      "x": 1269884.182275832,
+      "y": 6817849.391232354
+    },
+    {
+      "type": "node",
+      "id": 9556871220,
+      "lat": 52.2842631,
+      "lon": 11.407354,
+      "tags": {},
+      "x": 1269860.8385786123,
+      "y": 6817864.4567816295
+    },
+    {
+      "type": "node",
+      "id": 9556871221,
+      "lat": 52.2844638,
+      "lon": 11.4068839,
+      "tags": {},
+      "x": 1269808.5072859905,
+      "y": 6817900.886486071
+    },
+    {
+      "type": "node",
+      "id": 9556871222,
+      "lat": 52.2819382,
+      "lon": 11.412634,
+      "tags": {},
+      "x": 1270448.6054900012,
+      "y": 6817442.468769793
+    },
+    {
+      "type": "node",
+      "id": 9556871223,
+      "lat": 52.2815807,
+      "lon": 11.4134316,
+      "tags": {},
+      "x": 1270537.3939158574,
+      "y": 6817377.581624079
+    },
+    {
+      "type": "node",
+      "id": 9556871224,
+      "lat": 52.281658,
+      "lon": 11.4131679,
+      "tags": {},
+      "x": 1270508.0389661354,
+      "y": 6817391.6117231725
+    },
+    {
+      "type": "node",
+      "id": 9556871225,
+      "lat": 52.2814052,
+      "lon": 11.4138919,
+      "tags": {},
+      "x": 1270588.6342774697,
+      "y": 6817345.7281269
+    },
+    {
+      "type": "node",
+      "id": 9556871226,
+      "lat": 52.2834032,
+      "lon": 11.4095067,
+      "tags": {},
+      "x": 1270100.476046443,
+      "y": 6817708.3754361
+    },
+    {
+      "type": "node",
+      "id": 9556871227,
+      "lat": 52.2814625,
+      "lon": 11.4138874,
+      "tags": {},
+      "x": 1270588.133339761,
+      "y": 6817356.128143663
+    },
+    {
+      "type": "node",
+      "id": 9556871228,
+      "lat": 52.2813279,
+      "lon": 11.4141051,
+      "tags": {},
+      "x": 1270612.367592907,
+      "y": 6817331.698108249
+    },
+    {
+      "type": "node",
+      "id": 9556871229,
+      "lat": 52.2820579,
+      "lon": 11.4127061,
+      "tags": {},
+      "x": 1270456.631625287,
+      "y": 6817464.194737275
+    },
+    {
+      "type": "node",
+      "id": 9556871246,
+      "lat": 52.2840068,
+      "lon": 11.4085154,
+      "tags": {},
+      "x": 1269990.1250352198,
+      "y": 6817817.935182948
+    },
+    {
+      "type": "node",
+      "id": 9556871248,
+      "lat": 52.285305,
+      "lon": 11.4056368,
+      "tags": {},
+      "x": 1269669.6807490222,
+      "y": 6818053.577216007
+    },
+    {
+      "type": "node",
+      "id": 9556871249,
+      "lat": 52.2854118,
+      "lon": 11.4053955,
+      "tags": {},
+      "x": 1269642.8193558936,
+      "y": 6818072.963266046
+    },
+    {
+      "type": "node",
+      "id": 9556871250,
+      "lat": 52.2850802,
+      "lon": 11.4059952,
+      "tags": {},
+      "x": 1269709.5776545226,
+      "y": 6818012.772275383
+    },
+    {
+      "type": "node",
+      "id": 9556871251,
+      "lat": 52.2852182,
+      "lon": 11.4055863,
+      "tags": {},
+      "x": 1269664.0591147372,
+      "y": 6818037.821547013
+    },
+    {
+      "type": "node",
+      "id": 9556871252,
+      "lat": 52.2851117,
+      "lon": 11.4057369,
+      "tags": {},
+      "x": 1269680.8238300506,
+      "y": 6818018.490037001
+    },
+    {
+      "type": "node",
+      "id": 9556871253,
+      "lat": 52.2851894,
+      "lon": 11.4055967,
+      "tags": {},
+      "x": 1269665.2168374415,
+      "y": 6818032.593866458
+    },
+    {
+      "type": "node",
+      "id": 9556871254,
+      "lat": 52.2850741,
+      "lon": 11.4056869,
+      "tags": {},
+      "x": 1269675.2578555108,
+      "y": 6818011.665026778
+    },
+    {
+      "type": "node",
+      "id": 9556871255,
+      "lat": 52.2853255,
+      "lon": 11.4051325,
+      "tags": {},
+      "x": 1269613.5423298152,
+      "y": 6818057.298317475
+    },
+    {
+      "type": "node",
+      "id": 9556871256,
+      "lat": 52.2854692,
+      "lon": 11.4048312,
+      "tags": {},
+      "x": 1269580.001767239,
+      "y": 6818083.382379759
+    },
+    {
+      "type": "node",
+      "id": 9556871257,
+      "lat": 52.2855269,
+      "lon": 11.4047261,
+      "tags": {},
+      "x": 1269568.3020887568,
+      "y": 6818093.855962442
+    },
+    {
+      "type": "node",
+      "id": 9556871258,
+      "lat": 52.2859745,
+      "lon": 11.4041349,
+      "tags": {},
+      "x": 1269502.4900057998,
+      "y": 6818175.103838985
+    },
+    {
+      "type": "node",
+      "id": 9557593946,
+      "lat": 52.2776347,
+      "lon": 11.4224271,
+      "tags": {},
+      "x": 1271538.7683952886,
+      "y": 6816661.407687745
+    },
+    {
+      "type": "node",
+      "id": 9557593948,
+      "lat": 52.2764222,
+      "lon": 11.4262976,
+      "tags": {},
+      "x": 1271969.6304844038,
+      "y": 6816441.359510702
+    },
+    {
+      "type": "node",
+      "id": 9557593949,
+      "lat": 52.2771453,
+      "lon": 11.4241046,
+      "tags": {},
+      "x": 1271725.5068410942,
+      "y": 6816572.589163385
+    },
+    {
+      "type": "node",
+      "id": 9557597457,
+      "lat": 52.2812416,
+      "lon": 11.4127245,
+      "tags": {},
+      "x": 1270458.6799039177,
+      "y": 6817316.0346106645
+    },
+    {
+      "type": "node",
+      "id": 9557597461,
+      "lat": 52.2812726,
+      "lon": 11.4129417,
+      "tags": {},
+      "x": 1270482.8584973179,
+      "y": 6817321.66112423
+    },
+    {
+      "type": "node",
+      "id": 9557597462,
+      "lat": 52.2813763,
+      "lon": 11.4125963,
+      "tags": {},
+      "x": 1270444.408745198,
+      "y": 6817340.482748355
+    },
+    {
+      "type": "node",
+      "id": 9557597463,
+      "lat": 52.2814287,
+      "lon": 11.4124463,
+      "tags": {},
+      "x": 1270427.710821579,
+      "y": 6817349.993402644
+    },
+    {
+      "type": "node",
+      "id": 9557597464,
+      "lat": 52.2826092,
+      "lon": 11.4095202,
+      "tags": {},
+      "x": 1270101.9788595687,
+      "y": 6817564.258371488
+    },
+    {
+      "type": "node",
+      "id": 9557597465,
+      "lat": 52.2828275,
+      "lon": 11.4090719,
+      "tags": {},
+      "x": 1270052.0743318463,
+      "y": 6817603.881230178
+    },
+    {
+      "type": "node",
+      "id": 9557597466,
+      "lat": 52.2813854,
+      "lon": 11.4128521,
+      "tags": {},
+      "x": 1270472.884270943,
+      "y": 6817342.134406972
+    },
+    {
+      "type": "node",
+      "id": 9557597467,
+      "lat": 52.2813232,
+      "lon": 11.4132641,
+      "tags": {},
+      "x": 1270518.7479011498,
+      "y": 6817330.845054868
+    },
+    {
+      "type": "node",
+      "id": 9557597468,
+      "lat": 52.2813685,
+      "lon": 11.4130693,
+      "tags": {},
+      "x": 1270497.0628643432,
+      "y": 6817339.067041241
+    },
+    {
+      "type": "node",
+      "id": 9557597469,
+      "lat": 52.2814614,
+      "lon": 11.4127492,
+      "tags": {},
+      "x": 1270461.4294953402,
+      "y": 6817355.928492254
+    },
+    {
+      "type": "node",
+      "id": 9557597470,
+      "lat": 52.2818804,
+      "lon": 11.4115275,
+      "tags": {},
+      "x": 1270325.4304734382,
+      "y": 6817431.977889323
+    },
+    {
+      "type": "node",
+      "id": 9557597471,
+      "lat": 52.2822801,
+      "lon": 11.410481,
+      "tags": {},
+      "x": 1270208.9346263232,
+      "y": 6817504.52496862
+    },
+    {
+      "type": "node",
+      "id": 9557597472,
+      "lat": 52.2825066,
+      "lon": 11.409942,
+      "tags": {},
+      "x": 1270148.9334207852,
+      "y": 6817545.635877179
+    },
+    {
+      "type": "node",
+      "id": 9557597473,
+      "lat": 52.2824297,
+      "lon": 11.4103227,
+      "tags": {},
+      "x": 1270191.3127509304,
+      "y": 6817531.6781101525
+    },
+    {
+      "type": "node",
+      "id": 9557597474,
+      "lat": 52.2819161,
+      "lon": 11.4116778,
+      "tags": {},
+      "x": 1270342.1617929044,
+      "y": 6817438.457549166
+    },
+    {
+      "type": "node",
+      "id": 9557597475,
+      "lat": 52.2821692,
+      "lon": 11.4111627,
+      "tags": {},
+      "x": 1270284.8211231967,
+      "y": 6817484.396128381
+    },
+    {
+      "type": "node",
+      "id": 9557597476,
+      "lat": 52.2824867,
+      "lon": 11.4102997,
+      "tags": {},
+      "x": 1270188.752402642,
+      "y": 6817542.023916928
+    },
+    {
+      "type": "node",
+      "id": 9557597477,
+      "lat": 52.2827175,
+      "lon": 11.4096365,
+      "tags": {},
+      "x": 1270114.925316348,
+      "y": 6817583.915495825
+    },
+    {
+      "type": "node",
+      "id": 9557597478,
+      "lat": 52.2825139,
+      "lon": 11.4104173,
+      "tags": {},
+      "x": 1270201.8435747596,
+      "y": 6817546.960868033
+    },
+    {
+      "type": "node",
+      "id": 9557597479,
+      "lat": 52.2821846,
+      "lon": 11.4112896,
+      "tags": {},
+      "x": 1270298.9475665786,
+      "y": 6817487.1912934305
+    },
+    {
+      "type": "node",
+      "id": 9557606719,
+      "lat": 52.2783217,
+      "lon": 11.4210807,
+      "tags": {},
+      "x": 1271388.8878328842,
+      "y": 6816786.089216463
+    },
+    {
+      "type": "node",
+      "id": 9557606720,
+      "lat": 52.2797953,
+      "lon": 11.4177669,
+      "tags": {},
+      "x": 1271019.9973042938,
+      "y": 6817053.534925364
+    },
+    {
+      "type": "node",
+      "id": 9557606721,
+      "lat": 52.2795347,
+      "lon": 11.4183464,
+      "tags": {},
+      "x": 1271084.5069492084,
+      "y": 6817006.237619184
+    },
+    {
+      "type": "node",
+      "id": 9557606722,
+      "lat": 52.2798518,
+      "lon": 11.4175195,
+      "tags": {},
+      "x": 1270992.4568622715,
+      "y": 6817063.789366684
+    },
+    {
+      "type": "node",
+      "id": 9557606723,
+      "lat": 52.2805082,
+      "lon": 11.4161167,
+      "tags": {},
+      "x": 1270836.2978805867,
+      "y": 6817182.923343613
+    },
+    {
+      "type": "node",
+      "id": 9557606724,
+      "lat": 52.2806499,
+      "lon": 11.4157397,
+      "tags": {},
+      "x": 1270794.3304325575,
+      "y": 6817208.641560112
+    },
+    {
+      "type": "node",
+      "id": 9557606725,
+      "lat": 52.2809642,
+      "lon": 11.4150203,
+      "tags": {},
+      "x": 1270714.2471908808,
+      "y": 6817265.686565368
+    },
+    {
+      "type": "node",
+      "id": 9557606726,
+      "lat": 52.2807804,
+      "lon": 11.4155696,
+      "tags": {},
+      "x": 1270775.3949871736,
+      "y": 6817232.327076083
+    },
+    {
+      "type": "node",
+      "id": 9557606727,
+      "lat": 52.2809203,
+      "lon": 11.4153076,
+      "tags": {},
+      "x": 1270746.229280586,
+      "y": 6817257.718753056
+    },
+    {
+      "type": "node",
+      "id": 9557606728,
+      "lat": 52.2808862,
+      "lon": 11.4154266,
+      "tags": {},
+      "x": 1270759.4762999902,
+      "y": 6817251.529637805
+    },
+    {
+      "type": "node",
+      "id": 9557606729,
+      "lat": 52.2809322,
+      "lon": 11.4153185,
+      "tags": {},
+      "x": 1270747.4426630356,
+      "y": 6817259.878592055
+    },
+    {
+      "type": "node",
+      "id": 11982814549,
+      "lat": 52.286056,
+      "lon": 11.4037296,
+      "tags": {},
+      "x": 1269457.3722161814,
+      "y": 6818189.897721191
+    },
+    {
+      "type": "node",
+      "id": 11982814550,
+      "lat": 52.2860859,
+      "lon": 11.4037756,
+      "tags": {},
+      "x": 1269462.4929127577,
+      "y": 6818195.325176859
+    },
+    {
+      "type": "node",
+      "id": 11982814551,
+      "lat": 52.2861163,
+      "lon": 11.4038211,
+      "tags": {},
+      "x": 1269467.5579495889,
+      "y": 6818200.843396429
+    },
+    {
+      "type": "node",
+      "id": 11999098596,
+      "lat": 52.2862204,
+      "lon": 11.4035824,
+      "tags": {},
+      "x": 1269440.9859871364,
+      "y": 6818219.7396968715
+    },
+    {
+      "type": "node",
+      "id": 11999098597,
+      "lat": 52.2861906,
+      "lon": 11.4035389,
+      "tags": {},
+      "x": 1269436.1435892868,
+      "y": 6818214.330376719
+    },
+    {
+      "type": "node",
+      "id": 11999098598,
+      "lat": 52.2861628,
+      "lon": 11.4034985,
+      "tags": {},
+      "x": 1269431.646281859,
+      "y": 6818209.284101485
+    },
+    {
+      "type": "node",
+      "id": 12640701001,
+      "lat": 52.2779551,
+      "lon": 11.4219655,
+      "tags": {},
+      "x": 1271487.3833183383,
+      "y": 6816719.555862049
+    },
+    {
+      "type": "node",
+      "id": 12640701002,
+      "lat": 52.2778603,
+      "lon": 11.4219523,
+      "tags": {},
+      "x": 1271485.91390106,
+      "y": 6816702.350927514
+    },
+    {
+      "type": "node",
+      "id": 12640701003,
+      "lat": 52.2777937,
+      "lon": 11.421928,
+      "tags": {},
+      "x": 1271483.2088374335,
+      "y": 6816690.263938663
+    },
+    {
+      "type": "node",
+      "id": 12640701069,
+      "lat": 52.2777451,
+      "lon": 11.4220915,
+      "tags": {},
+      "x": 1271501.4095741783,
+      "y": 6816681.443715077
+    },
+    {
+      "type": "node",
+      "id": 12640701070,
+      "lat": 52.2777969,
+      "lon": 11.4220929,
+      "tags": {},
+      "x": 1271501.5654214656,
+      "y": 6816690.844694468
+    },
+    {
+      "type": "node",
+      "id": 12640701071,
+      "lat": 52.2779048,
+      "lon": 11.422089,
+      "tags": {},
+      "x": 1271501.1312754513,
+      "y": 6816710.427078885
+    },
+    {
+      "type": "way",
+      "id": 18516735,
+      "geometry": [
+        {
+          "lat": 52.276381009929054,
+          "lon": 11.42642387321525,
+          "x": 1271983.6871544262,
+          "y": 6816433.884317972
+        },
+        {
+          "lat": 52.2764222,
+          "lon": 11.4262976,
+          "x": 1271969.6304844038,
+          "y": 6816441.359510702
+        },
+        {
+          "lat": 52.2769454,
+          "lon": 11.4246985,
+          "x": 1271791.6194866765,
+          "y": 6816536.310691264
+        },
+        {
+          "lat": 52.2771453,
+          "lon": 11.4241046,
+          "x": 1271725.5068410942,
+          "y": 6816572.589163385
+        },
+        {
+          "lat": 52.2772935,
+          "lon": 11.4236859,
+          "x": 1271678.897370299,
+          "y": 6816599.4850652795
+        },
+        {
+          "lat": 52.2774781,
+          "lon": 11.4231809,
+          "x": 1271622.6810274485,
+          "y": 6816632.9871045835
+        },
+        {
+          "lat": 52.2776322,
+          "lon": 11.4227705,
+          "x": 1271576.995508427,
+          "y": 6816660.953973939
+        },
+        {
+          "lat": 52.2779048,
+          "lon": 11.422089,
+          "x": 1271501.1312754513,
+          "y": 6816710.427078885
+        },
+        {
+          "lat": 52.2779309,
+          "lon": 11.4220239,
+          "x": 1271493.8843766006,
+          "y": 6816715.163881573
+        },
+        {
+          "lat": 52.2779551,
+          "lon": 11.4219655,
+          "x": 1271487.3833183383,
+          "y": 6816719.555862049
+        },
+        {
+          "lat": 52.2783217,
+          "lon": 11.4210807,
+          "x": 1271388.8878328842,
+          "y": 6816786.089216463
+        },
+        {
+          "lat": 52.2786924,
+          "lon": 11.4202321,
+          "x": 1271294.4221129972,
+          "y": 6816853.367232495
+        },
+        {
+          "lat": 52.278977,
+          "lon": 11.4195906,
+          "x": 1271223.0106596535,
+          "y": 6816905.019419268
+        },
+        {
+          "lat": 52.2795347,
+          "lon": 11.4183464,
+          "x": 1271084.5069492084,
+          "y": 6817006.237619184
+        },
+        {
+          "lat": 52.2797953,
+          "lon": 11.4177669,
+          "x": 1271019.9973042938,
+          "y": 6817053.534925364
+        },
+        {
+          "lat": 52.2802379,
+          "lon": 11.4167569,
+          "x": 1270907.5646185924,
+          "y": 6817133.864758983
+        },
+        {
+          "lat": 52.2803252,
+          "lon": 11.4165633,
+          "x": 1270886.0131651748,
+          "y": 6817149.709396609
+        },
+        {
+          "lat": 52.2803808,
+          "lon": 11.4164315,
+          "x": 1270871.3412562883,
+          "y": 6817159.800614015
+        },
+        {
+          "lat": 52.2806501,
+          "lon": 11.4158311,
+          "x": 1270804.5050340162,
+          "y": 6817208.6778597
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "maxspeed": "100",
+        "operator": "DB Netz AG",
+        "passenger_lines": "1",
+        "proposed:electrified": "contact_line",
+        "proposed:frequency": "16.7",
+        "proposed:voltage": "15000",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "ref": "6409",
+        "usage": "main"
+      }
+    },
+    {
+      "type": "way",
+      "id": 38050800,
+      "geometry": [
+        {
+          "lat": 52.2859623,
+          "lon": 11.4040419,
+          "x": 1269492.137293156,
+          "y": 6818172.889297009
+        },
+        {
+          "lat": 52.2860525,
+          "lon": 11.4038509,
+          "x": 1269470.8752704146,
+          "y": 6818189.262400535
+        },
+        {
+          "lat": 52.2860859,
+          "lon": 11.4037756,
+          "x": 1269462.4929127577,
+          "y": 6818195.325176859
+        },
+        {
+          "lat": 52.2861283,
+          "lon": 11.4036799,
+          "x": 1269451.8396374888,
+          "y": 6818203.021642041
+        },
+        {
+          "lat": 52.2861906,
+          "lon": 11.4035389,
+          "x": 1269436.1435892868,
+          "y": 6818214.330376719
+        },
+        {
+          "lat": 52.28639484253827,
+          "lon": 11.40308966252994,
+          "x": 1269386.1347028746,
+          "y": 6818251.404721149
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "maxspeed": "100",
+        "operator": "DB Netz AG",
+        "passenger_lines": "2",
+        "proposed:electrified": "contact_line",
+        "proposed:frequency": "16.7",
+        "proposed:voltage": "15000",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "ref": "6409",
+        "usage": "main"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273032,
+      "geometry": [
+        {
+          "lat": 52.2810274,
+          "lon": 11.4151029,
+          "x": 1270723.4421808205,
+          "y": 6817277.157325041
+        },
+        {
+          "lat": 52.281112,
+          "lon": 11.4149273,
+          "x": 1270703.894478237,
+          "y": 6817292.512196797
+        },
+        {
+          "lat": 52.2814468,
+          "lon": 11.4141861,
+          "x": 1270621.3844716612,
+          "y": 6817353.278574025
+        },
+        {
+          "lat": 52.2826644,
+          "lon": 11.4114886,
+          "x": 1270321.1001452464,
+          "y": 6817574.27750916
+        },
+        {
+          "lat": 52.2828495,
+          "lon": 11.4110772,
+          "x": 1270275.303306734,
+          "y": 6817607.874383026
+        },
+        {
+          "lat": 52.2835257,
+          "lon": 11.4095825,
+          "x": 1270108.9140638453,
+          "y": 6817730.610352865
+        },
+        {
+          "lat": 52.2838577,
+          "lon": 11.408846,
+          "x": 1270026.9272588762,
+          "y": 6817790.871825663
+        },
+        {
+          "lat": 52.2840068,
+          "lon": 11.4085154,
+          "x": 1269990.1250352198,
+          "y": 6817817.935182948
+        },
+        {
+          "lat": 52.2841597,
+          "lon": 11.4081765,
+          "x": 1269952.3988597898,
+          "y": 6817845.6883788
+        },
+        {
+          "lat": 52.2850124,
+          "lon": 11.406282,
+          "x": 1269741.5040844819,
+          "y": 6818000.465488043
+        },
+        {
+          "lat": 52.2851167,
+          "lon": 11.4060536,
+          "x": 1269716.078712785,
+          "y": 6818019.397618583
+        },
+        {
+          "lat": 52.285305,
+          "lon": 11.4056368,
+          "x": 1269669.6807490222,
+          "y": 6818053.577216007
+        },
+        {
+          "lat": 52.2854118,
+          "lon": 11.4053955,
+          "x": 1269642.8193558936,
+          "y": 6818072.963266046
+        },
+        {
+          "lat": 52.2858346,
+          "lon": 11.4044487,
+          "x": 1269537.4220620107,
+          "y": 6818149.709250969
+        },
+        {
+          "lat": 52.2859745,
+          "lon": 11.4041349,
+          "x": 1269502.4900057998,
+          "y": 6818175.103838985
+        },
+        {
+          "lat": 52.2861163,
+          "lon": 11.4038211,
+          "x": 1269467.5579495889,
+          "y": 6818200.843396429
+        },
+        {
+          "lat": 52.286161,
+          "lon": 11.4037221,
+          "x": 1269456.5373200004,
+          "y": 6818208.957364351
+        },
+        {
+          "lat": 52.2862204,
+          "lon": 11.4035824,
+          "x": 1269440.9859871364,
+          "y": 6818219.7396968715
+        },
+        {
+          "lat": 52.2863742,
+          "lon": 11.4032543,
+          "x": 1269404.4620622073,
+          "y": 6818247.6576556545
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "passenger_lines": "2",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "railway:track_ref": "1",
+        "railway:traffic_mode": "mixed",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273033,
+      "geometry": [
+        {
+          "lat": 52.2811156,
+          "lon": 11.4146805,
+          "x": 1270676.4208279094,
+          "y": 6817293.165596248
+        },
+        {
+          "lat": 52.2812194,
+          "lon": 11.4144182,
+          "x": 1270647.221725474,
+          "y": 6817312.005303384
+        },
+        {
+          "lat": 52.2813279,
+          "lon": 11.4141051,
+          "x": 1270612.367592907,
+          "y": 6817331.698108249
+        },
+        {
+          "lat": 52.2814052,
+          "lon": 11.4138919,
+          "x": 1270588.6342774697,
+          "y": 6817345.7281269
+        },
+        {
+          "lat": 52.2814968,
+          "lon": 11.4136344,
+          "x": 1270559.9695085904,
+          "y": 6817362.3536400935
+        },
+        {
+          "lat": 52.2815807,
+          "lon": 11.4134316,
+          "x": 1270537.3939158574,
+          "y": 6817377.581624079
+        },
+        {
+          "lat": 52.2816662,
+          "lon": 11.4132386,
+          "x": 1270515.9092541344,
+          "y": 6817393.100040432
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273034,
+      "geometry": [
+        {
+          "lat": 52.277566,
+          "lon": 11.4226109,
+          "x": 1271559.2289176965,
+          "y": 6816648.93964171
+        },
+        {
+          "lat": 52.2776347,
+          "lon": 11.4224271,
+          "x": 1271538.7683952886,
+          "y": 6816661.407687745
+        },
+        {
+          "lat": 52.2777,
+          "lon": 11.4222369,
+          "x": 1271517.5954281397,
+          "y": 6816673.258701475
+        },
+        {
+          "lat": 52.2777451,
+          "lon": 11.4220915,
+          "x": 1271501.4095741783,
+          "y": 6816681.443715077
+        },
+        {
+          "lat": 52.2777661,
+          "lon": 11.4220235,
+          "x": 1271493.8398488045,
+          "y": 6816685.254921608
+        },
+        {
+          "lat": 52.2777937,
+          "lon": 11.421928,
+          "x": 1271483.2088374335,
+          "y": 6816690.263938663
+        },
+        {
+          "lat": 52.2778168,
+          "lon": 11.421848,
+          "x": 1271474.30327817,
+          "y": 6816694.456270566
+        },
+        {
+          "lat": 52.2778554,
+          "lon": 11.421683,
+          "x": 1271455.9355621892,
+          "y": 6816701.461643929
+        },
+        {
+          "lat": 52.2778871,
+          "lon": 11.4215262,
+          "x": 1271438.480666033,
+          "y": 6816707.214766015
+        },
+        {
+          "lat": 52.27789227299272,
+          "lon": 11.421499747626955,
+          "x": 1271435.5360013351,
+          "y": 6816708.153594759
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "spur",
+        "usage": "industrial"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273035,
+      "geometry": [
+        {
+          "lat": 52.2853484,
+          "lon": 11.4052945,
+          "x": 1269631.5760873237,
+          "y": 6818061.455062136
+        },
+        {
+          "lat": 52.2852182,
+          "lon": 11.4055863,
+          "x": 1269664.0591147372,
+          "y": 6818037.821547013
+        },
+        {
+          "lat": 52.2850564,
+          "lon": 11.4059381,
+          "x": 1269703.221311598,
+          "y": 6818008.4521915335
+        },
+        {
+          "lat": 52.2840931,
+          "lon": 11.4080827,
+          "x": 1269941.9570915534,
+          "y": 6817833.599662954
+        },
+        {
+          "lat": 52.2827786,
+          "lon": 11.4110002,
+          "x": 1270266.731705943,
+          "y": 6817595.005547575
+        },
+        {
+          "lat": 52.2817227,
+          "lon": 11.4133381,
+          "x": 1270526.9855434685,
+          "y": 6817403.354916874
+        },
+        {
+          "lat": 52.281374,
+          "lon": 11.4141074,
+          "x": 1270612.6236277358,
+          "y": 6817340.06529623
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "railway:track_ref": "3",
+        "railway:traffic_mode": "mixed",
+        "ref": "6891",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273036,
+      "geometry": [
+        {
+          "lat": 52.28644769783854,
+          "lon": 11.403091478170026,
+          "x": 1269386.3368190047,
+          "y": 6818260.99910505
+        },
+        {
+          "lat": 52.2863742,
+          "lon": 11.4032543,
+          "x": 1269404.4620622073,
+          "y": 6818247.6576556545
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "1b",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273037,
+      "geometry": [
+        {
+          "lat": 52.2840993,
+          "lon": 11.4075282,
+          "x": 1269880.2304339085,
+          "y": 6817834.725038132
+        },
+        {
+          "lat": 52.283902,
+          "lon": 11.4078747,
+          "x": 1269918.8026374686,
+          "y": 6817798.912773368
+        },
+        {
+          "lat": 52.2838461,
+          "lon": 11.407981,
+          "x": 1269930.6358993398,
+          "y": 6817788.7662966745
+        },
+        {
+          "lat": 52.283795,
+          "lon": 11.4080906,
+          "x": 1269942.8365155307,
+          "y": 6817779.491085048
+        },
+        {
+          "lat": 52.2834139,
+          "lon": 11.4089274,
+          "x": 1270035.9886654264,
+          "y": 6817710.317585549
+        },
+        {
+          "lat": 52.2825492,
+          "lon": 11.4108459,
+          "x": 1270249.5551085135,
+          "y": 6817553.3680186765
+        },
+        {
+          "lat": 52.2823374,
+          "lon": 11.4113182,
+          "x": 1270302.1313040152,
+          "y": 6817514.925191756
+        },
+        {
+          "lat": 52.2822391,
+          "lon": 11.4115488,
+          "x": 1270327.8015785923,
+          "y": 6817497.083281478
+        },
+        {
+          "lat": 52.2821576,
+          "lon": 11.4117668,
+          "x": 1270352.069227585,
+          "y": 6817482.290680027
+        },
+        {
+          "lat": 52.2820527,
+          "lon": 11.4120601,
+          "x": 1270384.7192342347,
+          "y": 6817463.250917913
+        },
+        {
+          "lat": 52.2818731,
+          "lon": 11.4125708,
+          "x": 1270441.5700981827,
+          "y": 6817430.652917507
+        },
+        {
+          "lat": 52.281658,
+          "lon": 11.4131679,
+          "x": 1270508.0389661354,
+          "y": 6817391.6117231725
+        },
+        {
+          "lat": 52.2814968,
+          "lon": 11.4136344,
+          "x": 1270559.9695085904,
+          "y": 6817362.3536400935
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "9",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273038,
+      "geometry": [
+        {
+          "lat": 52.2859623,
+          "lon": 11.4040419,
+          "x": 1269492.137293156,
+          "y": 6818172.889297009
+        },
+        {
+          "lat": 52.2858125,
+          "lon": 11.4043451,
+          "x": 1269525.8893627645,
+          "y": 6818145.697675813
+        },
+        {
+          "lat": 52.2856458,
+          "lon": 11.4046666,
+          "x": 1269561.6785790545,
+          "y": 6818115.438483681
+        },
+        {
+          "lat": 52.285527,
+          "lon": 11.4049029,
+          "x": 1269587.983374729,
+          "y": 6818093.874114244
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "ref": "6891",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273039,
+      "geometry": [
+        {
+          "lat": 52.2863742,
+          "lon": 11.4032543,
+          "x": 1269404.4620622073,
+          "y": 6818247.6576556545
+        },
+        {
+          "lat": 52.286441482911385,
+          "lon": 11.403091264680162,
+          "x": 1269386.3130534214,
+          "y": 6818259.870960317
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "passenger_lines": "2",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273042,
+      "geometry": [
+        {
+          "lat": 52.279506,
+          "lon": 11.4182977,
+          "x": 1271079.0856900068,
+          "y": 6817001.028761799
+        },
+        {
+          "lat": 52.2789464,
+          "lon": 11.419545,
+          "x": 1271217.9344908732,
+          "y": 6816899.465794999
+        },
+        {
+          "lat": 52.278472,
+          "lon": 11.4205925,
+          "x": 1271334.541657479,
+          "y": 6816813.366962723
+        },
+        {
+          "lat": 52.278006,
+          "lon": 11.4216321,
+          "x": 1271450.269400108,
+          "y": 6816728.793547854
+        },
+        {
+          "lat": 52.2778603,
+          "lon": 11.4219523,
+          "x": 1271485.91390106,
+          "y": 6816702.350927514
+        },
+        {
+          "lat": 52.2778271,
+          "lon": 11.4220252,
+          "x": 1271494.0290919389,
+          "y": 6816696.32557944
+        },
+        {
+          "lat": 52.2777969,
+          "lon": 11.4220929,
+          "x": 1271501.5654214656,
+          "y": 6816690.844694468
+        },
+        {
+          "lat": 52.277566,
+          "lon": 11.4226109,
+          "x": 1271559.2289176965,
+          "y": 6816648.93964171
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "ref": "6891",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177273043,
+      "geometry": [
+        {
+          "lat": 52.281374,
+          "lon": 11.4141074,
+          "x": 1270612.6236277358,
+          "y": 6817340.06529623
+        },
+        {
+          "lat": 52.2814625,
+          "lon": 11.4138874,
+          "x": 1270588.133339761,
+          "y": 6817356.128143663
+        },
+        {
+          "lat": 52.281653,
+          "lon": 11.4133925,
+          "x": 1270533.0413237677,
+          "y": 6817390.704212785
+        },
+        {
+          "lat": 52.2817161,
+          "lon": 11.4132438,
+          "x": 1270516.4881154867,
+          "y": 6817402.1570014255
+        },
+        {
+          "lat": 52.2827477,
+          "lon": 11.4109569,
+          "x": 1270261.9115719916,
+          "y": 6817589.396992478
+        },
+        {
+          "lat": 52.2834032,
+          "lon": 11.4095067,
+          "x": 1270100.476046443,
+          "y": 6817708.3754361
+        },
+        {
+          "lat": 52.2840615,
+          "lon": 11.4080459,
+          "x": 1269937.8605342922,
+          "y": 6817827.863882244
+        },
+        {
+          "lat": 52.2845683,
+          "lon": 11.4069193,
+          "x": 1269812.4479959647,
+          "y": 6817919.854683833
+        },
+        {
+          "lat": 52.284964,
+          "lon": 11.4060383,
+          "x": 1269714.3755245758,
+          "y": 6817991.680123412
+        },
+        {
+          "lat": 52.2850527,
+          "lon": 11.4058453,
+          "x": 1269692.8908628526,
+          "y": 6818007.780582071
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "railway:track_ref": "4",
+        "railway:traffic_mode": "mixed",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575706,
+      "geometry": [
+        {
+          "lat": 52.2832066,
+          "lon": 11.4086496,
+          "x": 1270005.0641108842,
+          "y": 6817672.690792695
+        },
+        {
+          "lat": 52.2830519,
+          "lon": 11.4089656,
+          "x": 1270040.2410699748,
+          "y": 6817644.611482721
+        },
+        {
+          "lat": 52.2829881,
+          "lon": 11.4091081,
+          "x": 1270056.104097413,
+          "y": 6817633.031291788
+        },
+        {
+          "lat": 52.2829153,
+          "lon": 11.4092849,
+          "x": 1270075.7853833851,
+          "y": 6817619.817552073
+        },
+        {
+          "lat": 52.282841,
+          "lon": 11.409498,
+          "x": 1270099.5075668732,
+          "y": 6817606.331573735
+        },
+        {
+          "lat": 52.2827194,
+          "lon": 11.4098403,
+          "x": 1270137.612228572,
+          "y": 6817584.260358087
+        },
+        {
+          "lat": 52.2825139,
+          "lon": 11.4104173,
+          "x": 1270201.8435747596,
+          "y": 6817546.960868033
+        },
+        {
+          "lat": 52.282299,
+          "lon": 11.4110077,
+          "x": 1270267.566602124,
+          "y": 6817507.955407219
+        },
+        {
+          "lat": 52.2821846,
+          "lon": 11.4112896,
+          "x": 1270298.9475665786,
+          "y": 6817487.1912934305
+        },
+        {
+          "lat": 52.2819104,
+          "lon": 11.4119438,
+          "x": 1270371.7727774554,
+          "y": 6817437.422981278
+        },
+        {
+          "lat": 52.2818653,
+          "lon": 11.4120456,
+          "x": 1270383.1051016182,
+          "y": 6817429.23719444
+        },
+        {
+          "lat": 52.28181,
+          "lon": 11.4121566,
+          "x": 1270395.4615650962,
+          "y": 6817419.200088084
+        },
+        {
+          "lat": 52.2817664,
+          "lon": 11.4122434,
+          "x": 1270405.1240968972,
+          "y": 6817411.286573685
+        },
+        {
+          "lat": 52.2817154,
+          "lon": 11.4123407,
+          "x": 1270415.9554833514,
+          "y": 6817402.029949799
+        },
+        {
+          "lat": 52.2816222,
+          "lon": 11.4125469,
+          "x": 1270438.909562353,
+          "y": 6817385.113951066
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "10",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575708,
+      "geometry": [
+        {
+          "lat": 52.282438,
+          "lon": 11.4096061,
+          "x": 1270111.5412038278,
+          "y": 6817533.18460399
+        },
+        {
+          "lat": 52.2826562,
+          "lon": 11.409297,
+          "x": 1270077.1323492238,
+          "y": 6817572.789158205
+        },
+        {
+          "lat": 52.2828275,
+          "lon": 11.4090719,
+          "x": 1270052.0743318463,
+          "y": 6817603.881230178
+        },
+        {
+          "lat": 52.2829818,
+          "lon": 11.408868,
+          "x": 1270029.3762876734,
+          "y": 6817631.88779422
+        },
+        {
+          "lat": 52.2831946,
+          "lon": 11.4086059,
+          "x": 1270000.1994491366,
+          "y": 6817670.5126914345
+        },
+        {
+          "lat": 52.2834175,
+          "lon": 11.4083223,
+          "x": 1269968.6292415475,
+          "y": 6817710.971019116
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575711,
+      "geometry": [
+        {
+          "lat": 52.2843156,
+          "lon": 11.407148,
+          "x": 1269837.906763509,
+          "y": 6817873.986209973
+        },
+        {
+          "lat": 52.2841811,
+          "lon": 11.4073454,
+          "x": 1269859.8812309916,
+          "y": 6817849.572744823
+        },
+        {
+          "lat": 52.2840271,
+          "lon": 11.4075541,
+          "x": 1269883.1136087202,
+          "y": 6817821.619872475
+        },
+        {
+          "lat": 52.2838384,
+          "lon": 11.4077949,
+          "x": 1269909.9193421032,
+          "y": 6817787.368661359
+        },
+        {
+          "lat": 52.2836714,
+          "lon": 11.4080006,
+          "x": 1269932.8177613593,
+          "y": 6817757.056371047
+        },
+        {
+          "lat": 52.2835389,
+          "lon": 11.408166,
+          "x": 1269951.2300051365,
+          "y": 6817733.00628228
+        },
+        {
+          "lat": 52.2834175,
+          "lon": 11.4083223,
+          "x": 1269968.6292415475,
+          "y": 6817710.971019116
+        },
+        {
+          "lat": 52.2832066,
+          "lon": 11.4086496,
+          "x": 1270005.0641108842,
+          "y": 6817672.690792695
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575713,
+      "geometry": [
+        {
+          "lat": 52.2840993,
+          "lon": 11.4075282,
+          "x": 1269880.2304339085,
+          "y": 6817834.725038132
+        },
+        {
+          "lat": 52.2839904,
+          "lon": 11.407758,
+          "x": 1269905.8116528927,
+          "y": 6817814.958390678
+        },
+        {
+          "lat": 52.2837838,
+          "lon": 11.4082176,
+          "x": 1269956.9740908616,
+          "y": 6817777.458163389
+        },
+        {
+          "lat": 52.2826433,
+          "lon": 11.4107489,
+          "x": 1270238.7571179066,
+          "y": 6817570.447728605
+        },
+        {
+          "lat": 52.2824135,
+          "lon": 11.4112507,
+          "x": 1270294.6172383865,
+          "y": 6817528.737725404
+        },
+        {
+          "lat": 52.2822954,
+          "lon": 11.4115295,
+          "x": 1270325.6531124199,
+          "y": 6817507.30199023
+        },
+        {
+          "lat": 52.2822228,
+          "lon": 11.411707,
+          "x": 1270345.4123220355,
+          "y": 6817494.124759001
+        },
+        {
+          "lat": 52.2820699,
+          "lon": 11.412143,
+          "x": 1270393.9476200214,
+          "y": 6817466.372782382
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "8",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575714,
+      "geometry": [
+        {
+          "lat": 52.281155,
+          "lon": 11.4130303,
+          "x": 1270492.7214042023,
+          "y": 6817300.316693733
+        },
+        {
+          "lat": 52.2812416,
+          "lon": 11.4127245,
+          "x": 1270458.6799039177,
+          "y": 6817316.0346106645
+        },
+        {
+          "lat": 52.2813145,
+          "lon": 11.4124901,
+          "x": 1270432.5866152756,
+          "y": 6817329.265998848
+        },
+        {
+          "lat": 52.2814117,
+          "lon": 11.4122184,
+          "x": 1270402.3411096272,
+          "y": 6817346.907883793
+        },
+        {
+          "lat": 52.2816484,
+          "lon": 11.4116166,
+          "x": 1270335.349040068,
+          "y": 6817389.86930332
+        },
+        {
+          "lat": 52.2818885,
+          "lon": 11.4110142,
+          "x": 1270268.290178814,
+          "y": 6817433.448063786
+        },
+        {
+          "lat": 52.282126,
+          "lon": 11.4104069,
+          "x": 1270200.6858520552,
+          "y": 6817476.555151113
+        },
+        {
+          "lat": 52.2822324,
+          "lon": 11.4101527,
+          "x": 1270172.3884374956,
+          "y": 6817495.867201554
+        },
+        {
+          "lat": 52.2823348,
+          "lon": 11.4098992,
+          "x": 1270144.1689465793,
+          "y": 6817514.4532790715
+        },
+        {
+          "lat": 52.2824211,
+          "lon": 11.4097083,
+          "x": 1270122.9180557872,
+          "y": 6817530.117165029
+        },
+        {
+          "lat": 52.2824953,
+          "lon": 11.4095591,
+          "x": 1270106.3091877606,
+          "y": 6817543.584864374
+        },
+        {
+          "lat": 52.2826562,
+          "lon": 11.409297,
+          "x": 1270077.1323492238,
+          "y": 6817572.789158205
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "22",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575715,
+      "geometry": [
+        {
+          "lat": 52.2812009,
+          "lon": 11.4132148,
+          "x": 1270513.2598502536,
+          "y": 6817308.647548863
+        },
+        {
+          "lat": 52.2812726,
+          "lon": 11.4129417,
+          "x": 1270482.8584973179,
+          "y": 6817321.66112423
+        },
+        {
+          "lat": 52.2813275,
+          "lon": 11.4127476,
+          "x": 1270461.251384155,
+          "y": 6817331.625507958
+        },
+        {
+          "lat": 52.2813763,
+          "lon": 11.4125963,
+          "x": 1270444.408745198,
+          "y": 6817340.482748355
+        },
+        {
+          "lat": 52.2814287,
+          "lon": 11.4124463,
+          "x": 1270427.710821579,
+          "y": 6817349.993402644
+        },
+        {
+          "lat": 52.2815024,
+          "lon": 11.4122429,
+          "x": 1270405.0684371518,
+          "y": 6817363.370048133
+        },
+        {
+          "lat": 52.281978,
+          "lon": 11.4110343,
+          "x": 1270270.527700579,
+          "y": 6817449.692602061
+        },
+        {
+          "lat": 52.2822327,
+          "lon": 11.4103892,
+          "x": 1270198.7154970681,
+          "y": 6817495.921652892
+        },
+        {
+          "lat": 52.2823747,
+          "lon": 11.4100381,
+          "x": 1270159.6312238507,
+          "y": 6817521.69532682
+        },
+        {
+          "lat": 52.2825064,
+          "lon": 11.4097379,
+          "x": 1270126.2131127145,
+          "y": 6817545.599576063
+        },
+        {
+          "lat": 52.2826092,
+          "lon": 11.4095202,
+          "x": 1270101.9788595687,
+          "y": 6817564.258371488
+        },
+        {
+          "lat": 52.2826876,
+          "lon": 11.4093688,
+          "x": 1270085.1250886626,
+          "y": 6817578.488454827
+        },
+        {
+          "lat": 52.2827802,
+          "lon": 11.4091902,
+          "x": 1270065.243427607,
+          "y": 6817595.295958302
+        },
+        {
+          "lat": 52.2829818,
+          "lon": 11.408868,
+          "x": 1270029.3762876734,
+          "y": 6817631.88779422
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "20",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575716,
+      "geometry": [
+        {
+          "lat": 52.2811273,
+          "lon": 11.412776,
+          "x": 1270464.4128576936,
+          "y": 6817295.2891448345
+        },
+        {
+          "lat": 52.2811714,
+          "lon": 11.4126137,
+          "x": 1270446.3457043378,
+          "y": 6817303.293294571
+        },
+        {
+          "lat": 52.281224,
+          "lon": 11.4124412,
+          "x": 1270427.143092176,
+          "y": 6817312.840204726
+        },
+        {
+          "lat": 52.2812875,
+          "lon": 11.4122534,
+          "x": 1270406.2372918052,
+          "y": 6817324.365482156
+        },
+        {
+          "lat": 52.2813738,
+          "lon": 11.4120219,
+          "x": 1270380.4668296862,
+          "y": 6817340.028996047
+        },
+        {
+          "lat": 52.2814665,
+          "lon": 11.4117862,
+          "x": 1270354.2288257063,
+          "y": 6817356.854148828
+        },
+        {
+          "lat": 52.2820404,
+          "lon": 11.4103528,
+          "x": 1270194.6634676033,
+          "y": 6817461.018422559
+        },
+        {
+          "lat": 52.2821488,
+          "lon": 11.4101231,
+          "x": 1270169.093380568,
+          "y": 6817480.693443716
+        },
+        {
+          "lat": 52.2823152,
+          "lon": 11.4098164,
+          "x": 1270134.9516927418,
+          "y": 6817510.89578433
+        },
+        {
+          "lat": 52.282438,
+          "lon": 11.4096061,
+          "x": 1270111.5412038278,
+          "y": 6817533.18460399
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "23",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575717,
+      "geometry": [
+        {
+          "lat": 52.2843625,
+          "lon": 11.4071589,
+          "x": 1269839.1201459586,
+          "y": 6817882.499175558
+        },
+        {
+          "lat": 52.2842631,
+          "lon": 11.407354,
+          "x": 1269860.8385786123,
+          "y": 6817864.4567816295
+        },
+        {
+          "lat": 52.2841602,
+          "lon": 11.4075361,
+          "x": 1269881.1098578859,
+          "y": 6817845.779134994
+        },
+        {
+          "lat": 52.2841019,
+          "lon": 11.4076463,
+          "x": 1269893.3772657712,
+          "y": 6817835.1969697075
+        },
+        {
+          "lat": 52.2840532,
+          "lon": 11.4077413,
+          "x": 1269903.9526173966,
+          "y": 6817826.357332929
+        },
+        {
+          "lat": 52.2839967,
+          "lon": 11.4078592,
+          "x": 1269917.0771853614,
+          "y": 6817816.101914406
+        },
+        {
+          "lat": 52.2826633,
+          "lon": 11.4108153,
+          "x": 1270246.1487320953,
+          "y": 6817574.07785231
+        },
+        {
+          "lat": 52.282405,
+          "lon": 11.4113905,
+          "x": 1270310.1797031995,
+          "y": 6817527.194931368
+        },
+        {
+          "lat": 52.2821931,
+          "lon": 11.4118555,
+          "x": 1270361.9432664183,
+          "y": 6817488.734079752
+        },
+        {
+          "lat": 52.2820699,
+          "lon": 11.412143,
+          "x": 1270393.9476200214,
+          "y": 6817466.372782382
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "7",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575718,
+      "geometry": [
+        {
+          "lat": 52.2819113,
+          "lon": 11.4125918,
+          "x": 1270443.9078074894,
+          "y": 6817437.586334092
+        },
+        {
+          "lat": 52.282049,
+          "lon": 11.4122833,
+          "x": 1270409.5657445798,
+          "y": 6817462.579354205
+        },
+        {
+          "lat": 52.2826874,
+          "lon": 11.4108728,
+          "x": 1270252.5496028159,
+          "y": 6817578.45215356
+        },
+        {
+          "lat": 52.2840202,
+          "lon": 11.4079169,
+          "x": 1269923.5003199799,
+          "y": 6817820.367440867
+        },
+        {
+          "lat": 52.2841801,
+          "lon": 11.4075637,
+          "x": 1269884.182275832,
+          "y": 6817849.391232354
+        },
+        {
+          "lat": 52.2843625,
+          "lon": 11.4071589,
+          "x": 1269839.1201459586,
+          "y": 6817882.499175558
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "6",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575719,
+      "geometry": [
+        {
+          "lat": 52.2812461,
+          "lon": 11.4134011,
+          "x": 1270533.9986713883,
+          "y": 6817316.851362389
+        },
+        {
+          "lat": 52.2813313,
+          "lon": 11.4130463,
+          "x": 1270494.502516055,
+          "y": 6817332.31521075
+        },
+        {
+          "lat": 52.2813854,
+          "lon": 11.4128521,
+          "x": 1270472.884270943,
+          "y": 6817342.134406972
+        },
+        {
+          "lat": 52.2814454,
+          "lon": 11.4126611,
+          "x": 1270451.6222482014,
+          "y": 6817353.024472323
+        },
+        {
+          "lat": 52.2815401,
+          "lon": 11.4123886,
+          "x": 1270421.2876869603,
+          "y": 6817370.212655625
+        },
+        {
+          "lat": 52.2818804,
+          "lon": 11.4115275,
+          "x": 1270325.4304734382,
+          "y": 6817431.977889323
+        },
+        {
+          "lat": 52.2822177,
+          "lon": 11.4106549,
+          "x": 1270228.293085772,
+          "y": 6817493.199086548
+        },
+        {
+          "lat": 52.2822801,
+          "lon": 11.410481,
+          "x": 1270208.9346263232,
+          "y": 6817504.52496862
+        },
+        {
+          "lat": 52.282379,
+          "lon": 11.4102259,
+          "x": 1270180.5370242216,
+          "y": 6817522.475798522
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "18",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575720,
+      "geometry": [
+        {
+          "lat": 52.2812137,
+          "lon": 11.413346,
+          "x": 1270527.8649674456,
+          "y": 6817310.970751841
+        },
+        {
+          "lat": 52.2812963,
+          "lon": 11.4130158,
+          "x": 1270491.1072715858,
+          "y": 6817325.962687267
+        },
+        {
+          "lat": 52.2813365,
+          "lon": 11.4128711,
+          "x": 1270474.999341268,
+          "y": 6817333.25901467
+        },
+        {
+          "lat": 52.2813912,
+          "lon": 11.4126952,
+          "x": 1270455.4182428373,
+          "y": 6817343.187112642
+        },
+        {
+          "lat": 52.2814648,
+          "lon": 11.4124769,
+          "x": 1270431.1171979972,
+          "y": 6817356.545596624
+        },
+        {
+          "lat": 52.2815831,
+          "lon": 11.4121597,
+          "x": 1270395.8066555178,
+          "y": 6817378.01722834
+        },
+        {
+          "lat": 52.2817911,
+          "lon": 11.4116282,
+          "x": 1270336.640346161,
+          "y": 6817415.7696875315
+        },
+        {
+          "lat": 52.2821186,
+          "lon": 11.4108047,
+          "x": 1270244.9687454929,
+          "y": 6817475.212021519
+        },
+        {
+          "lat": 52.2821998,
+          "lon": 11.4106152,
+          "x": 1270223.8737019876,
+          "y": 6817489.950158592
+        },
+        {
+          "lat": 52.2822516,
+          "lon": 11.4105038,
+          "x": 1270211.4727107133,
+          "y": 6817499.352087801
+        },
+        {
+          "lat": 52.282379,
+          "lon": 11.4102259,
+          "x": 1270180.5370242216,
+          "y": 6817522.475798522
+        },
+        {
+          "lat": 52.2825066,
+          "lon": 11.409942,
+          "x": 1270148.9334207852,
+          "y": 6817545.635877179
+        },
+        {
+          "lat": 52.2825999,
+          "lon": 11.4097367,
+          "x": 1270126.0795293255,
+          "y": 6817562.570365832
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "19",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 177575722,
+      "geometry": [
+        {
+          "lat": 52.281276,
+          "lon": 11.4134661,
+          "x": 1270541.2344382901,
+          "y": 6817322.278225958
+        },
+        {
+          "lat": 52.2813232,
+          "lon": 11.4132641,
+          "x": 1270518.7479011498,
+          "y": 6817330.845054868
+        },
+        {
+          "lat": 52.2813685,
+          "lon": 11.4130693,
+          "x": 1270497.0628643432,
+          "y": 6817339.067041241
+        },
+        {
+          "lat": 52.2814107,
+          "lon": 11.4129147,
+          "x": 1270479.8528710667,
+          "y": 6817346.726382722
+        },
+        {
+          "lat": 52.2814614,
+          "lon": 11.4127492,
+          "x": 1270461.4294953402,
+          "y": 6817355.928492254
+        },
+        {
+          "lat": 52.2815267,
+          "lon": 11.4125599,
+          "x": 1270440.3567157332,
+          "y": 6817367.78053452
+        },
+        {
+          "lat": 52.2816377,
+          "lon": 11.4122645,
+          "x": 1270407.4729381527,
+          "y": 6817387.927231638
+        },
+        {
+          "lat": 52.282219,
+          "lon": 11.4107845,
+          "x": 1270242.7200917788,
+          "y": 6817493.43504226
+        },
+        {
+          "lat": 52.2823948,
+          "lon": 11.4102902,
+          "x": 1270187.6948674796,
+          "y": 6817525.343578921
+        },
+        {
+          "lat": 52.2825022,
+          "lon": 11.4099953,
+          "x": 1270154.8667496447,
+          "y": 6817544.8372526625
+        },
+        {
+          "lat": 52.282532,
+          "lon": 11.4099085,
+          "x": 1270145.204217844,
+          "y": 6817550.246120272
+        },
+        {
+          "lat": 52.2825999,
+          "lon": 11.4097367,
+          "x": 1270126.0795293255,
+          "y": 6817562.570365832
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "17",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 319161053,
+      "geometry": [
+        {
+          "lat": 52.2806501,
+          "lon": 11.4158311,
+          "x": 1270804.5050340162,
+          "y": 6817208.6778597
+        },
+        {
+          "lat": 52.281078,
+          "lon": 11.4148841,
+          "x": 1270699.0854762348,
+          "y": 6817286.341204607
+        },
+        {
+          "lat": 52.2812452,
+          "lon": 11.4145106,
+          "x": 1270657.5076464235,
+          "y": 6817316.688012036
+        },
+        {
+          "lat": 52.2817588,
+          "lon": 11.4133747,
+          "x": 1270531.0598368314,
+          "y": 6817409.907154544
+        },
+        {
+          "lat": 52.2820579,
+          "lon": 11.4127061,
+          "x": 1270456.631625287,
+          "y": 6817464.194737275
+        },
+        {
+          "lat": 52.2828163,
+          "lon": 11.4110267,
+          "x": 1270269.681672449,
+          "y": 6817601.848353132
+        },
+        {
+          "lat": 52.2832544,
+          "lon": 11.4100513,
+          "x": 1270161.100641129,
+          "y": 6817681.366901933
+        },
+        {
+          "lat": 52.2841232,
+          "lon": 11.4081213,
+          "x": 1269946.2540238982,
+          "y": 6817839.063179417
+        },
+        {
+          "lat": 52.284973,
+          "lon": 11.406234,
+          "x": 1269736.160748924,
+          "y": 6817993.313764866
+        },
+        {
+          "lat": 52.2850802,
+          "lon": 11.4059952,
+          "x": 1269709.5776545226,
+          "y": 6818012.772275383
+        },
+        {
+          "lat": 52.2853779,
+          "lon": 11.4053381,
+          "x": 1269636.4296171223,
+          "y": 6818066.809823726
+        },
+        {
+          "lat": 52.2859623,
+          "lon": 11.4040419,
+          "x": 1269492.137293156,
+          "y": 6818172.889297009
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "maxspeed": "100",
+        "operator": "DB Netz AG",
+        "passenger_lines": "2",
+        "proposed:electrified": "contact_line",
+        "proposed:frequency": "16.7",
+        "proposed:voltage": "15000",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "railway:track_ref": "2",
+        "railway:traffic_mode": "mixed",
+        "ref": "6409",
+        "usage": "main"
+      }
+    },
+    {
+      "type": "way",
+      "id": 327096409,
+      "geometry": [
+        {
+          "lat": 52.2814041,
+          "lon": 11.4132494,
+          "x": 1270517.111504635,
+          "y": 6817345.52847575
+        },
+        {
+          "lat": 52.2814532,
+          "lon": 11.4130115,
+          "x": 1270490.6285977755,
+          "y": 6817354.440181907
+        },
+        {
+          "lat": 52.2814889,
+          "lon": 11.412842,
+          "x": 1270471.759944086,
+          "y": 6817360.919778971
+        },
+        {
+          "lat": 52.281533,
+          "lon": 11.4126846,
+          "x": 1270454.2382562351,
+          "y": 6817368.923994351
+        },
+        {
+          "lat": 52.2815744,
+          "lon": 11.4125507,
+          "x": 1270439.3325764178,
+          "y": 6817376.438163013
+        },
+        {
+          "lat": 52.2816144,
+          "lon": 11.4124317,
+          "x": 1270426.0855570135,
+          "y": 6817383.698236055
+        },
+        {
+          "lat": 52.2819161,
+          "lon": 11.4116778,
+          "x": 1270342.1617929044,
+          "y": 6817438.457549166
+        },
+        {
+          "lat": 52.2822215,
+          "lon": 11.4108985,
+          "x": 1270255.410513729,
+          "y": 6817493.888803266
+        },
+        {
+          "lat": 52.2824297,
+          "lon": 11.4103227,
+          "x": 1270191.3127509304,
+          "y": 6817531.6781101525
+        },
+        {
+          "lat": 52.2826338,
+          "lon": 11.4097467,
+          "x": 1270127.1927242335,
+          "y": 6817568.723420422
+        },
+        {
+          "lat": 52.2827232,
+          "lon": 11.4095075,
+          "x": 1270100.5651020359,
+          "y": 6817584.950082653
+        },
+        {
+          "lat": 52.2828012,
+          "lon": 11.4092995,
+          "x": 1270077.4106479508,
+          "y": 6817599.10760007
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "Z2",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 512982130,
+      "geometry": [
+        {
+          "lat": 52.2810274,
+          "lon": 11.4151029,
+          "x": 1270723.4421808205,
+          "y": 6817277.157325041
+        },
+        {
+          "lat": 52.2809322,
+          "lon": 11.4153185,
+          "x": 1270747.4426630356,
+          "y": 6817259.878592055
+        },
+        {
+          "lat": 52.2808862,
+          "lon": 11.4154266,
+          "x": 1270759.4762999902,
+          "y": 6817251.529637805
+        },
+        {
+          "lat": 52.2808396,
+          "lon": 11.4155375,
+          "x": 1270771.8216315191,
+          "y": 6817243.071793033
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:traffic_mode": "mixed",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 694349733,
+      "geometry": [
+        {
+          "lat": 52.286347969177235,
+          "lon": 11.403088052376317,
+          "x": 1269385.9554613933,
+          "y": 6818242.896198642
+        },
+        {
+          "lat": 52.2861628,
+          "lon": 11.4034985,
+          "x": 1269431.646281859,
+          "y": 6818209.284101485
+        },
+        {
+          "lat": 52.286101,
+          "lon": 11.4036304,
+          "x": 1269446.3293226946,
+          "y": 6818198.06613413
+        },
+        {
+          "lat": 52.286056,
+          "lon": 11.4037296,
+          "x": 1269457.3722161814,
+          "y": 6818189.897721191
+        },
+        {
+          "lat": 52.2859468,
+          "lon": 11.4039703,
+          "x": 1269484.1668176153,
+          "y": 6818170.075740463
+        },
+        {
+          "lat": 52.285527,
+          "lon": 11.4049029,
+          "x": 1269587.983374729,
+          "y": 6818093.874114244
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "1a",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 705620052,
+      "geometry": [
+        {
+          "lat": 52.284815,
+          "lon": 11.4062665,
+          "x": 1269739.7786323747,
+          "y": 6817964.634330032
+        },
+        {
+          "lat": 52.2850741,
+          "lon": 11.4056869,
+          "x": 1269675.2578555108,
+          "y": 6818011.665026778
+        },
+        {
+          "lat": 52.2853255,
+          "lon": 11.4051325,
+          "x": 1269613.5423298152,
+          "y": 6818057.298317475
+        },
+        {
+          "lat": 52.2854142,
+          "lon": 11.4049428,
+          "x": 1269592.4250224119,
+          "y": 6818073.398908158
+        },
+        {
+          "lat": 52.2854692,
+          "lon": 11.4048312,
+          "x": 1269580.001767239,
+          "y": 6818083.382379759
+        },
+        {
+          "lat": 52.2855269,
+          "lon": 11.4047261,
+          "x": 1269568.3020887568,
+          "y": 6818093.855962442
+        },
+        {
+          "lat": 52.2856186,
+          "lon": 11.4045584,
+          "x": 1269549.633810151,
+          "y": 6818110.5011818465
+        },
+        {
+          "lat": 52.2857591,
+          "lon": 11.404312,
+          "x": 1269522.204687619,
+          "y": 6818136.00455682
+        },
+        {
+          "lat": 52.2858798,
+          "lon": 11.4041064,
+          "x": 1269499.317400312,
+          "y": 6818157.913926774
+        },
+        {
+          "lat": 52.2859468,
+          "lon": 11.4039703,
+          "x": 1269484.1668176153,
+          "y": 6818170.075740463
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 827902959,
+      "geometry": [
+        {
+          "lat": 52.2807584,
+          "lon": 11.4154726,
+          "x": 1270764.5969965667,
+          "y": 6817228.334110625
+        },
+        {
+          "lat": 52.2806499,
+          "lon": 11.4157397,
+          "x": 1270794.3304325575,
+          "y": 6817208.641560112
+        },
+        {
+          "lat": 52.2805082,
+          "lon": 11.4161167,
+          "x": 1270836.2978805867,
+          "y": 6817182.923343613
+        },
+        {
+          "lat": 52.2803808,
+          "lon": 11.4164315,
+          "x": 1270871.3412562883,
+          "y": 6817159.800614015
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975426953,
+      "geometry": [
+        {
+          "lat": 52.2811206,
+          "lon": 11.4126213,
+          "x": 1270447.1917324676,
+          "y": 6817294.073095576
+        },
+        {
+          "lat": 52.2811827,
+          "lon": 11.4124089,
+          "x": 1270423.5474726234,
+          "y": 6817305.344245792
+        },
+        {
+          "lat": 52.2812623,
+          "lon": 11.4121778,
+          "x": 1270397.8215383012,
+          "y": 6817319.791669284
+        },
+        {
+          "lat": 52.2814095,
+          "lon": 11.4117944,
+          "x": 1270355.141645531,
+          "y": 6817346.508581442
+        },
+        {
+          "lat": 52.2815662,
+          "lon": 11.4113924,
+          "x": 1270310.391210232,
+          "y": 6817374.949848853
+        },
+        {
+          "lat": 52.2817217,
+          "lon": 11.4110141,
+          "x": 1270268.2790468647,
+          "y": 6817403.173414523
+        },
+        {
+          "lat": 52.2819563,
+          "lon": 11.4104259,
+          "x": 1270202.8009223803,
+          "y": 6817445.753979138
+        },
+        {
+          "lat": 52.2820421,
+          "lon": 11.4102398,
+          "x": 1270182.0843651437,
+          "y": 6817461.32697879
+        },
+        {
+          "lat": 52.2821041,
+          "lon": 11.4101207,
+          "x": 1270168.8262137903,
+          "y": 6817472.580214185
+        },
+        {
+          "lat": 52.2821818,
+          "lon": 11.4099849,
+          "x": 1270153.7090269404,
+          "y": 6817486.683081529
+        },
+        {
+          "lat": 52.2822601,
+          "lon": 11.4098601,
+          "x": 1270139.8163544894,
+          "y": 6817500.894876468
+        },
+        {
+          "lat": 52.282438,
+          "lon": 11.4096061,
+          "x": 1270111.5412038278,
+          "y": 6817533.18460399
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "24",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975426954,
+      "geometry": [
+        {
+          "lat": 52.2832066,
+          "lon": 11.4086496,
+          "x": 1270005.0641108842,
+          "y": 6817672.690792695
+        },
+        {
+          "lat": 52.2830406,
+          "lon": 11.4089313,
+          "x": 1270036.422811441,
+          "y": 6817642.560444548
+        },
+        {
+          "lat": 52.2829746,
+          "lon": 11.409044,
+          "x": 1270048.968518053,
+          "y": 6817630.580940056
+        },
+        {
+          "lat": 52.2829141,
+          "lon": 11.4091603,
+          "x": 1270061.9149748324,
+          "y": 6817619.59974336
+        },
+        {
+          "lat": 52.2828414,
+          "lon": 11.4093186,
+          "x": 1270079.536850225,
+          "y": 6817606.404176519
+        },
+        {
+          "lat": 52.2827845,
+          "lon": 11.4094535,
+          "x": 1270094.553849533,
+          "y": 6817596.076437184
+        },
+        {
+          "lat": 52.2827175,
+          "lon": 11.4096365,
+          "x": 1270114.925316348,
+          "y": 6817583.915495825
+        },
+        {
+          "lat": 52.2824867,
+          "lon": 11.4102997,
+          "x": 1270188.752402642,
+          "y": 6817542.023916928
+        },
+        {
+          "lat": 52.2823459,
+          "lon": 11.4106957,
+          "x": 1270232.8349209963,
+          "y": 6817516.467983426
+        },
+        {
+          "lat": 52.2821692,
+          "lon": 11.4111627,
+          "x": 1270284.8211231967,
+          "y": 6817484.396128381
+        },
+        {
+          "lat": 52.2819931,
+          "lon": 11.4116036,
+          "x": 1270333.9018866876,
+          "y": 6817452.43330395
+        },
+        {
+          "lat": 52.2817693,
+          "lon": 11.4121623,
+          "x": 1270396.0960861938,
+          "y": 6817411.812931051
+        },
+        {
+          "lat": 52.2816222,
+          "lon": 11.4125469,
+          "x": 1270438.909562353,
+          "y": 6817385.113951066
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "railway:track_ref": "Z1",
+        "railway:traffic_mode": "freight",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975426955,
+      "geometry": [
+        {
+          "lat": 52.2816222,
+          "lon": 11.4125469,
+          "x": 1270438.909562353,
+          "y": 6817385.113951066
+        },
+        {
+          "lat": 52.281553,
+          "lon": 11.4127356,
+          "x": 1270459.9155502655,
+          "y": 6817372.55402664
+        },
+        {
+          "lat": 52.2815141,
+          "lon": 11.4128551,
+          "x": 1270473.2182294154,
+          "y": 6817365.493615351
+        },
+        {
+          "lat": 52.2814733,
+          "lon": 11.4129894,
+          "x": 1270488.168437029,
+          "y": 6817358.08835776
+        },
+        {
+          "lat": 52.2814041,
+          "lon": 11.4132494,
+          "x": 1270517.111504635,
+          "y": 6817345.52847575
+        },
+        {
+          "lat": 52.2813124,
+          "lon": 11.4137035,
+          "x": 1270567.6616854044,
+          "y": 6817328.884847444
+        },
+        {
+          "lat": 52.2812301,
+          "lon": 11.4140969,
+          "x": 1270611.4547730824,
+          "y": 6817313.9473566385
+        },
+        {
+          "lat": 52.2811793,
+          "lon": 11.4143225,
+          "x": 1270636.5684502055,
+          "y": 6817304.727145369
+        },
+        {
+          "lat": 52.281139,
+          "lon": 11.4144772,
+          "x": 1270653.789575431,
+          "y": 6817297.412693986
+        },
+        {
+          "lat": 52.2810847,
+          "lon": 11.4146408,
+          "x": 1270672.0014441248,
+          "y": 6817287.557252691
+        },
+        {
+          "lat": 52.2810229,
+          "lon": 11.4148128,
+          "x": 1270691.1483965414,
+          "y": 6817276.3405773705
+        },
+        {
+          "lat": 52.2809613,
+          "lon": 11.4149895,
+          "x": 1270710.8185505646,
+          "y": 6817265.160217613
+        },
+        {
+          "lat": 52.2808826,
+          "lon": 11.4151999,
+          "x": 1270734.2401714274,
+          "y": 6817250.876241752
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975426956,
+      "geometry": [
+        {
+          "lat": 52.2825999,
+          "lon": 11.4097367,
+          "x": 1270126.0795293255,
+          "y": 6817562.570365832
+        },
+        {
+          "lat": 52.2827085,
+          "lon": 11.4094996,
+          "x": 1270099.6856780585,
+          "y": 6817582.281937947
+        },
+        {
+          "lat": 52.2828012,
+          "lon": 11.4092995,
+          "x": 1270077.4106479508,
+          "y": 6817599.10760007
+        },
+        {
+          "lat": 52.2828786,
+          "lon": 11.4091256,
+          "x": 1270058.0521885017,
+          "y": 6817613.156238263
+        },
+        {
+          "lat": 52.2829757,
+          "lon": 11.408946,
+          "x": 1270038.0592079554,
+          "y": 6817630.78059832
+        },
+        {
+          "lat": 52.2830725,
+          "lon": 11.4087892,
+          "x": 1270020.604311799,
+          "y": 6817648.350544814
+        },
+        {
+          "lat": 52.2831946,
+          "lon": 11.4086059,
+          "x": 1270000.1994491366,
+          "y": 6817670.5126914345
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434661,
+      "geometry": [
+        {
+          "lat": 52.2806501,
+          "lon": 11.4158311,
+          "x": 1270804.5050340162,
+          "y": 6817208.6778597
+        },
+        {
+          "lat": 52.2807804,
+          "lon": 11.4155696,
+          "x": 1270775.3949871736,
+          "y": 6817232.327076083
+        },
+        {
+          "lat": 52.2809203,
+          "lon": 11.4153076,
+          "x": 1270746.229280586,
+          "y": 6817257.718753056
+        },
+        {
+          "lat": 52.2810274,
+          "lon": 11.4151029,
+          "x": 1270723.4421808205,
+          "y": 6817277.157325041
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "passenger_lines": "2",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434662,
+      "geometry": [
+        {
+          "lat": 52.281374,
+          "lon": 11.4141074,
+          "x": 1270612.6236277358,
+          "y": 6817340.06529623
+        },
+        {
+          "lat": 52.2811156,
+          "lon": 11.4146805,
+          "x": 1270676.4208279094,
+          "y": 6817293.165596248
+        },
+        {
+          "lat": 52.281044,
+          "lon": 11.4148405,
+          "x": 1270694.2319464362,
+          "y": 6817280.170217177
+        },
+        {
+          "lat": 52.2809642,
+          "lon": 11.4150203,
+          "x": 1270714.2471908808,
+          "y": 6817265.686565368
+        },
+        {
+          "lat": 52.2808826,
+          "lon": 11.4151999,
+          "x": 1270734.2401714274,
+          "y": 6817250.876241752
+        },
+        {
+          "lat": 52.2807584,
+          "lon": 11.4154726,
+          "x": 1270764.5969965667,
+          "y": 6817228.334110625
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "ref": "6891",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434663,
+      "geometry": [
+        {
+          "lat": 52.285527,
+          "lon": 11.4049029,
+          "x": 1269587.983374729,
+          "y": 6818093.874114244
+        },
+        {
+          "lat": 52.2853484,
+          "lon": 11.4052945,
+          "x": 1269631.5760873237,
+          "y": 6818061.455062136
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "ref": "6891",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434664,
+      "geometry": [
+        {
+          "lat": 52.2816662,
+          "lon": 11.4132386,
+          "x": 1270515.9092541344,
+          "y": 6817393.100040432
+        },
+        {
+          "lat": 52.2817806,
+          "lon": 11.4129534,
+          "x": 1270484.1609353602,
+          "y": 6817413.863910084
+        },
+        {
+          "lat": 52.2819113,
+          "lon": 11.4125918,
+          "x": 1270443.9078074894,
+          "y": 6817437.586334092
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434665,
+      "geometry": [
+        {
+          "lat": 52.2843625,
+          "lon": 11.4071589,
+          "x": 1269839.1201459586,
+          "y": 6817882.499175558
+        },
+        {
+          "lat": 52.2844914,
+          "lon": 11.4068729,
+          "x": 1269807.2827715918,
+          "y": 6817905.896264077
+        },
+        {
+          "lat": 52.2846068,
+          "lon": 11.4066349,
+          "x": 1269780.7887327832,
+          "y": 6817926.842978556
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434666,
+      "geometry": [
+        {
+          "lat": 52.2820699,
+          "lon": 11.412143,
+          "x": 1270393.9476200214,
+          "y": 6817466.372782382
+        },
+        {
+          "lat": 52.2819113,
+          "lon": 11.4125918,
+          "x": 1270443.9078074894,
+          "y": 6817437.586334092
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434667,
+      "geometry": [
+        {
+          "lat": 52.2850527,
+          "lon": 11.4058453,
+          "x": 1269692.8908628526,
+          "y": 6818007.780582071
+        },
+        {
+          "lat": 52.2851117,
+          "lon": 11.4057369,
+          "x": 1269680.8238300506,
+          "y": 6818018.490037001
+        },
+        {
+          "lat": 52.2851894,
+          "lon": 11.4055967,
+          "x": 1269665.2168374415,
+          "y": 6818032.593866458
+        },
+        {
+          "lat": 52.2852579,
+          "lon": 11.405462,
+          "x": 1269650.2221020316,
+          "y": 6818045.02776504
+        },
+        {
+          "lat": 52.2853484,
+          "lon": 11.4052945,
+          "x": 1269631.5760873237,
+          "y": 6818061.455062136
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434668,
+      "geometry": [
+        {
+          "lat": 52.2816662,
+          "lon": 11.4132386,
+          "x": 1270515.9092541344,
+          "y": 6817393.100040432
+        },
+        {
+          "lat": 52.2819382,
+          "lon": 11.412634,
+          "x": 1270448.6054900012,
+          "y": 6817442.468769793
+        },
+        {
+          "lat": 52.282089,
+          "lon": 11.4123039,
+          "x": 1270411.85892609,
+          "y": 6817469.839505398
+        },
+        {
+          "lat": 52.2827156,
+          "lon": 11.4109155,
+          "x": 1270257.3029450728,
+          "y": 6817583.570633578
+        },
+        {
+          "lat": 52.2840322,
+          "lon": 11.4079975,
+          "x": 1269932.4726709381,
+          "y": 6817822.545582917
+        },
+        {
+          "lat": 52.284815,
+          "lon": 11.4062665,
+          "x": 1269739.7786323747,
+          "y": 6817964.634330032
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "railway:pzb": "yes",
+        "railway:track_ref": "5",
+        "railway:traffic_mode": "freight",
+        "service": "siding",
+        "usage": "freight"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434669,
+      "geometry": [
+        {
+          "lat": 52.284815,
+          "lon": 11.4062665,
+          "x": 1269739.7786323747,
+          "y": 6817964.634330032
+        },
+        {
+          "lat": 52.2850527,
+          "lon": 11.4058453,
+          "x": 1269692.8908628526,
+          "y": 6818007.780582071
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "service": "siding"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975434670,
+      "geometry": [
+        {
+          "lat": 52.284815,
+          "lon": 11.4062665,
+          "x": 1269739.7786323747,
+          "y": 6817964.634330032
+        },
+        {
+          "lat": 52.2846068,
+          "lon": 11.4066349,
+          "x": 1269780.7887327832,
+          "y": 6817926.842978556
+        },
+        {
+          "lat": 52.2844638,
+          "lon": 11.4068839,
+          "x": 1269808.5072859905,
+          "y": 6817900.886486071
+        },
+        {
+          "lat": 52.2843156,
+          "lon": 11.407148,
+          "x": 1269837.906763509,
+          "y": 6817873.986209973
+        },
+        {
+          "lat": 52.2842012,
+          "lon": 11.4073483,
+          "x": 1269860.2040575151,
+          "y": 6817853.221146407
+        },
+        {
+          "lat": 52.2840993,
+          "lon": 11.4075282,
+          "x": 1269880.2304339085,
+          "y": 6817834.725038132
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "railway": "rail",
+        "service": "yard"
+      }
+    },
+    {
+      "type": "way",
+      "id": 975439222,
+      "geometry": [
+        {
+          "lat": 52.2807584,
+          "lon": 11.4154726,
+          "x": 1270764.5969965667,
+          "y": 6817228.334110625
+        },
+        {
+          "lat": 52.2802884,
+          "lon": 11.4165219,
+          "x": 1270881.404538256,
+          "y": 6817143.03032446
+        },
+        {
+          "lat": 52.2798518,
+          "lon": 11.4175195,
+          "x": 1270992.4568622715,
+          "y": 6817063.789366684
+        },
+        {
+          "lat": 52.279506,
+          "lon": 11.4182977,
+          "x": 1271079.0856900068,
+          "y": 6817001.028761799
+        }
+      ],
+      "tags": {
+        "electrified": "no",
+        "gauge": "1435",
+        "operator": "DB Netz AG",
+        "railway": "rail",
+        "railway:track_ref": "3a",
+        "ref": "6891",
+        "service": "yard"
+      }
+    }
+  ]
+}

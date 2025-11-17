@@ -1,8 +1,5 @@
-"""PopUp-Sim Backend - Freight rail transport simulation tool for Digital Automatic Coupler retrofit."""
+"""PopUp-Sim: Railway DAC migration simulation."""
 
-__version__ = '0.1.0'
-__author__ = 'PopUp-Sim development team'
-__email__ = 'team@datenschleuder.dev'
-__description__ = (
-	'Backend for PopUp-Sim the freight rail transport simulation tool for Digital Automatic Coupler retrofit.'
-)
+from .routing import RailwayRouter, Route, auto_route, auto_waypoint_route
+
+__all__ = ['RailwayRouter', 'Route', 'auto_route', 'auto_waypoint_route']

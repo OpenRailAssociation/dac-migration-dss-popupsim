@@ -1,0 +1,50 @@
+# PopUpSim Tracks Configuration
+# Defines tracks (edge sequences) and throats (switch groupings)
+
+metadata:
+  description: "Haldensleben Yard Tracks"
+  version: "1.0.0"
+  topology_reference: "haldensleben_topology.yaml"
+
+tracks:
+  # Track extracted from OSM ref tag
+  - id: "track_1"
+    name: "1"  # From OSM railway:track_ref or ref tag
+    edges: ["edge_123", "edge_124", "edge_125"]
+    type: null  # User sets: collection, retrofit, storage, etc.
+
+  - id: "track_2"
+    name: "2"
+    edges: ["edge_126", "edge_127"]
+    type: null
+
+  - id: "track_3a"
+    name: "3a"
+    edges: ["edge_128", "edge_129", "edge_130"]
+    type: null
+
+# Optional: Throat groupings for simulation simplification
+throats:
+  # Simple throat: any entry can reach any exit
+  - id: "throat_west"
+    name: "West Throat"
+    nodes: ["switch_1", "switch_2", "switch_3"]
+    entries: ["boundary_entry_west"]
+    exits: ["track_1", "track_2"]
+
+  # Simple throat: multiple tracks to one exit
+  - id: "throat_east"
+    name: "East Throat"
+    nodes: ["switch_4", "switch_5"]
+    entries: ["track_1", "track_2", "track_3a"]
+    exits: ["boundary_exit_east"]
+
+  # Complex throat: explicit routing (use when entries/exits not sufficient)
+  - id: "throat_crossover"
+    name: "Crossover Throat"
+    nodes: ["switch_10", "switch_11"]
+    connections:
+      - from: "track_5"
+        to: "track_6"
+      - from: "track_7"
+        to: "track_8"

@@ -1,19 +1,13 @@
 """Geometry utilities for filtering OSM data."""
 
 import logging
-from typing import Any
-from typing import Dict
-from typing import Union
+from typing import Any, Dict, Union
 
-from shapely.geometry import LineString
-from shapely.geometry import Point
+from shapely.geometry import LineString, Point, box
 from shapely.geometry import Polygon as ShapelyPolygon
-from shapely.geometry import box
 
-from .models import BoundingBox
-from .models import Polygon
-from .validators import validate_bbox
-from .validators import validate_polygon
+from .models import BoundingBox, Polygon
+from .validators import validate_bbox, validate_polygon
 
 logger = logging.getLogger(__name__)
 
@@ -86,12 +80,19 @@ def filter_way_geometry(
 	else:
 		return None
 
-	# Convert back to OSM format
+	# Convert back to OSM format, preserving x/y if present
+	has_projection = way['geometry'] and 'x' in way['geometry'][0]
 	filtered_nodes = []
 	for segment in segments:
 		if len(segment.coords) >= 2:
 			for lon, lat in segment.coords:
-				filtered_nodes.append({'lat': lat, 'lon': lon})
+				node = {'lat': lat, 'lon': lon}
+				if has_projection:
+					from .projection import elliptical_mercator
+					x, y = elliptical_mercator(lat, lon)
+					node['x'] = x
+					node['y'] = y
+				filtered_nodes.append(node)
 
 	if len(filtered_nodes) >= 2:
 		way['geometry'] = filtered_nodes

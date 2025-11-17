@@ -1,0 +1,35 @@
+metadata:
+  description: "Animation sequence for train movements"
+  version: "1.0.0"
+  topology_reference: "topology.yaml"
+  tracks_reference: "tracks.yaml"
+  routes_reference: "routes.yaml"
+
+sequence:
+  - type: route
+    route_id: "6_To_10"  # References route from routes.yaml
+    duration: 60  # seconds to complete this route
+    train_id: "wagon_001"
+
+  - type: wait
+    duration: 30  # Wait at workshop for retrofit
+    train_id: "wagon_001"
+
+  - type: route
+    route_id: "10_To_7"  # Move to retrofitted track
+    duration: 45
+    train_id: "wagon_001"
+
+  - type: wait
+    duration: 10  # Wait at workshop for retrofit
+    train_id: "wagon_001"
+
+
+  #- type: wait
+  #  duration: 30
+  #  train_id: "wagon_001"
+
+  #- type: route
+  #  route_id: "Tracktrack_7ToTrack9"  # Move to parking
+  #  duration: 50
+  #  train_id: "wagon_001"

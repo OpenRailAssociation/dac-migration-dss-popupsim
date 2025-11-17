@@ -67,6 +67,10 @@ uv sync --frozen
 - **Run tests:**
   ```bash
   uv run pytest
+  
+  # Run tests for specific tool
+  uv run pytest tools/osm_extractor/tests/
+  uv run pytest tools/osm2popupsim/tests/
   ```
 
 - **Format code:**
@@ -109,6 +113,32 @@ The project uses pre-commit hooks to ensure code quality. These run automaticall
 uv run pre-commit run --all-files
 ```
 
+### Testing
+
+Both tools include pytest test suites:
+
+**osm_extractor:**
+- Comprehensive unit and integration tests
+- High test coverage
+- Mocked external dependencies
+
+**osm2popupsim:**
+- CLI command tests
+- Conversion and plotting tests
+
+**Run tests:**
+```bash
+# All tests
+uv run pytest
+
+# Specific tool
+uv run pytest tools/osm_extractor/tests/ -v
+uv run pytest tools/osm2popupsim/tests/ -v
+
+# With coverage
+uv run pytest --cov=tools/osm_extractor/src --cov=tools/osm2popupsim/src
+```
+
 ### Project Structure
 
 ```mermaid
@@ -136,17 +166,19 @@ graph TD
 
 ## Tools
 
-The project includes specialized tools for data extraction and processing:
+The project includes two specialized tools for railway data extraction and conversion:
 
-### OSM Railway Data Extractor
+### 1. OSM Railway Data Extractor
 
 A comprehensive tool for extracting, processing, and visualizing railway infrastructure data from OpenStreetMap.
 
 **Features:**
 - Extract railway data from OSM using Overpass API
-- Clip data to precise geographic boundaries
-- Project coordinates to Cartesian system
+- Clip data to precise geographic boundaries (bounding box or polygon)
+- Project coordinates to Cartesian system (elliptical Mercator)
 - Visualize railway networks with specialized markers
+- Filter by railway types and node types
+- Include/exclude disused and razed tracks
 
 **Documentation:** [tools/osm_extractor/README.md](tools/osm_extractor/README.md)
 
@@ -155,9 +187,59 @@ A comprehensive tool for extracting, processing, and visualizing railway infrast
 # Install dependencies
 uv sync --group osm-extractor
 
-# Extract railway data
+# Extract railway data with projection and clipping
 uv run --group osm-extractor osm-extractor extract \
-  "47.37,8.54,47.39,8.56" -t bbox -o railway_data.json
+  "47.37,8.54,47.39,8.56" -t bbox -o railway_data.json --project --clip
+
+# Visualize with labels
+uv run --group osm-extractor osm-extractor plot railway_data.json \
+  -o network.png --labels --switch-labels
+```
+
+### 2. OSM to PopUpSim Converter
+
+Convert OpenStreetMap railway data to PopUpSim network format for microscopic simulation.
+
+**Features:**
+- Convert OSM data to PopUpSim topology format
+- Extract track definitions from OSM ref tags
+- Automatic switch topology detection using angle analysis
+- Plot networks with track type visualization
+- Animate train movements (Folium HTML or Matplotlib GIF)
+
+**Documentation:** [tools/osm2popupsim/README.md](tools/osm2popupsim/README.md)
+
+**Quick Start:**
+```bash
+# Install dependencies
+uv sync --group osm2popupsim
+
+# Convert OSM to PopUpSim topology
+uv run osm2popupsim convert railway_data.json -o topology.yaml -d "Yard name"
+
+# Extract tracks from OSM ref tags
+uv run osm2popupsim extract-tracks railway_data.json topology.yaml -o tracks.yaml
+
+# Plot network
+uv run osm2popupsim plot topology.yaml -t tracks.yaml -o network.png
+```
+
+### Complete Pipeline: OSM to PopUpSim
+
+```bash
+# 1. Extract from OSM with projection
+uv run --group osm-extractor osm-extractor extract \
+  "52.276235,11.426263 52.276402,11.426447 52.278037,11.421849 52.280368,11.416562" \
+  -t polygon -o railway_data.json --project --clip
+
+# 2. Convert to PopUpSim format
+uv run osm2popupsim convert railway_data.json -o topology.yaml -d "My Yard"
+
+# 3. Extract tracks
+uv run osm2popupsim extract-tracks railway_data.json topology.yaml -o tracks.yaml
+
+# 4. Visualize
+uv run osm2popupsim plot topology.yaml -t tracks.yaml -o network.png
 ```
 
 ## Contributing

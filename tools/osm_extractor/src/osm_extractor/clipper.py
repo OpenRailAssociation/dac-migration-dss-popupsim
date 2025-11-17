@@ -3,14 +3,11 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import Union
+from typing import Any, Dict, Union
 
 from .exceptions import GeometryError
 from .geometry import filter_osm_data
-from .models import BoundingBox
-from .models import Polygon
+from .models import BoundingBox, Polygon
 
 logger = logging.getLogger(__name__)
 

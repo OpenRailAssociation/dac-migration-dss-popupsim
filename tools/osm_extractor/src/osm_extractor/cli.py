@@ -1,274 +1,138 @@
-"""CLI for OSM railway data extractor."""
+"""Unified CLI for OSM railway data extraction."""
 
-import json
 import logging
-import sys
-import typer
 from pathlib import Path
 from typing import Optional
-from typing import Union
 
-# Fix Windows console encoding
-if sys.platform == 'win32' and hasattr(sys.stdout, 'reconfigure'):
-	sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
-	sys.stderr.reconfigure(encoding='utf-8')  # type: ignore
+import typer
+from rich.console import Console
+from rich.logging import RichHandler
 
-from .clipper import clip_from_file
-from .exceptions import ExtractionError
-from .exceptions import GeometryError
-from .exceptions import PlottingError
-from .exceptions import ProjectionError
+from .clipper import clip_data
 from .extractor import OSMRailwayExtractor
-from .models import BoundingBox
-from .models import Polygon
-from .plotter import plot_from_file
-from .projector import project_from_file
+from .models import BoundingBox, Polygon
+from .plotter import plot_data
+from .projector import project_data
 
-app = typer.Typer(help='OSM Railway Data Extraction Pipeline')
-logging.basicConfig(level=logging.INFO, encoding='utf-8')
+app = typer.Typer(help="OSM Railway Data Extraction Tool")
+console = Console()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(console=console, show_time=False, show_path=False)]
+)
+logger = logging.getLogger(__name__)
+
+
+def parse_boundary(coords: str, boundary_type: str):
+    """Parse boundary from coordinates string."""
+    if boundary_type == "bbox":
+        parts = [float(x.strip()) for x in coords.split(",")]
+        if len(parts) != 4:
+            raise ValueError("Bbox requires 4 values: south,west,north,east")
+        return BoundingBox(south=parts[0], west=parts[1], north=parts[2], east=parts[3])
+    else:
+        pairs = [p.strip().split(",") for p in coords.split()]
+        coords_list = [(float(lat), float(lon)) for lat, lon in pairs]
+        return Polygon(coordinates=coords_list)
 
 
 @app.command()
 def extract(
-	coordinates: str = typer.Argument(
-		...,
-		help=("Coordinates as 'lat1,lon1,lat2,lon2' (bbox) or 'lat1,lon1"
-        "lat2,lon2 ...' (polygon)"),
-	),
-	output: Path = typer.Option(
-		'railway_data.json', '-o', '--output', help='Output JSON file'
-	),
-	boundary_type: str = typer.Option(
-		'bbox', '-t', '--type', help="Boundary type: 'bbox' or 'polygon'"
-	),
-	railway_types: Optional[str] = typer.Option(
-		'rail,siding,yard,spur',
-		'-r',
-		'--railway-types',
-		help='Comma-separated railway types',
-	),
-	node_types: Optional[str] = typer.Option(
-		'switch,buffer_stop',
-		'-n',
-		'--node-types',
-		help='Comma-separated node types',
-	),
-	no_filter: bool = typer.Option(
-		False, '--no-filter', help='Disable geometry filtering'
-	),
-	timeout: int = typer.Option(
-		60, '--timeout', help='Request timeout in seconds'
-	),
-) -> None:
-	"""Extract railway data from OSM within specified boundary."""
-
-	# Parse coordinates
-	try:
-		if boundary_type == 'bbox':
-			coords = [float(x.strip()) for x in coordinates.split(',')]
-			if len(coords) != 4:
-				raise ValueError(
-					"Bounding box requires 4 coordinates: south,west,"
-                    "north,east"
-				)
-			boundary: Union[BoundingBox, Polygon] = BoundingBox(
-				south=coords[0],
-				west=coords[1],
-				north=coords[2],
-				east=coords[3],
-			)
-		else:
-			coord_pairs = []
-			for pair in coordinates.split():
-				lat, lon = [float(x.strip()) for x in pair.split(',')]
-				coord_pairs.append((lat, lon))
-			if len(coord_pairs) < 3:
-				raise ValueError(
-					'Polygon requires at least 3 coordinate pairs'
-				)
-			boundary = Polygon(coordinates=coord_pairs)
-	except ValueError as e:
-		typer.echo(f'Error parsing coordinates: {e}', err=True)
-		raise typer.Exit(1)
-
-	# Parse types
-	railway_list = (
-		[t.strip() for t in railway_types.split(',')] if railway_types else []
-	)
-	node_list = (
-		[t.strip() for t in node_types.split(',')] if node_types else []
-	)
-
-	# Create extractor
-	extractor = OSMRailwayExtractor(
-		timeout=timeout, railway_types=railway_list, node_types=node_list
-	)
-
-	# Extract data (no filtering by default)
-	typer.echo(f'Extracting railway data from {boundary_type}...')
-	try:
-		data = extractor.extract(boundary, filter_geometry=False)
-
-		# Save to file
-		with open(output, 'w', encoding='utf-8') as f:
-			json.dump(data, f, indent=2)
-
-		element_count = len(data.get('elements', []))
-		typer.echo(f'SUCCESS: Extracted {element_count} elements to {output}')
-
-	except ExtractionError as e:
-		typer.echo(f'ERROR: {e}', err=True)
-		raise typer.Exit(1)
-	except Exception as e:
-		typer.echo(f'ERROR: Unexpected error: {e}', err=True)
-		raise typer.Exit(1)
-
-
-@app.command()
-def clip(
-	input_file: Path = typer.Argument(..., help='Input JSON file'),
-	output: Path = typer.Option(
-		'clipped.json', '-o', '--output', help='Output JSON file'
-	),
-	coordinates: str = typer.Option(
-		..., '-c', '--coordinates', help='Boundary coordinates'
-	),
-	boundary_type: str = typer.Option(
-		'bbox', '-t', '--type', help="Boundary type: 'bbox' or 'polygon'"
-	),
-) -> None:
-	"""Clip OSM data to boundary."""
-	try:
-		boundary: Union[BoundingBox, Polygon]
-		if boundary_type == 'bbox':
-			coords = [float(x.strip()) for x in coordinates.split(',')]
-			boundary = BoundingBox(
-				south=coords[0],
-				west=coords[1],
-				north=coords[2],
-				east=coords[3],
-			)
-		else:
-			coord_pairs = [
-				(float(p.split(',')[0]), float(p.split(',')[1]))
-				for p in coordinates.split()
-			]
-			boundary = Polygon(coordinates=coord_pairs)
-
-		clip_from_file(input_file, output, boundary)
-		typer.echo(f'SUCCESS: Clipped data saved to {output}')
-
-	except GeometryError as e:
-		typer.echo(f'ERROR: {e}', err=True)
-		raise typer.Exit(1)
-	except Exception as e:
-		typer.echo(f'ERROR: Unexpected error: {e}', err=True)
-		raise typer.Exit(1)
-
-
-@app.command()
-def project(
-	input_file: Path = typer.Argument(..., help='Input JSON file'),
-	output: Path = typer.Option(
-		'projected.json', '-o', '--output', help='Output JSON file'
-	),
-) -> None:
-	"""Project OSM data to Cartesian coordinates."""
-	try:
-		project_from_file(input_file, output)
-		typer.echo(f'SUCCESS: Projected data saved to {output}')
-
-	except ProjectionError as e:
-		typer.echo(f'ERROR: {e}', err=True)
-		raise typer.Exit(1)
-	except Exception as e:
-		typer.echo(f'ERROR: Unexpected error: {e}', err=True)
-		raise typer.Exit(1)
+    coordinates: str = typer.Argument(..., help="Boundary coordinates"),
+    output: Path = typer.Option("railway_data.json", "-o", help="Output file"),
+    boundary_type: str = typer.Option("bbox", "-t", help="Boundary type: bbox or polygon"),
+    railway_types: Optional[str] = typer.Option("rail,siding,yard,spur", "-r", help="Comma-separated railway types"),
+    node_types: Optional[str] = typer.Option("switch,buffer_stop", "-n", help="Comma-separated node types"),
+    timeout: int = typer.Option(180, "--timeout", help="Request timeout in seconds"),
+    include_disused: bool = typer.Option(False, "--include-disused", help="Include disused/abandoned tracks"),
+    include_razed: bool = typer.Option(False, "--include-razed", help="Include razed (demolished) tracks"),
+    project: bool = typer.Option(False, "--project", help="Project to Cartesian coordinates"),
+    clip: bool = typer.Option(False, "--clip", help="Clip to boundary"),
+    show_plot: bool = typer.Option(False, "--plot", help="Show plot after extraction"),
+):
+    """Extract railway data from OSM."""
+    try:
+        # Parse boundary
+        boundary = parse_boundary(coordinates, boundary_type)
+        
+        # Parse types
+        railway_list = [t.strip() for t in railway_types.split(',')] if railway_types else []
+        node_list = [t.strip() for t in node_types.split(',')] if node_types else []
+        
+        # Extract
+        console.print("[1/4] Extracting from OSM...", style="bold blue")
+        extractor = OSMRailwayExtractor(
+            timeout=timeout, 
+            railway_types=railway_list, 
+            node_types=node_list,
+            include_disused=include_disused,
+            include_razed=include_razed
+        )
+        data = extractor.extract(boundary, filter_geometry=False)
+        console.print(f"      Extracted {len(data['elements'])} elements", style="green")
+        
+        # Project
+        if project:
+            console.print("[2/4] Projecting coordinates...", style="bold blue")
+            data = project_data(data)
+            console.print("      Projection complete", style="green")
+        
+        # Clip
+        if clip:
+            console.print("[3/4] Clipping to boundary...", style="bold blue")
+            original = len(data['elements'])
+            data = clip_data(data, boundary)
+            console.print(f"      Clipped {original} -> {len(data['elements'])} elements", style="green")
+        
+        # Save
+        console.print("[4/4] Saving...", style="bold blue")
+        import json
+        with open(output, 'w') as f:
+            json.dump(data, f, indent=2)
+        console.print(f"      Saved to {output}", style="green")
+        
+        # Plot
+        if show_plot:
+            plot_data(data, show_plot=True)
+        
+        console.print("\nSUCCESS", style="bold green")
+        
+    except Exception as e:
+        console.print(f"\nERROR: {e}", style="bold red")
+        raise typer.Exit(1)
 
 
 @app.command()
 def plot(
-	input_file: Path = typer.Argument(..., help='Input JSON file'),
-	output: Path = typer.Option(
-		'railway_plot.png', '-o', '--output', help='Output image file'
-	),
-	title: Optional[str] = typer.Option(
-		None, '-t', '--title', help='Plot title'
-	),
-	no_nodes: bool = typer.Option(
-		False, '--no-nodes', help='Hide node markers'
-	),
-	show_boundary: bool = typer.Option(
-		False, '--show-boundary', help='Show boundary polygon/bbox'
-	),
-	coordinates: Optional[str] = typer.Option(
-		None, '-c', '--coordinates', help='Boundary coordinates (required with --show-boundary)'
-	),
-	boundary_type: str = typer.Option(
-		'bbox', '--boundary-type', help="Boundary type: 'bbox' or 'polygon'"
-	),
-) -> None:
-	"""Plot railway data."""
-	try:
-		boundary: Union[BoundingBox, Polygon, None] = None
-		if show_boundary:
-			if not coordinates:
-				typer.echo('ERROR: --coordinates required with --show-boundary', err=True)
-				raise typer.Exit(1)
-			
-			if boundary_type == 'bbox':
-				coords = [float(x.strip()) for x in coordinates.split(',')]
-				boundary = BoundingBox(
-					south=coords[0], west=coords[1], north=coords[2], east=coords[3]
-				)
-			else:
-				coord_pairs = [
-					(float(p.split(',')[0]), float(p.split(',')[1]))
-					for p in coordinates.split()
-				]
-				boundary = Polygon(coordinates=coord_pairs)
-		
-		plot_from_file(
-			input_file, output, title=title, show_nodes=not no_nodes, boundary=boundary
-		)
-		typer.echo(f'SUCCESS: Plot saved to {output}')
-
-	except PlottingError as e:
-		typer.echo(f'ERROR: {e}', err=True)
-		raise typer.Exit(1)
-	except Exception as e:
-		typer.echo(f'ERROR: Unexpected error: {e}', err=True)
-		raise typer.Exit(1)
+    input_file: Path = typer.Argument(..., help="Input JSON file"),
+    output: Optional[Path] = typer.Option(None, "-o", help="Output image file"),
+    show_labels: bool = typer.Option(False, "--labels", help="Show track labels"),
+    label_switches: bool = typer.Option(False, "--switch-labels", help="Show switch labels"),
+):
+    """Plot railway data."""
+    try:
+        import json
+        with open(input_file) as f:
+            data = json.load(f)
+        
+        plot_data(
+            data,
+            output_file=output,
+            title=input_file.stem,
+            show_labels=show_labels,
+            label_switches=label_switches,
+            show_plot=output is None
+        )
+        
+        if output:
+            console.print(f"Saved to {output}", style="bold green")
+        
+    except Exception as e:
+        console.print(f"ERROR: {e}", style="bold red")
+        raise typer.Exit(1)
 
 
-@app.command()
-def info() -> None:
-	"""Show information about available railway and node types."""
-	typer.echo('Available Railway Types:')
-	railway_types = [
-		'rail',
-		'siding',
-		'yard',
-		'spur',
-		'light_rail',
-		'subway',
-		'tram',
-		'monorail',
-	]
-	for rt in railway_types:
-		typer.echo(f'  • {rt}')
-
-	typer.echo('\nAvailable Node Types:')
-	node_types = [
-		'switch',
-		'buffer_stop',
-		'railway_crossing',
-		'level_crossing',
-		'signal',
-	]
-	for nt in node_types:
-		typer.echo(f'  • {nt}')
-
-
-if __name__ == '__main__':
-	app()
+if __name__ == "__main__":
+    app()

@@ -1,7 +1,6 @@
 """Input validation utilities."""
 
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 
 from .exceptions import OSMExtractorError
 
