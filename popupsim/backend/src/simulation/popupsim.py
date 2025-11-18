@@ -12,7 +12,7 @@ remains agnostic of the underlying simulation framework.
 
 import logging
 
-from models.scenario import ScenarioConfig
+from models.scenario import Scenario
 
 from .sim_adapter import SimulationAdapter
 
@@ -27,7 +27,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
     the simulation backend directly, keeping business logic backend-agnostic.
     """
 
-    def __init__(self, adapter: SimulationAdapter, scenario: ScenarioConfig) -> None:
+    def __init__(self, adapter: SimulationAdapter, scenario: Scenario) -> None:
         """Initialize the PopupSim orchestrator.
 
         Parameters
@@ -35,13 +35,13 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         adapter : SimulationAdapter
             SimulationAdapter instance used to drive the underlying
             simulation environment (e.g., SimPy).
-        scenario : ScenarioConfig
+        scenario : Scenario
             Domain scenario object containing routes, wagons and other
             models consumed by the simulation.
         """
         self.name: str = 'PopUpSim'
         self.adapter: SimulationAdapter = adapter
-        self.scenario: ScenarioConfig = scenario
+        self.scenario: Scenario = scenario
 
     def run(self, until: float | None = None) -> None:
         """Run the simulation until an optional time.

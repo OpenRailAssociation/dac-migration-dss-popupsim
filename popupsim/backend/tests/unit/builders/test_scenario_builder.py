@@ -43,7 +43,7 @@ def fixtures_path() -> Path:
     Path
         Path to the fixtures/config directory.
     """
-    return Path(__file__).parent.parent / 'fixtures' / 'config'
+    return Path(__file__).parent.parent / 'fixtures' / 'models'
 
 
 def _write_temp_file(content: str, suffix: str = '.json') -> Path:

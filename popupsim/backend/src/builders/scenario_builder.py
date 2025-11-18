@@ -17,7 +17,7 @@ from typing import Any
 
 from models.routes import Route
 from models.routes import Routes
-from models.scenario import ScenarioConfig
+from models.scenario import Scenario
 from models.track import Track
 from models.track import TrackType
 from models.train import Train
@@ -148,7 +148,7 @@ class ScenarioBuilder:
         logger.info('All referenced files validated for json scenario data: %s', scenario_data.get('scenario_id'))
         return scenario_data
 
-    def load_scenario_config(self, path: str | Path) -> ScenarioConfig:
+    def load_scenario_config(self, path: str | Path) -> Scenario:
         """Load and validate scenario models from a JSON file.
 
         Parameters
@@ -158,7 +158,7 @@ class ScenarioBuilder:
 
         Returns
         -------
-        ScenarioConfig
+        Scenario
             Validated ScenarioConfig object.
 
         Raises
@@ -168,7 +168,7 @@ class ScenarioBuilder:
         """
         data = self.load_and_validate_scenario_data(path)
         try:
-            scenario = ScenarioConfig(**data)
+            scenario = Scenario(**data)
             logger.info('ScenarioConfig created successfully for: %s', scenario.scenario_id)
             return scenario
         except ValidationError as e:
@@ -716,7 +716,7 @@ class ScenarioBuilder:
         scenario_dates: tuple[datetime, datetime],
         train_schedule_file: str,  # Todo make it a path
         components: dict[str, Any],
-    ) -> ScenarioConfig:
+    ) -> Scenario:
         """Build and validate ScenarioConfig object."""
         scenario_id = scenario_data.get('scenario_id')
         random_seed = scenario_data.get('random_seed')
@@ -726,7 +726,7 @@ class ScenarioBuilder:
 
         scenario_start, scenario_end = scenario_dates
         # Todo add Workshops
-        return ScenarioConfig(
+        return Scenario(
             scenario_id=scenario_id,
             start_date=scenario_start,
             end_date=scenario_end,
@@ -737,7 +737,7 @@ class ScenarioBuilder:
             tracks=components.get('tracks'),
         )
 
-    def load_complete_scenario(self, path: str | Path) -> ScenarioConfig:  # pylint: disable=too-many-locals
+    def load_complete_scenario(self, path: str | Path) -> Scenario:  # pylint: disable=too-many-locals
         """Load scenario models and train schedule data.
 
         Parameters
@@ -747,7 +747,7 @@ class ScenarioBuilder:
 
         Returns
         -------
-        tuple[ScenarioConfig, ValidationResult]
+        tuple[Scenario, ValidationResult]
             Loaded and validated scenario models with validation results.
 
         Raises
@@ -798,7 +798,7 @@ class ScenarioBuilder:
             'trains': trains,
             'tracks': tracks,
         }
-        scenario: ScenarioConfig = self._build_scenario_config(
+        scenario: Scenario = self._build_scenario_config(
             scenario_data=scenario_data,
             scenario_dates=scenario_dates,
             train_schedule_file=train_schedule_file,

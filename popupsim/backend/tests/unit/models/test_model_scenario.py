@@ -1,7 +1,7 @@
 """
-Unit tests for ScenarioConfig model.
+Unit tests for Scenario model.
 
-Tests the ScenarioConfig model validation logic, date validation,
+Tests the Scenario model validation logic, date validation,
 workshop integration, and file reference validation.
 """
 
@@ -9,15 +9,31 @@ from datetime import UTC
 from datetime import datetime
 import json
 from pathlib import Path
+import tempfile
 from typing import Any
 
-from models.scenario import ScenarioConfig
+from models.scenario import Scenario
 from pydantic import ValidationError
 import pytest
 
 
-class TestScenarioConfig:
-    """Test cases for ScenarioConfig model."""
+@pytest.fixture
+def test_scenario_json_path() -> Path:
+    """Return a scenario file path to be loaded."""
+    temp_file = Path(tempfile.mkstemp(suffix='.json')[1])
+    scenario_data = {
+        'scenario_id': 'Test_Scenario',
+        'description': 'DAC restrofit simualation',
+        'version': '1.0.0',
+        'start_date': '2024-01-15',
+        'end_date': '2024-01-16',
+    }
+    temp_file.write_text(json.dumps(scenario_data))
+    return temp_file
+
+
+class TestScenario:
+    """Test cases for Scenario model."""
 
     def test_scenario_config_with_file_from_fixture(self, test_scenario_json_path: Path) -> None:
         """
@@ -30,48 +46,21 @@ class TestScenarioConfig:
 
         Notes
         -----
-        Validates that a ScenarioConfig can be loaded from a JSON file
+        Validates that a Scenario can be loaded from a JSON file
         and that all fields match expected values, including date components.
         """
         with open(test_scenario_json_path, encoding='utf-8') as f:
             data: dict[str, Any] = json.load(f)
 
-        scenario: ScenarioConfig = ScenarioConfig(**data)
+        scenario: Scenario = Scenario(**data)
 
-        assert scenario.scenario_id == 'scenario_001'
+        assert scenario.scenario_id == 'Test_Scenario'
         # Compare date components (year, month, day) ignoring time
         expected_start = datetime(2024, 1, 15, tzinfo=UTC)
         expected_end = datetime(2024, 1, 16, tzinfo=UTC)
         assert scenario.start_date.date() == expected_start.date()
         assert scenario.end_date.date() == expected_end.date()
         assert scenario.random_seed == 0
-        assert scenario.train_schedule_file == 'test_train_schedule.csv'
-
-    def test_scenario_config_creation_valid_data_without_workshop(self) -> None:
-        """
-        Test successful scenario config creation without workshop.
-
-        Notes
-        -----
-        Tests backward compatibility for scenarios without workshop models.
-        Validates that all required fields are correctly assigned.
-        Date fields can be set from strings and datetime objects.
-        """
-        scenario = ScenarioConfig(
-            scenario_id='test_scenario',
-            start_date='2024-01-01',
-            end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            random_seed=42,
-            train_schedule_file='schedule.csv',
-        )
-
-        assert scenario.scenario_id == 'test_scenario'
-        expected_start = datetime(2024, 1, 1, tzinfo=UTC)
-        expected_end = datetime(2024, 1, 10, tzinfo=UTC)
-        assert scenario.start_date.date() == expected_start.date()
-        assert scenario.end_date.date() == expected_end.date()
-        assert scenario.random_seed == 42
-        assert scenario.train_schedule_file == 'schedule.csv'
 
     def test_scenario_id_validation_valid_formats(self) -> None:
         """
@@ -93,11 +82,10 @@ class TestScenarioConfig:
         ]
 
         for scenario_id in valid_ids:
-            config = ScenarioConfig(
+            config = Scenario(
                 scenario_id=scenario_id,
                 start_date=datetime(2024, 1, 1, tzinfo=UTC),
                 end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                train_schedule_file='schedule.csv',
             )
             assert config.scenario_id == scenario_id
 
@@ -124,11 +112,10 @@ class TestScenarioConfig:
 
         for scenario_id in invalid_ids:
             with pytest.raises(ValidationError) as exc_info:
-                ScenarioConfig(
+                Scenario(
                     scenario_id=scenario_id,
                     start_date=datetime(2024, 1, 1, tzinfo=UTC),
                     end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                    train_schedule_file='schedule.csv',
                 )
             error_msg = str(exc_info.value)
             assert (
@@ -154,11 +141,10 @@ class TestScenarioConfig:
         ]
 
         for start_date, end_date in valid_date_ranges:
-            config = ScenarioConfig(
+            config = Scenario(
                 scenario_id='test_scenario',
                 start_date=start_date,
                 end_date=end_date,
-                train_schedule_file='schedule.csv',
             )
             assert config.start_date.date() == start_date.date()
             assert config.end_date.date() == end_date.date()
@@ -180,11 +166,10 @@ class TestScenarioConfig:
 
         for start_date, end_date in invalid_date_ranges:
             with pytest.raises(ValidationError) as exc_info:
-                ScenarioConfig(
+                Scenario(
                     scenario_id='test_scenario',
                     start_date=start_date,
                     end_date=end_date,
-                    train_schedule_file='schedule.csv',
                 )
             error_msg = str(exc_info.value)
             assert 'end_date' in error_msg
@@ -200,11 +185,10 @@ class TestScenarioConfig:
         successfully and duration is calculated correctly. Warning logging is
         implementation-dependent and not tested here.
         """
-        config = ScenarioConfig(
+        config = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2025, 6, 1, tzinfo=UTC),  # More than 365 days
-            train_schedule_file='schedule.csv',
         )
 
         # Should create config successfully
@@ -226,20 +210,18 @@ class TestScenarioConfig:
         valid_seeds = [0, 1, 42, 999, 2147483647]
 
         for seed in valid_seeds:
-            config = ScenarioConfig(
+            config = Scenario(
                 scenario_id='test_scenario',
                 start_date=datetime(2024, 1, 1, tzinfo=UTC),
                 end_date=datetime(2024, 1, 10, tzinfo=UTC),
                 random_seed=seed,
-                train_schedule_file='schedule.csv',
             )
             assert config.random_seed == seed
 
-        config = ScenarioConfig(
+        config = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            train_schedule_file='schedule.csv',
         )
         assert config.random_seed == 0  # Default value
 
@@ -256,114 +238,14 @@ class TestScenarioConfig:
 
         for seed in invalid_seeds:
             with pytest.raises(ValidationError) as exc_info:
-                ScenarioConfig(
+                Scenario(
                     scenario_id='test_scenario',
                     start_date=datetime(2024, 1, 1, tzinfo=UTC),
                     end_date=datetime(2024, 1, 10, tzinfo=UTC),
                     random_seed=seed,
-                    train_schedule_file='schedule.csv',
                 )
             error_msg = str(exc_info.value)
             assert 'random_seed must be non-negative' in error_msg
-
-    def test_train_schedule_file_validation_valid_extensions(self) -> None:
-        """
-        Test train schedule file validation with valid extensions.
-
-        Notes
-        -----
-        Validates that files with .csv or .json extensions are accepted.
-        """
-        valid_files = [
-            'schedule.csv',
-            'data.json',
-            'train_data.csv',
-            'config.json',
-            'very_long_filename_with_valid_extension.csv',
-        ]
-
-        for filename in valid_files:
-            config = ScenarioConfig(
-                scenario_id='test_scenario',
-                start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                train_schedule_file=filename,
-            )
-            assert config.train_schedule_file == filename
-
-    def test_train_schedule_file_validation_invalid_extensions(self) -> None:
-        """
-        Test train schedule file validation with invalid extensions.
-
-        Notes
-        -----
-        Validates that files with unsupported extensions or missing extensions
-        raise ValidationError.
-        """
-        invalid_files = [
-            'schedule.txt',
-            'data.xlsx',  # Not supported in this validator
-            'config.xml',
-            'file.pdf',
-            'schedule',  # No extension
-            '',  # Empty string
-        ]
-
-        for filename in invalid_files:
-            with pytest.raises(ValidationError) as exc_info:
-                ScenarioConfig(
-                    scenario_id='test_scenario',
-                    start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                    end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                    train_schedule_file=filename,
-                )
-            error_msg = str(exc_info.value)
-            assert 'Invalid file extension' in error_msg or 'at least 1 character' in error_msg
-
-    def test_missing_required_fields(self) -> None:
-        """
-        Test validation error when required fields are missing.
-
-        Notes
-        -----
-        Validates that omitting any required field raises ValidationError
-        with 'Field required' message.
-        """
-        # Missing scenario_id
-        with pytest.raises(ValidationError) as exc_info:
-            ScenarioConfig(
-                start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                train_schedule_file='schedule.csv',
-            )
-        assert 'Field required' in str(exc_info.value)
-
-        # Missing start_date
-        with pytest.raises(ValidationError) as exc_info:
-            ScenarioConfig(
-                scenario_id='test_scenario',
-                end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                train_schedule_file='schedule.csv',
-            )
-        assert 'Field required' in str(exc_info.value)
-
-        # Missing end_date
-        with pytest.raises(ValidationError) as exc_info:
-            ScenarioConfig(
-                scenario_id='test_scenario',
-                start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                train_schedule_file='schedule.csv',
-            )
-        assert 'Field required' in str(exc_info.value)
-
-        # Missing train_schedule_file
-        with pytest.raises(ValidationError) as exc_info:
-            ScenarioConfig(
-                scenario_id='test_scenario',
-                start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            )
-        assert 'Field required' in str(exc_info.value)
 
     def test_scenario_config_equality(self) -> None:
         """
@@ -371,28 +253,25 @@ class TestScenarioConfig:
 
         Notes
         -----
-        Validates that ScenarioConfig instances with identical field values
+        Validates that Scenario instances with identical field values
         are considered equal, while instances with different values are not.
         """
-        config1 = ScenarioConfig(
+        config1 = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            train_schedule_file='schedule.csv',
         )
 
-        config2 = ScenarioConfig(
+        config2 = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            train_schedule_file='schedule.csv',
         )
 
-        config3 = ScenarioConfig(
+        config3 = Scenario(
             scenario_id='different_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            train_schedule_file='schedule.csv',
         )
 
         assert config1 == config2
@@ -404,16 +283,15 @@ class TestScenarioConfig:
 
         Notes
         -----
-        Validates that ScenarioConfig can be serialized to JSON and that
+        Validates that Scenario can be serialized to JSON and that
         the resulting JSON string contains expected field values.
         """
         start_date = '2024-01-01 08:00+00:00'
         end_date = '2024-01-10 20:00+00:00'
-        config = ScenarioConfig(
+        config = Scenario(
             scenario_id='test_scenario',
             start_date=start_date,
             end_date=end_date,
-            train_schedule_file='schedule.csv',
         )
 
         json_str = config.model_dump_json()
@@ -423,8 +301,8 @@ class TestScenarioConfig:
 
         assert parsed['scenario_id'] == 'test_scenario'
         # Verify date fields in parsed JSON match original date values
-        assert str(parsed['start_date']).startswith((start_date).split(' ')[0])
-        assert str(parsed['end_date']).startswith((end_date).split(' ')[0])
+        assert str(parsed['start_date']).startswith(start_date.split(' ')[0])
+        assert str(parsed['end_date']).startswith(end_date.split(' ')[0])
         assert str(parsed['start_date']).startswith(str(datetime(2024, 1, 1, tzinfo=UTC)).split(' ')[0])
         assert str(parsed['end_date']).startswith(str(datetime(2024, 1, 10, tzinfo=UTC)).split(' ')[0])
         assert datetime.fromisoformat(parsed.get('start_date')) == datetime.fromisoformat(start_date)
@@ -435,40 +313,21 @@ class TestScenarioConfig:
 
         Notes
         -----
-        Validates that ScenarioConfig can be created from a dictionary
+        Validates that Scenario can be created from a dictionary
         matching the structure of actual scenario JSON files, with all
         fields correctly parsed and assigned.
         """
-        config_data = {
+        scenario_data = {
             'scenario_id': 'scenario_001',
             'start_date': '2024-01-15',
             'end_date': '2024-01-16',
             'random_seed': 42,
-            'train_schedule_file': 'train_schedule.csv',
         }
 
-        config = ScenarioConfig(**config_data)
+        scenario = Scenario(**scenario_data)
 
         # Verify all fields are correctly parsed
-        assert config.scenario_id == 'scenario_001'
-        assert config.start_date.date() == datetime(2024, 1, 15, tzinfo=UTC).date()
-        assert config.end_date.date() == datetime(2024, 1, 16, tzinfo=UTC).date()
-        assert config.random_seed == 42
-
-    def test_scenario_config_with_file_references(self) -> None:
-        """
-        Test scenario config with external file references.
-
-        Notes
-        -----
-        Validates that file references are stored correctly. Actual file
-        loading and validation should be tested with service layer tests.
-        """
-        config = ScenarioConfig(
-            scenario_id='test_scenario',
-            start_date=datetime(2024, 1, 1, tzinfo=UTC),
-            end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            train_schedule_file='schedule.csv',
-        )
-
-        assert config.train_schedule_file == 'schedule.csv'
+        assert scenario.scenario_id == 'scenario_001'
+        assert scenario.start_date.date() == datetime(2024, 1, 15, tzinfo=UTC).date()
+        assert scenario.end_date.date() == datetime(2024, 1, 16, tzinfo=UTC).date()
+        assert scenario.random_seed == 42

@@ -20,10 +20,11 @@ class TrackType(Enum):
     """
 
     LOCOPARKING = 'loco_parking'  # Locomotive parking tracks
+    COLLECTION = 'collection'  # Tracks for collecting wagons
     MAINLINE = 'mainline'  # Mainline tracks outside the workshop area
     PARKING = 'parking_area'  # General parking area tracks
     RETROFIT = 'retrofit'  # Tracks specifically for retrofit operations
-    RETROFITTED = 'retrofitted'  # Tracks for trains that have been retrofitted
+    RETROFITTED = 'retrofitted'  # Tracks for wagons that have been retrofitted
     WORKSHOP = 'workshop_area'  # General workshop area tracks
 
 
@@ -39,6 +40,8 @@ class Track(BaseModel):
 
     edges: list[str] = Field(description='List of edge IDs connected to this track')
 
+    # TODO: Consider use and implementation of capacity in future versions
+    # TODO: Consider use of vlaidity period in future versions
     valid_from: datetime | None = Field(default=None, description='Start of track validity period')
 
     valid_to: datetime | None = Field(default=None, description='End of track validity period')

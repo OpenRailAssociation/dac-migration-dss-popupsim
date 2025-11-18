@@ -8,7 +8,7 @@ import pytest
 
 
 @pytest.fixture
-def fixtures_config_path() -> Path:
+def fixtures_path() -> Path:
     """Provide path to test models fixtures directory.
 
     Returns
@@ -22,11 +22,11 @@ def fixtures_config_path() -> Path:
     ...     scenario_file = fixtures_config_path / 'test_scenario.json'
     ...     assert scenario_file.exists()
     """
-    return Path(__file__).parent / 'fixtures' / 'config'
+    return Path(__file__).parent / 'fixtures'
 
 
 @pytest.fixture
-def test_scenario_json_path(fixtures_config_path: Path) -> Path:
+def test_scenario_json_path(fixtures_path: Path) -> Path:
     """Provide path to the test scenario JSON file.
 
     Returns
@@ -40,10 +40,4 @@ def test_scenario_json_path(fixtures_config_path: Path) -> Path:
     ...     assert test_scenario_json_path.exists()
     ...     assert test_scenario_json_path.name == 'test_scenario.json'
     """
-    return fixtures_config_path / 'test_scenario.json'
-
-
-@pytest.fixture
-def routes_csv_path(fixtures_config_path: Path) -> Path:
-    """Return the path to the test routes CSV file."""
-    return fixtures_config_path / 'test_routes.csv'
+    return fixtures_path / 'scenario.json'

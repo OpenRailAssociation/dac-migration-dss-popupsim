@@ -12,7 +12,7 @@ depending on an actual simpy environment in unit test runs.
 from datetime import date
 from typing import Any
 
-from models.scenario import ScenarioConfig
+from models.scenario import Scenario
 import pytest
 from simulation.popupsim import PopupSim
 from simulation.sim_adapter import SimPyAdapter
@@ -114,7 +114,7 @@ class TestPopupSimWithSimpyAdapter:
         """
         if __name__ == '__main__':
             # Example Usage
-            scenario = ScenarioConfig(
+            scenario = Scenario(
                 scenario_id='test_scenario',
                 start_date=date(2024, 1, 1),
                 end_date=date(2024, 1, 10),

@@ -58,7 +58,7 @@ class Routes:
             self.load_routes(routes_file)
             return
 
-    def load_routes(self, file_path: str | Path) -> None:
+    def load_routes(self, file_path: str | Path) -> None:  # noqa: C901
         """Load routes from a JSON file.
 
         Parameters
@@ -76,6 +76,11 @@ class Routes:
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f'Routes file not found: {path}')
+
+        if not path.is_file():
+            path = path / 'routes.json'
+            if not path.exists():
+                raise FileNotFoundError(f'Routes file not found: {path}')
 
         try:
             logger.info('Loading routes from JSON file: %s', path)

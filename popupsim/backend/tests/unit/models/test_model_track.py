@@ -18,6 +18,7 @@ class TestTrackType:
         """Test that all TrackType enum values are accessible and have correct string values."""
         expected_types: dict[TrackType, str] = {
             TrackType.LOCOPARKING: 'loco_parking',
+            TrackType.COLLECTION: 'collection',
             TrackType.MAINLINE: 'mainline',
             TrackType.PARKING: 'parking_area',
             TrackType.RETROFIT: 'retrofit',

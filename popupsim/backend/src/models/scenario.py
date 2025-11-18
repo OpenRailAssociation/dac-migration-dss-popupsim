@@ -23,8 +23,8 @@ from .workshop import Workshop
 logger = logging.getLogger(__name__)
 
 
-class ScenarioConfig(BaseModel):
-    """Configuration model for simulation scenarios.
+class Scenario(BaseModel):
+    """Scenario model for simulation scenarios.
 
     Validates scenario parameters including date ranges, random seeds,
     workshop models, and required file references.
@@ -40,20 +40,6 @@ class ScenarioConfig(BaseModel):
     random_seed: int = Field(default=0, ge=0, description='Random seed for reproducible simulations')
     # TODO: should be a list
     workshop: Workshop | None = Field(default=None, description='Workshop models with available tracks')
-    # Todo: should be a wagons list
-    train_schedule_file: str = Field(
-        pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to the train schedule file', min_length=1, max_length=50
-    )  # TODO: make it a Path
-    routes_file: str | None = Field(
-        default=None, pattern=r'^[a-zA-Z0-9_.-]+$', description='File path to routes file', min_length=1, max_length=50
-    )
-    tracks_file: str | None = Field(
-        default=None,
-        pattern=r'^[a-zA-Z0-9_.-]+$',
-        description='File path to workshop tracks file',
-        min_length=1,
-        max_length=50,
-    )  # TODO: make it a Path
     routes: list[Route] | None = Field(default=None, description='Route models')
     trains: list[Train] | None = Field(default=None, description='Train models')
     tracks: list[Track] | None = Field(default=None, description='Track models')
@@ -81,16 +67,8 @@ class ScenarioConfig(BaseModel):
             raise ValueError(f'random_seed must be non-negative, got {v}')
         return v
 
-    @field_validator('train_schedule_file')
-    @classmethod
-    def validate_train_schedule_file(cls, v: str) -> str:
-        """Validate that the train schedule file has a valid extension."""
-        if not v.endswith(('.json', '.csv')):
-            raise ValueError(f"Invalid file extension for train_schedule_file: '{v}'. Expected one of: .json, .csv")
-        return v
-
     @model_validator(mode='after')
-    def validate_dates(self) -> 'ScenarioConfig':
+    def validate_dates(self) -> 'Scenario':
         """Ensure end_date is after start_date and duration is reasonable."""
         if self.end_date <= self.start_date:
             raise ValueError(

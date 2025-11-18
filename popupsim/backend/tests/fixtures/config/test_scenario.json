@@ -1,8 +1,0 @@
-{
-  "scenario_id": "scenario_001",
-  "start_date": "2024-01-15",
-  "end_date": "2024-01-16",
-  "train_schedule_file": "test_train_schedule.csv",
-  "routes_file": "test_routes.csv",
-  "workshop_tracks_file": "test_workshop_tracks.csv"
-}

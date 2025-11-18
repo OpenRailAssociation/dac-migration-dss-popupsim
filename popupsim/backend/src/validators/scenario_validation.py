@@ -11,7 +11,7 @@ from dataclasses import field
 from enum import Enum
 import logging
 
-from models.scenario import ScenarioConfig
+from models.scenario import Scenario
 from models.track import TrackType
 
 logger = logging.getLogger('validation')
@@ -150,12 +150,12 @@ class ScenarioValidator:
     - Temporal consistency (trains within simulation time)
     """
 
-    def validate(self, config: ScenarioConfig) -> ValidationResult:
+    def validate(self, config: Scenario) -> ValidationResult:
         """Perform all validations and return result.
 
         Parameters
         ----------
-        config : ScenarioConfig
+        config : Scenario
             Loaded scenario models.
 
         Returns
@@ -179,7 +179,7 @@ class ScenarioValidator:
 
         return ValidationResult(is_valid=is_valid, issues=issues)
 
-    def _validate_workshop_tracks(self, config: ScenarioConfig) -> list[ValidationIssue]:
+    def _validate_workshop_tracks(self, config: Scenario) -> list[ValidationIssue]:
         """Validate workshop tracks.
 
         Checks:
@@ -299,7 +299,7 @@ class ScenarioValidator:
 
     # return issues
 
-    def _validate_routes(self, config: ScenarioConfig) -> list[ValidationIssue]:
+    def _validate_routes(self, config: Scenario) -> list[ValidationIssue]:
         """Validate routes.
 
         Checks:
@@ -381,7 +381,7 @@ class ScenarioValidator:
 
         return issues
 
-    def _validate_simulation_duration(self, scenario: ScenarioConfig) -> list[ValidationIssue]:
+    def _validate_simulation_duration(self, scenario: Scenario) -> list[ValidationIssue]:
         """Validate whether all trains arrive within simulation time."""
         issues: list[ValidationIssue] = []
 

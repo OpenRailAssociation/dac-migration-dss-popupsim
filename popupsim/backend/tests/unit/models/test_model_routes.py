@@ -153,3 +153,13 @@ class TestRoutesFromRoutes:
         assert routes.length == 2
         assert 'TEST01' in routes.routes_by_id
         assert 'TEST02' in routes.routes_by_id
+
+    def test_load_routes_from_file(self, fixtures_path: Path) -> None:
+        """Test loading routes from a file after initialization.
+
+        Generic test loading the routes.json file from the fixtures directory.
+        """
+        routes: Routes = Routes()
+        routes.load_routes(fixtures_path)
+        assert routes.length == 16
+        assert '6_To_10' in routes.routes_by_id
