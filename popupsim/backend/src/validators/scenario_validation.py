@@ -166,9 +166,10 @@ class ScenarioValidator:
         issues: list[ValidationIssue] = []
 
         # Perform all validations
-        # Todo : verifiy validations
+        # TODO: verifiy validations
         issues.extend(self._validate_workshop_tracks(config))
-        # issues.extend(self._validate_capacity(config)) ToDo: clarify if needed
+        # TODO: clarify if needed
+        # issues.extend(self._validate_capacity(config))
         issues.extend(self._validate_routes(config))
         # issues.extend(self._validate_train_schedule(config))
         # issues.extend(self._validate_simulation_duration(config))
@@ -366,7 +367,7 @@ class ScenarioValidator:
                     )
                 )
 
-            # ToDo: enable time_min check or remove completely?
+            # TODO: enable time_min check or remove completely?
             # Time > 0?
             # if route.time_min <= 0:
             #     issues.append(

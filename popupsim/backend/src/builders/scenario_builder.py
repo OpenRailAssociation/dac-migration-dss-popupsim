@@ -45,7 +45,7 @@ class ScenarioBuilder:
         ----------
         base_path : Path | None, optional
             Base directory for models files, by default None (uses current directory).
-            # Todo Clarify why we need that
+            # TODO: Clarify why we need that
         """
         self.base_path = base_path or Path.cwd()
         self.validator = ScenarioValidator()
@@ -778,7 +778,7 @@ class ScenarioBuilder:
         tracks: list[Track] = self._load_tracks(tracks_path)
 
         # Load routes if specified
-        # Todo use only routes eithere here or in sim to hanlde occupation
+        # TODO: use only routes eithere here or in sim to hanlde occupation
         routes: list[Route] = []
         routes_file_name: str | None = scenario_data.get('routes_file')
         if routes_file_name:
@@ -808,7 +808,7 @@ class ScenarioBuilder:
         logger.info('Successfully loaded complete scenario: %s', scenario.scenario_id)
 
         # 5. Validate models
-        # Todo enable validations
+        # TODO: enable validations
         # logger.info('Starting models validation for scenario: %s', scenario.scenario_id)
         # validation_result: ValidationResult = self.validator.validate(scenario)
 

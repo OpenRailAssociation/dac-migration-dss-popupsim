@@ -73,13 +73,13 @@ class Workshop(BaseModel):
             return {'error': 'No WORKSHOP tracks found'}
 
         # Safely aggregate capacities (t.capacity may be None)
-        # Todo clarify capacity handling
+        # TODO:  clarify capacity handling
         # capacities: list[int] = [t.capacity or 0 for t in werkstatt_tracks]
         # total_capacity: int = sum(capacities)
 
         # Collect retrofit times, ignoring tracks without a defined retrofit_time_min
         # retrofit_times: list[int] = [t.retrofit_time_min for t in werkstatt_tracks if t.retrofit_time_min is not None]
-        # Todo clarify retrofit_time_min handling
+        # TODO:  clarify retrofit_time_min handling
         retrofit_times: list[int] = [30, 30]  # Placeholder values for
 
         if not retrofit_times:

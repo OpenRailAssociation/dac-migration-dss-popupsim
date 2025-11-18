@@ -254,7 +254,7 @@ class TestTrainScheduleCSVLoading:
         """
         return Path(__file__).parent.parent / 'fixtures' / 'config' / 'test_train_schedule_invalid.csv'
 
-    # Todo decide how to chain Scenario with Train Shedule
+    # TODO: clarify if neededdecide how to chain Scenario with Train Shedule
     # def test_load_train_schedule_csv_success(self, config_service: ScenarioBuilder, valid_csv_path: Path) -> None:
     #     """
     #     Test successful loading of train schedule from valid CSV file.
