@@ -150,12 +150,12 @@ class ScenarioValidator:
     - Temporal consistency (trains within simulation time)
     """
 
-    def validate(self, config: Scenario) -> ValidationResult:
+    def validate(self, scenario: Scenario) -> ValidationResult:
         """Perform all validations and return result.
 
         Parameters
         ----------
-        config : Scenario
+        scenario : Scenario
             Loaded scenario models.
 
         Returns
@@ -167,161 +167,107 @@ class ScenarioValidator:
 
         # Perform all validations
         # TODO: verifiy validations
-        issues.extend(self._validate_workshop_tracks(config))
+        issues.extend(self._validate_workshop_tracks(scenario))
         # TODO: clarify if needed
-        # issues.extend(self._validate_capacity(config))
-        issues.extend(self._validate_routes(config))
-        # issues.extend(self._validate_train_schedule(config))
-        # issues.extend(self._validate_simulation_duration(config))
+        # issues.extend(self._validate_capacity(scenario))
+        issues.extend(self._validate_routes(scenario))
+        # issues.extend(self._validate_train_schedule(scenario))
+        # issues.extend(self._validate_simulation_duration(scenario))
 
         # is_valid = True when no errors
         is_valid = not any(i.level == ValidationLevel.ERROR for i in issues)
 
         return ValidationResult(is_valid=is_valid, issues=issues)
 
-    def _validate_workshop_tracks(self, config: Scenario) -> list[ValidationIssue]:
+    def _validate_workshop_tracks(self, scenario: Scenario) -> list[ValidationIssue]:
         """Validate workshop tracks.
 
         Checks:
-        - At least one workshop track available
-        - All required type available
-        - retrofit_time_min only for workshop tracks > 0
+        - At least one workshop available
+        - Workshop has tracks configured
+        - Required track types available
         """
         issues: list[ValidationIssue] = []
 
-        # Check if workshop is configured
-        if config.workshop is None:
+        # Check if workshops are configured
+        if not scenario.workshops:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message='Workshop models is missing',
-                    field='workshop',
-                    suggestion='Add workshop models with tracks',
+                    message='No workshops configured',
+                    field='workshops',
+                    suggestion='Add at least one workshop with tracks',
+                )
+            )
+            return issues
+
+        # Validate first workshop
+        workshop = scenario.workshops[0]
+
+        if not scenario.tracks:
+            issues.append(
+                ValidationIssue(
+                    level=ValidationLevel.ERROR,
+                    message=f'Workshop {workshop.workshop_id} has no tracks configured',
+                    field='tracks',
+                    suggestion='Add tracks to the workshop',
                 )
             )
             return issues
 
         # 1. At least one workshop track
-        werkstatt_tracks = [t for t in config.workshop.tracks if t.type == TrackType.WORKSHOP]
+        werkstatt_tracks = [t for t in scenario.tracks if t.type == TrackType.WORKSHOP]
 
-        if len(werkstatt_tracks) == 0:
+        if not werkstatt_tracks:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
                     message="At least one track with function='WORKSHOP' required",
-                    field='workshop.tracks',
-                    suggestion="Add a track with function='WORKSHOP' and retrofit_time_min > 0",
+                    field='tracks',
+                    suggestion="Add a track with function='WORKSHOP'",
                 )
             )
 
         # 2. All core tracktypes present?
         required_types = {TrackType.RETROFITTED, TrackType.WORKSHOP, TrackType.PARKING}
-        present_types = {t.type for t in config.workshop.tracks}
+        present_types = {t.type for t in scenario.tracks}
         missing = required_types - present_types
 
         if missing:
-            missing_names = [trackype.value for trackype in missing]
+            missing_names = [tracktype.value for tracktype in missing]
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.WARNING,
                     message=f'Missing track type: {", ".join(missing_names)}',
-                    field='workshop.tracks',
-                    suggestion='Complete workflow needed: sammelgleis → WORKSHOP → parkgleis',
+                    field='tracks',
+                    suggestion='Complete workflow needed: collection → WORKSHOP → parking',
                 )
             )
 
-        # 3. retrofit_time_min only for WORKSHOP. Should be added ?
-
         return issues
 
-    # def _validate_capacity(self, scenario: ScenarioConfig) -> list[ValidationIssue]:
-    #     """Validate whether workshop capacity is sufficient for train arrivals.
-
-    #     Calculates theoretical throughput and compares with arrival rate.
-    #     """
-    #     issues: list[ValidationIssue] = []
-
-    #     # Check if workshop is configured
-    #     if scenario.workshop is None:
-    #         return issues  # Workshop validation already handles this case
-
-    #     # Total workshop capacity
-    #     werkstatt_tracks = [t for t in scenario.workshop.tracks if t.type == TrackType.WORKSHOP]
-
-    #     if not werkstatt_tracks:
-    #         return issues  # Already checked in _validate_workshop_tracks
-
-    #     total_capacity = sum(t.capacity for t in werkstatt_tracks)
-
-    #     # Average retrofit time
-    #     avg_retrofit_time = sum(t.retrofit_time_min for t in werkstatt_tracks) / len(werkstatt_tracks)
-
-    #     # Wagons per day from train models
-    #     wagons_per_day = len(
-    #         [
-    #             w
-    #             for train in (scenario.trains or [])
-    #             for w in train.wagons
-    #             if w.needs_retrofit  # Only wagons that need retrofitting
-    #         ]
-    #     )
-
-    # # Theoretical throughput per day (24h * 60min / avg_time * capacity)
-    # max_throughput_per_day = (24 * 60 / avg_retrofit_time) * total_capacity
-
-    # # Warning at > 80% utilization
-    # utilization = wagons_per_day / max_throughput_per_day
-
-    # if utilization > 1.0:
-    #     issues.append(
-    #         ValidationIssue(
-    #             level=ValidationLevel.ERROR,
-    #             message=(
-    #                 f'Capacity exceeded: {wagons_per_day} wagons/day at max. '
-    #                 f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
-    #             ),
-    #             field='workshop.tracks',
-    #             suggestion='Increase capacity or reduce train arrivals',
-    #         )
-    #     )
-    # elif utilization > 0.8:
-    #     issues.append(
-    #         ValidationIssue(
-    #             level=ValidationLevel.WARNING,
-    #             message=(
-    #                 f'High utilization: {wagons_per_day} wagons/day at max. '
-    #                 f'{max_throughput_per_day:.0f} throughput ({utilization * 100:.0f}% utilization)'
-    #             ),
-    #             field='workshop.tracks',
-    #             suggestion='Consider higher capacity for better performance',
-    #         )
-    #     )
-
-    # return issues
-
-    def _validate_routes(self, config: Scenario) -> list[ValidationIssue]:
+    def _validate_routes(self, scenario: Scenario) -> list[ValidationIssue]:
         """Validate routes.
 
         Checks:
         - Track IDs in track_sequence exist
         - from_function and to_function exist
-        - time_min > 0
         """
         issues: list[ValidationIssue] = []
 
-        # Check if workshop is configured
-        if config.workshop is None:
+        # Check if tracks are configured
+        if not scenario.tracks:
             return issues  # Workshop validation already handles this case
 
         # Collect track IDs and function names
-        track_ids = {t.id for t in config.workshop.tracks}
-        function_names = {t.type.value for t in config.workshop.tracks}
+        track_ids = {t.id for t in scenario.tracks}
+        function_names = {t.type.value for t in scenario.tracks}
         valid_identifiers = track_ids | function_names
 
         # Collect tracktypes
-        tracktypes = {t.type for t in config.workshop.tracks}
+        tracktypes = {t.type for t in scenario.tracks}
 
-        for route in config.routes or []:
+        for route in scenario.routes or []:
             # Track IDs or function names exist?
             for track_identifier in route.track_sequence:
                 if track_identifier not in valid_identifiers:
@@ -336,7 +282,7 @@ class ScenarioValidator:
 
             # tracktypes exist?
             # Get the function of the from_track
-            from_track = next((t for t in config.workshop.tracks if t.id == route.from_track), None)
+            from_track = next((t for t in scenario.tracks if t.id == route.from_track), None)
             if from_track and from_track.type not in tracktypes:
                 tracktype_names = [str(f) for f in tracktypes]
                 issues.append(
@@ -352,7 +298,7 @@ class ScenarioValidator:
                 )
 
             # Get the function of the to_track
-            to_track = next((t for t in config.workshop.tracks if t.id == route.to_track), None)
+            to_track = next((t for t in scenario.tracks if t.id == route.to_track), None)
             if to_track and to_track.type not in tracktypes:
                 tracktype_names = [str(f) for f in tracktypes]
                 issues.append(
@@ -367,18 +313,6 @@ class ScenarioValidator:
                     )
                 )
 
-            # TODO: enable time_min check or remove completely?
-            # Time > 0?
-            # if route.time_min <= 0:
-            #     issues.append(
-            #         ValidationIssue(
-            #             level=ValidationLevel.ERROR,
-            #             message=f'Route {route.route_id}: time_min must be > 0',
-            #             field=f'routes[{route.route_id}].time_min',
-            #             suggestion='Set a realistic travel time in minutes',
-            #         )
-            #     )
-
         return issues
 
     def _validate_simulation_duration(self, scenario: Scenario) -> list[ValidationIssue]:
@@ -388,6 +322,9 @@ class ScenarioValidator:
         sim_start = scenario.start_date
         sim_end = scenario.end_date
 
+        if not sim_start or not sim_end:
+            return issues
+
         for train in scenario.trains or []:
             arrival_date = train.arrival_time
 
@@ -396,8 +333,8 @@ class ScenarioValidator:
                     ValidationIssue(
                         level=ValidationLevel.WARNING,
                         message=f'Train {train.train_id} arrives before simulation start ({arrival_date})',
-                        field=f'train[{train.train_id}].arrival_date',
-                        suggestion='Adjust start_date or arrival_date',
+                        field=f'train[{train.train_id}].arrival_time',
+                        suggestion='Adjust start_datetime or arrival_time',
                     )
                 )
 
@@ -406,8 +343,8 @@ class ScenarioValidator:
                     ValidationIssue(
                         level=ValidationLevel.WARNING,
                         message=f'Train {train.train_id} arrives after simulation end ({arrival_date})',
-                        field=f'train[{train.train_id}].arrival_date',
-                        suggestion='Adjust end_date or arrival_date',
+                        field=f'train[{train.train_id}].arrival_time',
+                        suggestion='Adjust stop_datetime or arrival_time',
                     )
                 )
 

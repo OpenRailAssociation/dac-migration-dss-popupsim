@@ -38,11 +38,10 @@ class Scenario(BaseModel):
     end_date: datetime = Field(description='Simulation end date')
     # Make model attribute an int (always set) but allow None during input via the before validator
     random_seed: int = Field(default=0, ge=0, description='Random seed for reproducible simulations')
-    # TODO: should be a list extracted from tracks ?
-    workshop: Workshop | None = Field(default=None, description='Workshop models with available tracks')
     routes: list[Route] | None = Field(default=None, description='Route models')
     trains: list[Train] | None = Field(default=None, description='Train models')
     tracks: list[Track] | None = Field(default=None, description='Track models')
+    workshops: list[Workshop] | None = Field(default=None, description='Workshop models with available tracks')
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod

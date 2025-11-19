@@ -22,7 +22,6 @@ class Wagon(BaseModel):
     wagon_id: str = Field(description='Unique identifier for the wagon')
     length: float = Field(gt=0, description='Length of the wagon in meters')
     is_loaded: bool = Field(description='Whether the wagon is loaded')
-    # TODO: decide if track_id is needed
     track_id: str | None = Field(default=None, description='ID of the track the wagon is on')
     arrival_time: datetime | None = Field(default=None, description='Arrival time of the wagon')
     needs_retrofit: bool = Field(description='Whether the wagon needs retrofit')

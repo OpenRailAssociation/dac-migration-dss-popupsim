@@ -56,6 +56,8 @@ class TestScenarioBuilder:
         ----------
         fixtures_scenario_json_path : Path
             Path to scenario JSON fixture.
+
+        Generic test to load scenario and its referenced tracks, trains, routes and workshops.
         """
         scenario = ScenarioBuilder(fixtures_scenario_json_path).build()
 
@@ -66,3 +68,5 @@ class TestScenarioBuilder:
         assert len(scenario.trains) > 1
         assert scenario.routes is not None
         assert len(scenario.routes) > 1
+        assert scenario.workshops is not None
+        assert len(scenario.workshops) > 1

@@ -171,19 +171,19 @@ def main(
         if scenario_path is None:
             raise typer.Exit(1)
         scenario = ScenarioBuilder(scenario_path).build()
-        # TODO: decide if validation happens here or in ScenarioBuilder
-        # self.validator.validate(self.scenario)
         typer.echo('\nScenario loaded and validated successfully.')
         typer.echo(f'Scenario ID: {scenario.scenario_id}')
         typer.echo(f'Start Date: {scenario.start_date}')
         typer.echo(f'End Date: {scenario.end_date}')
-        typer.echo(f'Number of Trains: {len(scenario.trains) if scenario.trains else 0}')
-        workshop_track_count = 0
-        if scenario.workshop is not None:
-            workshop_track_count = len(getattr(scenario.workshop, 'tracks', []))
-        typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
-        typer.echo(f'Number of Routes: {len(scenario.routes) if scenario.routes else 0}')
+        if scenario.routes is not None:
+            typer.echo(f'Number of Routes: {len(scenario.routes)}')
+        if scenario.trains is not None:
+            typer.echo(f'Number of Trains: {len(scenario.trains)}')
+        if scenario.workshops is not None:
+            typer.echo(f'Number of Workshops: {len(scenario.workshops)}')
         typer.echo('\nValidation Summary:')
+        # TODO: decide if validation happens here or in ScenarioBuilder
+        # self.validator.validate(self.scenario)
         # validation_result.print_summary()
 
         # if not validation_result.is_valid:
@@ -193,8 +193,6 @@ def main(
         typer.echo('\n🚀 Starting popupsim processing...')
         sim_adapter = SimPyAdapter.create_simpy_adapter()
         popup_sim = PopupSim(sim_adapter, scenario)
-        # pylint: disable=fixme
-        # TODO: make sure run_until is set appropriately from scenario config
         popup_sim.run()
 
     except BuilderError as e:

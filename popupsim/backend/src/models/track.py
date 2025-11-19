@@ -40,8 +40,6 @@ class Track(BaseModel):
 
     edges: list[str] = Field(description='List of edge IDs connected to this track')
 
-    # TODO: Consider use and implementation of capacity in future versions
-    # TODO: Consider use of vlaidity period in future versions
     valid_from: datetime | None = Field(default=None, description='Start of track validity period')
 
     valid_to: datetime | None = Field(default=None, description='End of track validity period')

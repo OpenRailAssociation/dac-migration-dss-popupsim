@@ -95,7 +95,7 @@ class Routes:
             if 'routes' not in data:
                 raise ValueError('Missing "routes" key in JSON file')
 
-            routes_data: list[dict[str, object]] = data['routes']  # type: ignore[assignment]
+            routes_data: list[dict[str, object]] = data.get('routes')  # type: ignore[assignment]
 
             # Clear existing routes
             self.routes = []

@@ -16,6 +16,7 @@ from builders.tracks_builder import TrackListBuilder
 from builders.train_list_builder import TrainListBuilder
 from models.routes import Routes
 from models.scenario import Scenario
+from models.workshop import Workshop
 from validators.scenario_validation import ScenarioValidator
 
 # Configure logging
@@ -172,6 +173,42 @@ class ScenarioBuilder:
         except Exception as e:
             raise BuilderError(f'Failed to load trains from {trains_path}: {e!s}') from e
 
+    def __load_workshops(self) -> None:
+        """Load workshops from JSON file referenced in scenario configuration.
+
+        Raises
+        ------
+        BuilderError
+            If workshops file is not specified or loading fails.
+        """
+        workshops_file: str | None = self.references.get('workshops')
+
+        if not workshops_file:
+            raise BuilderError('Missing workshops file reference in scenario configuration')
+
+        # Replace filename in scenario_path with workshops_file
+        scenario_dir: Path = Path(self.scenario_path).parent
+        workshops_path: Path = scenario_dir / workshops_file
+
+        if not workshops_path.exists():
+            raise BuilderError(f'Workshops file not found: {workshops_path}')
+
+        try:
+            if isinstance(self.scenario, Scenario):
+                with open(workshops_path, encoding='utf-8') as f:
+                    workshops_data: dict[str, object] = json.load(f)
+
+                if 'workshops' not in workshops_data:
+                    raise BuilderError(f'No workshops found in {workshops_path}')
+
+                workshops_list: list[dict[str, object]] = workshops_data['workshops']  # type: ignore[assignment]
+                self.scenario.workshops = [Workshop(**data) for data in workshops_list]  # type: ignore[arg-type]
+
+        except json.JSONDecodeError as e:
+            raise BuilderError(f'Invalid JSON format in {workshops_path}: {e!s}') from e
+        except Exception as e:
+            raise BuilderError(f'Failed to load workshops from {workshops_path}: {e!s}') from e
+
     def __find_scenario_in_path(self, path: Path) -> None:
         # Handle both directory and file paths
         if path.is_dir():
@@ -211,6 +248,7 @@ class ScenarioBuilder:
             self.__load_tracks()
             self.__load_trains()
             self.__load_routes()
+            self.__load_workshops()
             # TODO: decide if validation happens here or in main
             # self.validator.validate(self.scenario)
         else:
