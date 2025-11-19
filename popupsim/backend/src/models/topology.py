@@ -18,8 +18,9 @@ class Topology:
         """Load edge lengths from dict."""
         if 'edges' in data:
             for edge in data['edges']:
-                if 'edge_id' in edge and 'length' in edge:
-                    self.edge_lengths[edge['edge_id']] = float(edge['length'])
+                edge_id = edge.get('edge_id') or edge.get('id')
+                if edge_id and 'length' in edge:
+                    self.edge_lengths[edge_id] = float(edge['length'])
 
     def load_topology(self, file_path: str | Path) -> None:
         """Load edge lengths from topology JSON file."""

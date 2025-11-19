@@ -53,6 +53,10 @@ class Scenario(BaseModel):
         default=TrackSelectionStrategy.LEAST_OCCUPIED,
         description='Strategy for selecting collection tracks'
     )
+    retrofit_selection_strategy: TrackSelectionStrategy = Field(
+        default=TrackSelectionStrategy.LEAST_OCCUPIED,
+        description='Strategy for selecting retrofit tracks'
+    )
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
     process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
     routes: list[Route] | None = Field(default=None, description='Route models')
