@@ -1,15 +1,3 @@
-"""Simulate popupsim scenarios.
-
-This module keeps the simulation framework isolated from the domain logic.
-It provides adapters to different simulation backends (e.g., SimPy).
-It also provides builders for constructing simulation scenarios in a fluent manner.
-It provides a small concurrency mode : a pool of workers executing tasks in parallel.
-in a workshop which has multiple retrofit stations going on concurrently.
-
-All waiting and scheduling is expressed via the adapter interface, so the domain logic
-remains agnostic of the underlying simulation framework.
-"""
-
 import logging
 
 from models.locomotive import Locomotive
@@ -34,7 +22,7 @@ class LocomotivePool:
     def __init__(self, sim, locomotives: list[Locomotive], poll_interval: float = 0.01) -> None:
         self.available_locomotives = {}
         for loco in locomotives:
-            self.available_locomotives[loco.id] = loco
+            self.available_locomotives[loco.locomotive_id] = loco
         self.occupied_locomotives = {}
         self.poll = float(poll_interval)
         self.sim = sim
@@ -42,7 +30,7 @@ class LocomotivePool:
     # nested function to return a fresh generator every time it's called
     def acquire(self):
         def _acq():
-            while self.available_locomotive >= 1:
+            while len(self.available_locomotives) >= 1:
                 yield self.sim.delay(self.poll)
             locomotive = self.allocate_locomotive()
             self.occupied_locomotives[locomotive.id] = locomotive
@@ -85,7 +73,7 @@ class WorkshopPool:
         self.available_workshops = {}
         self.occupied_workshops = {}
         for workshop in workshops:
-            self.available_locomotives[workshop.id] = workshop
+            self.available_workshops[workshop.workshop_id] = workshop
 
         self.poll = float(poll_interval)
         self.sim = sim
@@ -93,10 +81,11 @@ class WorkshopPool:
     # nested function to return a fresh generator every time it's called
     def acquire(self):
         def _acq():
-            while self.available_workshop >= 1:
+            while len(self.available_workshops) >= 1:
                 yield self.sim.delay(self.poll)
             workshop = self.allocate_workshop()
-            self.occupied_workshops[workshop.id] = workshop
+            self.occupied_workshops[workshop.workshop_id] = workshop
+            return workshop
 
         return _acq()
 
@@ -123,8 +112,8 @@ class WorkshopPool:
         workshop : Workshop
             The workshop to release back to the pool.
         """
-        workshop = self.occupied_workshops.pop(workshop.id)
-        self.available_workshops[workshop.id] = workshop
+        released_workshop = self.occupied_workshops.pop(workshop.workshop_id)
+        self.available_workshops[released_workshop.workshop_id] = released_workshop
 
 
 class PopupSim:  # pylint: disable=too-few-public-methods
@@ -201,7 +190,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             until = self.get_simtime_limit_from_scenario()
         logger.info('Starting %s for: %s', self.name, self.scenario)
 
-        self.sim.process(trainschedule, self)
+        self.sim.run_process(trainschedule, self)
 
 
 
@@ -228,7 +217,7 @@ def trainschedule(popupsim: PopupSim, loco: Locomotive):
     logger.info('Starting train arrival generator for scenario %s', scenario.scenario_id)
     for train in scenario.trains:
         logger.debug('Waiting for next train arrival at %s', train.arrival_time)
-        yield popupsim.delay(train.arrival_time - scenario.start_date)
+        yield popupsim.sim.delay((train.arrival_time - scenario.start_date).total_seconds() / 60.0)
         logger.debug('Train %s arrived at %s', train.train_id, train.arrival_time)
         #sim.add_train(train)
         for wagon in train.wagons:
@@ -262,7 +251,7 @@ def move_wagons_from_collection_to_retrofit(popupsim: PopupSim):
     logger.info('Starting wagon movement generator for scenario %s', scenario.scenario_id)
     for wagon in popupsim.wagons_queue:
         logger.debug('Waiting for next wagon movement at %s', wagon.arrival_time)
-        yield popupsim.delay(wagon.arrival_time - scenario.start_date)
+        yield popupsim.sim.delay((wagon.arrival_time - scenario.start_date).total_seconds() / 60.0)
         logger.debug('Wagon %s arrived at %s', wagon.wagon_id, wagon.arrival_time)
 
 
