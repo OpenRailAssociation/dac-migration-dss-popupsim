@@ -165,7 +165,11 @@ class PopupSim:  # pylint: disable=too-few-public-methods
 
         # Initialize track capacity management
         if scenario.tracks and scenario.topology:
-            self.track_capacity = TrackCapacityManager(scenario.tracks, scenario.topology)
+            self.track_capacity = TrackCapacityManager(
+                scenario.tracks, 
+                scenario.topology,
+                strategy=scenario.track_selection_strategy
+            )
         else:
             raise ValueError('Scenario must have tracks and topology for capacity management.')
 
@@ -196,14 +200,14 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             until = self.get_simtime_limit_from_scenario()
         logger.info('Starting %s for: %s', self.name, self.scenario)
 
-        self.sim.run_process(trainschedule, self)
+        self.sim.run_process(process_train_arrivals, self)
 
 
 
         self.sim.run(until)
         logger.info('Simulation completed.')
 
-def trainschedule(popupsim: PopupSim):
+def process_train_arrivals(popupsim: PopupSim):
     """Generator function to simulate train arrivals.
 
     This function generates train arrivals based on the provided scenario.
@@ -236,18 +240,14 @@ def trainschedule(popupsim: PopupSim):
             wagon.status = WagonStatus.SELECTING
             logger.debug('The wagon %s was selected', wagon.wagon_id)
             if wagon.needs_retrofit and not wagon.is_loaded:
-                # Find first collection track with capacity
-                collection_track_id = None
-                for track in popupsim.scenario.tracks:
-                    if track.type.value == 'collection' and popupsim.track_capacity.can_add_wagon(track.id, wagon.length):
-                        collection_track_id = track.id
-                        break
+                # Select collection track using configured strategy
+                collection_track_id = popupsim.track_capacity.select_collection_track(wagon.length)
 
                 if collection_track_id:
                     popupsim.track_capacity.add_wagon(collection_track_id, wagon.length)
                     wagon.track_id = collection_track_id
                     wagon.status = WagonStatus.SELECTED
-                    logger.debug('Adding wagon %s to collection track', wagon.wagon_id)
+                    logger.debug('Adding wagon %s to collection track %s', wagon.wagon_id, collection_track_id)
                     popupsim.wagons_queue.append(wagon)
                 else:
                     wagon.status = WagonStatus.REJECTED

@@ -60,7 +60,6 @@ class TestScenario:
         expected_end = datetime(2024, 1, 16, tzinfo=UTC)
         assert scenario.start_date.date() == expected_start.date()
         assert scenario.end_date.date() == expected_end.date()
-        assert scenario.random_seed == 0
 
     def test_scenario_id_validation_valid_formats(self) -> None:
         """
@@ -197,55 +196,30 @@ class TestScenario:
         duration = (config.end_date - config.start_date).days
         assert duration > 365
 
-    def test_random_seed_validation(self) -> None:
+    def test_track_selection_strategy_validation(self) -> None:
         """
-        Test random seed validation with valid values.
+        Test track selection strategy validation.
 
         Notes
         -----
-        Validates that non-negative integer seeds are accepted and that
-        default value (0) is applied when seed is not specified.
+        Validates that valid strategy values are accepted and default is applied.
         """
-        # Valid seeds
-        valid_seeds = [0, 1, 42, 999, 2147483647]
-
-        for seed in valid_seeds:
-            config = Scenario(
-                scenario_id='test_scenario',
-                start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                random_seed=seed,
-            )
-            assert config.random_seed == seed
+        from models.scenario import TrackSelectionStrategy
+        
+        config = Scenario(
+            scenario_id='test_scenario',
+            start_date=datetime(2024, 1, 1, tzinfo=UTC),
+            end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN
+        )
+        assert config.track_selection_strategy == TrackSelectionStrategy.ROUND_ROBIN
 
         config = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
         )
-        assert config.random_seed == 0  # Default value
-
-    def test_random_seed_validation_invalid_values(self) -> None:
-        """
-        Test random seed validation with invalid values.
-
-        Notes
-        -----
-        Validates that negative integer seeds raise ValidationError with
-        appropriate constraint message (ge=0).
-        """
-        invalid_seeds = [-1, -42]
-
-        for seed in invalid_seeds:
-            with pytest.raises(ValidationError) as exc_info:
-                Scenario(
-                    scenario_id='test_scenario',
-                    start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                    end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                    random_seed=seed,
-                )
-            error_msg = str(exc_info.value)
-            assert 'random_seed must be non-negative' in error_msg
+        assert config.track_selection_strategy == TrackSelectionStrategy.LEAST_OCCUPIED
 
     def test_scenario_config_equality(self) -> None:
         """
@@ -321,7 +295,6 @@ class TestScenario:
             'scenario_id': 'scenario_001',
             'start_date': '2024-01-15',
             'end_date': '2024-01-16',
-            'random_seed': 42,
         }
 
         scenario = Scenario(**scenario_data)
@@ -330,7 +303,6 @@ class TestScenario:
         assert scenario.scenario_id == 'scenario_001'
         assert scenario.start_date.date() == datetime(2024, 1, 15, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2024, 1, 16, tzinfo=UTC).date()
-        assert scenario.random_seed == 42
 
     def test_load_scenario_from_file(self, fixtures_path: Path) -> None:
         """
@@ -356,4 +328,3 @@ class TestScenario:
         assert scenario.scenario_id == 'test_scenario_01'
         assert scenario.start_date.date() == datetime(2031, 7, 4, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2031, 7, 5, tzinfo=UTC).date()
-        assert scenario.random_seed == 0

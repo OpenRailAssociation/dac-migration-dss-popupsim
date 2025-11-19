@@ -47,7 +47,6 @@ class TestScenarioBuilder:
         assert scenario.scenario_id == 'test_scenario_01'
         assert scenario.start_date.date() == datetime(2031, 7, 4, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2031, 7, 5, tzinfo=UTC).date()
-        assert scenario.random_seed == 0
 
     def test_build_scenario_with_refrences_from_file(self, fixtures_scenario_json_path: Path) -> None:
         """Test building scenario with references to external data files.

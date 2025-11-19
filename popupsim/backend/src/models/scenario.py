@@ -7,6 +7,7 @@ such as date ranges, random seeds, workshop configurations, and file references.
 
 from datetime import UTC
 from datetime import datetime
+from enum import Enum
 import logging
 
 from pydantic import BaseModel
@@ -27,6 +28,14 @@ from .workshop import Workshop
 logger = logging.getLogger(__name__)
 
 
+class TrackSelectionStrategy(str, Enum):
+    """Strategy for selecting collection tracks when multiple are available."""
+    ROUND_ROBIN = 'round_robin'
+    LEAST_OCCUPIED = 'least_occupied'
+    FIRST_AVAILABLE = 'first_available'
+    RANDOM = 'random'
+
+
 class Scenario(BaseModel):
     """Scenario model for simulation scenarios.
 
@@ -40,6 +49,10 @@ class Scenario(BaseModel):
     )
     start_date: datetime = Field(description='Simulation start date')
     end_date: datetime = Field(description='Simulation end date')
+    track_selection_strategy: TrackSelectionStrategy = Field(
+        default=TrackSelectionStrategy.LEAST_OCCUPIED,
+        description='Strategy for selecting collection tracks'
+    )
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
     process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
     routes: list[Route] | None = Field(default=None, description='Route models')
