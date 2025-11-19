@@ -69,6 +69,52 @@ class LocomotivePool:
         """
         self.available_locomotives.add(locomotive)
 
+class WorkshopPool:
+    """Pool of workshops for managing available workshops in the simulation.
+
+    This class manages a collection of workshops, allowing for allocation
+    and release of workshops as needed during the simulation.
+    """
+
+    def __init__(self, sim, workshops: list[Workshop], poll_interval: float = 0.01) -> None:
+        self.available_workshops = set(workshops)
+        self.occupied_workshops = []
+        self.poll = float(poll_interval)
+        self.sim = sim
+
+      # nested function to return a fresh generator every time it's called
+    def acquire(self):
+        def _acq():
+            while self.available_workshop >= 1:
+                yield self.sim.delay(self.poll)
+            self.occupied_workshops.append(self.allocate_workshop())
+
+        return _acq()
+
+
+    def allocate_workshop(self) -> Workshop | None:
+        """Allocate an available workshop from the pool.
+
+        Returns
+        -------
+        Workshop | None
+            An available workshop if one exists, otherwise None.
+        """
+        if not self.available_workshops:
+            return None
+        workshop = self.available_workshops.pop()
+        return workshop
+
+    def release_workshop(self, workshop: Workshop) -> None:
+        """Release a workshop back to the pool.
+
+        Parameters
+        ----------
+        workshop : Workshop
+            The workshop to release back to the pool.
+        """
+        self.available_workshops.add(workshop)
+
 class PopupSim:  # pylint: disable=too-few-public-methods
     """High-level simulation orchestrator for PopUp-Sim.
 
