@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+
 class Topology:
     """Loads edge lengths from topology.json."""
 

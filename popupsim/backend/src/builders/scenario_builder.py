@@ -17,6 +17,7 @@ from builders.train_list_builder import TrainListBuilder
 from models.locomotive import Locomotive
 from models.routes import Routes
 from models.scenario import Scenario
+from models.topology import Topology
 from models.workshop import Workshop
 from validators.scenario_validation import ScenarioValidator
 
@@ -106,6 +107,32 @@ class ScenarioBuilder:
 
         except Exception as e:
             raise BuilderError(f'Failed to load routes from {routes_path}: {e!s}') from e
+
+    def __load_topology(self) -> None:
+        """Load topology from JSON file referenced in scenario configuration.
+
+        Raises
+        ------
+        BuilderError
+            If topology file is not specified or loading fails.
+        """
+        topology_file: str | None = self.references.get('topology')
+
+        if not topology_file:
+            raise BuilderError('Missing topology file reference in scenario configuration')
+
+        scenario_dir: Path = Path(self.scenario_path).parent
+        topology_path: Path = scenario_dir / topology_file
+
+        if not topology_path.exists():
+            raise BuilderError(f'Topology file not found: {topology_path}')
+
+        try:
+            if isinstance(self.scenario, Scenario):
+                self.scenario.topology = Topology(topology_path)
+
+        except Exception as e:
+            raise BuilderError(f'Failed to load topology from {topology_path}: {e!s}') from e
 
     def __load_scenario(self) -> None:
         """Load scenario models from a JSON file.
@@ -283,6 +310,7 @@ class ScenarioBuilder:
             self.__load_tracks()
             self.__load_trains()
             self.__load_routes()
+            self.__load_topology()
             self.__load_workshops()
             # TODO: decide if validation happens here or in main
             # self.validator.validate(self.scenario)

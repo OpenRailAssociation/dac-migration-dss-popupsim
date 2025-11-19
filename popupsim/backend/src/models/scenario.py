@@ -17,6 +17,7 @@ from pydantic import model_validator
 from .locomotive import Locomotive
 from .route import Route
 from .track import Track
+from .topology import Topology
 from .train import Train
 from .workshop import Workshop
 
@@ -37,10 +38,9 @@ class Scenario(BaseModel):
     )
     start_date: datetime = Field(description='Simulation start date')
     end_date: datetime = Field(description='Simulation end date')
-    # Make model attribute an int (always set) but allow None during input via the before validator
-    random_seed: int = Field(default=0, ge=0, description='Random seed for reproducible simulations')
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
     routes: list[Route] | None = Field(default=None, description='Route models')
+    topology: Topology | None = Field(default=None, description='Topology model')
     trains: list[Train] | None = Field(default=None, description='Train models')
     tracks: list[Track] | None = Field(default=None, description='Track models')
     workshops: list[Workshop] | None = Field(default=None, description='Workshop models with available tracks')
