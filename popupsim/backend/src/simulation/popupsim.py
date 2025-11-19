@@ -31,20 +31,22 @@ class LocomotivePool:
     """
 
     def __init__(self, sim, locomotives: list[Locomotive], poll_interval: float = 0.01) -> None:
-        self.available_locomotives = set(locomotives)
-        self.occupied_locomotives = []
+        self.available_locomotives = {}
+        for loco in locomotives:
+            self.available_locomotives[loco.id] = loco
+        self.occupied_locomotives = {}
         self.poll = float(poll_interval)
         self.sim = sim
 
-      # nested function to return a fresh generator every time it's called
+    # nested function to return a fresh generator every time it's called
     def acquire(self):
         def _acq():
             while self.available_locomotive >= 1:
                 yield self.sim.delay(self.poll)
-            self.occupied_locomotives.append(self.allocate_locomotive())
+            locomotive = self.allocate_locomotive()
+            self.occupied_locomotives[locomotive.id] = locomotive
 
         return _acq()
-
 
     def allocate_locomotive(self) -> Locomotive | None:
         """Allocate an available locomotive from the pool.
@@ -56,7 +58,8 @@ class LocomotivePool:
         """
         if not self.available_locomotives:
             return None
-        locomotive = self.available_locomotives.pop()
+        key_of_last_loco = list(self.available_locomotives.keys())[-1]
+        locomotive = self.available_locomotives.pop(key_of_last_loco)
         return locomotive
 
     def release_locomotive(self, locomotive: Locomotive) -> None:
@@ -67,7 +70,8 @@ class LocomotivePool:
         locomotive : Train
             The locomotive to release back to the pool.
         """
-        self.available_locomotives.add(locomotive)
+        loco = self.occupied_locomotives.pop(locomotive.id)
+        self.available_locomotives[loco.id] = loco
 
 class WorkshopPool:
     """Pool of workshops for managing available workshops in the simulation.
@@ -77,8 +81,11 @@ class WorkshopPool:
     """
 
     def __init__(self, sim, workshops: list[Workshop], poll_interval: float = 0.01) -> None:
-        self.available_workshops = set(workshops)
-        self.occupied_workshops = []
+        self.available_workshops = {}
+        self.occupied_workshops = {}
+        for workshop in workshops:
+            self.available_locomotives[workshop.id] = workshop
+
         self.poll = float(poll_interval)
         self.sim = sim
 
@@ -87,7 +94,8 @@ class WorkshopPool:
         def _acq():
             while self.available_workshop >= 1:
                 yield self.sim.delay(self.poll)
-            self.occupied_workshops.append(self.allocate_workshop())
+            workshop = self.allocate_workshop()
+            self.occupied_workshops[workshop.id] = workshop
 
         return _acq()
 
@@ -102,7 +110,8 @@ class WorkshopPool:
         """
         if not self.available_workshops:
             return None
-        workshop = self.available_workshops.pop()
+        key_of_last_workshop = list(self.available_workshops.keys())[-1]
+        workshop = self.available_workshops.pop(key_of_last_workshop)
         return workshop
 
     def release_workshop(self, workshop: Workshop) -> None:
@@ -113,7 +122,9 @@ class WorkshopPool:
         workshop : Workshop
             The workshop to release back to the pool.
         """
-        self.available_workshops.add(workshop)
+        workshop = self.occupied_workshops.pop(workshop.id)
+        self.available_workshops[workshop.id] = workshop
+
 
 class PopupSim:  # pylint: disable=too-few-public-methods
     """High-level simulation orchestrator for PopUp-Sim.
@@ -158,6 +169,9 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             raise ValueError('Scenario must have at least one workshop to simulate.')
         self.workshops_queue: list[Workshop] = scenario.workshops
 
+        self.locomotives = LocomotivePool(self.sim, self.locomotives_queue)
+        self.workshops = WorkshopPool(self.sim, self.workshops_queue)
+
         logger.info('Initialized %s with scenario: %s', self.name, self.scenario.scenario_id)
 
     def get_simtime_limit_from_scenario(self) -> float:
@@ -184,7 +198,8 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         if not until:
             until = self.get_simtime_limit_from_scenario()
         logger.info('Starting %s for: %s', self.name, self.scenario)
-        locs = LocomotivePool(self.sim, self.scenario.locomotives)
+
+
 
         self.sim.run(until)
         logger.info('Simulation completed.')
