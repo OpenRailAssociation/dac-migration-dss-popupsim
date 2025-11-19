@@ -214,9 +214,9 @@ class TestWorkshop:
         fixtures_workshops_json_path: Path = fixtures_path / 'workshops.json'
 
         with fixtures_workshops_json_path.open(encoding='utf-8') as f:
-            workshops_data: dict[str, Any] = json.load(f)
+            workshops_data: dict[str, str] = json.load(f)
 
-        workshops_list: list[dict[str, Any]] = workshops_data.get('workshops', [])
+        workshops_list: list[dict[str, str]] = workshops_data.get('workshops')
         workshops: list[Workshop] = [Workshop(**data) for data in workshops_list]
 
         assert len(workshops) == 2
