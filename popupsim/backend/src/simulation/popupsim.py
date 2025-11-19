@@ -171,6 +171,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.workshops_queue: list[Workshop] = scenario.workshops
 
         self.locomotives = LocomotivePool(self.sim, self.locomotives_queue)
+        #self.locomotives = self.sim.create_simpy_resource(self.sim, len(self.locomotives))
         self.workshops = WorkshopPool(self.sim, self.workshops_queue)
 
         logger.info('Initialized %s with scenario: %s', self.name, self.scenario.scenario_id)
@@ -203,10 +204,11 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.sim.process(trainschedule, self)
 
 
+
         self.sim.run(until)
         logger.info('Simulation completed.')
 
-def trainschedule(popupsim: PopupSim):
+def trainschedule(popupsim: PopupSim, loco: Locomotive):
     """Generator function to simulate train arrivals.
 
     This function generates train arrivals based on the provided scenario.
@@ -234,9 +236,11 @@ def trainschedule(popupsim: PopupSim):
             if wagon.needs_retrofit and  not wagon.is_loaded:
                 wagon.status = WagonStatus.SELECTED
                 popupsim.wagons_queue.append(wagon)
+
             else:
                 wagon.status = WagonStatus.REJECTED
             # TODO: Check if collection track is full and workshops are opened
+
 
 def move_wagons_from_collection_to_retrofit(popupsim: PopupSim):
     """Generator function to move wagons from collection to retrofit.
@@ -260,4 +264,6 @@ def move_wagons_from_collection_to_retrofit(popupsim: PopupSim):
         logger.debug('Waiting for next wagon movement at %s', wagon.arrival_time)
         yield popupsim.delay(wagon.arrival_time - scenario.start_date)
         logger.debug('Wagon %s arrived at %s', wagon.wagon_id, wagon.arrival_time)
-        #sim.add_wagon(wagon)
+
+
+

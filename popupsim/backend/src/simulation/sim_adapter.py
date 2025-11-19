@@ -119,6 +119,11 @@ class SimPyAdapter(SimulationAdapter):
         env = simpy.Environment()
         return cls(env)
 
+    @classmethod
+    def create_simpy_resource(cls, environment, capacity):
+        import simpy
+        return simpy.Resource(environment, capacity)
+
     def current_time(self) -> str:
         """Get current simulation time.
 
