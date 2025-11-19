@@ -62,11 +62,13 @@ class TestScenarioBuilder:
         scenario = ScenarioBuilder(fixtures_scenario_json_path).build()
 
         assert scenario.scenario_id == 'test_scenario_01'
+        assert scenario.locomotives is not None
+        assert len(scenario.locomotives) >= 1
+        assert scenario.routes is not None
+        assert len(scenario.routes) > 1
         assert scenario.tracks is not None
         assert len(scenario.tracks) > 1
         assert scenario.trains is not None
         assert len(scenario.trains) > 1
-        assert scenario.routes is not None
-        assert len(scenario.routes) > 1
         assert scenario.workshops is not None
         assert len(scenario.workshops) > 1

@@ -90,6 +90,7 @@ ignore = [
 "ANN206", # missing return type annotation for classmethod (Pydantic validators)
 "ANN401", # dynamically typed expressions (pandas/Any types)
 "FIX002", # TODO/FIXME without issue reference
+"G004",   # logging format string should use lazy % formatting
 ]
 
 [tool.ruff.lint.pydocstyle]

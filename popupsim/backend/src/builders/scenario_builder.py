@@ -14,6 +14,7 @@ from pathlib import Path
 
 from builders.tracks_builder import TrackListBuilder
 from builders.train_list_builder import TrainListBuilder
+from models.locomotive import Locomotive
 from models.routes import Routes
 from models.scenario import Scenario
 from models.workshop import Workshop
@@ -45,6 +46,39 @@ class ScenarioBuilder:
         self.scenario_path = scenario_path
         self.scenario: Scenario | None = None
         self.validator = ScenarioValidator()
+
+    def __load_locomotives(self) -> None:
+        """Load locomotives from JSON file referenced in scenario configuration.
+
+        Raises
+        ------
+        BuilderError
+            If locomotives file is not specified or loading fails.
+        """
+        locomotives_file: str | None = self.references.get('locomotives')
+
+        if not locomotives_file:
+            raise BuilderError('Missing locomotives file reference in scenario configuration')
+
+        # Replace filename in scenario_path with locomotives_file
+        scenario_dir: Path = Path(self.scenario_path).parent
+        locomotives_path: Path = scenario_dir / locomotives_file
+
+        if not locomotives_path.exists():
+            raise BuilderError(f'Locomotives file not found: {locomotives_path}')
+
+        try:
+            if isinstance(self.scenario, Scenario):
+                with locomotives_path.open('r') as f:
+                    locomotive_data = json.load(f)
+
+                locomotive_list: list[dict[str, str]] = locomotive_data.get('locomotives')
+                self.scenario.locomotives = [Locomotive(**data) for data in locomotive_list]
+
+        except json.JSONDecodeError as e:
+            raise BuilderError(f'Invalid JSON format in {locomotives_path}: {e!s}') from e
+        except Exception as e:
+            raise BuilderError(f'Failed to load locomotives from {locomotives_path}: {e!s}') from e
 
     def __load_routes(self) -> None:
         """Load routes from JSON file referenced in scenario configuration.
@@ -245,6 +279,7 @@ class ScenarioBuilder:
         self.__find_scenario_in_path(path)
         self.__load_scenario()
         if isinstance(self.scenario, Scenario):
+            self.__load_locomotives()
             self.__load_tracks()
             self.__load_trains()
             self.__load_routes()

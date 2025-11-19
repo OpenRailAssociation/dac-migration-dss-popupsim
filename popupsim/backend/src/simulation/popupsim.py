@@ -13,6 +13,9 @@ remains agnostic of the underlying simulation framework.
 import logging
 
 from models.scenario import Scenario
+from models.train import Train
+from models.wagon import Wagon
+from models.workshop import Workshop
 
 from .sim_adapter import SimulationAdapter
 
@@ -22,26 +25,44 @@ logger = logging.getLogger('PopupSim')
 class PopupSim:  # pylint: disable=too-few-public-methods
     """High-level simulation orchestrator for PopUp-Sim.
 
-    This facade coordinates simulation execution using a SimulationAdapter and a
-    scenario object. Domain code should interact with this class rather than
-    the simulation backend directly, keeping business logic backend-agnostic.
+    Parameters
+    ----------
+    sim : SimulationAdapter
+        Simulation backend adapter.
+    scenario : Scenario
+        Scenario configuration to simulate.
+
+    Attributes
+    ----------
+    name : str
+        Simulator name.
+    sim : SimulationAdapter
+        Active simulation adapter.
+    scenario : Scenario
+        Current scenario configuration.
+    trains_queue : list[Train]
+        Queue of trains from scenario.
+    wagons_queue : list[Wagon]
+        Queue of wagons to process.
+    workshops_queue : list[Workshop]
+        Queue of workshops from scenario.
     """
 
-    def __init__(self, adapter: SimulationAdapter, scenario: Scenario) -> None:
-        """Initialize the PopupSim orchestrator.
-
-        Parameters
-        ----------
-        adapter : SimulationAdapter
-            SimulationAdapter instance used to drive the underlying
-            simulation environment (e.g., SimPy).
-        scenario : Scenario
-            Domain scenario object containing routes, wagons and other
-            models consumed by the simulation.
-        """
+    def __init__(self, sim: SimulationAdapter, scenario: Scenario) -> None:
         self.name: str = 'PopUpSim'
-        self.adapter: SimulationAdapter = adapter
+        self.sim: SimulationAdapter = sim
         self.scenario: Scenario = scenario
+        if not scenario.trains:
+            raise ValueError('Scenario must have at least one train to simulate.')
+        self.trains_queue: list[Train] = scenario.trains
+        if not scenario.workshops:
+            raise ValueError('Scenario must have at least one workshop to simulate.')
+        self.wagons_queue: list[Wagon] = []
+        if not scenario.workshops:
+            raise ValueError('Scenario must have at least one workshop to simulate.')
+        self.workshops_queue: list[Workshop] = scenario.workshops
+
+        logger.info('Initialized %s with scenario: %s', self.name, self.scenario.scenario_id)
 
     def get_simtime_limit_from_scenario(self) -> float:
         """Determine simulation time limit from scenario configuration.
@@ -49,27 +70,23 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         Returns
         -------
         float
-            Simulation time limit derived from scenario parameters.
+            Simulation time limit in minutes.
         """
         start_datetime = self.scenario.start_date
         end_datetime = self.scenario.end_date
         delta = end_datetime - start_datetime
-        return delta.total_seconds() / 60.0  # Convert to minutes
+        return delta.total_seconds() / 60.0
 
     def run(self, until: float | None = None) -> None:
-        """Run the simulation until an optional time.
-
-        The method delegates execution to the configured SimulationAdapter.
+        """Run simulation until specified time or scenario end.
 
         Parameters
         ----------
-        until : float or None, optional
-            Simulation time indicating when to stop the simulation.
-            If None, the adapter runs until its own completion.
+        until : float | None, optional
+            Simulation time limit in minutes. If None, uses scenario end time.
         """
         if not until:
             until = self.get_simtime_limit_from_scenario()
-        runinfo = f'Starting {self.name} for: {self.scenario}'
-        logger.info(runinfo)
-        self.adapter.run(until)
+        logger.info('Starting %s for: %s', self.name, self.scenario)
+        self.sim.run(until)
         logger.info('Simulation completed.')

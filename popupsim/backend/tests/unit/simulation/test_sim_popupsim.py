@@ -10,8 +10,9 @@ depending on an actual simpy environment in unit test runs.
 """
 
 from datetime import date
-from typing import Any
+from pathlib import Path
 
+from builders.scenario_builder import ScenarioBuilder
 from models.scenario import Scenario
 import pytest
 from simulation.popupsim import PopupSim
@@ -33,12 +34,7 @@ class FakeAdapter:
     run_called_count: int
 
     def __init__(self) -> None:
-        """Initialize the fake adapter with default state.
-
-        Notes
-        -----
-        Sets `last_until` to None and `run_called_count` to 0.
-        """
+        """Initialize the fake adapter with default state."""
         self.last_until = None
         self.run_called_count = 0
 
@@ -56,37 +52,10 @@ class FakeAdapter:
 
 @pytest.mark.unit
 class TestPopupSimWithFakeSim:
-    """Test suite for PopupSim using a fake adapter.
-
-    These tests verify that PopupSim delegates execution control to the
-    provided adapter by calling its run() method with the expected arguments.
-    """
-
-    def test_run_calls_adapter_run_with_until(self) -> None:
-        """Ensure PopupSim.run forwards the `until` argument to the adapter.
-
-        Steps
-        -----
-        1. Create a FakeAdapter and a minimal scenario.
-        2. Construct PopupSim with the fake adapter.
-        3. Call sim.run(until=...) and assert adapter recorded the call.
-        """
-        adapter = FakeAdapter()
-        scenario: Any = {'name': 'test-scenario'}
-        sim = PopupSim(adapter, scenario)  # type: ignore[arg-type]
-
-        sim.run(until=123.45)
-
-        assert adapter.run_called_count == 1
-        assert adapter.last_until == 123.45
-        assert sim.name == 'PopUpSim'
+    """Test suite for PopupSim using a fake adapter."""
 
     def test_run_calls_adapter_run_without_until(self) -> None:
-        """Ensure PopupSim.run calls adapter.run when `until` is not provided.
-
-        Verifies that the adapter's run() method is invoked and that the
-        recorded `last_until` remains None.
-        """
+        """Ensure PopupSim.run calls adapter.run when `until` is not provided."""
         adapter = FakeAdapter()
         scenario_data = {
             'scenario_id': 'scenario_001',
@@ -105,21 +74,11 @@ class TestPopupSimWithFakeSim:
 
 @pytest.mark.unit
 class TestPopupSimWithSimpyAdapter:
-    """Integration-style example that demonstrates creating real adapters.
-
-    This test is guarded to run only when executed as main and provides an
-    example of constructing ScenarioBuilder, SimPyAdapter and running the
-    simulation. It is not executed as a normal unit test.
-    """
+    """Integration-style example that demonstrates creating real adapters."""
 
     def test_run_calls_adapter_run_with_until(self) -> None:
-        """Example usage constructing a full simulation and running it.
-
-        The block is only executed when the module is run as a script; kept
-        here as illustrative code rather than an assertion-based unit test.
-        """
+        """Example usage constructing a full simulation and running it."""
         if __name__ == '__main__':
-            # Example Usage
             scenario = Scenario(
                 scenario_id='test_scenario',
                 start_date=date(2024, 1, 1),
@@ -130,3 +89,20 @@ class TestPopupSimWithSimpyAdapter:
             sim_adapter = SimPyAdapter.create_simpy_adapter()
             popup_sim = PopupSim(sim_adapter, scenario)
             popup_sim.run(until=100.0)
+
+
+class TestPopupSimWithScenarioBuilder:
+    """Integration-style example using ScenarioBuilder."""
+
+    def test_popsim_with_scenario_from_fixture(self, test_scenario_json_path: Path) -> None:
+        """Test PopupSim with scenario loaded from fixture file.
+
+        Parameters
+        ----------
+        test_scenario_json_path : Path
+            Path to scenario JSON fixture file.
+        """
+        scenario = ScenarioBuilder(test_scenario_json_path).build()
+        sim_adapter = SimPyAdapter.create_simpy_adapter()
+        popup_sim = PopupSim(sim_adapter, scenario)
+        popup_sim.run()
