@@ -1,0 +1,1680 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+        <link rel="prev" href="../08-concepts/">
+      
+      
+        <link rel="next" href="../10-quality-requirements/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>Architecture Decisions - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#9-architecture-decisions-mvp" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture Decisions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Requirements
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Requirements
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Use Cases
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Konzept
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    MVP Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            MVP Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction & Goals
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Constraints
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Solution Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building Blocks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Runtime
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Architecture Decisions
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#91-mvp-architecture-decisions-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.1 MVP Architecture Decisions Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.1 MVP Architecture Decisions Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-adr-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      MVP ADR Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#92-technology-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.2 Technology Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.2 Technology Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-001-simpy-for-discrete-event-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-001: SimPy for Discrete Event Simulation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-002-file-based-data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-002: File-Based Data Storage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-003-pydantic-for-data-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-003: Pydantic for Data Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-004-matplotlib-for-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-004: Matplotlib for Visualization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#93-architecture-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.3 Architecture Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.3 Architecture Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-005-layered-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-005: Layered Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-006-3-bounded-contexts" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-006: 3 Bounded Contexts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-007-direct-method-calls-between-contexts" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-007: Direct Method Calls Between Contexts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#94-rejected-alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.4 Rejected Alternatives
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.4 Rejected Alternatives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rejected-architecture-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rejected Architecture Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejected-technology-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rejected Technology Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#95-migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.5 Migration Path
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.5 Migration Path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-full-version-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      MVP → Full Version Evolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quality Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Risks & Technical Debt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Glossary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bibliography
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CI/CD
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#91-mvp-architecture-decisions-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.1 MVP Architecture Decisions Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.1 MVP Architecture Decisions Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-adr-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      MVP ADR Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#92-technology-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.2 Technology Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.2 Technology Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-001-simpy-for-discrete-event-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-001: SimPy for Discrete Event Simulation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-002-file-based-data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-002: File-Based Data Storage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-003-pydantic-for-data-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-003: Pydantic for Data Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-004-matplotlib-for-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-004: Matplotlib for Visualization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#93-architecture-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.3 Architecture Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.3 Architecture Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-005-layered-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-005: Layered Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-006-3-bounded-contexts" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-006: 3 Bounded Contexts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adr-mvp-007-direct-method-calls-between-contexts" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR MVP-007: Direct Method Calls Between Contexts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#94-rejected-alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.4 Rejected Alternatives
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.4 Rejected Alternatives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rejected-architecture-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rejected Architecture Options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejected-technology-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rejected Technology Options
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#95-migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      9.5 Migration Path
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9.5 Migration Path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-full-version-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      MVP → Full Version Evolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="9-architecture-decisions-mvp">9. Architecture Decisions (MVP)<a class="headerlink" href="#9-architecture-decisions-mvp" title="Permanent link">&para;</a></h1>
+<h2 id="91-mvp-architecture-decisions-overview">9.1 MVP Architecture Decisions Overview<a class="headerlink" href="#91-mvp-architecture-decisions-overview" title="Permanent link">&para;</a></h2>
+<h3 id="mvp-adr-status">MVP ADR Status<a class="headerlink" href="#mvp-adr-status" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MVP-001</strong></td>
+<td>SimPy for Discrete Event Simulation</td>
+<td>✅ Accepted</td>
+<td>Proven in 3-Länderhack POC</td>
+</tr>
+<tr>
+<td><strong>MVP-002</strong></td>
+<td>File-Based Data Storage</td>
+<td>✅ Accepted</td>
+<td>No database installation required</td>
+</tr>
+<tr>
+<td><strong>MVP-003</strong></td>
+<td>Pydantic for Data Validation</td>
+<td>✅ Accepted</td>
+<td>Type safety and validation</td>
+</tr>
+<tr>
+<td><strong>MVP-004</strong></td>
+<td>Matplotlib for Visualization</td>
+<td>✅ Accepted</td>
+<td>Simple offline charts</td>
+</tr>
+<tr>
+<td><strong>MVP-005</strong></td>
+<td>Layered Architecture</td>
+<td>✅ Accepted</td>
+<td>Rapid development</td>
+</tr>
+<tr>
+<td><strong>MVP-006</strong></td>
+<td>3 Bounded Contexts</td>
+<td>✅ Accepted</td>
+<td>Reduced complexity</td>
+</tr>
+<tr>
+<td><strong>MVP-007</strong></td>
+<td>Direct Method Calls</td>
+<td>✅ Accepted</td>
+<td>Simple integration</td>
+</tr>
+</tbody>
+</table>
+<h2 id="92-technology-decisions">9.2 Technology Decisions<a class="headerlink" href="#92-technology-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="adr-mvp-001-simpy-for-discrete-event-simulation">ADR MVP-001: SimPy for Discrete Event Simulation<a class="headerlink" href="#adr-mvp-001-simpy-for-discrete-event-simulation" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Need a discrete event simulation framework for modeling Pop-Up workshop operations with individual wagon tracking and resource management.</p>
+<p><strong>Decision:</strong>
+Use <strong>SimPy</strong> as the simulation engine.</p>
+<p><strong>Rationale:</strong>
+- <strong>Proven in POC</strong>: Successfully validated during 3-Länderhack 2024 hackathon
+- <strong>Python native</strong>: Integrates seamlessly with Python ecosystem
+- <strong>Discrete event paradigm</strong>: Perfect fit for workshop operations simulation
+- <strong>Deterministic</strong>: Supports reproducible results
+- <strong>Well-documented</strong>: Mature library with good community support
+- <strong>Lightweight</strong>: No heavy infrastructure requirements</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>SimPy</strong> ✅ Chosen
+- <strong>Mesa</strong>: Agent-based, overkill for our use case
+- <strong>Custom simulation</strong>: Too much development effort
+- <strong>AnyLogic</strong>: Commercial, not open source</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Fast development, proven approach, deterministic results
+- <strong>Negative</strong>: Tight coupling to SimPy (mitigated by preparing abstraction layer)
+- <strong>Risk</strong>: Framework limitations (acceptable for MVP scope)</p>
+<hr />
+<h3 id="adr-mvp-002-file-based-data-storage">ADR MVP-002: File-Based Data Storage<a class="headerlink" href="#adr-mvp-002-file-based-data-storage" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Need data storage for configuration and results. Full version will use database, but MVP needs simplest approach.</p>
+<p><strong>Decision:</strong>
+Use <strong>file-based storage</strong> with JSON/CSV formats.</p>
+<p><strong>Rationale:</strong>
+- <strong>Local deployment</strong>: No server infrastructure needed
+- <strong>Small data volume</strong>: Typical scenarios have &lt;1000 wagons
+- <strong>Simple installation</strong>: No database setup required
+- <strong>Transparency</strong>: Human-readable formats
+- <strong>Version control</strong>: Git-friendly text files
+- <strong>Portability</strong>: Easy to share and backup</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>Files (JSON/CSV)</strong> ✅ Chosen
+- <strong>SQLite</strong>: Overkill for MVP data volume
+- <strong>PostgreSQL</strong>: Requires installation and setup
+- <strong>In-memory only</strong>: No persistence</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Zero installation complexity, transparent data
+- <strong>Negative</strong>: Limited scalability (acceptable for MVP)
+- <strong>Migration</strong>: Repository pattern prepared for database transition</p>
+<hr />
+<h3 id="adr-mvp-003-pydantic-for-data-validation">ADR MVP-003: Pydantic for Data Validation<a class="headerlink" href="#adr-mvp-003-pydantic-for-data-validation" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Need robust input validation for JSON/CSV configuration files with clear error messages.</p>
+<p><strong>Decision:</strong>
+Use <strong>Pydantic</strong> for data validation and parsing.</p>
+<p><strong>Rationale:</strong>
+- <strong>Type safety</strong>: Excellent integration with Python type hints (matches project rules)
+- <strong>Validation</strong>: Automatic validation with clear error messages
+- <strong>Performance</strong>: Fast (Rust-based core in Pydantic v2)
+- <strong>JSON Schema</strong>: Can generate schemas for documentation
+- <strong>IDE support</strong>: Great autocomplete and type checking
+- <strong>Standard</strong>: De facto standard in modern Python projects</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>Pydantic</strong> ✅ Chosen
+- <strong>dataclasses</strong>: No validation capabilities
+- <strong>attrs</strong>: Less popular, fewer features
+- <strong>marshmallow</strong>: Older, slower, less type-safe
+- <strong>cerberus</strong>: Less Pythonic, no type hints</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Type-safe code, excellent validation, good error messages
+- <strong>Negative</strong>: Additional dependency (minimal concern)
+- <strong>Benefit</strong>: Enforces project's type hint requirements</p>
+<hr />
+<h3 id="adr-mvp-004-matplotlib-for-visualization">ADR MVP-004: Matplotlib for Visualization<a class="headerlink" href="#adr-mvp-004-matplotlib-for-visualization" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Need visualization for simulation results. Full version will have web interface, but MVP needs simple charts.</p>
+<p><strong>Decision:</strong>
+Use <strong>Matplotlib</strong> for generating static charts (PNG files).</p>
+<p><strong>Rationale:</strong>
+- <strong>Simple</strong>: Easy to use, well-known library
+- <strong>Offline</strong>: No web server required
+- <strong>Sufficient</strong>: Meets MVP visualization needs
+- <strong>Python native</strong>: Integrated in Python ecosystem
+- <strong>No frontend developer</strong>: Backend team can handle it
+- <strong>Fast development</strong>: Quick to implement basic charts</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>Matplotlib</strong> ✅ Chosen
+- <strong>Plotly</strong>: Interactive but requires web server
+- <strong>Bokeh</strong>: Overkill for static charts
+- <strong>Seaborn</strong>: Built on Matplotlib, no significant advantage
+- <strong>Custom web charts</strong>: Requires frontend development</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Fast implementation, no web complexity
+- <strong>Negative</strong>: Static charts only (acceptable for MVP)
+- <strong>Migration</strong>: JSON data export prepared for web charts in full version</p>
+<hr />
+<h2 id="93-architecture-decisions">9.3 Architecture Decisions<a class="headerlink" href="#93-architecture-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="adr-mvp-005-layered-architecture">ADR MVP-005: Layered Architecture<a class="headerlink" href="#adr-mvp-005-layered-architecture" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Need simple architecture for rapid MVP development (5-week timeline) that can evolve to hexagonal architecture.</p>
+<p><strong>Decision:</strong>
+Use <strong>layered architecture</strong> within each bounded context:
+- Presentation Layer: CLI + File I/O
+- Business Logic Layer: Domain services
+- Data Access Layer: File operations
+- Infrastructure Layer: SimPy, Matplotlib, Pydantic</p>
+<p><strong>Rationale:</strong>
+- <strong>Fast development</strong>: Simple, well-understood pattern
+- <strong>Team experience</strong>: Familiar to all developers
+- <strong>Clear separation</strong>: Easy to test business logic
+- <strong>Migration ready</strong>: Foundation for hexagonal architecture</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>Layered</strong> ✅ Chosen
+- <strong>Hexagonal</strong>: Too complex for 5-week MVP
+- <strong>Microservices</strong>: Deployment overhead
+- <strong>Monolithic spaghetti</strong>: Unmaintainable</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Rapid development, clear structure
+- <strong>Negative</strong>: Less framework independence than hexagonal
+- <strong>Migration</strong>: Interface preparation for hexagonal transition</p>
+<hr />
+<h3 id="adr-mvp-006-3-bounded-contexts">ADR MVP-006: 3 Bounded Contexts<a class="headerlink" href="#adr-mvp-006-3-bounded-contexts" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Full version will have multiple bounded contexts. MVP needs minimal viable domain decomposition.</p>
+<p><strong>Decision:</strong>
+Use <strong>3 bounded contexts</strong>:
+1. <strong>Configuration Context</strong>: Input validation &amp; parsing
+2. <strong>Workshop Operations Context</strong>: Simulation execution &amp; analysis (workshops, tracks, trains)
+3. <strong>Analysis &amp; Reporting Context</strong>: Orchestration &amp; output</p>
+<p><strong>Rationale:</strong>
+- <strong>Time constraint</strong>: 5-week development with 3 developers
+- <strong>Clear ownership</strong>: 1 context per developer
+- <strong>Essential separation</strong>: Minimum viable domain boundaries
+- <strong>Extensible</strong>: Can split into more contexts in full version</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>3 contexts</strong> ✅ Chosen
+- <strong>1 monolith</strong>: No domain separation
+- <strong>More specialized contexts</strong>: Too complex for MVP timeline
+- <strong>2 contexts</strong>: Insufficient separation</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Fast development, clear responsibilities
+- <strong>Negative</strong>: Less granular than full version
+- <strong>Migration</strong>: Context splitting planned for full version</p>
+<hr />
+<h3 id="adr-mvp-007-direct-method-calls-between-contexts">ADR MVP-007: Direct Method Calls Between Contexts<a class="headerlink" href="#adr-mvp-007-direct-method-calls-between-contexts" title="Permanent link">&para;</a></h3>
+<p><strong>Status:</strong> Accepted - 2025-01-15</p>
+<p><strong>Context:</strong>
+Need integration strategy between bounded contexts. Full version will use event-driven architecture.</p>
+<p><strong>Decision:</strong>
+Use <strong>direct method calls</strong> between contexts (synchronous).</p>
+<p><strong>Rationale:</strong>
+- <strong>Simplest approach</strong>: No message bus, no events
+- <strong>Synchronous workflow</strong>: Matches file-based processing
+- <strong>Easy debugging</strong>: Clear call chain
+- <strong>Fast development</strong>: Minimal infrastructure</p>
+<p><strong>Alternatives Considered:</strong>
+- <strong>Direct calls</strong> ✅ Chosen
+- <strong>Event bus</strong>: Too complex for MVP
+- <strong>Message queue</strong>: Infrastructure overhead
+- <strong>REST API</strong>: Unnecessary for single process</p>
+<p><strong>Consequences:</strong>
+- <strong>Positive</strong>: Fast development, easy debugging
+- <strong>Negative</strong>: Tight coupling (acceptable for MVP)
+- <strong>Migration</strong>: Interface preparation for event-driven architecture</p>
+<hr />
+<h2 id="94-rejected-alternatives">9.4 Rejected Alternatives<a class="headerlink" href="#94-rejected-alternatives" title="Permanent link">&para;</a></h2>
+<h3 id="rejected-architecture-options">Rejected Architecture Options<a class="headerlink" href="#rejected-architecture-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Alternative</th>
+<th>Reason for Rejection</th>
+<th>MVP Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hexagonal Architecture</strong></td>
+<td>Too complex for 5-week timeline</td>
+<td>Layered Architecture</td>
+</tr>
+<tr>
+<td><strong>Microservices</strong></td>
+<td>Deployment complexity</td>
+<td>Monolith</td>
+</tr>
+<tr>
+<td><strong>Event-driven</strong></td>
+<td>Implementation effort</td>
+<td>Direct calls</td>
+</tr>
+<tr>
+<td><strong>Web Frontend</strong></td>
+<td>No frontend developer</td>
+<td>Matplotlib</td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>Installation complexity</td>
+<td>Files</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rejected-technology-options">Rejected Technology Options<a class="headerlink" href="#rejected-technology-options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Reason for Rejection</th>
+<th>MVP Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FastAPI</strong></td>
+<td>Web API not required</td>
+<td>Direct Python calls</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL</strong></td>
+<td>Database setup too complex</td>
+<td>CSV/JSON files</td>
+</tr>
+<tr>
+<td><strong>Docker</strong></td>
+<td>Container overhead</td>
+<td>Native Python</td>
+</tr>
+<tr>
+<td><strong>Vue.js</strong></td>
+<td>Frontend development</td>
+<td>Matplotlib PNG</td>
+</tr>
+<tr>
+<td><strong>WebSocket</strong></td>
+<td>Real-time not required</td>
+<td>Batch processing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="95-migration-path">9.5 Migration Path<a class="headerlink" href="#95-migration-path" title="Permanent link">&para;</a></h2>
+<h3 id="mvp-full-version-evolution">MVP → Full Version Evolution<a class="headerlink" href="#mvp-full-version-evolution" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>MVP (Current)</th>
+<th>Transition (Prepared)</th>
+<th>Full Version (Future)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Architecture</strong></td>
+<td>Layered within contexts</td>
+<td>Interface preparation</td>
+<td>Hexagonal architecture</td>
+</tr>
+<tr>
+<td><strong>Integration</strong></td>
+<td>Direct method calls</td>
+<td>Repository pattern</td>
+<td>Event-driven</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>File-based (JSON/CSV)</td>
+<td>Repository abstraction</td>
+<td>Database + Event Store</td>
+</tr>
+<tr>
+<td><strong>Visualization</strong></td>
+<td>Matplotlib (PNG)</td>
+<td>JSON data export</td>
+<td>Web frontend (interactive)</td>
+</tr>
+<tr>
+<td><strong>Contexts</strong></td>
+<td>3 bounded contexts</td>
+<td>Interface boundaries</td>
+<td>Multiple contexts (TBD)</td>
+</tr>
+<tr>
+<td><strong>Deployment</strong></td>
+<td>Desktop application</td>
+<td>Containerization prep</td>
+<td>Cloud-ready web app</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Migration Strategy:</strong>
+- MVP decisions prioritize rapid development (5-week timeline)
+- Transition preparations embedded in MVP (repository pattern, interfaces)
+- Full version evolution planned but not blocking MVP delivery</p>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
