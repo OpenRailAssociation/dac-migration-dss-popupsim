@@ -12,6 +12,8 @@ remains agnostic of the underlying simulation framework.
 
 import logging
 
+from enum import Enum
+
 from models.locomotive import Locomotive
 from models.scenario import Scenario
 from models.train import Train
@@ -21,6 +23,22 @@ from models.workshop import Workshop
 from .sim_adapter import SimulationAdapter
 
 logger = logging.getLogger('PopupSim')
+
+
+class WagonStatus(Enum):
+    """Wagon status events"""
+    PARKING = "parking"
+    TO_BE_RETROFFITED = "to_be_retrofitted"
+    RETROFITTING = "retrofitting"
+    RETROFITTED = "retrofitted"
+    MOVING = "moving"
+
+class LocoStatus(Enum):
+    """Locomotive status events"""
+    PARKING = "parking"
+    MOVING = "moving"
+    COUPLING = "coupling"
+    DECOUPLING = "decoupling"
 
 
 class LocomotivePool:
@@ -89,7 +107,7 @@ class WorkshopPool:
         self.poll = float(poll_interval)
         self.sim = sim
 
-      # nested function to return a fresh generator every time it's called
+    # nested function to return a fresh generator every time it's called
     def acquire(self):
         def _acq():
             while self.available_workshop >= 1:
