@@ -6,10 +6,20 @@ from pathlib import Path
 class Topology:
     """Loads edge lengths from topology.json."""
 
-    def __init__(self, topology_file: str | Path | None = None) -> None:
+    def __init__(self, topology_file: str | Path | dict | None = None) -> None:
         self.edge_lengths: dict[str, float] = {}
         if topology_file:
-            self.load_topology(topology_file)
+            if isinstance(topology_file, dict):
+                self._load_from_dict(topology_file)
+            else:
+                self.load_topology(topology_file)
+
+    def _load_from_dict(self, data: dict) -> None:
+        """Load edge lengths from dict."""
+        if 'edges' in data:
+            for edge in data['edges']:
+                if 'edge_id' in edge and 'length' in edge:
+                    self.edge_lengths[edge['edge_id']] = float(edge['length'])
 
     def load_topology(self, file_path: str | Path) -> None:
         """Load edge lengths from topology JSON file."""

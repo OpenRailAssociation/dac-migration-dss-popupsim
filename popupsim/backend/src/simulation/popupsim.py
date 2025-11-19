@@ -9,6 +9,7 @@ from models.wagon import WagonStatus
 from models.workshop import Workshop
 
 from .sim_adapter import SimulationAdapter
+from .track_capacity import TrackCapacityManager
 
 logger = logging.getLogger('PopupSim')
 
@@ -160,8 +161,13 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.workshops_queue: list[Workshop] = scenario.workshops
 
         self.locomotives = LocomotivePool(self.sim, self.locomotives_queue)
-        #self.locomotives = self.sim.create_simpy_resource(self.sim, len(self.locomotives))
         self.workshops = WorkshopPool(self.sim, self.workshops_queue)
+
+        # Initialize track capacity management
+        if scenario.tracks and scenario.topology:
+            self.track_capacity = TrackCapacityManager(scenario.tracks, scenario.topology)
+        else:
+            raise ValueError('Scenario must have tracks and topology for capacity management.')
 
         logger.info('Initialized %s with scenario: %s', self.name, self.scenario.scenario_id)
 
@@ -197,7 +203,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.sim.run(until)
         logger.info('Simulation completed.')
 
-def trainschedule(popupsim: PopupSim, loco: Locomotive):
+def trainschedule(popupsim: PopupSim):
     """Generator function to simulate train arrivals.
 
     This function generates train arrivals based on the provided scenario.
@@ -214,21 +220,43 @@ def trainschedule(popupsim: PopupSim, loco: Locomotive):
         A train arrival as a Train object.
     """
     scenario = popupsim.scenario
+    process_times = scenario.process_times
     logger.info('Starting train arrival generator for scenario %s', scenario.scenario_id)
+    
     for train in scenario.trains:
         logger.debug('Waiting for next train arrival at %s', train.arrival_time)
         yield popupsim.sim.delay((train.arrival_time - scenario.start_date).total_seconds() / 60.0)
-        logger.debug('Train %s arrived at %s', train.train_id, train.arrival_time)
-        #sim.add_train(train)
+        logger.info('Train %s arrived at %s', train.train_id, train.arrival_time)
+        
+        # Delay from train arrival to first wagon at hump
+        yield popupsim.sim.delay(process_times.train_to_hump_delay)
+        
+        # Process wagons one by one through hump
         for wagon in train.wagons:
-            wagon.status = WagonStatus.SELECTING # TODO: Check if model has attribute status
-            if wagon.needs_retrofit and  not wagon.is_loaded:
-                wagon.status = WagonStatus.SELECTED
-                popupsim.wagons_queue.append(wagon)
+            wagon.status = WagonStatus.SELECTING
+            logger.debug('The wagon %s was selected', wagon.wagon_id)
+            if wagon.needs_retrofit and not wagon.is_loaded:
+                # Find first collection track with capacity
+                collection_track_id = None
+                for track in popupsim.scenario.tracks:
+                    if track.type.value == 'collection' and popupsim.track_capacity.can_add_wagon(track.id, wagon.length):
+                        collection_track_id = track.id
+                        break
 
+                if collection_track_id:
+                    popupsim.track_capacity.add_wagon(collection_track_id, wagon.length)
+                    wagon.track_id = collection_track_id
+                    wagon.status = WagonStatus.SELECTED
+                    logger.debug('Adding wagon %s to collection track', wagon.wagon_id)
+                    popupsim.wagons_queue.append(wagon)
+                else:
+                    wagon.status = WagonStatus.REJECTED
+                    logger.debug('Wagon %s rejected - no collection track capacity', wagon.wagon_id)
             else:
                 wagon.status = WagonStatus.REJECTED
-            # TODO: Check if collection track is full and workshops are opened
+                
+            # Delay between wagons at hump
+            yield popupsim.sim.delay(process_times.wagon_hump_interval)
 
 
 def move_wagons_from_collection_to_retrofit(popupsim: PopupSim):

@@ -6,7 +6,7 @@
   "end_date": "2031-07-05 02:00:00",
   "references": {
     "locomotives": "locomotive.json",
-    "processes": "test_process_times.csv",
+    "process_times": "process_times.json",
     "routes": "routes.json",
     "trains": "test_train_schedule.csv",
     "topology": "topology.json",

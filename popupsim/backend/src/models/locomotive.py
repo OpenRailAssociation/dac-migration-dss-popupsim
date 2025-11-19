@@ -22,7 +22,7 @@ class Locomotive(BaseModel):
     start_date: datetime
     end_date: datetime
     track_id: str
-    status: LocoStatus
+    status: LocoStatus = LocoStatus.PARKING
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod

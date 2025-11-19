@@ -14,10 +14,12 @@ from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
 
+from typing import Any
+
 from .locomotive import Locomotive
+from .process_times import ProcessTimes
 from .route import Route
 from .track import Track
-from .topology import Topology
 from .train import Train
 from .workshop import Workshop
 
@@ -39,8 +41,9 @@ class Scenario(BaseModel):
     start_date: datetime = Field(description='Simulation start date')
     end_date: datetime = Field(description='Simulation end date')
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
+    process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
     routes: list[Route] | None = Field(default=None, description='Route models')
-    topology: Topology | None = Field(default=None, description='Topology model')
+    topology: Any = Field(default=None, description='Topology model')
     trains: list[Train] | None = Field(default=None, description='Train models')
     tracks: list[Track] | None = Field(default=None, description='Track models')
     workshops: list[Workshop] | None = Field(default=None, description='Workshop models with available tracks')
@@ -54,19 +57,6 @@ class Scenario(BaseModel):
         if dt.tzinfo is None:
             return dt.replace(tzinfo=UTC)
         return dt
-
-    @field_validator('random_seed', mode='before')
-    @classmethod
-    def validate_random_seed(cls, v: int | None) -> int:
-        """Ensure random_seed is never None, defaulting to 0 if None or omitted."""
-        if v is None:
-            logger.debug('random_seed was None or omitted, defaulting to 0')
-            return 0
-        if not isinstance(v, int):
-            raise ValueError(f'random_seed must be an integer, got {type(v).__name__}')
-        if v < 0:
-            raise ValueError(f'random_seed must be non-negative, got {v}')
-        return v
 
     @model_validator(mode='after')
     def validate_dates(self) -> 'Scenario':
@@ -84,3 +74,5 @@ class Scenario(BaseModel):
         elif duration < 1:
             raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
         return self
+    
+    model_config = {'arbitrary_types_allowed': True}
