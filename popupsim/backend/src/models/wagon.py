@@ -5,9 +5,10 @@ used in train simulations. It provides a structure for representing
 individual wagons, including their unique identifiers, physical attributes,
 and specific requirements such as loading status and retrofit needs.
 """
+import logging
 
 from datetime import datetime
-import logging
+from enum import Enum
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -15,6 +16,17 @@ from pydantic import Field
 # Configure logging
 logger = logging.getLogger(__name__)
 
+class WagonStatus(Enum):
+    """Wagon status events"""
+    PARKING = "parking"
+    TO_BE_RETROFFITED = "to_be_retrofitted"
+    RETROFITTING = "retrofitting"
+    RETROFITTED = "retrofitted"
+    MOVING = "moving"
+    SELECTING = "selecting"
+    UNKNOWN = "unknown"
+    SELECTED = "selected"
+    REJECTED = "rejected"
 
 class Wagon(BaseModel):
     """Information about a single wagon."""
@@ -27,6 +39,7 @@ class Wagon(BaseModel):
     needs_retrofit: bool = Field(description='Whether the wagon needs retrofit')
     retrofit_start_time: float | None = Field(default=None, description='Retrofit start time as counter')
     retrofit_end_time: float | None = Field(default=None, description='Retrofit end time as counter')
+    status: WagonStatus = Field(default=WagonStatus.UNKNOWN, description='Status of the wagon')
 
     @property
     def waiting_time(self) -> float | None:

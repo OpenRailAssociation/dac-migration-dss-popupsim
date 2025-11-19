@@ -2,10 +2,17 @@
 
 from datetime import UTC
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel
 from pydantic import field_validator
 
+class LocoStatus(Enum):
+    """Locomotive status events"""
+    PARKING = "parking"
+    MOVING = "moving"
+    COUPLING = "coupling"
+    DECOUPLING = "decoupling"
 
 class Locomotive(BaseModel):
     """Locomotive configuration for workshop operations."""
@@ -15,6 +22,7 @@ class Locomotive(BaseModel):
     start_date: datetime
     end_date: datetime
     track_id: str
+    status: LocoStatus
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod

@@ -12,34 +12,17 @@ remains agnostic of the underlying simulation framework.
 
 import logging
 
-from enum import Enum
-
 from models.locomotive import Locomotive
+from models.locomotive import LocoStatus
 from models.scenario import Scenario
 from models.train import Train
 from models.wagon import Wagon
+from models.wagon import WagonStatus
 from models.workshop import Workshop
 
 from .sim_adapter import SimulationAdapter
 
 logger = logging.getLogger('PopupSim')
-
-
-class WagonStatus(Enum):
-    """Wagon status events"""
-    PARKING = "parking"
-    TO_BE_RETROFFITED = "to_be_retrofitted"
-    RETROFITTING = "retrofitting"
-    RETROFITTED = "retrofitted"
-    MOVING = "moving"
-
-class LocoStatus(Enum):
-    """Locomotive status events"""
-    PARKING = "parking"
-    MOVING = "moving"
-    COUPLING = "coupling"
-    DECOUPLING = "decoupling"
-
 
 class LocomotivePool:
     """Pool of locomotives for managing available locomotives in the simulation.
@@ -217,7 +200,64 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             until = self.get_simtime_limit_from_scenario()
         logger.info('Starting %s for: %s', self.name, self.scenario)
 
+        self.sim.process(trainschedule, self)
 
 
         self.sim.run(until)
         logger.info('Simulation completed.')
+
+def trainschedule(popupsim: PopupSim):
+    """Generator function to simulate train arrivals.
+
+    This function generates train arrivals based on the provided scenario.
+    It yields train arrivals as Train objects.
+
+    Parameters
+    ----------
+    sim : SimulationAdapter
+        The simulation adapter used to manage the simulation.
+
+    Yields
+    ------
+    Train
+        A train arrival as a Train object.
+    """
+    scenario = popupsim.scenario
+    logger.info('Starting train arrival generator for scenario %s', scenario.scenario_id)
+    for train in scenario.trains:
+        logger.debug('Waiting for next train arrival at %s', train.arrival_time)
+        yield popupsim.delay(train.arrival_time - scenario.start_date)
+        logger.debug('Train %s arrived at %s', train.train_id, train.arrival_time)
+        #sim.add_train(train)
+        for wagon in train.wagons:
+            wagon.status = WagonStatus.SELECTING # TODO: Check if model has attribute status
+            if wagon.needs_retrofit and  not wagon.is_loaded:
+                wagon.status = WagonStatus.SELECTED
+                popupsim.wagons_queue.append(wagon)
+            else:
+                wagon.status = WagonStatus.REJECTED
+            # TODO: Check if collection track is full and workshops are opened
+
+def move_wagons_from_collection_to_retrofit(popupsim: PopupSim):
+    """Generator function to move wagons from collection to retrofit.
+
+    This function moves wagons from the collection to the retrofit station.
+    It yields wagon movements as Wagon objects.
+
+    Parameters
+    ----------
+    sim : SimulationAdapter
+        The simulation adapter used to manage the simulation.
+
+    Yields
+    ------
+    Wagon
+        A wagon movement as a Wagon object.
+    """
+    scenario = popupsim.scenario
+    logger.info('Starting wagon movement generator for scenario %s', scenario.scenario_id)
+    for wagon in popupsim.wagons_queue:
+        logger.debug('Waiting for next wagon movement at %s', wagon.arrival_time)
+        yield popupsim.delay(wagon.arrival_time - scenario.start_date)
+        logger.debug('Wagon %s arrived at %s', wagon.wagon_id, wagon.arrival_time)
+        #sim.add_wagon(wagon)
