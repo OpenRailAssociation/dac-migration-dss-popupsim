@@ -167,22 +167,22 @@ def main(
 
     # Load and validate scenario using ConfigurationService ---
     try:
-        # Import here to avoid circular import at module level
-        service = ScenarioBuilder()
         # scenario_path is guaranteed to be Path here (validated above)
         if scenario_path is None:
             raise typer.Exit(1)
-        scenario_config = service.load_complete_scenario(str(scenario_path.parent))
+        scenario = ScenarioBuilder(scenario_path).build()
+        # TODO: decide if validation happens here or in ScenarioBuilder
+        # self.validator.validate(self.scenario)
         typer.echo('\nScenario loaded and validated successfully.')
-        typer.echo(f'Scenario ID: {scenario_config.scenario_id}')
-        typer.echo(f'Start Date: {scenario_config.start_date}')
-        typer.echo(f'End Date: {scenario_config.end_date}')
-        typer.echo(f'Number of Trains: {len(scenario_config.trains) if scenario_config.trains else 0}')
+        typer.echo(f'Scenario ID: {scenario.scenario_id}')
+        typer.echo(f'Start Date: {scenario.start_date}')
+        typer.echo(f'End Date: {scenario.end_date}')
+        typer.echo(f'Number of Trains: {len(scenario.trains) if scenario.trains else 0}')
         workshop_track_count = 0
-        if scenario_config.workshop is not None:
-            workshop_track_count = len(getattr(scenario_config.workshop, 'tracks', []))
+        if scenario.workshop is not None:
+            workshop_track_count = len(getattr(scenario.workshop, 'tracks', []))
         typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
-        typer.echo(f'Number of Routes: {len(scenario_config.routes) if scenario_config.routes else 0}')
+        typer.echo(f'Number of Routes: {len(scenario.routes) if scenario.routes else 0}')
         typer.echo('\nValidation Summary:')
         # validation_result.print_summary()
 
@@ -192,7 +192,7 @@ def main(
         # Main application logic would go here
         typer.echo('\n🚀 Starting popupsim processing...')
         sim_adapter = SimPyAdapter.create_simpy_adapter()
-        popup_sim = PopupSim(sim_adapter, scenario_config)
+        popup_sim = PopupSim(sim_adapter, scenario)
         # pylint: disable=fixme
         # TODO: make sure run_until is set appropriately from scenario config
         popup_sim.run()

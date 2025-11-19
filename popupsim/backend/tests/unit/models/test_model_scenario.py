@@ -331,3 +331,29 @@ class TestScenario:
         assert scenario.start_date.date() == datetime(2024, 1, 15, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2024, 1, 16, tzinfo=UTC).date()
         assert scenario.random_seed == 42
+
+    def test_load_scenario_from_file(self, fixtures_path: Path) -> None:
+        """
+        Test loading scenario config from an actual JSON file.
+
+        Parameters
+        ----------
+        fixtures_path : Path
+            Path to the fixtures directory containing test JSON files.
+
+        Notes
+        -----
+        Validates that Scenario can be loaded from a real JSON file
+        and that all fields match expected values.
+        """
+        scenario_file = fixtures_path / 'scenario.json'
+
+        with open(scenario_file, encoding='utf-8') as f:
+            data: dict[str, Any] = json.load(f)
+
+        scenario: Scenario = Scenario(**data)
+
+        assert scenario.scenario_id == 'test_scenario_01'
+        assert scenario.start_date.date() == datetime(2031, 7, 4, tzinfo=UTC).date()
+        assert scenario.end_date.date() == datetime(2031, 7, 5, tzinfo=UTC).date()
+        assert scenario.random_seed == 0

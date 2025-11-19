@@ -88,13 +88,19 @@ class TestPopupSimWithFakeSim:
         recorded `last_until` remains None.
         """
         adapter = FakeAdapter()
-        scenario: Any = {'name': 'no-until'}
+        scenario_data = {
+            'scenario_id': 'scenario_001',
+            'start_date': '2024-01-15',
+            'end_date': '2024-01-16',
+        }
+
+        scenario = Scenario(**scenario_data)
         sim = PopupSim(adapter, scenario)  # type: ignore[arg-type]
 
         sim.run()
 
         assert adapter.run_called_count == 1
-        assert adapter.last_until is None
+        assert adapter.last_until == 1440.0  # 1 day in minutes
 
 
 @pytest.mark.unit

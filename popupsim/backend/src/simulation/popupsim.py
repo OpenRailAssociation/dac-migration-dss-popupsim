@@ -43,6 +43,19 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.adapter: SimulationAdapter = adapter
         self.scenario: Scenario = scenario
 
+    def get_simtime_limit_from_scenario(self) -> float:
+        """Determine simulation time limit from scenario configuration.
+
+        Returns
+        -------
+        float
+            Simulation time limit derived from scenario parameters.
+        """
+        start_datetime = self.scenario.start_date
+        end_datetime = self.scenario.end_date
+        delta = end_datetime - start_datetime
+        return delta.total_seconds() / 60.0  # Convert to minutes
+
     def run(self, until: float | None = None) -> None:
         """Run the simulation until an optional time.
 
@@ -54,6 +67,8 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             Simulation time indicating when to stop the simulation.
             If None, the adapter runs until its own completion.
         """
+        if not until:
+            until = self.get_simtime_limit_from_scenario()
         runinfo = f'Starting {self.name} for: {self.scenario}'
         logger.info(runinfo)
         self.adapter.run(until)
