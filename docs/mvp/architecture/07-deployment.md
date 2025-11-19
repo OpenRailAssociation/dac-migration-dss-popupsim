@@ -213,7 +213,7 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 # Basic execution
 uv run python main.py
 
-# With custom configuration
+# With custom models
 uv run python main.py --config custom_config/
 
 # With custom output directory
@@ -639,5 +639,3 @@ cat output/capacity_assessment.csv
 | **Updates** | Git pull | New zip release | New zip release |
 
 ---
-
-

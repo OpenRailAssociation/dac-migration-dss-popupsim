@@ -152,7 +152,7 @@ Custom: Use `--output` flag or `POPUPSIM_OUTPUT_PATH` environment variable
 ### Log Configuration
 
 ```python
-# Default logging configuration
+# Default logging models
 import logging
 
 logging.basicConfig(

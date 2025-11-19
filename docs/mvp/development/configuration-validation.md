@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from datetime import date
 
 class ScenarioConfig(BaseModel):
-    """Scenario configuration with validation"""
+    """Scenario models with validation"""
     scenario_id: str = Field(
         pattern=r'^[a-zA-Z0-9_-]+$',
         min_length=1,
@@ -33,11 +33,11 @@ from pydantic import field_validator
 
 class Workshop(BaseModel):
     tracks: list[WorkshopTrack] = Field(min_length=1)
-    
+
     @field_validator('tracks')
     @classmethod
     def validate_unique_track_ids(
-        cls, 
+        cls,
         tracks: list[WorkshopTrack]
     ) -> list[WorkshopTrack]:
         """Ensure all track IDs are unique"""
@@ -45,11 +45,11 @@ class Workshop(BaseModel):
         if len(track_ids) != len(set(track_ids)):
             raise ValueError("Track IDs must be unique")
         return tracks
-    
+
     @field_validator('tracks')
     @classmethod
     def validate_track_functions(
-        cls, 
+        cls,
         tracks: list[WorkshopTrack]
     ) -> list[WorkshopTrack]:
         """Ensure at least one WERKSTATTGLEIS exists"""
@@ -67,17 +67,17 @@ from pydantic import model_validator
 class ScenarioConfig(BaseModel):
     start_date: date
     end_date: date
-    
+
     @model_validator(mode='after')
     def validate_date_range(self) -> 'ScenarioConfig':
         """Validate date range"""
         if self.end_date <= self.start_date:
             raise ValueError("end_date must be after start_date")
-        
+
         duration = (self.end_date - self.start_date).days
         if duration > 7:
             raise ValueError("Simulation duration cannot exceed 7 days")
-        
+
         return self
 ```
 
@@ -186,7 +186,7 @@ try:
 except ValidationError as e:
     print("Validation failed:")
     print(e.json(indent=2))
-    
+
     # Access individual errors
     for error in e.errors():
         print(f"Field: {error['loc']}")
@@ -223,29 +223,29 @@ except ValidationError as e:
 ```python
 class Workshop(BaseModel):
     tracks: list[WorkshopTrack]
-    
+
     @model_validator(mode='after')
     def validate_capacity_distribution(self) -> 'Workshop':
         """Ensure capacity is reasonably distributed"""
         total_capacity = sum(t.capacity for t in self.tracks)
-        
+
         if total_capacity < 3:
             raise ValueError("Total workshop capacity must be at least 3")
-        
+
         if total_capacity > 50:
             raise ValueError("Total workshop capacity cannot exceed 50")
-        
+
         # Check for balanced distribution
         capacities = [t.capacity for t in self.tracks]
         max_capacity = max(capacities)
         min_capacity = min(capacities)
-        
+
         if max_capacity > min_capacity * 3:
             raise ValueError(
                 "Capacity distribution too unbalanced "
                 f"(max: {max_capacity}, min: {min_capacity})"
             )
-        
+
         return self
 ```
 
@@ -257,7 +257,7 @@ class WorkshopTrack(BaseModel):
     function: TrackFunction
     capacity: int
     retrofit_time_min: int
-    
+
     @model_validator(mode='after')
     def validate_retrofit_time(self) -> 'WorkshopTrack':
         """Validate retrofit time based on function"""
@@ -271,7 +271,7 @@ class WorkshopTrack(BaseModel):
                 raise ValueError(
                     f"{self.function} must have retrofit_time_min = 0"
                 )
-        
+
         return self
 ```
 
@@ -310,7 +310,7 @@ def test_invalid_scenario_id() -> None:
             scenario_id="invalid scenario!",
             ...
         )
-    
+
     errors = exc_info.value.errors()
     assert any(e['type'] == 'string_pattern_mismatch' for e in errors)
 
@@ -321,7 +321,7 @@ def test_invalid_date_range() -> None:
             end_date=date(2025, 1, 1),
             ...
         )
-    
+
     errors = exc_info.value.errors()
     assert any('end_date must be after start_date' in e['msg'] for e in errors)
 ```

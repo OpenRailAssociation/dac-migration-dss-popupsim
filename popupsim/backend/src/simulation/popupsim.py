@@ -12,7 +12,7 @@ remains agnostic of the underlying simulation framework.
 
 import logging
 
-from configuration.model_scenario import ScenarioConfig
+from models.scenario import Scenario
 
 from .sim_adapter import SimulationAdapter
 
@@ -27,7 +27,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
     the simulation backend directly, keeping business logic backend-agnostic.
     """
 
-    def __init__(self, adapter: SimulationAdapter, scenario: ScenarioConfig) -> None:
+    def __init__(self, adapter: SimulationAdapter, scenario: Scenario) -> None:
         """Initialize the PopupSim orchestrator.
 
         Parameters
@@ -35,13 +35,26 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         adapter : SimulationAdapter
             SimulationAdapter instance used to drive the underlying
             simulation environment (e.g., SimPy).
-        scenario : ScenarioConfig
+        scenario : Scenario
             Domain scenario object containing routes, wagons and other
-            configuration consumed by the simulation.
+            models consumed by the simulation.
         """
         self.name: str = 'PopUpSim'
         self.adapter: SimulationAdapter = adapter
-        self.scenario: ScenarioConfig = scenario
+        self.scenario: Scenario = scenario
+
+    def get_simtime_limit_from_scenario(self) -> float:
+        """Determine simulation time limit from scenario configuration.
+
+        Returns
+        -------
+        float
+            Simulation time limit derived from scenario parameters.
+        """
+        start_datetime = self.scenario.start_date
+        end_datetime = self.scenario.end_date
+        delta = end_datetime - start_datetime
+        return delta.total_seconds() / 60.0  # Convert to minutes
 
     def run(self, until: float | None = None) -> None:
         """Run the simulation until an optional time.
@@ -54,6 +67,8 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             Simulation time indicating when to stop the simulation.
             If None, the adapter runs until its own completion.
         """
+        if not until:
+            until = self.get_simtime_limit_from_scenario()
         runinfo = f'Starting {self.name} for: {self.scenario}'
         logger.info(runinfo)
         self.adapter.run(until)

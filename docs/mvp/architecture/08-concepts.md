@@ -131,7 +131,7 @@ class ScenarioConfig(BaseModel):
     # ... additional fields and validators in actual implementation
 
 class Workshop(BaseModel):
-    """Workshop configuration with available tracks."""
+    """Workshop models with available tracks."""
     tracks: list[WorkshopTrack] = Field(min_length=1)
     # ... additional validators in actual implementation
 
@@ -485,5 +485,3 @@ def safe_file_path(base_dir: str, filename: str) -> Path:
 ```
 
 ---
-
-

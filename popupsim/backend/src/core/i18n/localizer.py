@@ -8,16 +8,16 @@ Attributes
 _thread_local : threading.local
     Thread-local storage object storing per-thread localizer instances
 _global_config : Dict[str, Any]
-    Global configuration storing initialization parameters for auto-creating
+    Global models storing initialization parameters for auto-creating
     localizer instances in new threads
 
 Thread Safety
 -------------
 The module uses thread-local storage to ensure each thread gets its own
-localizer instance. When `init_i18n()` is called, it stores configuration in
+localizer instance. When `init_i18n()` is called, it stores models in
 `_global_config` and creates a localizer for the current thread. When
 `get_localizer()` is called from a new thread without a localizer, it
-auto-initializes using the stored configuration.
+auto-initializes using the stored models.
 """
 
 from pathlib import Path

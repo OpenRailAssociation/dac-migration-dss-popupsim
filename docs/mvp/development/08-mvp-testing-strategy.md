@@ -56,7 +56,8 @@ def test_track_availability() -> None:
 ```python
 import pytest
 from pydantic import ValidationError
-from configuration.models import ScenarioConfig, Workshop, WorkshopTrack
+from models.models import ScenarioConfig, Workshop, WorkshopTrack
+
 
 def test_valid_scenario_config() -> None:
     config = ScenarioConfig(
@@ -74,6 +75,7 @@ def test_valid_scenario_config() -> None:
         train_schedule_file="schedule.csv"
     )
     assert config.scenario_id == "test"
+
 
 def test_invalid_date_range() -> None:
     with pytest.raises(ValidationError):
@@ -133,7 +135,8 @@ def test_simple_simulation() -> None:
 ```python
 import pytest
 from pathlib import Path
-from configuration.services import ConfigurationService
+from models.services import ConfigurationService
+
 
 def test_load_scenario_from_json(tmp_path: Path) -> None:
     # Create test scenario file
@@ -172,10 +175,10 @@ def test_load_scenario_from_json(tmp_path: Path) -> None:
 ```python
 def test_complete_simulation_flow(tmp_path: Path) -> None:
     """Test complete simulation from config to results"""
-    # 1. Setup test configuration
+    # 1. Setup test models
     config_path = tmp_path / "config"
     config_path.mkdir()
-    
+
     # Create scenario.json
     (config_path / "scenario.json").write_text('''
     {
@@ -195,22 +198,22 @@ def test_complete_simulation_flow(tmp_path: Path) -> None:
         "train_schedule_file": "train_schedule.csv"
     }
     ''')
-    
+
     # Create train_schedule.csv
     (config_path / "train_schedule.csv").write_text('''
 train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
 TRAIN001,2025-01-01,08:00,W001,15.5,true,true
 TRAIN001,2025-01-01,08:00,W002,15.5,false,true
     ''')
-    
+
     # 2. Run simulation
     app = PopUpSimApplication()
     results = app.run_complete_analysis(str(config_path / "scenario.json"))
-    
+
     # 3. Verify results
     assert results.simulation_results.total_wagons_processed == 2
     assert results.simulation_results.throughput_per_hour > 0
-    
+
     # 4. Verify output files
     output_path = tmp_path / "results"
     assert (output_path / "summary.csv").exists()
@@ -286,14 +289,14 @@ import time
 def test_simulation_performance() -> None:
     """Ensure simulation completes in reasonable time"""
     start_time = time.time()
-    
+
     # Run simulation with 100 wagons
     config = create_test_config(wagon_count=100)
     service = SimulationService(config)
     results = service.run()
-    
+
     duration = time.time() - start_time
-    
+
     # Should complete in less than 10 seconds
     assert duration < 10.0
 ```

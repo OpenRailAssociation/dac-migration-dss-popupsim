@@ -3,12 +3,11 @@
 from pathlib import Path
 from typing import Annotated
 
+from builders.scenario_builder import BuilderError
+from builders.scenario_builder import ScenarioBuilder
 from simulation.popupsim import PopupSim
 from simulation.sim_adapter import SimPyAdapter
 import typer
-
-from configuration.service import ConfigurationError
-from configuration.service import ConfigurationService
 
 APP_NAME = 'popupsim'
 
@@ -168,37 +167,35 @@ def main(
 
     # Load and validate scenario using ConfigurationService ---
     try:
-        # Import here to avoid circular import at module level
-        service = ConfigurationService()
         # scenario_path is guaranteed to be Path here (validated above)
         if scenario_path is None:
             raise typer.Exit(1)
-        scenario_config, validation_result = service.load_complete_scenario(str(scenario_path.parent))
+        scenario = ScenarioBuilder(scenario_path).build()
         typer.echo('\nScenario loaded and validated successfully.')
-        typer.echo(f'Scenario ID: {scenario_config.scenario_id}')
-        typer.echo(f'Start Date: {scenario_config.start_date}')
-        typer.echo(f'End Date: {scenario_config.end_date}')
-        typer.echo(f'Number of Trains: {len(scenario_config.train) if scenario_config.train else 0}')
-        workshop_track_count = 0
-        if scenario_config.workshop is not None:
-            workshop_track_count = len(getattr(scenario_config.workshop, 'tracks', []))
-        typer.echo(f'Number of Workshop Tracks: {workshop_track_count}')
-        typer.echo(f'Number of Routes: {len(scenario_config.routes) if scenario_config.routes else 0}')
+        typer.echo(f'Scenario ID: {scenario.scenario_id}')
+        typer.echo(f'Start Date: {scenario.start_date}')
+        typer.echo(f'End Date: {scenario.end_date}')
+        if scenario.routes is not None:
+            typer.echo(f'Number of Routes: {len(scenario.routes)}')
+        if scenario.trains is not None:
+            typer.echo(f'Number of Trains: {len(scenario.trains)}')
+        if scenario.workshops is not None:
+            typer.echo(f'Number of Workshops: {len(scenario.workshops)}')
         typer.echo('\nValidation Summary:')
-        validation_result.print_summary()
+        # TODO: decide if validation happens here or in ScenarioBuilder
+        # self.validator.validate(self.scenario)
+        # validation_result.print_summary()
 
-        if not validation_result.is_valid:
-            typer.echo('\nErrors detected in scenario configuration. Exiting.')
-            raise typer.Exit(1)
+        # if not validation_result.is_valid:
+        #     typer.echo('\nErrors detected in scenario models. Exiting.')
+        #     raise typer.Exit(1)
         # Main application logic would go here
         typer.echo('\n🚀 Starting popupsim processing...')
         sim_adapter = SimPyAdapter.create_simpy_adapter()
-        popup_sim = PopupSim(sim_adapter, scenario_config)
-        # pylint: disable=fixme
-        # Todo make sure run_until is set appropriately from scenario config  # noqa: FIX002
+        popup_sim = PopupSim(sim_adapter, scenario)
         popup_sim.run()
 
-    except ConfigurationError as e:
+    except BuilderError as e:
         typer.echo(f'Configuration error: {e}')
         raise typer.Exit(1) from e
     except Exception as e:

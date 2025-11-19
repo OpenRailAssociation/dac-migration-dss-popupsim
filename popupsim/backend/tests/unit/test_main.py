@@ -1,6 +1,8 @@
 """Unit tests for the main entry point module."""
 
 from collections.abc import Generator
+from datetime import UTC
+from datetime import datetime
 from pathlib import Path
 import tempfile
 
@@ -9,6 +11,7 @@ from main import app
 from main import validate_output_path
 from main import validate_scenario_path
 import pytest
+from pytest_mock import MockerFixture
 import typer
 from typer.testing import CliRunner
 
@@ -82,19 +85,22 @@ def test_main_with_invalid_debug_level(runner: CliRunner, temp_scenario_file: Pa
 
 
 @pytest.mark.unit
-def test_main_with_valid_parameters(mocker, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
+def test_main_with_valid_parameters(
+    mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
+) -> None:
     """Test main function succeeds with valid parameters."""
-    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_config_service = mocker.patch('main.ScenarioBuilder')
     mock_service = mocker.MagicMock()
     mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
-    mock_config.start_date = '2024-01-01'
-    mock_config.end_date = '2024-12-31'
+    mock_config.start_date = datetime(2024, 1, 1, tzinfo=UTC)
+    mock_config.end_date = datetime(2024, 12, 31, tzinfo=UTC)
     mock_config.train = []
+    mock_config.workshop = mocker.MagicMock()
     mock_config.workshop.tracks = []
     mock_config.routes = []
-    mock_validation = mocker.MagicMock()
-    mock_service.load_complete_scenario.return_value = (mock_config, mock_validation)
+    # Return only ScenarioConfig, not a tuple
+    mock_service.load_complete_scenario.return_value = mock_config
     mock_config_service.return_value = mock_service
 
     result = runner.invoke(app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir)])
@@ -107,19 +113,22 @@ def test_main_with_valid_parameters(mocker, runner: CliRunner, temp_scenario_fil
 
 
 @pytest.mark.unit
-def test_main_with_verbose_flag(mocker, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path) -> None:
+def test_main_with_verbose_flag(
+    mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
+) -> None:
     """Test main function with verbose flag enabled."""
-    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_config_service = mocker.patch('main.ScenarioBuilder')
     mock_service = mocker.MagicMock()
     mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
-    mock_config.start_date = '2024-01-01'
-    mock_config.end_date = '2024-12-31'
+    mock_config.start_date = datetime(2024, 1, 1, tzinfo=UTC)
+    mock_config.end_date = datetime(2024, 12, 31, tzinfo=UTC)
     mock_config.train = []
+    mock_config.workshop = mocker.MagicMock()
     mock_config.workshop.tracks = []
     mock_config.routes = []
-    mock_validation = mocker.MagicMock()
-    mock_service.load_complete_scenario.return_value = (mock_config, mock_validation)
+    # Return only ScenarioConfig, not a tuple
+    mock_service.load_complete_scenario.return_value = mock_config
     mock_config_service.return_value = mock_service
 
     result = runner.invoke(
@@ -132,20 +141,21 @@ def test_main_with_verbose_flag(mocker, runner: CliRunner, temp_scenario_file: P
 
 @pytest.mark.unit
 def test_main_with_custom_debug_level(
-    mocker, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
+    mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function with custom debug level."""
-    mock_config_service = mocker.patch('main.ConfigurationService')
+    mock_config_service = mocker.patch('main.ScenarioBuilder')
     mock_service = mocker.MagicMock()
     mock_config = mocker.MagicMock()
     mock_config.scenario_id = 'test_scenario'
-    mock_config.start_date = '2024-01-01'
-    mock_config.end_date = '2024-12-31'
+    mock_config.start_date = datetime(2024, 1, 1, tzinfo=UTC)
+    mock_config.end_date = datetime(2024, 12, 31, tzinfo=UTC)
     mock_config.train = []
+    mock_config.workshop = mocker.MagicMock()
     mock_config.workshop.tracks = []
     mock_config.routes = []
-    mock_validation = mocker.MagicMock()
-    mock_service.load_complete_scenario.return_value = (mock_config, mock_validation)
+    # Return only ScenarioConfig, not a tuple
+    mock_service.load_complete_scenario.return_value = mock_config
     mock_config_service.return_value = mock_service
 
     result = runner.invoke(

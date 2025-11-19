@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "description": "Haldensleben Yard Routes",
+    "version": "1.0.0",
+    "topology_reference": "topology.yaml",
+    "tracks_reference": "tracks.yaml"
+  },
+  "routes": [
+     {
+      "id": "20_To_6",
+      "description": "Route from collection track to retrofit track",
+      "duration": 10,
+      "path": [
+        "track_20",
+        "track_1a",
+        "track_6"
+      ]
+    },
+    {
+      "id": "6_To_10",
+      "description": "Route from retrofit track to workshop 1",
+      "duration": 2,
+      "path": [
+        "track_6",
+        "track_1a",
+        "track_10"
+      ]
+    },
+    {
+      "id": "Tracktrack_6ToTracktrack_Z1",
+      "description": "Route from retrofit track to workshop 2",
+      "duration": 2,
+      "path": [
+        "track_6",
+        "track_1a",
+        "track_Z1"
+      ]
+    },
+    {
+      "id": "10_To_7",
+      "description": "Route from workshop 1 to retrofitted track",
+      "duration": 2,
+      "path": [
+        "track_10",
+        "track_1a",
+        "track_7"
+      ]
+    },
+    {
+      "id": "Tracktrack_Z1ToTracktrack_7",
+      "description": "Route from workshop 2 to retrofitted track",
+      "duration": 2,
+      "path": [
+        "track_Z1",
+        "track_1a",
+        "track_7"
+      ]
+    },
+    {
+      "id": "Tracktrack_7ToTrack9",
+      "description": "Route from retrofitted track to parking track 9",
+      "duration": 4,
+      "path": [
+        "track_7",
+        "track_1a",
+        "track_9"
+      ]
+    },
+    {
+      "id": "Tracktrack_7ToTracktrack_track_24",
+      "description": "Route from retrofitted track to parking track track_24",
+      "duration": 4,
+      "path": [
+        "track_7",
+        "track_1a",
+        "track_24"
+      ]
+    },
+    {
+      "id": "Tracktrack_7ToTrack23",
+      "description": "Route from retrofitted track to parking track 23",
+      "duration": 4,
+      "path": [
+        "track_7",
+        "track_1a",
+        "track_23"
+      ]
+    },
+    {
+      "id": "Parking_from_workshop",
+      "description": "Route from workshop 1 to parking position",
+      "duration": 3,
+      "path": [
+        "track_10",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "Tracktrack_Z1ToTrack19",
+      "duration": 4,
+      "description": "Route from workshop 2 to parking position",
+      "path": [
+        "track_Z1",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "From_7_to_parking",
+      "duration": 2,
+      "description": "From retrofitted track to parking position",
+      "path": [
+        "track_7",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "Tracktrack_7ToTrack19",
+      "duration": 2,
+      "description": "From retrofit track to parking position",
+      "path": [
+        "track_7",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "Track09ToTrack19",
+      "duration": 3,
+      "description": "From parking track 9 to parking position",
+      "path": [
+        "track_9",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "Tracktrack_24ToTrack19",
+      "description": "From parking track track_24 to parking position",
+      "duration": 3,
+      "path": [
+        "track_24",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "Track23ToTrack19",
+      "description": "From parking track 23 to parking position",
+      "duration": 3,
+      "path": [
+        "track_23",
+        "track_1a",
+        "track_19"
+      ]
+    },
+    {
+      "id": "parking_to_10",
+      "duration": 2,
+      "path": [
+        "track_19",
+        "track_1a",
+        "track_10"
+      ]
+    }
+  ]
+}

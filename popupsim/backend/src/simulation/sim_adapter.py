@@ -12,7 +12,6 @@ from abc import abstractmethod
 from collections.abc import Callable
 from collections.abc import Generator
 from typing import Any
-from typing import cast
 
 
 class SimulationAdapter(ABC):
@@ -23,7 +22,7 @@ class SimulationAdapter(ABC):
     """
 
     @abstractmethod
-    def current_time(self) -> float:
+    def current_time(self) -> str:
         """Get current simulation time.
 
         Returns
@@ -69,7 +68,7 @@ class SimulationAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:
+    def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule and run a domain callable in the simulation context.
 
         Parameters
@@ -120,15 +119,15 @@ class SimPyAdapter(SimulationAdapter):
         env = simpy.Environment()
         return cls(env)
 
-    def current_time(self) -> float:
+    def current_time(self) -> str:
         """Get current simulation time.
 
         Returns
         -------
-        float
-            Current time in the SimPy environment.
+        str
+            Current time in the SimPy environment formatted to two decimal places.
         """
-        return float(self._env.now)
+        return f'{float(self._env.now):8.2f}'
 
     def delay(self, duration: float) -> Any:
         """Create a SimPy timeout event.
@@ -162,7 +161,7 @@ class SimPyAdapter(SimulationAdapter):
             until = self.run_until
         return self._env.run(until)
 
-    def run_process(self, fn: Callable[..., Any] | Generator[Any, Any, Any], *args: Any, **kwargs: Any) -> Any:
+    def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule a callable in the SimPy environment.
 
         Accepts three types of callables:
@@ -174,7 +173,7 @@ class SimPyAdapter(SimulationAdapter):
 
         Parameters
         ----------
-        fn : Union[Callable[..., Any], Generator[Any, Any, Any]]
+        fn : Callable[..., Any]
             Callable to execute (generator function, regular function, or generator object).
         *args : Any
             Positional arguments to pass to the callable.
@@ -194,15 +193,11 @@ class SimPyAdapter(SimulationAdapter):
 
         # If fn is a generator-function, call it inside the sim context and schedule its generator
         if inspect.isgeneratorfunction(fn):
-            # Type checker knows fn is callable here
-            callable_fn = cast(Callable[..., Any], fn)
-            return self._env.process(callable_fn(*args, **kwargs))
+            return self._env.process(fn(*args, **kwargs))
 
         # Otherwise fn is a normal callable; wrap it in a tiny generator so SimPy can schedule it
         def _wrap() -> Generator[None]:
-            # Type checker knows fn is callable here
-            callable_fn = cast(Callable[..., Any], fn)
-            callable_fn(*args, **kwargs)
+            fn(*args, **kwargs)
             yield from ()
 
         return self._env.process(_wrap())

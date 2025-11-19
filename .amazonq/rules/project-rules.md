@@ -42,7 +42,7 @@ def temp_file() -> Generator[Path, None, None]:
         yield Path(f.name)
 
 def __init__(self, config: Dict[str, Any]) -> None:
-    """Initialize with configuration."""
+    """Initialize with models."""
     self.config = config
 ```
 
