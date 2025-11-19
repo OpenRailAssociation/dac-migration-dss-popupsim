@@ -12,6 +12,7 @@ remains agnostic of the underlying simulation framework.
 
 import logging
 
+from models.locomotive import Locomotive
 from models.scenario import Scenario
 from models.train import Train
 from models.wagon import Wagon
@@ -21,6 +22,52 @@ from .sim_adapter import SimulationAdapter
 
 logger = logging.getLogger('PopupSim')
 
+
+class LocomotivePool:
+    """Pool of locomotives for managing available locomotives in the simulation.
+
+    This class manages a collection of locomotives, allowing for allocation
+    and release of locomotives as needed during the simulation.
+    """
+
+    def __init__(self, sim, locomotives: list[Locomotive], poll_interval: float = 0.01) -> None:
+        self.available_locomotives = set(locomotives)
+        self.occupied_locomotives = []
+        self.poll = float(poll_interval)
+        self.sim = sim
+
+      # nested function to return a fresh generator every time it's called
+    def acquire(self):
+        def _acq():
+            while self.available_locomotive >= 1:
+                yield self.sim.delay(self.poll)
+            self.occupied_locomotives.append(self.allocate_locomotive())
+
+        return _acq()
+
+
+    def allocate_locomotive(self) -> Locomotive | None:
+        """Allocate an available locomotive from the pool.
+
+        Returns
+        -------
+        Train | None
+            An available locomotive if one exists, otherwise None.
+        """
+        if not self.available_locomotives:
+            return None
+        locomotive = self.available_locomotives.pop()
+        return locomotive
+
+    def release_locomotive(self, locomotive: Locomotive) -> None:
+        """Release a locomotive back to the pool.
+
+        Parameters
+        ----------
+        locomotive : Train
+            The locomotive to release back to the pool.
+        """
+        self.available_locomotives.add(locomotive)
 
 class PopupSim:  # pylint: disable=too-few-public-methods
     """High-level simulation orchestrator for PopUp-Sim.
@@ -52,6 +99,9 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.name: str = 'PopUpSim'
         self.sim: SimulationAdapter = sim
         self.scenario: Scenario = scenario
+        if not scenario.locomotives:
+            raise ValueError('Scenario must have at least one locomotive to simulate.')
+        self.locomotives_queue: list[Locomotive] = scenario.locomotives
         if not scenario.trains:
             raise ValueError('Scenario must have at least one train to simulate.')
         self.trains_queue: list[Train] = scenario.trains
@@ -88,5 +138,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         if not until:
             until = self.get_simtime_limit_from_scenario()
         logger.info('Starting %s for: %s', self.name, self.scenario)
+        locs = LocomotivePool(self.sim, self.scenario.locomotives)
+
         self.sim.run(until)
         logger.info('Simulation completed.')
