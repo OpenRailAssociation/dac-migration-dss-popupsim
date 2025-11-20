@@ -48,7 +48,7 @@ class FakeAdapter:
         """
         self.run_called_count += 1
         self.last_until = until
-    
+
     def run_process(self, process, *args) -> None:
         """Simulate adapter.run_process."""
         pass
@@ -60,33 +60,34 @@ class TestPopupSimWithFakeSim:
 
     def test_run_calls_adapter_run_without_until(self) -> None:
         """Ensure PopupSim.run calls adapter.run when `until` is not provided."""
+        from datetime import UTC
+        from datetime import datetime
+
         from models.locomotive import Locomotive
-        from models.workshop import Workshop
-        from models.track import Track, TrackType
         from models.topology import Topology
+        from models.track import Track
+        from models.track import TrackType
         from models.train import Train
         from models.wagon import Wagon
-        from datetime import datetime, UTC
-        
+        from models.workshop import Workshop
+
         adapter = FakeAdapter()
-        
+
         topology = Topology({'edges': [{'edge_id': 'e1', 'from_node': 'n1', 'to_node': 'n2', 'length': 100.0}]})
         track = Track(id='t1', name='Track 1', type=TrackType.COLLECTION, edges=['e1'])
         loco = Locomotive(
-            locomotive_id='L1', name='Loco 1',
+            locomotive_id='L1',
+            name='Loco 1',
             start_date=datetime(2024, 1, 15, tzinfo=UTC),
             end_date=datetime(2024, 1, 16, tzinfo=UTC),
-            track_id='t1'
+            track_id='t1',
         )
         workshop = Workshop(
-            workshop_id='W1',
-            start_date='2024-01-15T00:00:00Z',
-            end_date='2024-01-16T00:00:00Z',
-            track_id='t1'
+            workshop_id='W1', start_date='2024-01-15T00:00:00Z', end_date='2024-01-16T00:00:00Z', track_id='t1'
         )
         wagon = Wagon(wagon_id='W1', length=20.0, is_loaded=False, needs_retrofit=True)
         train = Train(train_id='T1', arrival_time=datetime(2024, 1, 15, 8, 0, tzinfo=UTC), wagons=[wagon])
-        
+
         scenario_data = {
             'scenario_id': 'scenario_001',
             'start_date': '2024-01-15',

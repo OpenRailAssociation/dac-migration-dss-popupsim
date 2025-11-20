@@ -5,7 +5,7 @@ from models.route import Route
 
 def find_route(routes: list[Route], from_track: str, to_track: str) -> Route | None:
     """Find route from one track to another by searching route paths.
-    
+
     Parameters
     ----------
     routes : list[Route]
@@ -14,7 +14,7 @@ def find_route(routes: list[Route], from_track: str, to_track: str) -> Route | N
         Starting track ID
     to_track : str
         Destination track ID
-        
+
     Returns
     -------
     Route | None

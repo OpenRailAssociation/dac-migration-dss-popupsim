@@ -22,7 +22,7 @@ class SimulationAdapter(ABC):
     """
 
     @abstractmethod
-    def current_time(self) -> str:
+    def current_time(self) -> float:
         """Get current simulation time.
 
         Returns
@@ -120,19 +120,20 @@ class SimPyAdapter(SimulationAdapter):
         return cls(env)
 
     @classmethod
-    def create_simpy_resource(cls, environment, capacity):
-        import simpy
+    def create_simpy_resource(cls, environment: Any, capacity: int) -> Any:
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
         return simpy.Resource(environment, capacity)
 
-    def current_time(self) -> str:
-        """Get current simulation time.
+    def current_time(self) -> float:
+        """Get current simulation time as float (minutes since start).
 
         Returns
         -------
-        str
-            Current time in the SimPy environment formatted to two decimal places.
+        float
+            Current time in the SimPy environment in minutes.
         """
-        return f'{float(self._env.now):8.2f}'
+        return float(self._env.now)
 
     def delay(self, duration: float) -> Any:
         """Create a SimPy timeout event.
@@ -190,7 +191,7 @@ class SimPyAdapter(SimulationAdapter):
         Any
             SimPy process object.
         """
-        import inspect  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+        import inspect  # pylint: disable=import-outside-toplevel
 
         # If a pre-built generator object was passed as `fn`, schedule it directly
         if inspect.isgenerator(fn):
@@ -201,7 +202,7 @@ class SimPyAdapter(SimulationAdapter):
             return self._env.process(fn(*args, **kwargs))
 
         # Otherwise fn is a normal callable; wrap it in a tiny generator so SimPy can schedule it
-        def _wrap() -> Generator[None]:
+        def _wrap() -> Generator[Any]:
             fn(*args, **kwargs)
             yield from ()
 

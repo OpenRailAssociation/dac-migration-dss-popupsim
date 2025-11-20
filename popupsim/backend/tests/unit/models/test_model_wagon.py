@@ -203,6 +203,7 @@ class TestWagon:
         wagon_dict = wagon.model_dump()
 
         from models.wagon import WagonStatus
+
         expected_dict = {
             'wagon_id': 'W014',
             'length': 18.5,

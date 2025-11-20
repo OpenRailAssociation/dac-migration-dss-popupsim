@@ -205,12 +205,12 @@ class TestScenario:
         Validates that valid strategy values are accepted and default is applied.
         """
         from models.scenario import TrackSelectionStrategy
-        
+
         config = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN
+            track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN,
         )
         assert config.track_selection_strategy == TrackSelectionStrategy.ROUND_ROBIN
 

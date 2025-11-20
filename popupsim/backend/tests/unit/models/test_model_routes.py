@@ -50,6 +50,7 @@ def temp_json_file() -> Generator[Path]:
     """Create a temporary JSON file with test route data."""
     fd, temp_path = tempfile.mkstemp(suffix='.json')
     import os
+
     os.close(fd)  # Close file descriptor before yielding
     temp_file = Path(temp_path)
     yield temp_file

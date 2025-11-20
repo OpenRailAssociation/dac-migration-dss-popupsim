@@ -9,13 +9,12 @@ from datetime import UTC
 from datetime import datetime
 from enum import Enum
 import logging
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
-
-from typing import Any
 
 from .locomotive import Locomotive
 from .process_times import ProcessTimes
@@ -30,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class TrackSelectionStrategy(str, Enum):
     """Strategy for selecting collection tracks when multiple are available."""
+
     ROUND_ROBIN = 'round_robin'
     LEAST_OCCUPIED = 'least_occupied'
     FIRST_AVAILABLE = 'first_available'
@@ -50,12 +50,10 @@ class Scenario(BaseModel):
     start_date: datetime = Field(description='Simulation start date')
     end_date: datetime = Field(description='Simulation end date')
     track_selection_strategy: TrackSelectionStrategy = Field(
-        default=TrackSelectionStrategy.LEAST_OCCUPIED,
-        description='Strategy for selecting collection tracks'
+        default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting collection tracks'
     )
     retrofit_selection_strategy: TrackSelectionStrategy = Field(
-        default=TrackSelectionStrategy.LEAST_OCCUPIED,
-        description='Strategy for selecting retrofit tracks'
+        default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting retrofit tracks'
     )
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
     process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
@@ -91,5 +89,5 @@ class Scenario(BaseModel):
         elif duration < 1:
             raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
         return self
-    
+
     model_config = {'arbitrary_types_allowed': True}
