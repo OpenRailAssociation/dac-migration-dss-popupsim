@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Annotated
+from typing import Any
 
 from builders.scenario_builder import BuilderError
 from builders.scenario_builder import ScenarioBuilder
@@ -93,6 +94,46 @@ def validate_output_path(output_path: Path | None) -> Path:
     return output_path
 
 
+def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | None, debug: str, verbose: bool) -> Any:  # type: ignore[misc]
+    """Validate inputs and load scenario."""
+    if debug not in ['ERROR', 'WARNING', 'INFO', 'DEBUG']:
+        typer.echo(f'Error: Invalid debug level: {debug}. Must be one of: ERROR, WARNING, INFO, DEBUG')
+        raise typer.Exit(1)
+    scenario_path = validate_scenario_path(scenario_path)
+    typer.echo(f'Using scenario file at: {scenario_path}')
+    output_path = validate_output_path(output_path)
+    typer.echo(f'Output will be saved to: {output_path}')
+    if verbose:
+        typer.echo('Verbose mode enabled.')
+    typer.echo(f'Debug level set to: {debug}')
+    scenario = ScenarioBuilder(scenario_path).build()
+    typer.echo('Scenario loaded and validated successfully.')
+    typer.echo(f'Scenario ID: {scenario.scenario_id}')
+    typer.echo(f'Start Date: {scenario.start_date}')
+    typer.echo(f'End Date: {scenario.end_date}')
+    if scenario.routes:
+        typer.echo(f'Number of Routes: {len(scenario.routes)}')
+    if scenario.trains:
+        typer.echo(f'Number of Trains: {len(scenario.trains)}')
+    if scenario.workshops:
+        typer.echo(f'Number of Workshops: {len(scenario.workshops)}')
+    return scenario
+
+
+def _run_simulation_and_display_metrics(scenario: Any) -> None:  # type: ignore[misc]
+    """Run simulation and display metrics."""
+    typer.echo('\nStarting simulation...')
+    sim_adapter = SimPyAdapter.create_simpy_adapter()
+    popup_sim = PopupSim(sim_adapter, scenario)
+    popup_sim.run()
+    metrics = popup_sim.get_metrics()
+    typer.echo('\n=== Simulation Metrics ===')
+    for category, category_metrics in metrics.items():
+        typer.echo(f'\n{category.upper().replace("_", " ")}:')
+        for metric in category_metrics:
+            typer.echo(f'  {metric["name"].replace("_", " ").title()}: {metric["value"]} {metric["unit"]}')
+
+
 @app.command()
 def main(
     ctx: typer.Context,
@@ -141,68 +182,13 @@ def main(
     >>> popupsim --scenarioPath ./scenario.json --outputPath ./output
     >>> popupsim --scenarioPath ./scenario.json --outputPath ./output --verbose --debug DEBUG
     """
-    # Show help if no required parameters are provided
     if scenario_path is None and output_path is None:
         typer.echo('No required parameters provided. Showing help:\n')
         typer.echo(ctx.get_help(), color=ctx.color)
         raise typer.Exit(1)
-
-    # Validate debug level
-    if debug not in ['ERROR', 'WARNING', 'INFO', 'DEBUG']:
-        typer.echo(f'Error: Invalid debug level: {debug}. Must be one of: ERROR, WARNING, INFO, DEBUG')
-        raise typer.Exit(1)
-
-    # Validate scenarioPath
-    scenario_path = validate_scenario_path(scenario_path)
-    typer.echo(f'Using scenario file at: {scenario_path}')
-
-    # Validate outputPath
-    output_path = validate_output_path(output_path)
-    typer.echo(f'Output will be saved to: {output_path}')
-
-    if verbose:
-        typer.echo('Verbose mode enabled.')
-
-    typer.echo(f'Debug level set to: {debug}')
-
-    # Load and validate scenario using ConfigurationService ---
     try:
-        # scenario_path is guaranteed to be Path here (validated above)
-        if scenario_path is None:
-            raise typer.Exit(1)
-        scenario = ScenarioBuilder(scenario_path).build()
-        typer.echo('Scenario loaded and validated successfully.')
-        typer.echo(f'Scenario ID: {scenario.scenario_id}')
-        typer.echo(f'Start Date: {scenario.start_date}')
-        typer.echo(f'End Date: {scenario.end_date}')
-        if scenario.routes is not None:
-            typer.echo(f'Number of Routes: {len(scenario.routes)}')
-        if scenario.trains is not None:
-            typer.echo(f'Number of Trains: {len(scenario.trains)}')
-        if scenario.workshops is not None:
-            typer.echo(f'Number of Workshops: {len(scenario.workshops)}')
-        typer.echo('\nValidation Summary:')
-        # TODO: decide if validation happens here or in ScenarioBuilder
-        # self.validator.validate(self.scenario)
-        # validation_result.print_summary()
-
-        # if not validation_result.is_valid:
-        #     typer.echo('\nErrors detected in scenario models. Exiting.')
-        #     raise typer.Exit(1)
-        # Main application logic would go here
-        typer.echo('\nStarting simulation...')
-        sim_adapter = SimPyAdapter.create_simpy_adapter()
-        popup_sim = PopupSim(sim_adapter, scenario)
-        popup_sim.run()
-
-        # Get and display metrics
-        metrics = popup_sim.get_metrics()
-        typer.echo('\n=== Simulation Metrics ===')
-        for category, category_metrics in metrics.items():
-            typer.echo(f'\n{category.upper().replace("_", " ")}:')
-            for metric in category_metrics:
-                typer.echo(f'  {metric["name"].replace("_", " ").title()}: {metric["value"]} {metric["unit"]}')
-
+        scenario = _validate_and_load_scenario(scenario_path, output_path, debug, verbose)
+        _run_simulation_and_display_metrics(scenario)
     except BuilderError as e:
         typer.echo(f'Configuration error: {e}')
         raise typer.Exit(1) from e

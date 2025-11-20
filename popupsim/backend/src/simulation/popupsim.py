@@ -220,150 +220,108 @@ def process_train_arrivals(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(process_times.wagon_hump_interval)
 
 
-def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
-    """Pickup wagons from collection and move to retrofit.
-
-    Waits for each train to be fully processed before picking up its wagons.
-
-    Parameters
-    ----------
-    popupsim : PopupSim
-        The PopupSim instance.
-
-    Yields
-    ------
-    Any
-        SimPy timeout events.
-    """
-    scenario = popupsim.scenario
-    process_times = scenario.process_times
-    if not process_times:
-        raise ValueError('Scenario must have process_times configured')
-    if not scenario.trains:
-        raise ValueError('Scenario must have trains configured')
-    if not scenario.routes:
-        raise ValueError('Scenario must have routes configured')
-
-    logger.info('Starting wagon pickup process')
-
+def _wait_for_wagons_ready(popupsim: PopupSim) -> Generator[tuple[str, list[Wagon]]]:  # type: ignore[misc]
+    """Wait for wagons ready on collection track."""
     last_processed_count = 0
-
-    # Use cached parking tracks
-    parking_tracks = popupsim.parking_tracks
-
     while True:
-        # Check if any new train has been fully processed
-        current_processed_count = len(
-            [
-                train
-                for train in scenario.trains
-                if all(w in popupsim.wagons_queue or w.status == WagonStatus.REJECTED for w in train.wagons)
-            ]
-        )
-
+        current_processed_count = len([
+            t for t in popupsim.scenario.trains
+            if all(w in popupsim.wagons_queue or w.status == WagonStatus.REJECTED for w in t.wagons)
+        ])
         if current_processed_count > last_processed_count:
             logger.info('Train fully processed, %d trains ready for pickup', current_processed_count)
             last_processed_count = current_processed_count
-
-        # Only pickup wagons from fully processed trains
         if last_processed_count == 0:
             yield popupsim.sim.delay(1.0)
             continue
-
-        # Group wagons by collection track
         wagons_by_track: dict[str, list[Wagon]] = {}
         for wagon in popupsim.wagons_queue:
             if wagon.status == WagonStatus.SELECTED and wagon.track_id:
-                if wagon.track_id not in wagons_by_track:
-                    wagons_by_track[wagon.track_id] = []
-                wagons_by_track[wagon.track_id].append(wagon)
+                wagons_by_track.setdefault(wagon.track_id, []).append(wagon)
+        if wagons_by_track:
+            try:
+                collection_track_id = next(iter(wagons_by_track))
+                return collection_track_id, wagons_by_track[collection_track_id]
+            except StopIteration:
+                pass
+        yield popupsim.sim.delay(1.0)
 
-        if not wagons_by_track:
-            yield popupsim.sim.delay(1.0)  # Wait 1 minute and check again
-            continue
 
-        # Get locomotive from pool (blocks until available)
+def _pickup_and_couple_wagons(
+    popupsim: PopupSim, loco: Locomotive, collection_track_id: str, collection_wagons: list[Wagon]
+) -> Generator[list[tuple[Wagon, str]]]:  # type: ignore[misc]
+    """Travel to collection, find and couple wagons."""
+    logger.info('🚂 ROUTE: Loco %s traveling [%s → %s]', loco.locomotive_id, loco.track_id, collection_track_id)
+    yield from move_locomotive(popupsim, loco, loco.track_id, collection_track_id)
+    wagons_to_pickup = _find_wagons_for_retrofit(popupsim, collection_wagons)
+    if wagons_to_pickup:
+        logger.debug('Loco %s coupling %d wagons', loco.locomotive_id, len(wagons_to_pickup))
+        yield from couple_wagons(popupsim, loco, len(wagons_to_pickup), wagons_to_pickup[0][0].coupler_type)
+    return wagons_to_pickup
+
+
+def _deliver_to_retrofit_tracks(
+    popupsim: PopupSim, loco: Locomotive, collection_track_id: str, wagons_by_retrofit: dict[str, list[Wagon]]
+) -> Generator:
+    """Deliver wagons to retrofit tracks and decouple."""
+    for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
+        for wagon in retrofit_wagons:
+            popupsim.track_capacity.remove_wagon(collection_track_id, wagon.length)
+            wagon.status = WagonStatus.MOVING
+            wagon.source_track_id = collection_track_id
+            wagon.destination_track_id = retrofit_track_id
+            wagon.track_id = None
+        logger.info('🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
+                   loco.locomotive_id, loco.track_id, retrofit_track_id, len(retrofit_wagons))
+        yield from move_locomotive(popupsim, loco, loco.track_id, retrofit_track_id)
+        for wagon in retrofit_wagons:
+            popupsim.track_capacity.add_wagon(retrofit_track_id, wagon.length)
+            wagon.track_id = retrofit_track_id
+            wagon.source_track_id = None
+            wagon.destination_track_id = None
+            wagon.status = WagonStatus.MOVING
+        logger.debug('Loco %s decoupling %d wagons', loco.locomotive_id, len(retrofit_wagons))
+        yield from decouple_wagons(popupsim, loco, len(retrofit_wagons))
+
+
+def _return_loco_and_signal(
+    popupsim: PopupSim, loco: Locomotive, wagons_by_retrofit: dict[str, list[Wagon]]
+) -> Generator:
+    """Return loco to parking and signal wagons ready."""
+    parking_track_id = popupsim.parking_tracks[0].id
+    logger.debug('Loco %s returning to parking', loco.locomotive_id)
+    yield from move_locomotive(popupsim, loco, loco.track_id, parking_track_id)
+    loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
+    yield from release_locomotive(popupsim, loco)
+    current_time = popupsim.sim.current_time()
+    for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
+        for wagon in retrofit_wagons:
+            wagon.status = WagonStatus.ON_RETROFIT_TRACK
+            popupsim.metrics.record_event('wagon_delivered', {'wagon_id': wagon.wagon_id, 'time': current_time})
+            logger.info('Wagon %s ready for station at t=%.1f', wagon.wagon_id, current_time)
+        yield popupsim.wagons_ready_for_stations[retrofit_track_id].put(retrofit_wagons)
+
+
+def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
+    """Pickup wagons from collection and move to retrofit."""
+    if not popupsim.scenario.process_times:
+        raise ValueError('Scenario must have process_times configured')
+    if not popupsim.scenario.trains:
+        raise ValueError('Scenario must have trains configured')
+    if not popupsim.scenario.routes:
+        raise ValueError('Scenario must have routes configured')
+    logger.info('Starting wagon pickup process')
+    while True:
+        collection_track_id, collection_wagons = yield from _wait_for_wagons_ready(popupsim)
         loco = yield from allocate_locomotive(popupsim)
-
-        # Pick first collection track with wagons
-        try:
-            collection_track_id = next(iter(wagons_by_track))
-        except StopIteration:
-            yield popupsim.sim.delay(1.0)
-            continue
-        collection_wagons = wagons_by_track[collection_track_id]
-
-        # Travel from loco position to collection track
-        from_track = loco.track_id
-        logger.info('🚂 ROUTE: Loco %s traveling [%s → %s]', loco.locomotive_id, from_track, collection_track_id)
-        yield from move_locomotive(popupsim, loco, from_track, collection_track_id)
-
-        # Pick wagons from this collection track
-        wagons_to_pickup = _find_wagons_for_retrofit(popupsim, collection_wagons)
-
+        wagons_to_pickup = yield from _pickup_and_couple_wagons(popupsim, loco, collection_track_id, collection_wagons)
         if not wagons_to_pickup:
             yield popupsim.locomotives.put(loco)
             yield popupsim.sim.delay(1.0)
             continue
-
-        # Couple wagons (use first wagon's coupler type for batch)
-        logger.debug('Loco %s coupling %d wagons', loco.locomotive_id, len(wagons_to_pickup))
-        first_wagon = wagons_to_pickup[0][0]
-        yield from couple_wagons(popupsim, loco, len(wagons_to_pickup), first_wagon.coupler_type)
-
-        # Group wagons by retrofit track destination
         wagons_by_retrofit = _group_wagons_by_retrofit_track(wagons_to_pickup)
-
-        # Deliver to each retrofit track
-        for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
-            # Remove from collection track
-            for wagon in retrofit_wagons:
-                popupsim.track_capacity.remove_wagon(collection_track_id, wagon.length)
-                wagon.status = WagonStatus.MOVING
-                wagon.source_track_id = collection_track_id
-                wagon.destination_track_id = retrofit_track_id
-                wagon.track_id = None
-
-            # Travel from collection to retrofit
-            from_track = loco.track_id
-            logger.info(
-                '🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
-                loco.locomotive_id,
-                from_track,
-                retrofit_track_id,
-                len(retrofit_wagons),
-            )
-            yield from move_locomotive(popupsim, loco, from_track, retrofit_track_id)
-
-            # Add wagons to retrofit track (still coupled to loco)
-            for wagon in retrofit_wagons:
-                popupsim.track_capacity.add_wagon(retrofit_track_id, wagon.length)
-                wagon.track_id = retrofit_track_id
-                wagon.source_track_id = None
-                wagon.destination_track_id = None
-                wagon.status = WagonStatus.MOVING  # Still coupled
-
-            # Decouple wagons at retrofit
-            logger.debug('Loco %s decoupling %d wagons', loco.locomotive_id, len(retrofit_wagons))
-            yield from decouple_wagons(popupsim, loco, len(retrofit_wagons))
-
-        # Return loco to parking (must happen before wagons are marked ready)
-        parking_track_id = parking_tracks[0].id
-        logger.debug('Loco %s returning to parking', loco.locomotive_id)
-        yield from move_locomotive(popupsim, loco, loco.track_id, parking_track_id)
-        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
-        yield from release_locomotive(popupsim, loco)
-
-        # Now mark all delivered wagons as ready and signal stores
-        current_time = popupsim.sim.current_time()
-        for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
-            for wagon in retrofit_wagons:
-                wagon.status = WagonStatus.ON_RETROFIT_TRACK
-                popupsim.metrics.record_event('wagon_delivered', {'wagon_id': wagon.wagon_id, 'time': current_time})
-                logger.info('Wagon %s ready for station at t=%.1f', wagon.wagon_id, current_time)
-
-            # Signal batch ready for this track
-            yield popupsim.wagons_ready_for_stations[retrofit_track_id].put(retrofit_wagons)
+        yield from _deliver_to_retrofit_tracks(popupsim, loco, collection_track_id, wagons_by_retrofit)
+        yield from _return_loco_and_signal(popupsim, loco, wagons_by_retrofit)
 
 
 def move_wagons_to_stations(popupsim: PopupSim) -> Generator[Any]:
