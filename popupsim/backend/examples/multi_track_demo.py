@@ -212,22 +212,29 @@ for track_id in ["retrofit_1", "retrofit_2"]:
 print(f"\nFinal Wagon Distribution (from wagons_queue):")
 wagons_by_track = {}
 for wagon in popup_sim.wagons_queue:
-    track = wagon.track_id or "unknown"
+    track = wagon.track_id or "in_transit"
     if track not in wagons_by_track:
         wagons_by_track[track] = []
-    wagons_by_track[track].append((wagon.wagon_id, wagon.status.value))
+    wagons_by_track[track].append((wagon.wagon_id, wagon.status.value, wagon.source_track_id, wagon.destination_track_id))
 
 for track_id, wagon_info in sorted(wagons_by_track.items()):
     print(f"  {track_id}: {len(wagon_info)} wagons")
-    for wagon_id, status in wagon_info:
-        print(f"    - {wagon_id} ({status})")
+    for wagon_id, status, source, destination in wagon_info:
+        if status == "moving" and source and destination:
+            print(f"    - {wagon_id} (moving: {source} -> {destination})")
+        else:
+            print(f"    - {wagon_id} ({status})")
 
 print(f"\nAll Train Wagons Status:")
 for train in popup_sim.scenario.trains:
     print(f"  {train.train_id}:")
     for wagon in train.wagons:
         in_queue = "in queue" if wagon in popup_sim.wagons_queue else "NOT in queue"
-        print(f"    - {wagon.wagon_id}: {wagon.status.value} on {wagon.track_id} ({in_queue})")
+        if wagon.status.value == "moving" and wagon.source_track_id and wagon.destination_track_id:
+            location = f"{wagon.source_track_id} -> {wagon.destination_track_id}"
+        else:
+            location = wagon.track_id or "unknown"
+        print(f"    - {wagon.wagon_id}: {wagon.status.value} on {location} ({in_queue})")
 
 print(f"\nLocomotive Status:")
 all_locos = {**popup_sim.locomotives.available_locomotives, **popup_sim.locomotives.occupied_locomotives}
