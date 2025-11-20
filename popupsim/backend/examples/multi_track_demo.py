@@ -242,6 +242,14 @@ for loco_id, loco in sorted(all_locos.items()):
     availability = "available" if loco_id in popup_sim.locomotives.available_locomotives else "occupied"
     print(f"  {loco_id}: {loco.status.value} at {loco.track_id} ({availability})")
 
+print(f"\n=== LOCOMOTIVE UTILIZATION ===")
+total_sim_time = sim.current_time()
+for loco_id, loco in sorted(all_locos.items()):
+    utilization = loco.get_utilization(total_sim_time)
+    print(f"\n{loco_id}:")
+    for status, percentage in sorted(utilization.items()):
+        print(f"  {status}: {percentage:.1f}%")
+
 # Print capacity timeline
 print(f"\n=== CAPACITY TIMELINE ===")
 
@@ -270,3 +278,12 @@ for event in retrofitted_events:
     action_symbol = '+' if event['action'] == 'ADD' else '-'
     pct = (event['occupancy'] / event['capacity'] * 100) if event['capacity'] > 0 else 0
     print(f"  t={event['time']:5.1f}min [{action_symbol}] {event['track']}: {event['length']:.0f}m -> {event['occupancy']:.0f}m/{event['capacity']:.0f}m ({pct:.0f}%)")
+
+print(f"\nParking Tracks:")
+parking_events = [e for e in capacity_events if e['track'].startswith('parking')]
+for event in parking_events:
+    action_symbol = '+' if event['action'] == 'ADD' else '-'
+    pct = (event['occupancy'] / event['capacity'] * 100) if event['capacity'] > 0 else 0
+    print(f"  t={event['time']:5.1f}min [{action_symbol}] {event['track']}: {event['length']:.0f}m -> {event['occupancy']:.0f}m/{event['capacity']:.0f}m ({pct:.0f}%)")
+
+

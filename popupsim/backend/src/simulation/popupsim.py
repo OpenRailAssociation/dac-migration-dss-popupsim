@@ -154,6 +154,9 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         if not scenario.locomotives:
             raise ValueError('Scenario must have at least one locomotive to simulate.')
         self.locomotives_queue: list[Locomotive] = scenario.locomotives
+        # Initialize status history for all locomotives
+        for loco in self.locomotives_queue:
+            loco.record_status_change(0.0, loco.status)
         if not scenario.trains:
             raise ValueError('Scenario must have at least one train to simulate.')
         self.trains_queue: list[Train] = scenario.trains
@@ -327,7 +330,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim):
         collection_wagons = wagons_by_track[collection_track_id]
 
         # Travel from loco position to collection track
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         route_to_collection = find_route(scenario.routes, loco.track_id, collection_track_id)
         if route_to_collection and route_to_collection.duration:
             logger.debug('Loco %s traveling to collection track %s', loco.locomotive_id, collection_track_id)
@@ -350,7 +353,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim):
             continue
 
         # Couple wagons
-        loco.status = LocoStatus.COUPLING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.COUPLING)
         coupling_time = len(wagons_to_pickup) * process_times.wagon_coupling_time
         logger.debug('Loco %s coupling %d wagons', loco.locomotive_id, len(wagons_to_pickup))
         yield popupsim.sim.delay(coupling_time)
@@ -373,7 +376,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim):
         # Deliver to each retrofit track
         for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
             # Travel from collection to retrofit
-            loco.status = LocoStatus.MOVING
+            loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
             route_to_retrofit = find_route(scenario.routes, loco.track_id, retrofit_track_id)
             if route_to_retrofit and route_to_retrofit.duration:
                 logger.debug('Loco %s traveling to retrofit %s with %d wagons', loco.locomotive_id, retrofit_track_id, len(retrofit_wagons))
@@ -388,7 +391,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim):
                 continue
 
             # Decouple wagons at retrofit
-            loco.status = LocoStatus.DECOUPLING
+            loco.record_status_change(popupsim.sim.current_time(), LocoStatus.DECOUPLING)
             decoupling_time = len(wagons_to_deliver) * process_times.wagon_decoupling_time
             logger.debug('Loco %s decoupling %d wagons to %d stations', loco.locomotive_id, len(wagons_to_deliver), available_stations)
             yield popupsim.sim.delay(decoupling_time)
@@ -404,14 +407,14 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim):
                 logger.info('Wagon %s moved to retrofit track %s (station occupied)', wagon.wagon_id, retrofit_track_id)
 
         # Return loco to parking
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         parking_track_id = parking_tracks[0].id
         route_to_parking = find_route(scenario.routes, loco.track_id, parking_track_id)
         if route_to_parking and route_to_parking.duration:
             logger.debug('Loco %s returning to parking', loco.locomotive_id)
             yield popupsim.sim.delay(route_to_parking.duration)
         loco.track_id = parking_track_id
-        loco.status = LocoStatus.PARKING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
         popupsim.locomotives.release_locomotive(loco)
 
 
@@ -499,7 +502,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim):
         wagons_to_pickup = retrofitted_by_track[retrofit_track_id]
 
         # Travel to retrofit track
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         route_to_retrofit = find_route(scenario.routes, loco.track_id, retrofit_track_id)
         if route_to_retrofit and route_to_retrofit.duration:
             logger.debug('Loco %s traveling to retrofit track %s for pickup', loco.locomotive_id, retrofit_track_id)
@@ -507,7 +510,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim):
         loco.track_id = retrofit_track_id
 
         # Couple wagons
-        loco.status = LocoStatus.COUPLING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.COUPLING)
         coupling_time = len(wagons_to_pickup) * process_times.wagon_coupling_time
         logger.debug('Loco %s coupling %d retrofitted wagons', loco.locomotive_id, len(wagons_to_pickup))
         yield popupsim.sim.delay(coupling_time)
@@ -523,7 +526,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim):
             logger.info('Station released on %s for wagon %s', retrofit_track_id, wagon.wagon_id)
 
         # Travel to retrofitted track
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         route_to_retrofitted = find_route(scenario.routes, retrofit_track_id, retrofitted_track.id)
         if route_to_retrofitted and route_to_retrofitted.duration:
             logger.debug('Loco %s traveling to retrofitted track with %d wagons', loco.locomotive_id, len(wagons_to_pickup))
@@ -531,7 +534,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim):
         loco.track_id = retrofitted_track.id
 
         # Decouple wagons
-        loco.status = LocoStatus.DECOUPLING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.DECOUPLING)
         decoupling_time = len(wagons_to_pickup) * process_times.wagon_decoupling_time
         logger.debug('Loco %s decoupling %d wagons at retrofitted track', loco.locomotive_id, len(wagons_to_pickup))
         yield popupsim.sim.delay(decoupling_time)
@@ -546,14 +549,14 @@ def pickup_retrofitted_wagons(popupsim: PopupSim):
             logger.info('Wagon %s moved to retrofitted track', wagon.wagon_id)
 
         # Return loco to parking
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         parking_track_id = parking_tracks[0].id
         route_to_parking = find_route(scenario.routes, loco.track_id, parking_track_id)
         if route_to_parking and route_to_parking.duration:
             logger.debug('Loco %s returning to parking', loco.locomotive_id)
             yield popupsim.sim.delay(route_to_parking.duration)
         loco.track_id = parking_track_id
-        loco.status = LocoStatus.PARKING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
         popupsim.locomotives.release_locomotive(loco)
 
 
@@ -596,7 +599,7 @@ def move_to_parking(popupsim: PopupSim):
             continue
 
         # Travel to retrofitted track
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         route_to_retrofitted = find_route(scenario.routes, loco.track_id, retrofitted_track.id)
         if route_to_retrofitted and route_to_retrofitted.duration:
             logger.debug('Loco %s traveling to retrofitted track', loco.locomotive_id)
@@ -631,7 +634,7 @@ def move_to_parking(popupsim: PopupSim):
             continue
 
         # Couple wagons
-        loco.status = LocoStatus.COUPLING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.COUPLING)
         coupling_time = len(wagons_to_move) * process_times.wagon_coupling_time
         logger.debug('Loco %s coupling %d wagons for parking', loco.locomotive_id, len(wagons_to_move))
         yield popupsim.sim.delay(coupling_time)
@@ -645,7 +648,7 @@ def move_to_parking(popupsim: PopupSim):
             wagon.track_id = None
 
         # Travel to parking track
-        loco.status = LocoStatus.MOVING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
         route_to_parking = find_route(scenario.routes, retrofitted_track.id, parking_track.id)
         if route_to_parking and route_to_parking.duration:
             logger.debug('Loco %s traveling to parking %s with %d wagons', loco.locomotive_id, parking_track.id, len(wagons_to_move))
@@ -653,7 +656,7 @@ def move_to_parking(popupsim: PopupSim):
         loco.track_id = parking_track.id
 
         # Decouple wagons
-        loco.status = LocoStatus.DECOUPLING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.DECOUPLING)
         decoupling_time = len(wagons_to_move) * process_times.wagon_decoupling_time
         logger.debug('Loco %s decoupling %d wagons at parking', loco.locomotive_id, len(wagons_to_move))
         yield popupsim.sim.delay(decoupling_time)
@@ -673,5 +676,5 @@ def move_to_parking(popupsim: PopupSim):
             current_parking_index = (current_parking_index + 1) % len(parking_tracks)
             logger.debug('Parking track %s full, switching to next', parking_track.id)
 
-        loco.status = LocoStatus.PARKING
+        loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
         popupsim.locomotives.release_locomotive(loco)
