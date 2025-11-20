@@ -20,109 +20,49 @@ logger = logging.getLogger('PopupSim')
 
 
 class LocomotivePool:
-    """Pool of locomotives for managing available locomotives in the simulation.
+    """Event-driven locomotive pool using SimPy Store.
 
-    This class manages a collection of locomotives, allowing for allocation
-    and release of locomotives as needed during the simulation.
+    Locomotives are managed via SimPy Store for blocking get/put operations.
+    This eliminates polling and provides proper event-driven resource allocation.
     """
 
-    def __init__(self, sim: SimulationAdapter, locomotives: list[Locomotive], poll_interval: float = 0.01) -> None:
-        self.available_locomotives: dict[str, Locomotive] = {}
+    def __init__(self, sim: SimulationAdapter, locomotives: list[Locomotive]) -> None:
+        self.sim = sim
+        # Create SimPy Store for event-driven locomotive management
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+        self.store: Any = simpy.Store(sim._env, capacity=len(locomotives))
+        # Put all locomotives in the store
         for loco in locomotives:
-            self.available_locomotives[loco.locomotive_id] = loco
-        self.occupied_locomotives: dict[str, Locomotive] = {}
-        self.poll = float(poll_interval)
-        self.sim = sim
+            self.store.put(loco)
 
-    # nested function to return a fresh generator every time it's called
-    def acquire(self) -> Generator[Any]:
-        def _acq() -> Generator[Any]:
-            while len(self.available_locomotives) >= 1:
-                yield self.sim.delay(self.poll)
-            locomotive = self.allocate_locomotive()
-            if locomotive:
-                self.occupied_locomotives[locomotive.locomotive_id] = locomotive
-
-        return _acq()
-
-    def allocate_locomotive(self) -> Locomotive | None:
-        """Allocate an available locomotive from the pool.
-
+    def get(self) -> Any:
+        """Get a locomotive from the pool (blocks until available).
+        
         Returns
         -------
-        Train | None
-            An available locomotive if one exists, otherwise None.
+        Any
+            SimPy Get event that yields a Locomotive when available.
         """
-        if not self.available_locomotives:
-            return None
-        key_of_last_loco = list(self.available_locomotives.keys())[-1]
-        locomotive = self.available_locomotives.pop(key_of_last_loco)
-        self.occupied_locomotives[locomotive.locomotive_id] = locomotive
-        return locomotive
+        return self.store.get()
 
-    def release_locomotive(self, locomotive: Locomotive) -> None:
-        """Release a locomotive back to the pool.
-
+    def put(self, locomotive: Locomotive) -> Any:
+        """Return a locomotive to the pool.
+        
         Parameters
         ----------
-        locomotive : Train
-            The locomotive to release back to the pool.
-        """
-        loco = self.occupied_locomotives.pop(locomotive.locomotive_id)
-        self.available_locomotives[loco.locomotive_id] = loco
-
-
-class WorkshopPool:
-    """Pool of workshops for managing available workshops in the simulation.
-
-    This class manages a collection of workshops, allowing for allocation
-    and release of workshops as needed during the simulation.
-    """
-
-    def __init__(self, sim: SimulationAdapter, workshops: list[Workshop], poll_interval: float = 0.01) -> None:
-        self.available_workshops: dict[str, Workshop] = {}
-        self.occupied_workshops: dict[str, Workshop] = {}
-        for workshop in workshops:
-            self.available_workshops[workshop.workshop_id] = workshop
-
-        self.poll = float(poll_interval)
-        self.sim = sim
-
-    # nested function to return a fresh generator every time it's called
-    def acquire(self) -> Generator[Any]:
-        def _acq() -> Generator[Any]:
-            while len(self.available_workshops) >= 1:
-                yield self.sim.delay(self.poll)
-            workshop = self.allocate_workshop()
-            if workshop:
-                self.occupied_workshops[workshop.workshop_id] = workshop
-
-        return _acq()
-
-    def allocate_workshop(self) -> Workshop | None:
-        """Allocate an available workshop from the pool.
-
+        locomotive : Locomotive
+            The locomotive to return to the pool.
+            
         Returns
         -------
-        Workshop | None
-            An available workshop if one exists, otherwise None.
+        Any
+            SimPy Put event.
         """
-        if not self.available_workshops:
-            return None
-        key_of_last_workshop = list(self.available_workshops.keys())[-1]
-        workshop = self.available_workshops.pop(key_of_last_workshop)
-        return workshop
+        return self.store.put(locomotive)
 
-    def release_workshop(self, workshop: Workshop) -> None:
-        """Release a workshop back to the pool.
 
-        Parameters
-        ----------
-        workshop : Workshop
-            The workshop to release back to the pool.
-        """
-        released_workshop = self.occupied_workshops.pop(workshop.workshop_id)
-        self.available_workshops[released_workshop.workshop_id] = released_workshop
+# WorkshopPool removed - workshops are managed via WorkshopCapacityManager
+# which tracks station availability per retrofit track
 
 
 class PopupSim:  # pylint: disable=too-few-public-methods
@@ -172,7 +112,6 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.workshops_queue: list[Workshop] = scenario.workshops
 
         self.locomotives = LocomotivePool(self.sim, self.locomotives_queue)
-        self.workshops = WorkshopPool(self.sim, self.workshops_queue)
 
         # Initialize track capacity management
         if scenario.tracks and scenario.topology:
@@ -351,11 +290,8 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(1.0)  # Wait 1 minute and check again
             continue
 
-        # Get available locomotive
-        loco = popupsim.locomotives.allocate_locomotive()
-        if not loco:
-            yield popupsim.sim.delay(1.0)
-            continue
+        # Get locomotive from pool (blocks until available)
+        loco = yield popupsim.locomotives.get()
 
         # Pick first collection track with wagons
         collection_track_id = list(wagons_by_track.keys())[0]
@@ -386,7 +322,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
                     break
 
         if not wagons_to_pickup:
-            popupsim.locomotives.release_locomotive(loco)
+            yield popupsim.locomotives.put(loco)
             yield popupsim.sim.delay(1.0)
             continue
 
@@ -466,7 +402,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(route_to_parking.duration)
         loco.track_id = parking_track_id
         loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
-        popupsim.locomotives.release_locomotive(loco)
+        yield popupsim.locomotives.put(loco)
 
 
 def move_wagons_to_stations(popupsim: PopupSim) -> Generator[Any]:
@@ -534,7 +470,11 @@ def move_wagons_to_stations(popupsim: PopupSim) -> Generator[Any]:
                 wagon.status = WagonStatus.RETROFITTING
                 logger.info('✓ Wagon %s arrived at workshop %s (station occupied)', wagon.wagon_id, workshop_id)
 
-        yield popupsim.sim.delay(0.5)  # Check frequently
+        # NOTE: Polling with 0.5-minute interval is acceptable for MVP:
+        # - Simulation time is cheap (not real-time)
+        # - Provides responsive station allocation
+        # - Simplifies coordination between processes
+        yield popupsim.sim.delay(0.5)
 
 
 def process_retrofit_work(popupsim: PopupSim) -> Generator[Any]:
@@ -573,6 +513,10 @@ def process_retrofit_work(popupsim: PopupSim) -> Generator[Any]:
                 # Schedule completion
                 popupsim.sim.run_process(complete_retrofit, popupsim, wagon, process_times.wagon_retrofit_time)
 
+        # NOTE: Polling with 1-minute interval is acceptable for MVP:
+        # - Matches business granularity (retrofit work is 30+ minutes)
+        # - Avoids complexity of event coordination
+        # - Simulation time is not a bottleneck
         yield popupsim.sim.delay(1.0)
 
 
@@ -653,11 +597,8 @@ def pickup_retrofitted_wagons(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(1.0)
             continue
 
-        # Get available locomotive
-        loco = popupsim.locomotives.allocate_locomotive()
-        if not loco:
-            yield popupsim.sim.delay(1.0)
-            continue
+        # Get locomotive from pool (blocks until available)
+        loco = yield popupsim.locomotives.get()
 
         # Pick first retrofit track with completed wagons
         retrofit_track_id = list(retrofitted_by_track.keys())[0]
@@ -721,7 +662,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(route_to_parking.duration)
         loco.track_id = parking_track_id
         loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
-        popupsim.locomotives.release_locomotive(loco)
+        yield popupsim.locomotives.put(loco)
 
 
 def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
@@ -774,11 +715,8 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(1.0)
             continue
 
-        # Get available locomotive
-        loco = popupsim.locomotives.allocate_locomotive()
-        if not loco:
-            yield popupsim.sim.delay(1.0)
-            continue
+        # Get locomotive from pool (blocks until available)
+        loco = yield popupsim.locomotives.get()
 
         # Travel to retrofitted track
         loco.record_status_change(popupsim.sim.current_time(), LocoStatus.MOVING)
@@ -799,7 +737,7 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
                 break
 
         if not parking_track:
-            popupsim.locomotives.release_locomotive(loco)
+            yield popupsim.locomotives.put(loco)
             yield popupsim.sim.delay(1.0)
             continue
 
@@ -811,7 +749,7 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
 
         if not wagons_to_move:
             current_parking_index = (current_parking_index + 1) % len(parking_tracks)
-            popupsim.locomotives.release_locomotive(loco)
+            yield popupsim.locomotives.put(loco)
             yield popupsim.sim.delay(1.0)
             continue
 
@@ -866,4 +804,4 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
             logger.debug('Parking track %s full, switching to next', parking_track.id)
 
         loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
-        popupsim.locomotives.release_locomotive(loco)
+        yield popupsim.locomotives.put(loco)
