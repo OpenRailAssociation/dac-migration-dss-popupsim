@@ -253,14 +253,12 @@ for train in popup_sim.scenario.trains:
         print(f'    - {wagon.wagon_id}: {wagon.status.value} on {location} ({in_queue})')
 
 print('\nLocomotive Status:')
-all_locos = {**popup_sim.locomotives.available_locomotives, **popup_sim.locomotives.occupied_locomotives}
-for loco_id, loco in sorted(all_locos.items()):
-    availability = 'available' if loco_id in popup_sim.locomotives.available_locomotives else 'occupied'
-    print(f'  {loco_id}: {loco.status.value} at {loco.track_id} ({availability})')
+for loco_id, loco in sorted(popup_sim.locomotives.all_locomotives.items()):
+    print(f'  {loco_id}: {loco.status.value} at {loco.track_id}')
 
 print('\n=== LOCOMOTIVE UTILIZATION ===')
 total_sim_time = sim.current_time()
-for loco_id, loco in sorted(all_locos.items()):
+for loco_id, loco in sorted(popup_sim.locomotives.all_locomotives.items()):
     utilization = loco.get_utilization(total_sim_time)
     print(f'\n{loco_id}:')
     for status, percentage in sorted(utilization.items()):

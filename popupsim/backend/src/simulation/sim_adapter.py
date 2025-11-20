@@ -125,6 +125,22 @@ class SimPyAdapter(SimulationAdapter):
 
         return simpy.Resource(environment, capacity)
 
+    def create_store(self, capacity: int) -> Any:
+        """Create a SimPy Store for resource pooling.
+        
+        Parameters
+        ----------
+        capacity : int
+            Maximum capacity of the store.
+            
+        Returns
+        -------
+        Any
+            SimPy Store instance.
+        """
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+        return simpy.Store(self._env, capacity=capacity)
+
     def current_time(self) -> float:
         """Get current simulation time as float (minutes since start).
 
