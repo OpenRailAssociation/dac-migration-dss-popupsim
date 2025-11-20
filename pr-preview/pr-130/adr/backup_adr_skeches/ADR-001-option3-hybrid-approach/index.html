@@ -1,0 +1,2018 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>ADR-001 Option 3: Hybrid Approach (Logging + Event Collection) - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-001-option-3-hybrid-approach-logging-event-collection" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR-001 Option 3: Hybrid Approach (Logging + Event Collection)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../mvp/architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Requirements
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Requirements
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Use Cases
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Konzept
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    MVP Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            MVP Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction & Goals
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Constraints
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Solution Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building Blocks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Runtime
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quality Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Risks & Technical Debt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Glossary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bibliography
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CI/CD
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metadata
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-and-problem-statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Context and Problem Statement
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context and Problem Statement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current State
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Question
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Design
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-principle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Principle
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-event-model-coreloggingeventspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Event Model (core/logging/events.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-console-logger-coreloggingconsolepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Console Logger (core/logging/console.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-event-collector-coreloggingcollectorpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Event Collector (core/logging/collector.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-exporters-coreloggingexporterspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Exporters (core/logging/exporters.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-usage-example-simulationenginepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Usage Example (simulation/engine.py)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-architecture-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Architecture Decision
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Responsibilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Responsibilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging-system-python-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging System (Python logging)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-collection-system-custom" class="md-nav__link">
+    <span class="md-ellipsis">
+      Event Collection System (Custom)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Flow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-design-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Design Choices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Choices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-separate-systems-not-integrated" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Separate Systems, Not Integrated
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-protocol-based-exporters" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Protocol-Based Exporters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-in-memory-collection-batch-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. In-Memory Collection, Batch Export
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-event-dataclass" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Event Dataclass
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-argumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detailed Argumentation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed Argumentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advantages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-complete-independence" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Complete Independence ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-right-tool-for-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Right Tool for Job ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-easy-to-extend" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Easy to Extend ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-no-coupling" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. No Coupling ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-clear-intent" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Clear Intent ✅
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disadvantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disadvantages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Disadvantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-two-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Two Systems ⚠️
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-events-processed-twice" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Events Processed Twice ⚠️
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-slightly-more-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Slightly More Code ⚠️
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verbose-flag-advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verbose Flag Advantages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verbose Flag Advantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-clean-separation" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Clean Separation ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-simple-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Simple Configuration ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-no-side-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. No Side Effects ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-clear-intent" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Clear Intent ✅
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verbose-flag-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verbose Flag Handling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Path
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Checklist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conclusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strengths" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strengths
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weaknesses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Weaknesses
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-001-option-3-hybrid-approach-logging-event-collection">ADR-001 Option 3: Hybrid Approach (Logging + Event Collection)<a class="headerlink" href="#adr-001-option-3-hybrid-approach-logging-event-collection" title="Permanent link">&para;</a></h1>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Status</strong>: Recommended</li>
+<li><strong>Date</strong>: 2024-01-15</li>
+<li><strong>Decision Makers</strong>: Backend Development Team</li>
+<li><strong>Related Options</strong>: <a href="../ADR-001-option1-single-logger-multiple-handlers/">Option 1</a>, <a href="../ADR-001-option2-multiple-loggers/">Option 2</a></li>
+</ul>
+<h2 id="context-and-problem-statement">Context and Problem Statement<a class="headerlink" href="#context-and-problem-statement" title="Permanent link">&para;</a></h2>
+<h3 id="current-state">Current State<a class="headerlink" href="#current-state" title="Permanent link">&para;</a></h3>
+<p>PopUp-Sim simulates freight rail DAC migration scenarios. Currently, the simulation runs without providing runtime visibility to users.</p>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<p>Implement a dual-output logging system that provides:</p>
+<ol>
+<li><strong>Console feedback</strong> during simulation runs</li>
+<li>Track simulation progress</li>
+<li>Display events as they occur</li>
+<li>
+<p>Controlled by <code>--verbose</code> flag from main.py</p>
+</li>
+<li>
+<p><strong>Structured data export</strong> (CSV/JSON) for post-simulation dashboard visualization</p>
+</li>
+<li>Complete event history</li>
+<li>Machine-readable format</li>
+<li>Independent of console verbosity</li>
+</ol>
+<p><strong>Key Constraint</strong>: Both outputs must be independently configurable to allow flexible user customization.</p>
+<h3 id="decision-question">Decision Question<a class="headerlink" href="#decision-question" title="Permanent link">&para;</a></h3>
+<p>Should we <strong>separate logging from data export</strong> by using Python logging for human-readable output and a custom event collection system for structured data?</p>
+<h2 id="architecture-design">Architecture Design<a class="headerlink" href="#architecture-design" title="Permanent link">&para;</a></h2>
+<h3 id="system-overview">System Overview<a class="headerlink" href="#system-overview" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                        PopupSim                              │
+│                                                              │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │         Simulation Event Emission                   │    │
+│  │              _emit_event()                          │    │
+│  └──────────────────┬──────────────────────────────────┘    │
+│                     │                                        │
+│         ┌───────────┴───────────┐                           │
+│         │                       │                           │
+│         ▼                       ▼                           │
+│  ┌─────────────┐         ┌─────────────┐                   │
+│  │   Console   │         │    Event    │                   │
+│  │   Logger    │         │  Collector  │                   │
+│  │  (logging)  │         │  (custom)   │                   │
+│  └──────┬──────┘         └──────┬──────┘                   │
+│         │                       │                           │
+│         ▼                       ▼                           │
+│    ┌────────┐           ┌──────────────┐                   │
+│    │ stdout │           │  Exporters   │                   │
+│    └────────┘           │ CSV | JSON   │                   │
+│                         └──────┬───────┘                    │
+│                                ▼                            │
+│                         ┌──────────────┐                    │
+│                         │  Data Files  │                    │
+│                         └──────────────┘                    │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="key-principle">Key Principle<a class="headerlink" href="#key-principle" title="Permanent link">&para;</a></h3>
+<p><strong>Separation of Concerns</strong>: Use each technology for what it's designed for:
+- <strong>Python logging</strong>: Human-readable console/file output
+- <strong>Custom event collector</strong>: Structured data export (CSV/JSON)</p>
+<p>These are fundamentally different concerns and should be separate systems.</p>
+<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
+<h3 id="1-event-model-coreloggingeventspy">1. Event Model (<code>core/logging/events.py</code>)<a class="headerlink" href="#1-event-model-coreloggingeventspy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Simulation event models.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">asdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulation event.&quot;&quot;&quot;</span>
+
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">event_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">location</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="2-console-logger-coreloggingconsolepy">2. Console Logger (<code>core/logging/console.py</code>)<a class="headerlink" href="#2-console-logger-coreloggingconsolepy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Console logging configuration.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_console_logger</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;PopupSim&#39;</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure console logger.&quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">level</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logger</span>
+</code></pre></div>
+<h3 id="3-event-collector-coreloggingcollectorpy">3. Event Collector (<code>core/logging/collector.py</code>)<a class="headerlink" href="#3-event-collector-coreloggingcollectorpy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Event collection system for structured data export.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationEvent</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DataExporter</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol for data exporters.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">],</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export events to file.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EventCollector</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Collects simulation events for structured data export.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize event collector.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">collect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">SimulationEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Collect an event.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exporter</span><span class="p">:</span> <span class="n">DataExporter</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export collected events.&quot;&quot;&quot;</span>
+        <span class="n">exporter</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear collected events.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="4-exporters-coreloggingexporterspy">4. Exporters (<code>core/logging/exporters.py</code>)<a class="headerlink" href="#4-exporters-coreloggingexporterspy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Data exporters for simulation events.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationEvent</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CSVExporter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Export events to CSV format.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">],</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export events to CSV file.&quot;&quot;&quot;</span>
+        <span class="n">output_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">events</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">JSONExporter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Export events to JSON format.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">],</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export events to JSON file.&quot;&quot;&quot;</span>
+        <span class="n">output_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">([</span><span class="n">event</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">],</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="5-usage-example-simulationenginepy">5. Usage Example (<code>simulation/engine.py</code>)<a class="headerlink" href="#5-usage-example-simulationenginepy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Simulation engine with hybrid logging.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">core.logging.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_console_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">core.logging.collector</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventCollector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">core.logging.exporters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CSVExporter</span><span class="p">,</span> <span class="n">JSONExporter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">core.logging.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationEvent</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationEngine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulation engine.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">),</span>
+        <span class="n">console_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">csv_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">json_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize simulation engine.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">output_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span> <span class="o">=</span> <span class="n">setup_console_logger</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span> <span class="k">if</span> <span class="n">console_enabled</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span> <span class="o">=</span> <span class="n">EventCollector</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_enabled</span> <span class="o">=</span> <span class="n">csv_enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">json_enabled</span> <span class="o">=</span> <span class="n">json_enabled</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_emit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">SimulationEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Emit event to both logger and collector.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run simulation.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting simulation...&quot;</span><span class="p">)</span>
+
+        <span class="n">event</span> <span class="o">=</span> <span class="n">SimulationEvent</span><span class="p">(</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">event_type</span><span class="o">=</span><span class="s1">&#39;train_arrival&#39;</span><span class="p">,</span>
+            <span class="n">entity_id</span><span class="o">=</span><span class="s1">&#39;TRAIN-001&#39;</span><span class="p">,</span>
+            <span class="n">location</span><span class="o">=</span><span class="s1">&#39;STATION-A&#39;</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;arrived&#39;</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="mf">120.0</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_emit_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Simulation complete&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Export collected data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
+                <span class="n">CSVExporter</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;events.csv&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
+                <span class="n">JSONExporter</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;events.json&#39;</span>
+            <span class="p">)</span>
+</code></pre></div>
+<h2 id="design-decisions">Design Decisions<a class="headerlink" href="#design-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="core-architecture-decision">Core Architecture Decision<a class="headerlink" href="#core-architecture-decision" title="Permanent link">&para;</a></h3>
+<p><strong>Use TWO independent systems</strong>:
+1. <strong>Python logging</strong> (<code>logging.Logger</code>) for console/file output
+2. <strong>Custom EventCollector</strong> for structured data export</p>
+<h3 id="system-responsibilities">System Responsibilities<a class="headerlink" href="#system-responsibilities" title="Permanent link">&para;</a></h3>
+<h4 id="logging-system-python-logging">Logging System (Python logging)<a class="headerlink" href="#logging-system-python-logging" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Console output for users</li>
+<li>File logs for developers</li>
+<li>Human-readable messages</li>
+<li>Controlled by verbose/debug flags</li>
+</ul>
+<h4 id="event-collection-system-custom">Event Collection System (Custom)<a class="headerlink" href="#event-collection-system-custom" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Collect SimulationEvent objects</li>
+<li>Export to CSV/JSON formats</li>
+<li>Structured data for analysis</li>
+<li>Independent of logging configuration</li>
+</ul>
+<h3 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">Simulation</span> <span class="n">Event</span> <span class="err">→</span> <span class="n">_emit_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                      <span class="err">↓</span>
+        <span class="err">┌─────────────┼─────────────┐</span>
+        <span class="err">↓</span>                       <span class="err">↓</span>
+   <span class="n">LOGGING</span> <span class="n">SYSTEM</span>        <span class="n">EVENT</span> <span class="n">COLLECTION</span>
+        <span class="err">↓</span>                       <span class="err">↓</span>
+   <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>         <span class="n">collector</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="err">↓</span>                       <span class="err">↓</span>
+     <span class="n">stdout</span>                  <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">()</span>
+                                 <span class="err">↓</span>
+                          <span class="n">exporters</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+                                 <span class="err">↓</span>
+                          <span class="n">CSV</span><span class="o">/</span><span class="n">JSON</span> <span class="n">files</span>
+</code></pre></div>
+<h3 id="key-design-choices">Key Design Choices<a class="headerlink" href="#key-design-choices" title="Permanent link">&para;</a></h3>
+<h4 id="1-separate-systems-not-integrated">1. Separate Systems, Not Integrated<a class="headerlink" href="#1-separate-systems-not-integrated" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: Logging and data collection are completely separate.</p>
+<p><strong>Rationale</strong>:
+- Logging is for human consumption
+- Data export is for machine consumption
+- Different purposes = different systems
+- No forced integration</p>
+<p><strong>Benefit</strong>: Each system can evolve independently.</p>
+<h4 id="2-protocol-based-exporters">2. Protocol-Based Exporters<a class="headerlink" href="#2-protocol-based-exporters" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: Use Protocol (typing.Protocol) for exporter interface.</p>
+<p><strong>Rationale</strong>:
+- Type-safe without inheritance
+- Easy to add new exporters
+- Duck typing with type checking
+- Follows Python best practices</p>
+<p><strong>Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DataExporter</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">],</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="o">...</span>
+</code></pre></div></p>
+<h4 id="3-in-memory-collection-batch-export">3. In-Memory Collection, Batch Export<a class="headerlink" href="#3-in-memory-collection-batch-export" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: Collect events in memory, export at end.</p>
+<p><strong>Rationale</strong>:
+- Simple implementation
+- Fast collection (list.append is O(1))
+- No file I/O during simulation
+- Export happens after simulation completes</p>
+<p><strong>Trade-off</strong>: Memory usage for large simulations (acceptable for 10,000 events).</p>
+<h4 id="4-event-dataclass">4. Event Dataclass<a class="headerlink" href="#4-event-dataclass" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: Use @dataclass for SimulationEvent.</p>
+<p><strong>Rationale</strong>:
+- Automatic <strong>init</strong>, <strong>repr</strong>, <strong>eq</strong>
+- Type hints enforced
+- Easy to convert to dict with asdict()
+- Immutable with frozen=True (optional)</p>
+<p><strong>Benefit</strong>: Less boilerplate, more maintainable.</p>
+<h2 id="detailed-argumentation">Detailed Argumentation<a class="headerlink" href="#detailed-argumentation" title="Permanent link">&para;</a></h2>
+<h3 id="advantages">Advantages<a class="headerlink" href="#advantages" title="Permanent link">&para;</a></h3>
+<h4 id="1-complete-independence">1. Complete Independence ✅<a class="headerlink" href="#1-complete-independence" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Logging and data export are fully decoupled.</p>
+<p><strong>Impact</strong>:
+- Console logger can be enabled/disabled independently
+- Data export can be enabled/disabled independently
+- Verbose flag affects only console
+- Debug flag affects only logging
+- No interference between systems</p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Console off, data export on</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">SimulationEngine</span><span class="p">(</span>
+    <span class="n">console_enabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># No console output</span>
+    <span class="n">csv_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># Still get CSV</span>
+    <span class="n">json_enabled</span><span class="o">=</span><span class="kc">True</span>       <span class="c1"># Still get JSON</span>
+<span class="p">)</span>
+</code></pre></div></p>
+<h4 id="2-right-tool-for-job">2. Right Tool for Job ✅<a class="headerlink" href="#2-right-tool-for-job" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Each system does what it's designed for.</p>
+<p><strong>Impact</strong>:
+- Logging module used for logging (its purpose)
+- Custom collector used for data collection (its purpose)
+- No conceptual mismatch
+- Code expresses intent clearly</p>
+<p><strong>Clarity</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Clear: this is logging</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting simulation...&quot;</span><span class="p">)</span>
+
+<span class="c1"># Clear: this is data collection</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</code></pre></div></p>
+<h4 id="3-easy-to-extend">3. Easy to Extend ✅<a class="headerlink" href="#3-easy-to-extend" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Add new exporters without touching logging.</p>
+<p><strong>Impact</strong>:
+- New exporter = new class implementing Protocol
+- No changes to logging system
+- No changes to event collector
+- Just add new exporter class</p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Add Parquet exporter</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParquetExporter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">],</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Implementation</span>
+        <span class="k">pass</span>
+
+<span class="c1"># Use it</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">ParquetExporter</span><span class="p">(),</span> <span class="n">output_path</span><span class="p">)</span>
+</code></pre></div></p>
+<h4 id="4-no-coupling">4. No Coupling ✅<a class="headerlink" href="#4-no-coupling" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Systems don't interfere with each other.</p>
+<p><strong>Impact</strong>:
+- Logging changes don't affect data export
+- Data export changes don't affect logging
+- Can test each system independently
+- Can replace either system without affecting the other</p>
+<p><strong>Independence</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Change logging format - data export unaffected</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">setup_console_logger</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Changed</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>  <span class="c1"># Still works exactly the same</span>
+</code></pre></div></p>
+<h4 id="5-clear-intent">5. Clear Intent ✅<a class="headerlink" href="#5-clear-intent" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Code clearly shows what's logging vs data collection.</p>
+<p><strong>Impact</strong>:
+- Easy to understand for new developers
+- No confusion about purpose
+- Self-documenting code
+- Follows principle of least surprise</p>
+<p><strong>Readability</strong>:
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_emit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">SimulationEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Logging: human-readable message</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Data collection: structured event</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="disadvantages">Disadvantages<a class="headerlink" href="#disadvantages" title="Permanent link">&para;</a></h3>
+<h4 id="1-two-systems">1. Two Systems ⚠️<a class="headerlink" href="#1-two-systems" title="Permanent link">&para;</a></h4>
+<p><strong>Trade-off</strong>: More code to maintain (two separate systems).</p>
+<p><strong>Impact</strong>:
+- Two codebases instead of one
+- Two sets of tests
+- Two systems to understand
+- More files in project</p>
+<p><strong>Mitigation</strong>:
+- Each system is simpler than integrated solution
+- Clear separation makes maintenance easier
+- Total complexity is lower</p>
+<p><strong>Reality</strong>: This is a feature, not a bug. Separation of concerns is good design.</p>
+<h4 id="2-events-processed-twice">2. Events Processed Twice ⚠️<a class="headerlink" href="#2-events-processed-twice" title="Permanent link">&para;</a></h4>
+<p><strong>Trade-off</strong>: Each event sent to both logger and collector.</p>
+<p><strong>Impact</strong>:
+- Two function calls per event: logger.info() + collector.collect()
+- Appears to be "duplicate work"
+- Both operations are simple and fast</p>
+<h4 id="3-slightly-more-code">3. Slightly More Code ⚠️<a class="headerlink" href="#3-slightly-more-code" title="Permanent link">&para;</a></h4>
+<p><strong>Trade-off</strong>: Two implementations instead of one.</p>
+<p><strong>Impact</strong>:
+- More lines of code
+- More files to navigate
+- Slightly larger codebase</p>
+<p><strong>Benefit</strong>:
+- Each implementation is simpler
+- Easier to understand individually
+- Lower cognitive load per component</p>
+<h3 id="verbose-flag-advantages">Verbose Flag Advantages<a class="headerlink" href="#verbose-flag-advantages" title="Permanent link">&para;</a></h3>
+<h4 id="1-clean-separation">1. Clean Separation ✅<a class="headerlink" href="#1-clean-separation" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Verbose only affects console logger, never data export.</p>
+<p><strong>Impact</strong>:
+- Data export files are always consistent
+- CSV/JSON format never changes
+- Dashboard can rely on stable format
+- No surprises in exported data</p>
+<p><strong>Guarantee</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Verbose or not, CSV/JSON are IDENTICAL</span>
+<span class="n">engine1</span> <span class="o">=</span> <span class="n">SimulationEngine</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">engine2</span> <span class="o">=</span> <span class="n">SimulationEngine</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Both produce identical events.csv and events.json</span>
+</code></pre></div></p>
+<h4 id="2-simple-configuration">2. Simple Configuration ✅<a class="headerlink" href="#2-simple-configuration" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Single parameter passed to console logger setup.</p>
+<p><strong>Impact</strong>:
+- Easy to understand
+- Easy to implement
+- No complex flag passing
+- Clear code flow</p>
+<p><strong>Simplicity</strong>:
+<div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span> <span class="o">=</span> <span class="n">setup_console_logger</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+<span class="c1"># That&#39;s it. Event collector doesn&#39;t even know about verbose.</span>
+</code></pre></div></p>
+<h4 id="3-no-side-effects">3. No Side Effects ✅<a class="headerlink" href="#3-no-side-effects" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Event collector completely unaffected by verbose mode.</p>
+<p><strong>Impact</strong>:
+- Data export is deterministic
+- No hidden dependencies
+- Easy to reason about
+- Testable independently</p>
+<p><strong>Independence</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Verbose affects this</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>  <span class="c1"># Format changes</span>
+
+<span class="c1"># Verbose does NOT affect this</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">event_collector</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>  <span class="c1"># Always the same</span>
+</code></pre></div></p>
+<h4 id="4-clear-intent">4. Clear Intent ✅<a class="headerlink" href="#4-clear-intent" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Verbose is for human output, data export remains structured.</p>
+<p><strong>Impact</strong>:
+- Matches user expectations
+- Verbose = more detail for humans
+- Data export = always complete for machines
+- No confusion about purpose</p>
+<h2 id="verbose-flag-handling">Verbose Flag Handling<a class="headerlink" href="#verbose-flag-handling" title="Permanent link">&para;</a></h2>
+<p>The <code>--verbose</code> flag from main.py affects <strong>only the console logger</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Non-verbose console output</span>
+<span class="n">INFO</span> <span class="o">-</span> <span class="n">Starting</span> <span class="n">simulation</span><span class="o">...</span>
+<span class="n">INFO</span> <span class="o">-</span> <span class="n">train_arrival</span><span class="p">:</span> <span class="n">TRAIN</span><span class="o">-</span><span class="mi">001</span>
+<span class="n">INFO</span> <span class="o">-</span> <span class="n">Simulation</span> <span class="n">complete</span>
+
+<span class="c1"># Verbose console output</span>
+<span class="mi">2024</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">15</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">45</span> <span class="o">-</span> <span class="n">INFO</span> <span class="o">-</span> <span class="n">Starting</span> <span class="n">simulation</span><span class="o">...</span>
+<span class="mi">2024</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">15</span> <span class="mi">14</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">46</span> <span class="o">-</span> <span class="n">INFO</span> <span class="o">-</span> <span class="n">train_arrival</span><span class="p">:</span> <span class="n">TRAIN</span><span class="o">-</span><span class="mi">001</span>
+<span class="mi">2024</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">15</span> <span class="mi">14</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">12</span> <span class="o">-</span> <span class="n">INFO</span> <span class="o">-</span> <span class="n">Simulation</span> <span class="n">complete</span>
+
+<span class="c1"># Data export (ALWAYS the same, unaffected by verbose)</span>
+<span class="n">events</span><span class="o">.</span><span class="n">csv</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span><span class="n">event_type</span><span class="p">,</span><span class="n">entity_id</span><span class="p">,</span><span class="n">location</span><span class="p">,</span><span class="n">status</span><span class="p">,</span><span class="n">duration</span>
+<span class="n">events</span><span class="o">.</span><span class="n">json</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;train_arrival&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">}]</span>
+</code></pre></div>
+<p><strong>Key Benefit</strong>: Verbose flag has <strong>zero impact</strong> on data export. CSV/JSON files remain consistent regardless of console verbosity.</p>
+<h2 id="migration-path">Migration Path<a class="headerlink" href="#migration-path" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Setup</strong>: Create <code>core/logging/</code> with events.py, console.py, collector.py, exporters.py</li>
+<li><strong>Integration</strong>: Connect to main.py (verbose/debug flags) and SimulationEngine</li>
+<li><strong>Migration</strong>: Replace print() with logger.info(), add _emit_event() for data collection</li>
+<li><strong>Validation</strong>: Verify system independence and verbose flag doesn't affect data export</li>
+</ol>
+<h2 id="implementation-checklist">Implementation Checklist<a class="headerlink" href="#implementation-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Create <code>core/logging/</code> directory structure</li>
+<li>[ ] Implement <code>events.py</code> with SimulationEvent dataclass</li>
+<li>[ ] Implement <code>console.py</code> with setup_console_logger()</li>
+<li>[ ] Implement <code>collector.py</code> with EventCollector class</li>
+<li>[ ] Implement <code>exporters.py</code> with CSVExporter and JSONExporter</li>
+<li>[ ] Integrate with main.py CLI (verbose, debug flags)</li>
+<li>[ ] Update SimulationEngine with console_logger and event_collector</li>
+<li>[ ] Implement _emit_event() method in SimulationEngine</li>
+<li>[ ] Replace print() with logger.info() and _emit_event()</li>
+<li>[ ] Verify with: <code>uv run ruff format . &amp;&amp; uv run mypy backend/src/ &amp;&amp; uv run pytest</code></li>
+</ul>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<h3 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h3>
+<p>This approach provides <strong>complete separation of concerns</strong> by using:
+- <strong>Python logging</strong> for human-readable console/file output
+- <strong>Custom event collection</strong> for structured data export (CSV/JSON)</p>
+<p>These are fundamentally different concerns and deserve separate systems.</p>
+<h3 id="strengths">Strengths<a class="headerlink" href="#strengths" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Complete independence between logging and data export</li>
+<li>✅ Right tool for the job (logging for logs, custom for data)</li>
+<li>✅ Easy to extend with new exporters</li>
+<li>✅ No coupling between systems</li>
+<li>✅ Optimal performance for each use case</li>
+<li>✅ Clear code intent</li>
+<li>✅ Verbose flag cleanly handled (affects only console)</li>
+<li>✅ Data export always consistent</li>
+<li>✅ Simple testing (test each system independently)</li>
+<li>✅ Flexible configuration</li>
+</ul>
+<h3 id="weaknesses">Weaknesses<a class="headerlink" href="#weaknesses" title="Permanent link">&para;</a></h3>
+<ul>
+<li>⚠️ Two systems to maintain (but each is simpler)</li>
+<li>⚠️ Events processed twice (but both operations are fast)</li>
+<li>⚠️ Slightly more code (but better organized)</li>
+</ul>
+<h3 id="recommendation">Recommendation<a class="headerlink" href="#recommendation" title="Permanent link">&para;</a></h3>
+<p>This is the <strong>preferred option</strong> for PopUp-Sim.</p>
+<p><strong>Use this option because</strong>:
+- ✅ Clean separation of concerns
+- ✅ Each system does what it's designed for
+- ✅ Easy to understand and maintain
+- ✅ Flexible and extensible
+- ✅ Verbose flag handled correctly
+- ✅ Data export is deterministic
+- ✅ Performance is excellent
+- ✅ Testing is straightforward
+- ✅ Follows Python best practices
+- ✅ Future-proof architecture</p>
+<p><strong>This option provides</strong>:
+1. <strong>For Users</strong>: Clear console output with optional verbose mode
+2. <strong>For Dashboard Team</strong>: Consistent CSV/JSON data, unaffected by console settings
+3. <strong>For Developers</strong>: Clean architecture, easy to extend, simple to test
+4. <strong>For Project</strong>: Maintainable code, follows standards, type-safe</p>
+<h3 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Review this ADR with team</li>
+<li>Get approval from stakeholders</li>
+<li>Begin Phase 1 implementation</li>
+<li>Follow migration path outlined above</li>
+<li>Monitor and iterate based on feedback</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

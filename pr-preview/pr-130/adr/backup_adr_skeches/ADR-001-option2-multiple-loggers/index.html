@@ -1,0 +1,1783 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>ADR-001 Option 2: Multiple Independent Loggers - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-001-option-2-multiple-independent-loggers" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR-001 Option 2: Multiple Independent Loggers
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../mvp/architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Requirements
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Requirements
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Use Cases
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Konzept
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    MVP Architecture
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            MVP Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction & Goals
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Constraints
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Context
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Solution Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building Blocks
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Runtime
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture Decisions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quality Requirements
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Risks & Technical Debt
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Glossary
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../mvp/architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bibliography
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CI/CD
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metadata
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-and-problem-statement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Context and Problem Statement
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context and Problem Statement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current State
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Question
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Design
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-principle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Principle
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-event-model-coreloggingeventspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Event Model (core/logging/events.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-logger-manager-coreloggingmanagerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Logger Manager (core/logging/manager.py)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design Decisions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-architecture-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Architecture Decision
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logger-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logger Responsibilities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Flow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-design-choices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Design Choices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Choices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-logger-namespace-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Logger Namespace Hierarchy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-propagation-disabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Propagation Disabled
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-direct-file-writing-for-csvjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Direct File Writing for CSV/JSON
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-manager-class-coordination" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Manager Class Coordination
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-argumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Detailed Argumentation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detailed Argumentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#advantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advantages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-complete-independence" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Complete Independence ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-clear-separation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Clear Separation ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-flexible-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Flexible Configuration ✅
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-namespace-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Namespace Isolation ✅
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disadvantages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disadvantages
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Disadvantages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-still-coupled-to-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Still Coupled to Logging ❌
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-configuration-complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Configuration Complexity ❌
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-propagation-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Propagation Issues ❌
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-awkward-data-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Awkward Data Export ❌
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-verbose-flag-complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Verbose Flag Complexity ❌
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verbose-flag-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verbose Flag Handling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Path
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Checklist
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conclusion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strengths" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strengths
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weaknesses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Weaknesses
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-001-option-2-multiple-independent-loggers">ADR-001 Option 2: Multiple Independent Loggers<a class="headerlink" href="#adr-001-option-2-multiple-independent-loggers" title="Permanent link">&para;</a></h1>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Status</strong>: Considered</li>
+<li><strong>Date</strong>: 2024-01-15</li>
+<li><strong>Decision Makers</strong>: Backend Development Team</li>
+<li><strong>Related Options</strong>: <a href="../ADR-001-option1-single-logger-multiple-handlers/">Option 1</a>, <a href="../ADR-001-option3-hybrid-approach/">Option 3</a></li>
+</ul>
+<h2 id="context-and-problem-statement">Context and Problem Statement<a class="headerlink" href="#context-and-problem-statement" title="Permanent link">&para;</a></h2>
+<h3 id="current-state">Current State<a class="headerlink" href="#current-state" title="Permanent link">&para;</a></h3>
+<p>PopUp-Sim simulates freight rail DAC migration scenarios. Currently, the simulation runs without providing runtime visibility to users.</p>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<p>Implement a dual-output logging system that provides:</p>
+<ol>
+<li><strong>Console feedback</strong> during simulation runs</li>
+<li>Track simulation progress</li>
+<li>Display events as they occur</li>
+<li>
+<p>Controlled by <code>--verbose</code> flag from main.py</p>
+</li>
+<li>
+<p><strong>Structured data export</strong> (CSV/JSON) for post-simulation dashboard visualization</p>
+</li>
+<li>Complete event history</li>
+<li>Machine-readable format</li>
+<li>Independent of console verbosity</li>
+</ol>
+<p><strong>Key Constraint</strong>: Both outputs must be independently configurable to allow flexible user customization.</p>
+<h3 id="decision-question">Decision Question<a class="headerlink" href="#decision-question" title="Permanent link">&para;</a></h3>
+<p>Should we use <strong>multiple independent logger instances</strong>, each dedicated to a specific output purpose?</p>
+<h2 id="architecture-design">Architecture Design<a class="headerlink" href="#architecture-design" title="Permanent link">&para;</a></h2>
+<h3 id="system-overview">System Overview<a class="headerlink" href="#system-overview" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                   Simulation Code                            │
+│                                                              │
+│                  emit_event(event)                           │
+│                         │                                    │
+│         ┌───────────────┼───────────────┬──────────────┐    │
+│         │               │               │              │    │
+│         ▼               ▼               ▼              ▼    │
+│  ┌─────────────┐ ┌─────────────┐ ┌──────────┐ ┌──────────┐│
+│  │   LOGGER    │ │   LOGGER    │ │  LOGGER  │ │  LOGGER  ││
+│  │  &#39;console&#39;  │ │   &#39;file&#39;    │ │  &#39;csv&#39;   │ │  &#39;json&#39;  ││
+│  │             │ │             │ │          │ │          ││
+│  │ propagate=  │ │ propagate=  │ │propagate=│ │propagate=││
+│  │   False     │ │   False     │ │  False   │ │  False   ││
+│  └──────┬──────┘ └──────┬──────┘ └────┬─────┘ └────┬─────┘│
+│         │               │              │            │      │
+│         ▼               ▼              ▼            ▼      │
+│  ┌──────────┐   ┌──────────┐   ┌──────────┐ ┌──────────┐ │
+│  │ Console  │   │   File   │   │   CSV    │ │   JSON   │ │
+│  │ Handler  │   │ Handler  │   │  Writer  │ │ Collector│ │
+│  └────┬─────┘   └────┬─────┘   └────┬─────┘ └────┬─────┘ │
+│       │              │              │            │        │
+│       ▼              ▼              ▼            ▼        │
+│   stdout        app.log       events.csv   events.json   │
+└─────────────────────────────────────────────────────────────┘
+
+Key: FOUR independent loggers, each with its own handler
+</code></pre></div>
+<h3 id="key-principle">Key Principle<a class="headerlink" href="#key-principle" title="Permanent link">&para;</a></h3>
+<p><strong>MULTIPLE independent logger instances</strong> (PopupSim.console, PopupSim.file, PopupSim.csv, PopupSim.json). Each logger is completely separate with its own configuration. Code must explicitly call each logger.</p>
+<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
+<h3 id="1-event-model-coreloggingeventspy">1. Event Model (<code>core/logging/events.py</code>)<a class="headerlink" href="#1-event-model-coreloggingeventspy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Simulation event models.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">asdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulation event.&quot;&quot;&quot;</span>
+
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">event_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">location</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_console_message</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format for console output.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">event_type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_csv_row</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format as CSV row.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">event_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to dictionary.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="2-logger-manager-coreloggingmanagerpy">2. Logger Manager (<code>core/logging/manager.py</code>)<a class="headerlink" href="#2-logger-manager-coreloggingmanagerpy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Multi-logger management system.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationEvent</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LoggerManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages multiple independent loggers.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">),</span>
+        <span class="n">console_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">csv_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">json_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize logger manager.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">output_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_console_logger</span><span class="p">()</span> <span class="k">if</span> <span class="n">console_enabled</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_file_logger</span><span class="p">()</span>
+
+        <span class="c1"># CSV setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_enabled</span> <span class="o">=</span> <span class="n">csv_enabled</span>
+        <span class="k">if</span> <span class="n">csv_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;events.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_file</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;event_type&#39;</span><span class="p">,</span> <span class="s1">&#39;entity_id&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;duration&#39;</span><span class="p">])</span>
+
+        <span class="c1"># JSON setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">json_enabled</span> <span class="o">=</span> <span class="n">json_enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">json_events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_console_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup console logger.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.console&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">logger</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_file_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup file logger.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.file&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;simulation.log&#39;</span><span class="p">)</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">logger</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">SimulationEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log event to all enabled loggers.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">to_console_message</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_logger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">event_type</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">to_csv_row</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">json_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close all loggers and flush data.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">csv_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_enabled</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_events</span><span class="p">:</span>
+            <span class="n">json_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s1">&#39;events.json&#39;</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json_events</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="design-decisions">Design Decisions<a class="headerlink" href="#design-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="core-architecture-decision">Core Architecture Decision<a class="headerlink" href="#core-architecture-decision" title="Permanent link">&para;</a></h3>
+<p><strong>Use FOUR independent logger instances</strong>, each with its own configuration, handler, and purpose:
+1. <code>PopupSim.console</code> - Console output
+2. <code>PopupSim.file</code> - Debug file logs
+3. <code>PopupSim.csv</code> - CSV data export (conceptual)
+4. <code>PopupSim.json</code> - JSON data export (conceptual)</p>
+<h3 id="logger-responsibilities">Logger Responsibilities<a class="headerlink" href="#logger-responsibilities" title="Permanent link">&para;</a></h3>
+<p>Each logger is completely independent:
+- Own namespace in logging hierarchy
+- Own handler and formatter
+- Own log level
+- Own enable/disable flag
+- <code>propagate = False</code> to prevent parent logger interference</p>
+<h3 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">Simulation</span> <span class="n">Event</span> <span class="err">→</span> <span class="n">emit_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+                      <span class="err">↓</span>
+        <span class="err">┌─────────────┼─────────────┬─────────────┐</span>
+        <span class="err">↓</span>             <span class="err">↓</span>             <span class="err">↓</span>             <span class="err">↓</span>
+   <span class="n">console_logger</span> <span class="n">file_logger</span>   <span class="n">csv_logger</span>    <span class="n">json_logger</span>
+   <span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>     <span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>   <span class="p">(</span><span class="n">direct</span> <span class="n">CSV</span><span class="p">)</span>  <span class="p">(</span><span class="n">collect</span><span class="p">)</span>
+        <span class="err">↓</span>             <span class="err">↓</span>             <span class="err">↓</span>             <span class="err">↓</span>
+     <span class="n">stdout</span>       <span class="n">app</span><span class="o">.</span><span class="n">log</span>      <span class="n">events</span><span class="o">.</span><span class="n">csv</span>    <span class="n">events</span><span class="o">.</span><span class="n">json</span>
+</code></pre></div>
+<h3 id="key-design-choices">Key Design Choices<a class="headerlink" href="#key-design-choices" title="Permanent link">&para;</a></h3>
+<h4 id="1-logger-namespace-hierarchy">1. Logger Namespace Hierarchy<a class="headerlink" href="#1-logger-namespace-hierarchy" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: Use hierarchical names (PopupSim.console, PopupSim.file, etc.)</p>
+<p><strong>Rationale</strong>:
+- Clear organization in logging system
+- Easy to identify logger purpose
+- Follows Python logging conventions
+- Prevents naming conflicts</p>
+<p><strong>Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">console_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.console&#39;</span><span class="p">)</span>
+<span class="n">file_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.file&#39;</span><span class="p">)</span>
+<span class="n">csv_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.csv&#39;</span><span class="p">)</span>
+<span class="n">json_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.json&#39;</span><span class="p">)</span>
+</code></pre></div></p>
+<h4 id="2-propagation-disabled">2. Propagation Disabled<a class="headerlink" href="#2-propagation-disabled" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: Set <code>propagate = False</code> on all loggers.</p>
+<p><strong>Rationale</strong>:
+- Prevents events from bubbling to parent loggers
+- Avoids duplicate log messages
+- Ensures complete independence</p>
+<p><strong>Critical</strong>: Without this, events would propagate to root logger and appear multiple times.</p>
+<div class="highlight"><pre><span></span><code><span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># MUST set this</span>
+</code></pre></div>
+<h4 id="3-direct-file-writing-for-csvjson">3. Direct File Writing for CSV/JSON<a class="headerlink" href="#3-direct-file-writing-for-csvjson" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: CSV/JSON loggers don't actually "log" - they write directly to files.</p>
+<p><strong>Rationale</strong>:
+- Logging paradigm doesn't fit data export well
+- Direct file writing is more natural
+- Better performance for structured data
+- Clearer code intent</p>
+<p><strong>Trade-off</strong>: Using "logger" name for non-logging is conceptually awkward.</p>
+<h4 id="4-manager-class-coordination">4. Manager Class Coordination<a class="headerlink" href="#4-manager-class-coordination" title="Permanent link">&para;</a></h4>
+<p><strong>Decision</strong>: LoggerManager class coordinates all loggers.</p>
+<p><strong>Rationale</strong>:
+- Single point of configuration
+- Manages logger lifecycle
+- Handles file closing and flushing
+- Simplifies usage in simulation code</p>
+<h2 id="detailed-argumentation">Detailed Argumentation<a class="headerlink" href="#detailed-argumentation" title="Permanent link">&para;</a></h2>
+<h3 id="advantages">Advantages<a class="headerlink" href="#advantages" title="Permanent link">&para;</a></h3>
+<h4 id="1-complete-independence">1. Complete Independence ✅<a class="headerlink" href="#1-complete-independence" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Each logger has its own configuration with zero interference.</p>
+<p><strong>Impact</strong>:
+- Console logger can be INFO level
+- File logger can be DEBUG level
+- CSV/JSON can be always-on
+- No shared state between loggers</p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">console_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>  <span class="c1"># User-facing</span>
+<span class="n">file_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>    <span class="c1"># Developer-facing</span>
+<span class="c1"># No conflict!</span>
+</code></pre></div></p>
+<h4 id="2-clear-separation">2. Clear Separation ✅<a class="headerlink" href="#2-clear-separation" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Each logger has single, clear responsibility.</p>
+<p><strong>Impact</strong>:
+- Easy to understand code
+- Clear which logger does what
+- No confusion about handler purpose
+- Follows Single Responsibility Principle</p>
+<p><strong>Code Clarity</strong>:
+<div class="highlight"><pre><span></span><code><span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;User message&quot;</span><span class="p">)</span>  <span class="c1"># Clear: goes to console</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">file_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Debug info&quot;</span><span class="p">)</span>      <span class="c1"># Clear: goes to file</span>
+</code></pre></div></p>
+<h4 id="3-flexible-configuration">3. Flexible Configuration ✅<a class="headerlink" href="#3-flexible-configuration" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: Each logger can have completely different settings.</p>
+<p><strong>Impact</strong>:
+- Different log levels per logger
+- Different formatters per logger
+- Different handlers per logger
+- Independent enable/disable</p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Console: simple format, INFO level</span>
+<span class="n">console_logger</span><span class="p">:</span> <span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+
+<span class="c1"># File: detailed format, DEBUG level</span>
+<span class="n">file_logger</span><span class="p">:</span> <span class="n">DEBUG</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(funcName)s</span><span class="s1">:</span><span class="si">%(lineno)d</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+</code></pre></div></p>
+<h4 id="4-namespace-isolation">4. Namespace Isolation ✅<a class="headerlink" href="#4-namespace-isolation" title="Permanent link">&para;</a></h4>
+<p><strong>Benefit</strong>: No naming conflicts in logging hierarchy.</p>
+<p><strong>Impact</strong>:
+- Clear logger identification
+- Easy to filter logs by logger name
+- No accidental logger reuse
+- Follows Python logging best practices</p>
+<p><strong>Hierarchy</strong>:
+<div class="highlight"><pre><span></span><code>PopupSim (root)
+  ├── console
+  ├── file
+  ├── csv
+  └── json
+</code></pre></div></p>
+<h3 id="disadvantages">Disadvantages<a class="headerlink" href="#disadvantages" title="Permanent link">&para;</a></h3>
+<h4 id="1-still-coupled-to-logging">1. Still Coupled to Logging ❌<a class="headerlink" href="#1-still-coupled-to-logging" title="Permanent link">&para;</a></h4>
+<p><strong>Problem</strong>: CSV/JSON export forced into logging paradigm even though it's not really logging.</p>
+<p><strong>Impact</strong>:
+- Conceptual mismatch: data export ≠ logging
+- Using logging.Logger for non-logging tasks
+- Awkward code that doesn't express intent
+- Misleading for future developers</p>
+<p><strong>Example</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># This &quot;logger&quot; doesn&#39;t actually log - it writes CSV</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">csv_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.csv&#39;</span><span class="p">)</span>  <span class="c1"># Misleading name</span>
+</code></pre></div></p>
+<h4 id="2-configuration-complexity">2. Configuration Complexity ❌<a class="headerlink" href="#2-configuration-complexity" title="Permanent link">&para;</a></h4>
+<p><strong>Problem</strong>: Must configure four separate loggers.</p>
+<p><strong>Impact</strong>:
+- More setup code required
+- More parameters to manage
+- More potential for configuration errors
+- Harder to maintain consistency</p>
+<p><strong>Code Volume</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Must setup each logger individually</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_setup_console_logger</span><span class="p">()</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_setup_file_logger</span><span class="p">()</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_setup_csv_logger</span><span class="p">()</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_setup_json_logger</span><span class="p">()</span>
+<span class="c1"># 4x the configuration code</span>
+</code></pre></div></p>
+<h4 id="3-propagation-issues">3. Propagation Issues ❌<a class="headerlink" href="#3-propagation-issues" title="Permanent link">&para;</a></h4>
+<p><strong>Problem</strong>: Must remember to set <code>propagate = False</code> on every logger.</p>
+<p><strong>Impact</strong>:
+- Easy to forget
+- Causes duplicate messages if forgotten
+- Hard to debug when it happens
+- Not obvious to new developers</p>
+<p><strong>Common Bug</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;PopupSim.console&#39;</span><span class="p">)</span>
+<span class="c1"># Forgot: logger.propagate = False</span>
+<span class="c1"># Result: Messages appear twice (console + root logger)</span>
+</code></pre></div></p>
+<h4 id="4-awkward-data-export">4. Awkward Data Export ❌<a class="headerlink" href="#4-awkward-data-export" title="Permanent link">&para;</a></h4>
+<p><strong>Problem</strong>: CSV/JSON "loggers" don't actually log.</p>
+<p><strong>Impact</strong>:
+- Misleading code structure
+- Logger used for file writing
+- Doesn't leverage logging features
+- Better done with custom classes</p>
+<p><strong>Reality</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># This isn&#39;t logging, it&#39;s just file writing</span>
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_enabled</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">csv_writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">to_csv_row</span><span class="p">())</span>  <span class="c1"># Direct file write</span>
+    <span class="c1"># Why use a &quot;logger&quot; for this?</span>
+</code></pre></div></p>
+<h4 id="5-verbose-flag-complexity">5. Verbose Flag Complexity ❌<a class="headerlink" href="#5-verbose-flag-complexity" title="Permanent link">&para;</a></h4>
+<p><strong>Problem</strong>: Must pass verbose flag to each logger setup individually.</p>
+<p><strong>Impact</strong>:
+- More parameters to pass around
+- More configuration code
+- Easy to forget for one logger
+- Inconsistent behavior if forgotten</p>
+<p><strong>Configuration</strong>:
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_console_logger</span><span class="p">()</span>  <span class="c1"># Uses self.verbose</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">file_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_file_logger</span><span class="p">()</span>        <span class="c1"># Might also use it</span>
+    <span class="c1"># Must remember to use verbose in each setup method</span>
+</code></pre></div></p>
+<h2 id="verbose-flag-handling">Verbose Flag Handling<a class="headerlink" href="#verbose-flag-handling" title="Permanent link">&para;</a></h2>
+<p>The <code>--verbose</code> flag from main.py can be handled independently per logger:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Console logger can be verbose</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">console_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_console_logger</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># File logger can have different format</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">file_logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_file_logger</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Advantage</strong>: Each logger can have independent verbose settings. Console can be verbose while file logs remain compact.</p>
+<p><strong>Disadvantage</strong>: Must pass verbose flag to each logger setup method, increasing configuration complexity.</p>
+<h2 id="migration-path">Migration Path<a class="headerlink" href="#migration-path" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Setup</strong>: Create <code>core/logging/</code> with events.py and manager.py (LoggerManager class)</li>
+<li><strong>Integration</strong>: Connect to main.py (verbose/debug flags) and SimulationEngine</li>
+<li><strong>Migration</strong>: Replace print() with manager.log_event() calls</li>
+<li><strong>Validation</strong>: Verify logger independence and propagate=False settings</li>
+</ol>
+<h2 id="implementation-checklist">Implementation Checklist<a class="headerlink" href="#implementation-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Create <code>core/logging/</code> directory structure</li>
+<li>[ ] Implement <code>events.py</code> with SimulationEvent dataclass</li>
+<li>[ ] Implement <code>manager.py</code> with LoggerManager class</li>
+<li>[ ] Implement _setup_console_logger() and _setup_file_logger() with propagate=False</li>
+<li>[ ] Implement CSV/JSON writing logic in LoggerManager</li>
+<li>[ ] Integrate with main.py CLI (verbose, debug flags)</li>
+<li>[ ] Update SimulationEngine to use LoggerManager</li>
+<li>[ ] Replace print() with manager.log_event()</li>
+<li>[ ] Verify with: <code>uv run ruff format . &amp;&amp; uv run mypy backend/src/ &amp;&amp; uv run pytest</code></li>
+</ul>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<h3 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h3>
+<p>This approach uses <strong>multiple independent logger instances</strong>, each dedicated to a specific output. It provides better independence than Option 1 but still forces data export into the logging paradigm.</p>
+<h3 id="strengths">Strengths<a class="headerlink" href="#strengths" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Complete independence between loggers</li>
+<li>✅ Clear separation of concerns</li>
+<li>✅ Flexible configuration per logger</li>
+<li>✅ Namespace isolation</li>
+<li>✅ Verbose flag can be per-logger</li>
+</ul>
+<h3 id="weaknesses">Weaknesses<a class="headerlink" href="#weaknesses" title="Permanent link">&para;</a></h3>
+<ul>
+<li>❌ Still couples data export to logging</li>
+<li>❌ Configuration complexity (4 loggers)</li>
+<li>❌ Must remember propagate=False</li>
+<li>❌ CSV/JSON "loggers" don't actually log</li>
+<li>❌ Testing complexity (mock 4 loggers)</li>
+<li>❌ More code to maintain</li>
+</ul>
+<h3 id="recommendation">Recommendation<a class="headerlink" href="#recommendation" title="Permanent link">&para;</a></h3>
+<p>This approach provides <strong>better independence</strong> than Option 1 but <strong>doesn't solve the fundamental problem</strong>: data export is not logging. The multiple loggers add complexity without addressing the conceptual mismatch.</p>
+<p><strong>Use this option if</strong>:
+- Complete logger independence is critical
+- Team comfortable with multiple logger management
+- Willing to accept logging paradigm for data export
+- Configuration complexity is acceptable</p>
+<p><strong>Avoid this option if</strong>:
+- Data export is primary concern
+- Want conceptually clean separation
+- Prefer simpler configuration
+- Team unfamiliar with propagate settings</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
