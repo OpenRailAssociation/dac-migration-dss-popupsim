@@ -192,7 +192,8 @@ for track_id in ["collection_1", "collection_2", "collection_3"]:
     capacity = popup_sim.track_capacity.track_capacities[track_id]
     occupancy = popup_sim.track_capacity.current_occupancy[track_id]
     pct = (occupancy/capacity*100) if capacity > 0 else 0
-    print(f"  {track_id}: {occupancy:.1f}m / {capacity:.1f}m ({pct:.1f}%)")
+    wagons_on_track = [w for w in popup_sim.wagons_queue if w.track_id == track_id]
+    print(f"  {track_id}: {occupancy:.1f}m / {capacity:.1f}m ({pct:.1f}%) - {len(wagons_on_track)} wagons in queue")
 
 print(f"\nFinal Retrofit Track Capacities (75% fill):")
 for track_id in ["retrofit_1", "retrofit_2"]:
@@ -208,20 +209,31 @@ for track_id in ["retrofit_1", "retrofit_2"]:
     available = total_stations - occupied
     print(f"  {track_id}: {occupied}/{total_stations} stations occupied ({available} available)")
 
-print(f"\nFinal Wagon Distribution:")
+print(f"\nFinal Wagon Distribution (from wagons_queue):")
 wagons_by_track = {}
 for wagon in popup_sim.wagons_queue:
     track = wagon.track_id or "unknown"
     if track not in wagons_by_track:
         wagons_by_track[track] = []
-    wagons_by_track[track].append(wagon.wagon_id)
+    wagons_by_track[track].append((wagon.wagon_id, wagon.status.value))
 
-for track_id, wagon_ids in sorted(wagons_by_track.items()):
-    print(f"  {track_id}: {len(wagon_ids)} wagons - {wagon_ids}")
+for track_id, wagon_info in sorted(wagons_by_track.items()):
+    print(f"  {track_id}: {len(wagon_info)} wagons")
+    for wagon_id, status in wagon_info:
+        print(f"    - {wagon_id} ({status})")
+
+print(f"\nAll Train Wagons Status:")
+for train in popup_sim.scenario.trains:
+    print(f"  {train.train_id}:")
+    for wagon in train.wagons:
+        in_queue = "in queue" if wagon in popup_sim.wagons_queue else "NOT in queue"
+        print(f"    - {wagon.wagon_id}: {wagon.status.value} on {wagon.track_id} ({in_queue})")
 
 print(f"\nLocomotive Status:")
-for loco_id, loco in popup_sim.locomotives.available_locomotives.items():
-    print(f"  {loco_id}: {loco.status.value} at {loco.track_id}")
+all_locos = {**popup_sim.locomotives.available_locomotives, **popup_sim.locomotives.occupied_locomotives}
+for loco_id, loco in sorted(all_locos.items()):
+    availability = "available" if loco_id in popup_sim.locomotives.available_locomotives else "occupied"
+    print(f"  {loco_id}: {loco.status.value} at {loco.track_id} ({availability})")
 
 # Print capacity timeline
 print(f"\n=== CAPACITY TIMELINE ===")

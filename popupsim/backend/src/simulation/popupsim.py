@@ -359,6 +359,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim):
         for wagon, _ in wagons_to_pickup:
             popupsim.track_capacity.remove_wagon(collection_track_id, wagon.length)
             wagon.status = WagonStatus.MOVING
+            wagon.track_id = None
 
         # Group wagons by retrofit track destination
         wagons_by_retrofit: dict[str, list[Wagon]] = {}
@@ -512,6 +513,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim):
             popupsim.track_capacity.remove_wagon(retrofit_track_id, wagon.length)
             popupsim.workshop_capacity.release_stations(retrofit_track_id, 1)
             wagon.status = WagonStatus.MOVING
+            wagon.track_id = None
             logger.info('Station released on %s for wagon %s', retrofit_track_id, wagon.wagon_id)
 
         # Travel to retrofitted track
@@ -630,6 +632,7 @@ def move_to_parking(popupsim: PopupSim):
         for wagon in wagons_to_move:
             popupsim.track_capacity.remove_wagon(retrofitted_track.id, wagon.length)
             wagon.status = WagonStatus.MOVING
+            wagon.track_id = None
 
         # Travel to parking track
         loco.status = LocoStatus.MOVING
