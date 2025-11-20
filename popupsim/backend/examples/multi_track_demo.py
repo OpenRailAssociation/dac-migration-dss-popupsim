@@ -27,38 +27,46 @@ capacity_events = []
 # Topology with track lengths
 topology_data = {
     "edges": [
-        {"id": "parking_edge", "length": 50.0},
+        {"id": "parking_1_edge", "length": 50.0},
+        {"id": "parking_2_edge", "length": 60.0},
         {"id": "collection_1_edge", "length": 100.0},
         {"id": "collection_2_edge", "length": 120.0},
         {"id": "collection_3_edge", "length": 80.0},
         {"id": "retrofit_1_edge", "length": 150.0},
-        {"id": "retrofit_2_edge", "length": 130.0}
+        {"id": "retrofit_2_edge", "length": 130.0},
+        {"id": "retrofitted_edge", "length": 200.0}
     ]
 }
 
 # Tracks
-parking_track = Track(id="parking", type=TrackType.PARKING, edges=["parking_edge"])
+parking_1 = Track(id="parking_1", type=TrackType.PARKING, edges=["parking_1_edge"])
+parking_2 = Track(id="parking_2", type=TrackType.PARKING, edges=["parking_2_edge"])
 collection_1 = Track(id="collection_1", type=TrackType.COLLECTION, edges=["collection_1_edge"])
 collection_2 = Track(id="collection_2", type=TrackType.COLLECTION, edges=["collection_2_edge"])
 collection_3 = Track(id="collection_3", type=TrackType.COLLECTION, edges=["collection_3_edge"])
 retrofit_1 = Track(id="retrofit_1", type=TrackType.RETROFIT, edges=["retrofit_1_edge"])
 retrofit_2 = Track(id="retrofit_2", type=TrackType.RETROFIT, edges=["retrofit_2_edge"])
+retrofitted_track = Track(id="retrofitted", type=TrackType.RETROFITTED, edges=["retrofitted_edge"])
 
-tracks = [parking_track, collection_1, collection_2, collection_3, retrofit_1, retrofit_2]
+tracks = [parking_1, parking_2, collection_1, collection_2, collection_3, retrofit_1, retrofit_2, retrofitted_track]
 
 # Routes between tracks
 routes = [
-    Route(route_id="parking_to_col1", path=["parking", "collection_1"], duration=2),
-    Route(route_id="parking_to_col2", path=["parking", "collection_2"], duration=3),
-    Route(route_id="parking_to_col3", path=["parking", "collection_3"], duration=3),
+    Route(route_id="parking1_to_col1", path=["parking_1", "collection_1"], duration=2),
+    Route(route_id="parking1_to_col2", path=["parking_1", "collection_2"], duration=3),
+    Route(route_id="parking1_to_col3", path=["parking_1", "collection_3"], duration=3),
     Route(route_id="col1_to_ret1", path=["collection_1", "retrofit_1"], duration=3),
     Route(route_id="col1_to_ret2", path=["collection_1", "retrofit_2"], duration=4),
     Route(route_id="col2_to_ret1", path=["collection_2", "retrofit_1"], duration=3),
     Route(route_id="col2_to_ret2", path=["collection_2", "retrofit_2"], duration=3),
     Route(route_id="col3_to_ret1", path=["collection_3", "retrofit_1"], duration=4),
     Route(route_id="col3_to_ret2", path=["collection_3", "retrofit_2"], duration=2),
-    Route(route_id="ret1_to_parking", path=["retrofit_1", "parking"], duration=3),
-    Route(route_id="ret2_to_parking", path=["retrofit_2", "parking"], duration=4),
+    Route(route_id="ret1_to_retrofitted", path=["retrofit_1", "retrofitted"], duration=2),
+    Route(route_id="ret2_to_retrofitted", path=["retrofit_2", "retrofitted"], duration=2),
+    Route(route_id="retrofitted_to_parking1", path=["retrofitted", "parking_1"], duration=3),
+    Route(route_id="retrofitted_to_parking2", path=["retrofitted", "parking_2"], duration=3),
+    Route(route_id="ret1_to_parking1", path=["retrofit_1", "parking_1"], duration=3),
+    Route(route_id="ret2_to_parking1", path=["retrofit_2", "parking_1"], duration=4),
 ]
 
 # Start time
@@ -71,14 +79,14 @@ locos = [
         name="Loco 1",
         start_date=start_time,
         end_date=start_time + timedelta(hours=2),
-        track_id="parking"
+        track_id="parking_1"
     ),
     Locomotive(
         locomotive_id="loco_2",
         name="Loco 2",
         start_date=start_time,
         end_date=start_time + timedelta(hours=2),
-        track_id="parking"
+        track_id="parking_1"
     )
 ]
 
@@ -87,7 +95,8 @@ process_times = ProcessTimes(
     train_to_hump_delay=5.0,
     wagon_hump_interval=1.0,
     wagon_coupling_time=0.5,
-    wagon_decoupling_time=0.5
+    wagon_decoupling_time=0.5,
+    wagon_retrofit_time=30.0  # 30 minutes per wagon
 )
 
 # Train 1 with 8 wagons (varying lengths: 25m, 15m, 30m, 20m, 25m, 15m, 20m, 30m = 180m total)
@@ -105,19 +114,21 @@ wagons_2 = [
 ]
 train_2 = Train(train_id="train_002", arrival_time=start_time + timedelta(minutes=25), wagons=wagons_2)
 
-# Workshops
+# Workshops with retrofit stations
 workshops = [
     Workshop(
         workshop_id="WS1",
         start_date="2025-01-01 08:00:00",
         end_date="2025-01-02 08:00:00",
-        track_id="retrofit_1"
+        track_id="retrofit_1",
+        retrofit_stations=4
     ),
     Workshop(
         workshop_id="WS2",
         start_date="2025-01-01 08:00:00",
         end_date="2025-01-02 08:00:00",
-        track_id="retrofit_2"
+        track_id="retrofit_2",
+        retrofit_stations=3
     )
 ]
 
@@ -190,6 +201,13 @@ for track_id in ["retrofit_1", "retrofit_2"]:
     pct = (occupancy/capacity*100) if capacity > 0 else 0
     print(f"  {track_id}: {occupancy:.1f}m / {capacity:.1f}m ({pct:.1f}%)")
 
+print(f"\nWorkshop Retrofit Stations:")
+for track_id in ["retrofit_1", "retrofit_2"]:
+    total_stations = popup_sim.workshop_capacity.workshops_by_track[track_id].retrofit_stations
+    occupied = popup_sim.workshop_capacity.occupied_stations[track_id]
+    available = total_stations - occupied
+    print(f"  {track_id}: {occupied}/{total_stations} stations occupied ({available} available)")
+
 print(f"\nFinal Wagon Distribution:")
 wagons_by_track = {}
 for wagon in popup_sim.wagons_queue:
@@ -218,6 +236,18 @@ for event in col_events:
 print(f"\nRetrofit Tracks:")
 ret_events = [e for e in capacity_events if e['track'].startswith('retrofit')]
 for event in ret_events:
+    action_symbol = '+' if event['action'] == 'ADD' else '-'
+    pct = (event['occupancy'] / event['capacity'] * 100) if event['capacity'] > 0 else 0
+    if event['track'] in popup_sim.workshop_capacity.workshops_by_track:
+        occupied = popup_sim.workshop_capacity.occupied_stations.get(event['track'], 0)
+        total_stations = popup_sim.workshop_capacity.workshops_by_track[event['track']].retrofit_stations
+        print(f"  t={event['time']:5.1f}min [{action_symbol}] {event['track']}: {event['length']:.0f}m -> {event['occupancy']:.0f}m/{event['capacity']:.0f}m ({pct:.0f}%) | stations: {occupied}/{total_stations}")
+    else:
+        print(f"  t={event['time']:5.1f}min [{action_symbol}] {event['track']}: {event['length']:.0f}m -> {event['occupancy']:.0f}m/{event['capacity']:.0f}m ({pct:.0f}%)")
+
+print(f"\nRetrofitted Track:")
+retrofitted_events = [e for e in capacity_events if e['track'] == 'retrofitted']
+for event in retrofitted_events:
     action_symbol = '+' if event['action'] == 'ADD' else '-'
     pct = (event['occupancy'] / event['capacity'] * 100) if event['capacity'] > 0 else 0
     print(f"  t={event['time']:5.1f}min [{action_symbol}] {event['track']}: {event['length']:.0f}m -> {event['occupancy']:.0f}m/{event['capacity']:.0f}m ({pct:.0f}%)")

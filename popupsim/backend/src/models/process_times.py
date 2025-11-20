@@ -30,6 +30,11 @@ class ProcessTimes(BaseModel):
         ge=0,
         description='Time in minutes to decouple one wagon'
     )
+    wagon_retrofit_time: float = Field(
+        default=60.0,
+        ge=0,
+        description='Time in minutes to retrofit one wagon at a station'
+    )
     
     @classmethod
     def load_from_file(cls, file_path: str | Path) -> 'ProcessTimes':
