@@ -255,16 +255,35 @@ for train in popup_sim.scenario.trains:
         print(f'    - {wagon.wagon_id}: {wagon.status.value} on {location} ({in_queue})')
 
 print('\nLocomotive Status:')
-for loco_id, loco in sorted(popup_sim.locomotives.all_locomotives.items()):
+for loco_id, loco in sorted(popup_sim.locomotives.all_resources.items()):
     print(f'  {loco_id}: {loco.status.value} at {loco.track_id}')
 
-print('\n=== LOCOMOTIVE UTILIZATION ===')
+print('\n=== LOCOMOTIVE METRICS ===')
 total_sim_time = sim.current_time()
-for loco_id, loco in sorted(popup_sim.locomotives.all_locomotives.items()):
-    utilization = loco.get_utilization(total_sim_time)
-    print(f'\n{loco_id}:')
-    for status, percentage in sorted(utilization.items()):
-        print(f'  {status}: {percentage:.1f}%')
+
+print('\nPool Allocation Time (checked out from pool):')
+pool_utilization = popup_sim.locomotives.get_utilization(total_sim_time)
+for loco_id in sorted(pool_utilization.keys()):
+    print(f'  {loco_id}: {pool_utilization[loco_id]:.1f}% allocated')
+
+print('\nOperational Status Time (what locomotive is doing):')
+for loco_id, loco in sorted(popup_sim.locomotives.all_resources.items()):
+    status_utilization = loco.get_utilization(total_sim_time)
+    print(f'  {loco_id}:')
+    for status, percentage in sorted(status_utilization.items()):
+        print(f'    {status}: {percentage:.1f}%')
+
+print('\n=== RESOURCE TRACKING ===')
+print('\nCurrent Locomotive States:')
+for loco_id, state in popup_sim.locomotives.get_all_states().items():
+    status_str = state["status"].value if hasattr(state["status"], 'value') else str(state["status"])
+    print(f'  {loco_id}: {status_str} at {state["location"]} (allocated={state["allocated"]})')
+
+print(f'\nAvailable locomotives: {popup_sim.locomotives.get_available_count()}/{len(popup_sim.locomotives.all_resources)}')
+
+print('\nAllocation History (last 10 events):')
+for time, loco_id, action, location in popup_sim.locomotives.allocation_history[-10:]:
+    print(f'  t={time:5.1f}min: {loco_id} {action} at {location}')
 
 # Print capacity timeline
 print('\n=== CAPACITY TIMELINE ===')
