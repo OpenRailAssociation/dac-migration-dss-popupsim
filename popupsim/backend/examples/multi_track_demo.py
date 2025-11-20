@@ -238,6 +238,8 @@ for track_id, wagon_info in sorted(wagons_by_track.items()):
     for wagon_id, status, source, destination in wagon_info:
         if status == 'moving' and source and destination:
             print(f'    - {wagon_id} (moving: {source} -> {destination})')
+        elif status == 'retrofitted':
+            print(f'    - {wagon_id} ({status}) [waiting for locomotive pickup]')
         else:
             print(f'    - {wagon_id} ({status})')
 
