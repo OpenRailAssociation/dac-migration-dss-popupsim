@@ -168,11 +168,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         if not scenario.trains:
             raise ValueError('Scenario must have at least one train to simulate.')
         self.trains_queue: list[Train] = scenario.trains
-        if not scenario.workshops:
-            raise ValueError('Scenario must have at least one workshop to simulate.')
         self.wagons_queue: list[Wagon] = []
-        if not scenario.workshops:
-            raise ValueError('Scenario must have at least one workshop to simulate.')
         self.workshops_queue: list[Workshop] = scenario.workshops
 
         self.locomotives = ResourcePool(self.sim, self.locomotives_queue, 'Locomotives')
@@ -323,8 +319,6 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
 
     logger.info('Starting wagon pickup process')
 
-    # Track which trains have been processed
-    processed_trains: set[str] = set()
     last_processed_count = 0
 
     # Use cached parking tracks
@@ -619,9 +613,9 @@ def pickup_retrofitted_wagons(popupsim: PopupSim) -> Generator[Any]:
             yield popupsim.sim.delay(1.0)
             continue
 
-        # Pick first retrofit track with completed wagons (pick up one wagon at a time)
+        # Pick first retrofit track with completed wagons (batch all completed)
         retrofit_track_id = list(retrofitted_by_track.keys())[0]
-        wagons_to_pickup = [retrofitted_by_track[retrofit_track_id][0]]
+        wagons_to_pickup = retrofitted_by_track[retrofit_track_id]
 
         # Release stations before transport
         for wagon in wagons_to_pickup:
