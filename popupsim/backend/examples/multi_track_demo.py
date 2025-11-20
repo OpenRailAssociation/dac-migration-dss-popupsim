@@ -223,6 +223,18 @@ for track_id in ['retrofit_1', 'retrofit_2']:
     available = total_stations - occupied
     print(f'  {track_id}: {occupied}/{total_stations} stations occupied ({available} available)')
 
+print('\n=== WORKSHOP STATION HISTORY ===')
+for track_id in ['retrofit_1', 'retrofit_2']:
+    print(f'\n{track_id}:')
+    stations = popup_sim.workshop_capacity.stations.get(track_id, [])
+    for station in stations:
+        print(f'  {station.station_id}: {station.wagons_completed} wagons completed')
+        for start_time, end_time, wagon_id in station.history:
+            duration = end_time - start_time
+            print(f'    t={start_time:5.1f}-{end_time:5.1f}min ({duration:4.1f}min): {wagon_id}')
+        if station.is_occupied and station.current_wagon_id:
+            print(f'    t={station.last_occupied_time:5.1f}-???     (WORKING): {station.current_wagon_id}')
+
 print('\nFinal Wagon Distribution (from wagons_queue):')
 wagons_by_track = {}
 for wagon in popup_sim.wagons_queue:
@@ -302,16 +314,9 @@ ret_events = [e for e in capacity_events if e['track'].startswith('retrofit')]
 for event in ret_events:
     action_symbol = '+' if event['action'] == 'ADD' else '-'
     pct = (event['occupancy'] / event['capacity'] * 100) if event['capacity'] > 0 else 0
-    if event['track'] in popup_sim.workshop_capacity.workshops_by_track:
-        occupied = popup_sim.workshop_capacity.occupied_stations.get(event['track'], 0)
-        total_stations = popup_sim.workshop_capacity.workshops_by_track[event['track']].retrofit_stations
-        print(
-            f'  t={event["time"]:5.1f}min [{action_symbol}] {event["track"]}: {event["length"]:.0f}m -> {event["occupancy"]:.0f}m/{event["capacity"]:.0f}m ({pct:.0f}%) | stations: {occupied}/{total_stations}'
-        )
-    else:
-        print(
-            f'  t={event["time"]:5.1f}min [{action_symbol}] {event["track"]}: {event["length"]:.0f}m -> {event["occupancy"]:.0f}m/{event["capacity"]:.0f}m ({pct:.0f}%)'
-        )
+    print(
+        f'  t={event["time"]:5.1f}min [{action_symbol}] {event["track"]}: {event["length"]:.0f}m -> {event["occupancy"]:.0f}m/{event["capacity"]:.0f}m ({pct:.0f}%)'
+    )
 
 print('\nRetrofitted Track:')
 retrofitted_events = [e for e in capacity_events if e['track'] == 'retrofitted']

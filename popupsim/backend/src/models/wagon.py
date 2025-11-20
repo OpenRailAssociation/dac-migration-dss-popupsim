@@ -17,6 +17,13 @@ from pydantic import Field
 logger = logging.getLogger(__name__)
 
 
+class CouplerType(Enum):
+    """Coupler type for wagons"""
+
+    SCREW = 'screw'
+    DAC = 'dac'
+
+
 class WagonStatus(Enum):
     """Wagon status events"""
 
@@ -47,6 +54,7 @@ class Wagon(BaseModel):
     retrofit_start_time: float | None = Field(default=None, description='Retrofit start time as counter')
     retrofit_end_time: float | None = Field(default=None, description='Retrofit end time as counter')
     status: WagonStatus = Field(default=WagonStatus.UNKNOWN, description='Status of the wagon')
+    coupler_type: CouplerType = Field(default=CouplerType.SCREW, description='Type of coupler on the wagon')
 
     @property
     def waiting_time(self) -> float | None:

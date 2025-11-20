@@ -56,9 +56,11 @@ def execute_transport_job(popupsim: Any, job: TransportJob) -> Generator[Any]:
     logger.info('🚂 ROUTE: %s traveling [%s → %s]', resource.locomotive_id, resource.track_id, job.from_track)
     yield from move_locomotive(popupsim, resource, resource.track_id, job.from_track)
     
-    # Couple wagons
+    # Couple wagons (use first wagon's coupler type)
+    from models.wagon import CouplerType
+    coupler_type = job.wagons[0].coupler_type if job.wagons else CouplerType.SCREW
     logger.debug('%s coupling %d wagons', resource.locomotive_id, len(job.wagons))
-    yield from couple_wagons(popupsim, resource, len(job.wagons))
+    yield from couple_wagons(popupsim, resource, len(job.wagons), coupler_type)
     
     # Update wagon states - remove from source track
     for wagon in job.wagons:
