@@ -93,7 +93,7 @@ def decouple_wagons(popupsim: 'PopupSim', loco: Locomotive, wagon_count: int) ->
 
 def allocate_locomotive(popupsim: 'PopupSim') -> Generator[Any]:
     """Allocate locomotive from pool with tracking.
-    
+
     Yields
     ------
     Locomotive
@@ -107,14 +107,14 @@ def allocate_locomotive(popupsim: 'PopupSim') -> Generator[Any]:
 
 def release_locomotive(popupsim: 'PopupSim', loco: Locomotive) -> Generator[Any]:
     """Release locomotive to pool with tracking.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
         The PopupSim instance.
     loco : Locomotive
         The locomotive to release.
-    
+
     Yields
     ------
     Any
@@ -123,10 +123,6 @@ def release_locomotive(popupsim: 'PopupSim', loco: Locomotive) -> Generator[Any]
     resource_id = getattr(loco, 'locomotive_id', getattr(loco, 'id', str(loco)))
     popupsim.locomotives.track_release(resource_id)
     yield popupsim.locomotives.put(loco)
-
-
-# WorkshopPool removed - workshops are managed via WorkshopCapacityManager
-# which tracks station availability per retrofit track
 
 
 class PopupSim:  # pylint: disable=too-few-public-methods
@@ -190,10 +186,10 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         # Cache track lookups to avoid repeated list comprehensions
         if not scenario.tracks:
             raise ValueError('Scenario must have tracks configured')
-        self.parking_tracks = [t for t in scenario.tracks 
+        self.parking_tracks = [t for t in scenario.tracks
                               if t.type == TrackType.PARKING or t.type.value == 'resourceparking']
         self.retrofitted_tracks = [t for t in scenario.tracks if t.type == TrackType.RETROFITTED]
-        
+
         if not self.parking_tracks:
             raise ValueError('Scenario must have at least one parking track')
         if not self.retrofitted_tracks:
@@ -405,7 +401,7 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
         for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
             # Travel from collection to retrofit
             from_track = loco.track_id
-            logger.info('🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons', 
+            logger.info('🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
                        loco.locomotive_id, from_track, retrofit_track_id, len(retrofit_wagons))
             yield from move_locomotive(popupsim, loco, from_track, retrofit_track_id)
 
@@ -603,7 +599,7 @@ def pickup_retrofitted_wagons(popupsim: PopupSim) -> Generator[Any]:
         retrofitted_by_track: dict[str, list[Wagon]] = {}
         for wagon in popupsim.wagons_queue:
             # Only pick up wagons that are RETROFITTED and on a retrofit track (not retrofitted track)
-            if (wagon.status == WagonStatus.RETROFITTED and wagon.track_id and 
+            if (wagon.status == WagonStatus.RETROFITTED and wagon.track_id and
                 wagon.track_id != retrofitted_track.id and wagon.track_id.startswith('retrofit_')):
                 if wagon.track_id not in retrofitted_by_track:
                     retrofitted_by_track[wagon.track_id] = []
@@ -682,7 +678,7 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
             continue
 
         # Batch all wagons that fit on selected parking track
-        wagons_to_move = [w for w in wagons_on_retrofitted 
+        wagons_to_move = [w for w in wagons_on_retrofitted
                          if popupsim.track_capacity.can_add_wagon(parking_track.id, w.length)]
 
         if not wagons_to_move:
