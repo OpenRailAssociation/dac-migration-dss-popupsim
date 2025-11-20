@@ -53,6 +53,25 @@ class FakeAdapter:
         """Simulate adapter.run_process."""
         pass
 
+    def create_store(self, capacity: int) -> 'FakeStore':
+        """Simulate adapter.create_store."""
+        return FakeStore()
+
+
+class FakeStore:
+    """Fake store for testing."""
+    def put(self, item: object) -> None:
+        """Fake put."""
+        pass
+
+    def get(self) -> None:
+        """Fake get."""
+        return None
+
+    def current_time(self) -> float:
+        """Simulate adapter.current_time."""
+        return 0.0
+
 
 @pytest.mark.unit
 class TestPopupSimWithFakeSim:

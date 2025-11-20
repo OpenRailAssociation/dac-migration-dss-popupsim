@@ -22,8 +22,8 @@ def test_simpy_adapter_create_and_basic_delegation() -> None:
     """
     adapter: SimPyAdapter = SimPyAdapter.create_simpy_adapter()
     assert isinstance(adapter, SimPyAdapter)
-    # current_time should be 0.0 at start and is hard-coded to two decimal places
-    assert adapter.current_time() == '    0.00'
+    # current_time should be 0.0 at start (returns float now)
+    assert adapter.current_time() == 0.0
     # delay returns a simpy Event / Timeout object (non-None)
     timeout_result = adapter.delay(5.0)
     assert timeout_result is not None

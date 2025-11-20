@@ -210,6 +210,8 @@ class TestWagon:
             'is_loaded': False,
             'needs_retrofit': True,
             'track_id': None,
+            'source_track_id': None,
+            'destination_track_id': None,
             'arrival_time': datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC),
             'retrofit_start_time': 180.0,
             'retrofit_end_time': 240.0,
