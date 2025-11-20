@@ -106,6 +106,8 @@ process_times = ProcessTimes(
     wagon_hump_interval=1.0,
     wagon_coupling_time=0.5,
     wagon_decoupling_time=0.5,
+    wagon_move_to_next_station=1.0,
+    wagon_coupling_retrofitted_time=0.5,
     wagon_retrofit_time=30.0,  # 30 minutes per wagon
 )
 
@@ -199,6 +201,14 @@ popup_sim.track_capacity.remove_wagon = tracked_remove
 
 popup_sim.run(until=120.0)
 
+# Display metrics
+metrics = popup_sim.get_metrics()
+print('\n=== SIMULATION METRICS ===')
+for category, category_metrics in metrics.items():
+    print(f'\n{category.upper().replace("_", " ")}:')
+    for metric in category_metrics:
+        print(f"  {metric['name'].replace('_', ' ').title()}: {metric['value']} {metric['unit']}")
+
 # Print results
 print('\n=== SIMULATION RESULTS ===')
 print('\nFinal Collection Track Capacities (75% fill):')
@@ -219,7 +229,7 @@ for track_id in ['retrofit_1', 'retrofit_2']:
 print('\nWorkshop Retrofit Stations:')
 for track_id in ['retrofit_1', 'retrofit_2']:
     total_stations = popup_sim.workshop_capacity.workshops_by_track[track_id].retrofit_stations
-    occupied = popup_sim.workshop_capacity.occupied_stations[track_id]
+    occupied = sum(1 for s in popup_sim.workshop_capacity.stations[track_id] if s.is_occupied)
     available = total_stations - occupied
     print(f'  {track_id}: {occupied}/{total_stations} stations occupied ({available} available)')
 

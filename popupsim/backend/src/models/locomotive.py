@@ -9,7 +9,7 @@ from pydantic import field_validator
 
 
 class LocoStatus(Enum):
-    """Locomotive status events"""
+    """Locomotive status events."""
 
     PARKING = 'parking'
     MOVING = 'moving'

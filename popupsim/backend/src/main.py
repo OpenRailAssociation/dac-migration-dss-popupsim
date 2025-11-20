@@ -154,16 +154,16 @@ def main(
 
     # Validate scenarioPath
     scenario_path = validate_scenario_path(scenario_path)
-    typer.echo(f'✓ Using scenario file at: {scenario_path}')
+    typer.echo(f'Using scenario file at: {scenario_path}')
 
     # Validate outputPath
     output_path = validate_output_path(output_path)
-    typer.echo(f'✓ Output will be saved to: {output_path}')
+    typer.echo(f'Output will be saved to: {output_path}')
 
     if verbose:
-        typer.echo('✓ Verbose mode enabled.')
+        typer.echo('Verbose mode enabled.')
 
-    typer.echo(f'✓ Debug level set to: {debug}')
+    typer.echo(f'Debug level set to: {debug}')
 
     # Load and validate scenario using ConfigurationService ---
     try:
@@ -171,7 +171,7 @@ def main(
         if scenario_path is None:
             raise typer.Exit(1)
         scenario = ScenarioBuilder(scenario_path).build()
-        typer.echo('\nScenario loaded and validated successfully.')
+        typer.echo('Scenario loaded and validated successfully.')
         typer.echo(f'Scenario ID: {scenario.scenario_id}')
         typer.echo(f'Start Date: {scenario.start_date}')
         typer.echo(f'End Date: {scenario.end_date}')
@@ -190,10 +190,18 @@ def main(
         #     typer.echo('\nErrors detected in scenario models. Exiting.')
         #     raise typer.Exit(1)
         # Main application logic would go here
-        typer.echo('\n🚀 Starting popupsim processing...')
+        typer.echo('\nStarting simulation...')
         sim_adapter = SimPyAdapter.create_simpy_adapter()
         popup_sim = PopupSim(sim_adapter, scenario)
         popup_sim.run()
+
+        # Get and display metrics
+        metrics = popup_sim.get_metrics()
+        typer.echo('\n=== Simulation Metrics ===')
+        for category, category_metrics in metrics.items():
+            typer.echo(f'\n{category.upper().replace("_", " ")}:')
+            for metric in category_metrics:
+                typer.echo(f'  {metric["name"].replace("_", " ").title()}: {metric["value"]} {metric["unit"]}')
 
     except BuilderError as e:
         typer.echo(f'Configuration error: {e}')

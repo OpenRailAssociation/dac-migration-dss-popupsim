@@ -1,12 +1,15 @@
 """Generic resource pool with tracking capabilities."""
-from typing import Any, Protocol
+
 import logging
+from typing import Any
+from typing import Protocol
 
 logger = logging.getLogger('ResourcePool')
 
 
 class Trackable(Protocol):
     """Protocol for trackable resources."""
+
     locomotive_id: str  # or worker_id, crane_id, etc.
     status: Any
     track_id: str | None
@@ -19,13 +22,12 @@ class ResourcePool:
     (locomotives, workers, cranes, etc.).
     """
 
-    def __init__(self, sim: Any, resources: list[Trackable], name: str = "ResourcePool") -> None:
+    def __init__(self, sim: Any, resources: list[Trackable], name: str = 'ResourcePool') -> None:
         self.sim = sim
         self.name = name
         # Support different ID attributes (locomotive_id, worker_id, etc.)
         self.all_resources: dict[str, Trackable] = {
-            getattr(r, 'locomotive_id', getattr(r, 'worker_id', getattr(r, 'id', str(r)))): r
-            for r in resources
+            getattr(r, 'locomotive_id', getattr(r, 'worker_id', getattr(r, 'id', str(r)))): r for r in resources
         }
         self.store: Any = sim.create_store(capacity=len(resources))
 

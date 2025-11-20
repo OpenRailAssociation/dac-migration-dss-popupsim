@@ -1,10 +1,15 @@
 """Workshop retrofit station capacity management."""
 
+from typing import Any
+
 from models.workshop import Workshop
+
+from .sim_adapter import SimulationAdapter
 
 
 class StationState:
     """Track state of a single retrofit station."""
+
     def __init__(self, station_id: str) -> None:
         self.station_id = station_id
         self.is_occupied = False
@@ -18,57 +23,61 @@ class StationState:
 class WorkshopCapacityManager:
     """Manages retrofit station capacity for workshops."""
 
-    def __init__(self, workshops: list[Workshop]) -> None:
+    def __init__(self, sim: SimulationAdapter, workshops: list[Workshop]) -> None:
+        self.sim = sim
         self.workshops_by_track: dict[str, Workshop] = {}
-        self.occupied_stations: dict[str, int] = {}
-        self.stations: dict[str, list[StationState]] = {}
+        self.resources: dict[str, Any] = {}  # SimPy Resources
+        self.stations: dict[str, list[StationState]] = {}  # For metrics
 
         for workshop in workshops:
-            self.workshops_by_track[workshop.track_id] = workshop
-            self.occupied_stations[workshop.track_id] = 0
-            self.stations[workshop.track_id] = [
-                StationState(f"{workshop.track_id}_station_{i}")
-                for i in range(workshop.retrofit_stations)
+            track_id = workshop.track_id
+            self.workshops_by_track[track_id] = workshop
+            # Create SimPy Resource for station allocation
+            self.resources[track_id] = sim.create_resource(capacity=workshop.retrofit_stations)
+            # Keep station tracking for metrics/history
+            self.stations[track_id] = [
+                StationState(f'{track_id}_station_{i}') for i in range(workshop.retrofit_stations)
             ]
 
-    def get_available_stations(self, track_id: str) -> int:
-        """Get number of available retrofit stations on track."""
-        if track_id not in self.workshops_by_track:
-            return 0
-        workshop = self.workshops_by_track[track_id]
-        return workshop.retrofit_stations - self.occupied_stations[track_id]
+    def get_resource(self, track_id: str) -> Any:
+        """Get SimPy Resource for requesting stations."""
+        return self.resources[track_id]
 
-    def occupy_stations(self, track_id: str, count: int, current_time: float = 0.0, wagon_id: str | None = None) -> bool:
-        """Occupy retrofit stations. Returns True if successful."""
-        available = self.get_available_stations(track_id)
-        if count <= available:
-            self.occupied_stations[track_id] += count
-            stations = self.stations.get(track_id, [])
-            occupied_count = 0
-            for station in stations:
-                if not station.is_occupied and occupied_count < count:
-                    station.is_occupied = True
-                    station.last_occupied_time = current_time
-                    station.current_wagon_id = wagon_id
-                    occupied_count += 1
-            return True
-        return False
+    def get_available_stations(self, track_id: str) -> int:
+        """Get number of available stations (for backward compatibility)."""
+        return sum(1 for s in self.stations.get(track_id, []) if not s.is_occupied)
+
+    def occupy_stations(
+        self, track_id: str, count: int, current_time: float = 0.0, wagon_id: str | None = None
+    ) -> bool:
+        """Occupy stations (for backward compatibility - will be removed)."""
+        for _ in range(count):
+            self.record_station_occupied(track_id, wagon_id or '', current_time)
+        return True
 
     def release_stations(self, track_id: str, count: int, current_time: float = 0.0) -> None:
-        """Release retrofit stations."""
-        if track_id in self.occupied_stations:
-            self.occupied_stations[track_id] = max(0, self.occupied_stations[track_id] - count)
-            stations = self.stations.get(track_id, [])
-            released_count = 0
-            for station in stations:
-                if station.is_occupied and released_count < count:
-                    station.is_occupied = False
-                    if station.last_occupied_time is not None:
-                        station.total_busy_time += current_time - station.last_occupied_time
-                        if station.current_wagon_id:
-                            station.history.append((station.last_occupied_time, current_time, station.current_wagon_id))
-                    station.wagons_completed += 1
-                    station.current_wagon_id = None
-                    released_count += 1
-    
+        """Release stations (for backward compatibility - will be removed)."""
+        for _ in range(count):
+            self.record_station_released(track_id, current_time)
 
+    def record_station_occupied(self, track_id: str, wagon_id: str, time: float) -> None:
+        """Record station occupied for metrics (find first free station)."""
+        for station in self.stations.get(track_id, []):
+            if not station.is_occupied:
+                station.is_occupied = True
+                station.last_occupied_time = time
+                station.current_wagon_id = wagon_id
+                break
+
+    def record_station_released(self, track_id: str, time: float) -> None:
+        """Record station released for metrics (find first occupied station)."""
+        for station in self.stations.get(track_id, []):
+            if station.is_occupied:
+                station.is_occupied = False
+                if station.last_occupied_time is not None:
+                    station.total_busy_time += time - station.last_occupied_time
+                    if station.current_wagon_id:
+                        station.history.append((station.last_occupied_time, time, station.current_wagon_id))
+                station.wagons_completed += 1
+                station.current_wagon_id = None
+                break

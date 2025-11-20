@@ -18,8 +18,12 @@ class ProcessTimes(BaseModel):
     )
     wagon_coupling_time: float = Field(default=1.0, ge=0, description='Time in minutes to couple one wagon')
     wagon_decoupling_time: float = Field(default=1.0, ge=0, description='Time in minutes to decouple one wagon')
-    wagon_move_to_next_station: float = Field(default=0.5, ge=0, description='Time in minutes to move wagons to next station')
-    wagon_coupling_retrofitted_time: float = Field(default=2.0, ge=0, description='Time in minutes to couple retrofitted wagon (DAC coupler)')
+    wagon_move_to_next_station: float = Field(
+        default=0.5, ge=0, description='Time in minutes to move wagons to next station'
+    )
+    wagon_coupling_retrofitted_time: float = Field(
+        default=2.0, ge=0, description='Time in minutes to couple retrofitted wagon (DAC coupler)'
+    )
     wagon_retrofit_time: float = Field(
         default=60.0, ge=0, description='Time in minutes to retrofit one wagon at a station'
     )

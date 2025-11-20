@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class CouplerType(Enum):
-    """Coupler type for wagons"""
+    """Coupler type for wagons."""
 
     SCREW = 'screw'
     DAC = 'dac'
 
 
 class WagonStatus(Enum):
-    """Wagon status events"""
+    """Wagon status events."""
 
     PARKING = 'parking'
     TO_BE_RETROFFITED = 'to_be_retrofitted'

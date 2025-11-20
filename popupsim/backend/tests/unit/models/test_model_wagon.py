@@ -204,6 +204,8 @@ class TestWagon:
 
         from models.wagon import WagonStatus
 
+        from models.wagon import CouplerType
+        
         expected_dict = {
             'wagon_id': 'W014',
             'length': 18.5,
@@ -216,6 +218,7 @@ class TestWagon:
             'retrofit_start_time': 180.0,
             'retrofit_end_time': 240.0,
             'status': WagonStatus.UNKNOWN,
+            'coupler_type': CouplerType.SCREW,
         }
 
         assert wagon_dict == expected_dict

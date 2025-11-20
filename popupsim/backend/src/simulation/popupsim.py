@@ -1,18 +1,24 @@
+"""PopUp-Sim simulation orchestrator."""
+
 from collections.abc import Generator
 import logging
-from typing import Any, cast
+from typing import Any
+from typing import cast
 
 from models.locomotive import Locomotive
 from models.locomotive import LocoStatus
 from models.scenario import Scenario
 from models.track import TrackType
 from models.train import Train
+from models.wagon import CouplerType
 from models.wagon import Wagon
 from models.wagon import WagonStatus
-from models.wagon import CouplerType
 from models.workshop import Workshop
 
-from .jobs import TransportJob, execute_transport_job
+from .analysis.collectors.wagon_flow import WagonFlowCollector
+from .analysis.metrics import SimulationMetrics
+from .jobs import TransportJob
+from .jobs import execute_transport_job
 from .resource_pool import ResourcePool
 from .route_finder import find_route
 from .sim_adapter import SimulationAdapter
@@ -78,14 +84,33 @@ class PopupSim:  # pylint: disable=too-few-public-methods
             raise ValueError('Scenario must have tracks and topology for capacity management.')
 
         # Initialize workshop capacity management
-        self.workshop_capacity = WorkshopCapacityManager(self.workshops_queue)
+        self.workshop_capacity = WorkshopCapacityManager(sim, self.workshops_queue)
+
+        # Create stores for wagon flow coordination
+        self.wagons_ready_for_stations: dict[str, Any] = {}
+        self.wagons_completed: dict[str, Any] = {}
+
+        # Initialize metrics collection
+        self.metrics = SimulationMetrics()
+        self.metrics.register(WagonFlowCollector())
+        for workshop in self.workshops_queue:
+            track_id = workshop.track_id
+            self.wagons_ready_for_stations[track_id] = sim.create_store(capacity=1000)
+            self.wagons_completed[track_id] = sim.create_store(capacity=1000)
 
         # Cache track lookups to avoid repeated list comprehensions
         if not scenario.tracks:
             raise ValueError('Scenario must have tracks configured')
-        self.parking_tracks = [t for t in scenario.tracks
-                              if t.type == TrackType.PARKING or t.type.value == 'resourceparking']
+        self.parking_tracks = [
+            t
+            for t in scenario.tracks
+            if t.type == TrackType.PARKING or (hasattr(t.type, 'value') and t.type.value == 'resourceparking')
+        ]
         self.retrofitted_tracks = [t for t in scenario.tracks if t.type == TrackType.RETROFITTED]
+
+        if not self.parking_tracks:
+            # Try to find any track that could serve as parking
+            self.parking_tracks = [t for t in scenario.tracks if 'parking' in str(t.type).lower()]
 
         if not self.parking_tracks:
             raise ValueError('Scenario must have at least one parking track')
@@ -122,16 +147,25 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.sim.run_process(process_train_arrivals, self)
         self.sim.run_process(pickup_wagons_to_retrofit, self)
         self.sim.run_process(move_wagons_to_stations, self)
-        self.sim.run_process(process_retrofit_work, self)
         self.sim.run_process(pickup_retrofitted_wagons, self)
         self.sim.run_process(move_to_parking, self)
 
         self.sim.run(until)
         logger.info('Simulation completed.')
 
+    def get_metrics(self) -> dict[str, list[dict[str, Any]]]:
+        """Get simulation metrics grouped by category.
+
+        Returns
+        -------
+        dict[str, list[dict[str, Any]]]
+            Metrics grouped by category.
+        """
+        return self.metrics.get_results()
+
 
 def process_train_arrivals(popupsim: PopupSim) -> Generator[Any]:
-    """Generator function to simulate train arrivals.
+    """Simulate train arrivals.
 
     This function generates train arrivals based on the provided scenario.
     It yields train arrivals as Train objects.
@@ -187,7 +221,7 @@ def process_train_arrivals(popupsim: PopupSim) -> Generator[Any]:
 
 
 def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
-    """Generator function to pickup wagons from collection and move to retrofit.
+    """Pickup wagons from collection and move to retrofit.
 
     Waits for each train to be fully processed before picking up its wagons.
 
@@ -252,7 +286,11 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
         loco = yield from allocate_locomotive(popupsim)
 
         # Pick first collection track with wagons
-        collection_track_id = list(wagons_by_track.keys())[0]
+        try:
+            collection_track_id = next(iter(wagons_by_track))
+        except StopIteration:
+            yield popupsim.sim.delay(1.0)
+            continue
         collection_wagons = wagons_by_track[collection_track_id]
 
         # Travel from loco position to collection track
@@ -288,8 +326,13 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
 
             # Travel from collection to retrofit
             from_track = loco.track_id
-            logger.info('🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
-                       loco.locomotive_id, from_track, retrofit_track_id, len(retrofit_wagons))
+            logger.info(
+                '🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
+                loco.locomotive_id,
+                from_track,
+                retrofit_track_id,
+                len(retrofit_wagons),
+            )
             yield from move_locomotive(popupsim, loco, from_track, retrofit_track_id)
 
             # Add wagons to retrofit track (still coupled to loco)
@@ -311,31 +354,23 @@ def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
         loco.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
         yield from release_locomotive(popupsim, loco)
 
-        # Now mark all delivered wagons as ready for station movement
+        # Now mark all delivered wagons as ready and signal stores
         current_time = popupsim.sim.current_time()
         for retrofit_track_id, retrofit_wagons in wagons_by_retrofit.items():
             for wagon in retrofit_wagons:
                 wagon.status = WagonStatus.ON_RETROFIT_TRACK
-                logger.info(
-                    'Wagon %s ready for station at t=%.1f', wagon.wagon_id, current_time
-                )
+                popupsim.metrics.record_event('wagon_delivered', {'wagon_id': wagon.wagon_id, 'time': current_time})
+                logger.info('Wagon %s ready for station at t=%.1f', wagon.wagon_id, current_time)
+
+            # Signal batch ready for this track
+            yield popupsim.wagons_ready_for_stations[retrofit_track_id].put(retrofit_wagons)
 
 
 def move_wagons_to_stations(popupsim: PopupSim) -> Generator[Any]:
-    """Move wagons from retrofit track to workshop stations using routes.
+    """Move wagon batches from retrofit track to stations.
 
-    Wagons wait on retrofit track until a station becomes available,
-    then travel via route to the workshop station location.
-
-    Parameters
-    ----------
-    popupsim : PopupSim
-        The PopupSim instance.
-
-    Yields
-    ------
-    Any
-        SimPy timeout events.
+    Blocks until batch delivered, travels via route, decouples sequentially,
+    then spawns independent process for each wagon.
     """
     scenario = popupsim.scenario
     if not scenario.routes:
@@ -343,227 +378,167 @@ def move_wagons_to_stations(popupsim: PopupSim) -> Generator[Any]:
 
     logger.info('Starting wagon-to-station movement process')
 
-    while True:
-        # Check each retrofit track for waiting wagons
-        for retrofit_track_id, workshop in popupsim.workshop_capacity.workshops_by_track.items():
-            # Find wagons waiting on this retrofit track
-            waiting_wagons = [
-                w
-                for w in popupsim.wagons_queue
-                if w.track_id == retrofit_track_id and w.status == WagonStatus.ON_RETROFIT_TRACK
-            ]
-
-            if not waiting_wagons:
-                continue
-
-            # Check available stations
-            available_stations = popupsim.workshop_capacity.get_available_stations(retrofit_track_id)
-
-            # Batch strategy: wait for all stations to be free, then process next batch
-            total_stations = workshop.retrofit_stations
-            if available_stations == total_stations and len(waiting_wagons) > 0:
-                # All stations free - process next batch
-                batch_size = min(len(waiting_wagons), total_stations)
-                wagons_to_move = waiting_wagons[:batch_size]
-                workshop_id = workshop.workshop_id
-            else:
-                continue
-
-            if not wagons_to_move:
-                continue
-
-            # All wagons move together as a batch (they're coupled)
-            route_to_workshop = find_route(scenario.routes, retrofit_track_id, workshop_id)
-            if route_to_workshop and route_to_workshop.duration:
-                logger.info(
-                    '🚂 ROUTE: %d wagons traveling [%s → %s] via route (duration: %.1f min)',
-                    len(wagons_to_move),
-                    retrofit_track_id,
-                    workshop_id,
-                    route_to_workshop.duration,
-                )
-                for wagon in wagons_to_move:
-                    wagon.status = WagonStatus.MOVING_TO_STATION
-                yield popupsim.sim.delay(route_to_workshop.duration)
-            else:
-                logger.warning('⚠️  No route found from %s to %s', retrofit_track_id, workshop_id)
-
-            # Sequential decoupling: decouple first wagon, move to next station, repeat
-            process_times = popupsim.scenario.process_times
-            for i, wagon in enumerate(wagons_to_move):
-                # Decouple wagon at current station
-                yield popupsim.sim.delay(process_times.wagon_decoupling_time)
-                current_time = popupsim.sim.current_time()
-                popupsim.workshop_capacity.occupy_stations(retrofit_track_id, 1, current_time, wagon.wagon_id)
-                wagon.status = WagonStatus.RETROFITTING
-                logger.info('✓ Wagon %s decoupled at station (t=%.1f)', wagon.wagon_id, current_time)
-                
-                # Move remaining wagons to next station (if not last wagon)
-                if i < len(wagons_to_move) - 1:
-                    yield popupsim.sim.delay(process_times.wagon_move_to_next_station)
-                    logger.info('🚂 Loco moved remaining wagons to next station')
-
-        # NOTE: Polling with 0.5-minute interval is acceptable for MVP:
-        # - Simulation time is cheap (not real-time)
-        # - Provides responsive station allocation
-        # - Simplifies coordination between processes
-        yield popupsim.sim.delay(0.5)
+    # Process each track independently
+    for track_id in popupsim.wagons_ready_for_stations:
+        popupsim.sim.run_process(_process_track_batches, popupsim, track_id)
 
 
-def process_retrofit_work(popupsim: PopupSim) -> Generator[Any]:
-    """Generator function to process retrofit work and release stations.
-
-    Monitors wagons in RETROFITTING status and releases stations after work completes.
-
-    Parameters
-    ----------
-    popupsim : PopupSim
-        The PopupSim instance.
-
-    Yields
-    ------
-    Any
-        SimPy timeout events.
-    """
+def _process_track_batches(popupsim: PopupSim, track_id: str) -> Generator[Any]:
+    """Process batches for a single track."""
     scenario = popupsim.scenario
-    process_times = scenario.process_times
-    if not process_times:
-        raise ValueError('Scenario must have process_times configured')
-
-    logger.info('Starting retrofit work processor')
 
     while True:
-        # Find wagons that are retrofitting
-        retrofitting_wagons = [
-            w for w in popupsim.wagons_queue if w.status == WagonStatus.RETROFITTING and not w.retrofit_start_time
-        ]
+        # Block until batch delivered
+        batch = yield popupsim.wagons_ready_for_stations[track_id].get()
 
-        if retrofitting_wagons:
-            for wagon in retrofitting_wagons:
-                # Start retrofit work
-                wagon.retrofit_start_time = popupsim.sim.current_time()
-                logger.debug('Wagon %s started retrofit at t=%.1f', wagon.wagon_id, wagon.retrofit_start_time)
-                # Schedule completion
-                popupsim.sim.run_process(complete_retrofit, popupsim, wagon, process_times.wagon_retrofit_time)
+        workshop = popupsim.workshop_capacity.workshops_by_track[track_id]
+        workshop_id = workshop.workshop_id
 
-        # NOTE: Polling with 1-minute interval is acceptable for MVP:
-        # - Matches business granularity (retrofit work is 30+ minutes)
-        # - Avoids complexity of event coordination
-        # - Simulation time is not a bottleneck
-        yield popupsim.sim.delay(1.0)
+        # Travel to workshop via route
+        route = find_route(scenario.routes, track_id, workshop_id)
+        if route and route.duration:
+            logger.info(
+                '🚂 ROUTE: %d wagons traveling [%s → %s] via route (duration: %.1f min)',
+                len(batch),
+                track_id,
+                workshop_id,
+                route.duration,
+            )
+            for wagon in batch:
+                wagon.status = WagonStatus.MOVING_TO_STATION
+            yield popupsim.sim.delay(route.duration)
+        else:
+            logger.warning('⚠️  No route found from %s to %s', track_id, workshop_id)
+
+        # Sequential decoupling and spawn processes
+        process_times = scenario.process_times
+        for i, wagon in enumerate(batch):
+            # Decouple wagon
+            yield popupsim.sim.delay(process_times.wagon_decoupling_time)
+            logger.info('✓ Wagon %s decoupled at station (t=%.1f)', wagon.wagon_id, popupsim.sim.current_time())
+
+            # Spawn independent process for this wagon
+            popupsim.sim.run_process(process_single_wagon, popupsim, wagon, track_id)
+
+            # Move to next station (if not last)
+            if i < len(batch) - 1:
+                yield popupsim.sim.delay(process_times.wagon_move_to_next_station)
+                logger.info('🚂 Loco moved remaining wagons to next station')
 
 
-def complete_retrofit(popupsim: PopupSim, wagon: Wagon, retrofit_duration: float) -> Generator[Any]:
-    """Complete retrofit work for a wagon. Station remains occupied until pickup.
+def process_single_wagon(popupsim: PopupSim, wagon: Wagon, track_id: str) -> Generator[Any]:
+    """Process single wagon at workshop station using SimPy Resource.
 
-    Parameters
-    ----------
-    popupsim : PopupSim
-        The PopupSim instance.
-    wagon : Wagon
-        The wagon being retrofitted.
-    retrofit_duration : float
-        Duration of retrofit work in minutes.
-
-    Yields
-    ------
-    Any
-        SimPy timeout events.
+    Blocks until station available, processes wagon, then signals completion.
     """
-    yield popupsim.sim.delay(retrofit_duration)
+    workshop_resource = popupsim.workshop_capacity.get_resource(track_id)
+    process_times = popupsim.scenario.process_times
 
-    wagon.status = WagonStatus.RETROFITTED
-    wagon.retrofit_end_time = popupsim.sim.current_time()
-    wagon.needs_retrofit = False
-    wagon.coupler_type = CouplerType.DAC
-    logger.info(
-        'Wagon %s retrofit completed at t=%s, coupler changed to DAC', wagon.wagon_id, wagon.retrofit_end_time
-    )
+    # Request station (blocks until available)
+    with workshop_resource.request() as station_req:
+        yield station_req
+
+        # Station acquired
+        current_time = popupsim.sim.current_time()
+        wagon.status = WagonStatus.RETROFITTING
+        wagon.retrofit_start_time = current_time
+        popupsim.workshop_capacity.record_station_occupied(track_id, wagon.wagon_id, current_time)
+        logger.debug('Wagon %s started retrofit at station (t=%.1f)', wagon.wagon_id, current_time)
+
+        # Perform retrofit work
+        yield popupsim.sim.delay(process_times.wagon_retrofit_time)
+
+        # Retrofit complete
+        current_time = popupsim.sim.current_time()
+        wagon.status = WagonStatus.RETROFITTED
+        wagon.retrofit_end_time = current_time
+        wagon.needs_retrofit = False
+        wagon.coupler_type = CouplerType.DAC
+        popupsim.workshop_capacity.record_station_released(track_id, current_time)
+        popupsim.metrics.record_event('wagon_retrofitted', {'wagon_id': wagon.wagon_id, 'time': current_time})
+        logger.info(
+            'Wagon %s retrofit completed at t=%s, coupler changed to DAC', wagon.wagon_id, wagon.retrofit_end_time
+        )
+
+        # Signal completion
+        yield popupsim.wagons_completed[track_id].put(wagon)
+    # Station automatically released
 
 
 def pickup_retrofitted_wagons(popupsim: PopupSim) -> Generator[Any]:
-    """Pickup retrofitted wagons and move to retrofitted track, releasing stations.
-
-    Parameters
-    ----------
-    popupsim : PopupSim
-        The PopupSim instance.
-
-    Yields
-    ------
-    Any
-        SimPy timeout events.
-    """
-    yield popupsim.sim.delay(20.0)
+    """Pickup retrofitted wagons in batches."""
     logger.info('Starting retrofitted wagon pickup process')
+
+    # Process each track independently
+    for track_id in popupsim.wagons_completed:
+        popupsim.sim.run_process(_pickup_track_batches, popupsim, track_id)
+
+
+def _pickup_track_batches(popupsim: PopupSim, track_id: str) -> Generator[Any]:
+    """Pickup batches from a single track."""
     retrofitted_track = popupsim.retrofitted_tracks[0]
     parking_tracks = popupsim.parking_tracks
     process_times = popupsim.scenario.process_times
+    workshop = popupsim.workshop_capacity.workshops_by_track[track_id]
+    batch_size = workshop.retrofit_stations
 
     while True:
-        retrofitted_by_track: dict[str, list[Wagon]] = {}
-        for wagon in popupsim.wagons_queue:
-            if (wagon.status == WagonStatus.RETROFITTED and wagon.track_id and
-                wagon.track_id != retrofitted_track.id and wagon.track_id.startswith('retrofit_')):
-                if wagon.track_id not in retrofitted_by_track:
-                    retrofitted_by_track[wagon.track_id] = []
-                retrofitted_by_track[wagon.track_id].append(wagon)
+        # Collect full batch (blocks until all ready)
+        batch = []
+        for _ in range(batch_size):
+            wagon = yield popupsim.wagons_completed[track_id].get()
+            batch.append(wagon)
 
-        if not retrofitted_by_track:
-            yield popupsim.sim.delay(1.0)
-            continue
-
-        retrofit_track_id = list(retrofitted_by_track.keys())[0]
-        all_retrofitted = retrofitted_by_track[retrofit_track_id]
-        total_stations = popupsim.workshop_capacity.workshops_by_track[retrofit_track_id].retrofit_stations
-        
-        # Wait until we have a full batch (all stations completed)
-        if len(all_retrofitted) >= total_stations:
-            wagons_to_pickup = all_retrofitted[:total_stations]
-        else:
-            yield popupsim.sim.delay(1.0)
-            continue
+        logger.info('Full batch of %d wagons ready for pickup', len(batch))
 
         # Get locomotive
         loco = yield from allocate_locomotive(popupsim)
         from_track = loco.track_id
-        logger.info('🚂 ROUTE: Loco %s traveling [%s → %s]', loco.locomotive_id, from_track, retrofit_track_id)
-        yield from move_locomotive(popupsim, loco, from_track, retrofit_track_id)
+        logger.info('🚂 ROUTE: Loco %s traveling [%s → %s]', loco.locomotive_id, from_track, track_id)
+        yield from move_locomotive(popupsim, loco, from_track, track_id)
 
-        # Sequential coupling: couple first wagon, move to next station, repeat
-        for i, wagon in enumerate(wagons_to_pickup):
-            # Couple wagon (use wagon's coupler type)
-            coupling_time = (process_times.wagon_coupling_retrofitted_time if wagon.coupler_type == CouplerType.DAC 
-                           else process_times.wagon_coupling_time)
+        # Sequential coupling
+        for i, wagon in enumerate(batch):
+            coupling_time = (
+                process_times.wagon_coupling_retrofitted_time
+                if wagon.coupler_type == CouplerType.DAC
+                else process_times.wagon_coupling_time
+            )
             yield popupsim.sim.delay(coupling_time)
-            current_time = popupsim.sim.current_time()
-            popupsim.workshop_capacity.release_stations(retrofit_track_id, 1, current_time)
-            logger.info('✓ Wagon %s coupled (%s) and station released (t=%.1f)', 
-                       wagon.wagon_id, wagon.coupler_type.value, current_time)
-            
-            # Move to next station (if not last wagon)
-            if i < len(wagons_to_pickup) - 1:
+            logger.info(
+                '✓ Wagon %s coupled (%s) (t=%.1f)',
+                wagon.wagon_id,
+                wagon.coupler_type.value,
+                popupsim.sim.current_time(),
+            )
+
+            if i < len(batch) - 1:
                 yield popupsim.sim.delay(process_times.wagon_move_to_next_station)
                 logger.info('🚂 Loco moved to next station')
 
         # Remove from retrofit track
-        for wagon in wagons_to_pickup:
-            popupsim.track_capacity.remove_wagon(retrofit_track_id, wagon.length)
+        for wagon in batch:
+            popupsim.track_capacity.remove_wagon(track_id, wagon.length)
             wagon.status = WagonStatus.MOVING
-            wagon.source_track_id = retrofit_track_id
+            wagon.source_track_id = track_id
             wagon.destination_track_id = retrofitted_track.id
             wagon.track_id = None
 
         # Travel to retrofitted track
-        logger.info('🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
-                   loco.locomotive_id, retrofit_track_id, retrofitted_track.id, len(wagons_to_pickup))
+        logger.info(
+            '🚂 ROUTE: Loco %s traveling [%s → %s] with %d wagons',
+            loco.locomotive_id,
+            track_id,
+            retrofitted_track.id,
+            len(batch),
+        )
         yield from move_locomotive(popupsim, loco, loco.track_id, retrofitted_track.id)
 
         # Decouple wagons
-        yield from decouple_wagons(popupsim, loco, len(wagons_to_pickup))
+        yield from decouple_wagons(popupsim, loco, len(batch))
 
         # Add to retrofitted track
-        for wagon in wagons_to_pickup:
+        for wagon in batch:
             popupsim.track_capacity.add_wagon(retrofitted_track.id, wagon.length)
             wagon.track_id = retrofitted_track.id
             wagon.source_track_id = None
@@ -601,7 +576,8 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
     while True:
         # Find wagons on retrofitted track
         wagons_on_retrofitted = [
-            w for w in popupsim.wagons_queue
+            w
+            for w in popupsim.wagons_queue
             if w.track_id == retrofitted_track.id and w.status == WagonStatus.RETROFITTED
         ]
 
@@ -624,8 +600,9 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
             continue
 
         # Batch all wagons that fit on selected parking track
-        wagons_to_move = [w for w in wagons_on_retrofitted
-                         if popupsim.track_capacity.can_add_wagon(parking_track.id, w.length)]
+        wagons_to_move = [
+            w for w in wagons_on_retrofitted if popupsim.track_capacity.can_add_wagon(parking_track.id, w.length)
+        ]
 
         if not wagons_to_move:
             current_parking_index = (current_parking_index + 1) % len(parking_tracks)
@@ -658,7 +635,7 @@ def _find_wagons_for_retrofit(popupsim: PopupSim, collection_wagons: list[Wagon]
     """Find wagons that can be moved to retrofit tracks with available stations."""
     wagons_to_pickup = []
     for wagon in collection_wagons:
-        for retrofit_track_id in popupsim.workshop_capacity.workshops_by_track.keys():
+        for retrofit_track_id in popupsim.workshop_capacity.workshops_by_track:
             available_stations = popupsim.workshop_capacity.get_available_stations(retrofit_track_id)
             if available_stations > 0 and popupsim.track_capacity.can_add_wagon(retrofit_track_id, wagon.length):
                 wagons_to_pickup.append((wagon, retrofit_track_id))
@@ -723,8 +700,11 @@ def couple_wagons(popupsim: PopupSim, loco: Locomotive, wagon_count: int, couple
     """
     loco.record_status_change(popupsim.sim.current_time(), LocoStatus.COUPLING)
     process_times = popupsim.scenario.process_times
-    time_per_wagon = (process_times.wagon_coupling_retrofitted_time if coupler_type == CouplerType.DAC 
-                     else process_times.wagon_coupling_time)
+    time_per_wagon = (
+        process_times.wagon_coupling_retrofitted_time
+        if coupler_type == CouplerType.DAC
+        else process_times.wagon_coupling_time
+    )
     coupling_time = wagon_count * time_per_wagon
     yield popupsim.sim.delay(coupling_time)
 

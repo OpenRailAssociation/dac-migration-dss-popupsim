@@ -87,6 +87,22 @@ class SimulationAdapter(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def create_resource(self, capacity: int) -> Any:
+        """Create a resource with limited capacity.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum number of concurrent users.
+
+        Returns
+        -------
+        Any
+            Simulator-specific resource object.
+        """
+        raise NotImplementedError
+
 
 class SimPyAdapter(SimulationAdapter):
     """Adapter for SimPy simulation framework.
@@ -121,24 +137,26 @@ class SimPyAdapter(SimulationAdapter):
 
     @classmethod
     def create_simpy_resource(cls, environment: Any, capacity: int) -> Any:
+        """Create SimPy Resource with specified capacity."""
         import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
 
         return simpy.Resource(environment, capacity)
 
     def create_store(self, capacity: int) -> Any:
         """Create a SimPy Store for resource pooling.
-        
+
         Parameters
         ----------
         capacity : int
             Maximum capacity of the store.
-            
+
         Returns
         -------
         Any
             SimPy Store instance.
         """
         import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
         return simpy.Store(self._env, capacity=capacity)
 
     def current_time(self) -> float:
@@ -223,3 +241,20 @@ class SimPyAdapter(SimulationAdapter):
             yield from ()
 
         return self._env.process(_wrap())
+
+    def create_resource(self, capacity: int) -> Any:
+        """Create a SimPy Resource with limited capacity.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum number of concurrent users.
+
+        Returns
+        -------
+        Any
+            SimPy Resource object.
+        """
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
+        return simpy.Resource(self._env, capacity=capacity)
