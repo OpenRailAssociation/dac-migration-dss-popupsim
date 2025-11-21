@@ -56,6 +56,10 @@ class FakeAdapter:
     def create_store(self, capacity: int) -> 'FakeStore':
         """Simulate adapter.create_store."""
         return FakeStore()
+    
+    def current_time(self) -> float:
+        """Simulate adapter.current_time."""
+        return 0.0
 
 
 class FakeStore:

@@ -258,3 +258,28 @@ class SimPyAdapter(SimulationAdapter):
         import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
 
         return simpy.Resource(self._env, capacity=capacity)
+
+    def create_event(self) -> Any:
+        """Create a SimPy Event for signaling.
+
+        Returns
+        -------
+        Any
+            SimPy Event wrapper with wait() and trigger() methods.
+        """
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
+        class EventWrapper:
+            def __init__(self, env: Any) -> None:
+                self._env = env
+                self._event = simpy.Event(env)
+
+            def wait(self) -> Any:
+                return self._event
+
+            def trigger(self) -> None:
+                if not self._event.triggered:
+                    self._event.succeed()
+                self._event = simpy.Event(self._env)
+
+        return EventWrapper(self._env)

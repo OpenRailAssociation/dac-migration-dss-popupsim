@@ -36,6 +36,13 @@ class TrackSelectionStrategy(str, Enum):
     RANDOM = 'random'
 
 
+class LocoDeliveryStrategy(str, Enum):
+    """Strategy for locomotive delivery to workshop stations."""
+
+    RETURN_TO_PARKING = 'return_to_parking'
+    DIRECT_DELIVERY = 'direct_delivery'
+
+
 class Scenario(BaseModel):
     """Scenario model for simulation scenarios.
 
@@ -54,6 +61,10 @@ class Scenario(BaseModel):
     )
     retrofit_selection_strategy: TrackSelectionStrategy = Field(
         default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting retrofit tracks'
+    )
+    loco_delivery_strategy: LocoDeliveryStrategy = Field(
+        default=LocoDeliveryStrategy.RETURN_TO_PARKING,
+        description='Strategy for locomotive delivery to workshop stations'
     )
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
     process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')

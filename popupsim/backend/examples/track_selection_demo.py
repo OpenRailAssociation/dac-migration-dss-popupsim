@@ -10,6 +10,7 @@ from datetime import datetime
 
 from models.locomotive import Locomotive
 from models.process_times import ProcessTimes
+from models.route import Route
 from models.scenario import Scenario
 from models.scenario import TrackSelectionStrategy
 from models.topology import Topology
@@ -24,12 +25,7 @@ from simulation.sim_adapter import SimPyAdapter
 
 def create_topology_with_two_tracks() -> dict:
     """Create topology with two collection tracks."""
-    return {
-        'edges': [
-            {'edge_id': 'edge_1', 'from_node': 'n1', 'to_node': 'n2', 'length': 100.0},
-            {'edge_id': 'edge_2', 'from_node': 'n3', 'to_node': 'n4', 'length': 100.0},
-        ]
-    }
+    return {'edges': [{'id': 'e1', 'length': 100.0}, {'id': 'e2', 'length': 100.0}]}
 
 
 def run_strategy_demo(strategy: TrackSelectionStrategy) -> None:
@@ -49,36 +45,28 @@ def run_strategy_demo(strategy: TrackSelectionStrategy) -> None:
 
     train = Train(train_id='T1', arrival_time=datetime(2031, 7, 4, 8, 0, 0, tzinfo=UTC), wagons=wagons)
 
-    # Two collection tracks (100m each, 75m capacity each)
     tracks = [
-        Track(id='collection_1', name='Collection 1', type=TrackType.COLLECTION, edges=['edge_1']),
-        Track(id='collection_2', name='Collection 2', type=TrackType.COLLECTION, edges=['edge_2']),
+        Track(id='parking', type=TrackType.PARKING, edges=['e1']),
+        Track(id='collection_1', type=TrackType.COLLECTION, edges=['e1']),
+        Track(id='collection_2', type=TrackType.COLLECTION, edges=['e2']),
+        Track(id='retrofitted', type=TrackType.RETROFITTED, edges=['e1']),
     ]
 
-    loco = Locomotive(
-        locomotive_id='L1',
-        name='Loco 1',
-        start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC),
-        track_id='collection_1',
-    )
+    loco = Locomotive(locomotive_id='L1', name='Loco 1',
+                     start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
+                     end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC), track_id='parking')
 
-    workshop = Workshop(
-        workshop_id='WS1', start_date='2031-07-04T00:00:00Z', end_date='2031-07-05T00:00:00Z', track_id='collection_1'
-    )
+    routes = [
+        Route(route_id='parking_to_col1', path=['parking', 'collection_1'], duration=1.0),
+        Route(route_id='parking_to_col2', path=['parking', 'collection_2'], duration=1.0),
+    ]
 
     scenario = Scenario(
-        scenario_id=f'demo_{strategy.value}',
-        start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC),
-        trains=[train],
-        tracks=tracks,
-        locomotives=[loco],
-        workshops=[workshop],
-        topology=topology,
+        scenario_id=f'demo_{strategy.value}', start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
+        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC), trains=[train], tracks=tracks,
+        locomotives=[loco], workshops=[], topology=topology, routes=routes,
         process_times=ProcessTimes(train_to_hump_delay=5.0, wagon_hump_interval=1.0),
-        track_selection_strategy=strategy,
-    )
+        track_selection_strategy=strategy)
 
     sim = SimPyAdapter.create_simpy_adapter()
     popup_sim = PopupSim(sim, scenario)

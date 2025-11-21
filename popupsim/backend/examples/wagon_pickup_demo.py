@@ -12,7 +12,7 @@ from models.locomotive import Locomotive
 from models.process_times import ProcessTimes
 from models.route import Route
 from models.scenario import Scenario
-from models.scenario import TrackSelectionStrategy
+
 from models.topology import Topology
 from models.track import Track
 from models.track import TrackType
@@ -26,74 +26,36 @@ from simulation.sim_adapter import SimPyAdapter
 
 def create_demo_scenario() -> Scenario:
     """Create scenario with collection, retrofit, and parking tracks."""
-    # Topology: parking -> collection -> retrofit
-    topology = Topology(
-        {
-            'edges': [
-                {'edge_id': 'e_parking', 'from_node': 'n1', 'to_node': 'n2', 'length': 100.0},
-                {'edge_id': 'e_collection', 'from_node': 'n3', 'to_node': 'n4', 'length': 200.0},
-                {'edge_id': 'e_retrofit', 'from_node': 'n5', 'to_node': 'n6', 'length': 150.0},
-            ]
-        }
-    )
+    topology = Topology({'edges': [{'id': 'e1', 'length': 200.0}]})
 
-    # Tracks
-    parking_track = Track(id='parking_1', name='Resource Parking', type=TrackType.PARKING, edges=['e_parking'])
+    tracks = [
+        Track(id='parking_1', type=TrackType.PARKING, edges=['e1']),
+        Track(id='collection_1', type=TrackType.COLLECTION, edges=['e1']),
+        Track(id='retrofit_1', type=TrackType.RETROFIT, edges=['e1']),
+        Track(id='retrofitted', type=TrackType.RETROFITTED, edges=['e1']),
+    ]
 
-    collection_track = Track(
-        id='collection_1', name='Collection Track 1', type=TrackType.COLLECTION, edges=['e_collection']
-    )
-
-    retrofit_track = Track(id='retrofit_1', name='Retrofit Track', type=TrackType.RETROFIT, edges=['e_retrofit'])
-
-    # Routes
     routes = [
         Route(route_id='parking_to_collection', path=['parking_1', 'collection_1'], duration=5.0),
         Route(route_id='collection_to_retrofit', path=['collection_1', 'retrofit_1'], duration=3.0),
         Route(route_id='retrofit_to_parking', path=['retrofit_1', 'parking_1'], duration=5.0),
+        Route(route_id='retrofit_to_retrofitted', path=['retrofit_1', 'retrofitted'], duration=2.0),
     ]
 
-    # Locomotive at parking
-    loco = Locomotive(
-        locomotive_id='L1',
-        name='Loco 1',
-        start_date=datetime(2031, 7, 4, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, tzinfo=UTC),
-        track_id='parking_1',
-    )
+    loco = Locomotive(locomotive_id='L1', name='Loco 1',
+                     start_date=datetime(2031, 7, 4, 0, 0, tzinfo=UTC),
+                     end_date=datetime(2031, 7, 5, 0, 0, tzinfo=UTC), track_id='parking_1')
 
-    # Workshop
-    workshop = Workshop(
-        workshop_id='WS1', start_date='2031-07-04T00:00:00Z', end_date='2031-07-05T00:00:00Z', track_id='retrofit_1'
-    )
-
-    # Train with 3 wagons
     wagons = [Wagon(wagon_id=f'W{i}', length=20.0, is_loaded=False, needs_retrofit=True) for i in range(1, 4)]
-
-    train = Train(
-        train_id='T1',
-        arrival_time=datetime(2031, 7, 4, 0, 5, tzinfo=UTC),  # 5 minutes after start
-        wagons=wagons,
-    )
-
-    # Process times
-    process_times = ProcessTimes(
-        train_to_hump_delay=5.0, wagon_hump_interval=1.0, wagon_coupling_time=2.0, wagon_decoupling_time=2.0
-    )
+    train = Train(train_id='T1', arrival_time=datetime(2031, 7, 4, 0, 5, tzinfo=UTC), wagons=wagons)
+    process_times = ProcessTimes(train_to_hump_delay=5.0, wagon_hump_interval=1.0,
+                                wagon_coupling_time=2.0, wagon_decoupling_time=2.0)
 
     return Scenario(
-        scenario_id='wagon_pickup_demo',
-        start_date=datetime(2031, 7, 4, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, tzinfo=UTC),
-        trains=[train],
-        tracks=[parking_track, collection_track, retrofit_track],
-        locomotives=[loco],
-        workshops=[workshop],
-        routes=routes,
-        topology=topology,
-        process_times=process_times,
-        track_selection_strategy=TrackSelectionStrategy.FIRST_AVAILABLE,
-    )
+        scenario_id='wagon_pickup_demo', start_date=datetime(2031, 7, 4, 0, 0, tzinfo=UTC),
+        end_date=datetime(2031, 7, 5, 0, 0, tzinfo=UTC), trains=[train], tracks=tracks,
+        locomotives=[loco], workshops=[], routes=routes, topology=topology,
+        process_times=process_times)
 
 
 def print_simulation_state(popup_sim: PopupSim, time: float) -> None:

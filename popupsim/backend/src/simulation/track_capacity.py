@@ -98,3 +98,13 @@ class TrackCapacityManager:
             return random.choice(available_tracks)
 
         return None
+
+    def get_available_capacity(self, track_id: str) -> float:
+        """Get available capacity on track."""
+        if track_id not in self.track_capacities:
+            return 0.0
+        return self.track_capacities[track_id] - self.current_occupancy[track_id]
+
+    def get_total_capacity(self, track_id: str) -> float:
+        """Get total capacity of track."""
+        return self.track_capacities.get(track_id, 0.0)

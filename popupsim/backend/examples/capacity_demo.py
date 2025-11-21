@@ -15,6 +15,7 @@ from datetime import datetime
 
 from models.locomotive import Locomotive
 from models.process_times import ProcessTimes
+from models.route import Route
 from models.scenario import Scenario
 from models.topology import Topology
 from models.track import Track
@@ -28,7 +29,7 @@ from simulation.sim_adapter import SimPyAdapter
 
 def create_simple_topology() -> dict:
     """Create simple topology with one collection track of 100m."""
-    return {'edges': [{'edge_id': 'edge_1', 'from_node': 'node_1', 'to_node': 'node_2', 'length': 100.0}]}
+    return {'edges': [{'id': 'edge_1', 'length': 100.0}]}
 
 
 def scenario_within_capacity() -> None:
@@ -41,39 +42,30 @@ def scenario_within_capacity() -> None:
     print('Wagons: 3 wagons × 20m = 60m total')
     print('-' * 60)
 
-    # Create scenario
-    topology_data = create_simple_topology()
-    topology = Topology(topology_data)
-
+    topology = Topology(create_simple_topology())
     wagons = [Wagon(wagon_id=f'W{i}', length=20.0, is_loaded=False, needs_retrofit=True) for i in range(1, 4)]
-
     train = Train(train_id='T1', arrival_time=datetime(2031, 7, 4, 8, 0, 0, tzinfo=UTC), wagons=wagons)
-
-    track = Track(id='collection_1', name='Collection Track 1', type=TrackType.COLLECTION, edges=['edge_1'])
-
-    loco = Locomotive(
-        locomotive_id='L1',
-        name='Loco 1',
-        start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC),
-        track_id='collection_1',
-    )
-
-    workshop = Workshop(
-        workshop_id='WS1', start_date='2031-07-04T00:00:00Z', end_date='2031-07-05T00:00:00Z', track_id='collection_1'
-    )
-
+    
+    tracks = [
+        Track(id='parking', type=TrackType.PARKING, edges=['edge_1']),
+        Track(id='collection_1', type=TrackType.COLLECTION, edges=['edge_1']),
+        Track(id='retrofitted', type=TrackType.RETROFITTED, edges=['edge_1']),
+    ]
+    
+    loco = Locomotive(locomotive_id='L1', name='Loco 1',
+                     start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
+                     end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC), track_id='parking')
+    
+    routes = [
+        Route(route_id='parking_to_collection', path=['parking', 'collection_1'], duration=1.0),
+        Route(route_id='collection_to_retrofitted', path=['collection_1', 'retrofitted'], duration=1.0),
+    ]
+    
     scenario = Scenario(
-        scenario_id='within_capacity',
-        start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC),
-        trains=[train],
-        tracks=[track],
-        locomotives=[loco],
-        workshops=[workshop],
-        topology=topology,
-        process_times=ProcessTimes(train_to_hump_delay=5.0, wagon_hump_interval=1.0),
-    )
+        scenario_id='within_capacity', start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
+        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC), trains=[train], tracks=tracks,
+        locomotives=[loco], workshops=[], topology=topology, routes=routes,
+        process_times=ProcessTimes(train_to_hump_delay=5.0, wagon_hump_interval=1.0))
 
     # Run simulation
     sim = SimPyAdapter.create_simpy_adapter()
@@ -109,39 +101,30 @@ def scenario_exceeds_capacity() -> None:
     print('Wagons: 5 wagons × 20m = 100m total')
     print('-' * 60)
 
-    # Create scenario
-    topology_data = create_simple_topology()
-    topology = Topology(topology_data)
-
+    topology = Topology(create_simple_topology())
     wagons = [Wagon(wagon_id=f'W{i}', length=20.0, is_loaded=False, needs_retrofit=True) for i in range(1, 6)]
-
     train = Train(train_id='T1', arrival_time=datetime(2031, 7, 4, 8, 0, 0, tzinfo=UTC), wagons=wagons)
-
-    track = Track(id='collection_1', name='Collection Track 1', type=TrackType.COLLECTION, edges=['edge_1'])
-
-    loco = Locomotive(
-        locomotive_id='L1',
-        name='Loco 1',
-        start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC),
-        track_id='collection_1',
-    )
-
-    workshop = Workshop(
-        workshop_id='WS1', start_date='2031-07-04T00:00:00Z', end_date='2031-07-05T00:00:00Z', track_id='collection_1'
-    )
-
+    
+    tracks = [
+        Track(id='parking', type=TrackType.PARKING, edges=['edge_1']),
+        Track(id='collection_1', type=TrackType.COLLECTION, edges=['edge_1']),
+        Track(id='retrofitted', type=TrackType.RETROFITTED, edges=['edge_1']),
+    ]
+    
+    loco = Locomotive(locomotive_id='L1', name='Loco 1',
+                     start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
+                     end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC), track_id='parking')
+    
+    routes = [
+        Route(route_id='parking_to_collection', path=['parking', 'collection_1'], duration=1.0),
+        Route(route_id='collection_to_retrofitted', path=['collection_1', 'retrofitted'], duration=1.0),
+    ]
+    
     scenario = Scenario(
-        scenario_id='exceeds_capacity',
-        start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
-        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC),
-        trains=[train],
-        tracks=[track],
-        locomotives=[loco],
-        workshops=[workshop],
-        topology=topology,
-        process_times=ProcessTimes(train_to_hump_delay=5.0, wagon_hump_interval=1.0),
-    )
+        scenario_id='exceeds_capacity', start_date=datetime(2031, 7, 4, 0, 0, 0, tzinfo=UTC),
+        end_date=datetime(2031, 7, 5, 0, 0, 0, tzinfo=UTC), trains=[train], tracks=tracks,
+        locomotives=[loco], workshops=[], topology=topology, routes=routes,
+        process_times=ProcessTimes(train_to_hump_delay=5.0, wagon_hump_interval=1.0))
 
     # Run simulation
     sim = SimPyAdapter.create_simpy_adapter()
