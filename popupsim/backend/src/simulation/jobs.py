@@ -5,7 +5,12 @@ from dataclasses import dataclass
 import logging
 from typing import Any
 
+from models.locomotive import LocoStatus
+from models.wagon import CouplerType
 from models.wagon import Wagon
+from models.wagon import WagonStatus
+
+from .services import LocomotiveService
 
 logger = logging.getLogger('Jobs')
 
@@ -32,7 +37,7 @@ class TransportJob:
     resource_pool_name: str = 'locomotives'
 
 
-def execute_transport_job(popupsim: Any, job: TransportJob) -> Generator[Any]:
+def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: LocomotiveService) -> Generator[Any]:
     """Execute a transport job: allocate resource, move, couple, transport, decouple, release.
 
     Parameters
@@ -41,34 +46,25 @@ def execute_transport_job(popupsim: Any, job: TransportJob) -> Generator[Any]:
         The PopupSim instance.
     job : TransportJob
         The transport job to execute.
+    loco_service : LocomotiveService
+        Service for locomotive operations.
 
     Yields
     ------
     Any
         SimPy events.
     """
-    from models.locomotive import LocoStatus
-    from models.wagon import WagonStatus
-
-    from .popupsim import allocate_locomotive
-    from .popupsim import couple_wagons
-    from .popupsim import decouple_wagons
-    from .popupsim import move_locomotive
-    from .popupsim import release_locomotive
-
     # Allocate resource
-    resource = yield from allocate_locomotive(popupsim)
+    resource = yield from loco_service.allocate(popupsim)
 
     # Travel to pickup location
     logger.info('🚂 ROUTE: %s traveling [%s → %s]', resource.locomotive_id, resource.track_id, job.from_track)
-    yield from move_locomotive(popupsim, resource, resource.track_id, job.from_track)
+    yield from loco_service.move(popupsim, resource, resource.track_id, job.from_track)
 
     # Couple wagons (use first wagon's coupler type)
-    from models.wagon import CouplerType
-
     coupler_type = job.wagons[0].coupler_type if job.wagons else CouplerType.SCREW
     logger.debug('%s coupling %d wagons', resource.locomotive_id, len(job.wagons))
-    yield from couple_wagons(popupsim, resource, len(job.wagons), coupler_type)
+    yield from loco_service.couple_wagons(popupsim, resource, len(job.wagons), coupler_type)
 
     # Update wagon states - remove from source track
     for wagon in job.wagons:
@@ -86,11 +82,11 @@ def execute_transport_job(popupsim: Any, job: TransportJob) -> Generator[Any]:
         job.to_track,
         len(job.wagons),
     )
-    yield from move_locomotive(popupsim, resource, job.from_track, job.to_track)
+    yield from loco_service.move(popupsim, resource, job.from_track, job.to_track)
 
     # Decouple wagons
     logger.debug('%s decoupling %d wagons at %s', resource.locomotive_id, len(job.wagons), job.to_track)
-    yield from decouple_wagons(popupsim, resource, len(job.wagons))
+    yield from loco_service.decouple_wagons(popupsim, resource, len(job.wagons))
 
     # Update wagon states - add to destination track
     for wagon in job.wagons:
@@ -103,6 +99,6 @@ def execute_transport_job(popupsim: Any, job: TransportJob) -> Generator[Any]:
     # Return resource to parking
     parking_track_id = popupsim.parking_tracks[0].id
     logger.debug('%s returning to parking', resource.locomotive_id)
-    yield from move_locomotive(popupsim, resource, resource.track_id, parking_track_id)
+    yield from loco_service.move(popupsim, resource, resource.track_id, parking_track_id)
     resource.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)
-    yield from release_locomotive(popupsim, resource)
+    yield from loco_service.release(popupsim, resource)

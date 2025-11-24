@@ -103,6 +103,33 @@ class SimulationAdapter(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def create_store(self, capacity: int) -> Any:
+        """Create a store with limited capacity.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum capacity of the store.
+
+        Returns
+        -------
+        Any
+            Simulator-specific store object.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_event(self) -> Any:
+        """Create an event for signaling.
+
+        Returns
+        -------
+        Any
+            Simulator-specific event object.
+        """
+        raise NotImplementedError
+
 
 class SimPyAdapter(SimulationAdapter):
     """Adapter for SimPy simulation framework.
@@ -270,16 +297,23 @@ class SimPyAdapter(SimulationAdapter):
         import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
 
         class EventWrapper:
+            """Wrapper for SimPy events to provide consistent interface."""
+
             def __init__(self, env: Any) -> None:
                 self._env = env
                 self._event = simpy.Event(env)
 
             def wait(self) -> Any:
+                """Wait for event to be triggered."""
                 return self._event
 
-            def trigger(self) -> None:
+            def succeed(self) -> None:
+                """Trigger the event."""
                 if not self._event.triggered:
                     self._event.succeed()
-                self._event = simpy.Event(self._env)
+
+            def trigger(self) -> None:
+                """Trigger the event (alias for succeed)."""
+                self.succeed()
 
         return EventWrapper(self._env)

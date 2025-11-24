@@ -20,6 +20,7 @@ from .locomotive import Locomotive
 from .process_times import ProcessTimes
 from .route import Route
 from .track import Track
+from .track import TrackType
 from .train import Train
 from .workshop import Workshop
 
@@ -64,7 +65,7 @@ class Scenario(BaseModel):
     )
     loco_delivery_strategy: LocoDeliveryStrategy = Field(
         default=LocoDeliveryStrategy.RETURN_TO_PARKING,
-        description='Strategy for locomotive delivery to workshop stations'
+        description='Strategy for locomotive delivery to workshop stations',
     )
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
     process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
@@ -99,6 +100,29 @@ class Scenario(BaseModel):
             )
         elif duration < 1:
             raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
+        return self
+
+    def validate_simulation_requirements(self) -> 'Scenario':
+        """Validate scenario has required resources for simulation.
+
+        This should be called after all referenced files are loaded.
+        """
+        if not self.locomotives:
+            raise ValueError('Scenario must have at least one locomotive')
+        if not self.trains:
+            raise ValueError('Scenario must have at least one train')
+        if not self.tracks or not self.topology:
+            raise ValueError('Scenario must have tracks and topology')
+
+        if self.tracks:
+            retrofitted_tracks = [t for t in self.tracks if t.type == TrackType.RETROFITTED]
+            if not retrofitted_tracks:
+                raise ValueError('Scenario must have at least one retrofitted track')
+
+            parking_tracks = [t for t in self.tracks if t.type == TrackType.PARKING]
+            if not parking_tracks:
+                logger.warning('No parking tracks found - some simulation features may not work')
+
         return self
 
     model_config = {'arbitrary_types_allowed': True}

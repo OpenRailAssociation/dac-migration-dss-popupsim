@@ -340,8 +340,8 @@ class ScenarioBuilder:
             self.__load_topology()
             self.__load_process_times()
             self.__load_workshops()
-            # TODO: decide if validation happens here or in main
-            # self.validator.validate(self.scenario)
+            # Validate scenario after all referenced files are loaded
+            self.scenario.validate_simulation_requirements()
         else:
             raise BuilderError('Scenario could not be loaded properly.')
         return self.scenario

@@ -21,9 +21,13 @@ def test_wagon_pickup_process() -> None:
     # Run simulation for enough time to process train and pickup
     popup_sim.run(until=100.0)
 
-    # Verify wagons were moved to retrofit
+    # Verify loaded wagons were rejected (not moved to retrofit)
+    rejected_wagons = [w for w in popup_sim.rejected_wagons_queue if w.status == WagonStatus.REJECTED]
+    assert len(rejected_wagons) > 0, 'Loaded wagons should be rejected'
+
+    # Verify no wagons reached retrofitting (since they're all loaded)
     retrofitting_wagons = [w for w in popup_sim.wagons_queue if w.status == WagonStatus.RETROFITTING]
-    assert len(retrofitting_wagons) > 0, 'Should have wagons in retrofit'
+    assert len(retrofitting_wagons) == 0, 'Loaded wagons should not reach retrofit'
 
 
 def test_locomotive_status_updates() -> None:

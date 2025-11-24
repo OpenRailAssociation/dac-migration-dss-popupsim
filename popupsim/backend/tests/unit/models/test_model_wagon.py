@@ -202,10 +202,9 @@ class TestWagon:
 
         wagon_dict = wagon.model_dump()
 
+        from models.wagon import CouplerType
         from models.wagon import WagonStatus
 
-        from models.wagon import CouplerType
-        
         expected_dict = {
             'wagon_id': 'W014',
             'length': 18.5,

@@ -1,30 +1,5 @@
 train_id;wagon_id;length;Track;arrival_time;is_loaded;needs_retrofit
-;1078;14.27;ABC_D;2031-07-04 15:45:00;true;false
-;1043;31;ABC_D;2031-07-04 18:44:00;true;false
-;1040;31;ABC_D;2031-07-04 17:55:00;true;false
-;976;27;ABC_D;2031-07-04 12:53:00;true;true
-;971;27;ABC_D;2031-07-04 10:48:00;false;true
-;971;27;ABC_D;2031-07-04 17:13:00;true;true
-;962;27;ABC_D;2031-07-04 01:30:00;true;true
-;948;27;ABC_D;2031-07-04 10:35:00;true;true
-;948;27;ABC_D;2031-07-04 15:24:00;false;true
-;947;27;ABC_D;2031-07-04 18:50:00;true;true
-;943;27;ABC_D;2031-07-04 09:39:00;true;true
-;943;27;ABC_D;2031-07-04 18:46:00;false;true
-;936;27;ABC_D;2031-07-04 01:20:00;true;true
-;928;27;ABC_D;2031-07-04 10:55:00;true;true
-;928;27;ABC_D;2031-07-04 19:41:00;false;true
-;924;27;ABC_D;2031-07-04 11:13:00;true;true
-;888;27;ABC_D;2031-07-04 10:55:00;true;true
-;888;27;ABC_D;2031-07-04 12:00:00;true;true
-;883;31;ABC_D;2031-07-04 12:50:00;true;true
-;881;10.6;ABC_D;2031-07-04 23:50:00;false;true
-;881;10.6;ABC_D;2031-07-04 23:20:00;false;true
-;875;10.43;ABC_D;2031-07-04 18:46:00;false;true
-;875;10.43;ABC_D;2031-07-04 17:36:00;false;true
-;874;10.4;ABC_D;2031-07-04 22:44:00;false;true
-1;874;10.4;ABC_D;2031-07-04 22:29:00;false;true
-1;874;10.43;ABC_D;2031-07-04 23:28:00;false;true
-1;855;33;ABC_D;2031-09-07-04:26:00;true;true
-1;848;9.64;ABC_D;2031-07-04 12:56:00;false;true
-1;841;9.64;ABC_D;2031-07-04 12:03:00;true;true
+T1;W1;14.27;ABC_D;2031-07-04 02:00:00;true;true
+T1;W2;14.27;ABC_D;2031-07-04 02:00:00;true;true
+T2;W3;31;ABC_D;2031-07-04 18:44:00;true;false
+T2;W4;31;ABC_D;2031-07-04 18:44:00;true;false

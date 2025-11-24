@@ -175,6 +175,16 @@
         "track_1a",
         "WS_01"
       ]
+    },
+    {
+      "id": "6_To_10",
+      "duration": 2,
+      "description": "Route from retrofit track to track 10",
+      "path": [
+        "track_6",
+        "track_1a",
+        "track_10"
+      ]
     }
   ]
 }

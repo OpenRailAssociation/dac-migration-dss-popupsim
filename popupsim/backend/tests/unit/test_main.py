@@ -89,27 +89,29 @@ def test_main_with_valid_parameters(
     mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function succeeds with valid parameters."""
-    mock_config_service = mocker.patch('main.ScenarioBuilder')
-    mock_service = mocker.MagicMock()
-    mock_config = mocker.MagicMock()
-    mock_config.scenario_id = 'test_scenario'
-    mock_config.start_date = datetime(2024, 1, 1, tzinfo=UTC)
-    mock_config.end_date = datetime(2024, 12, 31, tzinfo=UTC)
-    mock_config.train = []
-    mock_config.workshop = mocker.MagicMock()
-    mock_config.workshop.tracks = []
-    mock_config.routes = []
-    # Return only ScenarioConfig, not a tuple
-    mock_service.load_complete_scenario.return_value = mock_config
-    mock_config_service.return_value = mock_service
+    mock_scenario_builder = mocker.patch('main.ScenarioBuilder')
+    mock_builder_instance = mocker.MagicMock()
+    mock_scenario = mocker.MagicMock()
+    mock_scenario.scenario_id = 'test_scenario'
+    mock_scenario.start_date = datetime(2024, 1, 1, tzinfo=UTC)
+    mock_scenario.end_date = datetime(2024, 12, 31, tzinfo=UTC)
+    mock_scenario.trains = []
+    mock_scenario.workshops = []
+    mock_scenario.routes = []
+    mock_builder_instance.build.return_value = mock_scenario
+    mock_scenario_builder.return_value = mock_builder_instance
+
+    # Mock the simulation components
+    mocker.patch('main.SimPyAdapter')
+    mocker.patch('main.PopupSim')
 
     result = runner.invoke(app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir)])
 
     assert result.exit_code == 0
-    assert f'✓ Using scenario file at: {temp_scenario_file}' in result.stdout
-    assert f'✓ Output will be saved to: {temp_output_dir}' in result.stdout
-    assert '✓ Debug level set to: INFO' in result.stdout
-    assert '🚀 Starting popupsim processing...' in result.stdout
+    assert f'Using scenario file at: {temp_scenario_file}' in result.stdout
+    assert f'Output will be saved to: {temp_output_dir}' in result.stdout
+    assert 'Debug level set to: INFO' in result.stdout
+    assert 'Starting simulation...' in result.stdout
 
 
 @pytest.mark.unit
@@ -117,26 +119,28 @@ def test_main_with_verbose_flag(
     mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function with verbose flag enabled."""
-    mock_config_service = mocker.patch('main.ScenarioBuilder')
-    mock_service = mocker.MagicMock()
-    mock_config = mocker.MagicMock()
-    mock_config.scenario_id = 'test_scenario'
-    mock_config.start_date = datetime(2024, 1, 1, tzinfo=UTC)
-    mock_config.end_date = datetime(2024, 12, 31, tzinfo=UTC)
-    mock_config.train = []
-    mock_config.workshop = mocker.MagicMock()
-    mock_config.workshop.tracks = []
-    mock_config.routes = []
-    # Return only ScenarioConfig, not a tuple
-    mock_service.load_complete_scenario.return_value = mock_config
-    mock_config_service.return_value = mock_service
+    mock_scenario_builder = mocker.patch('main.ScenarioBuilder')
+    mock_builder_instance = mocker.MagicMock()
+    mock_scenario = mocker.MagicMock()
+    mock_scenario.scenario_id = 'test_scenario'
+    mock_scenario.start_date = datetime(2024, 1, 1, tzinfo=UTC)
+    mock_scenario.end_date = datetime(2024, 12, 31, tzinfo=UTC)
+    mock_scenario.trains = []
+    mock_scenario.workshops = []
+    mock_scenario.routes = []
+    mock_builder_instance.build.return_value = mock_scenario
+    mock_scenario_builder.return_value = mock_builder_instance
+
+    # Mock the simulation components
+    mocker.patch('main.SimPyAdapter')
+    mocker.patch('main.PopupSim')
 
     result = runner.invoke(
         app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--verbose']
     )
 
     assert result.exit_code == 0
-    assert '✓ Verbose mode enabled.' in result.stdout
+    assert 'Verbose mode enabled.' in result.stdout
 
 
 @pytest.mark.unit
@@ -144,26 +148,28 @@ def test_main_with_custom_debug_level(
     mocker: MockerFixture, runner: CliRunner, temp_scenario_file: Path, temp_output_dir: Path
 ) -> None:
     """Test main function with custom debug level."""
-    mock_config_service = mocker.patch('main.ScenarioBuilder')
-    mock_service = mocker.MagicMock()
-    mock_config = mocker.MagicMock()
-    mock_config.scenario_id = 'test_scenario'
-    mock_config.start_date = datetime(2024, 1, 1, tzinfo=UTC)
-    mock_config.end_date = datetime(2024, 12, 31, tzinfo=UTC)
-    mock_config.train = []
-    mock_config.workshop = mocker.MagicMock()
-    mock_config.workshop.tracks = []
-    mock_config.routes = []
-    # Return only ScenarioConfig, not a tuple
-    mock_service.load_complete_scenario.return_value = mock_config
-    mock_config_service.return_value = mock_service
+    mock_scenario_builder = mocker.patch('main.ScenarioBuilder')
+    mock_builder_instance = mocker.MagicMock()
+    mock_scenario = mocker.MagicMock()
+    mock_scenario.scenario_id = 'test_scenario'
+    mock_scenario.start_date = datetime(2024, 1, 1, tzinfo=UTC)
+    mock_scenario.end_date = datetime(2024, 12, 31, tzinfo=UTC)
+    mock_scenario.trains = []
+    mock_scenario.workshops = []
+    mock_scenario.routes = []
+    mock_builder_instance.build.return_value = mock_scenario
+    mock_scenario_builder.return_value = mock_builder_instance
+
+    # Mock the simulation components
+    mocker.patch('main.SimPyAdapter')
+    mocker.patch('main.PopupSim')
 
     result = runner.invoke(
         app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--debug', 'DEBUG']
     )
 
     assert result.exit_code == 0
-    assert '✓ Debug level set to: DEBUG' in result.stdout
+    assert 'Debug level set to: DEBUG' in result.stdout
 
 
 @pytest.mark.unit

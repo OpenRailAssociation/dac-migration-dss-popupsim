@@ -165,5 +165,5 @@ class TestRoutesFromRoutes:
         """
         routes: Routes = Routes()
         routes.load_routes(fixtures_path)
-        assert routes.length == 17
+        assert routes.length == 18
         assert '6_To_10' in routes.routes_by_id

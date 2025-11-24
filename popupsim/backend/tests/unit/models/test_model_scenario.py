@@ -85,6 +85,27 @@ class TestScenario:
                 scenario_id=scenario_id,
                 start_date=datetime(2024, 1, 1, tzinfo=UTC),
                 end_date=datetime(2024, 1, 10, tzinfo=UTC),
+                locomotives=[
+                    {
+                        'locomotive_id': 'L1',
+                        'name': 'L1',
+                        'start_date': '2024-01-01 00:00:00',
+                        'end_date': '2024-01-10 00:00:00',
+                        'track_id': 'track_19',
+                    }
+                ],
+                trains=[
+                    {
+                        'train_id': 'T1',
+                        'arrival_time': '2024-01-01T08:00:00Z',
+                        'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    }
+                ],
+                tracks=[
+                    {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                    {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+                ],
+                topology={'tracks': ['track_19', 'track_7']},
             )
             assert config.scenario_id == scenario_id
 
@@ -144,6 +165,27 @@ class TestScenario:
                 scenario_id='test_scenario',
                 start_date=start_date,
                 end_date=end_date,
+                locomotives=[
+                    {
+                        'locomotive_id': 'L1',
+                        'name': 'L1',
+                        'start_date': start_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        'end_date': end_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        'track_id': 'track_19',
+                    }
+                ],
+                trains=[
+                    {
+                        'train_id': 'T1',
+                        'arrival_time': start_date,
+                        'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    }
+                ],
+                tracks=[
+                    {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                    {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+                ],
+                topology={'tracks': ['track_19', 'track_7']},
             )
             assert config.start_date.date() == start_date.date()
             assert config.end_date.date() == end_date.date()
@@ -188,6 +230,27 @@ class TestScenario:
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2025, 6, 1, tzinfo=UTC),  # More than 365 days
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2025-06-01 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
 
         # Should create config successfully
@@ -211,6 +274,27 @@ class TestScenario:
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN,
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2024-01-10 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
         assert config.track_selection_strategy == TrackSelectionStrategy.ROUND_ROBIN
 
@@ -218,6 +302,27 @@ class TestScenario:
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2024-01-10 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
         assert config.track_selection_strategy == TrackSelectionStrategy.LEAST_OCCUPIED
 
@@ -230,22 +335,49 @@ class TestScenario:
         Validates that Scenario instances with identical field values
         are considered equal, while instances with different values are not.
         """
+        base_data = {
+            'locomotives': [
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2024-01-10 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            'trains': [
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            'tracks': [
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            'topology': {'tracks': ['track_19', 'track_7']},
+        }
+
         config1 = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            **base_data,
         )
 
         config2 = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            **base_data,
         )
 
         config3 = Scenario(
             scenario_id='different_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            **base_data,
         )
 
         assert config1 == config2
@@ -260,12 +392,33 @@ class TestScenario:
         Validates that Scenario can be serialized to JSON and that
         the resulting JSON string contains expected field values.
         """
-        start_date = '2024-01-01 08:00+00:00'
-        end_date = '2024-01-10 20:00+00:00'
+        start_date = '2024-01-01 08:00:00'
+        end_date = '2024-01-10 20:00:00'
         config = Scenario(
             scenario_id='test_scenario',
             start_date=start_date,
             end_date=end_date,
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': start_date,
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
 
         json_str = config.model_dump_json()
@@ -279,7 +432,10 @@ class TestScenario:
         assert str(parsed['end_date']).startswith(end_date.split(' ')[0])
         assert str(parsed['start_date']).startswith(str(datetime(2024, 1, 1, tzinfo=UTC)).split(' ')[0])
         assert str(parsed['end_date']).startswith(str(datetime(2024, 1, 10, tzinfo=UTC)).split(' ')[0])
-        assert datetime.fromisoformat(parsed.get('start_date')) == datetime.fromisoformat(start_date)
+        # Compare dates ignoring timezone differences
+        parsed_start = datetime.fromisoformat(parsed.get('start_date')).replace(tzinfo=None)
+        original_start = datetime.fromisoformat(start_date)
+        assert parsed_start == original_start
 
     def test_scenario_config_realistic_complete_scenario(self) -> None:
         """
@@ -295,6 +451,27 @@ class TestScenario:
             'scenario_id': 'scenario_001',
             'start_date': '2024-01-15',
             'end_date': '2024-01-16',
+            'locomotives': [
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-15 00:00:00',
+                    'end_date': '2024-01-16 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            'trains': [
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-15T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            'tracks': [
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            'topology': {'tracks': ['track_19', 'track_7']},
         }
 
         scenario = Scenario(**scenario_data)

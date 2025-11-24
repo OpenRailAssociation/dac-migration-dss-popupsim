@@ -94,7 +94,8 @@ def validate_output_path(output_path: Path | None) -> Path:
     return output_path
 
 
-def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | None, debug: str, verbose: bool) -> Any:  # type: ignore[misc]
+def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | None,
+                                debug: str, verbose: bool) -> Any:
     """Validate inputs and load scenario."""
     if debug not in ['ERROR', 'WARNING', 'INFO', 'DEBUG']:
         typer.echo(f'Error: Invalid debug level: {debug}. Must be one of: ERROR, WARNING, INFO, DEBUG')

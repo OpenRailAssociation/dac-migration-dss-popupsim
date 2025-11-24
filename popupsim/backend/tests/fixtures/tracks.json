@@ -49,40 +49,7 @@
         "edge_102",
         "edge_103"
       ],
-      "type": "workshop"
-    },
-    {
-      "id": "track_17",
-      "name": "17",
-      "edges": [
-        "edge_190",
-        "edge_191",
-        "edge_192",
-        "edge_193",
-        "edge_194",
-        "edge_195",
-        "edge_196",
-        "edge_197",
-        "edge_198",
-        "edge_199",
-        "edge_200"
-      ],
-      "type": "unused"
-    },
-    {
-      "id": "track_18",
-      "name": "18",
-      "edges": [
-        "edge_170",
-        "edge_171",
-        "edge_172",
-        "edge_173",
-        "edge_174",
-        "edge_175",
-        "edge_176",
-        "edge_177"
-      ],
-      "type": "unused"
+      "type": "workshop_area"
     },
     {
       "id": "track_19",
@@ -101,36 +68,7 @@
         "edge_188",
         "edge_189"
       ],
-      "type": "resourceparking"
-    },
-    {
-      "id": "track_1a",
-      "name": "1a",
-      "edges": [
-        "edge_226",
-        "edge_227",
-        "edge_228",
-        "edge_229"
-      ],
-      "type": "circulating"
-    },
-    {
-      "id": "track_2",
-      "name": "2",
-      "edges": [
-        "edge_201",
-        "edge_202",
-        "edge_203",
-        "edge_204",
-        "edge_205",
-        "edge_206",
-        "edge_207",
-        "edge_208",
-        "edge_209",
-        "edge_210",
-        "edge_211"
-      ],
-      "type": "unused"
+      "type": "loco_parking"
     },
     {
       "id": "track_20",
@@ -153,24 +91,6 @@
       "type": "collection"
     },
     {
-      "id": "track_22",
-      "name": "22",
-      "edges": [
-        "edge_123",
-        "edge_124",
-        "edge_125",
-        "edge_126",
-        "edge_127",
-        "edge_128",
-        "edge_129",
-        "edge_130",
-        "edge_131",
-        "edge_132",
-        "edge_133"
-      ],
-      "type": "unused"
-    },
-    {
       "id": "track_23",
       "name": "23",
       "edges": [
@@ -184,76 +104,7 @@
         "edge_154",
         "edge_155"
       ],
-      "type": "parking"
-    },
-    {
-      "id": "track_24",
-      "name": "24",
-      "edges": [
-        "edge_242",
-        "edge_243",
-        "edge_244",
-        "edge_245",
-        "edge_246",
-        "edge_247",
-        "edge_248",
-        "edge_249",
-        "edge_250",
-        "edge_251",
-        "edge_252"
-      ],
-      "type": "parking"
-    },
-    {
-      "id": "track_3",
-      "name": "3",
-      "edges": [
-        "edge_53",
-        "edge_54",
-        "edge_55",
-        "edge_56",
-        "edge_57",
-        "edge_58"
-      ],
-      "type": "unused"
-    },
-    {
-      "id": "track_3a",
-      "name": "3a",
-      "edges": [
-        "edge_312",
-        "edge_313",
-        "edge_314"
-      ],
-      "type": "unused"
-    },
-    {
-      "id": "track_4",
-      "name": "4",
-      "edges": [
-        "edge_81",
-        "edge_82",
-        "edge_83",
-        "edge_84",
-        "edge_85",
-        "edge_86",
-        "edge_87",
-        "edge_88",
-        "edge_89"
-      ],
-      "type": "unused"
-    },
-    {
-      "id": "track_5",
-      "name": "5",
-      "edges": [
-        "edge_301",
-        "edge_302",
-        "edge_303",
-        "edge_304",
-        "edge_305"
-      ],
-      "type": "unused"
+      "type": "parking_area"
     },
     {
       "id": "track_6",
@@ -266,57 +117,6 @@
         "edge_169"
       ],
       "type": "retrofit"
-    },
-    {
-      "id": "track_6409",
-      "name": "6409",
-      "edges": [
-        "edge_0",
-        "edge_1",
-        "edge_2",
-        "edge_3",
-        "edge_4",
-        "edge_5",
-        "edge_6",
-        "edge_7",
-        "edge_8",
-        "edge_9",
-        "edge_10",
-        "edge_11",
-        "edge_12",
-        "edge_13",
-        "edge_14",
-        "edge_15",
-        "edge_16",
-        "edge_17",
-        "edge_18",
-        "edge_19",
-        "edge_20"
-      ],
-      "type": "unused"
-    },
-    {
-      "id": "track_6891",
-      "name": "6891",
-      "edges": [
-        "edge_71",
-        "edge_72",
-        "edge_73",
-        "edge_74",
-        "edge_75",
-        "edge_76",
-        "edge_77",
-        "edge_78",
-        "edge_79",
-        "edge_80",
-        "edge_286",
-        "edge_287",
-        "edge_288",
-        "edge_289",
-        "edge_290",
-        "edge_291"
-      ],
-      "type": "unused"
     },
     {
       "id": "track_7",
@@ -333,76 +133,6 @@
         "edge_164"
       ],
       "type": "retrofitted"
-    },
-    {
-      "id": "track_8",
-      "name": "8",
-      "edges": [
-        "edge_116",
-        "edge_117",
-        "edge_118",
-        "edge_119",
-        "edge_120",
-        "edge_121",
-        "edge_122"
-      ],
-      "type": "unused"
-    },
-    {
-      "id": "track_9",
-      "name": "9",
-      "edges": [
-        "edge_59",
-        "edge_60",
-        "edge_61",
-        "edge_62",
-        "edge_63",
-        "edge_64",
-        "edge_65",
-        "edge_66",
-        "edge_67",
-        "edge_68",
-        "edge_69",
-        "edge_70"
-      ],
-      "type": "parking"
-    },
-    {
-      "id": "track_Z1",
-      "name": "Z1",
-      "edges": [
-        "edge_253",
-        "edge_254",
-        "edge_255",
-        "edge_256",
-        "edge_257",
-        "edge_258",
-        "edge_259",
-        "edge_260",
-        "edge_261",
-        "edge_262",
-        "edge_263",
-        "edge_264"
-      ],
-      "type": "workshop"
-    },
-    {
-      "id": "track_Z2",
-      "name": "Z2",
-      "edges": [
-        "edge_212",
-        "edge_213",
-        "edge_214",
-        "edge_215",
-        "edge_216",
-        "edge_217",
-        "edge_218",
-        "edge_219",
-        "edge_220",
-        "edge_221",
-        "edge_222"
-      ],
-      "type": "unused"
     }
   ]
 }

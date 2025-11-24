@@ -41,8 +41,7 @@ class Locomotive(BaseModel):
 
         time_in_status = {status.value: 0.0 for status in LocoStatus}
 
-        for i in range(len(self.status_history)):
-            current_time, current_status = self.status_history[i]
+        for i, (current_time, current_status) in enumerate(self.status_history):
             next_time = self.status_history[i + 1][0] if i + 1 < len(self.status_history) else sim_time
             duration = float(next_time) - float(current_time)
             time_in_status[current_status.value] += duration
