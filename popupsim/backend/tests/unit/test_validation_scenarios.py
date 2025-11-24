@@ -18,7 +18,6 @@ from models.track import TrackType
 from models.train import Train
 from models.wagon import Wagon
 from models.workshop import Workshop
-import pytest
 from simulation.popupsim import PopupSim
 from simulation.sim_adapter import SimPyAdapter
 
@@ -328,10 +327,6 @@ def test_six_wagons_two_workshops() -> None:
     ws2_stations = popup_sim.workshop_capacity.stations['WS2']
     assert ws2_stations[0].wagons_completed == 1, f'WS2[0] expected 1, got {ws2_stations[0].wagons_completed}'
     assert ws2_stations[1].wagons_completed == 1, f'WS2[1] expected 1, got {ws2_stations[1].wagons_completed}'
-
-
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
 
 
 def test_seven_wagons_two_workshops() -> None:

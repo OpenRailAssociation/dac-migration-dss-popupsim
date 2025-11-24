@@ -38,7 +38,7 @@ def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
 
 
 def _validate_loco(
-    popup_sim: Any, loco_id: str, time: float, status_name: str, rest: str, end_time: float | None = None
+    popup_sim: Any, loco_id: str, time: float, status_name: str, rest: str, end_time: float | None = None  # noqa: PLR0913
 ) -> None:
     """Validate locomotive state at specific time."""
     loco = next((locomotive for locomotive in popup_sim.locomotives_queue if locomotive.locomotive_id == loco_id), None)
@@ -60,7 +60,8 @@ def _validate_loco(
             route = find_route(popup_sim.scenario.routes, from_track, to_track)
             if route and route.duration:
                 assert route.duration == expected_duration, (
-                    f't={time}->{end_time}: loco[{loco_id}] route {from_track}->{to_track} expected duration {expected_duration}, got {route.duration}'
+                    f't={time}->{end_time}: loco[{loco_id}] route {from_track}->{to_track} '
+                    f'expected duration {expected_duration}, got {route.duration}'
                 )
 
 

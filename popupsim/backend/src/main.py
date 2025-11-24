@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import Annotated
 from typing import Any
 
+from analytics.kpi import KPICalculator
+from analytics.reporting import CSVExporter
+from analytics.reporting import Visualizer
 from builders.scenario_builder import BuilderError
 from builders.scenario_builder import ScenarioBuilder
 from simulation.popupsim import PopupSim
@@ -120,18 +123,63 @@ def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | 
     return scenario
 
 
-def _run_simulation_and_display_metrics(scenario: Any) -> None:  # type: ignore[misc]
+def _run_simulation_and_display_metrics(scenario: Any) -> Any:  # type: ignore[misc]
     """Run simulation and display metrics."""
     typer.echo('\nStarting simulation...')
     sim_adapter = SimPyAdapter.create_simpy_adapter()
     popup_sim = PopupSim(sim_adapter, scenario)
     popup_sim.run()
+
+    # Get raw metrics
     metrics = popup_sim.get_metrics()
-    typer.echo('\n=== Simulation Metrics ===')
+    typer.echo('\n=== Raw Simulation Metrics ===')
     for category, category_metrics in metrics.items():
         typer.echo(f'\n{category.upper().replace("_", " ")}:')
         for metric in category_metrics:
             typer.echo(f'  {metric["name"].replace("_", " ").title()}: {metric["value"]} {metric["unit"]}')
+
+    # Calculate KPIs
+    typer.echo('\n=== Calculating KPIs ===')
+    kpi_calculator = KPICalculator()
+    kpi_result = kpi_calculator.calculate_from_simulation(
+        metrics,
+        scenario,
+        popup_sim.wagons_queue,
+        popup_sim.rejected_wagons_queue,
+        popup_sim.workshops_queue,
+    )
+
+    # Display KPIs
+    typer.echo('\n=== THROUGHPUT KPIs ===')
+    typer.echo(f'  Total Wagons Processed: {kpi_result.throughput.total_wagons_processed}')
+    typer.echo(f'  Wagons Retrofitted: {kpi_result.throughput.total_wagons_retrofitted}')
+    typer.echo(f'  Wagons Rejected: {kpi_result.throughput.total_wagons_rejected}')
+    typer.echo(f'  Simulation Duration: {kpi_result.throughput.simulation_duration_hours:.1f} hours')
+    typer.echo(f'  Throughput: {kpi_result.throughput.wagons_per_hour:.2f} wagons/hour')
+    typer.echo(f'  Daily Throughput: {kpi_result.throughput.wagons_per_day:.2f} wagons/day')
+
+    typer.echo('\n=== UTILIZATION KPIs ===')
+    for util in kpi_result.utilization:
+        typer.echo(f'  Workshop {util.workshop_id}:')
+        typer.echo(f'    Capacity: {util.total_capacity} stations')
+        typer.echo(f'    Avg Utilization: {util.average_utilization_percent:.1f}%')
+        typer.echo(f'    Peak Utilization: {util.peak_utilization_percent:.1f}%')
+        typer.echo(f'    Idle Time: {util.idle_time_percent:.1f}%')
+
+    if kpi_result.bottlenecks:
+        typer.echo('\n=== BOTTLENECKS DETECTED ===')
+        for bottleneck in kpi_result.bottlenecks:
+            typer.echo(f'  [{bottleneck.severity.upper()}] {bottleneck.location} ({bottleneck.type})')
+            typer.echo(f'    {bottleneck.description}')
+            typer.echo(f'    Impact: {bottleneck.impact_wagons_per_hour:.2f} wagons/hour')
+    else:
+        typer.echo('\n=== No bottlenecks detected ===')
+
+    typer.echo('\n=== TIMING KPIs ===')
+    typer.echo(f'  Avg Flow Time: {kpi_result.avg_flow_time_minutes:.1f} minutes')
+    typer.echo(f'  Avg Waiting Time: {kpi_result.avg_waiting_time_minutes:.1f} minutes')
+
+    return kpi_result
 
 
 @app.command()
@@ -188,7 +236,24 @@ def main(
         raise typer.Exit(1)
     try:
         scenario = _validate_and_load_scenario(scenario_path, output_path, debug, verbose)
-        _run_simulation_and_display_metrics(scenario)
+        kpi_result = _run_simulation_and_display_metrics(scenario)
+
+        # Export results to CSV
+        typer.echo('\n=== Exporting Results ===')
+        csv_exporter = CSVExporter()
+
+        csv_files = csv_exporter.export_all(kpi_result, output_path)
+        typer.echo(f'CSV files saved to: {output_path}')
+        for csv_file in csv_files:
+            typer.echo(f'  - {csv_file.name}')
+
+        # Generate visualization charts
+        typer.echo('\n=== Generating Charts ===')
+        visualizer = Visualizer()
+        chart_paths = visualizer.generate_all_charts(kpi_result, output_path)
+        typer.echo(f'Charts saved to: {output_path}')
+        for chart_path in chart_paths:
+            typer.echo(f'  - {chart_path.name}')
     except BuilderError as e:
         typer.echo(f'Configuration error: {e}')
         raise typer.Exit(1) from e

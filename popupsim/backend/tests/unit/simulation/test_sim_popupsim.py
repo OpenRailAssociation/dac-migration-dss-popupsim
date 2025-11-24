@@ -168,19 +168,19 @@ class TestPopupSimWithFakeSim:
 class TestPopupSimWithSimpyAdapter:
     """Integration-style example that demonstrates creating real adapters."""
 
+    @pytest.mark.skip(reason="Incomplete scenario - needs trains, tracks, routes for simulation")
     def test_run_calls_adapter_run_with_until(self) -> None:
         """Example usage constructing a full simulation and running it."""
-        if __name__ == '__main__':
-            scenario = Scenario(
-                scenario_id='test_scenario',
-                start_date=date(2024, 1, 1),
-                end_date=date(2024, 1, 10),
-                random_seed=42,
-                train_schedule_file='schedule.csv',
-            )
-            sim_adapter = SimPyAdapter.create_simpy_adapter()
-            popup_sim = PopupSim(sim_adapter, scenario)
-            popup_sim.run(until=100.0)
+        scenario = Scenario(
+            scenario_id='test_scenario',
+            start_date=date(2024, 1, 1),
+            end_date=date(2024, 1, 10),
+            random_seed=42,
+            train_schedule_file='schedule.csv',
+        )
+        sim_adapter = SimPyAdapter.create_simpy_adapter()
+        popup_sim = PopupSim(sim_adapter, scenario)
+        popup_sim.run(until=100.0)
 
 
 class TestPopupSimWithScenarioBuilder:

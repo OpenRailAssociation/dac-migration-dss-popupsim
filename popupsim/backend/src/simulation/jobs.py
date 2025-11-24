@@ -37,7 +37,9 @@ class TransportJob:
     resource_pool_name: str = 'locomotives'
 
 
-def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: LocomotiveService) -> Generator[Any]:
+def execute_transport_job(
+    popupsim: Any, job: TransportJob, loco_service: LocomotiveService
+) -> Generator[Any, Any]:
     """Execute a transport job: allocate resource, move, couple, transport, decouple, release.
 
     Parameters
@@ -55,7 +57,7 @@ def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: Locomo
         SimPy events.
     """
     # Allocate resource
-    resource = yield from loco_service.allocate(popupsim)
+    resource = yield from loco_service.allocate(popupsim)  # type: ignore[assignment]
 
     # Travel to pickup location
     logger.info('🚂 ROUTE: %s traveling [%s → %s]', resource.locomotive_id, resource.track_id, job.from_track)

@@ -1,5 +1,7 @@
 """Workshop business logic - no simulation dependencies."""
 
+from collections.abc import Callable
+
 from models.workshop import Workshop
 
 
@@ -8,7 +10,7 @@ class WorkshopDistributor:
 
     @staticmethod
     def select_best_workshop(
-        workshops: list[Workshop], get_available_capacity: callable, capacity_claims: dict[str, int]
+        workshops: list[Workshop], get_available_capacity: Callable[[str], int], capacity_claims: dict[str, int]
     ) -> Workshop:
         """Select workshop with most available capacity."""
         return max(workshops, key=lambda w: get_available_capacity(w.track_id) - capacity_claims[w.track_id])

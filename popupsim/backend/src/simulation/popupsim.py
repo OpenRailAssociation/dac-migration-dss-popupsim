@@ -6,6 +6,8 @@ from collections.abc import Generator
 import logging
 from typing import Any
 
+from analytics.collectors import SimulationMetrics
+from analytics.collectors import WagonCollector
 from domain.locomotive_operations import LocomotiveStateManager
 from domain.wagon_operations import WagonSelector
 from domain.wagon_operations import WagonStateManager
@@ -20,8 +22,6 @@ from models.wagon import Wagon
 from models.wagon import WagonStatus
 from models.workshop import Workshop
 
-from .analysis.collectors.wagon_flow import WagonFlowCollector
-from .analysis.metrics import SimulationMetrics
 from .jobs import TransportJob
 from .jobs import execute_transport_job
 from .resource_pool import ResourcePool
@@ -35,7 +35,7 @@ from .workshop_capacity import WorkshopCapacityManager
 logger = logging.getLogger(__name__)
 
 
-class PopupSim:  # pylint: disable=too-few-public-methods
+class PopupSim:  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """High-level simulation orchestrator for PopUp-Sim.
 
     Parameters
@@ -102,7 +102,7 @@ class PopupSim:  # pylint: disable=too-few-public-methods
         self.train_processed_event = sim.create_event()
 
         self.metrics = SimulationMetrics()
-        self.metrics.register(WagonFlowCollector())
+        self.metrics.register(WagonCollector())
         for workshop in self.workshops_queue:
             workshop_track_id = workshop.track_id
             self.wagons_ready_for_stations[workshop_track_id] = sim.create_store(capacity=1000)
@@ -222,7 +222,9 @@ def process_train_arrivals(popupsim: PopupSim) -> Generator[Any]:
         popupsim.train_processed_event = popupsim.sim.create_event()
 
 
-def _wait_for_wagons_ready(popupsim: PopupSim) -> Generator[Any, Any, tuple[str, list[Wagon]]]:  # type: ignore[misc]
+def _wait_for_wagons_ready(
+    popupsim: PopupSim,
+) -> Generator[Any, Any, tuple[str, list[Wagon]]]:  # type: ignore[misc]
     """Wait for wagons ready on collection track.
 
     Parameters
@@ -246,7 +248,7 @@ def _wait_for_wagons_ready(popupsim: PopupSim) -> Generator[Any, Any, tuple[str,
         wagons_by_track = popupsim.wagon_selector.filter_selected_wagons(popupsim.wagons_queue)
         if wagons_by_track:
             collection_track_id = next(iter(wagons_by_track))
-            return collection_track_id, wagons_by_track[collection_track_id]
+            return (collection_track_id, wagons_by_track[collection_track_id])
 
 
 def _pickup_and_couple_wagons(

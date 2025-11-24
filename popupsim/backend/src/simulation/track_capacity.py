@@ -8,10 +8,10 @@ from models.track import Track
 from models.track import TrackType
 
 
-class TrackCapacityManager:
+class TrackCapacityManager:  # pylint: disable=too-many-instance-attributes
     """Manages track capacity based on length and fill factor."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         tracks: list[Track],
         topology: Topology,
@@ -186,7 +186,7 @@ class TrackCapacityManager:
             return available_tracks[0]
 
         if strategy == TrackSelectionStrategy.RANDOM:
-            return random.choice(available_tracks)
+            return random.choice(available_tracks)  # noqa: S311
 
         return None
 

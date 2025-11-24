@@ -7,7 +7,7 @@ from models.workshop import Workshop
 from .sim_adapter import SimulationAdapter
 
 
-class StationState:
+class StationState:  # pylint: disable=too-few-public-methods
     """Track state of a single retrofit station."""
 
     def __init__(self, station_id: str) -> None:
@@ -20,7 +20,7 @@ class StationState:
         self.history: list[tuple[float, float, str]] = []  # (start_time, end_time, wagon_id)
 
 
-class WorkshopCapacityManager:
+class WorkshopCapacityManager:  # pylint: disable=too-few-public-methods
     """Manages retrofit station capacity for workshops."""
 
     def __init__(self, sim: SimulationAdapter, workshops: list[Workshop]) -> None:

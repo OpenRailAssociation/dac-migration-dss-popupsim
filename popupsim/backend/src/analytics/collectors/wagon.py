@@ -1,18 +1,18 @@
-"""Wagon flow metrics collector."""
+"""Wagon metrics collector."""
 
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
 
-from ..base import MetricCollector
-from ..base import MetricResult
+from .base import MetricCollector
+from .base import MetricResult
 
 
 @dataclass
-class WagonFlowCollector(MetricCollector):
-    """Collect wagon flow metrics.
+class WagonCollector(MetricCollector):
+    """Collect wagon metrics.
 
-    Tracks wagon delivery, retrofit completion, and flow times.
+    Tracks wagon delivery, retrofit completion, and processing times.
     """
 
     wagons_delivered: int = 0
@@ -22,7 +22,7 @@ class WagonFlowCollector(MetricCollector):
     wagon_start_times: dict[str, float] = field(default_factory=dict)
 
     def record_event(self, event_type: str, data: dict[str, Any]) -> None:
-        """Record wagon flow events."""
+        """Record wagon events."""
         if event_type == 'wagon_delivered':
             self.wagons_delivered += 1
             wagon_id = data.get('wagon_id')
@@ -42,14 +42,14 @@ class WagonFlowCollector(MetricCollector):
             self.wagons_rejected += 1
 
     def get_results(self) -> list[MetricResult]:
-        """Get wagon flow metrics."""
+        """Get wagon metrics."""
         avg_flow_time = self.total_flow_time / self.wagons_retrofitted if self.wagons_retrofitted > 0 else 0.0
 
         return [
-            MetricResult('wagons_delivered', self.wagons_delivered, 'wagons', 'wagon_flow'),
-            MetricResult('wagons_retrofitted', self.wagons_retrofitted, 'wagons', 'wagon_flow'),
-            MetricResult('wagons_rejected', self.wagons_rejected, 'wagons', 'wagon_flow'),
-            MetricResult('avg_flow_time', round(avg_flow_time, 1), 'min', 'wagon_flow'),
+            MetricResult('wagons_delivered', self.wagons_delivered, 'wagons', 'wagon'),
+            MetricResult('wagons_retrofitted', self.wagons_retrofitted, 'wagons', 'wagon'),
+            MetricResult('wagons_rejected', self.wagons_rejected, 'wagons', 'wagon'),
+            MetricResult('avg_flow_time', round(avg_flow_time, 1), 'min', 'wagon'),
         ]
 
     def reset(self) -> None:

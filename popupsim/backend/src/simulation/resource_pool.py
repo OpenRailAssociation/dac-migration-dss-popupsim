@@ -7,7 +7,7 @@ from typing import Protocol
 logger = logging.getLogger('ResourcePool')
 
 
-class Trackable(Protocol):
+class Trackable(Protocol):  # pylint: disable=too-few-public-methods
     """Protocol for trackable resources."""
 
     locomotive_id: str  # or worker_id, crane_id, etc.
@@ -15,7 +15,7 @@ class Trackable(Protocol):
     track_id: str | None
 
 
-class ResourcePool:
+class ResourcePool:  # pylint: disable=too-few-public-methods
     """Generic resource pool with allocation tracking.
 
     Tracks resource state, location, and utilization for any resource type

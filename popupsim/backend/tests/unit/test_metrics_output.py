@@ -100,10 +100,10 @@ def test_metrics_output() -> None:
 
     # Verify structure
     assert isinstance(metrics, dict)
-    assert 'wagon_flow' in metrics
+    assert 'wagon' in metrics
 
     # Verify wagon flow metrics
-    wagon_flow = metrics['wagon_flow']
+    wagon_flow = metrics['wagon']
     assert len(wagon_flow) == 4  # 4 metrics expected
 
     metric_names = {m['name'] for m in wagon_flow}

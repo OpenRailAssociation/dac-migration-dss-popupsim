@@ -45,7 +45,3 @@ def test_route_duration_mismatch() -> None:
             t=0->2: loco[L1] MOVING parking->collection
         """,
         )
-
-
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])

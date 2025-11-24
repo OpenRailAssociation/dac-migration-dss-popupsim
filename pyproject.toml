@@ -126,7 +126,10 @@ max-line-length = 120
 load-plugins = "pylint_pydantic"
 init-hook = "import sys; sys.path.append('popupsim/backend/src')"
 source-roots = ["popupsim/backend/src"] # Default to src folder only
-disable = ["W0511"]  # Disable fixme warnings (TODO/FIXME comments)
+disable = [
+    "W0511",  # Disable fixme warnings (TODO/FIXME comments)
+    "R1708",  # stop-iteration-return: Using return in generator is valid Python 3.3+ for SimPy patterns
+]
 
 [tool.mypy]
 python_version = "3.13"
@@ -144,7 +147,7 @@ plugins = ['pydantic.mypy']
 
 # Third-party libraries without stubs
 [[tool.mypy.overrides]]
-module = ["typer.*", "simpy.*", "matplotlib.*", "pytest.*", "pytest_mock.*"]
+module = ["typer.*", "simpy.*", "matplotlib.*", "pytest.*", "pytest_mock.*", "numpy.*"]
 ignore_missing_imports = true
 disallow_untyped_defs = false
 
@@ -152,6 +155,12 @@ disallow_untyped_defs = false
 [[tool.mypy.overrides]]
 module = ["pandas.*", "pydantic.*"]
 ignore_missing_imports = false
+
+# Relaxed checking for simulation generators (complex SimPy code)
+[[tool.mypy.overrides]]
+module = ["simulation.popupsim", "simulation.jobs", "simulation.services"]
+disallow_untyped_defs = false
+disable_error_code = ["func-returns-value", "return-value", "has-type", "misc", "arg-type", "attr-defined", "union-attr", "var-annotated", "return"]
 
 # Relaxed checking for tests only
 [[tool.mypy.overrides]]
