@@ -22,12 +22,12 @@ class LocomotiveService(ABC):
     @abstractmethod
     def allocate(self, popupsim: Any) -> Generator[Locomotive]:
         """Allocate locomotive from pool.
-        
+
         Parameters
         ----------
         popupsim : Any
             The PopupSim instance containing simulation state.
-            
+
         Returns
         -------
         Generator[Locomotive]
@@ -37,14 +37,14 @@ class LocomotiveService(ABC):
     @abstractmethod
     def release(self, popupsim: Any, loco: Locomotive) -> Generator[Any]:
         """Release locomotive to pool.
-        
+
         Parameters
         ----------
         popupsim : Any
             The PopupSim instance containing simulation state.
         loco : Locomotive
             The locomotive to release.
-            
+
         Returns
         -------
         Generator[Any]
@@ -54,7 +54,7 @@ class LocomotiveService(ABC):
     @abstractmethod
     def move(self, popupsim: Any, loco: Locomotive, from_track: str, to_track: str) -> Generator[Any]:
         """Move locomotive between tracks.
-        
+
         Parameters
         ----------
         popupsim : Any
@@ -65,7 +65,7 @@ class LocomotiveService(ABC):
             Source track ID.
         to_track : str
             Destination track ID.
-            
+
         Returns
         -------
         Generator[Any]
@@ -77,7 +77,7 @@ class LocomotiveService(ABC):
         self, popupsim: Any, loco: Locomotive, wagon_count: int, coupler_type: CouplerType
     ) -> Generator[Any]:
         """Couple wagons to locomotive.
-        
+
         Parameters
         ----------
         popupsim : Any
@@ -88,7 +88,7 @@ class LocomotiveService(ABC):
             Number of wagons to couple.
         coupler_type : CouplerType
             Type of coupler on the wagons.
-            
+
         Returns
         -------
         Generator[Any]
@@ -98,7 +98,7 @@ class LocomotiveService(ABC):
     @abstractmethod
     def decouple_wagons(self, popupsim: Any, loco: Locomotive, wagon_count: int) -> Generator[Any]:
         """Decouple wagons from locomotive.
-        
+
         Parameters
         ----------
         popupsim : Any
@@ -107,7 +107,7 @@ class LocomotiveService(ABC):
             The locomotive to decouple wagons from.
         wagon_count : int
             Number of wagons to decouple.
-            
+
         Returns
         -------
         Generator[Any]
@@ -120,12 +120,12 @@ class DefaultLocomotiveService(LocomotiveService):
 
     def allocate(self, popupsim: Any) -> Generator[Locomotive]:
         """Allocate locomotive from pool with tracking.
-        
+
         Parameters
         ----------
         popupsim : Any
             The PopupSim instance containing simulation state.
-            
+
         Returns
         -------
         Generator[Locomotive]
@@ -138,14 +138,14 @@ class DefaultLocomotiveService(LocomotiveService):
 
     def release(self, popupsim: Any, loco: Locomotive) -> Generator[Any]:
         """Release locomotive to pool with tracking.
-        
+
         Parameters
         ----------
         popupsim : Any
             The PopupSim instance containing simulation state.
         loco : Locomotive
             The locomotive to release.
-            
+
         Yields
         ------
         Any
@@ -161,7 +161,9 @@ class DefaultLocomotiveService(LocomotiveService):
         loco.record_status_change(start_time, LocoStatus.MOVING)
         route = find_route(popupsim.scenario.routes, from_track, to_track)
         duration = route.duration if route and route.duration else 0.0
-        logger.info('🚂 Loco %s starts moving [%s → %s] at t=%.1f', loco.locomotive_id, from_track, to_track, start_time)
+        logger.info(
+            '🚂 Loco %s starts moving [%s → %s] at t=%.1f', loco.locomotive_id, from_track, to_track, start_time
+        )
 
         if duration > 0:
             yield popupsim.sim.delay(duration)

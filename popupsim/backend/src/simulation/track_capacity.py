@@ -20,7 +20,7 @@ class TrackCapacityManager:
         retrofit_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED,
     ) -> None:
         """Initialize track capacity manager.
-        
+
         Parameters
         ----------
         tracks : list[Track]
@@ -48,7 +48,7 @@ class TrackCapacityManager:
 
     def _calculate_capacities(self, tracks: list[Track], topology: Topology) -> None:
         """Calculate capacity for managed tracks.
-        
+
         Parameters
         ----------
         tracks : list[Track]
@@ -68,14 +68,14 @@ class TrackCapacityManager:
 
     def can_add_wagon(self, track_id: str, wagon_length: float) -> bool:
         """Check if wagon can be added to track.
-        
+
         Parameters
         ----------
         track_id : str
             ID of the track to check.
         wagon_length : float
             Length of the wagon to add.
-            
+
         Returns
         -------
         bool
@@ -87,14 +87,14 @@ class TrackCapacityManager:
 
     def add_wagon(self, track_id: str, wagon_length: float) -> bool:
         """Add wagon to track if space available.
-        
+
         Parameters
         ----------
         track_id : str
             ID of the track to add wagon to.
         wagon_length : float
             Length of the wagon to add.
-            
+
         Returns
         -------
         bool
@@ -107,7 +107,7 @@ class TrackCapacityManager:
 
     def remove_wagon(self, track_id: str, wagon_length: float) -> None:
         """Remove wagon from track.
-        
+
         Parameters
         ----------
         track_id : str
@@ -120,12 +120,12 @@ class TrackCapacityManager:
 
     def select_collection_track(self, wagon_length: float) -> str | None:
         """Select collection track based on configured strategy.
-        
+
         Parameters
         ----------
         wagon_length : float
             Length of wagon needing a collection track.
-            
+
         Returns
         -------
         str | None
@@ -135,12 +135,12 @@ class TrackCapacityManager:
 
     def select_retrofit_track(self, wagon_length: float) -> str | None:
         """Select retrofit track based on configured strategy.
-        
+
         Parameters
         ----------
         wagon_length : float
             Length of wagon needing a retrofit track.
-            
+
         Returns
         -------
         str | None
@@ -152,7 +152,7 @@ class TrackCapacityManager:
         self, track_list: list[str], wagon_length: float, strategy: TrackSelectionStrategy, track_type: str
     ) -> str | None:
         """Select track based on strategy.
-        
+
         Parameters
         ----------
         track_list : list[str]
@@ -163,7 +163,7 @@ class TrackCapacityManager:
             Selection strategy to use.
         track_type : str
             Type of track ('collection' or 'retrofit') for round-robin indexing.
-            
+
         Returns
         -------
         str | None
@@ -192,12 +192,12 @@ class TrackCapacityManager:
 
     def get_available_capacity(self, track_id: str) -> float:
         """Get available capacity on track.
-        
+
         Parameters
         ----------
         track_id : str
             ID of the track to check.
-            
+
         Returns
         -------
         float
@@ -209,12 +209,12 @@ class TrackCapacityManager:
 
     def get_total_capacity(self, track_id: str) -> float:
         """Get total capacity of track.
-        
+
         Parameters
         ----------
         track_id : str
             ID of the track to check.
-            
+
         Returns
         -------
         float

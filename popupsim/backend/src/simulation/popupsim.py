@@ -224,17 +224,17 @@ def process_train_arrivals(popupsim: PopupSim) -> Generator[Any]:
 
 def _wait_for_wagons_ready(popupsim: PopupSim) -> Generator[Any, Any, tuple[str, list[Wagon]]]:  # type: ignore[misc]
     """Wait for wagons ready on collection track.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
         The PopupSim instance containing simulation state.
-        
+
     Returns
     -------
     tuple[str, list[Wagon]]
         Collection track ID and list of wagons ready for pickup.
-        
+
     Yields
     ------
     Any
@@ -253,7 +253,7 @@ def _pickup_and_couple_wagons(
     popupsim: PopupSim, loco: Locomotive, collection_track_id: str, collection_wagons: list[Wagon]
 ) -> Generator[list[tuple[Wagon, str]]]:  # type: ignore[misc]
     """Travel to collection, find and couple wagons.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
@@ -264,12 +264,12 @@ def _pickup_and_couple_wagons(
         ID of the collection track to travel to.
     collection_wagons : list[Wagon]
         List of wagons available on the collection track.
-        
+
     Returns
     -------
     list[tuple[Wagon, str]]
         List of (wagon, retrofit_track_id) tuples for wagons to pickup.
-        
+
     Yields
     ------
     Any
@@ -280,7 +280,9 @@ def _pickup_and_couple_wagons(
     wagons_to_pickup = _find_wagons_for_retrofit(popupsim, collection_wagons)
     if wagons_to_pickup:
         logger.debug('Loco %s coupling %d wagons', loco.locomotive_id, len(wagons_to_pickup))
-        yield from popupsim.locomotive_service.couple_wagons(popupsim, loco, len(wagons_to_pickup), wagons_to_pickup[0][0].coupler_type)
+        yield from popupsim.locomotive_service.couple_wagons(
+            popupsim, loco, len(wagons_to_pickup), wagons_to_pickup[0][0].coupler_type
+        )
     return wagons_to_pickup
 
 
@@ -288,7 +290,7 @@ def _deliver_to_retrofit_tracks(
     popupsim: PopupSim, loco: Locomotive, collection_track_id: str, wagons_by_retrofit: dict[str, list[Wagon]]
 ) -> Generator:
     """Deliver wagons to retrofit tracks and decouple.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
@@ -299,7 +301,7 @@ def _deliver_to_retrofit_tracks(
         ID of the collection track wagons are coming from.
     wagons_by_retrofit : dict[str, list[Wagon]]
         Dictionary mapping retrofit track IDs to lists of wagons to deliver.
-        
+
     Yields
     ------
     Any
@@ -329,7 +331,7 @@ def _deliver_to_retrofit_tracks(
 
 def _distribute_wagons_to_workshops(popupsim: PopupSim, retrofit_track_id: str, wagons: list[Wagon]) -> Generator:
     """Distribute wagons to workshops based on available capacity.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
@@ -338,7 +340,7 @@ def _distribute_wagons_to_workshops(popupsim: PopupSim, retrofit_track_id: str, 
         ID of the retrofit track wagons are coming from.
     wagons : list[Wagon]
         List of wagons to distribute to workshops.
-        
+
     Yields
     ------
     Any
@@ -399,17 +401,17 @@ def _return_loco_and_signal(
 
 def pickup_wagons_to_retrofit(popupsim: PopupSim) -> Generator[Any]:
     """Pickup wagons from collection and move to retrofit.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
         The PopupSim instance containing simulation state.
-        
+
     Yields
     ------
     Any
         SimPy events for the entire pickup and delivery process.
-        
+
     Raises
     ------
     ValueError
@@ -594,12 +596,12 @@ def process_single_wagon(popupsim: PopupSim, wagon: Wagon, track_id: str) -> Gen
 
 def pickup_retrofitted_wagons(popupsim: PopupSim) -> Generator[Any]:
     """Pickup retrofitted wagons in batches.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
         The PopupSim instance containing simulation state.
-        
+
     Yields
     ------
     Any
@@ -759,14 +761,14 @@ def move_to_parking(popupsim: PopupSim) -> Generator[Any]:
 
 def _find_wagons_for_retrofit(popupsim: PopupSim, collection_wagons: list[Wagon]) -> list[tuple[Wagon, str]]:
     """Find wagons that can be moved to retrofit tracks with available stations.
-    
+
     Parameters
     ----------
     popupsim : PopupSim
         The PopupSim instance containing simulation state.
     collection_wagons : list[Wagon]
         List of wagons available on the collection track.
-        
+
     Returns
     -------
     list[tuple[Wagon, str]]
@@ -790,12 +792,12 @@ def _find_wagons_for_retrofit(popupsim: PopupSim, collection_wagons: list[Wagon]
 
 def _group_wagons_by_retrofit_track(wagons_to_pickup: list[tuple[Wagon, str]]) -> dict[str, list[Wagon]]:
     """Group wagons by their destination retrofit track.
-    
+
     Parameters
     ----------
     wagons_to_pickup : list[tuple[Wagon, str]]
         List of (wagon, retrofit_track_id) tuples.
-        
+
     Returns
     -------
     dict[str, list[Wagon]]
@@ -807,21 +809,6 @@ def _group_wagons_by_retrofit_track(wagons_to_pickup: list[tuple[Wagon, str]]) -
             result[track_id] = []
         result[track_id].append(wagon)
     return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _return_loco_to_parking_and_release(popupsim: PopupSim, loco: Locomotive) -> Generator[Any]:
