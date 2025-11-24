@@ -69,7 +69,8 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 | Core Documents (1-10) | ✅ Complete | 2025 |
 | Domain Processes (11) | 📋 Template | 2025 |
 | Reference Documents | ✅ Complete | 2025 |
-| Code Examples | ✅ Type hints added | 2025 |
+| Code Examples | ✅ Actual implementation | 2025 |
+| Level 3 Architecture | ✅ Added | 2025 |
 | Cross-references | ✅ Added | 2025 |
 | Translation | ✅ English | 2025 |
 
@@ -77,10 +78,13 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| Configuration Context | ✅ Implemented | `popupsim/backend/src/configuration/` |
-| Workshop Operations Context | 🚧 In Progress | `popupsim/backend/src/domain/` |
-| Analysis & Reporting Context | 📋 Planned | `popupsim/backend/src/control/` |
-| SimPy Integration | 🚧 In Progress | `popupsim/backend/src/simulation/` |
+| Configuration Context | ✅ Implemented | `popupsim/backend/src/builders/`, `models/`, `validators/` |
+| Workshop Operations Context | ✅ Implemented | `popupsim/backend/src/simulation/`, `domain/` |
+| Analysis & Reporting Context | ✅ Implemented | `popupsim/backend/src/main.py`, `analytics/` |
+| SimPy Integration | ✅ Implemented | `popupsim/backend/src/simulation/popupsim.py`, `sim_adapter.py` |
+| Resource Management | ✅ Implemented | `popupsim/backend/src/simulation/resource_pool.py`, `track_capacity.py`, `workshop_capacity.py` |
+| Metrics Collection | ✅ Implemented | `popupsim/backend/src/analytics/collectors/` |
+| 5 Process Coordinators | ✅ Implemented | `popupsim/backend/src/simulation/` (train arrival, pickup, workshop, retrofitted pickup, parking) |
 | Testing | 🚧 In Progress | `popupsim/backend/tests/` |
 
 ## Contributing
