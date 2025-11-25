@@ -1,6 +1,6 @@
 """Unit tests for the Route model."""
 
-from models.route import Route
+from configuration.domain.models.route import Route
 import pytest
 
 

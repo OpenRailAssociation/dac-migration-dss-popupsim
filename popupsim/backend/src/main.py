@@ -4,14 +4,15 @@ from pathlib import Path
 from typing import Annotated
 from typing import Any
 
-from analytics.kpi import KPICalculator
-from analytics.reporting import CSVExporter
-from analytics.reporting import Visualizer
-from builders.scenario_builder import BuilderError
-from builders.scenario_builder import ScenarioBuilder
-from simulation.popupsim import PopupSim
-from simulation.sim_adapter import SimPyAdapter
+from analytics.domain.services.kpi_calculator import KPICalculator
+from analytics.infrastructure.exporters.csv_exporter import CSVExporter
+from analytics.infrastructure.visualization.matplotlib_visualizer import Visualizer
 import typer
+from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
+
+from configuration.application.scenario_builder import BuilderError
+from configuration.application.scenario_builder import ScenarioBuilder
 
 APP_NAME = 'popupsim'
 
@@ -127,7 +128,7 @@ def _run_simulation_and_display_metrics(scenario: Any) -> Any:  # type: ignore[m
     """Run simulation and display metrics."""
     typer.echo('\nStarting simulation...')
     sim_adapter = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim_adapter, scenario)
+    popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
     popup_sim.run()
 
     # Get raw metrics

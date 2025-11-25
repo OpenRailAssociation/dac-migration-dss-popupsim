@@ -1,7 +1,7 @@
 """Tests for wagon collector."""
 
 
-from analytics.collectors.wagon import WagonCollector
+from analytics.domain.collectors.wagon_collector import WagonCollector
 
 
 def test_wagon_collector_initialization() -> None:

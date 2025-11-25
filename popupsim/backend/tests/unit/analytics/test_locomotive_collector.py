@@ -1,7 +1,7 @@
 """Tests for locomotive collector."""
 
 
-from analytics.collectors.locomotive import LocomotiveCollector
+from analytics.domain.collectors.locomotive_collector import LocomotiveCollector
 
 
 def test_locomotive_collector_initialization() -> None:

@@ -1,7 +1,7 @@
 """Tests for base metric collector classes."""
 
-from analytics.collectors.base import MetricCollector
-from analytics.collectors.base import MetricResult
+from analytics.domain.collectors.base import MetricCollector
+from analytics.domain.collectors.base import MetricResult
 import pytest
 
 

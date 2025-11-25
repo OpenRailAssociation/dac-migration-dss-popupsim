@@ -103,7 +103,7 @@ def test_main_with_valid_parameters(
 
     # Mock the simulation components
     mocker.patch('main.SimPyAdapter')
-    mocker.patch('main.PopupSim')
+    mocker.patch('main.WorkshopOrchestrator')
 
     result = runner.invoke(app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir)])
 
@@ -133,7 +133,7 @@ def test_main_with_verbose_flag(
 
     # Mock the simulation components
     mocker.patch('main.SimPyAdapter')
-    mocker.patch('main.PopupSim')
+    mocker.patch('main.WorkshopOrchestrator')
 
     result = runner.invoke(
         app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--verbose']
@@ -162,7 +162,7 @@ def test_main_with_custom_debug_level(
 
     # Mock the simulation components
     mocker.patch('main.SimPyAdapter')
-    mocker.patch('main.PopupSim')
+    mocker.patch('main.WorkshopOrchestrator')
 
     result = runner.invoke(
         app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--debug', 'DEBUG']

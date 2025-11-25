@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from models.workshop import Workshop
+from configuration.domain.models.workshop import Workshop
 from pydantic import ValidationError
 import pytest
 

@@ -1,10 +1,10 @@
 """Tests for simulation metrics registry."""
 
 
-from analytics.collectors.base import MetricCollector
-from analytics.collectors.base import MetricResult
-from analytics.collectors.metrics import SimulationMetrics
-from analytics.collectors.wagon import WagonCollector
+from analytics.domain.collectors.base import MetricCollector
+from analytics.domain.collectors.base import MetricResult
+from analytics.application.metrics_aggregator import SimulationMetrics
+from analytics.domain.collectors.wagon_collector import WagonCollector
 
 
 def test_simulation_metrics_initialization() -> None:

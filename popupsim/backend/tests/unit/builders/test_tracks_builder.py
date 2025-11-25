@@ -1,4 +1,4 @@
-"""Unit tests for TrackListBuilder class.
+"""Unit tests for TrackListParser class.
 
 Tests for loading tracks from JSON files and building track lists.
 """
@@ -8,9 +8,9 @@ import json
 from pathlib import Path
 import tempfile
 
-from builders.tracks_builder import TrackListBuilder
-from models.track import Track
-from models.track import TrackType
+from configuration.infrastructure.parsers.track_list_parser import TrackListParser
+from configuration.domain.models.track import Track
+from configuration.domain.models.track import TrackType
 import pytest
 
 
@@ -65,7 +65,7 @@ def valid_tracks_json(temp_json_file: Path) -> Path:
 
 @pytest.mark.unit
 class TestTrackListBuilder:
-    """Test suite for TrackListBuilder class."""
+    """Test suite for TrackListParser class."""
 
     def test_init_creates_empty_list(self, temp_json_file: Path) -> None:
         """Test that initialization creates empty track list.
@@ -75,7 +75,7 @@ class TestTrackListBuilder:
         temp_json_file : Path
             Temporary file path.
         """
-        builder: TrackListBuilder = TrackListBuilder(temp_json_file)
+        builder: TrackListParser = TrackListParser(temp_json_file)
 
         assert builder.tracks == []
         assert builder.tracks_path == temp_json_file
@@ -88,7 +88,7 @@ class TestTrackListBuilder:
         temp_json_file : Path
             Temporary file path.
         """
-        builder: TrackListBuilder = TrackListBuilder(temp_json_file)
+        builder: TrackListParser = TrackListParser(temp_json_file)
         track: Track = Track(id='test_track', type=TrackType.MAINLINE, edges=['edge_1'])
 
         builder.add_track(track)
@@ -104,7 +104,7 @@ class TestTrackListBuilder:
         valid_tracks_json : Path
             Path to valid tracks JSON file.
         """
-        builder: TrackListBuilder = TrackListBuilder(valid_tracks_json)
+        builder: TrackListParser = TrackListParser(valid_tracks_json)
 
         tracks: list[Track] = builder._load_tracks_from_file()
 
@@ -124,7 +124,7 @@ class TestTrackListBuilder:
             Temporary file path.
         """
         nonexistent: Path = temp_json_file.parent / 'nonexistent.json'
-        builder: TrackListBuilder = TrackListBuilder(nonexistent)
+        builder: TrackListParser = TrackListParser(nonexistent)
 
         with pytest.raises(FileNotFoundError, match='Tracks file not found'):
             builder._load_tracks_from_file()
@@ -138,7 +138,7 @@ class TestTrackListBuilder:
             Temporary file path.
         """
         temp_json_file.write_text('{ invalid json }')
-        builder: TrackListBuilder = TrackListBuilder(temp_json_file)
+        builder: TrackListParser = TrackListParser(temp_json_file)
 
         with pytest.raises(ValueError, match='Invalid JSON format'):
             builder._load_tracks_from_file()
@@ -152,7 +152,7 @@ class TestTrackListBuilder:
             Temporary file path.
         """
         temp_json_file.write_text('{"metadata": {"version": "1.0"}}')
-        builder: TrackListBuilder = TrackListBuilder(temp_json_file)
+        builder: TrackListParser = TrackListParser(temp_json_file)
 
         with pytest.raises(ValueError, match='Missing "tracks" key'):
             builder._load_tracks_from_file()
@@ -171,7 +171,7 @@ class TestTrackListBuilder:
             ],
         }
         temp_json_file.write_text(json.dumps(data))
-        builder: TrackListBuilder = TrackListBuilder(temp_json_file)
+        builder: TrackListParser = TrackListParser(temp_json_file)
 
         with pytest.raises(ValueError):  # noqa: PT011
             builder._load_tracks_from_file()
@@ -184,7 +184,7 @@ class TestTrackListBuilder:
         valid_tracks_json : Path
             Path to valid tracks JSON file.
         """
-        builder: TrackListBuilder = TrackListBuilder(valid_tracks_json)
+        builder: TrackListParser = TrackListParser(valid_tracks_json)
 
         tracks: list[Track] = builder.build()
 
@@ -200,7 +200,7 @@ class TestTrackListBuilder:
         valid_tracks_json : Path
             Path to valid tracks JSON file.
         """
-        builder: TrackListBuilder = TrackListBuilder(valid_tracks_json)
+        builder: TrackListParser = TrackListParser(valid_tracks_json)
         manual_track: Track = Track(id='manual', type=TrackType.PARKING, edges=['edge_m'])
         builder.add_track(manual_track)
 
@@ -229,7 +229,7 @@ class TestTrackListBuilder:
             ],
         }
         temp_json_file.write_text(json.dumps(data))
-        builder: TrackListBuilder = TrackListBuilder(temp_json_file)
+        builder: TrackListParser = TrackListParser(temp_json_file)
 
         tracks: list[Track] = builder.build()
 
@@ -253,7 +253,7 @@ class TestTrackListBuilder:
         """
         fixture_file: Path = fixtures_path / 'tracks.json'
 
-        tracks: list[Track] = TrackListBuilder(fixture_file).build()
+        tracks: list[Track] = TrackListParser(fixture_file).build()
 
         assert len(tracks) == 7
         assert tracks[0].id == 'track_1'

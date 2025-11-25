@@ -5,8 +5,8 @@ import json
 from pathlib import Path
 import tempfile
 
-from models.route import Route
-from models.routes import Routes
+from configuration.domain.models.route import Route
+from configuration.domain.models.routes import Routes
 import pytest
 
 len_test_routes = 3

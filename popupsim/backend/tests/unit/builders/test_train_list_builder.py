@@ -1,4 +1,4 @@
-"""Unit tests for TrainListBuilder class.
+"""Unit tests for TrainListParser class.
 
 Tests for loading train schedules from CSV files and building train lists.
 """
@@ -9,10 +9,10 @@ from datetime import datetime
 from pathlib import Path
 import tempfile
 
-from builders.train_list_builder import TrainListBuilder
-from models.train import TRAIN_DEFAULT_ID
-from models.train import Train
-from models.wagon import Wagon
+from configuration.infrastructure.parsers.train_list_parser import TrainListParser
+from configuration.domain.models.train import TRAIN_DEFAULT_ID
+from configuration.domain.models.train import Train
+from configuration.domain.models.wagon import Wagon
 import pandas as pd
 import pytest
 
@@ -82,7 +82,7 @@ def schedule_with_empty_train_ids(temp_csv_file: Path) -> Path:
 
 @pytest.mark.unit
 class TestTrainListBuilder:
-    """Test suite for TrainListBuilder class."""
+    """Test suite for TrainListParser class."""
 
     def test_init_creates_empty_list(self, temp_csv_file: Path) -> None:
         """Test that initialization creates empty train list.
@@ -92,7 +92,7 @@ class TestTrainListBuilder:
         temp_csv_file : Path
             Temporary file path.
         """
-        builder: TrainListBuilder = TrainListBuilder(temp_csv_file)
+        builder: TrainListParser = TrainListParser(temp_csv_file)
 
         assert builder.trains == []
         assert builder.schedule_path == temp_csv_file
@@ -105,7 +105,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
 
         df: pd.DataFrame = builder._load_csv()
 
@@ -123,7 +123,7 @@ class TestTrainListBuilder:
             Temporary file path.
         """
         nonexistent: Path = temp_csv_file.parent / 'nonexistent.csv'
-        builder: TrainListBuilder = TrainListBuilder(nonexistent)
+        builder: TrainListParser = TrainListParser(nonexistent)
 
         with pytest.raises(FileNotFoundError, match='Schedule file not found'):
             builder._load_csv()
@@ -137,7 +137,7 @@ class TestTrainListBuilder:
             Temporary file path.
         """
         temp_csv_file.write_text('invalid;csv;format\nwith;wrong;structure')
-        builder: TrainListBuilder = TrainListBuilder(temp_csv_file)
+        builder: TrainListParser = TrainListParser(temp_csv_file)
 
         with pytest.raises(ValueError, match='Failed to parse CSV file'):
             builder._load_csv()
@@ -150,7 +150,7 @@ class TestTrainListBuilder:
         schedule_with_empty_train_ids : Path
             Path to CSV with empty train_id fields.
         """
-        builder: TrainListBuilder = TrainListBuilder(schedule_with_empty_train_ids)
+        builder: TrainListParser = TrainListParser(schedule_with_empty_train_ids)
 
         df: pd.DataFrame = builder._load_csv()
 
@@ -165,7 +165,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
         df: pd.DataFrame = builder._load_csv()
         df_single_train: pd.DataFrame = df[df['train_id'] == '1']
 
@@ -184,7 +184,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
         df: pd.DataFrame = builder._load_csv()
 
         trains: list[Train] = builder._create_trains_from_dataframe(df)
@@ -203,7 +203,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
         df: pd.DataFrame = builder._load_csv()
 
         trains: list[Train] = builder._create_trains_from_dataframe(df)
@@ -220,7 +220,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
         df: pd.DataFrame = builder._load_csv()
 
         trains: list[Train] = builder._create_trains_from_dataframe(df)
@@ -245,7 +245,7 @@ class TestTrainListBuilder:
             '1;W001;invalid;ABC_D;2024-01-15 10:30:00;true;false\n'
         )
         temp_csv_file.write_text(content)
-        builder: TrainListBuilder = TrainListBuilder(temp_csv_file)
+        builder: TrainListParser = TrainListParser(temp_csv_file)
         df: pd.DataFrame = builder._load_csv()
 
         with pytest.raises(ValueError, match='Failed to create train'):
@@ -259,7 +259,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
 
         trains: list[Train] = builder.build()
 
@@ -275,7 +275,7 @@ class TestTrainListBuilder:
         valid_train_schedule : Path
             Path to valid train schedule CSV.
         """
-        builder: TrainListBuilder = TrainListBuilder(valid_train_schedule)
+        builder: TrainListParser = TrainListParser(valid_train_schedule)
 
         assert builder.trains == []
 
@@ -293,7 +293,7 @@ class TestTrainListBuilder:
             Temporary file path.
         """
         nonexistent: Path = temp_csv_file.parent / 'nonexistent.csv'
-        builder: TrainListBuilder = TrainListBuilder(nonexistent)
+        builder: TrainListParser = TrainListParser(nonexistent)
 
         with pytest.raises(FileNotFoundError):
             builder.build()
@@ -316,7 +316,7 @@ class TestTrainListBuilder:
             'T003;W006;16.8;ABC_D;2024-01-15 18:00:00;true;true\n'
         )
         temp_csv_file.write_text(content)
-        builder: TrainListBuilder = TrainListBuilder(temp_csv_file)
+        builder: TrainListParser = TrainListParser(temp_csv_file)
 
         trains: list[Train] = builder.build()
 
@@ -338,7 +338,7 @@ class TestTrainListBuilder:
         Generic test loading the test_train_schedule file from the fixtures directory.
         """
         schedule_file: Path = fixtures_path / 'test_train_schedule.csv'
-        trains: list[Train] = TrainListBuilder(schedule_file).build()
+        trains: list[Train] = TrainListParser(schedule_file).build()
 
         assert len(trains) == 2
         assert all(isinstance(train, Train) for train in trains)

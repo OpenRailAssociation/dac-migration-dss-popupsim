@@ -4,7 +4,7 @@ from datetime import UTC
 from datetime import datetime
 from pathlib import Path
 
-from models.locomotive import Locomotive
+from configuration.domain.models.locomotive import Locomotive
 from pydantic import ValidationError
 import pytest
 

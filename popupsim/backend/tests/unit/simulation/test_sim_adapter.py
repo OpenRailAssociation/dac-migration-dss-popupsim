@@ -10,7 +10,7 @@ sys.modules.
 from collections.abc import Generator
 
 import pytest
-from simulation.sim_adapter import SimPyAdapter
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
 
 @pytest.mark.unit

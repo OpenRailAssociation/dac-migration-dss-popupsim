@@ -3,11 +3,11 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from analytics.models.kpi_result import BottleneckInfo
-from analytics.models.kpi_result import KPIResult
-from analytics.models.kpi_result import ThroughputKPI
-from analytics.models.kpi_result import UtilizationKPI
-from analytics.reporting.csv_exporter import CSVExporter
+from analytics.domain.models.kpi_result import BottleneckInfo
+from analytics.domain.models.kpi_result import KPIResult
+from analytics.domain.models.kpi_result import ThroughputKPI
+from analytics.domain.models.kpi_result import UtilizationKPI
+from analytics.infrastructure.exporters.csv_exporter import CSVExporter
 import pandas as pd
 import pytest
 

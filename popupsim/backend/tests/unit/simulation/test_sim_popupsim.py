@@ -1,7 +1,7 @@
-"""Unit tests for the PopupSim simulation entry point.
+"""Unit tests for the WorkshopOrchestrator simulation entry point.
 
-This module contains unit tests that exercise the PopupSim façade used by the
-backend simulation. Tests verify that PopupSim delegates simulation control to
+This module contains unit tests that exercise the WorkshopOrchestrator façade used by the
+backend simulation. Tests verify that WorkshopOrchestrator delegates simulation control to
 the provided adapter objects and that integration-style examples show how to
 construct a full simulation using ScenarioBuilder and SimPyAdapter.
 
@@ -13,11 +13,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from builders.scenario_builder import ScenarioBuilder
-from models.scenario import Scenario
+from configuration.application.scenario_builder import ScenarioBuilder
+from configuration.domain.models.scenario import Scenario
 import pytest
-from simulation.popupsim import PopupSim
-from simulation.sim_adapter import SimPyAdapter
+from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
 
 class FakeAdapter:
@@ -111,20 +111,20 @@ class FakeEvent:
 
 @pytest.mark.unit
 class TestPopupSimWithFakeSim:
-    """Test suite for PopupSim using a fake adapter."""
+    """Test suite for WorkshopOrchestrator using a fake adapter."""
 
     def test_run_calls_adapter_run_without_until(self) -> None:
-        """Ensure PopupSim.run calls adapter.run when `until` is not provided."""
+        """Ensure WorkshopOrchestrator.run calls adapter.run when `until` is not provided."""
         from datetime import UTC
         from datetime import datetime
 
-        from models.locomotive import Locomotive
-        from models.topology import Topology
-        from models.track import Track
-        from models.track import TrackType
-        from models.train import Train
-        from models.wagon import Wagon
-        from models.workshop import Workshop
+        from configuration.domain.models.locomotive import Locomotive
+        from configuration.domain.models.topology import Topology
+        from configuration.domain.models.track import Track
+        from configuration.domain.models.track import TrackType
+        from configuration.domain.models.train import Train
+        from configuration.domain.models.wagon import Wagon
+        from configuration.domain.models.workshop import Workshop
 
         adapter = FakeAdapter()
 
@@ -156,7 +156,7 @@ class TestPopupSimWithFakeSim:
         }
 
         scenario = Scenario(**scenario_data)
-        sim = PopupSim(adapter, scenario)  # type: ignore[arg-type]
+        sim = WorkshopOrchestrator(adapter, scenario)  # type: ignore[arg-type]
 
         sim.run()
 
@@ -179,7 +179,7 @@ class TestPopupSimWithSimpyAdapter:
             train_schedule_file='schedule.csv',
         )
         sim_adapter = SimPyAdapter.create_simpy_adapter()
-        popup_sim = PopupSim(sim_adapter, scenario)
+        popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
         popup_sim.run(until=100.0)
 
 
@@ -187,7 +187,7 @@ class TestPopupSimWithScenarioBuilder:
     """Integration-style example using ScenarioBuilder."""
 
     def test_popsim_with_scenario_from_fixture(self, test_scenario_json_path: Path) -> None:
-        """Test PopupSim with scenario loaded from fixture file.
+        """Test WorkshopOrchestrator with scenario loaded from fixture file.
 
         Parameters
         ----------
@@ -196,5 +196,5 @@ class TestPopupSimWithScenarioBuilder:
         """
         scenario = ScenarioBuilder(test_scenario_json_path).build()
         sim_adapter = SimPyAdapter.create_simpy_adapter()
-        popup_sim = PopupSim(sim_adapter, scenario)
+        popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
         popup_sim.run()

@@ -9,7 +9,7 @@ from datetime import UTC
 from datetime import datetime
 from typing import Any
 
-from models.wagon import Wagon
+from configuration.domain.models.wagon import Wagon
 from pydantic import ValidationError
 import pytest
 
@@ -202,8 +202,8 @@ class TestWagon:
 
         wagon_dict = wagon.model_dump()
 
-        from models.wagon import CouplerType
-        from models.wagon import WagonStatus
+        from configuration.domain.models.wagon import CouplerType
+        from configuration.domain.models.wagon import WagonStatus
 
         expected_dict = {
             'wagon_id': 'W014',

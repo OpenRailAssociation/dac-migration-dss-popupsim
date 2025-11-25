@@ -3,7 +3,7 @@
 import re
 from typing import Any
 
-from models.locomotive import LocoStatus
+from configuration.domain.models.locomotive import LocoStatus
 
 
 def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
@@ -55,7 +55,7 @@ def _validate_loco(
             from_track, to_track = route_match.groups()
             expected_duration = end_time - time
             # Find actual route duration
-            from simulation.route_finder import find_route
+            from workshop_operations.infrastructure.routing.route_finder import find_route
 
             route = find_route(popup_sim.scenario.routes, from_track, to_track)
             if route and route.duration:

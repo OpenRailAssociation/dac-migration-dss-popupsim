@@ -4,19 +4,19 @@ from datetime import UTC
 from datetime import datetime
 from datetime import timedelta
 
-from models.locomotive import Locomotive
-from models.process_times import ProcessTimes
-from models.route import Route
-from models.scenario import Scenario
-from models.scenario import TrackSelectionStrategy
-from models.topology import Topology
-from models.track import Track
-from models.track import TrackType
-from models.train import Train
-from models.wagon import Wagon
-from models.workshop import Workshop
-from simulation.popupsim import PopupSim
-from simulation.sim_adapter import SimPyAdapter
+from configuration.domain.models.locomotive import Locomotive
+from configuration.domain.models.process_times import ProcessTimes
+from configuration.domain.models.route import Route
+from configuration.domain.models.scenario import Scenario
+from configuration.domain.models.scenario import TrackSelectionStrategy
+from configuration.domain.models.topology import Topology
+from configuration.domain.models.track import Track
+from configuration.domain.models.track import TrackType
+from configuration.domain.models.train import Train
+from configuration.domain.models.wagon import Wagon
+from configuration.domain.models.workshop import Workshop
+from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
 
 def test_metrics_output() -> None:
@@ -93,7 +93,7 @@ def test_metrics_output() -> None:
     )
 
     sim = SimPyAdapter.create_simpy_adapter()
-    popupsim = PopupSim(sim, scenario)
+    popupsim = WorkshopOrchestrator(sim, scenario)
     popupsim.run(until=100.0)
 
     metrics = popupsim.get_metrics()

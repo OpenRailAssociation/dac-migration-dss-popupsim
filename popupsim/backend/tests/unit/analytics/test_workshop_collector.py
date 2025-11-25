@@ -1,7 +1,7 @@
 """Tests for workshop collector."""
 
 
-from analytics.collectors.workshop import WorkshopCollector
+from analytics.domain.collectors.workshop_collector import WorkshopCollector
 
 
 def test_workshop_collector_initialization() -> None:

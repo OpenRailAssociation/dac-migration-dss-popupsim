@@ -5,8 +5,8 @@ Tests the Track model validation logic, field constraints,
 and error handling for workshop track configurations.
 """
 
-from models.track import Track
-from models.track import TrackType
+from configuration.domain.models.track import Track
+from configuration.domain.models.track import TrackType
 from pydantic import ValidationError
 import pytest
 

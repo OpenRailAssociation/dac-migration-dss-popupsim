@@ -1,8 +1,8 @@
 """Test route duration validation in timeline validator."""
 
 import pytest
-from simulation.popupsim import PopupSim
-from simulation.sim_adapter import SimPyAdapter
+from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
 from .test_validation_scenarios import create_minimal_scenario
 from .timeline_validator import validate_timeline
@@ -17,7 +17,7 @@ def test_route_duration_validation() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=1, num_stations=1, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
 
     # This should pass - routes have 1.0 min duration
@@ -34,7 +34,7 @@ def test_route_duration_mismatch() -> None:
     """Test that incorrect route duration is caught."""
     scenario = create_minimal_scenario(num_wagons=1, num_stations=1, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
 
     # This should fail - route duration is 1.0, not 2.0

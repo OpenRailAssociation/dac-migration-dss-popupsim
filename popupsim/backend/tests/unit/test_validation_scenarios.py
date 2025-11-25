@@ -8,18 +8,18 @@ from datetime import UTC
 from datetime import datetime
 from datetime import timedelta
 
-from models.locomotive import Locomotive
-from models.process_times import ProcessTimes
-from models.route import Route
-from models.scenario import Scenario
-from models.topology import Topology
-from models.track import Track
-from models.track import TrackType
-from models.train import Train
-from models.wagon import Wagon
-from models.workshop import Workshop
-from simulation.popupsim import PopupSim
-from simulation.sim_adapter import SimPyAdapter
+from configuration.domain.models.locomotive import Locomotive
+from configuration.domain.models.process_times import ProcessTimes
+from configuration.domain.models.route import Route
+from configuration.domain.models.scenario import Scenario
+from configuration.domain.models.topology import Topology
+from configuration.domain.models.track import Track
+from configuration.domain.models.track import TrackType
+from configuration.domain.models.train import Train
+from configuration.domain.models.wagon import Wagon
+from configuration.domain.models.workshop import Workshop
+from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
 
 def create_minimal_scenario(
@@ -131,7 +131,7 @@ def test_single_wagon_single_station() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=1, num_stations=1, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
 
     from .timeline_validator import validate_timeline_from_docstring
@@ -170,7 +170,7 @@ def test_two_wagons_one_station() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=2, num_stations=1, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
 
     from .timeline_validator import validate_timeline_from_docstring
@@ -203,7 +203,7 @@ def test_two_wagons_two_stations() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=2, num_stations=2, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
 
     from .timeline_validator import validate_timeline_from_docstring
@@ -249,7 +249,7 @@ def test_four_wagons_two_stations() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=4, num_stations=2, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
 
     from .timeline_validator import validate_timeline_from_docstring
@@ -313,7 +313,7 @@ def test_six_wagons_two_workshops() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=6, num_stations=2, retrofit_time=10.0, num_workshops=2)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=60.0)
 
     from .timeline_validator import validate_timeline_from_docstring
@@ -390,7 +390,7 @@ def test_seven_wagons_two_workshops() -> None:
     """
     scenario = create_minimal_scenario(num_wagons=7, num_stations=2, retrofit_time=10.0, num_workshops=2)
     sim = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim, scenario)
+    popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=100.0)
 
     from .timeline_validator import validate_timeline_from_docstring
