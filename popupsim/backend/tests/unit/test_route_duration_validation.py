@@ -4,7 +4,7 @@ import pytest
 from workshop_operations.application.orchestrator import WorkshopOrchestrator
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
-from .test_validation_scenarios import create_minimal_scenario
+from .test_helpers import create_minimal_scenario_with_dtos
 from .timeline_validator import validate_timeline
 
 
@@ -15,7 +15,7 @@ def test_route_duration_validation() -> None:
     t=0->1: loco[L1] MOVING parking->collection
     t=4->5: loco[L1] MOVING retrofit->WS1
     """
-    scenario = create_minimal_scenario(num_wagons=1, num_stations=1, retrofit_time=10.0)
+    scenario = create_minimal_scenario_with_dtos(num_wagons=1, num_stations=1, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
     popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)
@@ -32,7 +32,7 @@ def test_route_duration_validation() -> None:
 
 def test_route_duration_mismatch() -> None:
     """Test that incorrect route duration is caught."""
-    scenario = create_minimal_scenario(num_wagons=1, num_stations=1, retrofit_time=10.0)
+    scenario = create_minimal_scenario_with_dtos(num_wagons=1, num_stations=1, retrofit_time=10.0)
     sim = SimPyAdapter.create_simpy_adapter()
     popup_sim = WorkshopOrchestrator(sim, scenario)
     popup_sim.run(until=50.0)

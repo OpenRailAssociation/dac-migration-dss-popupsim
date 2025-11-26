@@ -2,11 +2,12 @@
 
 from pathlib import Path
 
-from configuration.application.scenario_builder import ScenarioBuilder
-from configuration.domain.models.locomotive import LocoStatus
-from configuration.domain.models.wagon import WagonStatus
 from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.domain.entities.locomotive import LocoStatus
+from workshop_operations.domain.entities.wagon import WagonStatus
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
+
+from configuration.application.scenario_builder import ScenarioBuilder
 
 
 def test_wagon_pickup_process() -> None:

@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 
-from configuration.domain.models.workshop import Workshop
+from workshop_operations.domain.entities.workshop import Workshop
 
 
 class WorkshopDistributor:

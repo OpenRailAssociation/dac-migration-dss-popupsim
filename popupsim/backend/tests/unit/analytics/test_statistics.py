@@ -1,6 +1,5 @@
 """Tests for statistics calculator."""
 
-
 from analytics.application.statistics_calculator import StatisticsCalculator
 
 

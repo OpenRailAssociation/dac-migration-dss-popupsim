@@ -1,7 +1,7 @@
 """Locomotive business logic - no simulation dependencies."""
 
-from configuration.domain.models.locomotive import Locomotive
-from configuration.domain.models.locomotive import LocoStatus
+from workshop_operations.domain.entities.locomotive import Locomotive
+from workshop_operations.domain.entities.locomotive import LocoStatus
 
 
 class LocomotiveStateManager:

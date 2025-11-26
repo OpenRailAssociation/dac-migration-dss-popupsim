@@ -2,10 +2,11 @@
 
 import random
 
+from workshop_operations.domain.entities.track import Track
+from workshop_operations.domain.entities.track import TrackType
+
 from configuration.domain.models.scenario import TrackSelectionStrategy
 from configuration.domain.models.topology import Topology
-from configuration.domain.models.track import Track
-from configuration.domain.models.track import TrackType
 
 
 class TrackCapacityManager:  # pylint: disable=too-many-instance-attributes

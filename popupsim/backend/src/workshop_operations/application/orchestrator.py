@@ -10,7 +10,15 @@ from analytics.application.metrics_aggregator import SimulationMetrics
 from analytics.domain.collectors.wagon_collector import WagonCollector
 from workshop_operations.application.services.locomotive_service import DefaultLocomotiveService
 from workshop_operations.application.services.locomotive_service import LocomotiveService
+from workshop_operations.domain.aggregates.train import Train
+from workshop_operations.domain.entities.locomotive import Locomotive
+from workshop_operations.domain.entities.track import TrackType
+from workshop_operations.domain.entities.wagon import CouplerType
+from workshop_operations.domain.entities.wagon import Wagon
+from workshop_operations.domain.entities.wagon import WagonStatus
+from workshop_operations.domain.entities.workshop import Workshop
 from workshop_operations.domain.services.locomotive_operations import LocomotiveStateManager
+from workshop_operations.domain.services.scenario_domain_validator import ScenarioDomainValidator
 from workshop_operations.domain.services.wagon_operations import WagonSelector
 from workshop_operations.domain.services.wagon_operations import WagonStateManager
 from workshop_operations.domain.services.workshop_operations import WorkshopDistributor
@@ -22,15 +30,8 @@ from workshop_operations.infrastructure.routing.transport_job import TransportJo
 from workshop_operations.infrastructure.routing.transport_job import execute_transport_job
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimulationAdapter
 
-from configuration.domain.models.locomotive import Locomotive
 from configuration.domain.models.scenario import LocoDeliveryStrategy
 from configuration.domain.models.scenario import Scenario
-from configuration.domain.models.track import TrackType
-from configuration.domain.models.train import Train
-from configuration.domain.models.wagon import CouplerType
-from configuration.domain.models.wagon import Wagon
-from configuration.domain.models.wagon import WagonStatus
-from configuration.domain.models.workshop import Workshop
 
 logger = logging.getLogger(__name__)
 
@@ -69,19 +70,26 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         self.scenario: Scenario = scenario
         self.locomotive_service = locomotive_service or DefaultLocomotiveService()
 
-        self.locomotives_queue: list[Locomotive] = scenario.locomotives or []
+        # Convert DTOs to entities
+        from workshop_operations.application.factories.entity_factory import EntityFactory
+        
+        self.locomotives_queue: list[Locomotive] = [
+            EntityFactory.create_locomotive(dto) for dto in (scenario.locomotives or [])
+        ]
         for loco in self.locomotives_queue:
             loco.record_status_change(0.0, loco.status)
 
         self.trains_queue: list[Train] = scenario.trains or []
         self.wagons_queue: list[Wagon] = []
         self.rejected_wagons_queue: list[Wagon] = []
-        self.workshops_queue: list[Workshop] = scenario.workshops or []
+        self.workshops_queue: list[Workshop] = [
+            EntityFactory.create_workshop(dto) for dto in (scenario.workshops or [])
+        ]
 
-        self.locomotives = ResourcePool(self.sim, self.locomotives_queue, 'Locomotives')
+        self.locomotives = ResourcePool(self.sim, self.locomotives_queue, 'Locomotives')  # type: ignore[arg-type]
 
         self.track_capacity = TrackCapacityManager(
-            scenario.tracks or [],
+            scenario.tracks or [],  # type: ignore[arg-type]
             scenario.topology,
             collection_strategy=scenario.track_selection_strategy,
             retrofit_strategy=scenario.retrofit_selection_strategy,
@@ -95,6 +103,13 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         self.wagon_state = WagonStateManager()
         self.loco_state = LocomotiveStateManager()
         self.workshop_distributor = WorkshopDistributor()
+        
+        # Validate domain requirements
+        domain_validator = ScenarioDomainValidator()
+        domain_result = domain_validator.validate_workshop_requirements(scenario)
+        if not domain_result.is_valid:
+            error_messages = [str(issue) for issue in domain_result.issues if issue.level.value == 'ERROR']
+            raise ValueError(f'Domain validation failed: {"\n".join(error_messages)}')
 
         # Create stores for wagon flow coordination
         self.wagons_ready_for_stations: dict[str, Any] = {}
@@ -111,7 +126,7 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         self.parking_tracks = [t for t in (scenario.tracks or []) if t.type == TrackType.PARKING]
         self.retrofitted_tracks = [t for t in (scenario.tracks or []) if t.type == TrackType.RETROFITTED]
 
-        logger.info('Initialized %s with scenario: %s', self.name, self.scenario.scenario_id)
+        logger.info('Initialized %s with scenario: %s (domain validated)', self.name, self.scenario.scenario_id)
 
     def get_simtime_limit_from_scenario(self) -> float:
         """Determine simulation time limit from scenario configuration.
@@ -189,7 +204,7 @@ def process_train_arrivals(popupsim: WorkshopOrchestrator) -> Generator[Any]:
         logger.info('Train %s arrived at %s', train.train_id, train.arrival_time)
 
         # Delay from train arrival to first wagon at hump
-        yield popupsim.sim.delay(process_times.train_to_hump_delay)
+        yield popupsim.sim.delay(process_times.train_to_hump_delay)  # type: ignore[union-attr]
 
         # Process wagons one by one through hump
         for wagon in train.wagons:
@@ -213,18 +228,19 @@ def process_train_arrivals(popupsim: WorkshopOrchestrator) -> Generator[Any]:
                 popupsim.rejected_wagons_queue.append(wagon)
 
             # Delay between wagons at hump
-            yield popupsim.sim.delay(process_times.wagon_hump_interval)
+            yield popupsim.sim.delay(process_times.wagon_hump_interval)  # type: ignore[union-attr]
 
         # Signal that train is fully processed
         logger.info('Train %s fully processed, signaling pickup', train.train_id)
         popupsim.train_processed_event.succeed()
         # Create new event for next train
         popupsim.train_processed_event = popupsim.sim.create_event()
+        yield popupsim.sim.delay(0)  # Ensure generator yields
 
 
 def _wait_for_wagons_ready(
     popupsim: WorkshopOrchestrator,
-) -> Generator[Any, Any, tuple[str, list[Wagon]]]:  # type: ignore[misc]
+) -> Generator[Any, Any, tuple[str, list[Wagon]]]:
     """Wait for wagons ready on collection track.
 
     Parameters
@@ -248,12 +264,12 @@ def _wait_for_wagons_ready(
         wagons_by_track = popupsim.wagon_selector.filter_selected_wagons(popupsim.wagons_queue)
         if wagons_by_track:
             collection_track_id = next(iter(wagons_by_track))
-            return (collection_track_id, wagons_by_track[collection_track_id])
+            return (collection_track_id, wagons_by_track[collection_track_id])  # type: ignore[return-value]
 
 
 def _pickup_and_couple_wagons(
     popupsim: WorkshopOrchestrator, loco: Locomotive, collection_track_id: str, collection_wagons: list[Wagon]
-) -> Generator[list[tuple[Wagon, str]]]:  # type: ignore[misc]
+) -> Generator[Any, Any, list[tuple[Wagon, str]]]:
     """Travel to collection, find and couple wagons.
 
     Parameters
@@ -285,7 +301,7 @@ def _pickup_and_couple_wagons(
         yield from popupsim.locomotive_service.couple_wagons(
             popupsim, loco, len(wagons_to_pickup), wagons_to_pickup[0][0].coupler_type
         )
-    return wagons_to_pickup
+    return wagons_to_pickup  # type: ignore[return-value]
 
 
 def _deliver_to_retrofit_tracks(
@@ -391,7 +407,16 @@ def _distribute_wagons_to_workshops(
 
         for wagon in batch:
             popupsim.wagon_state.mark_on_retrofit_track(wagon)
-            popupsim.metrics.record_event('wagon_delivered', {'wagon_id': wagon.wagon_id, 'time': current_time})
+            
+            # Record domain event
+            from analytics.domain.events.simulation_events import WagonDeliveredEvent
+            from analytics.domain.value_objects.timestamp import Timestamp
+            event = WagonDeliveredEvent.create(
+                timestamp=Timestamp.from_simulation_time(current_time),
+                wagon_id=wagon.wagon_id
+            )
+            popupsim.metrics.record_event(event)
+            
             yield popupsim.wagons_ready_for_stations[best_workshop.track_id].put((retrofit_track_id, [wagon]))
 
 
@@ -432,16 +457,16 @@ def pickup_wagons_to_retrofit(popupsim: WorkshopOrchestrator) -> Generator[Any]:
         raise ValueError('Scenario must have routes configured')
     logger.info('Starting wagon pickup process')
     while True:
-        collection_track_id, collection_wagons = yield from _wait_for_wagons_ready(popupsim)
-        loco = yield from popupsim.locomotive_service.allocate(popupsim)
-        wagons_to_pickup = yield from _pickup_and_couple_wagons(popupsim, loco, collection_track_id, collection_wagons)
+        collection_track_id, collection_wagons = yield from _wait_for_wagons_ready(popupsim)  # type: ignore[misc]
+        loco = yield from popupsim.locomotive_service.allocate(popupsim)  # type: ignore[misc,func-returns-value]
+        wagons_to_pickup = yield from _pickup_and_couple_wagons(popupsim, loco, collection_track_id, collection_wagons)  # type: ignore[misc]
         if not wagons_to_pickup:
-            yield from popupsim.locomotive_service.release(popupsim, loco)
+            yield from popupsim.locomotive_service.release(popupsim, loco)  # type: ignore[arg-type]
             yield popupsim.sim.delay(1.0)
             continue
         wagons_by_retrofit = _group_wagons_by_retrofit_track(wagons_to_pickup)
-        yield from _deliver_to_retrofit_tracks(popupsim, loco, collection_track_id, wagons_by_retrofit)
-        yield from _return_loco_and_signal(popupsim, loco, wagons_by_retrofit)
+        yield from _deliver_to_retrofit_tracks(popupsim, loco, collection_track_id, wagons_by_retrofit)  # type: ignore[arg-type]
+        yield from _return_loco_and_signal(popupsim, loco, wagons_by_retrofit)  # type: ignore[arg-type]
 
 
 def move_wagons_to_stations(popupsim: WorkshopOrchestrator) -> Generator[Any]:
@@ -496,27 +521,29 @@ def _wait_for_workshop_ready(popupsim: WorkshopOrchestrator, workshop_track_id: 
 
 
 def _deliver_batch_to_workshop(
-    popupsim: WorkshopOrchestrator, loco: Locomotive, batch: list[Wagon], retrofit_track_id: str, workshop_id: str
+    popupsim: WorkshopOrchestrator, loco: Locomotive, batch: list[Wagon], retrofit_track_id: str, workshop_track_id: str
 ) -> Generator:
     """Move loco with batch from retrofit track to workshop."""
     if popupsim.scenario.loco_delivery_strategy == LocoDeliveryStrategy.RETURN_TO_PARKING:
         logger.info('🚂 ROUTE: Loco %s traveling [%s → %s]', loco.locomotive_id, loco.track_id, retrofit_track_id)
         yield from popupsim.locomotive_service.move(popupsim, loco, loco.track_id, retrofit_track_id)
 
-    route = find_route(popupsim.scenario.routes, retrofit_track_id, workshop_id)
+    # Convert route DTOs to entities for route finding
+    routes = [EntityFactory.create_route(dto) for dto in (popupsim.scenario.routes or [])]
+    route = find_route(routes, retrofit_track_id, workshop_track_id)
     if route and route.duration:
         logger.info(
             '🚂 ROUTE: Loco %s with %d wagons traveling [%s → %s] (duration: %.1f min)',
             loco.locomotive_id,
             len(batch),
             retrofit_track_id,
-            workshop_id,
+            workshop_track_id,
             route.duration,
         )
         # Wagon state tracking would go here
-        yield from popupsim.locomotive_service.move(popupsim, loco, loco.track_id, workshop_id)
+        yield from popupsim.locomotive_service.move(popupsim, loco, loco.track_id, workshop_track_id)
     else:
-        logger.warning('⚠️  No route found from %s to %s', retrofit_track_id, workshop_id)
+        logger.warning('⚠️  No route found from %s to %s', retrofit_track_id, workshop_track_id)
 
 
 def _decouple_and_process_wagons(
@@ -558,7 +585,7 @@ def _process_track_batches(popupsim: WorkshopOrchestrator, workshop_track_id: st
         yield from _wait_for_workshop_ready(popupsim, workshop_track_id, workshop)
 
         loco = yield from popupsim.locomotive_service.allocate(popupsim)
-        yield from _deliver_batch_to_workshop(popupsim, loco, batch_wagons, retrofit_track_id, workshop.workshop_id)
+        yield from _deliver_batch_to_workshop(popupsim, loco, batch_wagons, retrofit_track_id, workshop.track_id)
         yield from _decouple_and_process_wagons(popupsim, batch_wagons, workshop_track_id)
         yield from _return_loco_to_parking(popupsim, loco)
         yield from popupsim.locomotive_service.release(popupsim, loco)
@@ -584,7 +611,7 @@ def process_single_wagon(popupsim: WorkshopOrchestrator, wagon: Wagon, track_id:
         logger.debug('Wagon %s started retrofit at station (t=%.1f)', wagon.wagon_id, current_time)
 
         # Perform retrofit work
-        yield popupsim.sim.delay(process_times.wagon_retrofit_time)
+        yield popupsim.sim.delay(process_times.wagon_retrofit_time)  # type: ignore[union-attr]
 
         # Retrofit complete
         current_time = popupsim.sim.current_time()
@@ -593,7 +620,18 @@ def process_single_wagon(popupsim: WorkshopOrchestrator, wagon: Wagon, track_id:
         wagon.needs_retrofit = False
         wagon.coupler_type = CouplerType.DAC
         popupsim.workshop_capacity.record_station_released(track_id, current_time)
-        popupsim.metrics.record_event('wagon_retrofitted', {'wagon_id': wagon.wagon_id, 'time': current_time})
+        
+        # Record domain event
+        from analytics.domain.events.simulation_events import WagonRetrofittedEvent
+        from analytics.domain.value_objects.timestamp import Timestamp
+        event = WagonRetrofittedEvent.create(
+            timestamp=Timestamp.from_simulation_time(current_time),
+            wagon_id=wagon.wagon_id,
+            workshop_id=track_id,
+            processing_duration=process_times.wagon_retrofit_time
+        )
+        popupsim.metrics.record_event(event)
+        
         logger.info(
             'Wagon %s retrofit completed at t=%s, coupler changed to DAC', wagon.wagon_id, wagon.retrofit_end_time
         )
@@ -632,7 +670,7 @@ def _pickup_track_batches(popupsim: WorkshopOrchestrator, workshop_track_id: str
 
     while True:
         # Collect full batch (blocks until all ready)
-        batch = []
+        batch: list[Wagon] = []
         for _ in range(batch_size):
             wagon = yield popupsim.wagons_completed[workshop_track_id].get()
             batch.append(wagon)
@@ -787,7 +825,7 @@ def _find_wagons_for_retrofit(
     """
     wagons_to_pickup = []
     # Find retrofit tracks (not workshop tracks)
-    retrofit_tracks = [t for t in popupsim.scenario.tracks if t.type == TrackType.RETROFIT]
+    retrofit_tracks = [t for t in (popupsim.scenario.tracks or []) if t.type == TrackType.RETROFIT]  # type: ignore[union-attr]
     for wagon in collection_wagons:
         for retrofit_track in retrofit_tracks:
             retrofit_track_id = retrofit_track.id

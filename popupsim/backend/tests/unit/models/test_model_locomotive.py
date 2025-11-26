@@ -4,9 +4,9 @@ from datetime import UTC
 from datetime import datetime
 from pathlib import Path
 
-from configuration.domain.models.locomotive import Locomotive
 from pydantic import ValidationError
 import pytest
+from workshop_operations.domain.entities.locomotive import Locomotive
 
 
 def test_locomotive_creation() -> None:

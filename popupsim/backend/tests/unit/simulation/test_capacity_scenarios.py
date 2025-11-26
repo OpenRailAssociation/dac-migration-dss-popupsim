@@ -2,9 +2,10 @@
 
 from pathlib import Path
 
-from configuration.application.scenario_builder import ScenarioBuilder
 from workshop_operations.application.orchestrator import WorkshopOrchestrator
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
+
+from configuration.application.scenario_builder import ScenarioBuilder
 
 
 def test_collection_track_within_capacity() -> None:

@@ -3,15 +3,22 @@
 import logging
 from typing import Any
 
-from configuration.domain.models.scenario import Scenario
-from configuration.domain.models.wagon import Wagon
-from configuration.domain.models.wagon import WagonStatus
-from configuration.domain.models.workshop import Workshop
+from workshop_operations.domain.entities.wagon import Wagon
+from workshop_operations.domain.entities.wagon import WagonStatus
+from workshop_operations.domain.entities.workshop import Workshop
 
+from configuration.domain.models.scenario import Scenario
+
+from ..factories.analytics_factory import AnalyticsFactory
 from ..models.kpi_result import BottleneckInfo
 from ..models.kpi_result import KPIResult
 from ..models.kpi_result import ThroughputKPI
 from ..models.kpi_result import UtilizationKPI
+from ..specifications.bottleneck_specifications import (
+    CriticalUtilizationSpec,
+    HighRejectionRateSpec,
+    HighUtilizationSpec,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +66,13 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         avg_flow_time = self._calculate_avg_flow_time(metrics)
         avg_waiting_time = self._calculate_avg_waiting_time(wagons)
 
-        return KPIResult(
+        return AnalyticsFactory.create_kpi_result(
             scenario_id=scenario.scenario_id,
             throughput=throughput,
             utilization=utilization,
             bottlenecks=bottlenecks,
-            avg_flow_time_minutes=avg_flow_time,
-            avg_waiting_time_minutes=avg_waiting_time,
+            avg_flow_time=avg_flow_time,
+            avg_waiting_time=avg_waiting_time,
         )
 
     def _calculate_throughput(
@@ -81,16 +88,11 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         total_processed = len(wagons)
         total_rejected = len(rejected_wagons)
 
-        wagons_per_hour = retrofitted / duration_hours if duration_hours > 0 else 0.0
-        wagons_per_day = wagons_per_hour * 24.0
-
-        return ThroughputKPI(
-            total_wagons_processed=total_processed,
-            total_wagons_retrofitted=retrofitted,
-            total_wagons_rejected=total_rejected,
-            simulation_duration_hours=duration_hours,
-            wagons_per_hour=round(wagons_per_hour, 2),
-            wagons_per_day=round(wagons_per_day, 2),
+        return AnalyticsFactory.create_throughput_kpi(
+            total_processed=total_processed,
+            total_retrofitted=retrofitted,
+            total_rejected=total_rejected,
+            duration_hours=duration_hours,
         )
 
     def _calculate_utilization(self, workshops: list[Workshop], wagons: list[Wagon]) -> list[UtilizationKPI]:
@@ -98,24 +100,12 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         utilization_list: list[UtilizationKPI] = []
 
         for workshop in workshops:
-            # Calculate based on retrofit stations
-            total_capacity = workshop.retrofit_stations
-
             # Count wagons processed at this workshop
             workshop_wagons = [w for w in wagons if w.track_id == workshop.track_id]
             processed_count = len(workshop_wagons)
 
-            # Simple utilization estimate
-            avg_utilization = min(100.0, (processed_count / total_capacity * 10) if total_capacity > 0 else 0.0)
-
             utilization_list.append(
-                UtilizationKPI(
-                    workshop_id=workshop.workshop_id,
-                    total_capacity=total_capacity,
-                    average_utilization_percent=round(avg_utilization, 1),
-                    peak_utilization_percent=round(min(100.0, avg_utilization * 1.2), 1),
-                    idle_time_percent=round(100.0 - avg_utilization, 1),
-                )
+                AnalyticsFactory.create_utilization_kpi(workshop, processed_count)
             )
 
         return utilization_list
@@ -123,31 +113,36 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
     def _identify_bottlenecks(
         self, throughput: ThroughputKPI, utilization: list[UtilizationKPI]
     ) -> list[BottleneckInfo]:
-        """Identify bottlenecks in the system."""
+        """Identify bottlenecks using specifications."""
         bottlenecks: list[BottleneckInfo] = []
+        
+        # Use specifications for business rules
+        high_rejection_spec = HighRejectionRateSpec()
+        high_utilization_spec = HighUtilizationSpec()
+        critical_utilization_spec = CriticalUtilizationSpec()
 
         # Check for high rejection rate
-        if throughput.total_wagons_processed > 0:
+        if high_rejection_spec.is_satisfied_by(throughput):
             rejection_rate = throughput.total_wagons_rejected / throughput.total_wagons_processed
-            if rejection_rate > 0.1:  # More than 10% rejected
-                bottlenecks.append(
-                    BottleneckInfo(
-                        location='Collection Tracks',
-                        type='track',
-                        severity='high' if rejection_rate > 0.2 else 'medium',
-                        description=f'High rejection rate: {rejection_rate * 100:.1f}% of wagons rejected',
-                        impact_wagons_per_hour=throughput.wagons_per_hour * rejection_rate,
-                    )
+            bottlenecks.append(
+                AnalyticsFactory.create_bottleneck_info(
+                    location='Collection Tracks',
+                    bottleneck_type='track',
+                    severity='high' if rejection_rate > 0.2 else 'medium',
+                    description=f'High rejection rate: {rejection_rate * 100:.1f}% of wagons rejected',
+                    impact_wagons_per_hour=throughput.wagons_per_hour * rejection_rate,
                 )
+            )
 
         # Check for high utilization workshops
         for util in utilization:
-            if util.average_utilization_percent > 90:
+            if high_utilization_spec.is_satisfied_by(util):
+                severity = 'critical' if critical_utilization_spec.is_satisfied_by(util) else 'high'
                 bottlenecks.append(
-                    BottleneckInfo(
+                    AnalyticsFactory.create_bottleneck_info(
                         location=util.workshop_id,
-                        type='workshop',
-                        severity='critical' if util.average_utilization_percent > 95 else 'high',
+                        bottleneck_type='workshop',
+                        severity=severity,
                         description=f'Workshop at {util.average_utilization_percent:.1f}% utilization',
                         impact_wagons_per_hour=throughput.wagons_per_hour * 0.1,
                     )

@@ -7,7 +7,7 @@ This context is responsible for:
 - Providing capacity assessments
 """
 
-from .infrastructure.exporters.csv_exporter import CSVExporter
 from .application.statistics_calculator import StatisticsCalculator
+from .infrastructure.exporters.csv_exporter import CSVExporter
 
 __all__ = ['CSVExporter', 'StatisticsCalculator']

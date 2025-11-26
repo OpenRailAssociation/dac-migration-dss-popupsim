@@ -133,6 +133,30 @@
         "edge_164"
       ],
       "type": "retrofitted"
+    },
+    {
+      "id": "track_1a",
+      "name": "1a",
+      "edges": ["edge_39"],
+      "type": "mainline"
+    },
+    {
+      "id": "track_Z1",
+      "name": "Z1",
+      "edges": ["edge_200"],
+      "type": "workshop_area"
+    },
+    {
+      "id": "track_9",
+      "name": "9",
+      "edges": ["edge_201"],
+      "type": "parking_area"
+    },
+    {
+      "id": "track_24",
+      "name": "24",
+      "edges": ["edge_202"],
+      "type": "parking_area"
     }
   ]
 }

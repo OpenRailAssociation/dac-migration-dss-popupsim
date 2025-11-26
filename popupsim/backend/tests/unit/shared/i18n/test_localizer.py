@@ -4,13 +4,13 @@ from collections.abc import Generator
 from pathlib import Path
 import tempfile
 
+import pytest
 from shared.i18n.localizer import Localizer
 from shared.i18n.localizer import _
 from shared.i18n.localizer import get_localizer
 from shared.i18n.localizer import init_i18n
 from shared.i18n.localizer import ngettext
 from shared.i18n.localizer import set_locale
-import pytest
 
 pytestmark = pytest.mark.unit
 
@@ -117,10 +117,11 @@ class TestLocalizer:
         """Test get_localizer raises error when not initialized."""
         # Clear any existing localizer and global config
         import shared.i18n.localizer as localizer_module
+
         if hasattr(localizer_module._thread_local, 'localizer'):
             delattr(localizer_module._thread_local, 'localizer')
         localizer_module._global_config.clear()
-        
+
         with pytest.raises(RuntimeError, match='Localizer not initialized'):
             get_localizer()
 

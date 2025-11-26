@@ -7,9 +7,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from configuration.domain.models.workshop import Workshop
 from pydantic import ValidationError
 import pytest
+from workshop_operations.domain.entities.workshop import Workshop
 
 
 @pytest.mark.unit

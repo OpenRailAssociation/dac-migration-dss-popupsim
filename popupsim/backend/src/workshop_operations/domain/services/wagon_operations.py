@@ -1,7 +1,7 @@
 """Wagon business logic - no simulation dependencies."""
 
-from configuration.domain.models.wagon import Wagon
-from configuration.domain.models.wagon import WagonStatus
+from workshop_operations.domain.entities.wagon import Wagon
+from workshop_operations.domain.entities.wagon import WagonStatus
 
 
 class WagonStateManager:

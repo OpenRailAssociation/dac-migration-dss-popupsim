@@ -1,10 +1,14 @@
-"""Models and validation logic for train simulation models and arrivals.
+"""Configuration models for train simulation scenarios.
 
-This module defines the data models and validation logic for configuring
+This module defines the configuration data models for setting up
 train simulation scenarios. It includes validation for scenario parameters
-such as date ranges, random seeds, workshop configurations, and file references.
+such as date ranges, strategies, and file references.
+
+Operational models (locomotives, wagons, trains, tracks, workshops, routes)
+have been moved to workshop_operations context.
 """
 
+from collections.abc import Sequence
 from datetime import UTC
 from datetime import datetime
 from enum import Enum
@@ -16,13 +20,10 @@ from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
 
-from .locomotive import Locomotive
+from configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
+from configuration.application.dtos.route_input_dto import RouteInputDTO
+from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
 from .process_times import ProcessTimes
-from .route import Route
-from .track import Track
-from .track import TrackType
-from .train import Train
-from .workshop import Workshop
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -67,13 +68,13 @@ class Scenario(BaseModel):
         default=LocoDeliveryStrategy.RETURN_TO_PARKING,
         description='Strategy for locomotive delivery to workshop stations',
     )
-    locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
+    locomotives: list[LocomotiveInputDTO] | None = Field(default=None, description='Locomotive data')
     process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
-    routes: list[Route] | None = Field(default=None, description='Route models')
+    routes: list[RouteInputDTO] | None = Field(default=None, description='Route data')
     topology: Any = Field(default=None, description='Topology model')
-    trains: list[Train] | None = Field(default=None, description='Train models')
-    tracks: list[Track] | None = Field(default=None, description='Track models')
-    workshops: list[Workshop] | None = Field(default=None, description='Workshop models with available tracks')
+    trains: Any | None = Field(default=None, description='Train models')
+    tracks: Sequence[Any] | None = Field(default=None, description='Track models')
+    workshops: list[WorkshopInputDTO] | None = Field(default=None, description='Workshop data')
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
@@ -106,6 +107,7 @@ class Scenario(BaseModel):
         """Validate scenario has required resources for simulation.
 
         This should be called after all referenced files are loaded.
+        Basic validation only - detailed track validation happens in workshop_operations context.
         """
         if not self.locomotives:
             raise ValueError('Scenario must have at least one locomotive')
@@ -113,15 +115,6 @@ class Scenario(BaseModel):
             raise ValueError('Scenario must have at least one train')
         if not self.tracks or not self.topology:
             raise ValueError('Scenario must have tracks and topology')
-
-        if self.tracks:
-            retrofitted_tracks = [t for t in self.tracks if t.type == TrackType.RETROFITTED]
-            if not retrofitted_tracks:
-                raise ValueError('Scenario must have at least one retrofitted track')
-
-            parking_tracks = [t for t in self.tracks if t.type == TrackType.PARKING]
-            if not parking_tracks:
-                logger.warning('No parking tracks found - some simulation features may not work')
 
         return self
 

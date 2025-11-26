@@ -2,9 +2,8 @@
 
 from typing import Any
 
+from workshop_operations.domain.entities.workshop import Workshop
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimulationAdapter
-
-from configuration.domain.models.workshop import Workshop
 
 
 class StationState:  # pylint: disable=too-few-public-methods

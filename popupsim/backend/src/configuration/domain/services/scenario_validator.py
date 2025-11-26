@@ -12,7 +12,6 @@ from enum import Enum
 import logging
 
 from configuration.domain.models.scenario import Scenario
-from configuration.domain.models.track import TrackType
 
 logger = logging.getLogger('validation')
 
@@ -151,7 +150,7 @@ class ScenarioValidator:
     """
 
     def validate(self, scenario: Scenario) -> ValidationResult:
-        """Perform all validations and return result.
+        """Perform basic configuration validations.
 
         Parameters
         ----------
@@ -165,27 +164,21 @@ class ScenarioValidator:
         """
         issues: list[ValidationIssue] = []
 
-        # Perform all validations
-        # TODO: verifiy validations
-        issues.extend(self._validate_workshop_tracks(scenario))
-        # TODO: clarify if needed
-        # issues.extend(self._validate_capacity(scenario))
-        issues.extend(self._validate_routes(scenario))
-        # issues.extend(self._validate_train_schedule(scenario))
-        # issues.extend(self._validate_simulation_duration(scenario))
+        # Only basic configuration validation - no domain-specific logic
+        issues.extend(self._validate_basic_requirements(scenario))
+        issues.extend(self._validate_basic_routes(scenario))
 
         # is_valid = True when no errors
         is_valid = not any(i.level == ValidationLevel.ERROR for i in issues)
 
         return ValidationResult(is_valid=is_valid, issues=issues)
 
-    def _validate_workshop_tracks(self, scenario: Scenario) -> list[ValidationIssue]:
-        """Validate workshop tracks.
+    def _validate_basic_requirements(self, scenario: Scenario) -> list[ValidationIssue]:
+        """Validate basic scenario requirements.
 
         Checks:
-        - At least one workshop available
-        - Workshop has tracks configured
-        - Required track types available
+        - Basic data presence
+        - Required fields populated
         """
         issues: list[ValidationIssue] = []
 
@@ -196,120 +189,62 @@ class ScenarioValidator:
                     level=ValidationLevel.ERROR,
                     message='No workshops configured',
                     field='workshops',
-                    suggestion='Add at least one workshop with tracks',
+                    suggestion='Add at least one workshop',
                 )
             )
-            return issues
 
-        # Validate first workshop
-        workshop = scenario.workshops[0]
-
+        # Check if tracks are configured
         if not scenario.tracks:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.ERROR,
-                    message=f'Workshop {workshop.workshop_id} has no tracks configured',
+                    message='No tracks configured',
                     field='tracks',
-                    suggestion='Add tracks to the workshop',
-                )
-            )
-            return issues
-
-        # 1. At least one workshop track
-        werkstatt_tracks = [t for t in scenario.tracks if t.type == TrackType.WORKSHOP]
-
-        if not werkstatt_tracks:
-            issues.append(
-                ValidationIssue(
-                    level=ValidationLevel.ERROR,
-                    message="At least one track with function='WORKSHOP' required",
-                    field='tracks',
-                    suggestion="Add a track with function='WORKSHOP'",
+                    suggestion='Add track configuration',
                 )
             )
 
-        # 2. All core tracktypes present?
-        required_types = {TrackType.RETROFITTED, TrackType.WORKSHOP, TrackType.PARKING}
-        present_types = {t.type for t in scenario.tracks}
-        missing = required_types - present_types
-
-        if missing:
-            missing_names = [tracktype.value for tracktype in missing]
+        # Check if trains are configured
+        if not scenario.trains:
             issues.append(
                 ValidationIssue(
                     level=ValidationLevel.WARNING,
-                    message=f'Missing track type: {", ".join(missing_names)}',
-                    field='tracks',
-                    suggestion='Complete workflow needed: collection → WORKSHOP → parking',
+                    message='No trains configured',
+                    field='trains',
+                    suggestion='Add train schedule',
                 )
             )
 
         return issues
 
-    def _validate_routes(self, scenario: Scenario) -> list[ValidationIssue]:
-        """Validate routes.
+    def _validate_basic_routes(self, scenario: Scenario) -> list[ValidationIssue]:
+        """Validate basic route configuration.
 
         Checks:
-        - Track IDs in track_sequence exist
-        - from_function and to_function exist
+        - Routes have required fields
+        - Basic data consistency
         """
         issues: list[ValidationIssue] = []
 
-        # Check if tracks are configured
-        if not scenario.tracks:
-            return issues  # Workshop validation already handles this case
-
-        # Collect track IDs and function names
-        track_ids = {t.id for t in scenario.tracks}
-        function_names = {t.type.value for t in scenario.tracks}
-        valid_identifiers = track_ids | function_names
-
-        # Collect tracktypes
-        tracktypes = {t.type for t in scenario.tracks}
-
         for route in scenario.routes or []:
-            # Track IDs or function names exist?
-            for track_identifier in route.track_sequence:
-                if track_identifier not in valid_identifiers:
-                    issues.append(
-                        ValidationIssue(
-                            level=ValidationLevel.ERROR,
-                            message=f"Route {route.route_id}: Track '{track_identifier}' does not exist",
-                            field=f'routes[{route.route_id}].track_sequence',
-                            suggestion=f'Use one of the IDs: {", ".join(sorted(track_ids))}',
-                        )
-                    )
-
-            # tracktypes exist?
-            # Get the function of the from_track
-            from_track = next((t for t in scenario.tracks if t.id == route.from_track), None)
-            if from_track and from_track.type not in tracktypes:
-                tracktype_names = [str(f) for f in tracktypes]
+            # Check basic route data
+            if not route.track_sequence:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=(
-                            f"Route {route.route_id}: from_track '{route.from_track}' "
-                            f"has function '{from_track.type}' which does not exist"
-                        ),
-                        field=f'routes[{route.route_id}].from_track',
-                        suggestion=f'Use one of the tracktypes: {", ".join(sorted(tracktype_names))}',
+                        message=f"Route {route.route_id}: Empty track sequence",
+                        field=f'routes[{route.route_id}].track_sequence',
+                        suggestion='Add track sequence to route',
                     )
                 )
-
-            # Get the function of the to_track
-            to_track = next((t for t in scenario.tracks if t.id == route.to_track), None)
-            if to_track and to_track.type not in tracktypes:
-                tracktype_names = [str(f) for f in tracktypes]
+            
+            if route.duration <= 0:
                 issues.append(
                     ValidationIssue(
-                        level=ValidationLevel.ERROR,
-                        message=(
-                            f"Route {route.route_id}: to_track '{route.to_track}' "
-                            f"has function '{to_track.type}' which does not exist"
-                        ),
-                        field=f'routes[{route.route_id}].to_track',
-                        suggestion=f'Use one of the tracktypes: {", ".join(sorted(tracktype_names))}',
+                        level=ValidationLevel.WARNING,
+                        message=f"Route {route.route_id}: Duration is {route.duration}",
+                        field=f'routes[{route.route_id}].duration',
+                        suggestion='Set positive duration for route',
                     )
                 )
 

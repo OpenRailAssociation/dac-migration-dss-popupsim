@@ -6,6 +6,9 @@ from typing import Any
 
 from .base import MetricCollector
 from .base import MetricResult
+from ..events.base_event import DomainEvent
+from ..events.simulation_events import WagonDeliveredEvent, WagonRetrofittedEvent, WagonRejectedEvent
+from ..value_objects.metric_value import MetricValue
 
 
 @dataclass
@@ -21,24 +24,19 @@ class WagonCollector(MetricCollector):
     total_flow_time: float = 0.0
     wagon_start_times: dict[str, float] = field(default_factory=dict)
 
-    def record_event(self, event_type: str, data: dict[str, Any]) -> None:
-        """Record wagon events."""
-        if event_type == 'wagon_delivered':
+    def record_event(self, event: DomainEvent) -> None:
+        """Record wagon domain events."""
+        if isinstance(event, WagonDeliveredEvent):
             self.wagons_delivered += 1
-            wagon_id = data.get('wagon_id')
-            time = data.get('time', 0.0)
-            if wagon_id:
-                self.wagon_start_times[wagon_id] = time
+            self.wagon_start_times[event.wagon_id] = event.timestamp.to_minutes()
 
-        elif event_type == 'wagon_retrofitted':
+        elif isinstance(event, WagonRetrofittedEvent):
             self.wagons_retrofitted += 1
-            wagon_id = data.get('wagon_id')
-            time = data.get('time', 0.0)
-            if wagon_id and wagon_id in self.wagon_start_times:
-                flow_time = time - self.wagon_start_times[wagon_id]
+            if event.wagon_id in self.wagon_start_times:
+                flow_time = event.timestamp.to_minutes() - self.wagon_start_times[event.wagon_id]
                 self.total_flow_time += flow_time
-
-        elif event_type == 'wagon_rejected':
+                
+        elif isinstance(event, WagonRejectedEvent):
             self.wagons_rejected += 1
 
     def get_results(self) -> list[MetricResult]:
@@ -46,10 +44,10 @@ class WagonCollector(MetricCollector):
         avg_flow_time = self.total_flow_time / self.wagons_retrofitted if self.wagons_retrofitted > 0 else 0.0
 
         return [
-            MetricResult('wagons_delivered', self.wagons_delivered, 'wagons', 'wagon'),
-            MetricResult('wagons_retrofitted', self.wagons_retrofitted, 'wagons', 'wagon'),
-            MetricResult('wagons_rejected', self.wagons_rejected, 'wagons', 'wagon'),
-            MetricResult('avg_flow_time', round(avg_flow_time, 1), 'min', 'wagon'),
+            MetricResult('wagons_delivered', MetricValue.count(self.wagons_delivered), 'wagon'),
+            MetricResult('wagons_retrofitted', MetricValue.count(self.wagons_retrofitted), 'wagon'),
+            MetricResult('wagons_rejected', MetricValue.count(self.wagons_rejected), 'wagon'),
+            MetricResult('avg_flow_time', MetricValue.duration_minutes(avg_flow_time), 'wagon'),
         ]
 
     def reset(self) -> None:

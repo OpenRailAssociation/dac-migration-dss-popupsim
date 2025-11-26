@@ -11,16 +11,19 @@ This module provides the ConfigurationService class that handles:
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
-from configuration.domain.models.locomotive import Locomotive
+from configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
+from configuration.application.dtos.route_input_dto import RouteInputDTO
+from configuration.application.dtos.scenario_input_dto import ScenarioInputDTO
+from configuration.application.dtos.track_input_dto import TrackInputDTO
+from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
+
 from configuration.domain.models.process_times import ProcessTimes
-from configuration.domain.models.routes import Routes
 from configuration.domain.models.scenario import Scenario
 from configuration.domain.models.topology import Topology
-from configuration.domain.models.workshop import Workshop
 from configuration.domain.services.scenario_validator import ScenarioValidator
-from configuration.infrastructure.parsers.track_list_parser import TrackListParser
-from configuration.infrastructure.parsers.train_list_parser import TrainListParser
+
 
 # Configure logging
 logger = logging.getLogger('ConfigurationService')
@@ -44,10 +47,10 @@ class ScenarioBuilder:
         scenario_path : Path
             Directory for scenario files.
         """
-        self.references: dict = {}
         self.scenario_path = scenario_path
         self.scenario: Scenario | None = None
         self.validator = ScenarioValidator()
+        self.references: dict = {}
 
     def __load_locomotives(self) -> None:
         """Load locomotives from JSON file referenced in scenario configuration.
@@ -75,27 +78,31 @@ class ScenarioBuilder:
                     locomotive_data = json.load(f)
 
                 locomotive_list: list[dict[str, str]] = locomotive_data.get('locomotives')
-                self.scenario.locomotives = [Locomotive(**data) for data in locomotive_list]
+                self.scenario.locomotives = [LocomotiveInputDTO(**data) for data in locomotive_list]
 
         except json.JSONDecodeError as e:
             raise BuilderError(f'Invalid JSON format in {locomotives_path}: {e!s}') from e
         except Exception as e:
             raise BuilderError(f'Failed to load locomotives from {locomotives_path}: {e!s}') from e
 
-    def __load_routes(self) -> None:
-        """Load routes from JSON file referenced in scenario configuration.
+    def __load_routes(self, scenario_dto: ScenarioInputDTO) -> None:
+        """Load routes from CSV file and map to domain models.
+
+        Parameters
+        ----------
+        scenario_dto : ScenarioInputDTO
+            Scenario DTO containing file references.
 
         Raises
         ------
         BuilderError
             If routes file is not specified or loading fails.
         """
-        routes_file: str | None = self.references.get('routes')
+        routes_file: str | None = scenario_dto.routes_file or self.references.get('routes')
 
         if not routes_file:
-            raise BuilderError('Missing routes file reference in scenario configuration')
+            raise BuilderError('Missing routes_file in scenario configuration')
 
-        # Replace filename in scenario_path with routes_file
         scenario_dir: Path = Path(self.scenario_path).parent
         routes_path: Path = scenario_dir / routes_file
 
@@ -104,7 +111,21 @@ class ScenarioBuilder:
 
         try:
             if isinstance(self.scenario, Scenario):
-                self.scenario.routes = Routes(routes_path).routes
+                with routes_path.open('r') as f:
+                    routes_data = json.load(f)
+                
+                routes_list: list[dict[str, Any]] = routes_data.get('routes', [])
+                # Map JSON fields to DTO fields
+                mapped_routes = []
+                for route_data in routes_list:
+                    mapped_route = {
+                        'route_id': route_data.get('id', ''),
+                        'description': route_data.get('description'),
+                        'duration': route_data.get('duration', 0.0),
+                        'track_sequence': route_data.get('path', [])
+                    }
+                    mapped_routes.append(RouteInputDTO(**mapped_route))
+                self.scenario.routes = mapped_routes
 
         except Exception as e:
             raise BuilderError(f'Failed to load routes from {routes_path}: {e!s}') from e
@@ -161,18 +182,13 @@ class ScenarioBuilder:
         except Exception as e:
             raise BuilderError(f'Failed to load process times from {process_times_path}: {e!s}') from e
 
-    def __load_scenario(self) -> None:
-        """Load scenario models from a JSON file.
-
-        Parameters
-        ----------
-        path : str | Path
-            Directory path containing scenario.json or direct path to JSON file.
+    def __load_scenario(self) -> ScenarioInputDTO:
+        """Load scenario DTO from a JSON file.
 
         Returns
         -------
-        None
-
+        ScenarioInputDTO
+            Raw scenario input data.
         """
         logger.info('Loading scenario models from %s', self.scenario_path)
 
@@ -180,8 +196,8 @@ class ScenarioBuilder:
             with open(self.scenario_path, encoding='utf-8') as f:
                 data = json.load(f)
 
-            # Validate required fields exist before creating model
-            required_fields = ['scenario_id', 'start_date', 'end_date', 'references']
+            # Validate required fields exist before creating DTO
+            required_fields = ['scenario_id', 'start_date', 'end_date']
             missing_fields = [field for field in required_fields if field not in data]
 
             if missing_fields:
@@ -190,10 +206,11 @@ class ScenarioBuilder:
                     f'Found fields: {", ".join(data.keys())}'
                 )
 
-            self.scenario = Scenario(**data)
+            scenario_dto = ScenarioInputDTO(**data)
+            # Populate references for backward compatibility
             self.references = data.get('references', {})
-
-            logger.info('Successfully loaded scenario: %s', data.get('scenario_id'))
+            logger.info('Successfully loaded scenario DTO: %s', data.get('scenario_id'))
+            return scenario_dto
 
         except json.JSONDecodeError as e:
             error_msg = (
@@ -207,20 +224,24 @@ class ScenarioBuilder:
             logger.error('%s', error_msg)
             raise BuilderError(error_msg) from e
 
-    def __load_tracks(self) -> None:
-        """Load tracks from JSON file referenced in scenario configuration.
+    def __load_tracks(self, scenario_dto: ScenarioInputDTO) -> None:
+        """Load tracks from JSON file and map to domain models.
+
+        Parameters
+        ----------
+        scenario_dto : ScenarioInputDTO
+            Scenario DTO containing file references.
 
         Raises
         ------
         BuilderError
             If tracks file is not specified or loading fails.
         """
-        tracks_file: str | None = self.references.get('tracks')
+        tracks_file: str | None = scenario_dto.workshop_tracks_file or self.references.get('tracks')
 
         if not tracks_file:
-            raise BuilderError('Missing tracks file reference in scenario configuration')
+            raise BuilderError('Missing workshop_tracks_file in scenario configuration')
 
-        # Replace filename in scenario_path with tracks_file
         scenario_dir: Path = Path(self.scenario_path).parent
         tracks_path: Path = scenario_dir / tracks_file
 
@@ -229,25 +250,34 @@ class ScenarioBuilder:
 
         try:
             if isinstance(self.scenario, Scenario):
-                self.scenario.tracks = TrackListParser(tracks_path).build()
+                with tracks_path.open('r', encoding='utf-8') as f:
+                    tracks_data = json.load(f)
+                
+                tracks_list: list[dict[str, Any]] = tracks_data.get('tracks', [])
+                track_dtos = [TrackInputDTO(**track_data) for track_data in tracks_list]
+                self.scenario.tracks = track_dtos
 
         except Exception as e:
             raise BuilderError(f'Failed to load tracks from {tracks_path}: {e!s}') from e
 
-    def __load_trains(self) -> None:
-        """Load trains from CSV file referenced in scenario configuration.
+    def __load_trains(self, scenario_dto: ScenarioInputDTO) -> None:
+        """Load trains from CSV file and map to domain models.
+
+        Parameters
+        ----------
+        scenario_dto : ScenarioInputDTO
+            Scenario DTO containing file references.
 
         Raises
         ------
         BuilderError
             If trains file is not specified or loading fails.
         """
-        trains_file: str | None = self.references.get('trains')
+        trains_file: str | None = scenario_dto.train_schedule_file or self.references.get('trains')
 
         if not trains_file:
-            raise BuilderError('Missing trains file reference in scenario configuration')
+            raise BuilderError('Missing train_schedule_file in scenario configuration')
 
-        # Replace filename in scenario_path with trains_file
         scenario_dir: Path = Path(self.scenario_path).parent
         trains_path: Path = scenario_dir / trains_file
 
@@ -256,7 +286,41 @@ class ScenarioBuilder:
 
         try:
             if isinstance(self.scenario, Scenario):
-                self.scenario.trains = TrainListParser(trains_path).build()
+                import pandas as pd
+                from configuration.application.dtos.train_input_dto import TrainInputDTO
+                from configuration.application.dtos.wagon_input_dto import WagonInputDTO
+                
+                df = pd.read_csv(trains_path, sep=';', parse_dates=['arrival_time'])
+                df['train_id'] = df['train_id'].fillna('NO_ID').astype(str)
+                df['arrival_time'] = pd.to_datetime(df['arrival_time'], errors='coerce')
+                
+                train_dtos = []
+                for train_id, group in df.groupby('train_id'):
+                    latest_arrival = group['arrival_time'].max()
+                    first_row = group.iloc[0]
+                    
+                    wagon_dtos: list[WagonInputDTO] = []
+                    for _, row in group.iterrows():
+                        wagon_dto = WagonInputDTO(
+                            wagon_id=str(row.get('wagon_id', f'{train_id}_wagon_{len(wagon_dtos) + 1}')),
+                            length=float(row.get('length', 10.0)),
+                            is_loaded=bool(row.get('is_loaded', False)),
+                            needs_retrofit=bool(row.get('needs_retrofit', True)),
+                            track=str(row.get('Track', '')) if pd.notna(row.get('Track')) else None,
+                        )
+                        wagon_dtos.append(wagon_dto)
+                    
+                    train_dto = TrainInputDTO(
+                        train_id=str(train_id),
+                        arrival_time=latest_arrival.isoformat(),
+                        departure_time=latest_arrival.isoformat(),
+                        locomotive_id=str(first_row.get('locomotive_id', 'default_loco')),
+                        route_id=str(first_row.get('route_id', 'default_route')),
+                        wagons=wagon_dtos,
+                    )
+                    train_dtos.append(train_dto)
+                
+                self.scenario.trains = train_dtos
 
         except Exception as e:
             raise BuilderError(f'Failed to load trains from {trains_path}: {e!s}') from e
@@ -290,7 +354,16 @@ class ScenarioBuilder:
                     raise BuilderError(f'No workshops found in {workshops_path}')
 
                 workshops_list: list[dict[str, object]] = workshops_data['workshops']  # type: ignore[assignment]
-                self.scenario.workshops = [Workshop(**data) for data in workshops_list]  # type: ignore[arg-type]
+                # Map only required fields for DTO
+                mapped_workshops = []
+                for workshop_data in workshops_list:
+                    mapped_workshop = {
+                        'workshop_id': workshop_data.get('workshop_id', ''),
+                        'track_id': workshop_data.get('track_id', ''),
+                        'retrofit_stations': workshop_data.get('retrofit_stations', 0)
+                    }
+                    mapped_workshops.append(WorkshopInputDTO(**mapped_workshop))
+                self.scenario.workshops = mapped_workshops
 
         except json.JSONDecodeError as e:
             raise BuilderError(f'Invalid JSON format in {workshops_path}: {e!s}') from e
@@ -331,17 +404,42 @@ class ScenarioBuilder:
         path = Path(self.scenario_path)
 
         self.__find_scenario_in_path(path)
-        self.__load_scenario()
+        scenario_dto = self.__load_scenario()
+
+        # Validate DTO
+        scenario_dto.model_validate(scenario_dto.model_dump())
+
+        # Create domain model from DTO with defaults
+        from configuration.domain.models.scenario import TrackSelectionStrategy, LocoDeliveryStrategy
+        
+        self.scenario = Scenario(
+            scenario_id=scenario_dto.scenario_id,
+            start_date=scenario_dto.start_date,
+            end_date=scenario_dto.end_date,
+            track_selection_strategy=scenario_dto.track_selection_strategy or TrackSelectionStrategy.LEAST_OCCUPIED,
+            retrofit_selection_strategy=scenario_dto.retrofit_selection_strategy or TrackSelectionStrategy.LEAST_OCCUPIED,
+            loco_delivery_strategy=scenario_dto.loco_delivery_strategy or LocoDeliveryStrategy.RETURN_TO_PARKING,
+        )
+
         if isinstance(self.scenario, Scenario):
             self.__load_locomotives()
-            self.__load_tracks()
-            self.__load_trains()
-            self.__load_routes()
+            self.__load_tracks(scenario_dto)
+            self.__load_trains(scenario_dto)
+            self.__load_routes(scenario_dto)
             self.__load_topology()
             self.__load_process_times()
             self.__load_workshops()
             # Validate scenario after all referenced files are loaded
             self.scenario.validate_simulation_requirements()
+
+            # Run comprehensive validation
+            validation_result = self.validator.validate(self.scenario)
+            if not validation_result.is_valid:
+                validation_result.print_summary()
+                if validation_result.has_errors():
+                    error_messages = [str(issue) for issue in validation_result.get_errors()]
+                    raise BuilderError(f'Scenario validation failed: {"\n".join(error_messages)}')
+                logger.warning('Scenario has validation warnings but will proceed')
         else:
             raise BuilderError('Scenario could not be loaded properly.')
         return self.scenario

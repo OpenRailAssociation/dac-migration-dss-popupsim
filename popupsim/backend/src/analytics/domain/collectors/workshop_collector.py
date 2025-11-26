@@ -6,6 +6,9 @@ from typing import Any
 
 from .base import MetricCollector
 from .base import MetricResult
+from ..events.base_event import DomainEvent
+from ..events.simulation_events import WorkshopUtilizationChangedEvent
+from ..value_objects.metric_value import MetricValue
 
 
 @dataclass
@@ -20,34 +23,24 @@ class WorkshopCollector(MetricCollector):
     workshop_idle_time: dict[str, float] = field(default_factory=dict)
     workshop_last_event: dict[str, tuple[float, int]] = field(default_factory=dict)
 
-    def record_event(self, event_type: str, data: dict[str, Any]) -> None:
-        """Record workshop events."""
-        if event_type == 'workshop_station_occupied':
-            workshop_id = data.get('workshop_id')
-            time = data.get('time', 0.0)
-            stations_used = data.get('stations_used', 0)
+    def record_event(self, event: DomainEvent) -> None:
+        """Record workshop domain events."""
+        if isinstance(event, WorkshopUtilizationChangedEvent):
+            workshop_id = event.workshop_id
+            time = event.timestamp.to_minutes()
+            stations_used = event.available_stations
 
-            if workshop_id:
-                if workshop_id in self.workshop_last_event:
-                    last_time, last_stations = self.workshop_last_event[workshop_id]
-                    duration = time - last_time
-                    if last_stations > 0:
-                        self.workshop_active_time[workshop_id] = (
-                            self.workshop_active_time.get(workshop_id, 0.0) + duration
-                        )
-                    else:
-                        self.workshop_idle_time[workshop_id] = self.workshop_idle_time.get(workshop_id, 0.0) + duration
-
-                self.workshop_last_event[workshop_id] = (time, stations_used)
-
-        elif event_type == 'simulation_end':
-            end_time = data.get('time', 0.0)
-            for workshop_id, (last_time, last_stations) in self.workshop_last_event.items():
-                duration = end_time - last_time
+            if workshop_id in self.workshop_last_event:
+                last_time, last_stations = self.workshop_last_event[workshop_id]
+                duration = time - last_time
                 if last_stations > 0:
-                    self.workshop_active_time[workshop_id] = self.workshop_active_time.get(workshop_id, 0.0) + duration
+                    self.workshop_active_time[workshop_id] = (
+                        self.workshop_active_time.get(workshop_id, 0.0) + duration
+                    )
                 else:
                     self.workshop_idle_time[workshop_id] = self.workshop_idle_time.get(workshop_id, 0.0) + duration
+
+            self.workshop_last_event[workshop_id] = (time, stations_used)
 
     def get_results(self) -> list[MetricResult]:
         """Get workshop utilization metrics."""
@@ -63,16 +56,14 @@ class WorkshopCollector(MetricCollector):
                 results.append(
                     MetricResult(
                         f'{workshop_id}_utilization',
-                        round(utilization, 1),
-                        '%',
+                        MetricValue.percentage(utilization),
                         'workshop',
                     )
                 )
                 results.append(
                     MetricResult(
                         f'{workshop_id}_idle_time',
-                        round(idle / 60.0, 1),
-                        'min',
+                        MetricValue.duration_minutes(idle / 60.0),
                         'workshop',
                     )
                 )

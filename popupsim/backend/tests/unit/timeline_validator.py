@@ -3,7 +3,7 @@
 import re
 from typing import Any
 
-from configuration.domain.models.locomotive import LocoStatus
+from workshop_operations.domain.entities.locomotive import LocoStatus
 
 
 def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
@@ -38,7 +38,12 @@ def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
 
 
 def _validate_loco(
-    popup_sim: Any, loco_id: str, time: float, status_name: str, rest: str, end_time: float | None = None  # noqa: PLR0913
+    popup_sim: Any,
+    loco_id: str,
+    time: float,
+    status_name: str,
+    rest: str,
+    end_time: float | None = None,
 ) -> None:
     """Validate locomotive state at specific time."""
     loco = next((locomotive for locomotive in popup_sim.locomotives_queue if locomotive.locomotive_id == loco_id), None)

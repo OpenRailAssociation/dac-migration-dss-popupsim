@@ -6,26 +6,26 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
 
+from ..events.base_event import DomainEvent
+from ..value_objects.metric_value import MetricValue
+
 
 @dataclass
 class MetricResult:
-    """Single metric result.
+    """Single metric result with strong typing.
 
     Attributes
     ----------
     name : str
         Metric name.
-    value : float | int | str
-        Metric value.
-    unit : str
-        Unit of measurement.
+    value : MetricValue
+        Strongly typed metric value.
     category : str
         Metric category for grouping.
     """
 
     name: str
-    value: float | int | str
-    unit: str
+    value: MetricValue
     category: str
 
 
@@ -36,15 +36,13 @@ class MetricCollector(ABC):
     """
 
     @abstractmethod
-    def record_event(self, event_type: str, data: dict[str, Any]) -> None:
-        """Record an event for metric computation.
+    def record_event(self, event: DomainEvent) -> None:
+        """Record a domain event for metric computation.
 
         Parameters
         ----------
-        event_type : str
-            Type of event.
-        data : dict[str, Any]
-            Event data.
+        event : DomainEvent
+            Domain event to process.
         """
         raise NotImplementedError
 
@@ -109,8 +107,7 @@ class ResourceUtilizationCollector(MetricCollector):
                     results.append(
                         MetricResult(
                             f'{resource_id}_{state}_utilization',
-                            round(utilization, 1),
-                            '%',
+                            MetricValue.percentage(utilization),
                             self.category,
                         )
                     )

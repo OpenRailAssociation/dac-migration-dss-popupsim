@@ -1,10 +1,14 @@
 """Tests for simulation metrics registry."""
 
-
+from analytics.application.metrics_aggregator import SimulationMetrics
 from analytics.domain.collectors.base import MetricCollector
 from analytics.domain.collectors.base import MetricResult
-from analytics.application.metrics_aggregator import SimulationMetrics
 from analytics.domain.collectors.wagon_collector import WagonCollector
+from analytics.domain.events.simulation_events import WagonDeliveredEvent, WagonRetrofittedEvent
+from analytics.domain.events.base_event import DomainEvent
+from analytics.domain.value_objects.event_id import EventId
+from analytics.domain.value_objects.timestamp import Timestamp
+from analytics.domain.value_objects.metric_value import MetricValue
 
 
 def test_simulation_metrics_initialization() -> None:
@@ -43,7 +47,10 @@ def test_record_event_to_single_collector() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    metrics.record_event('wagon_delivered', {'wagon_id': 'W001', 'time': 10.0})
+    event = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'
+    )
+    metrics.record_event(event)
 
     assert collector.wagons_delivered == 1
 
@@ -56,7 +63,10 @@ def test_record_event_to_multiple_collectors() -> None:
     metrics.register(collector1)
     metrics.register(collector2)
 
-    metrics.record_event('wagon_delivered', {'wagon_id': 'W001', 'time': 10.0})
+    event = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'
+    )
+    metrics.record_event(event)
 
     assert collector1.wagons_delivered == 1
     assert collector2.wagons_delivered == 1
@@ -77,8 +87,15 @@ def test_get_results_single_collector() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    collector.record_event('wagon_delivered', {'wagon_id': 'W001', 'time': 0.0})
-    collector.record_event('wagon_retrofitted', {'wagon_id': 'W001', 'time': 60.0})
+    delivered_event = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'
+    )
+    retrofitted_event = WagonRetrofittedEvent(
+        EventId.generate(), Timestamp.from_simulation_time(60.0), 'W001', 'WS001', 60.0
+    )
+    
+    collector.record_event(delivered_event)
+    collector.record_event(retrofitted_event)
 
     results = metrics.get_results()
 
@@ -94,7 +111,10 @@ def test_get_results_grouped_by_category() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    collector.record_event('wagon_delivered', {'wagon_id': 'W001', 'time': 0.0})
+    event = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'
+    )
+    collector.record_event(event)
 
     results = metrics.get_results()
 
@@ -110,8 +130,15 @@ def test_reset_all_collectors() -> None:
     metrics.register(collector1)
     metrics.register(collector2)
 
-    collector1.record_event('wagon_delivered', {'wagon_id': 'W001', 'time': 10.0})
-    collector2.record_event('wagon_delivered', {'wagon_id': 'W002', 'time': 20.0})
+    event1 = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'
+    )
+    event2 = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(20.0), 'W002'
+    )
+    
+    collector1.record_event(event1)
+    collector2.record_event(event2)
 
     metrics.reset()
 
@@ -125,7 +152,10 @@ def test_get_results_format() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    collector.record_event('wagon_delivered', {'wagon_id': 'W001', 'time': 0.0})
+    event = WagonDeliveredEvent(
+        EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'
+    )
+    collector.record_event(event)
 
     results = metrics.get_results()
 
@@ -142,13 +172,13 @@ def test_multiple_categories() -> None:
     """Test handling multiple metric categories."""
 
     class CustomCollector(MetricCollector):
-        def record_event(self, event_type: str, data: dict) -> None:
+        def record_event(self, event: DomainEvent) -> None:
             pass
 
         def get_results(self) -> list[MetricResult]:
             return [
-                MetricResult('metric1', 10, 'units', 'category1'),
-                MetricResult('metric2', 20, 'units', 'category2'),
+                MetricResult('metric1', MetricValue(10, 'units'), 'category1'),
+                MetricResult('metric2', MetricValue(20, 'units'), 'category2'),
             ]
 
         def reset(self) -> None:

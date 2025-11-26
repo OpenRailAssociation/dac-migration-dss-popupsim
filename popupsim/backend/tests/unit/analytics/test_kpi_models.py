@@ -1,6 +1,5 @@
 """Tests for KPI result models."""
 
-
 from analytics.domain.models.kpi_result import BottleneckInfo
 from analytics.domain.models.kpi_result import KPIResult
 from analytics.domain.models.kpi_result import ThroughputKPI

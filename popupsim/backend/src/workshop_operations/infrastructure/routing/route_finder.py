@@ -1,6 +1,6 @@
 """Utility to find routes between tracks."""
 
-from configuration.domain.models.route import Route
+from workshop_operations.domain.value_objects.route import Route
 
 
 def find_route(routes: list[Route], from_track: str, to_track: str) -> Route | None:

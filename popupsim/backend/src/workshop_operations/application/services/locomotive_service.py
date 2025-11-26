@@ -7,11 +7,10 @@ import logging
 from typing import Any
 from typing import cast
 
+from workshop_operations.domain.entities.locomotive import Locomotive
+from workshop_operations.domain.entities.locomotive import LocoStatus
+from workshop_operations.domain.entities.wagon import CouplerType
 from workshop_operations.infrastructure.routing.route_finder import find_route
-
-from configuration.domain.models.locomotive import Locomotive
-from configuration.domain.models.locomotive import LocoStatus
-from configuration.domain.models.wagon import CouplerType
 
 logger = logging.getLogger(__name__)
 

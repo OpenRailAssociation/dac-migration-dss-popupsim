@@ -12,9 +12,10 @@ from pathlib import Path
 import tempfile
 from typing import Any
 
-from configuration.domain.models.scenario import Scenario
 from pydantic import ValidationError
 import pytest
+
+from configuration.domain.models.scenario import Scenario
 
 
 @pytest.fixture

@@ -9,15 +9,15 @@ The tests are written for pytest and use lightweight fake adapters to avoid
 depending on an actual simpy environment in unit test runs.
 """
 
-from datetime import date
 from pathlib import Path
 from typing import Any
 
-from configuration.application.scenario_builder import ScenarioBuilder
-from configuration.domain.models.scenario import Scenario
 import pytest
 from workshop_operations.application.orchestrator import WorkshopOrchestrator
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
+
+from configuration.application.scenario_builder import ScenarioBuilder
+from configuration.domain.models.scenario import Scenario
 
 
 class FakeAdapter:
@@ -118,13 +118,14 @@ class TestPopupSimWithFakeSim:
         from datetime import UTC
         from datetime import datetime
 
-        from configuration.domain.models.locomotive import Locomotive
+        from workshop_operations.domain.aggregates.train import Train
+        from workshop_operations.domain.entities.locomotive import Locomotive
+        from workshop_operations.domain.entities.track import Track
+        from workshop_operations.domain.entities.track import TrackType
+        from workshop_operations.domain.entities.wagon import Wagon
+        from workshop_operations.domain.entities.workshop import Workshop
+
         from configuration.domain.models.topology import Topology
-        from configuration.domain.models.track import Track
-        from configuration.domain.models.track import TrackType
-        from configuration.domain.models.train import Train
-        from configuration.domain.models.wagon import Wagon
-        from configuration.domain.models.workshop import Workshop
 
         adapter = FakeAdapter()
 
@@ -168,16 +169,56 @@ class TestPopupSimWithFakeSim:
 class TestPopupSimWithSimpyAdapter:
     """Integration-style example that demonstrates creating real adapters."""
 
-    @pytest.mark.skip(reason="Incomplete scenario - needs trains, tracks, routes for simulation")
     def test_run_calls_adapter_run_with_until(self) -> None:
         """Example usage constructing a full simulation and running it."""
-        scenario = Scenario(
-            scenario_id='test_scenario',
-            start_date=date(2024, 1, 1),
-            end_date=date(2024, 1, 10),
-            random_seed=42,
-            train_schedule_file='schedule.csv',
+        from datetime import UTC
+        from datetime import datetime
+
+        from workshop_operations.domain.aggregates.train import Train
+        from workshop_operations.domain.entities.locomotive import Locomotive
+        from workshop_operations.domain.entities.track import Track
+        from workshop_operations.domain.entities.track import TrackType
+        from workshop_operations.domain.entities.wagon import Wagon
+        from workshop_operations.domain.entities.workshop import Workshop
+        from workshop_operations.domain.value_objects.route import Route
+        from workshop_operations.domain.value_objects.routes import Routes
+
+        from configuration.domain.models.process_times import ProcessTimes
+        from configuration.domain.models.topology import Topology
+
+        topology = Topology({'edges': [{'edge_id': 'e1', 'from_node': 'n1', 'to_node': 'n2', 'length': 100.0}]})
+        process_times = ProcessTimes()
+        route = Route(route_id='r1', from_track='t1', to_track='t2', path=['t1', 't2'], duration=10.0)
+        routes = Routes(routes=[route])
+        track = Track(id='t1', name='Track 1', type=TrackType.COLLECTION, edges=['e1'])
+        retrofitted_track = Track(id='t2', name='Track 2', type=TrackType.RETROFITTED, edges=['e1'])
+        loco = Locomotive(
+            locomotive_id='L1',
+            name='Loco 1',
+            start_date=datetime(2024, 1, 1, tzinfo=UTC),
+            end_date=datetime(2024, 1, 2, tzinfo=UTC),
+            track_id='t1',
         )
+        workshop = Workshop(
+            workshop_id='W1', start_date='2024-01-01T00:00:00Z', end_date='2024-01-02T00:00:00Z', track_id='t1'
+        )
+        wagon = Wagon(wagon_id='W1', length=20.0, is_loaded=False, needs_retrofit=True)
+        train = Train(train_id='T1', arrival_time=datetime(2024, 1, 1, 8, 0, tzinfo=UTC), wagons=[wagon])
+
+        scenario_data = {
+            'scenario_id': 'test_scenario',
+            'start_date': datetime(2024, 1, 1, tzinfo=UTC),
+            'end_date': datetime(2024, 1, 2, tzinfo=UTC),
+            'locomotives': [loco],
+            'workshops': [workshop],
+            'tracks': [track, retrofitted_track],
+            'trains': [train],
+            'topology': topology,
+            'process_times': process_times,
+            'routes': routes,
+        }
+
+        scenario = Scenario(**scenario_data)
         sim_adapter = SimPyAdapter.create_simpy_adapter()
         popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
         popup_sim.run(until=100.0)

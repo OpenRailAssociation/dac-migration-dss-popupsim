@@ -4,9 +4,8 @@ from collections.abc import Generator
 from typing import Any
 
 from workshop_operations.application.services.locomotive_service import DefaultLocomotiveService
-
-from configuration.domain.models.locomotive import Locomotive
-from configuration.domain.models.wagon import CouplerType
+from workshop_operations.domain.entities.locomotive import Locomotive
+from workshop_operations.domain.entities.wagon import CouplerType
 
 
 def move_locomotive(popupsim: Any, loco: Locomotive, from_track: str, to_track: str) -> Generator[Any]:

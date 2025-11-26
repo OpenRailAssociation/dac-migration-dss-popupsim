@@ -243,6 +243,8 @@ def main(
         typer.echo('\n=== Exporting Results ===')
         csv_exporter = CSVExporter()
 
+        # output_path is validated to not be None in _validate_and_load_scenario
+        assert output_path is not None
         csv_files = csv_exporter.export_all(kpi_result, output_path)
         typer.echo(f'CSV files saved to: {output_path}')
         for csv_file in csv_files:
