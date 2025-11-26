@@ -4,9 +4,10 @@
   "version": "1.0.0",
   "start_date": "2031-07-04 01:30:00",
   "end_date": "2031-07-05 02:00:00",
+  "track_selection_strategy": "least_occupied",
   "references": {
     "locomotives": "locomotive.json",
-    "processes": "test_process_times.csv",
+    "process_times": "process_times.json",
     "routes": "routes.json",
     "trains": "test_train_schedule.csv",
     "topology": "topology.json",

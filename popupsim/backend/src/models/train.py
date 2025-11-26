@@ -6,11 +6,13 @@ arrival dates, times, and associated wagons, ensuring data integrity
 through validation methods.
 """
 
+from datetime import UTC
 from datetime import datetime
 import logging
 
 from pydantic import BaseModel
 from pydantic import Field
+from pydantic import field_validator
 from pydantic import model_validator
 
 from .wagon import Wagon
@@ -27,6 +29,15 @@ class Train(BaseModel):
     train_id: str = Field(default=TRAIN_DEFAULT_ID, description='Unique identifier for the train')
     arrival_time: datetime = Field(description='Time of arrival')
     wagons: list[Wagon] = Field(description='List of wagons in the train')
+
+    @field_validator('arrival_time', mode='before')
+    @classmethod
+    def ensure_utc_timezone(cls, v: datetime | str) -> datetime:
+        """Ensure datetime has UTC timezone."""
+        dt = datetime.fromisoformat(v) if isinstance(v, str) else v
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=UTC)
+        return dt
 
     @model_validator(mode='after')
     def validate_wagons(self) -> 'Train':

@@ -17,41 +17,41 @@
       ]
     },
     {
-      "id": "6_To_10",
-      "description": "Route from retrofit track to workshop 1",
-      "duration": 2,
-      "path": [
-        "track_6",
-        "track_1a",
-        "track_10"
-      ]
-    },
-    {
-      "id": "Tracktrack_6ToTracktrack_Z1",
+      "id": "6_To_WS_02",
       "description": "Route from retrofit track to workshop 2",
       "duration": 2,
       "path": [
         "track_6",
         "track_1a",
-        "track_Z1"
+        "WS_02"
       ]
     },
     {
-      "id": "10_To_7",
-      "description": "Route from workshop 1 to retrofitted track",
+      "id": "6_To_WS_01",
+      "description": "Route from retrofit track to workshop 1",
       "duration": 2,
       "path": [
-        "track_10",
+        "track_6",
+        "track_1a",
+        "WS_01"
+      ]
+    },
+    {
+      "id": "WS_02_To_7",
+      "description": "Route from workshop 2 to retrofitted track",
+      "duration": 2,
+      "path": [
+        "WS_02",
         "track_1a",
         "track_7"
       ]
     },
     {
-      "id": "Tracktrack_Z1ToTracktrack_7",
-      "description": "Route from workshop 2 to retrofitted track",
+      "id": "WS_01_To_7",
+      "description": "Route from workshop 1 to retrofitted track",
       "duration": 2,
       "path": [
-        "track_Z1",
+        "WS_01",
         "track_1a",
         "track_7"
       ]
@@ -87,21 +87,21 @@
       ]
     },
     {
-      "id": "Parking_from_workshop",
-      "description": "Route from workshop 1 to parking position",
+      "id": "WS_02_To_19",
+      "description": "Route from workshop 2 to parking position",
       "duration": 3,
       "path": [
-        "track_10",
+        "WS_02",
         "track_1a",
         "track_19"
       ]
     },
     {
-      "id": "Tracktrack_Z1ToTrack19",
+      "id": "WS_01_To_19",
       "duration": 4,
-      "description": "Route from workshop 2 to parking position",
+      "description": "Route from workshop 1 to parking position",
       "path": [
-        "track_Z1",
+        "WS_01",
         "track_1a",
         "track_19"
       ]
@@ -157,10 +157,31 @@
       ]
     },
     {
-      "id": "parking_to_10",
+      "id": "19_To_WS_02",
       "duration": 2,
+      "description": "Route from parking to workshop 2",
       "path": [
         "track_19",
+        "track_1a",
+        "WS_02"
+      ]
+    },
+    {
+      "id": "19_To_WS_01",
+      "duration": 2,
+      "description": "Route from parking to workshop 1",
+      "path": [
+        "track_19",
+        "track_1a",
+        "WS_01"
+      ]
+    },
+    {
+      "id": "6_To_10",
+      "duration": 2,
+      "description": "Route from retrofit track to track 10",
+      "path": [
+        "track_6",
         "track_1a",
         "track_10"
       ]

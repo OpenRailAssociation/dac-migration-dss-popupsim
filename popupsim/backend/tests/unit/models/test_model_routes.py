@@ -48,7 +48,11 @@ def routes_json_path() -> Path:
 @pytest.fixture
 def temp_json_file() -> Generator[Path]:
     """Create a temporary JSON file with test route data."""
-    temp_file = Path(tempfile.mkstemp(suffix='.json')[1])
+    fd, temp_path = tempfile.mkstemp(suffix='.json')
+    import os
+
+    os.close(fd)  # Close file descriptor before yielding
+    temp_file = Path(temp_path)
     yield temp_file
     if temp_file.exists():
         temp_file.unlink()
@@ -161,5 +165,5 @@ class TestRoutesFromRoutes:
         """
         routes: Routes = Routes()
         routes.load_routes(fixtures_path)
-        assert routes.length == 16
+        assert routes.length == 18
         assert '6_To_10' in routes.routes_by_id

@@ -7,7 +7,9 @@ such as date ranges, random seeds, workshop configurations, and file references.
 
 from datetime import UTC
 from datetime import datetime
+from enum import Enum
 import logging
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -15,13 +17,31 @@ from pydantic import field_validator
 from pydantic import model_validator
 
 from .locomotive import Locomotive
+from .process_times import ProcessTimes
 from .route import Route
 from .track import Track
+from .track import TrackType
 from .train import Train
 from .workshop import Workshop
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+
+class TrackSelectionStrategy(str, Enum):
+    """Strategy for selecting collection tracks when multiple are available."""
+
+    ROUND_ROBIN = 'round_robin'
+    LEAST_OCCUPIED = 'least_occupied'
+    FIRST_AVAILABLE = 'first_available'
+    RANDOM = 'random'
+
+
+class LocoDeliveryStrategy(str, Enum):
+    """Strategy for locomotive delivery to workshop stations."""
+
+    RETURN_TO_PARKING = 'return_to_parking'
+    DIRECT_DELIVERY = 'direct_delivery'
 
 
 class Scenario(BaseModel):
@@ -37,10 +57,20 @@ class Scenario(BaseModel):
     )
     start_date: datetime = Field(description='Simulation start date')
     end_date: datetime = Field(description='Simulation end date')
-    # Make model attribute an int (always set) but allow None during input via the before validator
-    random_seed: int = Field(default=0, ge=0, description='Random seed for reproducible simulations')
+    track_selection_strategy: TrackSelectionStrategy = Field(
+        default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting collection tracks'
+    )
+    retrofit_selection_strategy: TrackSelectionStrategy = Field(
+        default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting retrofit tracks'
+    )
+    loco_delivery_strategy: LocoDeliveryStrategy = Field(
+        default=LocoDeliveryStrategy.RETURN_TO_PARKING,
+        description='Strategy for locomotive delivery to workshop stations',
+    )
     locomotives: list[Locomotive] | None = Field(default=None, description='Locomotive models')
+    process_times: ProcessTimes | None = Field(default=None, description='Process timing configuration')
     routes: list[Route] | None = Field(default=None, description='Route models')
+    topology: Any = Field(default=None, description='Topology model')
     trains: list[Train] | None = Field(default=None, description='Train models')
     tracks: list[Track] | None = Field(default=None, description='Track models')
     workshops: list[Workshop] | None = Field(default=None, description='Workshop models with available tracks')
@@ -54,19 +84,6 @@ class Scenario(BaseModel):
         if dt.tzinfo is None:
             return dt.replace(tzinfo=UTC)
         return dt
-
-    @field_validator('random_seed', mode='before')
-    @classmethod
-    def validate_random_seed(cls, v: int | None) -> int:
-        """Ensure random_seed is never None, defaulting to 0 if None or omitted."""
-        if v is None:
-            logger.debug('random_seed was None or omitted, defaulting to 0')
-            return 0
-        if not isinstance(v, int):
-            raise ValueError(f'random_seed must be an integer, got {type(v).__name__}')
-        if v < 0:
-            raise ValueError(f'random_seed must be non-negative, got {v}')
-        return v
 
     @model_validator(mode='after')
     def validate_dates(self) -> 'Scenario':
@@ -84,3 +101,28 @@ class Scenario(BaseModel):
         elif duration < 1:
             raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
         return self
+
+    def validate_simulation_requirements(self) -> 'Scenario':
+        """Validate scenario has required resources for simulation.
+
+        This should be called after all referenced files are loaded.
+        """
+        if not self.locomotives:
+            raise ValueError('Scenario must have at least one locomotive')
+        if not self.trains:
+            raise ValueError('Scenario must have at least one train')
+        if not self.tracks or not self.topology:
+            raise ValueError('Scenario must have tracks and topology')
+
+        if self.tracks:
+            retrofitted_tracks = [t for t in self.tracks if t.type == TrackType.RETROFITTED]
+            if not retrofitted_tracks:
+                raise ValueError('Scenario must have at least one retrofitted track')
+
+            parking_tracks = [t for t in self.tracks if t.type == TrackType.PARKING]
+            if not parking_tracks:
+                logger.warning('No parking tracks found - some simulation features may not work')
+
+        return self
+
+    model_config = {'arbitrary_types_allowed': True}

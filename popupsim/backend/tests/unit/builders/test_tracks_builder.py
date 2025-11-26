@@ -255,7 +255,7 @@ class TestTrackListBuilder:
 
         tracks: list[Track] = TrackListBuilder(fixture_file).build()
 
-        assert len(tracks) == 4
+        assert len(tracks) == 7
         assert tracks[0].id == 'track_1'
         assert tracks[0].type == TrackType.MAINLINE
         assert tracks[0].edges[0] == 'edge_21'

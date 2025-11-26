@@ -15,8 +15,10 @@ from pathlib import Path
 from builders.tracks_builder import TrackListBuilder
 from builders.train_list_builder import TrainListBuilder
 from models.locomotive import Locomotive
+from models.process_times import ProcessTimes
 from models.routes import Routes
 from models.scenario import Scenario
+from models.topology import Topology
 from models.workshop import Workshop
 from validators.scenario_validation import ScenarioValidator
 
@@ -106,6 +108,58 @@ class ScenarioBuilder:
 
         except Exception as e:
             raise BuilderError(f'Failed to load routes from {routes_path}: {e!s}') from e
+
+    def __load_topology(self) -> None:
+        """Load topology from JSON file referenced in scenario configuration.
+
+        Raises
+        ------
+        BuilderError
+            If topology file is not specified or loading fails.
+        """
+        topology_file: str | None = self.references.get('topology')
+
+        if not topology_file:
+            raise BuilderError('Missing topology file reference in scenario configuration')
+
+        scenario_dir: Path = Path(self.scenario_path).parent
+        topology_path: Path = scenario_dir / topology_file
+
+        if not topology_path.exists():
+            raise BuilderError(f'Topology file not found: {topology_path}')
+
+        try:
+            if isinstance(self.scenario, Scenario):
+                self.scenario.topology = Topology(topology_path)
+
+        except Exception as e:
+            raise BuilderError(f'Failed to load topology from {topology_path}: {e!s}') from e
+
+    def __load_process_times(self) -> None:
+        """Load process times from JSON file referenced in scenario configuration.
+
+        Raises
+        ------
+        BuilderError
+            If process times file is not specified or loading fails.
+        """
+        process_times_file: str | None = self.references.get('process_times')
+
+        if not process_times_file:
+            raise BuilderError('Missing process_times file reference in scenario configuration')
+
+        scenario_dir: Path = Path(self.scenario_path).parent
+        process_times_path: Path = scenario_dir / process_times_file
+
+        if not process_times_path.exists():
+            raise BuilderError(f'Process times file not found: {process_times_path}')
+
+        try:
+            if isinstance(self.scenario, Scenario):
+                self.scenario.process_times = ProcessTimes.load_from_file(process_times_path)
+
+        except Exception as e:
+            raise BuilderError(f'Failed to load process times from {process_times_path}: {e!s}') from e
 
     def __load_scenario(self) -> None:
         """Load scenario models from a JSON file.
@@ -283,9 +337,11 @@ class ScenarioBuilder:
             self.__load_tracks()
             self.__load_trains()
             self.__load_routes()
+            self.__load_topology()
+            self.__load_process_times()
             self.__load_workshops()
-            # TODO: decide if validation happens here or in main
-            # self.validator.validate(self.scenario)
+            # Validate scenario after all referenced files are loaded
+            self.scenario.validate_simulation_requirements()
         else:
             raise BuilderError('Scenario could not be loaded properly.')
         return self.scenario

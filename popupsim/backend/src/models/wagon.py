@@ -7,6 +7,7 @@ and specific requirements such as loading status and retrofit needs.
 """
 
 from datetime import datetime
+from enum import Enum
 import logging
 
 from pydantic import BaseModel
@@ -16,6 +17,29 @@ from pydantic import Field
 logger = logging.getLogger(__name__)
 
 
+class CouplerType(Enum):
+    """Coupler type for wagons."""
+
+    SCREW = 'screw'
+    DAC = 'dac'
+
+
+class WagonStatus(Enum):
+    """Wagon status events."""
+
+    PARKING = 'parking'
+    TO_BE_RETROFFITED = 'to_be_retrofitted'
+    ON_RETROFIT_TRACK = 'on_retrofit_track'
+    MOVING_TO_STATION = 'moving_to_station'
+    RETROFITTING = 'retrofitting'
+    RETROFITTED = 'retrofitted'
+    MOVING = 'moving'
+    SELECTING = 'selecting'
+    UNKNOWN = 'unknown'
+    SELECTED = 'selected'
+    REJECTED = 'rejected'
+
+
 class Wagon(BaseModel):
     """Information about a single wagon."""
 
@@ -23,10 +47,14 @@ class Wagon(BaseModel):
     length: float = Field(gt=0, description='Length of the wagon in meters')
     is_loaded: bool = Field(description='Whether the wagon is loaded')
     track_id: str | None = Field(default=None, description='ID of the track the wagon is on')
+    source_track_id: str | None = Field(default=None, description='Source track when moving')
+    destination_track_id: str | None = Field(default=None, description='Destination track when moving')
     arrival_time: datetime | None = Field(default=None, description='Arrival time of the wagon')
     needs_retrofit: bool = Field(description='Whether the wagon needs retrofit')
     retrofit_start_time: float | None = Field(default=None, description='Retrofit start time as counter')
     retrofit_end_time: float | None = Field(default=None, description='Retrofit end time as counter')
+    status: WagonStatus = Field(default=WagonStatus.UNKNOWN, description='Status of the wagon')
+    coupler_type: CouplerType = Field(default=CouplerType.SCREW, description='Type of coupler on the wagon')
 
     @property
     def waiting_time(self) -> float | None:

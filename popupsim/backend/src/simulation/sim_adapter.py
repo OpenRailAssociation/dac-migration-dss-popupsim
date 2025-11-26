@@ -22,7 +22,7 @@ class SimulationAdapter(ABC):
     """
 
     @abstractmethod
-    def current_time(self) -> str:
+    def current_time(self) -> float:
         """Get current simulation time.
 
         Returns
@@ -87,6 +87,49 @@ class SimulationAdapter(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def create_resource(self, capacity: int) -> Any:
+        """Create a resource with limited capacity.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum number of concurrent users.
+
+        Returns
+        -------
+        Any
+            Simulator-specific resource object.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_store(self, capacity: int) -> Any:
+        """Create a store with limited capacity.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum capacity of the store.
+
+        Returns
+        -------
+        Any
+            Simulator-specific store object.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_event(self) -> Any:
+        """Create an event for signaling.
+
+        Returns
+        -------
+        Any
+            Simulator-specific event object.
+        """
+        raise NotImplementedError
+
 
 class SimPyAdapter(SimulationAdapter):
     """Adapter for SimPy simulation framework.
@@ -119,15 +162,39 @@ class SimPyAdapter(SimulationAdapter):
         env = simpy.Environment()
         return cls(env)
 
-    def current_time(self) -> str:
-        """Get current simulation time.
+    @classmethod
+    def create_simpy_resource(cls, environment: Any, capacity: int) -> Any:
+        """Create SimPy Resource with specified capacity."""
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
+        return simpy.Resource(environment, capacity)
+
+    def create_store(self, capacity: int) -> Any:
+        """Create a SimPy Store for resource pooling.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum capacity of the store.
 
         Returns
         -------
-        str
-            Current time in the SimPy environment formatted to two decimal places.
+        Any
+            SimPy Store instance.
         """
-        return f'{float(self._env.now):8.2f}'
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
+        return simpy.Store(self._env, capacity=capacity)
+
+    def current_time(self) -> float:
+        """Get current simulation time as float (minutes since start).
+
+        Returns
+        -------
+        float
+            Current time in the SimPy environment in minutes.
+        """
+        return float(self._env.now)
 
     def delay(self, duration: float) -> Any:
         """Create a SimPy timeout event.
@@ -185,7 +252,7 @@ class SimPyAdapter(SimulationAdapter):
         Any
             SimPy process object.
         """
-        import inspect  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+        import inspect  # pylint: disable=import-outside-toplevel
 
         # If a pre-built generator object was passed as `fn`, schedule it directly
         if inspect.isgenerator(fn):
@@ -196,8 +263,57 @@ class SimPyAdapter(SimulationAdapter):
             return self._env.process(fn(*args, **kwargs))
 
         # Otherwise fn is a normal callable; wrap it in a tiny generator so SimPy can schedule it
-        def _wrap() -> Generator[None]:
+        def _wrap() -> Generator[Any]:
             fn(*args, **kwargs)
             yield from ()
 
         return self._env.process(_wrap())
+
+    def create_resource(self, capacity: int) -> Any:
+        """Create a SimPy Resource with limited capacity.
+
+        Parameters
+        ----------
+        capacity : int
+            Maximum number of concurrent users.
+
+        Returns
+        -------
+        Any
+            SimPy Resource object.
+        """
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
+        return simpy.Resource(self._env, capacity=capacity)
+
+    def create_event(self) -> Any:
+        """Create a SimPy Event for signaling.
+
+        Returns
+        -------
+        Any
+            SimPy Event wrapper with wait() and trigger() methods.
+        """
+        import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
+
+        class EventWrapper:
+            """Wrapper for SimPy events to provide consistent interface."""
+
+            def __init__(self, env: Any) -> None:
+                self._env = env
+                self._event = simpy.Event(env)
+
+            def wait(self) -> Any:
+                """Wait for event to be triggered."""
+                return self._event
+
+            def succeed(self) -> None:
+                """Trigger the event."""
+                if not self._event.triggered:
+                    self._event.succeed()
+
+            def trigger(self) -> None:
+                """Trigger the event (alias for succeed)."""
+                self.succeed()
+
+        return EventWrapper(self._env)

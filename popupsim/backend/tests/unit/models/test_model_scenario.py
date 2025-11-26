@@ -60,7 +60,6 @@ class TestScenario:
         expected_end = datetime(2024, 1, 16, tzinfo=UTC)
         assert scenario.start_date.date() == expected_start.date()
         assert scenario.end_date.date() == expected_end.date()
-        assert scenario.random_seed == 0
 
     def test_scenario_id_validation_valid_formats(self) -> None:
         """
@@ -86,6 +85,27 @@ class TestScenario:
                 scenario_id=scenario_id,
                 start_date=datetime(2024, 1, 1, tzinfo=UTC),
                 end_date=datetime(2024, 1, 10, tzinfo=UTC),
+                locomotives=[
+                    {
+                        'locomotive_id': 'L1',
+                        'name': 'L1',
+                        'start_date': '2024-01-01 00:00:00',
+                        'end_date': '2024-01-10 00:00:00',
+                        'track_id': 'track_19',
+                    }
+                ],
+                trains=[
+                    {
+                        'train_id': 'T1',
+                        'arrival_time': '2024-01-01T08:00:00Z',
+                        'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    }
+                ],
+                tracks=[
+                    {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                    {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+                ],
+                topology={'tracks': ['track_19', 'track_7']},
             )
             assert config.scenario_id == scenario_id
 
@@ -145,6 +165,27 @@ class TestScenario:
                 scenario_id='test_scenario',
                 start_date=start_date,
                 end_date=end_date,
+                locomotives=[
+                    {
+                        'locomotive_id': 'L1',
+                        'name': 'L1',
+                        'start_date': start_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        'end_date': end_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        'track_id': 'track_19',
+                    }
+                ],
+                trains=[
+                    {
+                        'train_id': 'T1',
+                        'arrival_time': start_date,
+                        'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    }
+                ],
+                tracks=[
+                    {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                    {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+                ],
+                topology={'tracks': ['track_19', 'track_7']},
             )
             assert config.start_date.date() == start_date.date()
             assert config.end_date.date() == end_date.date()
@@ -189,6 +230,27 @@ class TestScenario:
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2025, 6, 1, tzinfo=UTC),  # More than 365 days
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2025-06-01 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
 
         # Should create config successfully
@@ -197,55 +259,72 @@ class TestScenario:
         duration = (config.end_date - config.start_date).days
         assert duration > 365
 
-    def test_random_seed_validation(self) -> None:
+    def test_track_selection_strategy_validation(self) -> None:
         """
-        Test random seed validation with valid values.
+        Test track selection strategy validation.
 
         Notes
         -----
-        Validates that non-negative integer seeds are accepted and that
-        default value (0) is applied when seed is not specified.
+        Validates that valid strategy values are accepted and default is applied.
         """
-        # Valid seeds
-        valid_seeds = [0, 1, 42, 999, 2147483647]
-
-        for seed in valid_seeds:
-            config = Scenario(
-                scenario_id='test_scenario',
-                start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                random_seed=seed,
-            )
-            assert config.random_seed == seed
+        from models.scenario import TrackSelectionStrategy
 
         config = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN,
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2024-01-10 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
-        assert config.random_seed == 0  # Default value
+        assert config.track_selection_strategy == TrackSelectionStrategy.ROUND_ROBIN
 
-    def test_random_seed_validation_invalid_values(self) -> None:
-        """
-        Test random seed validation with invalid values.
-
-        Notes
-        -----
-        Validates that negative integer seeds raise ValidationError with
-        appropriate constraint message (ge=0).
-        """
-        invalid_seeds = [-1, -42]
-
-        for seed in invalid_seeds:
-            with pytest.raises(ValidationError) as exc_info:
-                Scenario(
-                    scenario_id='test_scenario',
-                    start_date=datetime(2024, 1, 1, tzinfo=UTC),
-                    end_date=datetime(2024, 1, 10, tzinfo=UTC),
-                    random_seed=seed,
-                )
-            error_msg = str(exc_info.value)
-            assert 'random_seed must be non-negative' in error_msg
+        config = Scenario(
+            scenario_id='test_scenario',
+            start_date=datetime(2024, 1, 1, tzinfo=UTC),
+            end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2024-01-10 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
+        )
+        assert config.track_selection_strategy == TrackSelectionStrategy.LEAST_OCCUPIED
 
     def test_scenario_config_equality(self) -> None:
         """
@@ -256,22 +335,49 @@ class TestScenario:
         Validates that Scenario instances with identical field values
         are considered equal, while instances with different values are not.
         """
+        base_data = {
+            'locomotives': [
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-01 00:00:00',
+                    'end_date': '2024-01-10 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            'trains': [
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-01T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            'tracks': [
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            'topology': {'tracks': ['track_19', 'track_7']},
+        }
+
         config1 = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            **base_data,
         )
 
         config2 = Scenario(
             scenario_id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            **base_data,
         )
 
         config3 = Scenario(
             scenario_id='different_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
+            **base_data,
         )
 
         assert config1 == config2
@@ -286,12 +392,33 @@ class TestScenario:
         Validates that Scenario can be serialized to JSON and that
         the resulting JSON string contains expected field values.
         """
-        start_date = '2024-01-01 08:00+00:00'
-        end_date = '2024-01-10 20:00+00:00'
+        start_date = '2024-01-01 08:00:00'
+        end_date = '2024-01-10 20:00:00'
         config = Scenario(
             scenario_id='test_scenario',
             start_date=start_date,
             end_date=end_date,
+            locomotives=[
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'track_id': 'track_19',
+                }
+            ],
+            trains=[
+                {
+                    'train_id': 'T1',
+                    'arrival_time': start_date,
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            tracks=[
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            topology={'tracks': ['track_19', 'track_7']},
         )
 
         json_str = config.model_dump_json()
@@ -305,7 +432,10 @@ class TestScenario:
         assert str(parsed['end_date']).startswith(end_date.split(' ')[0])
         assert str(parsed['start_date']).startswith(str(datetime(2024, 1, 1, tzinfo=UTC)).split(' ')[0])
         assert str(parsed['end_date']).startswith(str(datetime(2024, 1, 10, tzinfo=UTC)).split(' ')[0])
-        assert datetime.fromisoformat(parsed.get('start_date')) == datetime.fromisoformat(start_date)
+        # Compare dates ignoring timezone differences
+        parsed_start = datetime.fromisoformat(parsed.get('start_date')).replace(tzinfo=None)
+        original_start = datetime.fromisoformat(start_date)
+        assert parsed_start == original_start
 
     def test_scenario_config_realistic_complete_scenario(self) -> None:
         """
@@ -321,7 +451,27 @@ class TestScenario:
             'scenario_id': 'scenario_001',
             'start_date': '2024-01-15',
             'end_date': '2024-01-16',
-            'random_seed': 42,
+            'locomotives': [
+                {
+                    'locomotive_id': 'L1',
+                    'name': 'L1',
+                    'start_date': '2024-01-15 00:00:00',
+                    'end_date': '2024-01-16 00:00:00',
+                    'track_id': 'track_19',
+                }
+            ],
+            'trains': [
+                {
+                    'train_id': 'T1',
+                    'arrival_time': '2024-01-15T08:00:00Z',
+                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                }
+            ],
+            'tracks': [
+                {'id': 'track_19', 'type': 'parking_area', 'capacity': 100, 'edges': ['track_7']},
+                {'id': 'track_7', 'type': 'retrofitted', 'capacity': 100, 'edges': ['track_19']},
+            ],
+            'topology': {'tracks': ['track_19', 'track_7']},
         }
 
         scenario = Scenario(**scenario_data)
@@ -330,7 +480,6 @@ class TestScenario:
         assert scenario.scenario_id == 'scenario_001'
         assert scenario.start_date.date() == datetime(2024, 1, 15, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2024, 1, 16, tzinfo=UTC).date()
-        assert scenario.random_seed == 42
 
     def test_load_scenario_from_file(self, fixtures_path: Path) -> None:
         """
@@ -356,4 +505,3 @@ class TestScenario:
         assert scenario.scenario_id == 'test_scenario_01'
         assert scenario.start_date.date() == datetime(2031, 7, 4, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2031, 7, 5, tzinfo=UTC).date()
-        assert scenario.random_seed == 0
