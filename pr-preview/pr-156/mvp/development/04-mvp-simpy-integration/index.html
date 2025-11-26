@@ -1,0 +1,1666 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>4. MVP SimPy Integration - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#4-mvp-simpy-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              4. MVP SimPy Integration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction & Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risks & Technical Debt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-principle-thin-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Principle: Thin Adapter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simpy-core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SimPy Core Concepts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SimPy Core Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mvp-simpy-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MVP SimPy Adapter
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MVP SimPy Adapter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-environment-wrapper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Environment Wrapper
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-workshop-simpy-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Workshop SimPy Adapter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-event-logging-adapter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Event Logging Adapter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simulation-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulation Orchestration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests-without-simpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests (without SimPy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-tests-with-simpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Tests (with SimPy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Do's
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#donts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ❌ Don'ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-path-post-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Path (Post-MVP)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Path (Post-MVP)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#full-version-replace-simpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Version: Replace SimPy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="4-mvp-simpy-integration">4. MVP SimPy Integration<a class="headerlink" href="#4-mvp-simpy-integration" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/04-solution-strategy/#42-technology-decisions">Architecture Section 4.2</a> for SimPy decision rationale.</p>
+<p>This document describes SimPy integration as discrete event simulation engine for MVP. Focus is on <strong>thin adapter pattern</strong> to decouple domain logic from SimPy and enable future replaceability.</p>
+<h2 id="architecture-principle-thin-adapter">Architecture Principle: Thin Adapter<a class="headerlink" href="#architecture-principle-thin-adapter" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────┐
+│     Domain Logic (Framework-free)      │
+│  Workshop, Wagon, Train, Track          │
+└─────────────────┬───────────────────────┘
+                  │
+                  │ Interface
+                  │
+┌─────────────────▼───────────────────────┐
+│      SimPy Adapter (Thin Layer)         │
+│  - SimPy Environment Wrapper            │
+│  - Process Generators                   │
+│  - Resource Management                  │
+└─────────────────┬───────────────────────┘
+                  │
+                  │
+┌─────────────────▼───────────────────────┐
+│         SimPy Framework                 │
+│  Environment, Resource, Process         │
+└─────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Goal:</strong> Domain logic can be tested without SimPy, SimPy can be replaced later.</p>
+<h2 id="simpy-core-concepts">SimPy Core Concepts<a class="headerlink" href="#simpy-core-concepts" title="Permanent link">&para;</a></h2>
+<h3 id="environment">Environment<a class="headerlink" href="#environment" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">simpy</span>
+
+<span class="c1"># SimPy Environment = Simulation clock</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">()</span>
+
+<span class="c1"># Time in minutes (MVP convention)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">until</span><span class="o">=</span><span class="mi">480</span><span class="p">)</span>  <span class="c1"># 8 hours = 480 minutes</span>
+</code></pre></div>
+<h3 id="resource">Resource<a class="headerlink" href="#resource" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Resource = Limited capacity (e.g. workshop track)</span>
+<span class="n">track_resource</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">capacity</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Request = Request resource</span>
+<span class="k">with</span> <span class="n">track_resource</span><span class="o">.</span><span class="n">request</span><span class="p">()</span> <span class="k">as</span> <span class="n">req</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">req</span>  <span class="c1"># Wait until available</span>
+    <span class="c1"># Resource is now occupied</span>
+    <span class="k">yield</span> <span class="n">env</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>  <span class="c1"># Work for 30 minutes</span>
+    <span class="c1"># Resource is automatically released</span>
+</code></pre></div>
+<h3 id="process">Process<a class="headerlink" href="#process" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Process = Generator function</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_arrival_process</span><span class="p">(</span><span class="n">env</span><span class="p">:</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">env</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># Every 60 minutes</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Train arrives at t=</span><span class="si">{</span><span class="n">env</span><span class="o">.</span><span class="n">now</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Register process</span>
+<span class="n">env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">train_arrival_process</span><span class="p">(</span><span class="n">env</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="mvp-simpy-adapter">MVP SimPy Adapter<a class="headerlink" href="#mvp-simpy-adapter" title="Permanent link">&para;</a></h2>
+<h3 id="1-environment-wrapper">1. Environment Wrapper<a class="headerlink" href="#1-environment-wrapper" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpy</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationEnvironment</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for simulation environment (SimPy-independent)&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Current simulation time&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait for delay time units&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register a process&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">until</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run simulation until time &#39;until&#39;&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimPyEnvironmentAdapter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thin adapter for SimPy environment&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">now</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">now</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delay</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">until</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">until</span><span class="o">=</span><span class="n">until</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">simpy_env</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Access to native SimPy environment (for resources)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span>
+</code></pre></div>
+<h3 id="2-workshop-simpy-adapter">2. Workshop SimPy Adapter<a class="headerlink" href="#2-workshop-simpy-adapter" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WorkshopSimPyAdapter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adapter between workshop domain and SimPy&quot;&quot;&quot;</span>
+
+    <span class="n">workshop</span><span class="p">:</span> <span class="n">Workshop</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">SimPyEnvironmentAdapter</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize SimPy resources for all tracks&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshop</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
+            <span class="n">track</span><span class="o">.</span><span class="n">resource</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">simpy_env</span><span class="p">,</span>
+                <span class="n">capacity</span><span class="o">=</span><span class="n">track</span><span class="o">.</span><span class="n">capacity</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_arrival_process</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">interval_minutes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">wagons_per_train</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SimPy process: Trains arrive&quot;&quot;&quot;</span>
+        <span class="n">train_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Wait for next train</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="n">interval_minutes</span><span class="p">)</span>
+
+            <span class="c1"># Create train with wagons</span>
+            <span class="n">train_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="n">Train</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;TRAIN</span><span class="si">{</span><span class="n">train_counter</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">arrival_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">now</span><span class="p">,</span>
+                <span class="n">wagons</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">Wagon</span><span class="p">(</span>
+                        <span class="nb">id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;WAGON</span><span class="si">{</span><span class="n">train_counter</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">train_id</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;TRAIN</span><span class="si">{</span><span class="n">train_counter</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">needs_retrofit</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">wagons_per_train</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Start retrofit for all wagons</span>
+            <span class="k">for</span> <span class="n">wagon</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">wagons</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retrofit_process</span><span class="p">(</span><span class="n">wagon</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">retrofit_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wagon</span><span class="p">:</span> <span class="n">Wagon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SimPy process: Wagon is retrofitted&quot;&quot;&quot;</span>
+        <span class="n">wagon</span><span class="o">.</span><span class="n">arrival_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">now</span>
+
+        <span class="c1"># Select track (MVP: Simple strategy - first available)</span>
+        <span class="n">track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_track</span><span class="p">()</span>
+
+        <span class="c1"># Request track resource</span>
+        <span class="k">with</span> <span class="n">track</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">request</span><span class="p">()</span> <span class="k">as</span> <span class="n">req</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">req</span>  <span class="c1"># Wait until track available</span>
+
+            <span class="c1"># Retrofit starts</span>
+            <span class="n">wagon</span><span class="o">.</span><span class="n">retrofit_start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">now</span>
+            <span class="n">wagon</span><span class="o">.</span><span class="n">track_id</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">track</span><span class="o">.</span><span class="n">current_wagons</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># Perform retrofit</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">retrofit_time_min</span><span class="p">)</span>
+
+            <span class="c1"># Retrofit completed</span>
+            <span class="n">wagon</span><span class="o">.</span><span class="n">retrofit_end_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">now</span>
+            <span class="n">wagon</span><span class="o">.</span><span class="n">needs_retrofit</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">track</span><span class="o">.</span><span class="n">current_wagons</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_track</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorkshopTrack</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select available track (MVP: Round-robin)&quot;&quot;&quot;</span>
+        <span class="c1"># MVP: Simply first available track</span>
+        <span class="k">for</span> <span class="n">track</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshop</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">track</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">track</span>
+        <span class="c1"># Fallback: First track (will wait)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshop</span><span class="o">.</span><span class="n">tracks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="3-event-logging-adapter">3. Event Logging Adapter<a class="headerlink" href="#3-event-logging-adapter" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">EventLogger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logs simulation events for later analysis&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimulationEvent</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_train_arrival</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">env</span><span class="p">:</span> <span class="n">SimulationEnvironment</span><span class="p">,</span> 
+        <span class="n">train</span><span class="p">:</span> <span class="n">Train</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">TrainArrivalEvent</span><span class="p">(</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">now</span><span class="p">,</span>
+            <span class="n">train_id</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">wagon_count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">wagons</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_retrofit_start</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">env</span><span class="p">:</span> <span class="n">SimulationEnvironment</span><span class="p">,</span>
+        <span class="n">wagon</span><span class="p">:</span> <span class="n">Wagon</span><span class="p">,</span>
+        <span class="n">track</span><span class="p">:</span> <span class="n">WorkshopTrack</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">RetrofitStartEvent</span><span class="p">(</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">now</span><span class="p">,</span>
+            <span class="n">wagon_id</span><span class="o">=</span><span class="n">wagon</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">track_id</span><span class="o">=</span><span class="n">track</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_retrofit_complete</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">env</span><span class="p">:</span> <span class="n">SimulationEnvironment</span><span class="p">,</span>
+        <span class="n">wagon</span><span class="p">:</span> <span class="n">Wagon</span><span class="p">,</span>
+        <span class="n">track</span><span class="p">:</span> <span class="n">WorkshopTrack</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">RetrofitCompleteEvent</span><span class="p">(</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">now</span><span class="p">,</span>
+            <span class="n">wagon_id</span><span class="o">=</span><span class="n">wagon</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">track_id</span><span class="o">=</span><span class="n">track</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="simulation-orchestration">Simulation Orchestration<a class="headerlink" href="#simulation-orchestration" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationService</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Orchestrates complete simulation&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ScenarioConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">SimPyEnvironmentAdapter</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_logger</span> <span class="o">=</span> <span class="n">EventLogger</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimulationResults</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run simulation&quot;&quot;&quot;</span>
+
+        <span class="c1"># 1. Setup workshop</span>
+        <span class="n">workshop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_workshop</span><span class="p">()</span>
+
+        <span class="c1"># 2. Create adapter</span>
+        <span class="n">adapter</span> <span class="o">=</span> <span class="n">WorkshopSimPyAdapter</span><span class="p">(</span>
+            <span class="n">workshop</span><span class="o">=</span><span class="n">workshop</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span>
+            <span class="n">event_logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">event_logger</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 3. Register processes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span>
+            <span class="n">adapter</span><span class="o">.</span><span class="n">train_arrival_process</span><span class="p">(</span>
+                <span class="n">interval_minutes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trains</span><span class="o">.</span><span class="n">arrival_interval_minutes</span><span class="p">,</span>
+                <span class="n">wagons_per_train</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trains</span><span class="o">.</span><span class="n">wagons_per_train</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 4. Run simulation</span>
+        <span class="n">duration_minutes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">duration_hours</span> <span class="o">*</span> <span class="mi">60</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">until</span><span class="o">=</span><span class="n">duration_minutes</span><span class="p">)</span>
+
+        <span class="c1"># 5. Collect results</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_results</span><span class="p">(</span><span class="n">workshop</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_workshop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Workshop</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create workshop from config&quot;&quot;&quot;</span>
+        <span class="n">tracks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">WorkshopTrack</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">track_config</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">capacity</span><span class="o">=</span><span class="n">track_config</span><span class="o">.</span><span class="n">capacity</span><span class="p">,</span>
+                <span class="n">retrofit_time_min</span><span class="o">=</span><span class="n">track_config</span><span class="o">.</span><span class="n">retrofit_time_min</span><span class="p">,</span>
+                <span class="n">current_wagons</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="kc">None</span>  <span class="c1"># Set by adapter</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">track_config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">workshop</span><span class="o">.</span><span class="n">tracks</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">Workshop</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;workshop_001&quot;</span><span class="p">,</span> <span class="n">tracks</span><span class="o">=</span><span class="n">tracks</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_collect_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workshop</span><span class="p">:</span> <span class="n">Workshop</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimulationResults</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Collect results from events and wagons&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation see KPI service</span>
+        <span class="k">pass</span>
+</code></pre></div>
+<h2 id="testing-strategy">Testing Strategy<a class="headerlink" href="#testing-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="unit-tests-without-simpy">Unit Tests (without SimPy)<a class="headerlink" href="#unit-tests-without-simpy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Domain logic can be tested without SimPy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_wagon_waiting_time</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">wagon</span> <span class="o">=</span> <span class="n">Wagon</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;W001&quot;</span><span class="p">,</span>
+        <span class="n">train_id</span><span class="o">=</span><span class="s2">&quot;T001&quot;</span><span class="p">,</span>
+        <span class="n">arrival_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+        <span class="n">retrofit_start_time</span><span class="o">=</span><span class="mf">15.0</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">wagon</span><span class="o">.</span><span class="n">waiting_time</span> <span class="o">==</span> <span class="mf">5.0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_track_availability</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">track</span> <span class="o">=</span> <span class="n">WorkshopTrack</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;TRACK01&quot;</span><span class="p">,</span>
+        <span class="n">capacity</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">retrofit_time_min</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">current_wagons</span><span class="o">=</span><span class="mi">3</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">track</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span>
+
+    <span class="n">track</span><span class="o">.</span><span class="n">current_wagons</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">track</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span>
+</code></pre></div>
+<h3 id="integration-tests-with-simpy">Integration Tests (with SimPy)<a class="headerlink" href="#integration-tests-with-simpy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_simple_simulation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test with SimPy environment&quot;&quot;&quot;</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">SimPyEnvironmentAdapter</span><span class="p">()</span>
+
+    <span class="n">workshop</span> <span class="o">=</span> <span class="n">Workshop</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;test_workshop&quot;</span><span class="p">,</span>
+        <span class="n">tracks</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">WorkshopTrack</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;TRACK01&quot;</span><span class="p">,</span>
+                <span class="n">capacity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">retrofit_time_min</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">simpy</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">simpy_env</span><span class="p">,</span> <span class="n">capacity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">adapter</span> <span class="o">=</span> <span class="n">WorkshopSimPyAdapter</span><span class="p">(</span>
+        <span class="n">workshop</span><span class="o">=</span><span class="n">workshop</span><span class="p">,</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+        <span class="n">event_logger</span><span class="o">=</span><span class="n">EventLogger</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create test wagon</span>
+    <span class="n">wagon</span> <span class="o">=</span> <span class="n">Wagon</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;W001&quot;</span><span class="p">,</span> <span class="n">train_id</span><span class="o">=</span><span class="s2">&quot;T001&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Start retrofit process</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">adapter</span><span class="o">.</span><span class="n">retrofit_process</span><span class="p">(</span><span class="n">wagon</span><span class="p">))</span>
+
+    <span class="c1"># Run simulation</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">until</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+
+    <span class="c1"># Assertions</span>
+    <span class="k">assert</span> <span class="n">wagon</span><span class="o">.</span><span class="n">retrofit_end_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">wagon</span><span class="o">.</span><span class="n">needs_retrofit</span> <span class="o">==</span> <span class="kc">False</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="dos">✅ Do's<a class="headerlink" href="#dos" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Domain logic in separate classes (without SimPy imports)</li>
+<li>Use thin adapter pattern</li>
+<li>Log events for traceability</li>
+<li>Keep generator functions small</li>
+<li>Type hints for better IDE support</li>
+</ul>
+<h3 id="donts">❌ Don'ts<a class="headerlink" href="#donts" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Don't import SimPy directly in domain logic</li>
+<li>No complex logic in generator functions</li>
+<li>No global SimPy resources</li>
+<li>No direct <code>yield</code> statements in domain models</li>
+</ul>
+<h2 id="migration-path-post-mvp">Migration Path (Post-MVP)<a class="headerlink" href="#migration-path-post-mvp" title="Permanent link">&para;</a></h2>
+<h3 id="full-version-replace-simpy">Full Version: Replace SimPy<a class="headerlink" href="#full-version-replace-simpy" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Alternative: Salabim</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SalabimEnvironmentAdapter</span><span class="p">(</span><span class="n">SimulationEnvironment</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">salabim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">Environment</span><span class="p">()</span>
+
+    <span class="c1"># Implement same interface</span>
+    <span class="o">...</span>
+
+<span class="c1"># Alternative: Custom discrete event engine</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomDESAdapter</span><span class="p">(</span><span class="n">SimulationEnvironment</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_queue</span><span class="p">:</span> <span class="n">PriorityQueue</span> <span class="o">=</span> <span class="n">PriorityQueue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Implement same interface</span>
+    <span class="o">...</span>
+</code></pre></div>
+<p><strong>Effort:</strong> Estimated 2-3 days (to be validated), as domain logic remains unchanged.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>

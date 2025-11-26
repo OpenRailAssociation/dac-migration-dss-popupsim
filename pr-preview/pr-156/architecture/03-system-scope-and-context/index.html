@@ -1,0 +1,1331 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.0" name="generator"/>
+<title>3. System Scope and Context - PopUpSim Documentation</title>
+<link href="../../assets/stylesheets/main.618322db.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#3-system-scope-and-context">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              3. System Scope and Context
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../mvp/architecture/">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../mvp/architecture/13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#31-business-context">
+<span class="md-ellipsis">
+      
+        3.1 Business Context
+      
+    </span>
+</a>
+<nav aria-label="3.1 Business Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#311-communication-partners">
+<span class="md-ellipsis">
+      
+        3.1.1 Communication Partners
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#312-data-sources-outputs">
+<span class="md-ellipsis">
+      
+        3.1.2 Data Sources &amp; Outputs
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#313-future-extensions-implementation-phase">
+<span class="md-ellipsis">
+      
+        3.1.3 Future Extensions (Implementation Phase)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#32-technical-context">
+<span class="md-ellipsis">
+      
+        3.2 Technical Context
+      
+    </span>
+</a>
+<nav aria-label="3.2 Technical Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#321-technical-channels-and-transmission-media">
+<span class="md-ellipsis">
+      
+        3.2.1 Technical Channels and Transmission Media
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#322-functional-to-technical-mapping">
+<span class="md-ellipsis">
+      
+        3.2.2 Functional to Technical Mapping
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#323-security-and-quality-requirements">
+<span class="md-ellipsis">
+      
+        3.2.3 Security and Quality Requirements
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#324-operational-considerations">
+<span class="md-ellipsis">
+      
+        3.2.4 Operational Considerations
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#33-data-flow-context">
+<span class="md-ellipsis">
+      
+        3.3 Data Flow Context
+      
+    </span>
+</a>
+<nav aria-label="3.3 Data Flow Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#331-input-data-flow">
+<span class="md-ellipsis">
+      
+        3.3.1 Input Data Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#332-output-data-flow">
+<span class="md-ellipsis">
+      
+        3.3.2 Output Data Flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#34-critical-dependencies-analysis">
+<span class="md-ellipsis">
+      
+        3.4 Critical Dependencies Analysis
+      
+    </span>
+</a>
+<nav aria-label="3.4 Critical Dependencies Analysis" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#341-current-critical-dependencies">
+<span class="md-ellipsis">
+      
+        3.4.1 Current Critical Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#342-future-critical-dependencies-implementation-phase-tbd">
+<span class="md-ellipsis">
+      
+        3.4.2 Future Critical Dependencies (Implementation Phase - TBD)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#343-dependency-categories">
+<span class="md-ellipsis">
+      
+        3.4.3 Dependency Categories
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="3-system-scope-and-context">3. System Scope and Context<a class="headerlink" href="#3-system-scope-and-context" title="Permanent link">¶</a></h1>
+<h2 id="31-business-context">3.1 Business Context<a class="headerlink" href="#31-business-context" title="Permanent link">¶</a></h2>
+<p><strong>PopUpSim's Role in DAC Migration Strategy:</strong></p>
+<p>PopUpSim is a <strong>workshop layout optimization tool</strong> within Europe's 500,000-car DAC retrofit program (2029-2034). The tool helps determine if the migration strategy is feasible by optimizing individual Pop-Up workshop layouts and calculating their throughput capacity.</p>
+<p><strong>Strategic Business Logic:</strong>
+1. <strong>Europe must retrofit 500,000 cars</strong> by 2034 using temporary Pop-Up workshop sites
+2. <strong>PopUpSim simulates individual workshop layouts</strong> to determine optimal throughput (cars/day)
+3. <strong>Strategic planners use results</strong> to calculate: "How many sites with Layout X do we need for 500k cars?"
+4. <strong>Layout optimization directly impacts</strong> the feasibility and economics of the entire migration program</p>
+<p><strong>Business Impact Examples:</strong>
+- <strong>Layout A</strong>: 30 cars/day → Need 45+ sites across Europe
+- <strong>Layout B</strong>: 50 cars/day → Need 27+ sites across Europe
+- <strong>Layout C</strong>: 70 cars/day → Need 19+ sites across Europe</p>
+<pre class="mermaid"><code>C4Context
+    title Business Context - PopUpSim in DAC Migration Strategy
+
+    %% Primary Users
+    Person(workshop_planner, "Workshop Layout Planner", "DB/SBB/ÖBB engineers optimizing individual Pop-Up site layouts")
+    Person(strategic_planner, "Strategic Migration Planner", "Open Rail Association planners determining Europe-wide site requirements")
+    Person(operations_manager, "Operations Manager", "Railway company managers evaluating workshop capacity and resource needs")
+
+    %% Central System
+    System(popupsim, "PopUpSim", "Workshop layout optimization tool: simulates individual Pop-Up sites to determine optimal throughput")
+
+    %% External Business Systems
+    System_Ext(dac_dss, "DAC Migration DSS", "Europe-wide migration coordination system (500k cars, 2029-2034)")
+    System_Ext(topology_system, "Railway Topology System", "Track network data provider (future integration)")
+    System_Ext(train_mgmt, "Train Management System", "Operational scheduling system (future integration)")
+
+    %% Business Data Sources
+    SystemDb_Ext(site_constraints, "Site Constraints", "Physical limitations, regulations, resource availability per country")
+    SystemDb(layout_templates, "Layout Templates", "Standardized workshop designs and historical performance data")
+
+    %% Primary Business Relationships
+    Rel(workshop_planner, popupsim, "Site-specific constraints, layout variations")
+    Rel(strategic_planner, popupsim, "Standardization requirements, throughput targets")
+    Rel(operations_manager, popupsim, "Resource planning, capacity validation")
+
+    Rel(popupsim, workshop_planner, "Optimized layouts, bottleneck analysis, throughput estimates")
+    Rel(popupsim, strategic_planner, "Site capacity data for Europe-wide planning")
+    Rel(popupsim, operations_manager, "Resource utilization, operational feasibility")
+
+    %% Business Data Exchange
+    Rel(site_constraints, popupsim, "Physical and regulatory constraints")
+    Rel(popupsim, dac_dss, "Site capacity estimates for migration feasibility analysis")
+    Rel(popupsim, layout_templates, "Validated layout designs and performance benchmarks")
+    Rel(layout_templates, strategic_planner, "Standardized designs for replication")
+
+    %% Future Business Integrations
+    Rel(topology_system, popupsim, "Real-time track availability (implementation phase)", "dashed")
+    Rel(train_mgmt, popupsim, "Dynamic train scheduling (implementation phase)", "dashed")</code></pre>
+<p><strong>Business Value Proposition:</strong>
+- <strong>Feasibility Validation</strong>: Determines if 500k car migration is achievable with proposed infrastructure
+- <strong>Cost Optimization</strong>: Minimizes number of required Pop-Up sites through layout optimization
+- <strong>Risk Mitigation</strong>: Identifies bottlenecks and capacity constraints before site construction
+- <strong>Standardization</strong>: Enables reusable workshop designs across European railway companies</p>
+<h3 id="311-communication-partners">3.1.1 Communication Partners<a class="headerlink" href="#311-communication-partners" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>External Entity</th>
+<th>Input to PopUpSim</th>
+<th>Output from PopUpSim</th>
+<th>Business Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Workshop Layout Planner</strong></td>
+<td>Site constraints, layout variations, resource limits</td>
+<td>Optimized layouts, throughput estimates, bottleneck analysis</td>
+<td>Optimize individual Pop-Up workshop sites for maximum car processing capacity</td>
+</tr>
+<tr>
+<td><strong>Strategic Migration Planner</strong></td>
+<td>Standardization requirements, throughput targets</td>
+<td>Site capacity data, layout templates, feasibility analysis</td>
+<td>Determine total number of Pop-Up sites needed across Europe for 500k car migration</td>
+</tr>
+<tr>
+<td><strong>Operations Manager</strong></td>
+<td>Resource availability, operational constraints</td>
+<td>Resource utilization reports, operational feasibility assessment</td>
+<td>Validate that proposed layouts are operationally viable with available resources</td>
+</tr>
+<tr>
+<td><strong>DAC Migration DSS</strong></td>
+<td>-</td>
+<td>Aggregated capacity estimates, site requirements</td>
+<td>Integrate individual site capacities into Europe-wide migration planning</td>
+</tr>
+</tbody>
+</table>
+<h3 id="312-data-sources-outputs">3.1.2 Data Sources &amp; Outputs<a class="headerlink" href="#312-data-sources-outputs" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th>Type</th>
+<th>Content</th>
+<th>Business Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Site Constraint Files</strong></td>
+<td>Input</td>
+<td>Track topology, physical limitations, regulatory requirements</td>
+<td>Define realistic constraints for each Pop-Up workshop location</td>
+</tr>
+<tr>
+<td><strong>Workshop Configuration</strong></td>
+<td>Input</td>
+<td>Resource capacity, processing times, operating schedules</td>
+<td>Model workshop operations and resource availability</td>
+</tr>
+<tr>
+<td><strong>Train Schedule Data</strong></td>
+<td>Input</td>
+<td>Wagon arrival patterns, service requirements, routing</td>
+<td>Simulate realistic workload for capacity planning</td>
+</tr>
+<tr>
+<td><strong>Throughput Analysis</strong></td>
+<td>Output</td>
+<td>Cars/day capacity, resource utilization, bottleneck identification</td>
+<td>Determine optimal layout performance for strategic planning</td>
+</tr>
+<tr>
+<td><strong>Layout Comparison Reports</strong></td>
+<td>Output</td>
+<td>Side-by-side layout performance, cost-benefit analysis</td>
+<td>Support decision-making for standardized workshop designs</td>
+</tr>
+<tr>
+<td><strong>Capacity Estimates</strong></td>
+<td>Output</td>
+<td>Site-specific throughput data for DAC Migration DSS</td>
+<td>Enable Europe-wide migration feasibility assessment</td>
+</tr>
+<tr>
+<td><strong>Input File Archive</strong></td>
+<td>Output</td>
+<td>Copy of original configuration files with simulation results</td>
+<td>Ensure reproducibility and maintain input-output consistency</td>
+</tr>
+</tbody>
+</table>
+<h3 id="313-future-extensions-implementation-phase">3.1.3 Future Extensions (Implementation Phase)<a class="headerlink" href="#313-future-extensions-implementation-phase" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>External Entity</th>
+<th>Input to PopUpSim</th>
+<th>Business Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Railway Topology System</strong></td>
+<td>Real-time track availability, maintenance windows</td>
+<td>Enable dynamic layout optimization based on actual network conditions</td>
+</tr>
+<tr>
+<td><strong>Train Management System</strong></td>
+<td>Live train schedules, dynamic arrivals</td>
+<td>Support real-time workshop operations during actual DAC migration</td>
+</tr>
+<tr>
+<td><strong>Multi-Site Coordination</strong></td>
+<td>Cross-site capacity sharing, overflow management</td>
+<td>Optimize workshop network performance across multiple Pop-Up sites</td>
+</tr>
+</tbody>
+</table>
+<h2 id="32-technical-context">3.2 Technical Context<a class="headerlink" href="#32-technical-context" title="Permanent link">¶</a></h2>
+<pre class="mermaid"><code>C4Context
+    title Technical Context - PopUpSim Implementation
+
+    Person(users, "Users", "Web Browsers (Chrome/Firefox/Edge)")
+
+    System_Boundary(popupsim_boundary, "PopUpSim System") {
+        Container(web_ui, "Web Interface", "React/Vue.js + Nginx", "Serves UI on port 443, handles static assets")
+        Container(api_gateway, "API Gateway", "FastAPI + Uvicorn", "REST endpoints on port 8000, WebSocket support")
+        Container(sim_engine, "Simulation Engine", "Python + NumPy/Pandas", "Core simulation logic, multi-threaded processing")
+        Container(file_handler, "File Handler", "Python + Pandas", "Configuration parsing, result serialization")
+        Container(session_mgmt, "Session Management", "File-based Storage", "Session data, temporary simulation state (future: database)")
+    }
+
+    SystemDb_Ext(config_files, "Configuration Files", "JSON/CSV/YAML on Local FS")
+    SystemDb(results_storage, "Results Storage", "Local File System + SQLite")
+
+    System_Ext(dac_dss, "DAC Migration DSS", "Future integration (format TBD)")
+    System_Ext(topology_api, "Railway Topology API", "Future integration (format TBD)")
+    System_Ext(train_mgmt, "Train Management API", "Future integration (format TBD)")
+
+    %% Current Technical Channels
+    Rel(users, web_ui, "HTTPS:443", "TLS 1.3, HTTP/2")
+    Rel(web_ui, api_gateway, "HTTP:8000/WebSocket", "Internal network")
+    Rel(api_gateway, sim_engine, "Internal API", "Process communication")
+    Rel(api_gateway, session_mgmt, "File I/O", "Session management")
+    Rel(sim_engine, file_handler, "Internal API", "Data processing")
+    Rel(file_handler, config_files, "File I/O", "Read operations")
+    Rel(file_handler, results_storage, "File I/O + SQL", "Write operations")
+
+    %% Future Technical Channels
+    Rel(api_gateway, dac_dss, "REST API:443", "OAuth 2.0 + mTLS (future)", "dashed")
+    Rel(topology_api, api_gateway, "GraphQL:443", "OAuth 2.0 + API Keys (future)", "dashed")
+    Rel(train_mgmt, api_gateway, "WebSocket:443", "JWT + WSS (future)", "dashed")</code></pre>
+<h3 id="321-technical-channels-and-transmission-media">3.2.1 Technical Channels and Transmission Media<a class="headerlink" href="#321-technical-channels-and-transmission-media" title="Permanent link">¶</a></h3>
+<p><strong>Current Technical Interfaces:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Transmission Media</th>
+<th>Protocol/Format</th>
+<th>Direction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web Interface</strong></td>
+<td>TCP/IP Network</td>
+<td>HTTPS (Port 443)</td>
+<td>Bidirectional</td>
+<td>User access via web browsers</td>
+</tr>
+<tr>
+<td><strong>Configuration Input</strong></td>
+<td>Local File System</td>
+<td>File I/O (JSON/CSV/YAML)</td>
+<td>Input</td>
+<td>Static scenario configuration files (formats under specification)</td>
+</tr>
+<tr>
+<td><strong>Results Output</strong></td>
+<td>Local File System</td>
+<td>File I/O (JSON/CSV)</td>
+<td>Output</td>
+<td>Simulation results and exports (formats under specification, future: Parquet for snapshots)</td>
+</tr>
+<tr>
+<td><strong>Internal Communication</strong></td>
+<td>Process Memory</td>
+<td>HTTP/WebSocket</td>
+<td>Internal</td>
+<td>API Gateway to Simulation Engine</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Future Technical Interfaces (To Be Determined):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Transmission Media</th>
+<th>Protocol/Format</th>
+<th>Direction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DAC Integration</strong></td>
+<td>TCP/IP Network</td>
+<td>TBD (possibly no integration needed)</td>
+<td>Output</td>
+<td>Capacity estimates, layout performance data (if required)</td>
+</tr>
+<tr>
+<td><strong>Railway Topology</strong></td>
+<td>TCP/IP Network</td>
+<td>TBD</td>
+<td>Input</td>
+<td>Track definitions, constraints, maintenance windows</td>
+</tr>
+<tr>
+<td><strong>Train Management</strong></td>
+<td>TCP/IP Network</td>
+<td>TBD</td>
+<td>Input</td>
+<td>Real-time train arrivals, schedule updates</td>
+</tr>
+</tbody>
+</table>
+<h3 id="322-functional-to-technical-mapping">3.2.2 Functional to Technical Mapping<a class="headerlink" href="#322-functional-to-technical-mapping" title="Permanent link">¶</a></h3>
+<p><strong>Current Implementation:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Functional Interface</th>
+<th>Technical Channel</th>
+<th>Transmission Media</th>
+<th>Security</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web-based Configuration</strong></td>
+<td>Web Browser → HTTP/HTTPS → REST API → Backend</td>
+<td>Localhost (127.0.0.1)</td>
+<td>Input validation, CSRF protection</td>
+</tr>
+<tr>
+<td><strong>File-based Configuration</strong></td>
+<td>Configuration Files → File I/O → File Handler</td>
+<td>Local File System</td>
+<td>Input validation, schema validation</td>
+</tr>
+<tr>
+<td><strong>Results Export</strong></td>
+<td>Simulation Engine → File I/O → Results Storage</td>
+<td>Local File System</td>
+<td>OS file permissions</td>
+</tr>
+<tr>
+<td><strong>Real-time Updates</strong></td>
+<td>Simulation Engine → WebSocket → Web Interface</td>
+<td>Localhost (127.0.0.1)</td>
+<td>No authentication needed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Future Extensions (Technical Details TBD):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Functional Interface</th>
+<th>Technical Channel</th>
+<th>Transmission Media</th>
+<th>Security</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>External Data Integration</td>
+<td>Railway APIs → API Gateway</td>
+<td>TCP/IP Network</td>
+<td>TBD (authentication method to be determined)</td>
+</tr>
+<tr>
+<td>Result Sharing</td>
+<td>Simulation Engine → DAC Migration DSS</td>
+<td>TCP/IP Network</td>
+<td>TBD (may not be needed)</td>
+</tr>
+<tr>
+<td>Dynamic Input</td>
+<td>Train Management → Real-time Processing</td>
+<td>TCP/IP Network</td>
+<td>TBD</td>
+</tr>
+</tbody>
+</table>
+<h3 id="323-security-and-quality-requirements">3.2.3 Security and Quality Requirements<a class="headerlink" href="#323-security-and-quality-requirements" title="Permanent link">¶</a></h3>
+<p><strong>Local Deployment Security (Single User):</strong>
+- <strong>HTTP/HTTPS</strong> for web interface (TLS optional for local deployment)
+- <strong>Localhost binding</strong> (127.0.0.1) to prevent external network access
+- <strong>No authentication required</strong> for local single-user access</p>
+<p><strong>Data Protection:</strong>
+- <strong>Input validation</strong> with schema validation and file size limits
+- <strong>Output sanitization</strong> preventing XSS in web interface
+- <strong>File system permissions</strong> using standard OS user permissions
+- <strong>No data encryption needed</strong> for local configuration files</p>
+<p><strong>Future External Integration Security:</strong>
+- <strong>TLS 1.3</strong> for external API connections (when implemented)
+- <strong>Authentication</strong> for external systems (method TBD)
+- <strong>Certificate validation</strong> for external API connections</p>
+<h3 id="324-operational-considerations">3.2.4 Operational Considerations<a class="headerlink" href="#324-operational-considerations" title="Permanent link">¶</a></h3>
+<p><strong>Local Application Management:</strong>
+- <strong>Error logging</strong> to local files for debugging simulation issues
+- <strong>Progress indicators</strong> for long-running simulations
+- <strong>Input file archiving</strong> (automatic copy to output folder for reproducibility)</p>
+<p><strong>User Responsibilities:</strong>
+- <strong>File management</strong> for configuration and results storage
+- <strong>Resource monitoring</strong> using OS task manager (Windows/macOS/Linux)
+- <strong>Software updates</strong> through standard installation process
+- <strong>Data backup</strong> of important results (if needed - user's choice)</p>
+<p><strong>Future External Integration (When Implemented):</strong>
+- <strong>Connection status</strong> for external API availability
+- <strong>Error handling</strong> for network connectivity issues</p>
+<h2 id="33-data-flow-context">3.3 Data Flow Context<a class="headerlink" href="#33-data-flow-context" title="Permanent link">¶</a></h2>
+<h3 id="331-input-data-flow">3.3.1 Input Data Flow<a class="headerlink" href="#331-input-data-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    subgraph "Input Methods"
+        web_ui["Web Interface&lt;br/&gt;• Form-based input&lt;br/&gt;• File upload&lt;br/&gt;• REST API calls"]
+        file_system["File System&lt;br/&gt;• Direct file access&lt;br/&gt;• Pre-configured files&lt;br/&gt;• Template loading"]
+        external["External Systems&lt;br/&gt;• Future APIs&lt;br/&gt;• Real-time data&lt;br/&gt;• Integration feeds"]
+    end
+
+    subgraph "Backend Processing"
+        rest_api["REST API&lt;br/&gt;• HTTP endpoints&lt;br/&gt;• JSON payload&lt;br/&gt;• Input validation"]
+        file_handler["File Handler&lt;br/&gt;• File I/O operations&lt;br/&gt;• Format detection&lt;br/&gt;• Error handling"]
+        validation["Input Validation&lt;br/&gt;• Schema validation (JSON Schema)&lt;br/&gt;• Business rules validation&lt;br/&gt;• Error reporting &amp; graceful shutdown"]
+        parsing["Data Parsing&lt;br/&gt;• JSON/CSV processing&lt;br/&gt;• Type conversion &amp; validation&lt;br/&gt;• Error recovery &amp; defaults"]
+        persistence["Data Persistence&lt;br/&gt;• Atomic file operations&lt;br/&gt;• Configuration versioning&lt;br/&gt;• Copy input files to output folder"]
+    end
+
+    subgraph "Configuration Data Types"
+        scenario["Scenario Parameters&lt;br/&gt;• Simulation timeframe&lt;br/&gt;• Random seed&lt;br/&gt;• KPI targets"]
+        workshop["Workshop Configuration&lt;br/&gt;• Opening times&lt;br/&gt;• Resource capacity&lt;br/&gt;• Processing times"]
+        schedule["Train Schedules&lt;br/&gt;• Arrival times&lt;br/&gt;• Wagon compositions&lt;br/&gt;• Service requirements"]
+        routes["Routes&lt;br/&gt;• Prescribed locomotive paths&lt;br/&gt;• Track sequence per route&lt;br/&gt;• Cannot be computed, must be provided"]
+        topology["Track Infrastructure&lt;br/&gt;• Individual tracks&lt;br/&gt;• Track properties &amp; constraints&lt;br/&gt;• Workshop placement locations"]
+    end
+
+    subgraph "Simulation Pipeline"
+        simulation["Simulation Engine&lt;br/&gt;• SimPy discrete event simulation&lt;br/&gt;• Event processing&lt;br/&gt;• Memory-efficient state management"]
+        analysis["Analysis Engine&lt;br/&gt;• Statistical processing (NumPy/Pandas)&lt;br/&gt;• KPI aggregation&lt;br/&gt;• Export formatting (JSON/CSV)"]
+        input_copy["Input Archiving&lt;br/&gt;• Copy input files to output folder&lt;br/&gt;• Maintain input-output consistency&lt;br/&gt;• Enable result reproducibility"]
+    end
+
+    %% Input methods to backend processing
+    web_ui --&gt; rest_api
+    file_system --&gt; file_handler
+    external -.-&gt; rest_api
+
+    %% Backend processing flow
+    rest_api --&gt; validation
+    file_handler --&gt; validation
+
+    %% Error handling - validation failures stop processing
+    validation --&gt;|"Validation Success"| parsing
+    validation --&gt;|"Validation Errors"| user_feedback
+
+    %% User feedback for errors
+    user_feedback["User Feedback&lt;br/&gt;• Error messages&lt;br/&gt;• Validation details&lt;br/&gt;• Graceful shutdown"]
+    user_feedback --&gt; web_ui
+    user_feedback --&gt; file_system
+
+    parsing --&gt; persistence
+    persistence --&gt; input_copy
+
+    %% Backend populates configuration data types
+    parsing --&gt; scenario
+    parsing --&gt; workshop
+    parsing --&gt; schedule
+    parsing --&gt; routes
+    parsing --&gt; topology
+
+    %% Relationships between configuration data types
+    topology --&gt; routes
+    routes --&gt; schedule
+    topology --&gt; workshop
+
+    %% Configuration data types feed simulation (only after successful validation)
+    scenario --&gt; simulation
+    workshop --&gt; simulation
+    schedule --&gt; simulation
+    routes --&gt; simulation
+    topology --&gt; simulation
+
+    %% Analysis engine gets configuration for output requirements
+    scenario --&gt; analysis
+    workshop --&gt; analysis
+
+    %% Simulation pipeline (input archiving happens before simulation)
+    input_copy --&gt; simulation
+    simulation --&gt; analysis
+
+    classDef input fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    classDef backend fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef data fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef process fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+
+    class web_ui,file_system,external input
+    class rest_api,file_handler,validation,parsing,persistence,user_feedback backend
+    class scenario,workshop,schedule,routes,topology data
+    class simulation,analysis,input_copy process</code></pre>
+<h3 id="332-output-data-flow">3.3.2 Output Data Flow<a class="headerlink" href="#332-output-data-flow" title="Permanent link">¶</a></h3>
+<p>During simulation execution, the simulation engine and analysis engine work together to continuously generate result data in memory (both temporal and aggregated data).</p>
+<pre class="mermaid"><code>flowchart TB
+    subgraph "Simulation Execution (From Input Flow)"
+        sim_engine["Simulation Engine&lt;br/&gt;• SimPy discrete event simulation&lt;br/&gt;• Generates events during runtime&lt;br/&gt;• Maintains simulation state"]
+        analysis_engine["Analysis Engine&lt;br/&gt;• Processes events in real-time&lt;br/&gt;• Calculates KPIs during simulation&lt;br/&gt;• Stores temporal &amp; aggregated data"]
+    end
+
+    subgraph "In-Memory Result Data"
+        temporal_data["Temporal Data&lt;br/&gt;• Time-series events&lt;br/&gt;• State changes over time&lt;br/&gt;• Individual train movements"]
+        aggregated_data["Aggregated Data&lt;br/&gt;• Resource utilization summaries&lt;br/&gt;• Throughput calculations&lt;br/&gt;• Bottleneck analysis"]
+    end
+
+    subgraph "Output Processing"
+        formatting["Output Formatting&lt;br/&gt;• JSON/CSV export&lt;br/&gt;• Chart data preparation&lt;br/&gt;• Report generation"]
+        file_export["File Export&lt;br/&gt;• Write results to disk&lt;br/&gt;• Package with input archive (from input processing)&lt;br/&gt;• Create complete result package"]
+    end
+
+    subgraph "Output Types"
+        kpis["KPI Reports&lt;br/&gt;• Resource utilization&lt;br/&gt;• Processing times&lt;br/&gt;• Queue lengths&lt;br/&gt;• Throughput (cars/day)"]
+        events["Event Logs&lt;br/&gt;• Train arrivals&lt;br/&gt;• Resource assignments&lt;br/&gt;• System events"]
+        charts["Visualizations&lt;br/&gt;• Utilization graphs&lt;br/&gt;• Heat maps"]
+        summaries["Summaries&lt;br/&gt;• Key findings"]
+    end
+
+
+
+    subgraph "Delivery Channels"
+        web_dashboard["Web Dashboard&lt;br/&gt;• Real-time updates via WebSocket&lt;br/&gt;• Interactive charts&lt;br/&gt;• User interface"]
+        file_exports["File Exports&lt;br/&gt;• CSV downloads&lt;br/&gt;• JSON data"]
+        rest_api["REST API&lt;br/&gt;• Programmatic access&lt;br/&gt;• Future external integration&lt;br/&gt;• Alternative to file exports"]
+        websocket["WebSocket&lt;br/&gt;• Real-time simulation data&lt;br/&gt;• Live progress updates&lt;br/&gt;• Event streaming"]
+    end
+
+    subgraph "End Users"
+        planners["Workshop Layout Planners&lt;br/&gt;• Layout optimization&lt;br/&gt;• Bottleneck analysis&lt;br/&gt;• Site-specific decisions"]
+        analysts["Strategic Migration Planners&lt;br/&gt;• Europe-wide capacity planning&lt;br/&gt;• Site requirement analysis&lt;br/&gt;• Migration feasibility assessment"]
+        managers["Operations Managers&lt;br/&gt;• Summaries&lt;br/&gt;• KPI monitoring&lt;br/&gt;• Strategic planning"]
+        external_systems["DAC Migration DSS&lt;br/&gt;• Capacity aggregation&lt;br/&gt;• Migration coordination"]
+    end
+
+    %% Simulation engines work together during execution
+    sim_engine --&gt; analysis_engine
+
+    %% Analysis engine generates result data in memory
+    analysis_engine --&gt; temporal_data
+    analysis_engine --&gt; aggregated_data
+
+    %% Result data is formatted for output
+    temporal_data --&gt; formatting
+    aggregated_data --&gt; formatting
+    formatting --&gt; file_export
+
+    %% Formatted data becomes output types
+    formatting --&gt; kpis
+    formatting --&gt; events
+    formatting --&gt; charts
+    formatting --&gt; summaries
+
+    %% Real-time data flow via WebSocket
+    temporal_data --&gt; websocket
+    aggregated_data --&gt; websocket
+    websocket --&gt; web_dashboard
+
+    %% Output types to delivery channels
+    kpis --&gt; file_exports
+    kpis -.-&gt; rest_api
+
+    events --&gt; file_exports
+
+    charts --&gt; file_exports
+
+    summaries --&gt; file_exports
+
+
+
+    %% Delivery channels to end users
+    web_dashboard --&gt; planners
+    web_dashboard --&gt; analysts
+
+    file_exports --&gt; planners
+    file_exports --&gt; analysts
+    file_exports --&gt; managers
+
+    %% REST API for future programmatic access
+    rest_api -.-&gt;|"Future Use"| planners
+    rest_api -.-&gt;|"Future Use"| analysts
+
+    %% Future connections (marked as possibilities)
+    rest_api -.-&gt;|"Future Integration"| external_systems
+
+    classDef simulation fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef processing fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef output fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef delivery fill:#e3f2fd,stroke:#01579b,stroke-width:2px
+    classDef users fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+
+    class sim_engine,analysis_engine simulation
+    class temporal_data,aggregated_data data
+    class formatting,file_export processing
+    class kpis,events,charts,summaries output
+    class web_dashboard,file_exports,rest_api,websocket delivery
+    class planners,analysts,managers,external_systems users</code></pre>
+<h2 id="34-critical-dependencies-analysis">3.4 Critical Dependencies Analysis<a class="headerlink" href="#34-critical-dependencies-analysis" title="Permanent link">¶</a></h2>
+<h3 id="341-current-critical-dependencies">3.4.1 Current Critical Dependencies<a class="headerlink" href="#341-current-critical-dependencies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Criticality</th>
+<th>Failure Impact</th>
+<th>Mitigation Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python Runtime (3.13+)</strong></td>
+<td>High</td>
+<td>System inoperable</td>
+<td>Containerization, version pinning, startup checks</td>
+</tr>
+<tr>
+<td><strong>SimPy Library</strong></td>
+<td>High</td>
+<td>Simulation engine fails</td>
+<td>Version pinning, fallback simulation modes, dependency monitoring</td>
+</tr>
+<tr>
+<td><strong>NumPy/Pandas</strong></td>
+<td>High</td>
+<td>Analysis engine fails</td>
+<td>Version compatibility testing, alternative calculation methods</td>
+</tr>
+<tr>
+<td><strong>Web Browser (Modern)</strong></td>
+<td>High</td>
+<td>Users cannot access system</td>
+<td>Progressive enhancement, browser testing, fallback UI</td>
+</tr>
+<tr>
+<td><strong>Operating System (Windows/Linux/macOS)</strong></td>
+<td>High</td>
+<td>Cross-platform compatibility issues</td>
+<td>OS-specific testing, path abstraction, permission handling</td>
+</tr>
+<tr>
+<td><strong>File System Access</strong></td>
+<td>High</td>
+<td>Cannot save/load configurations or results</td>
+<td>Backup strategies, redundant storage, recovery procedures</td>
+</tr>
+<tr>
+<td><strong>File Path Handling</strong></td>
+<td>High</td>
+<td>Path separator issues, invalid characters</td>
+<td>Cross-platform path libraries (pathlib), input sanitization</td>
+</tr>
+<tr>
+<td><strong>Memory (8GB+ RAM)</strong></td>
+<td>Medium</td>
+<td>Performance degradation with large simulations</td>
+<td>User manually monitors via OS task manager, simulation size warnings in UI</td>
+</tr>
+<tr>
+<td><strong>Disk Space (1GB+ free)</strong></td>
+<td>Medium</td>
+<td>Cannot save large simulation results</td>
+<td>Disk space checks, result compression, cleanup utilities</td>
+</tr>
+</tbody>
+</table>
+<h3 id="342-future-critical-dependencies-implementation-phase-tbd">3.4.2 Future Critical Dependencies (Implementation Phase - TBD)<a class="headerlink" href="#342-future-critical-dependencies-implementation-phase-tbd" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Criticality</th>
+<th>Failure Impact</th>
+<th>Mitigation Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DAC Migration DSS</strong></td>
+<td>TBD</td>
+<td>TBD (integration may not be needed)</td>
+<td>Manual export capabilities, file-based data sharing</td>
+</tr>
+<tr>
+<td><strong>Railway Topology API</strong></td>
+<td>TBD</td>
+<td>Must use static topology data</td>
+<td>Cached topology data, manual configuration updates</td>
+</tr>
+<tr>
+<td><strong>Train Management API</strong></td>
+<td>TBD</td>
+<td>Cannot simulate dynamic arrivals</td>
+<td>Use historical patterns, static scheduling data</td>
+</tr>
+</tbody>
+</table>
+<h3 id="343-dependency-categories">3.4.3 Dependency Categories<a class="headerlink" href="#343-dependency-categories" title="Permanent link">¶</a></h3>
+<p><strong>Runtime Dependencies:</strong>
+- <strong>Core Platform</strong>: Python 3.13+, operating system (Windows/Linux/macOS)
+- <strong>Simulation Libraries</strong>: SimPy, NumPy, Pandas
+- <strong>User Interface</strong>: Modern web browser, localhost network interface</p>
+<p><strong>System Resources:</strong>
+- <strong>File System</strong>: Read/write access, cross-platform path handling
+- <strong>Memory</strong>: 8GB+ RAM recommended for large simulations
+- <strong>Storage</strong>: 1GB+ free disk space for results</p>
+<p><strong>Future Integration Dependencies:</strong>
+- <strong>External APIs</strong>: DAC Migration DSS, Railway Topology API, Train Management API (all TBD)
+- <strong>Data Formats</strong>: API specifications and data exchange protocols (to be determined)</p>
+<p><em>Note: Risk analysis and mitigation strategies for these dependencies are detailed in <a href="../11-technical-risks/">Chapter 11 - Risks and Technical Debt</a>.</em></p>
+<p><strong>Navigation:</strong>
+<a href="../02-architecture-constraints/">← Architecture and constraints</a></p>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+</body>
+</html>

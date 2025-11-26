@@ -1,0 +1,1712 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>MVP Documentation Update Summary - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mvp-documentation-update-summary" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              MVP Documentation Update Summary
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction & Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risks & Technical Debt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-was-updated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Was Updated
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Was Updated">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-architecture-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Architecture Documentation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Architecture Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#05-building-blocksmd-major-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        05-building-blocks.md - Major Update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#05a-level3-implementationmd-new-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        05a-level3-implementation.md - New Document
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readmemd-updated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        README.md - Updated
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-development-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Development Documentation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Development Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#02-mvp-contextsmd-complete-rewrite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        02-mvp-contexts.md - Complete Rewrite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readmemd-updated_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        README.md - Updated
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-root-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Root Documentation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Root Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#readmemd-updated_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        README.md - Updated
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-components-documented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Components Documented
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="New Components Documented">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workshop-operations-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Operations Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analysis-reporting-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analysis &amp; Reporting Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-patterns-documented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Patterns Documented
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Patterns Documented">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#design-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architectural-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code-examples-updated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Examples Updated
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Code Examples Updated">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-simplified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before (Simplified)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-actual-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After (Actual Implementation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-modified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Modified
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Files Modified">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Root Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary Documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Statistics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recommended-follow-up-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Follow-up Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-code-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Code Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="mvp-documentation-update-summary">MVP Documentation Update Summary<a class="headerlink" href="#mvp-documentation-update-summary" title="Permanent link">&para;</a></h1>
+<p><strong>Date:</strong> 2025
+<strong>Status:</strong> Complete</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This document summarizes the comprehensive update of PopUpSim MVP documentation to reflect the actual implemented architecture with Level 3 details, real code examples, and all additional components.</p>
+<h2 id="what-was-updated">What Was Updated<a class="headerlink" href="#what-was-updated" title="Permanent link">&para;</a></h2>
+<h3 id="1-architecture-documentation">1. Architecture Documentation<a class="headerlink" href="#1-architecture-documentation" title="Permanent link">&para;</a></h3>
+<h4 id="05-building-blocksmd-major-update"><strong>05-building-blocks.md</strong> - Major Update<a class="headerlink" href="#05-building-blocksmd-major-update" title="Permanent link">&para;</a></h4>
+<ul>
+<li>✅ Updated Level 2: Configuration Context with actual Builder pattern implementation</li>
+<li>✅ Updated Level 2: Workshop Operations Context with 5 process coordinators</li>
+<li>✅ Added Level 3: Process Coordinators diagram and table</li>
+<li>✅ Updated Level 2: Analysis &amp; Reporting Context with actual components</li>
+<li>✅ Added Level 3: Metrics Collection Architecture</li>
+<li>✅ Replaced all simplified examples with actual production code</li>
+<li>✅ Added implementation file references for all components</li>
+</ul>
+<p><strong>Key Additions:</strong>
+- ScenarioBuilder with 7 referenced files
+- 5 Process Coordinators (train arrival, wagon pickup, workshop, retrofitted pickup, parking)
+- ResourcePool, TrackCapacityManager, WorkshopCapacityManager
+- Domain Services (WagonSelector, WagonStateManager, LocomotiveStateManager, WorkshopDistributor)
+- Metrics Collectors (WagonCollector, LocomotiveCollector, WorkshopCollector)
+- KPICalculator with actual calculation logic
+- Typer CLI orchestration</p>
+<h4 id="05a-level3-implementationmd-new-document"><strong>05a-level3-implementation.md</strong> - New Document<a class="headerlink" href="#05a-level3-implementationmd-new-document" title="Permanent link">&para;</a></h4>
+<ul>
+<li>✅ Created comprehensive Level 3 architecture document</li>
+<li>✅ Detailed component diagrams for all 3 contexts</li>
+<li>✅ Complete component tables with file references</li>
+<li>✅ 5 Process Coordinators detailed responsibilities</li>
+<li>✅ Resource Management components</li>
+<li>✅ Domain Services (no SimPy dependencies)</li>
+<li>✅ Infrastructure components</li>
+<li>✅ Metrics Collection architecture</li>
+<li>✅ KPI Calculation flow sequence diagram</li>
+<li>✅ Batch processing details</li>
+<li>✅ Locomotive delivery strategies</li>
+<li>✅ Track selection strategies (4 types)</li>
+<li>✅ Wagon state machine diagram</li>
+<li>✅ Metrics collection events</li>
+<li>✅ Technology integration details (SimPy, Pydantic, Pandas/NumPy, Matplotlib)</li>
+<li>✅ Complete file organization tree</li>
+</ul>
+<h4 id="readmemd-updated"><strong>README.md</strong> - Updated<a class="headerlink" href="#readmemd-updated" title="Permanent link">&para;</a></h4>
+<ul>
+<li>✅ Added reference to new Level 3 document</li>
+<li>✅ Updated architecture documentation list</li>
+</ul>
+<h3 id="2-development-documentation">2. Development Documentation<a class="headerlink" href="#2-development-documentation" title="Permanent link">&para;</a></h3>
+<h4 id="02-mvp-contextsmd-complete-rewrite"><strong>02-mvp-contexts.md</strong> - Complete Rewrite<a class="headerlink" href="#02-mvp-contextsmd-complete-rewrite" title="Permanent link">&para;</a></h4>
+<ul>
+<li>✅ Updated Configuration Context with actual implementation</li>
+<li>✅ Added directory structure for builders/, models/, validators/</li>
+<li>✅ Replaced simplified examples with actual ScenarioBuilder code</li>
+<li>✅ Added Pydantic models (Scenario, Workshop, TrackSelectionStrategy, LocoDeliveryStrategy)</li>
+<li>✅ Updated Workshop Operations Context with 5 coordinators</li>
+<li>✅ Added directory structure for simulation/, domain/, analytics/collectors/</li>
+<li>✅ Replaced simplified examples with actual PopupSim orchestrator code</li>
+<li>✅ Added ResourcePool, TrackCapacityManager implementations</li>
+<li>✅ Added Domain Services (WagonSelector, WagonStateManager)</li>
+<li>✅ Updated Analysis &amp; Reporting Context with actual implementation</li>
+<li>✅ Added directory structure for main.py, analytics/</li>
+<li>✅ Replaced simplified examples with actual main.py orchestration</li>
+<li>✅ Added KPICalculator implementation</li>
+<li>✅ Added MetricCollector base class</li>
+<li>✅ Updated Implementation Status table - all contexts now ✅ Implemented</li>
+<li>✅ Added new components to status table (Resource Management, Metrics Collection, 5 Process Coordinators)</li>
+</ul>
+<h4 id="readmemd-updated_1"><strong>README.md</strong> - Updated<a class="headerlink" href="#readmemd-updated_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>✅ Updated Documentation Status table</li>
+<li>✅ Changed "Code Examples" from "Type hints added" to "Actual implementation"</li>
+<li>✅ Added "Level 3 Architecture" row</li>
+<li>✅ Updated Implementation Status table - all contexts now ✅ Implemented</li>
+<li>✅ Updated file locations to reflect actual structure</li>
+<li>✅ Added Resource Management, Metrics Collection, 5 Process Coordinators rows</li>
+</ul>
+<h3 id="3-root-documentation">3. Root Documentation<a class="headerlink" href="#3-root-documentation" title="Permanent link">&para;</a></h3>
+<h4 id="readmemd-updated_2"><strong>README.md</strong> - Updated<a class="headerlink" href="#readmemd-updated_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>✅ Updated Project Status section</li>
+<li>✅ Changed from "MVP Development (5 weeks)" to "MVP Implementation Complete"</li>
+<li>✅ Moved Workshop Operations Context from "In Progress" to "Implemented"</li>
+<li>✅ Moved Analysis &amp; Reporting Context from "In Progress" to "Implemented"</li>
+<li>✅ Added Resource Management to implemented list</li>
+<li>✅ Added Metrics Collection to implemented list</li>
+<li>✅ Added Domain Services to implemented list</li>
+<li>✅ Added CLI interface to implemented list</li>
+<li>✅ Updated "In Progress" section with performance optimization and additional scenarios</li>
+</ul>
+<h2 id="new-components-documented">New Components Documented<a class="headerlink" href="#new-components-documented" title="Permanent link">&para;</a></h2>
+<h3 id="configuration-context">Configuration Context<a class="headerlink" href="#configuration-context" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>ScenarioBuilder</strong> - Orchestrates loading of 7 referenced files</li>
+<li><strong>TrainListBuilder</strong> - CSV train schedule parsing</li>
+<li><strong>TrackListBuilder</strong> - JSON track configuration parsing</li>
+<li><strong>ScenarioValidator</strong> - Cross-validation logic</li>
+<li><strong>Strategy Enums</strong> - TrackSelectionStrategy, LocoDeliveryStrategy</li>
+</ol>
+<h3 id="workshop-operations-context">Workshop Operations Context<a class="headerlink" href="#workshop-operations-context" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>PopupSim Orchestrator</strong> - Main simulation coordinator</li>
+<li><strong>5 Process Coordinators:</strong></li>
+<li>process_train_arrivals</li>
+<li>pickup_wagons_to_retrofit</li>
+<li>move_wagons_to_stations</li>
+<li>pickup_retrofitted_wagons</li>
+<li>move_to_parking</li>
+<li><strong>Resource Management:</strong></li>
+<li>ResourcePool (generic with tracking)</li>
+<li>TrackCapacityManager (4 selection strategies)</li>
+<li>WorkshopCapacityManager (SimPy Resources)</li>
+<li><strong>Domain Services:</strong></li>
+<li>WagonSelector</li>
+<li>WagonStateManager</li>
+<li>LocomotiveStateManager</li>
+<li>WorkshopDistributor</li>
+<li><strong>Infrastructure:</strong></li>
+<li>SimPyAdapter (abstraction layer)</li>
+<li>LocomotiveService</li>
+<li>RouteFinder</li>
+<li>TransportJob</li>
+<li><strong>Metrics Collection:</strong></li>
+<li>SimulationMetrics (aggregator)</li>
+<li>WagonCollector</li>
+<li>LocomotiveCollector</li>
+<li>WorkshopCollector</li>
+</ol>
+<h3 id="analysis-reporting-context">Analysis &amp; Reporting Context<a class="headerlink" href="#analysis-reporting-context" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Main CLI</strong> - Typer-based command-line interface</li>
+<li><strong>KPI Calculation:</strong></li>
+<li>KPICalculator</li>
+<li>ThroughputKPI</li>
+<li>UtilizationKPI</li>
+<li>BottleneckInfo</li>
+<li><strong>Statistical Analysis:</strong></li>
+<li>StatisticsCalculator (Pandas/NumPy)</li>
+<li><strong>Export:</strong></li>
+<li>CSVExporter</li>
+<li><strong>Visualization:</strong></li>
+<li>Visualizer (Matplotlib)</li>
+</ol>
+<h2 id="implementation-patterns-documented">Implementation Patterns Documented<a class="headerlink" href="#implementation-patterns-documented" title="Permanent link">&para;</a></h2>
+<h3 id="design-patterns">Design Patterns<a class="headerlink" href="#design-patterns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Builder Pattern</strong> - ScenarioBuilder orchestrates multi-file loading</li>
+<li><strong>Strategy Pattern</strong> - Track selection and locomotive delivery strategies</li>
+<li><strong>Coordinator Pattern</strong> - 5 independent process coordinators</li>
+<li><strong>Resource Pool Pattern</strong> - Generic resource management with tracking</li>
+<li><strong>Collector Pattern</strong> - Metrics collection during simulation</li>
+<li><strong>Adapter Pattern</strong> - SimPyAdapter abstracts simulation engine</li>
+</ul>
+<h3 id="architectural-patterns">Architectural Patterns<a class="headerlink" href="#architectural-patterns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Layered Architecture</strong> - Clear separation of concerns</li>
+<li><strong>Domain-Driven Design</strong> - Domain services isolated from infrastructure</li>
+<li><strong>Separation of Concerns</strong> - Domain logic has no SimPy dependencies</li>
+<li><strong>Direct Method Calls</strong> - MVP simplification (no event bus)</li>
+</ul>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Batch Processing</strong> - Efficient locomotive utilization</li>
+<li><strong>Sequential Coupling/Decoupling</strong> - Realistic timing</li>
+<li><strong>Wagon State Machine</strong> - 9 states tracked</li>
+<li><strong>Real-time Metrics</strong> - Collection during simulation</li>
+<li><strong>Post-simulation KPIs</strong> - Aggregated analysis</li>
+<li><strong>Multiple Output Formats</strong> - Console, CSV, PNG charts</li>
+</ul>
+<h2 id="code-examples-updated">Code Examples Updated<a class="headerlink" href="#code-examples-updated" title="Permanent link">&para;</a></h2>
+<p>All code examples replaced with actual production code:</p>
+<h3 id="before-simplified">Before (Simplified)<a class="headerlink" href="#before-simplified" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Workshop</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">,</span> <span class="n">station_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">capacity</span><span class="o">=</span><span class="n">station_count</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="after-actual-implementation">After (Actual Implementation)<a class="headerlink" href="#after-actual-implementation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PopupSim</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">:</span> <span class="n">SimulationAdapter</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span> <span class="o">=</span> <span class="n">sim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span> <span class="o">=</span> <span class="n">scenario</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locomotives</span> <span class="o">=</span> <span class="n">ResourcePool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locomotives_queue</span><span class="p">,</span> <span class="s1">&#39;Locomotives&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">track_capacity</span> <span class="o">=</span> <span class="n">TrackCapacityManager</span><span class="p">(</span>
+            <span class="n">scenario</span><span class="o">.</span><span class="n">tracks</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">scenario</span><span class="o">.</span><span class="n">topology</span><span class="p">,</span>
+            <span class="n">collection_strategy</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_selection_strategy</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wagon_selector</span> <span class="o">=</span> <span class="n">WagonSelector</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">SimulationMetrics</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="files-modified">Files Modified<a class="headerlink" href="#files-modified" title="Permanent link">&para;</a></h2>
+<h3 id="architecture-documentation">Architecture Documentation<a class="headerlink" href="#architecture-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>docs/mvp/architecture/05-building-blocks.md</code> - Major update</li>
+<li><code>docs/mvp/architecture/05a-level3-implementation.md</code> - New file</li>
+<li><code>docs/mvp/architecture/README.md</code> - Updated</li>
+</ul>
+<h3 id="development-documentation">Development Documentation<a class="headerlink" href="#development-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>docs/mvp/development/02-mvp-contexts.md</code> - Complete rewrite</li>
+<li><code>docs/mvp/development/README.md</code> - Updated</li>
+</ul>
+<h3 id="root-documentation">Root Documentation<a class="headerlink" href="#root-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>README.md</code> - Updated</li>
+</ul>
+<h3 id="summary-documents">Summary Documents<a class="headerlink" href="#summary-documents" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>docs/mvp/DOCUMENTATION_UPDATE_SUMMARY.md</code> - New file (this document)</li>
+</ul>
+<h2 id="statistics">Statistics<a class="headerlink" href="#statistics" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Files Modified:</strong> 5</li>
+<li><strong>Files Created:</strong> 2</li>
+<li><strong>Total Lines Added:</strong> ~2,500+</li>
+<li><strong>Components Documented:</strong> 40+</li>
+<li><strong>Code Examples Updated:</strong> 15+</li>
+<li><strong>Diagrams Added:</strong> 8+</li>
+</ul>
+<h2 id="verification-checklist">Verification Checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>✅ All 3 contexts updated with actual implementation</li>
+<li>✅ Level 3 architecture documented</li>
+<li>✅ All code examples use actual production code</li>
+<li>✅ All components have file references</li>
+<li>✅ Implementation status updated to "Implemented"</li>
+<li>✅ Directory structures documented</li>
+<li>✅ Design patterns documented</li>
+<li>✅ Technology integrations documented</li>
+<li>✅ Sequence diagrams added</li>
+<li>✅ State machines documented</li>
+<li>✅ Cross-references added</li>
+</ul>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<h3 id="recommended-follow-up-documentation">Recommended Follow-up Documentation<a class="headerlink" href="#recommended-follow-up-documentation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Runtime View Update</strong> - Add sequence diagrams for 5 coordinators</li>
+<li><strong>Testing Strategy</strong> - Document testing approach for coordinators</li>
+<li><strong>Performance Optimization</strong> - Document optimization strategies</li>
+<li><strong>Deployment Guide</strong> - Detailed deployment instructions</li>
+<li><strong>API Documentation</strong> - Generate API docs from code</li>
+</ol>
+<h3 id="recommended-code-documentation">Recommended Code Documentation<a class="headerlink" href="#recommended-code-documentation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Inline Documentation</strong> - Ensure all functions have docstrings</li>
+<li><strong>Type Hints</strong> - Verify all functions have complete type hints</li>
+<li><strong>Examples</strong> - Add more example scenarios</li>
+<li><strong>Tutorials</strong> - Create step-by-step tutorials</li>
+</ol>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>The MVP documentation has been comprehensively updated to reflect the actual implemented architecture. All simplified examples have been replaced with production code, Level 3 details have been added, and all additional components are now documented. The documentation accurately represents the current state of the implementation.</p>
+<p><strong>Documentation Status:</strong> ✅ Complete and Accurate
+<strong>Implementation Status:</strong> ✅ MVP Complete
+<strong>Next Phase:</strong> Testing and Optimization</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
