@@ -37,7 +37,7 @@ def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
             _validate_wagon(popup_sim, resource_id, time, status_name, rest)
 
 
-def _validate_loco(
+def _validate_loco(  # noqa: PLR0913
     popup_sim: Any,
     loco_id: str,
     time: float,

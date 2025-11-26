@@ -1,5 +1,6 @@
 """Tests for KPI calculator."""
 
+from datetime import UTC
 from datetime import datetime
 
 from analytics.domain.services.kpi_calculator import KPICalculator
@@ -16,8 +17,8 @@ def sample_scenario() -> Scenario:
     """Create sample scenario for testing."""
     return Scenario(
         scenario_id='TEST_SCENARIO',
-        start_date=datetime(2025, 1, 1, 0, 0),
-        end_date=datetime(2025, 1, 2, 0, 0),
+        start_date=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
+        end_date=datetime(2025, 1, 2, 0, 0, tzinfo=UTC),
     )
 
 
@@ -55,7 +56,7 @@ def sample_wagons() -> list[Wagon]:
             needs_retrofit=True,
             track_id='T001',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=600.0,
         ),
         Wagon(
@@ -65,7 +66,7 @@ def sample_wagons() -> list[Wagon]:
             needs_retrofit=True,
             track_id='T001',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=900.0,
         ),
         Wagon(
@@ -75,7 +76,7 @@ def sample_wagons() -> list[Wagon]:
             needs_retrofit=True,
             track_id='T002',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=1200.0,
         ),
         Wagon(
@@ -85,7 +86,7 @@ def sample_wagons() -> list[Wagon]:
             needs_retrofit=True,
             track_id='T002',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=300.0,
         ),
     ]
@@ -288,7 +289,7 @@ def test_avg_flow_time_from_metrics(
 def test_avg_waiting_time_calculation(sample_scenario: Scenario, sample_metrics: dict) -> None:
     """Test average waiting time calculation."""
     calculator = KPICalculator()
-    base_time = datetime(2025, 1, 1, 0, 0).timestamp()
+    base_time = datetime(2025, 1, 1, 0, 0, tzinfo=UTC).timestamp()
     wagons = [
         Wagon(
             wagon_id='W001',
@@ -297,7 +298,7 @@ def test_avg_waiting_time_calculation(sample_scenario: Scenario, sample_metrics:
             needs_retrofit=True,
             track_id='T001',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 600.0,
         ),
         Wagon(
@@ -307,7 +308,7 @@ def test_avg_waiting_time_calculation(sample_scenario: Scenario, sample_metrics:
             needs_retrofit=True,
             track_id='T001',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 900.0,
         ),
         Wagon(
@@ -317,7 +318,7 @@ def test_avg_waiting_time_calculation(sample_scenario: Scenario, sample_metrics:
             needs_retrofit=True,
             track_id='T002',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 1200.0,
         ),
         Wagon(
@@ -327,7 +328,7 @@ def test_avg_waiting_time_calculation(sample_scenario: Scenario, sample_metrics:
             needs_retrofit=True,
             track_id='T002',
             status=WagonStatus.RETROFITTED,
-            arrival_time=datetime(2025, 1, 1, 0, 0),
+            arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 300.0,
         ),
     ]

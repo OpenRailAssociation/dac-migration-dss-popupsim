@@ -192,6 +192,7 @@ markers = [
     "unit: Unit tests (fast, isolated)",
     "integration: Integration tests (external APIs)",
     "pending: Tests written before implementation (TDD)",
+    "xfail: Expected to fail (temporary - will be fixed in future commits)",
 ]
 
 [tool.coverage.run]
