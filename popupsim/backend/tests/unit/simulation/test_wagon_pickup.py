@@ -2,11 +2,12 @@
 
 from pathlib import Path
 
-from builders.scenario_builder import ScenarioBuilder
-from models.locomotive import LocoStatus
-from models.wagon import WagonStatus
-from simulation.popupsim import PopupSim
-from simulation.sim_adapter import SimPyAdapter
+from workshop_operations.application.orchestrator import WorkshopOrchestrator
+from workshop_operations.domain.entities.locomotive import LocoStatus
+from workshop_operations.domain.entities.wagon import WagonStatus
+from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
+
+from configuration.application.scenario_builder import ScenarioBuilder
 
 
 def test_wagon_pickup_process() -> None:
@@ -16,7 +17,7 @@ def test_wagon_pickup_process() -> None:
     scenario = scenario_builder.build()
 
     sim_adapter = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim_adapter, scenario)
+    popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
 
     # Run simulation for enough time to process train and pickup
     popup_sim.run(until=100.0)
@@ -37,7 +38,7 @@ def test_locomotive_status_updates() -> None:
     scenario = scenario_builder.build()
 
     sim_adapter = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim_adapter, scenario)
+    popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
 
     # Get initial loco
     initial_loco = scenario.locomotives[0]
@@ -58,7 +59,7 @@ def test_wagons_grouped_by_collection_track() -> None:
     scenario = scenario_builder.build()
 
     sim_adapter = SimPyAdapter.create_simpy_adapter()
-    popup_sim = PopupSim(sim_adapter, scenario)
+    popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
 
     popup_sim.run(until=50.0)
 

@@ -1,7 +1,7 @@
 """Unit tests for the Route model."""
 
-from models.route import Route
 import pytest
+from workshop_operations.domain.value_objects.route import Route
 
 
 @pytest.mark.unit

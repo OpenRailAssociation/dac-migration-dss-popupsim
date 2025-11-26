@@ -2,12 +2,13 @@
 
 from datetime import datetime
 
-from analytics.kpi.calculator import KPICalculator
-from models.scenario import Scenario
-from models.wagon import Wagon
-from models.wagon import WagonStatus
-from models.workshop import Workshop
+from analytics.domain.services.kpi_calculator import KPICalculator
 import pytest
+from workshop_operations.domain.entities.wagon import Wagon
+from workshop_operations.domain.entities.wagon import WagonStatus
+from workshop_operations.domain.entities.workshop import Workshop
+
+from configuration.domain.models.scenario import Scenario
 
 
 @pytest.fixture

@@ -1,7 +1,6 @@
 """Tests for statistics calculator."""
 
-
-from analytics.reporting.statistics import StatisticsCalculator
+from analytics.application.statistics_calculator import StatisticsCalculator
 
 
 def test_calculate_summary_stats() -> None:

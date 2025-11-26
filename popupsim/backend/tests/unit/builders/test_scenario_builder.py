@@ -9,8 +9,9 @@ from datetime import UTC
 from datetime import datetime
 from pathlib import Path
 
-from builders.scenario_builder import ScenarioBuilder
 import pytest
+
+from configuration.application.scenario_builder import ScenarioBuilder
 
 
 @pytest.fixture

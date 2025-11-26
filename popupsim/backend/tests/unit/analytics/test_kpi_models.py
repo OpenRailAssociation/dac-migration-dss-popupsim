@@ -1,10 +1,9 @@
 """Tests for KPI result models."""
 
-
-from analytics.models.kpi_result import BottleneckInfo
-from analytics.models.kpi_result import KPIResult
-from analytics.models.kpi_result import ThroughputKPI
-from analytics.models.kpi_result import UtilizationKPI
+from analytics.domain.models.kpi_result import BottleneckInfo
+from analytics.domain.models.kpi_result import KPIResult
+from analytics.domain.models.kpi_result import ThroughputKPI
+from analytics.domain.models.kpi_result import UtilizationKPI
 
 
 def test_throughput_kpi_creation() -> None:

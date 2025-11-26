@@ -1,1 +1,0 @@
-"""Simulation context of PopUpSim."""
