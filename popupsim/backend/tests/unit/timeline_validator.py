@@ -3,7 +3,7 @@
 import re
 from typing import Any
 
-from models.locomotive import LocoStatus
+from workshop_operations.domain.entities.locomotive import LocoStatus
 
 
 def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
@@ -37,8 +37,13 @@ def validate_timeline(popup_sim: Any, timeline_spec: str) -> None:
             _validate_wagon(popup_sim, resource_id, time, status_name, rest)
 
 
-def _validate_loco(
-    popup_sim: Any, loco_id: str, time: float, status_name: str, rest: str, end_time: float | None = None  # noqa: PLR0913
+def _validate_loco(  # noqa: PLR0913
+    popup_sim: Any,
+    loco_id: str,
+    time: float,
+    status_name: str,
+    rest: str,
+    end_time: float | None = None,
 ) -> None:
     """Validate locomotive state at specific time."""
     loco = next((locomotive for locomotive in popup_sim.locomotives_queue if locomotive.locomotive_id == loco_id), None)
@@ -55,7 +60,7 @@ def _validate_loco(
             from_track, to_track = route_match.groups()
             expected_duration = end_time - time
             # Find actual route duration
-            from simulation.route_finder import find_route
+            from workshop_operations.infrastructure.routing.route_finder import find_route
 
             route = find_route(popup_sim.scenario.routes, from_track, to_track)
             if route and route.duration:

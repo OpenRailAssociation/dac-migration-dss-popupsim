@@ -23,7 +23,7 @@
       "path": [
         "track_6",
         "track_1a",
-        "WS_02"
+        "track_10"
       ]
     },
     {
@@ -33,7 +33,7 @@
       "path": [
         "track_6",
         "track_1a",
-        "WS_01"
+        "track_Z1"
       ]
     },
     {
@@ -41,7 +41,7 @@
       "description": "Route from workshop 2 to retrofitted track",
       "duration": 2,
       "path": [
-        "WS_02",
+        "track_10",
         "track_1a",
         "track_7"
       ]
@@ -51,7 +51,7 @@
       "description": "Route from workshop 1 to retrofitted track",
       "duration": 2,
       "path": [
-        "WS_01",
+        "track_Z1",
         "track_1a",
         "track_7"
       ]
@@ -91,7 +91,7 @@
       "description": "Route from workshop 2 to parking position",
       "duration": 3,
       "path": [
-        "WS_02",
+        "track_10",
         "track_1a",
         "track_19"
       ]
@@ -101,7 +101,7 @@
       "duration": 4,
       "description": "Route from workshop 1 to parking position",
       "path": [
-        "WS_01",
+        "track_Z1",
         "track_1a",
         "track_19"
       ]
@@ -163,7 +163,7 @@
       "path": [
         "track_19",
         "track_1a",
-        "WS_02"
+        "track_10"
       ]
     },
     {
@@ -173,7 +173,7 @@
       "path": [
         "track_19",
         "track_1a",
-        "WS_01"
+        "track_Z1"
       ]
     },
     {

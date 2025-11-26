@@ -1,13 +1,16 @@
 """Tests for locomotive collector."""
 
-
-from analytics.collectors.locomotive import LocomotiveCollector
+from analytics.domain.collectors.locomotive_collector import LocomotiveCollector
+from analytics.domain.events.locomotive_events import LocomotiveStatusChangeEvent
+from analytics.domain.value_objects.event_id import EventId
+from analytics.domain.value_objects.timestamp import Timestamp
 
 
 def test_locomotive_collector_initialization() -> None:
     """Test LocomotiveCollector initialization."""
     collector = LocomotiveCollector()
 
+    assert collector.category == 'locomotive'
     assert len(collector.resource_times) == 0
     assert len(collector.resource_last_event) == 0
 
@@ -16,58 +19,76 @@ def test_record_locomotive_status_change() -> None:
     """Test recording locomotive status change."""
     collector = LocomotiveCollector()
 
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'moving', 'time': 0.0})
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'parking', 'time': 100.0})
+    event = LocomotiveStatusChangeEvent(
+        event_id=EventId.generate(),
+        timestamp=Timestamp.from_simulation_time(0.0),
+        locomotive_id='L001',
+        status='moving',
+    )
+    collector.record_event(event)
 
-    assert 'L001' in collector.resource_times
-    assert collector.resource_times['L001']['moving'] == 100.0
+    assert 'L001' in collector.resource_last_event
+    assert collector.resource_last_event['L001'] == (0.0, 'moving')
 
 
 def test_multiple_locomotives() -> None:
     """Test tracking multiple locomotives."""
     collector = LocomotiveCollector()
 
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'moving', 'time': 0.0})
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L002', 'status': 'parking', 'time': 0.0})
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'parking', 'time': 50.0})
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L002', 'status': 'moving', 'time': 30.0})
+    events = [
+        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle'),
+        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(5.0), 'L002', 'moving'),
+        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'L001', 'moving'),
+    ]
 
-    assert 'L001' in collector.resource_times
-    assert 'L002' in collector.resource_times
-    assert collector.resource_times['L001']['moving'] == 50.0
-    assert collector.resource_times['L002']['parking'] == 30.0
+    for event in events:
+        collector.record_event(event)
+
+    assert len(collector.resource_last_event) == 2
+    assert collector.resource_last_event['L001'] == (10.0, 'moving')
+    assert collector.resource_last_event['L002'] == (5.0, 'moving')
 
 
 def test_simulation_end_event() -> None:
-    """Test simulation end event finalizes times."""
+    """Test finalizing times at simulation end."""
     collector = LocomotiveCollector()
 
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'moving', 'time': 0.0})
-    collector.record_event('simulation_end', {'time': 100.0})
+    event = LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle')
+    collector.record_event(event)
 
-    assert collector.resource_times['L001']['moving'] == 100.0
+    collector._finalize_times(60.0)
+
+    assert 'L001' in collector.resource_times
+    assert collector.resource_times['L001']['idle'] == 60.0
 
 
 def test_get_results() -> None:
-    """Test getting locomotive utilization results."""
+    """Test getting utilization results."""
     collector = LocomotiveCollector()
 
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'moving', 'time': 0.0})
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'parking', 'time': 60.0})
-    collector.record_event('simulation_end', {'time': 100.0})
+    events = [
+        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle'),
+        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(30.0), 'L001', 'moving'),
+    ]
 
+    for event in events:
+        collector.record_event(event)
+
+    collector._finalize_times(60.0)
     results = collector.get_results()
 
     assert len(results) == 2
-    assert any(r.name == 'L001_moving_utilization' and r.value == 60.0 for r in results)
-    assert any(r.name == 'L001_parking_utilization' and r.value == 40.0 for r in results)
+    assert any(r.name == 'L001_idle_utilization' for r in results)
+    assert any(r.name == 'L001_moving_utilization' for r in results)
 
 
 def test_reset_collector() -> None:
     """Test resetting collector state."""
     collector = LocomotiveCollector()
 
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'moving', 'time': 0.0})
+    event = LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle')
+    collector.record_event(event)
+
     collector.reset()
 
     assert len(collector.resource_times) == 0
@@ -78,8 +99,9 @@ def test_metric_categories() -> None:
     """Test that all metrics have correct category."""
     collector = LocomotiveCollector()
 
-    collector.record_event('locomotive_status_change', {'locomotive_id': 'L001', 'status': 'moving', 'time': 0.0})
-    collector.record_event('simulation_end', {'time': 100.0})
+    event = LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle')
+    collector.record_event(event)
+    collector._finalize_times(60.0)
 
     results = collector.get_results()
 

@@ -10,10 +10,10 @@ from datetime import datetime
 from datetime import timedelta
 import json
 
-from models.train import Train
-from models.wagon import Wagon
 from pydantic import ValidationError
 import pytest
+from workshop_operations.domain.aggregates.train import Train
+from workshop_operations.domain.entities.wagon import Wagon
 
 
 class TestTrain:

@@ -5,9 +5,9 @@ import json
 from pathlib import Path
 import tempfile
 
-from models.route import Route
-from models.routes import Routes
 import pytest
+from workshop_operations.domain.value_objects.route import Route
+from workshop_operations.domain.value_objects.routes import Routes
 
 len_test_routes = 3
 

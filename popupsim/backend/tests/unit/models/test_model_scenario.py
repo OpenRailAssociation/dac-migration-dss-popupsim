@@ -12,9 +12,10 @@ from pathlib import Path
 import tempfile
 from typing import Any
 
-from models.scenario import Scenario
 from pydantic import ValidationError
 import pytest
+
+from configuration.domain.models.scenario import Scenario
 
 
 @pytest.fixture
@@ -267,7 +268,7 @@ class TestScenario:
         -----
         Validates that valid strategy values are accepted and default is applied.
         """
-        from models.scenario import TrackSelectionStrategy
+        from configuration.domain.models.scenario import TrackSelectionStrategy
 
         config = Scenario(
             scenario_id='test_scenario',

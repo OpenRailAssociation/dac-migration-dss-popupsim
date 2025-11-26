@@ -220,7 +220,8 @@ jobs:
       - name: Test with pytest
         run: |
           if [ -d "popupsim/backend/tests" ] && [ "$(find popupsim/backend/tests -name '*.py' -type f | wc -l)" -gt 0 ]; then
-            uv run pytest --tb=short
+            echo "Running tests with expected failures marked as xfail..."
+            uv run pytest --tb=short -v
           else
             echo "No tests found, skipping pytest"
             exit 0
