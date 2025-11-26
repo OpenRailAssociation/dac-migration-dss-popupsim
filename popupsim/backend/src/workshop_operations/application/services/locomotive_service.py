@@ -19,7 +19,7 @@ class LocomotiveService(ABC):
     """Service for locomotive operations."""
 
     @abstractmethod
-    def allocate(self, popupsim: Any) -> Generator[Locomotive]:
+    def allocate(self, popupsim: Any) -> Generator[Any, Any, Locomotive]:
         """Allocate locomotive from pool.
 
         Parameters
@@ -29,7 +29,7 @@ class LocomotiveService(ABC):
 
         Returns
         -------
-        Generator[Locomotive]
+        Generator[Any, Any, Locomotive]
             Generator yielding the allocated locomotive.
         """
 
@@ -117,7 +117,7 @@ class LocomotiveService(ABC):
 class DefaultLocomotiveService(LocomotiveService):
     """Default implementation of locomotive service."""
 
-    def allocate(self, popupsim: Any) -> Generator[Locomotive]:
+    def allocate(self, popupsim: Any) -> Generator[Any, Any, Locomotive]:
         """Allocate locomotive from pool with tracking.
 
         Parameters
@@ -127,7 +127,7 @@ class DefaultLocomotiveService(LocomotiveService):
 
         Returns
         -------
-        Generator[Locomotive]
+        Generator[Any, Any, Locomotive]
             Generator yielding the allocated locomotive.
         """
         loco = cast(Locomotive, (yield popupsim.locomotives.get()))

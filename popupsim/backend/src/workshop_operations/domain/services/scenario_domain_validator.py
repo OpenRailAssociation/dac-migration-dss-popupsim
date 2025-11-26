@@ -1,38 +1,15 @@
 """Domain-specific validation for workshop operations context."""
 
-from dataclasses import dataclass
-from dataclasses import field
-from enum import Enum
-
+from shared.validation.base import ValidationIssue
+from shared.validation.base import ValidationLevel
+from shared.validation.base import ValidationResult
 from workshop_operations.domain.entities.track import TrackType
+
 from configuration.domain.models.scenario import Scenario
 
-
-class ValidationLevel(Enum):
-    """Severity level of a validation message."""
-    ERROR = 'ERROR'
-    WARNING = 'WARNING'
-    INFO = 'INFO'
-
-
-@dataclass
-class DomainValidationIssue:
-    """Domain validation issue."""
-    level: ValidationLevel
-    message: str
-    field: str | None = None
-    suggestion: str | None = None
-
-
-@dataclass
-class DomainValidationResult:
-    """Result of domain validation."""
-    is_valid: bool
-    issues: list[DomainValidationIssue] = field(default_factory=list)
-
-    def has_errors(self) -> bool:
-        """Check if there are any ERROR-level issues."""
-        return any(i.level == ValidationLevel.ERROR for i in self.issues)
+# Type aliases for domain-specific validation
+DomainValidationIssue = ValidationIssue
+DomainValidationResult = ValidationResult
 
 
 class ScenarioDomainValidator:
@@ -93,3 +70,18 @@ class ScenarioDomainValidator:
                 )
 
         return issues
+
+    def validate_locomotive_requirements(self, scenario: Scenario) -> DomainValidationResult:
+        """Validate locomotive configuration requirements."""
+        issues: list[DomainValidationIssue] = []
+
+        if not scenario.locomotives:
+            issues.append(DomainValidationIssue(
+                level=ValidationLevel.WARNING,
+                message='No locomotives configured - simulation may not function properly',
+                field='locomotives',
+                suggestion='Add at least one locomotive for wagon transport'
+            ))
+
+        is_valid = not any(i.level == ValidationLevel.ERROR for i in issues)
+        return DomainValidationResult(is_valid=is_valid, issues=issues)

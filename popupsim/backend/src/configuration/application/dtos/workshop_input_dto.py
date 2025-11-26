@@ -1,6 +1,7 @@
 """Workshop input DTO for configuration context."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class WorkshopInputDTO(BaseModel):

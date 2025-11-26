@@ -36,7 +36,7 @@ class TransportJob:
     resource_pool_name: str = 'locomotives'
 
 
-def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: LocomotiveService) -> Generator[Any, Any, None]:
+def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: LocomotiveService) -> Generator[Any, Any]:
     """Execute a transport job: allocate resource, move, couple, transport, decouple, release.
 
     Parameters
@@ -57,8 +57,12 @@ def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: Locomo
     resource = yield from loco_service.allocate(popupsim)  # type: ignore[assignment,func-returns-value]
 
     # Travel to pickup location
-    logger.info('🚂 ROUTE: %s traveling [%s → %s]', resource.locomotive_id, resource.track_id, job.from_track)  # type: ignore[attr-defined]
-    yield from loco_service.move(popupsim, resource, resource.track_id, job.from_track)  # type: ignore[arg-type,attr-defined]
+    logger.info(
+        '🚂 ROUTE: %s traveling [%s → %s]', resource.locomotive_id, resource.track_id, job.from_track
+    )  # type: ignore[attr-defined]
+    yield from loco_service.move(
+        popupsim, resource, resource.track_id, job.from_track
+    )  # type: ignore[arg-type,attr-defined]
 
     # Couple wagons (use first wagon's coupler type)
     coupler_type = job.wagons[0].coupler_type if job.wagons else CouplerType.SCREW
@@ -84,7 +88,9 @@ def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: Locomo
     yield from loco_service.move(popupsim, resource, job.from_track, job.to_track)  # type: ignore[arg-type]
 
     # Decouple wagons
-    logger.debug('%s decoupling %d wagons at %s', resource.locomotive_id, len(job.wagons), job.to_track)  # type: ignore[attr-defined]
+    logger.debug(
+        '%s decoupling %d wagons at %s', resource.locomotive_id, len(job.wagons), job.to_track
+    )  # type: ignore[attr-defined]
     yield from loco_service.decouple_wagons(popupsim, resource, len(job.wagons))  # type: ignore[arg-type]
 
     # Update wagon states - add to destination track
@@ -98,6 +104,8 @@ def execute_transport_job(popupsim: Any, job: TransportJob, loco_service: Locomo
     # Return resource to parking
     parking_track_id = popupsim.parking_tracks[0].id
     logger.debug('%s returning to parking', resource.locomotive_id)  # type: ignore[attr-defined]
-    yield from loco_service.move(popupsim, resource, resource.track_id, parking_track_id)  # type: ignore[arg-type,attr-defined]
+    yield from loco_service.move(
+        popupsim, resource, resource.track_id, parking_track_id
+    )  # type: ignore[arg-type,attr-defined]
     resource.record_status_change(popupsim.sim.current_time(), LocoStatus.PARKING)  # type: ignore[attr-defined]
     yield from loco_service.release(popupsim, resource)  # type: ignore[arg-type]

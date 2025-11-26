@@ -1,12 +1,16 @@
 """Factory for creating workshop_operations entities from configuration DTOs."""
 
-from datetime import datetime, UTC
+from datetime import UTC
+from datetime import datetime
+
+from workshop_operations.domain.entities.locomotive import Locomotive
+from workshop_operations.domain.entities.locomotive import LocoStatus
+from workshop_operations.domain.entities.workshop import Workshop
+from workshop_operations.domain.value_objects.route import Route
+
 from configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from configuration.application.dtos.route_input_dto import RouteInputDTO
 from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
-from workshop_operations.domain.entities.locomotive import Locomotive, LocoStatus
-from workshop_operations.domain.entities.workshop import Workshop
-from workshop_operations.domain.value_objects.route import Route
 
 
 class EntityFactory:
@@ -20,16 +24,16 @@ class EntityFactory:
             'AVAILABLE': LocoStatus.PARKING,
             'MOVING': LocoStatus.MOVING,
             'COUPLING': LocoStatus.COUPLING,
-            'DECOUPLING': LocoStatus.DECOUPLING
+            'DECOUPLING': LocoStatus.DECOUPLING,
         }
-        
+
         return Locomotive(
             locomotive_id=dto.locomotive_id,
-            name=f"Locomotive {dto.locomotive_id}",
+            name=f'Locomotive {dto.locomotive_id}',
             start_date=datetime.now(UTC),
             end_date=datetime.now(UTC),
             track_id=dto.track_id,
-            status=status_map.get(dto.status, LocoStatus.PARKING)
+            status=status_map.get(dto.status, LocoStatus.PARKING),
         )
 
     @staticmethod
@@ -40,7 +44,7 @@ class EntityFactory:
             start_date='2025-01-01 00:00:00',
             end_date='2025-01-02 00:00:00',
             track_id=dto.track_id,
-            retrofit_stations=dto.retrofit_stations
+            retrofit_stations=dto.retrofit_stations,
         )
 
     @staticmethod
@@ -52,5 +56,5 @@ class EntityFactory:
             to_track=dto.to_track,
             duration=dto.duration,
             description=dto.description,
-            path=dto.track_sequence
+            path=dto.track_sequence,
         )

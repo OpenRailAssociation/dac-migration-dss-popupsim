@@ -4,11 +4,12 @@ from analytics.application.metrics_aggregator import SimulationMetrics
 from analytics.domain.collectors.base import MetricCollector
 from analytics.domain.collectors.base import MetricResult
 from analytics.domain.collectors.wagon_collector import WagonCollector
-from analytics.domain.events.simulation_events import WagonDeliveredEvent, WagonRetrofittedEvent
 from analytics.domain.events.base_event import DomainEvent
+from analytics.domain.events.simulation_events import WagonDeliveredEvent
+from analytics.domain.events.simulation_events import WagonRetrofittedEvent
 from analytics.domain.value_objects.event_id import EventId
-from analytics.domain.value_objects.timestamp import Timestamp
 from analytics.domain.value_objects.metric_value import MetricValue
+from analytics.domain.value_objects.timestamp import Timestamp
 
 
 def test_simulation_metrics_initialization() -> None:
@@ -47,9 +48,7 @@ def test_record_event_to_single_collector() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    event = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'
-    )
+    event = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001')
     metrics.record_event(event)
 
     assert collector.wagons_delivered == 1
@@ -63,9 +62,7 @@ def test_record_event_to_multiple_collectors() -> None:
     metrics.register(collector1)
     metrics.register(collector2)
 
-    event = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'
-    )
+    event = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001')
     metrics.record_event(event)
 
     assert collector1.wagons_delivered == 1
@@ -87,13 +84,11 @@ def test_get_results_single_collector() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    delivered_event = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'
-    )
+    delivered_event = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001')
     retrofitted_event = WagonRetrofittedEvent(
         EventId.generate(), Timestamp.from_simulation_time(60.0), 'W001', 'WS001', 60.0
     )
-    
+
     collector.record_event(delivered_event)
     collector.record_event(retrofitted_event)
 
@@ -111,9 +106,7 @@ def test_get_results_grouped_by_category() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    event = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'
-    )
+    event = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001')
     collector.record_event(event)
 
     results = metrics.get_results()
@@ -130,13 +123,9 @@ def test_reset_all_collectors() -> None:
     metrics.register(collector1)
     metrics.register(collector2)
 
-    event1 = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'
-    )
-    event2 = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(20.0), 'W002'
-    )
-    
+    event1 = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001')
+    event2 = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(20.0), 'W002')
+
     collector1.record_event(event1)
     collector2.record_event(event2)
 
@@ -152,9 +141,7 @@ def test_get_results_format() -> None:
     collector = WagonCollector()
     metrics.register(collector)
 
-    event = WagonDeliveredEvent(
-        EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'
-    )
+    event = WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001')
     collector.record_event(event)
 
     results = metrics.get_results()

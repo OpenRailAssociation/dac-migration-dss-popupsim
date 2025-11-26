@@ -4,13 +4,14 @@ import logging
 from typing import Any
 
 from workshop_operations.domain.entities.wagon import Wagon
-from workshop_operations.domain.entities.workshop import Workshop
+
 from configuration.domain.models.scenario import Scenario
 
 from ...domain.aggregates.analytics_session import AnalyticsSession
 from ...domain.factories.analytics_factory import AnalyticsFactory
 from ...domain.models.kpi_result import KPIResult
-from ...domain.observers.analytics_observer import KPIObserver, MetricsObserver
+from ...domain.observers.analytics_observer import KPIObserver
+from ...domain.observers.analytics_observer import MetricsObserver
 from ...domain.observers.event_publisher import EventPublisher
 from ...domain.services.kpi_calculator import KPICalculator
 
@@ -26,7 +27,7 @@ class AnalyticsService:
         self.kpi_observer = KPIObserver()
         self.metrics_observer = MetricsObserver()
         self.kpi_calculator = KPICalculator()
-        
+
         # Subscribe observers
         self.publisher.subscribe(self.kpi_observer)
         self.publisher.subscribe(self.metrics_observer)
@@ -34,12 +35,12 @@ class AnalyticsService:
     def start_analytics_session(self, scenario: Scenario) -> AnalyticsSession:
         """Start analytics session and publish simulation started event."""
         session = AnalyticsFactory.create_analytics_session(scenario.scenario_id)
-        
+
         # Publish simulation started event
         event = AnalyticsFactory.create_simulation_started_event(scenario)
         self.publisher.publish(event)
         session.add_event(event)
-        
+
         logger.info('Started analytics session for scenario %s', scenario.scenario_id)
         return session
 
@@ -65,12 +66,26 @@ class AnalyticsService:
         self,
         session: AnalyticsSession,
         scenario: Scenario,
-        wagons: list[Wagon],
-        rejected_wagons: list[Wagon],
-        workshops: list[Workshop],
+        simulation_data: dict[str, Any],
         metrics: dict[str, list[dict[str, Any]]],
     ) -> KPIResult:
-        """Complete analytics session and calculate final KPIs."""
+        """Complete analytics session and calculate final KPIs.
+
+        Parameters
+        ----------
+        session : AnalyticsSession
+            The analytics session to complete.
+        scenario : Scenario
+            The simulation scenario.
+        simulation_data : dict[str, Any]
+            Dictionary containing 'wagons', 'rejected_wagons', and 'workshops' keys.
+        metrics : dict[str, list[dict[str, Any]]]
+            Collected simulation metrics.
+        """
+        wagons = simulation_data['wagons']
+        rejected_wagons = simulation_data['rejected_wagons']
+        workshops = simulation_data['workshops']
+
         # Publish simulation completed event
         event = AnalyticsFactory.create_simulation_completed_event(
             scenario.scenario_id, len(wagons), len(rejected_wagons)
@@ -85,7 +100,7 @@ class AnalyticsService:
 
         session.complete_session()
         logger.info('Completed analytics session for scenario %s', scenario.scenario_id)
-        
+
         return kpi_result
 
     def get_collected_events(self) -> list[Any]:

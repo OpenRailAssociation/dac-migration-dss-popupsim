@@ -14,11 +14,9 @@ from ..models.kpi_result import BottleneckInfo
 from ..models.kpi_result import KPIResult
 from ..models.kpi_result import ThroughputKPI
 from ..models.kpi_result import UtilizationKPI
-from ..specifications.bottleneck_specifications import (
-    CriticalUtilizationSpec,
-    HighRejectionRateSpec,
-    HighUtilizationSpec,
-)
+from ..specifications.bottleneck_specifications import CriticalUtilizationSpec
+from ..specifications.bottleneck_specifications import HighRejectionRateSpec
+from ..specifications.bottleneck_specifications import HighUtilizationSpec
 
 logger = logging.getLogger(__name__)
 
@@ -66,13 +64,16 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         avg_flow_time = self._calculate_avg_flow_time(metrics)
         avg_waiting_time = self._calculate_avg_waiting_time(wagons)
 
+        analysis_data = {
+            'utilization': utilization,
+            'bottlenecks': bottlenecks,
+            'avg_flow_time': avg_flow_time,
+            'avg_waiting_time': avg_waiting_time,
+        }
         return AnalyticsFactory.create_kpi_result(
             scenario_id=scenario.scenario_id,
             throughput=throughput,
-            utilization=utilization,
-            bottlenecks=bottlenecks,
-            avg_flow_time=avg_flow_time,
-            avg_waiting_time=avg_waiting_time,
+            analysis_data=analysis_data,
         )
 
     def _calculate_throughput(
@@ -104,9 +105,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
             workshop_wagons = [w for w in wagons if w.track_id == workshop.track_id]
             processed_count = len(workshop_wagons)
 
-            utilization_list.append(
-                AnalyticsFactory.create_utilization_kpi(workshop, processed_count)
-            )
+            utilization_list.append(AnalyticsFactory.create_utilization_kpi(workshop, processed_count))
 
         return utilization_list
 
@@ -115,7 +114,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
     ) -> list[BottleneckInfo]:
         """Identify bottlenecks using specifications."""
         bottlenecks: list[BottleneckInfo] = []
-        
+
         # Use specifications for business rules
         high_rejection_spec = HighRejectionRateSpec()
         high_utilization_spec = HighUtilizationSpec()

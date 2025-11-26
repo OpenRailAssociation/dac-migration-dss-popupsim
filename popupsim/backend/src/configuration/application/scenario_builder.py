@@ -17,13 +17,15 @@ from configuration.application.dtos.locomotive_input_dto import LocomotiveInputD
 from configuration.application.dtos.route_input_dto import RouteInputDTO
 from configuration.application.dtos.scenario_input_dto import ScenarioInputDTO
 from configuration.application.dtos.track_input_dto import TrackInputDTO
+from configuration.application.dtos.train_input_dto import TrainInputDTO
+from configuration.application.dtos.wagon_input_dto import WagonInputDTO
 from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
-
 from configuration.domain.models.process_times import ProcessTimes
+from configuration.domain.models.scenario import LocoDeliveryStrategy
 from configuration.domain.models.scenario import Scenario
+from configuration.domain.models.scenario import TrackSelectionStrategy
 from configuration.domain.models.topology import Topology
 from configuration.domain.services.scenario_validator import ScenarioValidator
-
 
 # Configure logging
 logger = logging.getLogger('ConfigurationService')
@@ -113,7 +115,7 @@ class ScenarioBuilder:
             if isinstance(self.scenario, Scenario):
                 with routes_path.open('r') as f:
                     routes_data = json.load(f)
-                
+
                 routes_list: list[dict[str, Any]] = routes_data.get('routes', [])
                 # Map JSON fields to DTO fields
                 mapped_routes = []
@@ -122,7 +124,7 @@ class ScenarioBuilder:
                         'route_id': route_data.get('id', ''),
                         'description': route_data.get('description'),
                         'duration': route_data.get('duration', 0.0),
-                        'track_sequence': route_data.get('path', [])
+                        'track_sequence': route_data.get('path', []),
                     }
                     mapped_routes.append(RouteInputDTO(**mapped_route))
                 self.scenario.routes = mapped_routes
@@ -252,7 +254,7 @@ class ScenarioBuilder:
             if isinstance(self.scenario, Scenario):
                 with tracks_path.open('r', encoding='utf-8') as f:
                     tracks_data = json.load(f)
-                
+
                 tracks_list: list[dict[str, Any]] = tracks_data.get('tracks', [])
                 track_dtos = [TrackInputDTO(**track_data) for track_data in tracks_list]
                 self.scenario.tracks = track_dtos
@@ -260,7 +262,7 @@ class ScenarioBuilder:
         except Exception as e:
             raise BuilderError(f'Failed to load tracks from {tracks_path}: {e!s}') from e
 
-    def __load_trains(self, scenario_dto: ScenarioInputDTO) -> None:
+    def __load_trains(self, scenario_dto: ScenarioInputDTO) -> None:  # pylint: disable=too-many-locals
         """Load trains from CSV file and map to domain models.
 
         Parameters
@@ -286,19 +288,17 @@ class ScenarioBuilder:
 
         try:
             if isinstance(self.scenario, Scenario):
-                import pandas as pd
-                from configuration.application.dtos.train_input_dto import TrainInputDTO
-                from configuration.application.dtos.wagon_input_dto import WagonInputDTO
-                
+                import pandas as pd  # pylint: disable=import-outside-toplevel
+
                 df = pd.read_csv(trains_path, sep=';', parse_dates=['arrival_time'])
                 df['train_id'] = df['train_id'].fillna('NO_ID').astype(str)
                 df['arrival_time'] = pd.to_datetime(df['arrival_time'], errors='coerce')
-                
+
                 train_dtos = []
                 for train_id, group in df.groupby('train_id'):
                     latest_arrival = group['arrival_time'].max()
                     first_row = group.iloc[0]
-                    
+
                     wagon_dtos: list[WagonInputDTO] = []
                     for _, row in group.iterrows():
                         wagon_dto = WagonInputDTO(
@@ -309,7 +309,7 @@ class ScenarioBuilder:
                             track=str(row.get('Track', '')) if pd.notna(row.get('Track')) else None,
                         )
                         wagon_dtos.append(wagon_dto)
-                    
+
                     train_dto = TrainInputDTO(
                         train_id=str(train_id),
                         arrival_time=latest_arrival.isoformat(),
@@ -319,7 +319,7 @@ class ScenarioBuilder:
                         wagons=wagon_dtos,
                     )
                     train_dtos.append(train_dto)
-                
+
                 self.scenario.trains = train_dtos
 
         except Exception as e:
@@ -360,7 +360,7 @@ class ScenarioBuilder:
                     mapped_workshop = {
                         'workshop_id': workshop_data.get('workshop_id', ''),
                         'track_id': workshop_data.get('track_id', ''),
-                        'retrofit_stations': workshop_data.get('retrofit_stations', 0)
+                        'retrofit_stations': workshop_data.get('retrofit_stations', 0),
                     }
                     mapped_workshops.append(WorkshopInputDTO(**mapped_workshop))
                 self.scenario.workshops = mapped_workshops
@@ -410,14 +410,15 @@ class ScenarioBuilder:
         scenario_dto.model_validate(scenario_dto.model_dump())
 
         # Create domain model from DTO with defaults
-        from configuration.domain.models.scenario import TrackSelectionStrategy, LocoDeliveryStrategy
-        
+
         self.scenario = Scenario(
             scenario_id=scenario_dto.scenario_id,
             start_date=scenario_dto.start_date,
             end_date=scenario_dto.end_date,
             track_selection_strategy=scenario_dto.track_selection_strategy or TrackSelectionStrategy.LEAST_OCCUPIED,
-            retrofit_selection_strategy=scenario_dto.retrofit_selection_strategy or TrackSelectionStrategy.LEAST_OCCUPIED,
+            retrofit_selection_strategy=(
+                scenario_dto.retrofit_selection_strategy or TrackSelectionStrategy.LEAST_OCCUPIED
+            ),
             loco_delivery_strategy=scenario_dto.loco_delivery_strategy or LocoDeliveryStrategy.RETURN_TO_PARKING,
         )
 

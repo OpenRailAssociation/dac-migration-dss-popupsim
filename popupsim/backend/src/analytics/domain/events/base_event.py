@@ -11,15 +11,11 @@ from ..value_objects.timestamp import Timestamp
 @dataclass(frozen=True)
 class DomainEvent(ABC):
     """Base class for all domain events."""
-    
+
     event_id: EventId
     timestamp: Timestamp
-    
+
     @classmethod
     def create(cls, timestamp: Timestamp, **kwargs: Any) -> 'DomainEvent':
         """Create event with generated ID."""
-        return cls(
-            event_id=EventId.generate(),
-            timestamp=timestamp,
-            **kwargs
-        )
+        return cls(event_id=EventId.generate(), timestamp=timestamp, **kwargs)

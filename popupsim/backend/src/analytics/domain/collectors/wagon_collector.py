@@ -2,13 +2,14 @@
 
 from dataclasses import dataclass
 from dataclasses import field
-from typing import Any
 
+from ..events.base_event import DomainEvent
+from ..events.simulation_events import WagonDeliveredEvent
+from ..events.simulation_events import WagonRejectedEvent
+from ..events.simulation_events import WagonRetrofittedEvent
+from ..value_objects.metric_value import MetricValue
 from .base import MetricCollector
 from .base import MetricResult
-from ..events.base_event import DomainEvent
-from ..events.simulation_events import WagonDeliveredEvent, WagonRetrofittedEvent, WagonRejectedEvent
-from ..value_objects.metric_value import MetricValue
 
 
 @dataclass
@@ -35,7 +36,7 @@ class WagonCollector(MetricCollector):
             if event.wagon_id in self.wagon_start_times:
                 flow_time = event.timestamp.to_minutes() - self.wagon_start_times[event.wagon_id]
                 self.total_flow_time += flow_time
-                
+
         elif isinstance(event, WagonRejectedEvent):
             self.wagons_rejected += 1
 

@@ -23,6 +23,7 @@ from pydantic import model_validator
 from configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from configuration.application.dtos.route_input_dto import RouteInputDTO
 from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
+
 from .process_times import ProcessTimes
 
 # Configure logging

@@ -2,13 +2,12 @@
 
 from dataclasses import dataclass
 from dataclasses import field
-from typing import Any
 
-from .base import MetricCollector
-from .base import MetricResult
 from ..events.base_event import DomainEvent
 from ..events.simulation_events import WorkshopUtilizationChangedEvent
 from ..value_objects.metric_value import MetricValue
+from .base import MetricCollector
+from .base import MetricResult
 
 
 @dataclass
@@ -34,9 +33,7 @@ class WorkshopCollector(MetricCollector):
                 last_time, last_stations = self.workshop_last_event[workshop_id]
                 duration = time - last_time
                 if last_stations > 0:
-                    self.workshop_active_time[workshop_id] = (
-                        self.workshop_active_time.get(workshop_id, 0.0) + duration
-                    )
+                    self.workshop_active_time[workshop_id] = self.workshop_active_time.get(workshop_id, 0.0) + duration
                 else:
                     self.workshop_idle_time[workshop_id] = self.workshop_idle_time.get(workshop_id, 0.0) + duration
 

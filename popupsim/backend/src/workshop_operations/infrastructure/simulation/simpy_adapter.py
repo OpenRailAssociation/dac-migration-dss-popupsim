@@ -14,7 +14,7 @@ from collections.abc import Generator
 from typing import Any
 
 
-class SimulationAdapter(ABC):
+class SimulationAdapter(ABC):  # pylint: disable=duplicate-code
     """Abstract adapter for simulation environments.
 
     Provides a framework-agnostic interface for simulation operations.

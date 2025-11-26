@@ -1,6 +1,7 @@
 """Analytics Observer - observes simulation events for analytics collection."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from typing import Protocol
 
 from ..events.base_event import DomainEvent
@@ -11,7 +12,9 @@ class AnalyticsObserver(Protocol):
 
     def handle_event(self, event: DomainEvent) -> None:
         """Handle domain event."""
-        ...
+
+    def get_events(self) -> list[DomainEvent]:
+        """Get collected events."""
 
 
 class BaseAnalyticsObserver(ABC):
@@ -20,6 +23,10 @@ class BaseAnalyticsObserver(ABC):
     @abstractmethod
     def handle_event(self, event: DomainEvent) -> None:
         """Handle domain event."""
+
+    @abstractmethod
+    def get_events(self) -> list[DomainEvent]:
+        """Get collected events."""
 
 
 class KPIObserver(BaseAnalyticsObserver):
@@ -67,3 +74,10 @@ class MetricsObserver(BaseAnalyticsObserver):
     def clear_metrics(self) -> None:
         """Clear collected metrics."""
         self.metrics.clear()
+
+    def get_events(self) -> list[DomainEvent]:
+        """Get all events as flat list."""
+        events = []
+        for event_list in self.metrics.values():
+            events.extend(event_list)
+        return events

@@ -1,6 +1,7 @@
 """Central metrics registry."""
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
+from typing import Any
 
 from analytics.domain.collectors.base import MetricCollector
 

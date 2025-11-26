@@ -1,7 +1,5 @@
 """Event Publisher - manages observers and publishes domain events."""
 
-from typing import Any
-
 from ..events.base_event import DomainEvent
 from .analytics_observer import AnalyticsObserver
 

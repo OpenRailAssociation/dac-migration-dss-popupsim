@@ -1,14 +1,20 @@
 """Test helpers for creating scenarios with DTOs."""
 
-from datetime import datetime, timedelta, UTC
-from configuration.domain.models.scenario import Scenario, TrackSelectionStrategy
-from configuration.domain.models.process_times import ProcessTimes
+from datetime import UTC
+from datetime import datetime
+from datetime import timedelta
+
+from workshop_operations.domain.aggregates.train import Train
+from workshop_operations.domain.entities.track import Track
+from workshop_operations.domain.entities.track import TrackType
+from workshop_operations.domain.entities.wagon import Wagon
+
 from configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from configuration.application.dtos.route_input_dto import RouteInputDTO
 from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
-from workshop_operations.domain.entities.track import Track, TrackType
-from workshop_operations.domain.aggregates.train import Train
-from workshop_operations.domain.entities.wagon import Wagon
+from configuration.domain.models.process_times import ProcessTimes
+from configuration.domain.models.scenario import Scenario
+from configuration.domain.models.scenario import TrackSelectionStrategy
 from configuration.domain.models.topology import Topology
 
 
@@ -49,12 +55,14 @@ def create_minimal_scenario_with_dtos(
         edge_id = f'e{4 + i}'
         tracks.append(Track(id=ws_id, type=TrackType.WORKSHOP, edges=[edge_id]))
         edges.append({'id': edge_id, 'length': 100.0})
-        routes.extend([
-            RouteInputDTO(route_id=f'r_ret_to_{ws_id}', track_sequence=['retrofit', ws_id], duration=1.0),
-            RouteInputDTO(route_id=f'r_park_to_{ws_id}', track_sequence=['parking', ws_id], duration=1.0),
-            RouteInputDTO(route_id=f'r_{ws_id}_to_ret', track_sequence=[ws_id, 'retrofitted'], duration=1.0),
-            RouteInputDTO(route_id=f'r_{ws_id}_to_park', track_sequence=[ws_id, 'parking'], duration=1.0),
-        ])
+        routes.extend(
+            [
+                RouteInputDTO(route_id=f'r_ret_to_{ws_id}', track_sequence=['retrofit', ws_id], duration=1.0),
+                RouteInputDTO(route_id=f'r_park_to_{ws_id}', track_sequence=['parking', ws_id], duration=1.0),
+                RouteInputDTO(route_id=f'r_{ws_id}_to_ret', track_sequence=[ws_id, 'retrofitted'], duration=1.0),
+                RouteInputDTO(route_id=f'r_{ws_id}_to_park', track_sequence=[ws_id, 'parking'], duration=1.0),
+            ]
+        )
         workshops.append(
             WorkshopInputDTO(
                 workshop_id=ws_id,
@@ -64,8 +72,7 @@ def create_minimal_scenario_with_dtos(
         )
 
     wagons = [
-        Wagon(wagon_id=f'W{i:02d}', length=10.0, needs_retrofit=True, is_loaded=False) 
-        for i in range(1, num_wagons + 1)
+        Wagon(wagon_id=f'W{i:02d}', length=10.0, needs_retrofit=True, is_loaded=False) for i in range(1, num_wagons + 1)
     ]
     train = Train(train_id='T1', arrival_time=start_time, wagons=wagons)
 

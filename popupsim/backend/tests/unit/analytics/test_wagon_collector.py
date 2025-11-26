@@ -1,7 +1,9 @@
 """Tests for wagon collector."""
 
 from analytics.domain.collectors.wagon_collector import WagonCollector
-from analytics.domain.events.simulation_events import WagonDeliveredEvent, WagonRetrofittedEvent, WagonRejectedEvent
+from analytics.domain.events.simulation_events import WagonDeliveredEvent
+from analytics.domain.events.simulation_events import WagonRejectedEvent
+from analytics.domain.events.simulation_events import WagonRetrofittedEvent
 from analytics.domain.value_objects.event_id import EventId
 from analytics.domain.value_objects.timestamp import Timestamp
 
@@ -20,11 +22,9 @@ def test_wagon_collector_initialization() -> None:
 def test_record_wagon_delivered() -> None:
     """Test recording wagon delivered event."""
     collector = WagonCollector()
-    
+
     event = WagonDeliveredEvent(
-        event_id=EventId.generate(),
-        timestamp=Timestamp.from_simulation_time(10.0),
-        wagon_id='W001'
+        event_id=EventId.generate(), timestamp=Timestamp.from_simulation_time(10.0), wagon_id='W001'
     )
     collector.record_event(event)
 
@@ -38,18 +38,16 @@ def test_record_wagon_retrofitted() -> None:
     collector = WagonCollector()
 
     delivered_event = WagonDeliveredEvent(
-        event_id=EventId.generate(),
-        timestamp=Timestamp.from_simulation_time(10.0),
-        wagon_id='W001'
+        event_id=EventId.generate(), timestamp=Timestamp.from_simulation_time(10.0), wagon_id='W001'
     )
     retrofitted_event = WagonRetrofittedEvent(
         event_id=EventId.generate(),
         timestamp=Timestamp.from_simulation_time(50.0),
         wagon_id='W001',
         workshop_id='WS001',
-        processing_duration=40.0
+        processing_duration=40.0,
     )
-    
+
     collector.record_event(delivered_event)
     collector.record_event(retrofitted_event)
 
@@ -62,10 +60,7 @@ def test_record_wagon_rejected() -> None:
     collector = WagonCollector()
 
     event = WagonRejectedEvent(
-        event_id=EventId.generate(),
-        timestamp=Timestamp.now(),
-        wagon_id='W001',
-        reason='capacity_exceeded'
+        event_id=EventId.generate(), timestamp=Timestamp.now(), wagon_id='W001', reason='capacity_exceeded'
     )
     collector.record_event(event)
 
@@ -80,9 +75,9 @@ def test_multiple_wagon_flow() -> None:
         WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'W001'),
         WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(5.0), 'W002'),
         WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(30.0), 'W001', 'WS001', 30.0),
-        WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(45.0), 'W002', 'WS001', 40.0)
+        WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(45.0), 'W002', 'WS001', 40.0),
     ]
-    
+
     for event in events:
         collector.record_event(event)
 
@@ -117,9 +112,9 @@ def test_get_results_with_data() -> None:
         WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'W002'),
         WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(60.0), 'W001', 'WS001', 60.0),
         WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(80.0), 'W002', 'WS001', 70.0),
-        WagonRejectedEvent(EventId.generate(), Timestamp.now(), 'W003', 'capacity')
+        WagonRejectedEvent(EventId.generate(), Timestamp.now(), 'W003', 'capacity'),
     ]
-    
+
     for event in events:
         collector.record_event(event)
 
@@ -142,9 +137,9 @@ def test_avg_flow_time_calculation() -> None:
         WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'W003'),
         WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(30.0), 'W001', 'WS001', 30.0),
         WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(60.0), 'W002', 'WS001', 60.0),
-        WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(90.0), 'W003', 'WS001', 90.0)
+        WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(90.0), 'W003', 'WS001', 90.0),
     ]
-    
+
     for event in events:
         collector.record_event(event)
 
@@ -162,9 +157,9 @@ def test_reset_collector() -> None:
     events = [
         WagonDeliveredEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'W001'),
         WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(50.0), 'W001', 'WS001', 40.0),
-        WagonRejectedEvent(EventId.generate(), Timestamp.now(), 'W002', 'capacity')
+        WagonRejectedEvent(EventId.generate(), Timestamp.now(), 'W002', 'capacity'),
     ]
-    
+
     for event in events:
         collector.record_event(event)
 
@@ -180,6 +175,7 @@ def test_reset_collector() -> None:
 def test_unknown_event_type() -> None:
     """Test handling unknown event types."""
     from analytics.domain.events.base_event import DomainEvent
+
     collector = WagonCollector()
 
     unknown_event = DomainEvent(EventId.generate(), Timestamp.now())
@@ -193,9 +189,7 @@ def test_wagon_retrofitted_without_delivery() -> None:
     """Test retrofitted event without prior delivery event."""
     collector = WagonCollector()
 
-    event = WagonRetrofittedEvent(
-        EventId.generate(), Timestamp.from_simulation_time(50.0), 'W001', 'WS001', 50.0
-    )
+    event = WagonRetrofittedEvent(EventId.generate(), Timestamp.from_simulation_time(50.0), 'W001', 'WS001', 50.0)
     collector.record_event(event)
 
     assert collector.wagons_retrofitted == 1

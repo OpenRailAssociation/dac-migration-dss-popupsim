@@ -26,7 +26,7 @@ def decouple_wagons(popupsim: Any, loco: Locomotive, wagon_count: int) -> Genera
     return service.decouple_wagons(popupsim, loco, wagon_count)
 
 
-def allocate_locomotive(popupsim: Any) -> Generator[Locomotive]:
+def allocate_locomotive(popupsim: Any) -> Generator[Any, Any, Locomotive]:
     """Allocate locomotive from pool (deprecated)."""
     service = DefaultLocomotiveService()
     return service.allocate(popupsim)

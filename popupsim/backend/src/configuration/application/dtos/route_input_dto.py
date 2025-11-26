@@ -10,12 +10,12 @@ class RouteInputDTO(BaseModel):
     description: str | None = None
     duration: float
     track_sequence: list[str]
-    
+
     @property
     def from_track(self) -> str:
         """First track in sequence."""
         return self.track_sequence[0] if self.track_sequence else ''
-    
+
     @property
     def to_track(self) -> str:
         """Last track in sequence."""
