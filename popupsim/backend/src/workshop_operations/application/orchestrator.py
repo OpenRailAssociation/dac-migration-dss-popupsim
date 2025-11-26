@@ -832,9 +832,7 @@ def _find_wagons_for_retrofit(
     """
     wagons_to_pickup = []
     # Find retrofit tracks (not workshop tracks)
-    retrofit_tracks = [
-        t for t in (popupsim.scenario.tracks or []) if t.type == TrackType.RETROFIT
-    ]  # type: ignore[union-attr]
+    retrofit_tracks = [t for t in (popupsim.scenario.tracks or []) if t.type == TrackType.RETROFIT]  # type: ignore[union-attr]
     for wagon in collection_wagons:
         for retrofit_track in retrofit_tracks:
             retrofit_track_id = retrofit_track.id

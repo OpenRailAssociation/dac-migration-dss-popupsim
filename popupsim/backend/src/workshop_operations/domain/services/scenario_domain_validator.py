@@ -76,12 +76,14 @@ class ScenarioDomainValidator:
         issues: list[DomainValidationIssue] = []
 
         if not scenario.locomotives:
-            issues.append(DomainValidationIssue(
-                level=ValidationLevel.WARNING,
-                message='No locomotives configured - simulation may not function properly',
-                field='locomotives',
-                suggestion='Add at least one locomotive for wagon transport'
-            ))
+            issues.append(
+                DomainValidationIssue(
+                    level=ValidationLevel.WARNING,
+                    message='No locomotives configured - simulation may not function properly',
+                    field='locomotives',
+                    suggestion='Add at least one locomotive for wagon transport',
+                )
+            )
 
         is_valid = not any(i.level == ValidationLevel.ERROR for i in issues)
         return DomainValidationResult(is_valid=is_valid, issues=issues)
