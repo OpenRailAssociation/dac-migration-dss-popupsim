@@ -51,7 +51,7 @@ def translatable(message_key: str) -> Callable[[F], F]:
 
     def decorator(decorated_obj: F) -> F:
         # Use public attribute instead of protected
-        decorated_obj.message_key = message_key
+        decorated_obj.message_key = message_key  # type: ignore[attr-defined]
         return decorated_obj
 
     return decorator

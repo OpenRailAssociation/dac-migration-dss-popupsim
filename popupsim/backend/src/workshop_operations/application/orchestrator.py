@@ -806,9 +806,10 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
 
         # Check if current parking track is full, move to next
         remaining_wagons = [w for w in wagons_on_retrofitted if w not in wagons_to_move]
-        if remaining_wagons and not any(
+        can_fit_remaining = any(
             popupsim.track_capacity.can_add_wagon(parking_track.id, w.length) for w in remaining_wagons
-        ):
+        )
+        if remaining_wagons and not can_fit_remaining:
             current_parking_index = (current_parking_index + 1) % len(parking_tracks)
             logger.debug('Parking track %s full, switching to next', parking_track.id)
 
@@ -832,7 +833,8 @@ def _find_wagons_for_retrofit(
     """
     wagons_to_pickup = []
     # Find retrofit tracks (not workshop tracks)
-    retrofit_tracks = [t for t in (popupsim.scenario.tracks or []) if t.type == TrackType.RETROFIT]  # type: ignore[union-attr]
+    tracks = popupsim.scenario.tracks or []
+    retrofit_tracks = [t for t in tracks if t.type == TrackType.RETROFIT]  # type: ignore[union-attr]
     for wagon in collection_wagons:
         for retrofit_track in retrofit_tracks:
             retrofit_track_id = retrofit_track.id
