@@ -55,7 +55,7 @@ class CsvDataSourceAdapter(DataSourcePort):
         self._load_locomotives(csv_dir)
 
         return ScenarioInputDTO(
-            scenario_id=scenario_data['scenario_id'],
+            id=scenario_data['scenario_id'],
             start_date=scenario_data['start_date'],
             end_date=scenario_data['end_date'],
             random_seed=scenario_data.get('random_seed'),
@@ -106,7 +106,7 @@ class CsvDataSourceAdapter(DataSourcePort):
 
         if csv_dir.is_dir():
             csv_files = list(csv_dir.glob('*.csv'))
-            metadata['files'] = [{'name': f.name} for f in csv_files]
+            metadata['files'] = [f.name for f in csv_files]
 
         return metadata
 
@@ -151,7 +151,7 @@ class CsvDataSourceAdapter(DataSourcePort):
 
         for _, row in df.iterrows():
             # Load wagons for this train (could be in separate file or embedded)
-            wagons = self._load_wagons_for_train(csv_dir, row['train_id'])
+            wagons = self._load_wagons_for_train(csv_dir, str(row['train_id']))
 
             trains.append(
                 TrainInputDTO(
@@ -185,7 +185,7 @@ class CsvDataSourceAdapter(DataSourcePort):
         for _, row in train_wagons.iterrows():
             wagons.append(
                 WagonInputDTO(
-                    wagon_id=row['wagon_id'],
+                    id=row['wagon_id'],
                     length=float(row['length']),
                     is_loaded=bool(row.get('is_loaded', False)),
                     needs_retrofit=bool(row.get('needs_retrofit', True)),
@@ -211,12 +211,9 @@ class CsvDataSourceAdapter(DataSourcePort):
         for _, row in df.iterrows():
             workshops.append(
                 WorkshopInputDTO(
-                    workshop_id=row['workshop_id'],
-                    track_id=row['track_id'],
-                    start_date=row['start_date'],
-                    end_date=row['end_date'],
+                    id=row['workshop_id'],
+                    track=row['track_id'],
                     retrofit_stations=int(row.get('retrofit_stations', 1)),
-                    worker=int(row.get('worker', 1)),
                 )
             )
 
@@ -269,7 +266,7 @@ class CsvDataSourceAdapter(DataSourcePort):
                 path_list = [row['from_track'], row['to_track']]
             routes.append(
                 RouteInputDTO(
-                    route_id=row['route_id'],
+                    id=row['route_id'],
                     duration=float(row['duration']),
                     track_sequence=path_list,
                 )
@@ -294,11 +291,8 @@ class CsvDataSourceAdapter(DataSourcePort):
         for _, row in df.iterrows():
             locomotives.append(
                 LocomotiveInputDTO(
-                    locomotive_id=row['locomotive_id'],
-                    name=row['name'],
-                    track_id=row['track_id'],
-                    start_date=row['start_date'],
-                    end_date=row['end_date'],
+                    id=row['locomotive_id'],
+                    track=row['track_id'],
                 )
             )
 

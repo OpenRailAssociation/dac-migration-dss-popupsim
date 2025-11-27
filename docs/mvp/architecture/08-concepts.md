@@ -61,7 +61,9 @@ graph TB
 
 ---
 
-## 8.2 Domain Model
+## 8.2 Domain Model with Standardized Field Names
+
+**Field Name Standardization:** All entity IDs use consistent naming: `id` (not `prefix_id`) and `track` (not `track_id`) for track references.
 
 > **WARNING:** Code examples in this section are **simplified illustrations for architecture documentation only**. They are **NOT production-ready** and lack:
 > - Complete validation logic
@@ -77,32 +79,34 @@ graph TB
 classDiagram
     class Workshop {
         +id: str
-        +stations: List[Station]
-        +get_available_station()
+        +track: str
+        +retrofit_stations: int
+        +get_available_capacity()
         +calculate_throughput()
     }
 
-    class Station {
+    class Locomotive {
         +id: str
-        +capacity: int
-        +workers: List[Worker]
-        +current_wagons: int
+        +track: str
+        +status: LocomotiveStatus
         +is_available()
-        +start_retrofit()
-    }
-
-    class Worker {
-        +id: str
-        +name: str
-        +skills: List[str]
-        +is_busy: bool
+        +assign_to_job()
     }
 
     class Wagon {
         +id: str
-        +type: str
+        +track: str
+        +length: float
         +needs_retrofit: bool
-        +retrofit_time: int
+        +status: WagonStatus
+    }
+
+    class Train {
+        +id: str
+        +locomotive_id: str
+        +route_id: str
+        +wagons: List[Wagon]
+        +arrival_time: datetime
     }
 
     Workshop --o Station
@@ -399,57 +403,117 @@ def log_memory_usage(phase: str) -> None:
     gc.collect()
 ```
 
-## 8.8 Data Validation
+## 8.8 4-Layer Validation Framework
 
-Data validation uses Pydantic 2.0+ ([ADR MVP-003](09-architecture-decisions.md#adr-mvp-003-pydantic-for-data-validation)) to ensure **Simulation Accuracy & Reliability** (Priority 2).
+**Enterprise-grade validation** with comprehensive error stacking ensures **Simulation Accuracy & Reliability** (Priority 2). See [Validation Framework README](../../../popupsim/backend/src/shared/validation/README.md) for complete documentation.
 
-### MVP Input Validation
+### 4-Layer Validation Architecture
 
-```python
-# CONCEPTUAL EXAMPLE - Illustrates Pydantic validation pattern
-from pydantic import BaseModel, field_validator
+```mermaid
+graph TB
+    subgraph "Validation Pipeline"
+        Input["Scenario Data"]
+        
+        subgraph "Layer 1: SYNTAX"
+            Syntax["Field format validation<br/>Type checking<br/>Required fields"]
+        end
+        
+        subgraph "Layer 2: SEMANTIC"
+            Semantic["Business rules<br/>Date logic<br/>Strategy validation"]
+        end
+        
+        subgraph "Layer 3: INTEGRITY"
+            Integrity["Cross-references<br/>Data consistency<br/>Duplicate detection"]
+        end
+        
+        subgraph "Layer 4: FEASIBILITY"
+            Feasibility["Capacity constraints<br/>Resource allocation<br/>Simulation readiness"]
+        end
+        
+        Result["ValidationResult<br/>All issues stacked"]
+    end
 
-class WorkshopStation(BaseModel):
-    id: str
-    capacity: int
-    workers: int
-    retrofit_time_min: int
+    Input --> Syntax
+    Syntax --> Semantic
+    Semantic --> Integrity
+    Integrity --> Feasibility
+    Feasibility --> Result
 
-    @field_validator('capacity')
-    @classmethod
-    def capacity_must_be_positive(cls, v: int) -> int:
-        if v <= 0:
-            raise ValueError('Capacity must be positive')
-        return v
+    classDef layer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef validation fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
 
-    @field_validator('retrofit_time_min')
-    @classmethod
-    def retrofit_time_reasonable(cls, v: int) -> int:
-        if v < 10 or v > 300:
-            raise ValueError('Retrofit time must be between 10-300 minutes')
-        return v
+    class Syntax,Semantic,Integrity,Feasibility layer
+    class Result validation
+    class Input external
 ```
 
-### MVP Output Validation
+### Error Stacking vs Fail-Fast Comparison
+
+| Approach | User Experience | Development Efficiency | Error Quality |
+|----------|-----------------|------------------------|---------------|
+| **Fail-Fast (Traditional)** | ❌ Fix 1 error → Run again → Fix 1 error | ⭐⭐ Slow iteration | ⭐⭐ Limited context |
+| **Error Stacking (PopUpSim)** | ✅ See ALL issues at once → Fix all | ⭐⭐⭐⭐⭐ Fast iteration | ⭐⭐⭐⭐⭐ Complete context |
+
+### Validation Layer Examples
 
 ```python
-# CONCEPTUAL EXAMPLE - Illustrates result validation pattern
-def validate_simulation_results(results: SimulationResults) -> bool:
-    """MVP Result Validation"""
+# ACTUAL IMPLEMENTATION - Layer 3: Integrity Validator
+class IntegrityValidator:
+    """Validates cross-references and data consistency."""
 
-    # Plausibility checks for MVP
-    if results.throughput_per_hour < 0:
-        logging.error("Negative throughput detected")
-        return False
+    def validate(self, scenario: Scenario) -> ValidationResult:
+        result = ValidationResult(is_valid=True)
+        
+        # Collect all available IDs
+        locomotive_ids = {loco.id for loco in scenario.locomotives or []}
+        route_ids = {route.id for route in scenario.routes or []}
+        
+        # Validate train references
+        for i, train in enumerate(scenario.trains or []):
+            if train.locomotive_id not in locomotive_ids:
+                result.add_error(
+                    f"Train {train.id} references non-existent locomotive '{train.locomotive_id}'",
+                    field=f"trains[{i}].locomotive_id",
+                    category=ValidationCategory.INTEGRITY,
+                    suggestion=f"Use one of: {', '.join(locomotive_ids)}"
+                )
+        
+        return result
 
-    if results.station_utilization > 1.0:
-        logging.warning("Station utilization > 100%")
+# ACTUAL IMPLEMENTATION - Validation Pipeline Usage
+from shared.validation.pipeline import ValidationPipeline
 
-    if results.total_wagons_processed == 0:
-        logging.error("No wagons processed")
-        return False
+pipeline = ValidationPipeline()
+result = pipeline.validate(scenario)
 
-    return True
+if not result.is_valid:
+    result.print_summary()  # Shows categorized issues
+    print(f"Found {len(result.get_errors())} errors, {len(result.get_warnings())} warnings")
+```
+
+### Validation Result Output Example
+
+```
+📋 Validation Summary: 5 errors, 2 warnings
+
+SYNTAX ERRORS:
+- Scenario ID too long (Field: id)
+  → Suggestion: Keep scenario ID under 50 characters
+
+INTEGRITY ERRORS:  
+- Train T1 references non-existent locomotive 'L99' (Field: trains[0].locomotive_id)
+  → Suggestion: Use one of: L1, L2, L3
+- Route R1 references non-existent track 'T99' (Field: routes[0].track_sequence[2])
+  → Suggestion: Use existing track ID from: T1, T2, T3
+- No locomotives configured (Field: locomotives)
+  → Suggestion: Add at least one locomotive for wagon transport
+
+FEASIBILITY WARNINGS:
+- High wagon-to-station ratio (150.0:1) may cause bottlenecks (Field: workshops)
+  → Suggestion: Consider adding more retrofit stations
+- Long simulation duration (400 days) may impact performance (Field: end_date)
+  → Suggestion: Consider shorter simulation periods
 ```
 
 ## 8.9 Security Concept

@@ -75,7 +75,7 @@ class CsvScenarioAdapter(ScenarioPort):
 
             trains.append(
                 TrainInputDTO(
-                    id=str(train_row['id']),
+                    train_id=str(train_row['id']),
                     arrival_time=str(train_row['arrival_time']),
                     departure_time=str(train_row['departure_time']),
                     locomotive_id=str(train_row.get('locomotive_id', '')),
@@ -91,7 +91,7 @@ class CsvScenarioAdapter(ScenarioPort):
         return [
             WorkshopInputDTO(
                 id=str(row['id']),
-                track_id=str(row['track_id']),
+                track=str(row['track_id']),
                 retrofit_stations=int(row['retrofit_stations']),
             )
             for _, row in workshops_df.iterrows()

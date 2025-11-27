@@ -1,27 +1,26 @@
-"""Validation coordinator for cross-context validation."""
+"""Validation coordinator using 4-layer pipeline."""
 
 from shared.validation.base import ValidationResult
-from workshop_operations.domain.services.scenario_domain_validator import WorkshopOperationsValidator
+from shared.validation.pipeline import ValidationPipeline
 
 from configuration.domain.models.scenario import Scenario
-from configuration.domain.services.configuration_validator import ConfigurationValidator
 
 
 class ValidationCoordinator:
-    """Coordinates validation across all contexts."""
+    """Coordinates validation using 4-layer pipeline with error stacking."""
 
     def __init__(self) -> None:
-        """Initialize with context validators."""
-        self.validators = [
-            ConfigurationValidator(),
-            WorkshopOperationsValidator(),
-        ]
+        """Initialize with validation pipeline and context validators."""
+        self.pipeline = ValidationPipeline()
+        self.context_validators: list = []  # Additional validators can be added
 
     def validate_all(self, scenario: Scenario) -> ValidationResult:
-        """Validate scenario across all contexts, collecting all issues."""
-        result = ValidationResult(is_valid=True)
+        """Validate scenario using 4-layer pipeline + context validators."""
+        # Start with 4-layer pipeline (stacks all errors)
+        result = self.pipeline.validate(scenario)
 
-        for validator in self.validators:
+        # Add context-specific validation
+        for validator in self.context_validators:
             context_result = validator.validate(scenario)
             result.merge(context_result)
 
@@ -30,6 +29,6 @@ class ValidationCoordinator:
     def add_validator(self, validator: object) -> None:
         """Add a new context validator."""
         if hasattr(validator, 'validate'):
-            self.validators.append(validator)
+            self.context_validators.append(validator)
         else:
             raise ValueError("Validator must have a 'validate' method")
