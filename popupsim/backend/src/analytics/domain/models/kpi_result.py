@@ -20,7 +20,7 @@ class ThroughputKPI:
 class UtilizationKPI:
     """Workshop utilization metrics."""
 
-    workshop_id: str
+    id: str
     total_capacity: int
     average_utilization_percent: float
     peak_utilization_percent: float

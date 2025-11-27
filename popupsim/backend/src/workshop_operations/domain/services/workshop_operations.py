@@ -13,7 +13,7 @@ class WorkshopDistributor:
         workshops: list[Workshop], get_available_capacity: Callable[[str], int], capacity_claims: dict[str, int]
     ) -> Workshop:
         """Select workshop with most available capacity."""
-        return max(workshops, key=lambda w: get_available_capacity(w.track_id) - capacity_claims[w.track_id])
+        return max(workshops, key=lambda w: get_available_capacity(w.track) - capacity_claims[w.track])
 
     @staticmethod
     def calculate_batch_size(available: int, remaining_count: int) -> int:

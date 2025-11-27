@@ -12,30 +12,30 @@ class TestWorkshopInputDTO:
     def test_valid_workshop_dto(self) -> None:
         """Test creating valid WorkshopInputDTO."""
         dto = WorkshopInputDTO(
-            workshop_id='WS001',
-            track_id='T001',
+            id='WS001',
+            track='T001',
             retrofit_stations=5,
         )
 
-        assert dto.workshop_id == 'WS001'
-        assert dto.track_id == 'T001'
+        assert dto.id == 'WS001'
+        assert dto.track == 'T001'
         assert dto.retrofit_stations == 5
 
     def test_invalid_track_type(self) -> None:
-        """Test validation fails for invalid workshop_id."""
+        """Test validation fails for invalid id."""
         with pytest.raises(ValidationError):
             WorkshopInputDTO(
-                workshop_id='',
-                track_id='T001',
+                id='',
+                track='T001',
                 retrofit_stations=5,
             )
 
-    def test_invalid_track_id_pattern(self) -> None:
-        """Test validation fails for invalid track_id."""
+    def test_invalid_track_pattern(self) -> None:
+        """Test validation fails for invalid track."""
         with pytest.raises(ValidationError):
             WorkshopInputDTO(
-                workshop_id='WS001',
-                track_id='',
+                id='WS001',
+                track='',
                 retrofit_stations=5,
             )
 
@@ -43,7 +43,7 @@ class TestWorkshopInputDTO:
         """Test validation fails for invalid retrofit_stations."""
         with pytest.raises(ValidationError):
             WorkshopInputDTO(
-                workshop_id='WS001',
-                track_id='T001',
+                id='WS001',
+                track='T001',
                 retrofit_stations=0,
             )

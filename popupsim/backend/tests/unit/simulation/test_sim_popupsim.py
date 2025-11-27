@@ -134,16 +134,14 @@ class TestPopupSimWithFakeSim:
         track = Track(id='t1', name='Track 1', type=TrackType.COLLECTION, edges=['e1'])
         retrofitted_track = Track(id='t2', name='Track 2', type=TrackType.RETROFITTED, edges=['e1'])
         loco = Locomotive(
-            locomotive_id='L1',
+            id='L1',
             name='Loco 1',
             start_date=datetime(2024, 1, 15, tzinfo=UTC),
             end_date=datetime(2024, 1, 16, tzinfo=UTC),
-            track_id='t1',
+            track='t1',
         )
-        workshop = Workshop(
-            workshop_id='W1', start_date='2024-01-15T00:00:00Z', end_date='2024-01-16T00:00:00Z', track_id='t1'
-        )
-        wagon = Wagon(wagon_id='W1', length=20.0, is_loaded=False, needs_retrofit=True)
+        workshop = Workshop(id='W1', start_date='2024-01-15T00:00:00Z', end_date='2024-01-16T00:00:00Z', track='t1')
+        wagon = Wagon(id='W1', length=20.0, is_loaded=False, needs_retrofit=True)
         train = Train(train_id='T1', arrival_time=datetime(2024, 1, 15, 8, 0, tzinfo=UTC), wagons=[wagon])
 
         scenario_data = {
@@ -195,16 +193,14 @@ class TestPopupSimWithSimpyAdapter:
         track = Track(id='t1', name='Track 1', type=TrackType.COLLECTION, edges=['e1'])
         retrofitted_track = Track(id='t2', name='Track 2', type=TrackType.RETROFITTED, edges=['e1'])
         loco = Locomotive(
-            locomotive_id='L1',
+            id='L1',
             name='Loco 1',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 2, tzinfo=UTC),
-            track_id='t1',
+            track='t1',
         )
-        workshop = Workshop(
-            workshop_id='W1', start_date='2024-01-01T00:00:00Z', end_date='2024-01-02T00:00:00Z', track_id='t1'
-        )
-        wagon = Wagon(wagon_id='W1', length=20.0, is_loaded=False, needs_retrofit=True)
+        workshop = Workshop(id='W1', start_date='2024-01-01T00:00:00Z', end_date='2024-01-02T00:00:00Z', track='t1')
+        wagon = Wagon(id='W1', length=20.0, is_loaded=False, needs_retrofit=True)
         train = Train(train_id='T1', arrival_time=datetime(2024, 1, 1, 8, 0, tzinfo=UTC), wagons=[wagon])
 
         scenario_data = {

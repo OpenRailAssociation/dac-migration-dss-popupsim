@@ -19,31 +19,31 @@ class TestWorkshop:
     def test_workshop_creation_with_all_fields(self) -> None:
         """Test creating workshop with all required fields."""
         workshop: Workshop = Workshop(
-            workshop_id='WS_TEST_01',
+            id='WS_TEST_01',
             start_date='2031-07-04T00:00:00',
             end_date='2031-07-25T23:59:59',
             retrofit_stations=2,
-            track_id='track_10',
+            track='track_10',
             worker=4,
         )
 
-        assert workshop.workshop_id == 'WS_TEST_01'
+        assert workshop.id == 'WS_TEST_01'
         assert workshop.start_date == '2031-07-04T00:00:00'
         assert workshop.end_date == '2031-07-25T23:59:59'
         assert workshop.retrofit_stations == 2
-        assert workshop.track_id == 'track_10'
+        assert workshop.track == 'track_10'
         assert workshop.worker == 4
 
     def test_workshop_creation_with_defaults(self) -> None:
         """Test creating workshop with default values."""
         workshop: Workshop = Workshop(
-            workshop_id='WS_TEST_02',
+            id='WS_TEST_02',
             start_date='2031-07-04T00:00:00',
             end_date='2031-07-25T23:59:59',
-            track_id='track_Z1',
+            track='track_Z1',
         )
 
-        assert workshop.workshop_id == 'WS_TEST_02'
+        assert workshop.id == 'WS_TEST_02'
         assert workshop.retrofit_stations == 1
         assert workshop.worker == 1
 
@@ -52,24 +52,24 @@ class TestWorkshop:
         with pytest.raises(ValidationError) as exc_info:
             Workshop(
                 start_date='2031-07-04T00:00:00',
-                # Missing workshop_id, end_date and track_id
+                # Missing id, end_date and track
             )
 
         errors: list[dict[str, Any]] = exc_info.value.errors()
         missing_fields: set[str] = {str(error['loc'][0]) for error in errors}
-        assert 'workshop_id' in missing_fields
+        assert 'id' in missing_fields
         assert 'end_date' in missing_fields
-        assert 'track_id' in missing_fields
+        assert 'track' in missing_fields
 
     def test_workshop_retrofit_stations_validation(self) -> None:
         """Test that retrofit_stations must be at least 1."""
         with pytest.raises(ValidationError) as exc_info:
             Workshop(
-                workshop_id='WS_TEST_03',
+                id='WS_TEST_03',
                 start_date='2031-07-04T00:00:00',
                 end_date='2031-07-25T23:59:59',
                 retrofit_stations=0,
-                track_id='track_10',
+                track='track_10',
             )
 
         error: dict[str, Any] = exc_info.value.errors()[0]
@@ -80,10 +80,10 @@ class TestWorkshop:
         """Test that worker must be at least 1."""
         with pytest.raises(ValidationError) as exc_info:
             Workshop(
-                workshop_id='WS_TEST_04',
+                id='WS_TEST_04',
                 start_date='2031-07-04T00:00:00',
                 end_date='2031-07-25T23:59:59',
-                track_id='track_10',
+                track='track_10',
                 worker=0,
             )
 
@@ -95,22 +95,22 @@ class TestWorkshop:
         """Test that negative retrofit_stations are invalid."""
         with pytest.raises(ValidationError):
             Workshop(
-                workshop_id='WS_TEST_05',
+                id='WS_TEST_05',
                 start_date='2031-07-04T00:00:00',
                 end_date='2031-07-25T23:59:59',
                 retrofit_stations=-1,
-                track_id='track_10',
+                track='track_10',
             )
 
     def test_workshop_negative_worker(self) -> None:
         """Test that negative worker count is invalid."""
         with pytest.raises(ValidationError):
             Workshop(
-                workshop_id='WS_TEST_06',
+                id='WS_TEST_06',
                 start_date='2031-07-04T00:00:00',
                 end_date='2031-07-25T23:59:59',
                 worker=-2,
-                track_id='track_10',
+                track='track_10',
             )
 
     @pytest.mark.parametrize('stations', [1, 2, 5, 10, 100])
@@ -123,11 +123,11 @@ class TestWorkshop:
             Number of retrofit stations to test.
         """
         workshop: Workshop = Workshop(
-            workshop_id=f'WS_TEST_{stations}',
+            id=f'WS_TEST_{stations}',
             start_date='2031-07-04T00:00:00',
             end_date='2031-07-25T23:59:59',
             retrofit_stations=stations,
-            track_id='track_10',
+            track='track_10',
         )
 
         assert workshop.retrofit_stations == stations
@@ -142,11 +142,11 @@ class TestWorkshop:
             Number of workers to test.
         """
         workshop: Workshop = Workshop(
-            workshop_id=f'WS_TEST_W{workers}',
+            id=f'WS_TEST_W{workers}',
             start_date='2031-07-04T00:00:00',
             end_date='2031-07-25T23:59:59',
             worker=workers,
-            track_id='track_10',
+            track='track_10',
         )
 
         assert workshop.worker == workers
@@ -154,50 +154,50 @@ class TestWorkshop:
     def test_workshop_from_dict(self) -> None:
         """Test creating workshop from dictionary."""
         workshop_data: dict[str, Any] = {
-            'workshop_id': 'WS_TEST_DICT',
+            'id': 'WS_TEST_DICT',
             'start_date': '2031-07-04T00:00:00',
             'end_date': '2031-07-25T23:59:59',
             'retrofit_stations': 3,
-            'track_id': 'track_7',
+            'track': 'track_7',
             'worker': 6,
         }
 
         workshop: Workshop = Workshop(**workshop_data)
 
-        assert workshop.workshop_id == 'WS_TEST_DICT'
+        assert workshop.id == 'WS_TEST_DICT'
         assert workshop.start_date == '2031-07-04T00:00:00'
         assert workshop.end_date == '2031-07-25T23:59:59'
         assert workshop.retrofit_stations == 3
-        assert workshop.track_id == 'track_7'
+        assert workshop.track == 'track_7'
         assert workshop.worker == 6
 
     def test_workshop_model_dump(self) -> None:
         """Test converting workshop to dictionary."""
         workshop: Workshop = Workshop(
-            workshop_id='WS_TEST_DUMP',
+            id='WS_TEST_DUMP',
             start_date='2031-07-11T00:00:00',
             end_date='2031-07-25T23:59:59',
             retrofit_stations=2,
-            track_id='track_Z1',
+            track='track_Z1',
             worker=4,
         )
 
         workshop_dict: dict[str, Any] = workshop.model_dump()
 
-        assert workshop_dict['workshop_id'] == 'WS_TEST_DUMP'
+        assert workshop_dict['id'] == 'WS_TEST_DUMP'
         assert workshop_dict['start_date'] == '2031-07-11T00:00:00'
         assert workshop_dict['end_date'] == '2031-07-25T23:59:59'
         assert workshop_dict['retrofit_stations'] == 2
-        assert workshop_dict['track_id'] == 'track_Z1'
+        assert workshop_dict['track'] == 'track_Z1'
         assert workshop_dict['worker'] == 4
 
     def test_workshop_date_format(self) -> None:
         """Test that various ISO date formats are accepted."""
         workshop: Workshop = Workshop(
-            workshop_id='WS_TEST_DATE',
+            id='WS_TEST_DATE',
             start_date='2031-07-04',
             end_date='2031-07-25T23:59:59.999Z',
-            track_id='track_10',
+            track='track_10',
         )
 
         assert workshop.start_date == '2031-07-04'
@@ -220,8 +220,8 @@ class TestWorkshop:
         workshops: list[Workshop] = [Workshop(**data) for data in workshops_list]
 
         assert len(workshops) == 2
-        assert workshops[0].workshop_id == 'WS_01'
-        assert workshops[0].track_id == 'track_Z1'
-        assert workshops[1].workshop_id == 'WS_02'
+        assert workshops[0].id == 'WS_01'
+        assert workshops[0].track == 'track_Z1'
+        assert workshops[1].id == 'WS_02'
         assert workshops[1].retrofit_stations == 3
         assert workshops[1].worker == 6

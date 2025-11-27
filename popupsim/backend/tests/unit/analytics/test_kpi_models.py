@@ -28,14 +28,14 @@ def test_throughput_kpi_creation() -> None:
 def test_utilization_kpi_creation() -> None:
     """Test UtilizationKPI creation."""
     kpi = UtilizationKPI(
-        workshop_id='WS001',
+        id='WS001',
         total_capacity=10,
         average_utilization_percent=75.5,
         peak_utilization_percent=95.0,
         idle_time_percent=24.5,
     )
 
-    assert kpi.workshop_id == 'WS001'
+    assert kpi.id == 'WS001'
     assert kpi.total_capacity == 10
     assert kpi.average_utilization_percent == 75.5
     assert kpi.peak_utilization_percent == 95.0
@@ -72,7 +72,7 @@ def test_kpi_result_creation() -> None:
 
     utilization = [
         UtilizationKPI(
-            workshop_id='WS001',
+            id='WS001',
             total_capacity=10,
             average_utilization_percent=75.0,
             peak_utilization_percent=90.0,
@@ -154,9 +154,9 @@ def test_multiple_utilization_kpis() -> None:
     )
 
     assert len(kpi_result.utilization) == 3
-    assert kpi_result.utilization[0].workshop_id == 'WS001'
-    assert kpi_result.utilization[1].workshop_id == 'WS002'
-    assert kpi_result.utilization[2].workshop_id == 'WS003'
+    assert kpi_result.utilization[0].id == 'WS001'
+    assert kpi_result.utilization[1].id == 'WS002'
+    assert kpi_result.utilization[2].id == 'WS003'
 
 
 def test_multiple_bottlenecks() -> None:

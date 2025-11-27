@@ -13,12 +13,12 @@ class WagonStateManager:
         wagon.status = WagonStatus.MOVING
         wagon.source_track_id = from_track
         wagon.destination_track_id = to_track
-        wagon.track_id = None
+        wagon.track = None
 
     @staticmethod
     def complete_arrival(wagon: Wagon, track: str, status: WagonStatus) -> None:
         """Update wagon state when arriving at destination."""
-        wagon.track_id = track
+        wagon.track = track
         wagon.source_track_id = None
         wagon.destination_track_id = None
         wagon.status = status
@@ -26,7 +26,7 @@ class WagonStateManager:
     @staticmethod
     def select_for_retrofit(wagon: Wagon, track_id: str) -> None:
         """Mark wagon as selected for retrofit."""
-        wagon.track_id = track_id
+        wagon.track = track_id
         wagon.status = WagonStatus.SELECTED
 
     @staticmethod
@@ -58,8 +58,8 @@ class WagonSelector:
         """Group selected wagons by track."""
         wagons_by_track: dict[str, list[Wagon]] = {}
         for wagon in wagons:
-            if wagon.status == WagonStatus.SELECTED and wagon.track_id:
-                wagons_by_track.setdefault(wagon.track_id, []).append(wagon)
+            if wagon.status == WagonStatus.SELECTED and wagon.track:
+                wagons_by_track.setdefault(wagon.track, []).append(wagon)
         return wagons_by_track
 
     @staticmethod

@@ -160,23 +160,21 @@ class DefaultLocomotiveService(LocomotiveService):
         loco.record_status_change(start_time, LocoStatus.MOVING)
         route = find_route(popupsim.scenario.routes, from_track, to_track)
         duration = route.duration if route and route.duration else 0.0
-        logger.info(
-            '🚂 Loco %s starts moving [%s → %s] at t=%.1f', loco.locomotive_id, from_track, to_track, start_time
-        )
+        logger.info('🚂 Loco %s starts moving [%s → %s] at t=%.1f', loco.id, from_track, to_track, start_time)
 
         if duration > 0:
             yield popupsim.sim.delay(duration)
             arrival_time = popupsim.sim.current_time()
             logger.info(
                 '✓ Loco %s arrived at %s at t=%.1f (travel time: %.1f min)',
-                loco.locomotive_id,
+                loco.id,
                 to_track,
                 arrival_time,
                 duration,
             )
         else:
-            logger.info('✓ Loco %s at %s (no travel needed)', loco.locomotive_id, to_track)
-        loco.track_id = to_track
+            logger.info('✓ Loco %s at %s (no travel needed)', loco.id, to_track)
+        loco.track = to_track
 
     def couple_wagons(
         self, popupsim: Any, loco: Locomotive, wagon_count: int, coupler_type: CouplerType

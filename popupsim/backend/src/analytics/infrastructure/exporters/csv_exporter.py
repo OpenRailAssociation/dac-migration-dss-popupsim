@@ -73,7 +73,7 @@ class CSVExporter:
             return
 
         data = {
-            'workshop_id': [u.workshop_id for u in kpi_result.utilization],
+            'workshop_id': [u.id for u in kpi_result.utilization],
             'total_capacity': [u.total_capacity for u in kpi_result.utilization],
             'average_utilization_percent': [u.average_utilization_percent for u in kpi_result.utilization],
             'peak_utilization_percent': [u.peak_utilization_percent for u in kpi_result.utilization],

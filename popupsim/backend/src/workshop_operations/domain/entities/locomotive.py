@@ -20,11 +20,11 @@ class LocoStatus(Enum):
 class Locomotive(BaseModel):
     """Locomotive configuration for workshop operations."""
 
-    locomotive_id: str
+    id: str
     name: str
     start_date: datetime
     end_date: datetime
-    track_id: str
+    track: str
     status: LocoStatus = LocoStatus.PARKING
     status_history: list[tuple[float, LocoStatus]] = []
 

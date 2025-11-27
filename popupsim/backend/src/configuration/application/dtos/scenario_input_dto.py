@@ -11,9 +11,7 @@ from pydantic import model_validator
 class ScenarioInputDTO(BaseModel):
     """Raw input DTO for scenario configuration from JSON files."""
 
-    scenario_id: str = Field(
-        pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50, description='Unique scenario identifier'
-    )
+    id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50, description='Unique scenario identifier')
     start_date: str | datetime
     end_date: str | datetime
     random_seed: int | None = Field(default=None, ge=0)

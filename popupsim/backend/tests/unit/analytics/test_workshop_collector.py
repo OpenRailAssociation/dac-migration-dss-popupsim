@@ -10,10 +10,10 @@ def test_workshop_collector_initialization() -> None:
     """Test WorkshopCollector initialization."""
     collector = WorkshopCollector()
 
-    assert len(collector.workshop_station_usage) == 0
-    assert len(collector.workshop_active_time) == 0
-    assert len(collector.workshop_idle_time) == 0
-    assert len(collector.workshop_last_event) == 0
+    assert len(collector.station_usage) == 0
+    assert len(collector.active_time) == 0
+    assert len(collector.idle_time) == 0
+    assert len(collector.last_event) == 0
 
 
 def test_record_workshop_station_occupied() -> None:
@@ -29,23 +29,35 @@ def test_record_workshop_station_occupied() -> None:
     )
     collector.record_event(event)
 
-    assert 'WS001' in collector.workshop_last_event
-    assert collector.workshop_last_event['WS001'] == (0.0, 2)
+    assert 'WS001' in collector.last_event
+    assert collector.last_event['WS001'] == (0.0, 2)
 
 
-def test_workshop_idle_time() -> None:
+def test_idle_time() -> None:
     """Test tracking workshop idle time."""
     collector = WorkshopCollector()
 
     events = [
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'WS001', 0.0, 0),
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(30.0), 'WS001', 50.0, 1),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(0.0),
+            workshop_id='WS001',
+            utilization_percent=0.0,
+            available_stations=0,
+        ),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(30.0),
+            workshop_id='WS001',
+            utilization_percent=50.0,
+            available_stations=1,
+        ),
     ]
 
     for event in events:
         collector.record_event(event)
 
-    assert collector.workshop_idle_time.get('WS001', 0.0) == 30.0
+    assert collector.idle_time.get('WS001', 0.0) == 30.0
 
 
 def test_multiple_workshops() -> None:
@@ -53,32 +65,54 @@ def test_multiple_workshops() -> None:
     collector = WorkshopCollector()
 
     events = [
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'WS001', 0.0, 0),
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(5.0), 'WS002', 25.0, 1),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(0.0),
+            workshop_id='WS001',
+            utilization_percent=0.0,
+            available_stations=0,
+        ),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(5.0),
+            workshop_id='WS002',
+            utilization_percent=25.0,
+            available_stations=1,
+        ),
     ]
 
     for event in events:
         collector.record_event(event)
 
-    assert len(collector.workshop_last_event) == 2
-    assert 'WS001' in collector.workshop_last_event
-    assert 'WS002' in collector.workshop_last_event
+    assert len(collector.last_event) == 2
+    assert 'WS001' in collector.last_event
+    assert 'WS002' in collector.last_event
 
 
 def test_simulation_end_event() -> None:
     """Test handling simulation end."""
     collector = WorkshopCollector()
 
-    event = WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'WS001', 50.0, 1)
+    event = WorkshopUtilizationChangedEvent(
+        EventId.generate(),
+        Timestamp.from_simulation_time(0.0),
+        workshop_id='WS001',
+        utilization_percent=50.0,
+        available_stations=1,
+    )
     collector.record_event(event)
 
     # Simulate end by recording final state
     end_event = WorkshopUtilizationChangedEvent(
-        EventId.generate(), Timestamp.from_simulation_time(60.0), 'WS001', 0.0, 0
+        EventId.generate(),
+        Timestamp.from_simulation_time(60.0),
+        workshop_id='WS001',
+        utilization_percent=0.0,
+        available_stations=0,
     )
     collector.record_event(end_event)
 
-    assert collector.workshop_active_time.get('WS001', 0.0) == 60.0
+    assert collector.active_time.get('WS001', 0.0) == 60.0
 
 
 def test_get_results() -> None:
@@ -86,9 +120,27 @@ def test_get_results() -> None:
     collector = WorkshopCollector()
 
     events = [
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'WS001', 0.0, 0),
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(30.0), 'WS001', 50.0, 1),
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(60.0), 'WS001', 0.0, 0),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(0.0),
+            workshop_id='WS001',
+            utilization_percent=0.0,
+            available_stations=0,
+        ),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(30.0),
+            workshop_id='WS001',
+            utilization_percent=50.0,
+            available_stations=1,
+        ),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(60.0),
+            workshop_id='WS001',
+            utilization_percent=0.0,
+            available_stations=0,
+        ),
     ]
 
     for event in events:
@@ -105,15 +157,21 @@ def test_reset_collector() -> None:
     """Test resetting collector state."""
     collector = WorkshopCollector()
 
-    event = WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'WS001', 50.0, 1)
+    event = WorkshopUtilizationChangedEvent(
+        EventId.generate(),
+        Timestamp.from_simulation_time(0.0),
+        workshop_id='WS001',
+        utilization_percent=50.0,
+        available_stations=1,
+    )
     collector.record_event(event)
 
     collector.reset()
 
-    assert len(collector.workshop_station_usage) == 0
-    assert len(collector.workshop_active_time) == 0
-    assert len(collector.workshop_idle_time) == 0
-    assert len(collector.workshop_last_event) == 0
+    assert len(collector.station_usage) == 0
+    assert len(collector.active_time) == 0
+    assert len(collector.idle_time) == 0
+    assert len(collector.last_event) == 0
 
 
 def test_metric_categories() -> None:
@@ -121,8 +179,20 @@ def test_metric_categories() -> None:
     collector = WorkshopCollector()
 
     events = [
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'WS001', 0.0, 0),
-        WorkshopUtilizationChangedEvent(EventId.generate(), Timestamp.from_simulation_time(60.0), 'WS001', 0.0, 0),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(0.0),
+            workshop_id='WS001',
+            utilization_percent=0.0,
+            available_stations=0,
+        ),
+        WorkshopUtilizationChangedEvent(
+            EventId.generate(),
+            Timestamp.from_simulation_time(60.0),
+            workshop_id='WS001',
+            utilization_percent=0.0,
+            available_stations=0,
+        ),
     ]
 
     for event in events:

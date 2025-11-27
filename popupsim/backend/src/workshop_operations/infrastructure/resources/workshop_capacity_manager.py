@@ -29,7 +29,7 @@ class WorkshopCapacityManager:  # pylint: disable=too-few-public-methods
         self.stations: dict[str, list[StationState]] = {}  # For metrics
 
         for workshop in workshops:
-            track_id = workshop.track_id
+            track_id = workshop.track
             self.workshops_by_track[track_id] = workshop
             # Create SimPy Resource for station allocation
             self.resources[track_id] = sim.create_resource(capacity=workshop.retrofit_stations)

@@ -30,4 +30,4 @@ class LocomotiveStateManager:
     @staticmethod
     def update_location(loco: Locomotive, track_id: str) -> None:
         """Update locomotive location."""
-        loco.track_id = track_id
+        loco.track = track_id
