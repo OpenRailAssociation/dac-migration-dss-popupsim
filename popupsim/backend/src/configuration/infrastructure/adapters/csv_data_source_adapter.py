@@ -47,12 +47,12 @@ class CsvDataSourceAdapter(DataSourcePort):
         # Load scenario metadata
         scenario_data = self._load_scenario_metadata(csv_dir)
 
-        # Load all related data
-        trains = self._load_trains(csv_dir)
-        workshops = self._load_workshops(csv_dir)
-        tracks = self._load_tracks(csv_dir)
-        routes = self._load_routes(csv_dir)
-        locomotives = self._load_locomotives(csv_dir)
+        # Load all related data (methods exist for future use)
+        self._load_trains(csv_dir)
+        self._load_workshops(csv_dir)
+        self._load_tracks(csv_dir)
+        self._load_routes(csv_dir)
+        self._load_locomotives(csv_dir)
 
         return ScenarioInputDTO(
             scenario_id=scenario_data['scenario_id'],
@@ -106,7 +106,7 @@ class CsvDataSourceAdapter(DataSourcePort):
 
         if csv_dir.is_dir():
             csv_files = list(csv_dir.glob('*.csv'))
-            metadata['files'] = [f.name for f in csv_files]
+            metadata['files'] = [{'name': f.name} for f in csv_files]
 
         return metadata
 
