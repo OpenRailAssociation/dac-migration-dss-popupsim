@@ -38,7 +38,7 @@ def test_csv_adapter_metadata(csv_scenario_path: Path) -> None:
     assert len(metadata['files']) > 0
 
     # Check that scenario.csv is present
-    file_names = [f['name'] for f in metadata['files']]
+    file_names = metadata['files']
     assert 'scenario.csv' in file_names
 
 
@@ -49,7 +49,7 @@ def test_csv_adapter_load_scenario(csv_scenario_path: Path) -> None:
     adapter = CsvDataSourceAdapter()
     scenario_dto = adapter.load_scenario(csv_scenario_path)
 
-    assert scenario_dto.scenario_id == 'csv_example'
+    assert scenario_dto.id == 'csv_example'
     assert scenario_dto.start_date == '2025-01-15'
     assert scenario_dto.end_date == '2025-01-16'
     assert scenario_dto.train_schedule_file == 'trains.csv'
