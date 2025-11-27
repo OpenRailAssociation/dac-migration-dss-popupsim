@@ -131,8 +131,7 @@ class DefaultLocomotiveService(LocomotiveService):
             Generator yielding the allocated locomotive.
         """
         loco = cast(Locomotive, (yield popupsim.locomotives.get()))
-        resource_id = getattr(loco, 'locomotive_id', getattr(loco, 'id', str(loco)))
-        popupsim.locomotives.track_allocation(resource_id)
+        popupsim.locomotives.track_allocation(loco.id)
         return loco
 
     def release(self, popupsim: Any, loco: Locomotive) -> Generator[Any]:
@@ -150,8 +149,7 @@ class DefaultLocomotiveService(LocomotiveService):
         Any
             SimPy events for putting locomotive back in pool.
         """
-        resource_id = getattr(loco, 'locomotive_id', getattr(loco, 'id', str(loco)))
-        popupsim.locomotives.track_release(resource_id)
+        popupsim.locomotives.track_release(loco.id)
         yield popupsim.locomotives.put(loco)
 
     def move(self, popupsim: Any, loco: Locomotive, from_track: str, to_track: str) -> Generator[Any]:
