@@ -10,9 +10,9 @@ logger = logging.getLogger('ResourcePool')
 class Trackable(Protocol):  # pylint: disable=too-few-public-methods
     """Protocol for trackable resources."""
 
-    locomotive_id: str  # or worker_id, crane_id, etc.
+    id: str
     status: Any
-    track_id: str | None
+    track: str | None
 
 
 class ResourcePool:  # pylint: disable=too-few-public-methods
@@ -25,10 +25,7 @@ class ResourcePool:  # pylint: disable=too-few-public-methods
     def __init__(self, sim: Any, resources: list[Trackable], name: str = 'ResourcePool') -> None:
         self.sim = sim
         self.name = name
-        # Support different ID attributes (locomotive_id, worker_id, etc.)
-        self.all_resources: dict[str, Trackable] = {
-            getattr(r, 'locomotive_id', getattr(r, 'worker_id', getattr(r, 'id', str(r)))): r for r in resources
-        }
+        self.all_resources: dict[str, Trackable] = {r.id: r for r in resources}
         self.store: Any = sim.create_store(capacity=len(resources))
 
         # Tracking state
@@ -58,8 +55,10 @@ class ResourcePool:  # pylint: disable=too-few-public-methods
 
     def track_release(self, resource_id: str) -> None:
         """Track resource release."""
-        if resource_id in self.allocated:
-            del self.allocated[resource_id]
+        if resource_id not in self.allocated:
+            logger.warning('Attempting to release non-allocated resource: %s', resource_id)
+            return
+        del self.allocated[resource_id]
         resource = self.all_resources[resource_id]
         self._track_event(resource_id, 'released', resource.track)
 
@@ -74,7 +73,7 @@ class ResourcePool:  # pylint: disable=too-few-public-methods
         return {
             'id': resource_id,
             'status': getattr(resource, 'status', 'unknown'),
-            'location': getattr(resource, 'track_id', None),
+            'location': getattr(resource, 'track', None),
             'allocated': is_allocated,
             'allocated_since': self.allocated.get(resource_id),
         }
