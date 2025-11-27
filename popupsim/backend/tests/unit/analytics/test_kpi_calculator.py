@@ -16,7 +16,7 @@ from configuration.domain.models.scenario import Scenario
 def sample_scenario() -> Scenario:
     """Create sample scenario for testing."""
     return Scenario(
-        scenario_id='TEST_SCENARIO',
+        id='TEST_SCENARIO',
         start_date=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
         end_date=datetime(2025, 1, 2, 0, 0, tzinfo=UTC),
     )
@@ -27,16 +27,16 @@ def sample_workshops() -> list[Workshop]:
     """Create sample workshops for testing."""
     return [
         Workshop(
-            workshop_id='WS001',
-            track_id='T001',
+            id='WS001',
+            track='T001',
             start_date='2025-01-01T00:00:00',
             end_date='2025-01-02T00:00:00',
             retrofit_stations=10,
             worker=5,
         ),
         Workshop(
-            workshop_id='WS002',
-            track_id='T002',
+            id='WS002',
+            track='T002',
             start_date='2025-01-01T00:00:00',
             end_date='2025-01-02T00:00:00',
             retrofit_stations=8,
@@ -50,41 +50,41 @@ def sample_wagons() -> list[Wagon]:
     """Create sample wagons for testing."""
     return [
         Wagon(
-            wagon_id='W001',
+            id='W001',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=600.0,
         ),
         Wagon(
-            wagon_id='W002',
+            id='W002',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=900.0,
         ),
         Wagon(
-            wagon_id='W003',
+            id='W003',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T002',
+            track='T002',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=1200.0,
         ),
         Wagon(
-            wagon_id='W004',
+            id='W004',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T002',
+            track='T002',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=300.0,
@@ -138,11 +138,11 @@ def test_calculate_throughput_with_rejections(
     calculator = KPICalculator()
     rejected = [
         Wagon(
-            wagon_id='W999',
+            id='W999',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.REJECTED,
         ),
     ]
@@ -190,8 +190,8 @@ def test_calculate_utilization(
     )
 
     assert len(result.utilization) == 2
-    assert result.utilization[0].workshop_id == 'WS001'
-    assert result.utilization[1].workshop_id == 'WS002'
+    assert result.utilization[0].id == 'WS001'
+    assert result.utilization[1].id == 'WS002'
     assert result.utilization[0].total_capacity == 10
     assert result.utilization[1].total_capacity == 8
 
@@ -201,22 +201,22 @@ def test_identify_bottleneck_high_rejection(sample_scenario: Scenario, sample_me
     calculator = KPICalculator()
     wagons = [
         Wagon(
-            wagon_id=f'W{i:03d}',
+            id=f'W{i:03d}',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
         )
         for i in range(10)
     ]
     rejected = [
         Wagon(
-            wagon_id=f'W{i:03d}',
+            id=f'W{i:03d}',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.REJECTED,
         )
         for i in range(10, 13)
@@ -238,8 +238,8 @@ def test_identify_bottleneck_high_utilization(sample_scenario: Scenario, sample_
     """Test bottleneck identification for high utilization."""
     calculator = KPICalculator()
     workshop = Workshop(
-        workshop_id='WS001',
-        track_id='T001',
+        id='WS001',
+        track='T001',
         start_date='2025-01-01T00:00:00',
         end_date='2025-01-02T00:00:00',
         retrofit_stations=1,
@@ -247,11 +247,11 @@ def test_identify_bottleneck_high_utilization(sample_scenario: Scenario, sample_
     )
     wagons = [
         Wagon(
-            wagon_id=f'W{i:03d}',
+            id=f'W{i:03d}',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
         )
         for i in range(100)
@@ -292,41 +292,41 @@ def test_avg_waiting_time_calculation(sample_scenario: Scenario, sample_metrics:
     base_time = datetime(2025, 1, 1, 0, 0, tzinfo=UTC).timestamp()
     wagons = [
         Wagon(
-            wagon_id='W001',
+            id='W001',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 600.0,
         ),
         Wagon(
-            wagon_id='W002',
+            id='W002',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 900.0,
         ),
         Wagon(
-            wagon_id='W003',
+            id='W003',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T002',
+            track='T002',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 1200.0,
         ),
         Wagon(
-            wagon_id='W004',
+            id='W004',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T002',
+            track='T002',
             status=WagonStatus.RETROFITTED,
             arrival_time=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             retrofit_start_time=base_time + 300.0,
@@ -397,19 +397,19 @@ def test_wagons_without_waiting_time(sample_scenario: Scenario, sample_metrics: 
     calculator = KPICalculator()
     wagons = [
         Wagon(
-            wagon_id='W001',
+            id='W001',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
         ),
         Wagon(
-            wagon_id='W002',
+            id='W002',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
         ),
     ]
@@ -445,22 +445,22 @@ def test_bottleneck_severity_levels(sample_scenario: Scenario, sample_metrics: d
     calculator = KPICalculator()
     wagons = [
         Wagon(
-            wagon_id=f'W{i:03d}',
+            id=f'W{i:03d}',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
         )
         for i in range(10)
     ]
     rejected = [
         Wagon(
-            wagon_id=f'W{i:03d}',
+            id=f'W{i:03d}',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.REJECTED,
         )
         for i in range(10, 13)
@@ -482,8 +482,8 @@ def test_utilization_capped_at_100(sample_scenario: Scenario, sample_metrics: di
     """Test that utilization is capped at 100%."""
     calculator = KPICalculator()
     workshop = Workshop(
-        workshop_id='WS001',
-        track_id='T001',
+        id='WS001',
+        track='T001',
         start_date='2025-01-01T00:00:00',
         end_date='2025-01-02T00:00:00',
         retrofit_stations=1,
@@ -491,11 +491,11 @@ def test_utilization_capped_at_100(sample_scenario: Scenario, sample_metrics: di
     )
     wagons = [
         Wagon(
-            wagon_id=f'W{i:03d}',
+            id=f'W{i:03d}',
             length=15.0,
             is_loaded=True,
             needs_retrofit=True,
-            track_id='T001',
+            track='T001',
             status=WagonStatus.RETROFITTED,
         )
         for i in range(1000)

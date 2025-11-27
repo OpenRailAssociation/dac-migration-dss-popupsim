@@ -12,7 +12,7 @@ class TestScenarioInputDTO:
     def test_valid_scenario_dto(self) -> None:
         """Test creating valid ScenarioInputDTO."""
         dto = ScenarioInputDTO(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date='2025-01-01',
             end_date='2025-01-02',
             train_schedule_file='trains.csv',
@@ -20,7 +20,7 @@ class TestScenarioInputDTO:
             workshop_tracks_file='tracks.csv',
         )
 
-        assert dto.scenario_id == 'test_scenario'
+        assert dto.id == 'test_scenario'
         assert dto.start_date == '2025-01-01'
         assert dto.end_date == '2025-01-02'
 
@@ -33,7 +33,7 @@ class TestScenarioInputDTO:
         """Test validation fails for empty scenario_id."""
         with pytest.raises(ValidationError):
             ScenarioInputDTO(
-                scenario_id='',
+                id='',
                 start_date='2025-01-01',
                 end_date='2025-01-02',
             )
@@ -42,7 +42,7 @@ class TestScenarioInputDTO:
         """Test validation fails for invalid scenario_id pattern."""
         with pytest.raises(ValidationError):
             ScenarioInputDTO(
-                scenario_id='invalid scenario!',
+                id='invalid scenario!',
                 start_date='2025-01-01',
                 end_date='2025-01-02',
             )
@@ -51,7 +51,7 @@ class TestScenarioInputDTO:
         """Test validation fails when end_date is before start_date."""
         with pytest.raises(ValidationError):
             ScenarioInputDTO(
-                scenario_id='test',
+                id='test',
                 start_date='2025-01-02',
                 end_date='2025-01-01',
             )
@@ -60,7 +60,7 @@ class TestScenarioInputDTO:
         """Test validation fails for invalid strategy values."""
         with pytest.raises(ValidationError):
             ScenarioInputDTO(
-                scenario_id='test',
+                id='test',
                 start_date='2025-01-01',
                 end_date='2025-01-02',
                 track_selection_strategy='invalid_strategy',

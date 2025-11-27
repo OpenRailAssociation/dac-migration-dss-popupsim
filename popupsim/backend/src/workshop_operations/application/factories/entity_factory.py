@@ -28,11 +28,11 @@ class EntityFactory:
         }
 
         return Locomotive(
-            locomotive_id=dto.locomotive_id,
-            name=f'Locomotive {dto.locomotive_id}',
+            id=dto.id,
+            name=f'Locomotive {dto.id}',
             start_date=datetime.now(UTC),
             end_date=datetime.now(UTC),
-            track_id=dto.track_id,
+            track=dto.track,
             status=status_map.get(dto.status, LocoStatus.PARKING),
         )
 
@@ -40,10 +40,10 @@ class EntityFactory:
     def create_workshop(dto: WorkshopInputDTO) -> Workshop:
         """Create Workshop entity from DTO."""
         return Workshop(
-            workshop_id=dto.workshop_id,
+            id=dto.id,
             start_date='2025-01-01 00:00:00',
             end_date='2025-01-02 00:00:00',
-            track_id=dto.track_id,
+            track=dto.track,
             retrofit_stations=dto.retrofit_stations,
         )
 
@@ -51,7 +51,7 @@ class EntityFactory:
     def create_route(dto: RouteInputDTO) -> Route:
         """Create Route entity from DTO."""
         return Route(
-            route_id=dto.route_id,
+            route_id=dto.id,
             from_track=dto.from_track,
             to_track=dto.to_track,
             duration=dto.duration,

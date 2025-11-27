@@ -161,7 +161,7 @@ def _run_simulation_and_display_metrics(scenario: Any) -> Any:  # type: ignore[m
 
     typer.echo('\n=== UTILIZATION KPIs ===')
     for util in kpi_result.utilization:
-        typer.echo(f'  Workshop {util.workshop_id}:')
+        typer.echo(f'  Workshop {util.id}:')
         typer.echo(f'    Capacity: {util.total_capacity} stations')
         typer.echo(f'    Avg Utilization: {util.average_utilization_percent:.1f}%')
         typer.echo(f'    Peak Utilization: {util.peak_utilization_percent:.1f}%')

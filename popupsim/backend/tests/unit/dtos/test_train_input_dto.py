@@ -12,7 +12,7 @@ class TestTrainInputDTO:
 
     def test_valid_train_dto(self) -> None:
         """Test creating valid TrainInputDTO."""
-        wagon = WagonInputDTO(wagon_id='W001', length=15.5, is_loaded=False, needs_retrofit=True)
+        wagon = WagonInputDTO(id='W001', length=15.5, is_loaded=False, needs_retrofit=True)
         dto = TrainInputDTO(
             train_id='T001',
             arrival_time='2025-01-01T08:00:00',
@@ -24,11 +24,11 @@ class TestTrainInputDTO:
 
         assert dto.train_id == 'T001'
         assert len(dto.wagons) == 1
-        assert dto.wagons[0].wagon_id == 'W001'
+        assert dto.wagons[0].id == 'W001'
 
     def test_invalid_train_id_pattern(self) -> None:
         """Test validation fails for invalid train_id pattern."""
-        wagon = WagonInputDTO(wagon_id='W001', length=15.5)
+        wagon = WagonInputDTO(id='W001', length=15.5)
         with pytest.raises(ValidationError):
             TrainInputDTO(
                 train_id='invalid train!',
@@ -41,7 +41,7 @@ class TestTrainInputDTO:
 
     def test_invalid_time_order(self) -> None:
         """Test validation fails when departure is before arrival."""
-        wagon = WagonInputDTO(wagon_id='W001', length=15.5)
+        wagon = WagonInputDTO(id='W001', length=15.5)
         with pytest.raises(ValidationError):
             TrainInputDTO(
                 train_id='T001',

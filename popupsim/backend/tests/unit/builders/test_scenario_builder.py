@@ -45,7 +45,7 @@ class TestScenarioBuilder:
         """
         scenario = ScenarioBuilder(fixtures_scenario_json_path).build()
 
-        assert scenario.scenario_id == 'test_scenario_01'
+        assert scenario.id == 'test_scenario_01'
         assert scenario.start_date.date() == datetime(2031, 7, 4, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2031, 7, 5, tzinfo=UTC).date()
 
@@ -61,7 +61,7 @@ class TestScenarioBuilder:
         """
         scenario = ScenarioBuilder(fixtures_scenario_json_path).build()
 
-        assert scenario.scenario_id == 'test_scenario_01'
+        assert scenario.id == 'test_scenario_01'
         assert scenario.locomotives is not None
         assert len(scenario.locomotives) >= 1
         assert scenario.routes is not None

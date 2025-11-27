@@ -1,5 +1,5 @@
 {
-  "scenario_id": "test_scenario_01",
+  "id": "test_scenario_01",
   "description": "DAC restrofit simualation",
   "version": "1.0.0",
   "start_date": "2031-07-04 01:30:00",

@@ -46,14 +46,14 @@ def test_locomotive_status_updates() -> None:
     # Get initial loco
     assert scenario.locomotives is not None, 'Scenario must have locomotives'
     initial_loco = scenario.locomotives[0]
-    initial_track = initial_loco.track_id
+    initial_track = initial_loco.track
 
     # Run simulation
     popup_sim.run(until=100.0)
 
     # Loco should be back at parking with PARKING status
     assert initial_loco.status == LocoStatus.PARKING
-    assert initial_loco.track_id == initial_track
+    assert initial_loco.track == initial_track
 
 
 @pytest.mark.xfail(reason='Simulation logic under development - will be fixed in future commits')
@@ -68,7 +68,7 @@ def test_wagons_grouped_by_collection_track() -> None:
 
     popup_sim.run(until=50.0)
 
-    # Check wagons have track_id set
+    # Check wagons have track set
     selected_wagons = [w for w in popup_sim.wagons_queue if w.status == WagonStatus.SELECTED]
     for wagon in selected_wagons:
-        assert wagon.track_id is not None, f'Wagon {wagon.wagon_id} should have track_id'
+        assert wagon.track is not None, f'Wagon {wagon.id} should have track'

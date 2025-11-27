@@ -36,9 +36,15 @@ def test_multiple_locomotives() -> None:
     collector = LocomotiveCollector()
 
     events = [
-        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle'),
-        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(5.0), 'L002', 'moving'),
-        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(10.0), 'L001', 'moving'),
+        LocomotiveStatusChangeEvent(
+            EventId.generate(), Timestamp.from_simulation_time(0.0), locomotive_id='L001', status='idle'
+        ),
+        LocomotiveStatusChangeEvent(
+            EventId.generate(), Timestamp.from_simulation_time(5.0), locomotive_id='L002', status='moving'
+        ),
+        LocomotiveStatusChangeEvent(
+            EventId.generate(), Timestamp.from_simulation_time(10.0), locomotive_id='L001', status='moving'
+        ),
     ]
 
     for event in events:
@@ -53,7 +59,9 @@ def test_simulation_end_event() -> None:
     """Test finalizing times at simulation end."""
     collector = LocomotiveCollector()
 
-    event = LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle')
+    event = LocomotiveStatusChangeEvent(
+        EventId.generate(), Timestamp.from_simulation_time(0.0), locomotive_id='L001', status='idle'
+    )
     collector.record_event(event)
 
     collector._finalize_times(60.0)
@@ -67,8 +75,12 @@ def test_get_results() -> None:
     collector = LocomotiveCollector()
 
     events = [
-        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle'),
-        LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(30.0), 'L001', 'moving'),
+        LocomotiveStatusChangeEvent(
+            EventId.generate(), Timestamp.from_simulation_time(0.0), locomotive_id='L001', status='idle'
+        ),
+        LocomotiveStatusChangeEvent(
+            EventId.generate(), Timestamp.from_simulation_time(30.0), locomotive_id='L001', status='moving'
+        ),
     ]
 
     for event in events:
@@ -86,7 +98,9 @@ def test_reset_collector() -> None:
     """Test resetting collector state."""
     collector = LocomotiveCollector()
 
-    event = LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle')
+    event = LocomotiveStatusChangeEvent(
+        EventId.generate(), Timestamp.from_simulation_time(0.0), locomotive_id='L001', status='idle'
+    )
     collector.record_event(event)
 
     collector.reset()
@@ -99,7 +113,9 @@ def test_metric_categories() -> None:
     """Test that all metrics have correct category."""
     collector = LocomotiveCollector()
 
-    event = LocomotiveStatusChangeEvent(EventId.generate(), Timestamp.from_simulation_time(0.0), 'L001', 'idle')
+    event = LocomotiveStatusChangeEvent(
+        EventId.generate(), Timestamp.from_simulation_time(0.0), locomotive_id='L001', status='idle'
+    )
     collector.record_event(event)
     collector._finalize_times(60.0)
 

@@ -38,7 +38,7 @@ class ResourcePool:  # pylint: disable=too-few-public-methods
 
         for resource_id, r in self.all_resources.items():
             self.store.put(r)
-            self._track_event(resource_id, 'initialized', r.track_id)
+            self._track_event(resource_id, 'initialized', r.track)
 
         logger.info('Initialized %s with %d resources', name, len(resources))
 
@@ -54,14 +54,14 @@ class ResourcePool:  # pylint: disable=too-few-public-methods
         """Track resource allocation."""
         self.allocated[resource_id] = self.sim.current_time()
         resource = self.all_resources[resource_id]
-        self._track_event(resource_id, 'allocated', resource.track_id)
+        self._track_event(resource_id, 'allocated', resource.track)
 
     def track_release(self, resource_id: str) -> None:
         """Track resource release."""
         if resource_id in self.allocated:
             del self.allocated[resource_id]
         resource = self.all_resources[resource_id]
-        self._track_event(resource_id, 'released', resource.track_id)
+        self._track_event(resource_id, 'released', resource.track)
 
     def _track_event(self, resource_id: str, action: str, location: str | None) -> None:
         """Record tracking event."""

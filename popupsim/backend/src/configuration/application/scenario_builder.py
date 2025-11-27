@@ -121,7 +121,7 @@ class ScenarioBuilder:
                 mapped_routes = []
                 for route_data in routes_list:
                     mapped_route = {
-                        'route_id': route_data.get('id', ''),
+                        'id': route_data.get('id', ''),
                         'description': route_data.get('description'),
                         'duration': route_data.get('duration', 0.0),
                         'track_sequence': route_data.get('path', []),
@@ -199,7 +199,7 @@ class ScenarioBuilder:
                 data = json.load(f)
 
             # Validate required fields exist before creating DTO
-            required_fields = ['scenario_id', 'start_date', 'end_date']
+            required_fields = ['id', 'start_date', 'end_date']
             missing_fields = [field for field in required_fields if field not in data]
 
             if missing_fields:
@@ -211,7 +211,7 @@ class ScenarioBuilder:
             scenario_dto = ScenarioInputDTO(**data)
             # Populate references for backward compatibility
             self.references = data.get('references', {})
-            logger.info('Successfully loaded scenario DTO: %s', data.get('scenario_id'))
+            logger.info('Successfully loaded scenario DTO: %s', data.get('id'))
             return scenario_dto
 
         except json.JSONDecodeError as e:
@@ -302,7 +302,7 @@ class ScenarioBuilder:
                     wagon_dtos: list[WagonInputDTO] = []
                     for _, row in group.iterrows():
                         wagon_dto = WagonInputDTO(
-                            wagon_id=str(row.get('wagon_id', f'{train_id}_wagon_{len(wagon_dtos) + 1}')),
+                            id=str(row.get('wagon_id', f'{train_id}_wagon_{len(wagon_dtos) + 1}')),
                             length=float(row.get('length', 10.0)),
                             is_loaded=bool(row.get('is_loaded', False)),
                             needs_retrofit=bool(row.get('needs_retrofit', True)),
@@ -358,8 +358,8 @@ class ScenarioBuilder:
                 mapped_workshops = []
                 for workshop_data in workshops_list:
                     mapped_workshop = {
-                        'workshop_id': workshop_data.get('workshop_id', ''),
-                        'track_id': workshop_data.get('track_id', ''),
+                        'id': workshop_data.get('id', ''),
+                        'track': workshop_data.get('track', ''),
                         'retrofit_stations': workshop_data.get('retrofit_stations', 0),
                     }
                     mapped_workshops.append(WorkshopInputDTO(**mapped_workshop))
@@ -412,7 +412,7 @@ class ScenarioBuilder:
         # Create domain model from DTO with defaults
 
         self.scenario = Scenario(
-            scenario_id=scenario_dto.scenario_id,
+            id=scenario_dto.id,
             start_date=scenario_dto.start_date,
             end_date=scenario_dto.end_date,
             track_selection_strategy=scenario_dto.track_selection_strategy or TrackSelectionStrategy.LEAST_OCCUPIED,
