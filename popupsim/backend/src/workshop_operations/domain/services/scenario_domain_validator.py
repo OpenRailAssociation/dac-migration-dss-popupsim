@@ -63,8 +63,8 @@ class ScenarioDomainValidator:
                 issues.append(
                     DomainValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=f'Workshop {workshop.workshop_id} has no retrofit stations',
-                        field=f'workshops[{workshop.workshop_id}].retrofit_stations',
+                        message=f'Workshop {workshop.id} has no retrofit stations',
+                        field=f'workshops[{workshop.id}].retrofit_stations',
                         suggestion='Set retrofit_stations > 0',
                     )
                 )

@@ -98,7 +98,9 @@ class JsonScenarioAdapter(ScenarioPort):
         if 'trains' in data:
             trains = [
                 TrainInputDTO(
-                    id=train['id'],
+                    train_id=train['id'],
+                    locomotive_id=train['locomotive_id'],
+                    route_id=train['route_id'],
                     arrival_time=train['arrival_time'],
                     departure_time=train['departure_time'],
                     wagons=[WagonInputDTO(**wagon) for wagon in train.get('wagons', [])],

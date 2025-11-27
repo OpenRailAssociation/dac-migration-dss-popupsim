@@ -119,7 +119,7 @@ class JsonDataSourceAdapter(DataSourcePort):
         )
         end_date = scenario.end_date.isoformat() if hasattr(scenario.end_date, 'isoformat') else str(scenario.end_date)
         return ScenarioInputDTO(
-            scenario_id=scenario.scenario_id,
+            id=scenario.id,
             start_date=start_date,
             end_date=end_date,
             random_seed=getattr(scenario, 'random_seed', None),

@@ -53,59 +53,64 @@ graph TB
 
 ### Whitebox: Configuration Context
 
-**Responsibility:** Load, parse, validate, and build complete scenario configuration using hexagonal architecture.
+**Responsibility:** Load, parse, validate, and build complete scenario configuration using hexagonal architecture with 4-layer validation pipeline.
 
-**Architecture Note:** Implements hexagonal architecture with data source adapters for multiple input formats.
+**Architecture Note:** Implements hexagonal architecture with pluggable data source adapters and enterprise-grade 4-layer validation framework.
 
 ```mermaid
 graph TB
     subgraph "Configuration Context"
-        Loader["ScenarioLoader<br/>Hexagonal orchestrator"]
-        Port["DataSourcePort<br/>Interface"]
-        JsonAdapter["JsonDataSourceAdapter<br/>JSON files"]
-        CsvAdapter["CsvDataSourceAdapter<br/>CSV files"]
-        Factory["DataSourceFactory<br/>Auto-detection"]
-        Builder["ScenarioBuilder<br/>Legacy JSON support"]
-        Validator["ScenarioValidator<br/>Cross-validation"]
-        Models["Domain Models<br/>Pydantic models"]
+        Service["ScenarioService<br/>Hexagonal orchestrator"]
+        Pipeline["ScenarioPipeline<br/>Processing pipeline"]
+        Port["ScenarioPort<br/>Interface"]
+        JsonAdapter["JsonScenarioAdapter<br/>JSON files"]
+        CsvAdapter["CsvScenarioAdapter<br/>CSV files"]
+        Factory["ScenarioFactory<br/>DTO → Domain"]
+        Builder["ScenarioBuilder<br/>Complex assembly"]
+        ValidationPipeline["4-Layer Validation<br/>SYNTAX→SEMANTIC→INTEGRITY→FEASIBILITY"]
+        Models["Domain Models<br/>Rich Pydantic models"]
     end
 
-    Files["JSON/CSV/API Sources"] --> Factory
-    Factory --> JsonAdapter
-    Factory --> CsvAdapter
+    Files["JSON/CSV Sources"] --> JsonAdapter
+    Files --> CsvAdapter
     JsonAdapter --> Port
     CsvAdapter --> Port
-    Port --> Loader
-    Loader --> Builder
-    Builder --> Validator
-    Validator --> Models
+    Port --> Service
+    Service --> Pipeline
+    Pipeline --> Factory
+    Factory --> Builder
+    Builder --> ValidationPipeline
+    ValidationPipeline --> Models
     Models --> Output[Validated Scenario]
 
     classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef port fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef validation fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
 
-    class Loader,JsonAdapter,CsvAdapter,Factory,Builder,Validator,Models component
+    class Service,Pipeline,JsonAdapter,CsvAdapter,Factory,Builder,Models component
     class Files,Output external
     class Port port
+    class ValidationPipeline validation
 ```
 
 ### Contained Building Blocks
 
 | Component | Responsibility | Layer | Implementation |
 |-----------|----------------|-------|----------------|
-| **ScenarioLoader** | Hexagonal orchestrator using data source adapters | Application | `application/scenario_loader.py` |
-| **DataSourcePort** | Interface for data source adapters (hexagonal architecture) | Domain | `domain/ports/data_source_port.py` |
-| **JsonDataSourceAdapter** | Load scenario data from JSON files | Infrastructure | `infrastructure/adapters/json_data_source_adapter.py` |
-| **CsvDataSourceAdapter** | Load scenario data from CSV files | Infrastructure | `infrastructure/adapters/csv_data_source_adapter.py` |
-| **DataSourceFactory** | Auto-detect source type and create appropriate adapter | Infrastructure | `infrastructure/adapters/data_source_factory.py` |
-| **ScenarioBuilder** | Legacy JSON support (wrapped by JSON adapter) | Application | `application/scenario_builder.py` |
-| **ScenarioValidator** | Cross-validate scenario consistency | Domain | `domain/services/scenario_validator.py` |
-| **Domain Models** | Type-safe Pydantic models (Scenario, Train, Wagon, Workshop, etc.) | Domain | `domain/models/` |
+| **ScenarioService** | Hexagonal orchestrator with pipeline integration | Application | `application/scenario_service.py` |
+| **ScenarioPipeline** | Multi-stage processing with late validation | Application | `application/pipeline/scenario_pipeline.py` |
+| **ScenarioPort** | Interface for scenario adapters (hexagonal architecture) | Domain | `domain/ports/scenario_port.py` |
+| **JsonScenarioAdapter** | Load scenario data from JSON files | Infrastructure | `infrastructure/adapters/json_scenario_adapter.py` |
+| **CsvScenarioAdapter** | Load scenario data from CSV files | Infrastructure | `infrastructure/adapters/csv_scenario_adapter.py` |
+| **ScenarioFactory** | Transform DTOs to rich domain models | Domain | `domain/factories/scenario_factory.py` |
+| **ScenarioBuilder** | Complex scenario assembly with file references | Application | `application/scenario_builder.py` |
+| **4-Layer Validation** | Enterprise validation pipeline with error stacking | Shared | `shared/validation/pipeline.py` |
+| **Domain Models** | Rich Pydantic models with business validation | Domain | `domain/models/` |
 
-### Level 3: Hexagonal Architecture Implementation
+### Level 3: 4-Layer Validation Pipeline
 
-**Data Source Adapters support multiple input formats:**
+**Enterprise-grade validation with comprehensive error stacking:**
 
 ```mermaid
 graph TB

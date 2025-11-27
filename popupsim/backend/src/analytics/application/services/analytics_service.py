@@ -34,14 +34,14 @@ class AnalyticsService:
 
     def start_analytics_session(self, scenario: Scenario) -> AnalyticsSession:
         """Start analytics session and publish simulation started event."""
-        session = AnalyticsFactory.create_analytics_session(scenario.scenario_id)
+        session = AnalyticsFactory.create_analytics_session(scenario.id)
 
         # Publish simulation started event
         event = AnalyticsFactory.create_simulation_started_event(scenario)
         self.publisher.publish(event)
         session.add_event(event)
 
-        logger.info('Started analytics session for scenario %s', scenario.scenario_id)
+        logger.info('Started analytics session for scenario %s', scenario.id)
         return session
 
     def record_wagon_delivered(self, session: AnalyticsSession, wagon: Wagon) -> None:
@@ -87,9 +87,7 @@ class AnalyticsService:
         workshops = simulation_data['workshops']
 
         # Publish simulation completed event
-        event = AnalyticsFactory.create_simulation_completed_event(
-            scenario.scenario_id, len(wagons), len(rejected_wagons)
-        )
+        event = AnalyticsFactory.create_simulation_completed_event(scenario.id, len(wagons), len(rejected_wagons))
         self.publisher.publish(event)
         session.add_event(event)
 
@@ -99,7 +97,7 @@ class AnalyticsService:
         )
 
         session.complete_session()
-        logger.info('Completed analytics session for scenario %s', scenario.scenario_id)
+        logger.info('Completed analytics session for scenario %s', scenario.id)
 
         return kpi_result
 

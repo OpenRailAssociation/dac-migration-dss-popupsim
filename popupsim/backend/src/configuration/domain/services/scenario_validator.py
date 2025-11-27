@@ -114,8 +114,8 @@ class ScenarioValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.ERROR,
-                        message=f'Route {route.route_id}: Empty track sequence',
-                        field=f'routes[{route.route_id}].track_sequence',
+                        message=f'Route {route.id}: Empty track sequence',
+                        field=f'routes[{route.id}].track_sequence',
                         suggestion='Add track sequence to route',
                     )
                 )
@@ -124,8 +124,8 @@ class ScenarioValidator:
                 issues.append(
                     ValidationIssue(
                         level=ValidationLevel.WARNING,
-                        message=f'Route {route.route_id}: Duration is {route.duration}',
-                        field=f'routes[{route.route_id}].duration',
+                        message=f'Route {route.id}: Duration is {route.duration}',
+                        field=f'routes[{route.id}].duration',
                         suggestion='Set positive duration for route',
                     )
                 )

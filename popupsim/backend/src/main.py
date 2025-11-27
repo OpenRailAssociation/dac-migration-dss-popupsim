@@ -112,7 +112,7 @@ def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | 
     typer.echo(f'Debug level set to: {debug}')
     scenario = ScenarioBuilder(scenario_path).build()
     typer.echo('Scenario loaded and validated successfully.')
-    typer.echo(f'Scenario ID: {scenario.scenario_id}')
+    typer.echo(f'Scenario ID: {scenario.id}')
     typer.echo(f'Start Date: {scenario.start_date}')
     typer.echo(f'End Date: {scenario.end_date}')
     if scenario.routes:
