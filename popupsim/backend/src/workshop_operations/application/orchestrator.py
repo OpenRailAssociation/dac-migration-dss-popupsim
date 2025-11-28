@@ -117,6 +117,7 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         # Create stores for wagon flow coordination
         self.wagons_ready_for_stations: dict[str, Any] = {}
         self.wagons_completed: dict[str, Any] = {}
+        self.retrofitted_wagons_ready = sim.create_store(capacity=1000)  # Fix for W07 tracking issue
         self.train_processed_event = sim.create_event()
 
         self.metrics = SimulationMetrics()
@@ -683,13 +684,34 @@ def _pickup_track_batches(popupsim: WorkshopOrchestrator, workshop_track_id: str
     batch_size = workshop.retrofit_stations
 
     while True:
-        # Collect full batch (blocks until all ready)
+        # Collect batch with timeout for partial batches
         batch: list[Wagon] = []
-        for _ in range(batch_size):
-            wagon: Wagon = yield popupsim.wagons_completed[workshop_track_id].get()
-            batch.append(wagon)
+        
+        # Get first wagon (blocks until available)
+        wagon: Wagon = yield popupsim.wagons_completed[workshop_track_id].get()
+        batch.append(wagon)
+        
+        # Try to collect additional wagons up to batch_size with timeout
+        for _ in range(batch_size - 1):
+            if len(popupsim.wagons_completed[workshop_track_id].items) > 0:
+                additional_wagon: Wagon = yield popupsim.wagons_completed[workshop_track_id].get()
+                batch.append(additional_wagon)
+            else:
+                # No more wagons immediately available, wait briefly
+                try:
+                    timeout_event = popupsim.sim.delay(5.0)  # 5 minute timeout
+                    get_event = popupsim.wagons_completed[workshop_track_id].get()
+                    result = yield timeout_event | get_event
+                    if get_event in result:
+                        batch.append(result[get_event])
+                    else:
+                        # Timeout - proceed with partial batch
+                        break
+                except Exception:
+                    # Timeout or other issue - proceed with partial batch
+                    break
 
-        logger.info('Full batch of %d wagons ready for pickup', len(batch))
+        logger.info('Batch of %d wagons ready for pickup (target: %d)', len(batch), batch_size)
 
         # Get locomotive
         loco: Locomotive = yield from popupsim.locomotive_service.allocate(popupsim)
@@ -738,6 +760,8 @@ def _pickup_track_batches(popupsim: WorkshopOrchestrator, workshop_track_id: str
                 popupsim.track_capacity.add_wagon(retrofitted_track.id, wagon.length)
                 popupsim.wagon_state.complete_arrival(wagon, retrofitted_track.id, WagonStatus.RETROFITTED)
                 logger.info('Wagon %s moved to retrofitted track', wagon.id)
+                # Signal wagon ready for parking (fixes W07 tracking issue)
+                yield popupsim.retrofitted_wagons_ready.put(wagon)
 
             # Return loco to parking and release
             yield from _return_loco_to_parking_and_release(popupsim, loco)
@@ -759,41 +783,52 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
     Any
         SimPy timeout events.
     """
-    yield popupsim.sim.delay(60.0)  # Wait for first wagons to reach retrofitted track
     logger.info('Starting move to parking process')
 
     retrofitted_track = popupsim.retrofitted_tracks[0]
     parking_tracks = popupsim.parking_tracks
     current_parking_index = 0
+    wagons_batch: list[Wagon] = []
 
     while True:
-        # Find wagons on retrofitted track
-        wagons_on_retrofitted = [
-            w for w in popupsim.wagons_queue if w.track == retrofitted_track.id and w.status == WagonStatus.RETROFITTED
-        ]
-
-        if not wagons_on_retrofitted:
-            yield popupsim.sim.delay(1.0)
-            continue
+        # Get wagon from retrofitted wagons store (blocks until available)
+        wagon: Wagon = yield popupsim.retrofitted_wagons_ready.get()
+        wagons_batch.append(wagon)
+        
+        # Collect additional wagons if available (non-blocking)
+        while len(popupsim.retrofitted_wagons_ready.items) > 0 and len(wagons_batch) < 10:
+            additional_wagon: Wagon = yield popupsim.retrofitted_wagons_ready.get()
+            wagons_batch.append(additional_wagon)
 
         # Select parking track (sequential fill strategy)
         parking_track = None
         for i in range(len(parking_tracks)):
             idx = (current_parking_index + i) % len(parking_tracks)
             track = parking_tracks[idx]
-            if any(popupsim.track_capacity.can_add_wagon(track.id, w.length) for w in wagons_on_retrofitted):
+            if any(popupsim.track_capacity.can_add_wagon(track.id, w.length) for w in wagons_batch):
                 parking_track = track
                 current_parking_index = idx
                 break
 
         if not parking_track:
+            # No parking capacity, put wagons back and wait
+            for wagon in wagons_batch:
+                yield popupsim.retrofitted_wagons_ready.put(wagon)
+            wagons_batch = []
             yield popupsim.sim.delay(1.0)
             continue
 
-        # Batch all wagons that fit on selected parking track
+        # Batch wagons that fit on selected parking track
         wagons_to_move = [
-            w for w in wagons_on_retrofitted if popupsim.track_capacity.can_add_wagon(parking_track.id, w.length)
+            w for w in wagons_batch if popupsim.track_capacity.can_add_wagon(parking_track.id, w.length)
         ]
+        wagons_to_requeue = [w for w in wagons_batch if w not in wagons_to_move]
+        
+        # Put back wagons that don't fit
+        for wagon in wagons_to_requeue:
+            yield popupsim.retrofitted_wagons_ready.put(wagon)
+        
+        wagons_batch = []
 
         if not wagons_to_move:
             current_parking_index = (current_parking_index + 1) % len(parking_tracks)
@@ -814,11 +849,7 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
             logger.info('Wagon %s moved to parking track %s', wagon.id, parking_track.id)
 
         # Check if current parking track is full, move to next
-        remaining_wagons = [w for w in wagons_on_retrofitted if w not in wagons_to_move]
-        can_fit_remaining = any(
-            popupsim.track_capacity.can_add_wagon(parking_track.id, w.length) for w in remaining_wagons
-        )
-        if remaining_wagons and not can_fit_remaining:
+        if not any(popupsim.track_capacity.can_add_wagon(parking_track.id, 10.0) for _ in range(1)):
             current_parking_index = (current_parking_index + 1) % len(parking_tracks)
             logger.debug('Parking track %s full, switching to next', parking_track.id)
 
