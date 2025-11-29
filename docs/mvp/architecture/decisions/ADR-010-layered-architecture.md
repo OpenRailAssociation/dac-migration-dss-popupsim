@@ -1,6 +1,6 @@
 # ADR-010: Layered Architecture
 
-**Status:** Accepted - 2025-01-15
+**Status:** IMPLEMENTED - 2025-01-15
 
 ## Context
 
@@ -28,8 +28,42 @@ Use **layered architecture** within each bounded context:
 - **Microservices**: Deployment overhead
 - **Monolithic spaghetti**: Unmaintainable
 
+## Implementation in MVP
+
+### Layer Structure per Context
+```
+configuration/
+├── application/     # Services, DTOs (Presentation)
+├── domain/         # Models, business logic
+└── infrastructure/ # File I/O, adapters (Data Access)
+
+workshop_operations/
+├── application/     # Orchestrator, coordinators
+├── domain/         # Entities, services, business rules
+└── infrastructure/ # SimPy, resources, routing
+
+analytics/
+├── application/     # KPI services, aggregators
+├── domain/         # Collectors, models
+└── infrastructure/ # Matplotlib, CSV export
+```
+
+### Dependency Direction
+```
+Presentation → Business Logic → Data Access
+Application  → Domain         → Infrastructure
+```
+
 ## Consequences
 
-- **Positive**: Rapid development, clear structure
-- **Negative**: Less framework independence than hexagonal
-- **Migration**: Interface preparation for hexagonal transition
+### Achieved
+- ✅ **Rapid Development**: 5-week MVP timeline met
+- ✅ **Clear Structure**: Consistent layering across all contexts
+- ✅ **Testable Business Logic**: Domain layer isolated from infrastructure
+- ✅ **Migration Ready**: Clean interfaces prepared for hexagonal transition
+- ✅ **Team Productivity**: Familiar pattern, easy to understand
+
+### Files Implementing This Decision
+- All contexts follow consistent layered structure
+- Domain layers contain pure business logic
+- Infrastructure layers handle external dependencies

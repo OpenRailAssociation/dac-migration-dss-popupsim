@@ -1,11 +1,11 @@
-# ADR-002: SimPy Workshop Modeling and Queue Coordination
+# ADR-015: SimPy Workshop Modeling and Queue Coordination
 
 ## Status
-**OPEN** - Under evaluation
+**IMPLEMENTED** - Resolved in MVP
 
 ## Context
 
-PopUpSim currently has a hybrid approach to SimPy usage - some components use SimPy resources and stores effectively, while others rely on manual queue management and polling. This inconsistency has led to the W07 wagon tracking issue and creates opportunities for better SimPy integration.
+PopUpSim had a hybrid approach to SimPy usage - some components used SimPy resources and stores effectively, while others relied on manual queue management and polling. This inconsistency led to the W07 wagon tracking issue and required better SimPy integration.
 
 ### Current SimPy Usage Analysis
 
@@ -41,7 +41,35 @@ if not wagons_on_retrofitted:
 ### Root Cause
 The fundamental issue is **incomplete SimPy workflow coordination**. We have SimPy stores for some workflow stages but not others, creating gaps where manual queue management and polling are required.
 
-## Decision Options
+## Decision
+
+**IMPLEMENTED: Option 1 (Minimal SimPy Store Fix)** - Added missing SimPy store to complete the workflow chain.
+
+The MVP implements complete SimPy workflow coordination:
+
+### Implementation in MVP
+
+```python
+class WorkshopOrchestrator:
+    def __init__(self, sim, scenario):
+        # Complete SimPy store workflow (no polling)
+        self.retrofitted_wagons_ready = sim.create_store()  # ✅ Added missing store
+        self.wagons_ready_for_stations = {track_id: sim.create_store() for track_id in workshops}
+        self.wagons_completed = {track_id: sim.create_store() for track_id in workshops}
+        
+        # SimPy Resources for workshop stations
+        self.workshop_capacity = WorkshopCapacityManager(sim, workshops)
+
+def move_to_parking(popupsim):
+    while True:
+        # ✅ Event-driven coordination (no polling)
+        wagon = yield from popupsim.get_wagon_from_retrofitted()
+        # Process wagon...
+```
+
+**Result**: Complete event-driven workflow with no polling delays.
+
+## Decision Options (Evaluated)
 
 ### Option 1: Minimal SimPy Store Fix
 
@@ -267,13 +295,19 @@ popupsim.metrics.record_event(event)
 ### For Advanced Modeling
 **Option 3** (SimPy Workshop Entity Model) - Most natural SimPy approach
 
-## Next Steps
+## Implementation Results
 
-1. **Prototype Option 1** - Minimal fix to validate approach
-2. **Performance testing** - Compare polling vs. SimPy store performance
-3. **Architecture review** - Evaluate long-term SimPy integration strategy
-4. **Team discussion** - Gather input on SimPy modeling preferences
-5. **Decision timeline** - Target decision by [DATE]
+### Achieved in MVP
+- ✅ **Complete SimPy Integration**: All workflow stages use SimPy stores
+- ✅ **No Polling**: Event-driven coordination throughout the system
+- ✅ **W07 Problem Solved**: `retrofitted_wagons_ready` store added for complete workflow
+- ✅ **Resource Management**: SimPy Resources for workshop stations with proper blocking
+- ✅ **Performance**: Eliminated 1-second polling delays, immediate event response
+
+### Files Implementing This Decision
+- `workshop_operations/application/orchestrator.py` - Complete SimPy store workflow
+- `workshop_operations/infrastructure/resources/workshop_capacity_manager.py` - SimPy Resources
+- `workshop_operations/infrastructure/simulation/simpy_adapter.py` - SimPy abstraction layer
 
 ## References
 

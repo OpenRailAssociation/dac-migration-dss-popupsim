@@ -1,14 +1,14 @@
-# ADR-001: Wagon Tracking and Queue Management Architecture
+# ADR-014: Wagon Tracking and Queue Management Architecture
 
 ## Status
-**OPEN** - Under evaluation
+**IMPLEMENTED** - Resolved in MVP
 
 ## Context
 
-PopUpSim currently has a fundamental issue with wagon tracking and queue management that causes wagons to be "lost" during the simulation workflow. The root cause is a dual-purpose `wagons_queue` that serves both as a processing queue and a global wagon registry, leading to data inconsistency.
+PopUpSim had a fundamental issue with wagon tracking and queue management that caused wagons to be "lost" during the simulation workflow. The root cause was a dual-purpose `wagons_queue` that served both as a processing queue and a global wagon registry, leading to data inconsistency.
 
-### Current Problem
-- **W07 stuck on retrofit track**: Wagons moved to retrofitted track are not added back to `wagons_queue`, making them invisible to `move_to_parking` process
+### Problem (Resolved)
+- **W07 stuck on retrofit track**: Wagons moved to retrofitted track were not added back to `wagons_queue`, making them invisible to `move_to_parking` process
 - **Dual-purpose queue**: `popupsim.wagons_queue` used for both processing workflow and wagon tracking
 - **Broken workflow chain**: Train → Collection → Retrofit → Workshop → Retrofitted → ❌ LOST → Parking
 - **Data inconsistency**: Wagons removed from queue during processing but needed for later stages
@@ -25,7 +25,40 @@ wagons_on_retrofitted = [
 ]
 ```
 
-## Decision Options
+## Decision
+
+**IMPLEMENTED: Option 1 (Separation of Concerns - Registry + Queues)** with SimPy store integration.
+
+The MVP implements a hybrid approach combining:
+- **WagonStateManager**: Handles wagon state transitions and tracking
+- **SimPy Stores**: Separate workflow coordination stores for each stage
+- **TrackCapacityManager**: Physical capacity management separate from workflow
+
+### Implementation in MVP
+
+```python
+class WorkshopOrchestrator:
+    def __init__(self, sim, scenario):
+        # Separate stores for workflow coordination (no dual-purpose queue)
+        self.retrofitted_wagons_ready = sim.create_store()
+        self.wagons_ready_for_stations = {}
+        self.wagons_completed = {}
+        
+        # State management (replaces dual-purpose wagons_queue)
+        self.wagon_state = WagonStateManager()
+        self.track_capacity = TrackCapacityManager()
+        
+    def put_wagon_if_fits_retrofitted(self, wagon):
+        """Capacity-validated workflow coordination."""
+        if self.track_capacity.can_add_wagon(track_id, wagon.length):
+            yield self.retrofitted_wagons_ready.put(wagon)
+            return True
+        return False
+```
+
+**Result**: No more lost wagons - complete workflow chain with proper separation of concerns.
+
+## Decision Options (Evaluated)
 
 ### Option 1: Separation of Concerns - Registry + Queues
 
@@ -228,13 +261,19 @@ Phase 4: Enterprise → Microservices + real-time analytics
 4. **Migration Path**: Should we implement incrementally or do a complete refactor?
 5. **Testing Strategy**: How do we ensure no regressions during architecture changes?
 
-## Next Steps
+## Implementation Results
 
-1. **Prototype Option 1** - Registry + Queues approach to solve W07
-2. **Evaluate Option 5** - State machine for Wagon resource
-3. **Performance testing** - Compare query performance across options
-4. **Team discussion** - Gather input on complexity vs. benefits trade-offs
-5. **Decision timeline** - Target decision by [DATE]
+### Achieved in MVP
+- ✅ **W07 Problem Solved**: Wagons no longer get lost during workflow
+- ✅ **Separation of Concerns**: WagonStateManager handles state, SimPy stores handle workflow
+- ✅ **No Dual-Purpose Queue**: Clear separation between tracking and coordination
+- ✅ **Complete Analytics**: All wagon states tracked for metrics and visualization
+- ✅ **Event-Driven Architecture**: SimPy stores eliminate polling and manual searches
+
+### Files Implementing This Decision
+- `workshop_operations/application/orchestrator.py` - Workflow coordination with separate stores
+- `workshop_operations/domain/services/wagon_operations.py` - WagonStateManager and WagonSelector
+- `analytics/domain/collectors/wagon_collector.py` - Wagon state tracking for analytics
 
 ## References
 
