@@ -19,8 +19,11 @@
 | **ADR-011** | [3 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md) | ✅ Accepted | Minimal viable domain decomposition |
 | **ADR-012** | [Direct Method Calls](decisions/ADR-012-direct-method-calls.md) | ✅ Accepted | Simple integration |
 | **ADR-013** | [Hexagonal Architecture for Data Sources](decisions/ADR-013-hexagonal-data-sources.md) | ✅ Accepted | Multi-format input support |
+| **ADR-014** | [Wagon Tracking and Queue Management](decisions/ADR-014-wagon-tracking-queue-management.md) | ✅ Implemented | Resolved wagon tracking issues |
+| **ADR-015** | [SimPy Workshop Modeling](decisions/ADR-015-simpy-workshop-modeling.md) | ✅ Implemented | Complete SimPy integration |
+| **ADR-016** | [Capacity Management Integration](decisions/ADR-016-capacity-management-integration.md) | ✅ Implemented | Physical capacity validation |
 
-**Note**: Full version architectural decisions (ADR-001 through ADR-018) are documented in [../../full-version/architecture/decisions/](../../full-version/architecture/decisions/).
+**Note**: Full version architectural decisions (ADR-001 through ADR-013) are documented in [../../full-version/architecture/decisions/](../../full-version/architecture/decisions/).
 
 ## 9.2 MVP Architecture Decisions
 
@@ -45,7 +48,12 @@ All MVP architectural decisions are documented as separate ADR files in the [dec
 - **[ADR-005: Type Hints Mandatory](decisions/ADR-005-type-hints-mandatory.md)** - Code quality and safety
 
 ### Integration Decisions
-- **[ADR-013: Hexagonal Architecture for Data Sources](decisions/ADR-013-hexagonal-data-sources.md)** - Multi-format input supportr testing
+- **[ADR-013: Hexagonal Architecture for Data Sources](decisions/ADR-013-hexagonal-data-sources.md)** - Multi-format input support
+
+### Implementation Decisions (Resolved Issues)
+- **[ADR-014: Wagon Tracking and Queue Management](decisions/ADR-014-wagon-tracking-queue-management.md)** - Resolved wagon tracking issues
+- **[ADR-015: SimPy Workshop Modeling](decisions/ADR-015-simpy-workshop-modeling.md)** - Complete SimPy integration
+- **[ADR-016: Capacity Management Integration](decisions/ADR-016-capacity-management-integration.md)** - Physical capacity validationr testing
 - **Maintainability**: Clear separation between data access and business logic
 - **Extensibility**: New data sources without changing core logic
 - **Type safety**: Consistent DTOs across all adapters
