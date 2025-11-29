@@ -6,253 +6,46 @@
 
 | ADR | Title | Status | Impact |
 |-----|-------|--------|--------|
-| **MVP-001** | SimPy for Discrete Event Simulation | ✅ Accepted | Proven in 3-Länderhack POC |
-| **MVP-002** | File-Based Data Storage | ✅ Accepted | No database installation required |
-| **MVP-003** | Pydantic for Data Validation | ✅ Accepted | Type safety and validation |
-| **MVP-004** | Matplotlib for Visualization | ✅ Accepted | Simple offline charts |
-| **MVP-005** | Layered Architecture | ✅ Accepted | Rapid development |
-| **MVP-006** | 3 Bounded Contexts | ✅ Accepted | Reduced complexity |
-| **MVP-007** | Direct Method Calls | ✅ Accepted | Simple integration |
-| **MVP-008** | Hexagonal Architecture for Data Sources | ✅ Accepted | Multi-format input support |
+| **ADR-001** | [Hexagonal Pipeline Architecture](decisions/ADR-001-hexagonal-pipeline-architecture.md) | ✅ Accepted | Clean separation of concerns |
+| **ADR-002** | [4-Layer Validation Framework](decisions/ADR-002-4-layer-validation-framework.md) | ✅ Accepted | Comprehensive input validation |
+| **ADR-003** | [Field Name Standardization](decisions/ADR-003-field-name-standardization.md) | ✅ Accepted | Consistent naming conventions |
+| **ADR-004** | [3 Bounded Context Architecture](decisions/ADR-004-3-bounded-context-architecture.md) | ✅ Accepted | Domain separation |
+| **ADR-005** | [Type Hints Mandatory](decisions/ADR-005-type-hints-mandatory.md) | ✅ Accepted | Code quality and safety |
+| **ADR-006** | [SimPy for Discrete Event Simulation](decisions/ADR-006-simpy-discrete-event-simulation.md) | ✅ Accepted | Proven simulation framework |
+| **ADR-007** | [File-Based Data Storage](decisions/ADR-007-file-based-data-storage.md) | ✅ Accepted | Simple deployment |
+| **ADR-008** | [Pydantic for Data Validation](decisions/ADR-008-pydantic-data-validation.md) | ✅ Accepted | Type safety and validation |
+| **ADR-009** | [Matplotlib for Visualization](decisions/ADR-009-matplotlib-visualization.md) | ✅ Accepted | Simple offline charts |
+| **ADR-010** | [Layered Architecture](decisions/ADR-010-layered-architecture.md) | ✅ Accepted | Rapid development |
+| **ADR-011** | [3 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md) | ✅ Accepted | Minimal viable domain decomposition |
+| **ADR-012** | [Direct Method Calls](decisions/ADR-012-direct-method-calls.md) | ✅ Accepted | Simple integration |
+| **ADR-013** | [Hexagonal Architecture for Data Sources](decisions/ADR-013-hexagonal-data-sources.md) | ✅ Accepted | Multi-format input support |
 
-## 9.2 Technology Decisions
+**Note**: Full version architectural decisions (ADR-001 through ADR-018) are documented in [../../full-version/architecture/decisions/](../../full-version/architecture/decisions/).
 
-### ADR MVP-001: SimPy for Discrete Event Simulation
+## 9.2 MVP Architecture Decisions
 
-**Status:** Accepted - 2025-01-15
+All MVP architectural decisions are documented as separate ADR files in the [decisions](decisions/) directory. This section provides an overview and links to the detailed decisions.
 
-**Context:**
-Need a discrete event simulation framework for modeling Pop-Up workshop operations with individual wagon tracking and resource management.
+### Architecture Pattern Decisions
+- **[ADR-001: Hexagonal Pipeline Architecture](decisions/ADR-001-hexagonal-pipeline-architecture.md)** - Clean separation of concerns
+- **[ADR-004: 3 Bounded Context Architecture](decisions/ADR-004-3-bounded-context-architecture.md)** - Domain separation
+- **[ADR-010: Layered Architecture](decisions/ADR-010-layered-architecture.md)** - Simple architecture for rapid development
+- **[ADR-011: 3 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md)** - Minimal viable domain decomposition
+- **[ADR-012: Direct Method Calls](decisions/ADR-012-direct-method-calls.md)** - Simple integration between contexts
 
-**Decision:**
-Use **SimPy** as the simulation engine.
+### Technology Decisions
+- **[ADR-006: SimPy for Discrete Event Simulation](decisions/ADR-006-simpy-discrete-event-simulation.md)** - Proven simulation framework
+- **[ADR-007: File-Based Data Storage](decisions/ADR-007-file-based-data-storage.md)** - Simple deployment without database
+- **[ADR-008: Pydantic for Data Validation](decisions/ADR-008-pydantic-data-validation.md)** - Type safety and validation
+- **[ADR-009: Matplotlib for Visualization](decisions/ADR-009-matplotlib-visualization.md)** - Simple offline charts
 
-**Rationale:**
-- **Proven in POC**: Successfully validated during 3-Länderhack 2024 hackathon
-- **Python native**: Integrates seamlessly with Python ecosystem
-- **Discrete event paradigm**: Perfect fit for workshop operations simulation
-- **Deterministic**: Supports reproducible results
-- **Well-documented**: Mature library with good community support
-- **Lightweight**: No heavy infrastructure requirements
+### Quality & Standards Decisions
+- **[ADR-002: 4-Layer Validation Framework](decisions/ADR-002-4-layer-validation-framework.md)** - Comprehensive input validation
+- **[ADR-003: Field Name Standardization](decisions/ADR-003-field-name-standardization.md)** - Consistent naming conventions
+- **[ADR-005: Type Hints Mandatory](decisions/ADR-005-type-hints-mandatory.md)** - Code quality and safety
 
-**Alternatives Considered:**
-- **SimPy** ✅ Chosen
-- **Mesa**: Agent-based, overkill for our use case
-- **Custom simulation**: Too much development effort
-- **AnyLogic**: Commercial, not open source
-
-**Consequences:**
-- **Positive**: Fast development, proven approach, deterministic results
-- **Negative**: Tight coupling to SimPy (mitigated by preparing abstraction layer)
-- **Risk**: Framework limitations (acceptable for MVP scope)
-
----
-
-### ADR MVP-002: File-Based Data Storage
-
-**Status:** Accepted - 2025-01-15
-
-**Context:**
-Need data storage for configuration and results. Full version will use database, but MVP needs simplest approach.
-
-**Decision:**
-Use **file-based storage** with JSON/CSV formats.
-
-**Rationale:**
-- **Local deployment**: No server infrastructure needed
-- **Small data volume**: Typical scenarios have <1000 wagons
-- **Simple installation**: No database setup required
-- **Transparency**: Human-readable formats
-- **Version control**: Git-friendly text files
-- **Portability**: Easy to share and backup
-
-**Alternatives Considered:**
-- **Files (JSON/CSV)** ✅ Chosen
-- **SQLite**: Overkill for MVP data volume
-- **PostgreSQL**: Requires installation and setup
-- **In-memory only**: No persistence
-
-**Consequences:**
-- **Positive**: Zero installation complexity, transparent data
-- **Negative**: Limited scalability (acceptable for MVP)
-- **Migration**: Repository pattern prepared for database transition
-
----
-
-### ADR MVP-003: Pydantic for Data Validation
-
-**Status:** Accepted - 2025-01-15
-
-**Context:**
-Need robust input validation for JSON/CSV configuration files with clear error messages.
-
-**Decision:**
-Use **Pydantic** for data validation and parsing.
-
-**Rationale:**
-- **Type safety**: Excellent integration with Python type hints (matches project rules)
-- **Validation**: Automatic validation with clear error messages
-- **Performance**: Fast (Rust-based core in Pydantic v2)
-- **JSON Schema**: Can generate schemas for documentation
-- **IDE support**: Great autocomplete and type checking
-- **Standard**: De facto standard in modern Python projects
-
-**Alternatives Considered:**
-- **Pydantic** ✅ Chosen
-- **dataclasses**: No validation capabilities
-- **attrs**: Less popular, fewer features
-- **marshmallow**: Older, slower, less type-safe
-- **cerberus**: Less Pythonic, no type hints
-
-**Consequences:**
-- **Positive**: Type-safe code, excellent validation, good error messages
-- **Negative**: Additional dependency (minimal concern)
-- **Benefit**: Enforces project's type hint requirements
-
----
-
-### ADR MVP-004: Matplotlib for Visualization
-
-**Status:** Accepted - 2025-01-15
-
-**Context:**
-Need visualization for simulation results. Full version will have web interface, but MVP needs simple charts.
-
-**Decision:**
-Use **Matplotlib** for generating static charts (PNG files).
-
-**Rationale:**
-- **Simple**: Easy to use, well-known library
-- **Offline**: No web server required
-- **Sufficient**: Meets MVP visualization needs
-- **Python native**: Integrated in Python ecosystem
-- **No frontend developer**: Backend team can handle it
-- **Fast development**: Quick to implement basic charts
-
-**Alternatives Considered:**
-- **Matplotlib** ✅ Chosen
-- **Plotly**: Interactive but requires web server
-- **Bokeh**: Overkill for static charts
-- **Seaborn**: Built on Matplotlib, no significant advantage
-- **Custom web charts**: Requires frontend development
-
-**Consequences:**
-- **Positive**: Fast implementation, no web complexity
-- **Negative**: Static charts only (acceptable for MVP)
-- **Migration**: JSON data export prepared for web charts in full version
-
----
-
-## 9.3 Architecture Decisions
-
-### ADR MVP-005: Layered Architecture
-
-**Status:** Accepted - 2025-01-15
-
-**Context:**
-Need simple architecture for rapid MVP development (5-week timeline) that can evolve to hexagonal architecture.
-
-**Decision:**
-Use **layered architecture** within each bounded context:
-- Presentation Layer: CLI + File I/O
-- Business Logic Layer: Domain services
-- Data Access Layer: File operations
-- Infrastructure Layer: SimPy, Matplotlib, Pydantic
-
-**Rationale:**
-- **Fast development**: Simple, well-understood pattern
-- **Team experience**: Familiar to all developers
-- **Clear separation**: Easy to test business logic
-- **Migration ready**: Foundation for hexagonal architecture
-
-**Alternatives Considered:**
-- **Layered** ✅ Chosen
-- **Hexagonal**: Too complex for 5-week MVP
-- **Microservices**: Deployment overhead
-- **Monolithic spaghetti**: Unmaintainable
-
-**Consequences:**
-- **Positive**: Rapid development, clear structure
-- **Negative**: Less framework independence than hexagonal
-- **Migration**: Interface preparation for hexagonal transition
-
----
-
-### ADR MVP-006: 3 Bounded Contexts
-
-**Status:** Accepted - 2025-01-15
-
-**Context:**
-Full version will have multiple bounded contexts. MVP needs minimal viable domain decomposition.
-
-**Decision:**
-Use **3 bounded contexts**:
-1. **Configuration Context**: Input validation & parsing
-2. **Workshop Operations Context**: Simulation execution & analysis (workshops, tracks, trains)
-3. **Analysis & Reporting Context**: Orchestration & output
-
-**Rationale:**
-- **Time constraint**: 5-week development with 3 developers
-- **Clear ownership**: 1 context per developer
-- **Essential separation**: Minimum viable domain boundaries
-- **Extensible**: Can split into more contexts in full version
-
-**Alternatives Considered:**
-- **3 contexts** ✅ Chosen
-- **1 monolith**: No domain separation
-- **More specialized contexts**: Too complex for MVP timeline
-- **2 contexts**: Insufficient separation
-
-**Consequences:**
-- **Positive**: Fast development, clear responsibilities
-- **Negative**: Less granular than full version
-- **Migration**: Context splitting planned for full version
-
----
-
-### ADR MVP-007: Direct Method Calls Between Contexts
-
-**Status:** Accepted - 2025-01-15
-
-**Context:**
-Need integration strategy between bounded contexts. Full version will use event-driven architecture.
-
-**Decision:**
-Use **direct method calls** between contexts (synchronous).
-
-**Rationale:**
-- **Simplest approach**: No message bus, no events
-- **Synchronous workflow**: Matches file-based processing
-- **Easy debugging**: Clear call chain
-- **Fast development**: Minimal infrastructure
-
-**Alternatives Considered:**
-- **Direct calls** ✅ Chosen
-- **Event bus**: Too complex for MVP
-- **Message queue**: Infrastructure overhead
-- **REST API**: Unnecessary for single process
-
-**Consequences:**
-- **Positive**: Fast development, easy debugging
-- **Negative**: Tight coupling (acceptable for MVP)
-- **Migration**: Interface preparation for event-driven architecture
-
----
-
-### ADR MVP-008: Hexagonal Architecture for Data Sources
-
-**Status:** Accepted - 2025-01-16
-
-**Context:**
-Need to support multiple input formats (JSON, CSV) and prepare for future API integration while maintaining clean separation between domain logic and data access.
-
-**Decision:**
-Implement **hexagonal architecture** specifically for the Configuration Context with data source adapters.
-
-**Rationale:**
-- **Multi-format support**: CSV import requirement from stakeholders
-- **Future API readiness**: Planned integration with external systems
-- **Testability**: Easy to mock data sources for testing
+### Integration Decisions
+- **[ADR-013: Hexagonal Architecture for Data Sources](decisions/ADR-013-hexagonal-data-sources.md)** - Multi-format input supportr testing
 - **Maintainability**: Clear separation between data access and business logic
 - **Extensibility**: New data sources without changing core logic
 - **Type safety**: Consistent DTOs across all adapters
@@ -301,7 +94,7 @@ scenario = csv_adapter.load_scenario('csv_directory')
 
 ---
 
-## 9.4 Rejected Alternatives
+## 9.3 Rejected Alternatives
 
 ### Rejected Architecture Options
 
@@ -325,7 +118,7 @@ scenario = csv_adapter.load_scenario('csv_directory')
 
 ---
 
-## 9.5 Migration Path
+## 9.4 Migration Path
 
 ### MVP → Full Version Evolution
 
