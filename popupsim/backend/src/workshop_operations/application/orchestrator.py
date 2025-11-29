@@ -36,6 +36,7 @@ from workshop_operations.infrastructure.resources.workshop_capacity_manager impo
 from workshop_operations.infrastructure.routing.transport_job import TransportJob
 from workshop_operations.infrastructure.routing.transport_job import execute_transport_job
 from workshop_operations.infrastructure.simulation.simpy_adapter import SimulationAdapter
+from yard_operations.application.yard_operations_context import YardOperationsContext
 
 from configuration.domain.models.scenario import LocoDeliveryStrategy
 from configuration.domain.models.scenario import Scenario
@@ -114,6 +115,9 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         self.wagon_state = WagonStateManager()
         self.loco_state = LocomotiveStateManager()
         self.workshop_distributor = WorkshopDistributor()
+
+        # Initialize Yard Operations Context
+        self.yard_operations = YardOperationsContext(self.track_capacity, self.wagon_state)
 
         # Validate domain requirements
         domain_validator = ScenarioDomainValidator()
@@ -322,26 +326,16 @@ def process_train_arrivals(popupsim: WorkshopOrchestrator) -> Generator[Any]:
         # Delay from train arrival to first wagon at hump
         yield popupsim.sim.delay(process_times.train_to_hump_delay)  # type: ignore[union-attr]
 
-        # Process wagons one by one through hump
+        # Process wagons one by one through hump using Yard Operations Context
         for wagon in train.wagons:
-            wagon.status = WagonStatus.SELECTING
-            logger.debug('The wagon %s was selected', wagon.id)
+            logger.debug('Processing wagon %s through hump yard', wagon.id)
 
-            if popupsim.wagon_selector.needs_retrofit(wagon):
-                collection_track_id = popupsim.track_capacity.select_collection_track(wagon.length)
+            # Use Yard Operations Context for wagon classification
+            decision = popupsim.yard_operations.hump_yard_service.process_wagon(
+                wagon, popupsim.wagons_queue, popupsim.rejected_wagons_queue
+            )
 
-                if collection_track_id:
-                    popupsim.track_capacity.add_wagon(collection_track_id, wagon.length)
-                    popupsim.wagon_state.select_for_retrofit(wagon, collection_track_id)
-                    logger.debug('Adding wagon %s to collection track %s', wagon.id, collection_track_id)
-                    popupsim.wagons_queue.append(wagon)
-                else:
-                    popupsim.wagon_state.reject_wagon(wagon)
-                    popupsim.rejected_wagons_queue.append(wagon)
-                    logger.debug('Wagon %s rejected - no collection track capacity', wagon.id)
-            else:
-                popupsim.wagon_state.reject_wagon(wagon)
-                popupsim.rejected_wagons_queue.append(wagon)
+            logger.debug('Wagon %s classification decision: %s', wagon.id, decision.value)
 
             # Delay between wagons at hump
             yield popupsim.sim.delay(process_times.wagon_hump_interval)  # type: ignore[union-attr]
