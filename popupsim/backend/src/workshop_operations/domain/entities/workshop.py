@@ -25,11 +25,11 @@ class Workshop(BaseModel):
     Contains all available tracks for train processing.
     """
 
-    workshop_id: str = Field(description='Unique identifier for the workshop')
+    id: str = Field(description='Unique identifier for the workshop')
     start_date: str = Field(description='Workshop operational start date as ISO string')
     end_date: str = Field(description='Workshop operational end date as ISO string')
     retrofit_stations: int = Field(
         default=1, ge=1, description='Number of concurrent retrofit stations in the workshop'
     )
-    track_id: str = Field(description='Track models available in the workshop')
+    track: str = Field(description='Track models available in the workshop')
     worker: int = Field(default=1, ge=1, description='Number of workers available in the workshop')

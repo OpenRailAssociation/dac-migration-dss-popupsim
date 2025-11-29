@@ -54,7 +54,7 @@ class Scenario(BaseModel):
     Timezone for start_date and end_date is enforced to be UTC in the validators.
     """
 
-    scenario_id: str = Field(
+    id: str = Field(
         pattern=r'^[a-zA-Z0-9_-]+$', description='Unique identifier for the scenario', min_length=1, max_length=50
     )
     start_date: datetime = Field(description='Simulation start date')
@@ -98,7 +98,7 @@ class Scenario(BaseModel):
 
         if duration > 365:
             logger.warning(
-                "Simulation duration of %d days for scenario '%s' may impact performance.", duration, self.scenario_id
+                "Simulation duration of %d days for scenario '%s' may impact performance.", duration, self.id
             )
         elif duration < 1:
             raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')

@@ -1,0 +1,5 @@
+wagon_id,train_id,length,is_loaded,needs_retrofit
+W001,T001,15.0,false,true
+W002,T001,15.0,false,true
+W003,T002,15.0,true,false
+W004,T002,15.0,false,true

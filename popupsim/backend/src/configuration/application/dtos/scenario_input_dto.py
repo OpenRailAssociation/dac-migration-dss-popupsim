@@ -1,6 +1,7 @@
 """Input DTO for scenario configuration data."""
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import Field
@@ -11,9 +12,7 @@ from pydantic import model_validator
 class ScenarioInputDTO(BaseModel):
     """Raw input DTO for scenario configuration from JSON files."""
 
-    scenario_id: str = Field(
-        pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50, description='Unique scenario identifier'
-    )
+    id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50, description='Unique scenario identifier')
     start_date: str | datetime
     end_date: str | datetime
     random_seed: int | None = Field(default=None, ge=0)
@@ -27,6 +26,14 @@ class ScenarioInputDTO(BaseModel):
         default=None, pattern=r'^(round_robin|least_occupied|first_available|random)$'
     )
     loco_delivery_strategy: str | None = Field(default=None, pattern=r'^(return_to_parking|direct_delivery)$')
+
+    # Optional nested collections for complex scenarios
+    trains: list[Any] | None = Field(default=None)
+    workshops: list[Any] | None = Field(default=None)
+    routes: list[Any] | None = Field(default=None)
+    locomotives: list[Any] | None = Field(default=None)
+    tracks: list[Any] | None = Field(default=None)
+    topology: dict[str, Any] | None = Field(default=None)
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod

@@ -56,7 +56,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         KPIResult
             Complete KPI analysis.
         """
-        logger.info('Calculating KPIs for scenario %s', scenario.scenario_id)
+        logger.info('Calculating KPIs for scenario %s', scenario.id)
 
         throughput = self._calculate_throughput(scenario, wagons, rejected_wagons)
         utilization = self._calculate_utilization(workshops, wagons)
@@ -71,7 +71,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
             'avg_waiting_time': avg_waiting_time,
         }
         return AnalyticsFactory.create_kpi_result(
-            scenario_id=scenario.scenario_id,
+            scenario_id=scenario.id,
             throughput=throughput,
             analysis_data=analysis_data,
         )
@@ -102,7 +102,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
 
         for workshop in workshops:
             # Count wagons processed at this workshop
-            workshop_wagons = [w for w in wagons if w.track_id == workshop.track_id]
+            workshop_wagons = [w for w in wagons if w.track == workshop.track]
             processed_count = len(workshop_wagons)
 
             utilization_list.append(AnalyticsFactory.create_utilization_kpi(workshop, processed_count))
@@ -139,7 +139,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
                 severity = 'critical' if critical_utilization_spec.is_satisfied_by(util) else 'high'
                 bottlenecks.append(
                     AnalyticsFactory.create_bottleneck_info(
-                        location=util.workshop_id,
+                        location=util.id,
                         bottleneck_type='workshop',
                         severity=severity,
                         description=f'Workshop at {util.average_utilization_percent:.1f}% utilization',

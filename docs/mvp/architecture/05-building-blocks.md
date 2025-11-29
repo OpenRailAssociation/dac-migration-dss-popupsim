@@ -53,169 +53,236 @@ graph TB
 
 ### Whitebox: Configuration Context
 
-**Responsibility:** Load, parse, validate, and build complete scenario configuration.
+**Responsibility:** Load, parse, validate, and build complete scenario configuration using hexagonal architecture with 4-layer validation pipeline.
 
-**Architecture Note:** Components follow layered architecture pattern (see [Section 8.1](08-concepts.md#81-layered-architecture)).
+**Architecture Note:** Implements hexagonal architecture with pluggable data source adapters and enterprise-grade 4-layer validation framework.
 
 ```mermaid
 graph TB
     subgraph "Configuration Context"
-        Builder["ScenarioBuilder<br/>Main orchestrator"]
-        TrainBuilder["TrainListBuilder<br/>CSV parsing"]
-        TrackBuilder["TrackListBuilder<br/>JSON parsing"]
-        Validator["ScenarioValidator<br/>Cross-validation"]
-        Models["Domain Models<br/>Pydantic models"]
+        Service["ScenarioService<br/>Hexagonal orchestrator"]
+        Pipeline["ScenarioPipeline<br/>Processing pipeline"]
+        Port["ScenarioPort<br/>Interface"]
+        JsonAdapter["JsonScenarioAdapter<br/>JSON files"]
+        CsvAdapter["CsvScenarioAdapter<br/>CSV files"]
+        Factory["ScenarioFactory<br/>DTO → Domain"]
+        Builder["ScenarioBuilder<br/>Complex assembly"]
+        ValidationPipeline["4-Layer Validation<br/>SYNTAX→SEMANTIC→INTEGRITY→FEASIBILITY"]
+        Models["Domain Models<br/>Rich Pydantic models"]
     end
 
-    Files[JSON/CSV Files] --> Builder
-    Builder --> TrainBuilder
-    Builder --> TrackBuilder
-    Builder --> Validator
-    TrainBuilder --> Models
-    TrackBuilder --> Models
-    Validator --> Models
+    Files["JSON/CSV Sources"] --> JsonAdapter
+    Files --> CsvAdapter
+    JsonAdapter --> Port
+    CsvAdapter --> Port
+    Port --> Service
+    Service --> Pipeline
+    Pipeline --> Factory
+    Factory --> Builder
+    Builder --> ValidationPipeline
+    ValidationPipeline --> Models
     Models --> Output[Validated Scenario]
 
     classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef port fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef validation fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
 
-    class Builder,TrainBuilder,TrackBuilder,Validator,Models component
+    class Service,Pipeline,JsonAdapter,CsvAdapter,Factory,Builder,Models component
     class Files,Output external
+    class Port port
+    class ValidationPipeline validation
 ```
 
 ### Contained Building Blocks
 
 | Component | Responsibility | Layer | Implementation |
 |-----------|----------------|-------|----------------|
-| **ScenarioBuilder** | Main builder, orchestrates loading of all referenced files | Business Logic | `builders/scenario_builder.py` |
-| **TrainListBuilder** | Parse train schedules from CSV | Business Logic | `builders/train_list_builder.py` |
-| **TrackListBuilder** | Parse track configurations from JSON | Business Logic | `builders/tracks_builder.py` |
-| **ScenarioValidator** | Cross-validate scenario consistency | Business Logic | `validators/scenario_validation.py` |
-| **Domain Models** | Type-safe Pydantic models (Scenario, Train, Wagon, Workshop, etc.) | Domain | `models/` |
+| **ScenarioService** | Hexagonal orchestrator with pipeline integration | Application | `application/scenario_service.py` |
+| **ScenarioPipeline** | Multi-stage processing with late validation | Application | `application/pipeline/scenario_pipeline.py` |
+| **ScenarioPort** | Interface for scenario adapters (hexagonal architecture) | Domain | `domain/ports/scenario_port.py` |
+| **JsonScenarioAdapter** | Load scenario data from JSON files | Infrastructure | `infrastructure/adapters/json_scenario_adapter.py` |
+| **CsvScenarioAdapter** | Load scenario data from CSV files | Infrastructure | `infrastructure/adapters/csv_scenario_adapter.py` |
+| **ScenarioFactory** | Transform DTOs to rich domain models | Domain | `domain/factories/scenario_factory.py` |
+| **ScenarioBuilder** | Complex scenario assembly with file references | Application | `application/scenario_builder.py` |
+| **4-Layer Validation** | Enterprise validation pipeline with error stacking | Shared | `shared/validation/pipeline.py` |
+| **Domain Models** | Rich Pydantic models with business validation | Domain | `domain/models/` |
 
-### Level 3: Builder Pattern Implementation
+### Level 3: 4-Layer Validation Pipeline
 
-**ScenarioBuilder orchestrates loading of 7 referenced files:**
+**Enterprise-grade validation with comprehensive error stacking:**
 
 ```mermaid
 graph TB
-    Scenario[scenario.json] --> Builder[ScenarioBuilder]
-    Builder --> Trains[trains.csv]
-    Builder --> Tracks[tracks.json]
-    Builder --> Workshops[workshops.json]
-    Builder --> Locomotives[locomotives.json]
-    Builder --> Routes[routes.json]
-    Builder --> Topology[topology.json]
-    Builder --> ProcessTimes[process_times.json]
-
-    Trains --> TrainList[TrainListBuilder]
-    Tracks --> TrackList[TrackListBuilder]
+    subgraph "Data Sources"
+        JsonDir["JSON Directory<br/>scenario.json + refs"]
+        CsvDir["CSV Directory<br/>scenario.csv + data files"]
+        ApiEndpoint["API Endpoint<br/>(future)"]
+    end
     
-    TrainList --> Complete[Complete Scenario]
-    TrackList --> Complete
-    Workshops --> Complete
-    Locomotives --> Complete
-    Routes --> Complete
-    Topology --> Complete
-    ProcessTimes --> Complete
+    subgraph "Adapters"
+        JsonAdapter["JsonDataSourceAdapter"]
+        CsvAdapter["CsvDataSourceAdapter"]
+        ApiAdapter["ApiDataSourceAdapter<br/>(planned)"]
+    end
+    
+    subgraph "Core"
+        Factory["DataSourceFactory<br/>Auto-detection"]
+        Loader["ScenarioLoader"]
+        DTO["ScenarioInputDTO"]
+    end
 
-    classDef file fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef builder fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    JsonDir --> JsonAdapter
+    CsvDir --> CsvAdapter
+    ApiEndpoint --> ApiAdapter
+    
+    JsonAdapter --> Factory
+    CsvAdapter --> Factory
+    ApiAdapter --> Factory
+    
+    Factory --> Loader
+    Loader --> DTO
+    DTO --> Complete[Complete Scenario]
 
-    class Scenario,Trains,Tracks,Workshops,Locomotives,Routes,Topology,ProcessTimes file
-    class Builder,TrainList,TrackList,Complete builder
+    classDef source fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef adapter fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef core fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+
+    class JsonDir,CsvDir,ApiEndpoint source
+    class JsonAdapter,CsvAdapter,ApiAdapter adapter
+    class Factory,Loader,DTO,Complete core
 ```
 
-### Code Example: Actual ScenarioBuilder
+**CSV Directory Structure:**
+```
+csv_scenario/
+├── scenario.csv      # Basic metadata (ID, dates, seed)
+├── trains.csv        # Train schedule with arrival times
+├── wagons.csv        # Wagon data linked to trains
+├── workshops.csv     # Workshop configuration
+├── tracks.csv        # Track definitions
+├── routes.csv        # Route definitions
+└── locomotives.csv   # Locomotive fleet data
+```
 
-**File:** `popupsim/backend/src/builders/scenario_builder.py`
+### Code Example: Hexagonal Architecture ScenarioLoader
+
+**File:** `popupsim/backend/src/configuration/application/scenario_loader.py`
 
 ```python
 from pathlib import Path
-from builders.tracks_builder import TrackListBuilder
-from builders.train_list_builder import TrainListBuilder
-from models.scenario import Scenario
-from validators.scenario_validation import ScenarioValidator
+from typing import Any
 
-class BuilderError(Exception):
-    """Custom exception for configuration-related errors."""
+from configuration.application.dtos.scenario_input_dto import ScenarioInputDTO
+from configuration.domain.exceptions import DataSourceError
+from configuration.domain.ports.data_source_port import DataSourcePort
+from configuration.infrastructure.adapters.data_source_factory import DataSourceFactory
 
-class ScenarioBuilder:
-    """Service for loading and validating configuration files."""
+class ScenarioLoader:
+    """Hexagonal architecture scenario loader.
+    
+    Uses data source adapters to load scenario data from various sources
+    while maintaining separation between domain logic and infrastructure.
+    """
 
-    def __init__(self, scenario_path: Path):
-        self.scenario_path = scenario_path
-        self.scenario: Scenario | None = None
-        self.references: dict = {}
-        self.validator = ScenarioValidator()
-
-    def build(self) -> Scenario:
-        """Build and return the scenario configuration."""
-        path = Path(self.scenario_path)
-        self.__find_scenario_in_path(path)
-        self.__load_scenario()  # Load scenario.json
+    def __init__(self, data_source_adapter: DataSourcePort | None = None) -> None:
+        """Initialize scenario loader.
         
-        if isinstance(self.scenario, Scenario):
-            # Load all referenced files
-            self.__load_locomotives()
-            self.__load_tracks()
-            self.__load_trains()
-            self.__load_routes()
-            self.__load_topology()
-            self.__load_process_times()
-            self.__load_workshops()
+        Parameters
+        ----------
+        data_source_adapter : DataSourcePort | None
+            Specific adapter to use, or None to auto-detect
+        """
+        self._adapter = data_source_adapter
+
+    def load_scenario(self, source_identifier: str | Path) -> ScenarioInputDTO:
+        """Load scenario data using appropriate adapter.
+        
+        Parameters
+        ----------
+        source_identifier : str | Path
+            Source identifier (file path, directory, URL, etc.)
             
-            # Validate complete scenario
-            self.scenario.validate_simulation_requirements()
-        else:
-            raise BuilderError('Scenario could not be loaded properly.')
+        Returns
+        -------
+        ScenarioInputDTO
+            Complete scenario data ready for domain model creation
+        """
+        # Use provided adapter or auto-detect
+        adapter = self._adapter or DataSourceFactory.create_adapter(source_identifier)
         
-        return self.scenario
+        # Validate source before loading
+        if not adapter.validate_source(source_identifier):
+            raise DataSourceError(f'Invalid or inaccessible data source: {source_identifier}')
+        
+        # Load scenario data
+        return adapter.load_scenario(source_identifier)
 
-    def __load_scenario(self) -> None:
-        """Load scenario configuration from JSON file."""
-        with open(self.scenario_path, encoding='utf-8') as f:
-            data = json.load(f)
-        
-        # Validate required fields
-        required_fields = ['scenario_id', 'start_date', 'end_date', 'references']
-        missing_fields = [field for field in required_fields if field not in data]
-        if missing_fields:
-            raise BuilderError(f'Missing required fields: {", ".join(missing_fields)}')
-        
-        self.scenario = Scenario(**data)
-        self.references = data.get('references', {})
-
-    def __load_trains(self) -> None:
-        """Load trains from CSV file referenced in scenario configuration."""
-        trains_file = self.references.get('trains')
-        if not trains_file:
-            raise BuilderError('Missing trains file reference')
-        
-        scenario_dir = Path(self.scenario_path).parent
-        trains_path = scenario_dir / trains_file
-        
-        if isinstance(self.scenario, Scenario):
-            self.scenario.trains = TrainListBuilder(trains_path).build()
-
-    def __load_workshops(self) -> None:
-        """Load workshops from JSON file."""
-        workshops_file = self.references.get('workshops')
-        if not workshops_file:
-            raise BuilderError('Missing workshops file reference')
-        
-        scenario_dir = Path(self.scenario_path).parent
-        workshops_path = scenario_dir / workshops_file
-        
-        if isinstance(self.scenario, Scenario):
-            with open(workshops_path, encoding='utf-8') as f:
-                workshops_data = json.load(f)
-            
-            workshops_list = workshops_data['workshops']
-            self.scenario.workshops = [Workshop(**data) for data in workshops_list]
+    def get_source_info(self, source_identifier: str | Path) -> dict[str, Any]:
+        """Get information about the data source."""
+        try:
+            adapter = self._adapter or DataSourceFactory.create_adapter(source_identifier)
+            metadata = adapter.get_source_metadata(source_identifier)
+            metadata['valid'] = adapter.validate_source(source_identifier)
+            return metadata
+        except DataSourceError as e:
+            return {
+                'valid': False,
+                'error': str(e),
+                'source_type': 'unknown',
+            }
 ```
 
-### Code Example: Pydantic Domain Models
+**File:** `popupsim/backend/src/configuration/infrastructure/adapters/csv_data_source_adapter.py`
+
+```python
+class CsvDataSourceAdapter(DataSourcePort):
+    """CSV data source adapter for loading scenario data from CSV files."""
+
+    def load_scenario(self, source_identifier: str | Path) -> ScenarioInputDTO:
+        """Load scenario data from CSV files in a directory."""
+        csv_dir = Path(source_identifier)
+        if not csv_dir.is_dir():
+            raise DataSourceError(f'CSV directory not found: {csv_dir}')
+
+        # Load scenario metadata
+        scenario_data = self._load_scenario_metadata(csv_dir)
+
+        return ScenarioInputDTO(
+            scenario_id=scenario_data['scenario_id'],
+            start_date=scenario_data['start_date'],
+            end_date=scenario_data['end_date'],
+            random_seed=scenario_data.get('random_seed'),
+            train_schedule_file='trains.csv',
+            routes_file='routes.csv',
+            workshop_tracks_file='workshops.csv',
+        )
+
+    def _load_scenario_metadata(self, csv_dir: Path) -> dict[str, Any]:
+        """Load scenario metadata from scenario.csv."""
+        scenario_file = csv_dir / 'scenario.csv'
+        if not scenario_file.exists():
+            raise DataSourceError(f'scenario.csv not found in {csv_dir}')
+
+        try:
+            import pandas as pd  # pylint: disable=import-outside-toplevel
+        except ImportError as e:
+            raise DataSourceError('pandas required for CSV processing') from e
+
+        df = pd.read_csv(scenario_file)
+        if df.empty:
+            raise DataSourceError('scenario.csv is empty')
+
+        row = df.iloc[0]
+        return {
+            'scenario_id': row['scenario_id'],
+            'start_date': row['start_date'],
+            'end_date': row['end_date'],
+            'random_seed': row.get('random_seed'),
+        }
+```
+
+### Code Example: Data Transfer Objects (DTOs)
 
 **File:** `popupsim/backend/src/models/scenario.py`
 
@@ -282,13 +349,38 @@ class Workshop(BaseModel):
     description: str | None = None
 ```
 
+### Hexagonal Architecture Benefits
+
 **Key aspects:**
-- Builder pattern orchestrates complex multi-file loading
-- Pydantic enforces type safety and validation rules
-- References in scenario.json point to external files
-- Comprehensive error handling with BuilderError
-- Cross-validation after all files loaded
-- Strategy pattern for configurable behaviors
+- **Source Independence:** Same domain logic works with JSON, CSV, API, or database sources
+- **Testability:** Easy to mock data sources for testing with fake adapters
+- **Extensibility:** New data sources can be added without changing core logic
+- **Maintainability:** Clear separation between data access and business logic
+- **Auto-detection:** Factory pattern automatically selects appropriate adapter
+- **Type Safety:** Pydantic DTOs ensure consistent data structure across adapters
+
+**Usage Examples:**
+```python
+# Auto-detect source type
+loader = ScenarioLoader()
+scenario = loader.load_scenario('path/to/csv_directory')  # CSV
+scenario = loader.load_scenario('path/to/scenario.json')  # JSON
+
+# Use specific adapter
+csv_adapter = CsvDataSourceAdapter()
+scenario = csv_adapter.load_scenario('csv_directory')
+
+# Get source information
+info = loader.get_source_info('data_source')
+print(f"Source type: {info['source_type']}")
+print(f"Valid: {info['valid']}")
+```
+
+**Future API Integration:**
+The architecture is designed for future API integration:
+- **Pull APIs:** Adapter fetches data from REST endpoints
+- **Push APIs:** Adapter receives data via webhooks/events
+- **Streaming APIs:** Real-time data updates during simulation
 
 ---
 

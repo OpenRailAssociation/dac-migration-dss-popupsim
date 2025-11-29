@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class RouteInputDTO(BaseModel):
     """Data transfer object for route input data."""
 
-    route_id: str
+    id: str
     description: str | None = None
     duration: float
     track_sequence: list[str]

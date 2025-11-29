@@ -26,9 +26,10 @@ This documentation describes the **MVP (Minimum Viable Product) architecture** o
 ## Key Architecture Characteristics
 
 - **3 Bounded Contexts:** Configuration, Workshop Operations, Analysis & Reporting
+- **Hexagonal Architecture:** Data source adapters for JSON, CSV, and future API integration
 - **Technology Stack:** Python 3.13+, SimPy, Pydantic, Matplotlib
 - **Deployment:** Desktop application (local execution)
-- **Data Storage:** File-based (JSON/CSV)
+- **Data Storage:** File-based (JSON/CSV) with adapter pattern for extensibility
 - **Integration:** Direct method calls (synchronous)
 
 ## Quick Links

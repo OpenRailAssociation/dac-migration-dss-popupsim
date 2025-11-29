@@ -104,13 +104,13 @@ class SimulationAdapter(ABC):  # pylint: disable=duplicate-code
         raise NotImplementedError
 
     @abstractmethod
-    def create_store(self, capacity: int) -> Any:
-        """Create a store with limited capacity.
+    def create_store(self, capacity: int | None = None) -> Any:
+        """Create a store with optional capacity limit.
 
         Parameters
         ----------
-        capacity : int
-            Maximum capacity of the store.
+        capacity : int | None, optional
+            Maximum capacity of the store. If None, unlimited capacity.
 
         Returns
         -------
@@ -169,13 +169,13 @@ class SimPyAdapter(SimulationAdapter):
 
         return simpy.Resource(environment, capacity)
 
-    def create_store(self, capacity: int) -> Any:
+    def create_store(self, capacity: int | None = None) -> Any:
         """Create a SimPy Store for resource pooling.
 
         Parameters
         ----------
-        capacity : int
-            Maximum capacity of the store.
+        capacity : int | None, optional
+            Maximum capacity of the store. If None, unlimited capacity.
 
         Returns
         -------
@@ -184,6 +184,8 @@ class SimPyAdapter(SimulationAdapter):
         """
         import simpy  # type: ignore[import-not-found]  # pylint: disable=import-error,import-outside-toplevel
 
+        if capacity is None:
+            return simpy.Store(self._env)  # Unlimited capacity
         return simpy.Store(self._env, capacity=capacity)
 
     def current_time(self) -> float:

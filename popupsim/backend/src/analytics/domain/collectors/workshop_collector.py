@@ -17,10 +17,10 @@ class WorkshopCollector(MetricCollector):
     Tracks station occupancy and worker utilization over time.
     """
 
-    workshop_station_usage: dict[str, dict[str, float]] = field(default_factory=dict)
-    workshop_active_time: dict[str, float] = field(default_factory=dict)
-    workshop_idle_time: dict[str, float] = field(default_factory=dict)
-    workshop_last_event: dict[str, tuple[float, int]] = field(default_factory=dict)
+    station_usage: dict[str, dict[str, float]] = field(default_factory=dict)
+    active_time: dict[str, float] = field(default_factory=dict)
+    idle_time: dict[str, float] = field(default_factory=dict)
+    last_event: dict[str, tuple[float, int]] = field(default_factory=dict)
 
     def record_event(self, event: DomainEvent) -> None:
         """Record workshop domain events."""
@@ -29,23 +29,23 @@ class WorkshopCollector(MetricCollector):
             time = event.timestamp.to_minutes()
             stations_used = event.available_stations
 
-            if workshop_id in self.workshop_last_event:
-                last_time, last_stations = self.workshop_last_event[workshop_id]
+            if workshop_id in self.last_event:
+                last_time, last_stations = self.last_event[workshop_id]
                 duration = time - last_time
                 if last_stations > 0:
-                    self.workshop_active_time[workshop_id] = self.workshop_active_time.get(workshop_id, 0.0) + duration
+                    self.active_time[workshop_id] = self.active_time.get(workshop_id, 0.0) + duration
                 else:
-                    self.workshop_idle_time[workshop_id] = self.workshop_idle_time.get(workshop_id, 0.0) + duration
+                    self.idle_time[workshop_id] = self.idle_time.get(workshop_id, 0.0) + duration
 
-            self.workshop_last_event[workshop_id] = (time, stations_used)
+            self.last_event[workshop_id] = (time, stations_used)
 
     def get_results(self) -> list[MetricResult]:
         """Get workshop utilization metrics."""
         results: list[MetricResult] = []
 
-        for workshop_id in set(list(self.workshop_active_time.keys()) + list(self.workshop_idle_time.keys())):
-            active = self.workshop_active_time.get(workshop_id, 0.0)
-            idle = self.workshop_idle_time.get(workshop_id, 0.0)
+        for workshop_id in set(list(self.active_time.keys()) + list(self.idle_time.keys())):
+            active = self.active_time.get(workshop_id, 0.0)
+            idle = self.idle_time.get(workshop_id, 0.0)
             total = active + idle
 
             if total > 0:
@@ -69,7 +69,7 @@ class WorkshopCollector(MetricCollector):
 
     def reset(self) -> None:
         """Reset collector state."""
-        self.workshop_station_usage.clear()
-        self.workshop_active_time.clear()
-        self.workshop_idle_time.clear()
-        self.workshop_last_event.clear()
+        self.station_usage.clear()
+        self.active_time.clear()
+        self.idle_time.clear()
+        self.last_event.clear()

@@ -43,10 +43,10 @@ class WagonStatus(Enum):
 class Wagon(BaseModel):
     """Information about a single wagon."""
 
-    wagon_id: str = Field(description='Unique identifier for the wagon')
+    id: str = Field(description='Unique identifier for the wagon')
     length: float = Field(gt=0, description='Length of the wagon in meters')
     is_loaded: bool = Field(description='Whether the wagon is loaded')
-    track_id: str | None = Field(default=None, description='ID of the track the wagon is on')
+    track: str | None = Field(default=None, description='ID of the track the wagon is on')
     source_track_id: str | None = Field(default=None, description='Source track when moving')
     destination_track_id: str | None = Field(default=None, description='Destination track when moving')
     arrival_time: datetime | None = Field(default=None, description='Arrival time of the wagon')

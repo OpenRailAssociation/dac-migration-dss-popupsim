@@ -23,7 +23,7 @@ def test_scenario_json_path() -> Path:
     """Return a scenario file path to be loaded."""
     temp_file = Path(tempfile.mkstemp(suffix='.json')[1])
     scenario_data = {
-        'scenario_id': 'Test_Scenario',
+        'id': 'Test_Scenario',
         'description': 'DAC restrofit simualation',
         'version': '1.0.0',
         'start_date': '2024-01-15',
@@ -55,7 +55,7 @@ class TestScenario:
 
         scenario: Scenario = Scenario(**data)
 
-        assert scenario.scenario_id == 'Test_Scenario'
+        assert scenario.id == 'Test_Scenario'
         # Compare date components (year, month, day) ignoring time
         expected_start = datetime(2024, 1, 15, tzinfo=UTC)
         expected_end = datetime(2024, 1, 16, tzinfo=UTC)
@@ -83,23 +83,23 @@ class TestScenario:
 
         for scenario_id in valid_ids:
             config = Scenario(
-                scenario_id=scenario_id,
+                id=scenario_id,
                 start_date=datetime(2024, 1, 1, tzinfo=UTC),
                 end_date=datetime(2024, 1, 10, tzinfo=UTC),
                 locomotives=[
                     {
-                        'locomotive_id': 'L1',
+                        'id': 'L1',
                         'name': 'L1',
                         'start_date': '2024-01-01 00:00:00',
                         'end_date': '2024-01-10 00:00:00',
-                        'track_id': 'track_19',
+                        'track': 'track_19',
                     }
                 ],
                 trains=[
                     {
                         'train_id': 'T1',
                         'arrival_time': '2024-01-01T08:00:00Z',
-                        'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                        'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                     }
                 ],
                 tracks=[
@@ -108,7 +108,7 @@ class TestScenario:
                 ],
                 topology={'tracks': ['track_19', 'track_7']},
             )
-            assert config.scenario_id == scenario_id
+            assert config.id == scenario_id
 
     def test_scenario_id_validation_invalid_formats(self) -> None:
         """
@@ -134,7 +134,7 @@ class TestScenario:
         for scenario_id in invalid_ids:
             with pytest.raises(ValidationError) as exc_info:
                 Scenario(
-                    scenario_id=scenario_id,
+                    id=scenario_id,
                     start_date=datetime(2024, 1, 1, tzinfo=UTC),
                     end_date=datetime(2024, 1, 10, tzinfo=UTC),
                 )
@@ -163,23 +163,23 @@ class TestScenario:
 
         for start_date, end_date in valid_date_ranges:
             config = Scenario(
-                scenario_id='test_scenario',
+                id='test_scenario',
                 start_date=start_date,
                 end_date=end_date,
                 locomotives=[
                     {
-                        'locomotive_id': 'L1',
+                        'id': 'L1',
                         'name': 'L1',
                         'start_date': start_date.strftime('%Y-%m-%d %H:%M:%S'),
                         'end_date': end_date.strftime('%Y-%m-%d %H:%M:%S'),
-                        'track_id': 'track_19',
+                        'track': 'track_19',
                     }
                 ],
                 trains=[
                     {
                         'train_id': 'T1',
                         'arrival_time': start_date,
-                        'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                        'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                     }
                 ],
                 tracks=[
@@ -209,7 +209,7 @@ class TestScenario:
         for start_date, end_date in invalid_date_ranges:
             with pytest.raises(ValidationError) as exc_info:
                 Scenario(
-                    scenario_id='test_scenario',
+                    id='test_scenario',
                     start_date=start_date,
                     end_date=end_date,
                 )
@@ -228,23 +228,23 @@ class TestScenario:
         implementation-dependent and not tested here.
         """
         config = Scenario(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2025, 6, 1, tzinfo=UTC),  # More than 365 days
             locomotives=[
                 {
-                    'locomotive_id': 'L1',
+                    'id': 'L1',
                     'name': 'L1',
                     'start_date': '2024-01-01 00:00:00',
                     'end_date': '2025-06-01 00:00:00',
-                    'track_id': 'track_19',
+                    'track': 'track_19',
                 }
             ],
             trains=[
                 {
                     'train_id': 'T1',
                     'arrival_time': '2024-01-01T08:00:00Z',
-                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                 }
             ],
             tracks=[
@@ -255,7 +255,7 @@ class TestScenario:
         )
 
         # Should create config successfully
-        assert config.scenario_id == 'test_scenario'
+        assert config.id == 'test_scenario'
         # Duration should be calculated correctly even if it's long
         duration = (config.end_date - config.start_date).days
         assert duration > 365
@@ -271,24 +271,24 @@ class TestScenario:
         from configuration.domain.models.scenario import TrackSelectionStrategy
 
         config = Scenario(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN,
             locomotives=[
                 {
-                    'locomotive_id': 'L1',
+                    'id': 'L1',
                     'name': 'L1',
                     'start_date': '2024-01-01 00:00:00',
                     'end_date': '2024-01-10 00:00:00',
-                    'track_id': 'track_19',
+                    'track': 'track_19',
                 }
             ],
             trains=[
                 {
                     'train_id': 'T1',
                     'arrival_time': '2024-01-01T08:00:00Z',
-                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                 }
             ],
             tracks=[
@@ -300,23 +300,23 @@ class TestScenario:
         assert config.track_selection_strategy == TrackSelectionStrategy.ROUND_ROBIN
 
         config = Scenario(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             locomotives=[
                 {
-                    'locomotive_id': 'L1',
+                    'id': 'L1',
                     'name': 'L1',
                     'start_date': '2024-01-01 00:00:00',
                     'end_date': '2024-01-10 00:00:00',
-                    'track_id': 'track_19',
+                    'track': 'track_19',
                 }
             ],
             trains=[
                 {
                     'train_id': 'T1',
                     'arrival_time': '2024-01-01T08:00:00Z',
-                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                 }
             ],
             tracks=[
@@ -339,18 +339,18 @@ class TestScenario:
         base_data = {
             'locomotives': [
                 {
-                    'locomotive_id': 'L1',
+                    'id': 'L1',
                     'name': 'L1',
                     'start_date': '2024-01-01 00:00:00',
                     'end_date': '2024-01-10 00:00:00',
-                    'track_id': 'track_19',
+                    'track': 'track_19',
                 }
             ],
             'trains': [
                 {
                     'train_id': 'T1',
                     'arrival_time': '2024-01-01T08:00:00Z',
-                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                 }
             ],
             'tracks': [
@@ -361,21 +361,21 @@ class TestScenario:
         }
 
         config1 = Scenario(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             **base_data,
         )
 
         config2 = Scenario(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             **base_data,
         )
 
         config3 = Scenario(
-            scenario_id='different_scenario',
+            id='different_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),
             end_date=datetime(2024, 1, 10, tzinfo=UTC),
             **base_data,
@@ -396,23 +396,23 @@ class TestScenario:
         start_date = '2024-01-01 08:00:00'
         end_date = '2024-01-10 20:00:00'
         config = Scenario(
-            scenario_id='test_scenario',
+            id='test_scenario',
             start_date=start_date,
             end_date=end_date,
             locomotives=[
                 {
-                    'locomotive_id': 'L1',
+                    'id': 'L1',
                     'name': 'L1',
                     'start_date': start_date,
                     'end_date': end_date,
-                    'track_id': 'track_19',
+                    'track': 'track_19',
                 }
             ],
             trains=[
                 {
                     'train_id': 'T1',
                     'arrival_time': start_date,
-                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                 }
             ],
             tracks=[
@@ -427,7 +427,7 @@ class TestScenario:
         # Should be valid JSON that can be parsed back
         parsed = json.loads(json_str)
 
-        assert parsed['scenario_id'] == 'test_scenario'
+        assert parsed['id'] == 'test_scenario'
         # Verify date fields in parsed JSON match original date values
         assert str(parsed['start_date']).startswith(start_date.split(' ')[0])
         assert str(parsed['end_date']).startswith(end_date.split(' ')[0])
@@ -449,23 +449,23 @@ class TestScenario:
         fields correctly parsed and assigned.
         """
         scenario_data = {
-            'scenario_id': 'scenario_001',
+            'id': 'scenario_001',
             'start_date': '2024-01-15',
             'end_date': '2024-01-16',
             'locomotives': [
                 {
-                    'locomotive_id': 'L1',
+                    'id': 'L1',
                     'name': 'L1',
                     'start_date': '2024-01-15 00:00:00',
                     'end_date': '2024-01-16 00:00:00',
-                    'track_id': 'track_19',
+                    'track': 'track_19',
                 }
             ],
             'trains': [
                 {
                     'train_id': 'T1',
                     'arrival_time': '2024-01-15T08:00:00Z',
-                    'wagons': [{'wagon_id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
+                    'wagons': [{'id': 'W1', 'length': 10.0, 'is_loaded': False, 'needs_retrofit': True}],
                 }
             ],
             'tracks': [
@@ -478,7 +478,7 @@ class TestScenario:
         scenario = Scenario(**scenario_data)
 
         # Verify all fields are correctly parsed
-        assert scenario.scenario_id == 'scenario_001'
+        assert scenario.id == 'scenario_001'
         assert scenario.start_date.date() == datetime(2024, 1, 15, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2024, 1, 16, tzinfo=UTC).date()
 
@@ -503,6 +503,6 @@ class TestScenario:
 
         scenario: Scenario = Scenario(**data)
 
-        assert scenario.scenario_id == 'test_scenario_01'
+        assert scenario.id == 'test_scenario_01'
         assert scenario.start_date.date() == datetime(2031, 7, 4, tzinfo=UTC).date()
         assert scenario.end_date.date() == datetime(2031, 7, 5, tzinfo=UTC).date()

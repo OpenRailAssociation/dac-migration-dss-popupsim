@@ -69,7 +69,7 @@ class Visualizer:
 
         fig, ax = plt.subplots(figsize=(12, 6))
 
-        workshop_ids = [util.workshop_id for util in result.utilization]
+        workshop_ids = [util.id for util in result.utilization]
         avg_utilization = [util.average_utilization_percent for util in result.utilization]
         peak_utilization = [util.peak_utilization_percent for util in result.utilization]
 

@@ -43,7 +43,7 @@ class AnalyticsFactory:
         return WagonDeliveredEvent(
             event_id=EventId.generate(),
             timestamp=Timestamp.now(),
-            wagon_id=wagon.wagon_id,
+            wagon_id=wagon.id,
         )
 
     @staticmethod
@@ -52,7 +52,7 @@ class AnalyticsFactory:
         return WagonRetrofittedEvent(
             event_id=EventId.generate(),
             timestamp=Timestamp.now(),
-            wagon_id=wagon.wagon_id,
+            wagon_id=wagon.id,
             workshop_id=workshop_id,
             processing_duration=0.0,
         )
@@ -63,7 +63,7 @@ class AnalyticsFactory:
         return WagonRejectedEvent(
             event_id=EventId.generate(),
             timestamp=Timestamp.now(),
-            wagon_id=wagon.wagon_id,
+            wagon_id=wagon.id,
             reason=reason,
         )
 
@@ -102,7 +102,7 @@ class AnalyticsFactory:
         avg_utilization = min(100.0, (processed_count / total_capacity * 10) if total_capacity > 0 else 0.0)
 
         return UtilizationKPI(
-            workshop_id=workshop.workshop_id,
+            id=workshop.id,
             total_capacity=total_capacity,
             average_utilization_percent=round(avg_utilization, 1),
             peak_utilization_percent=round(min(100.0, avg_utilization * 1.2), 1),

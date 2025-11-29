@@ -39,6 +39,25 @@ class WorkshopUtilizationChangedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
+class WagonMovedEvent(DomainEvent):
+    """Event when wagon moves between tracks."""
+
+    wagon_id: str
+    from_track: str
+    to_track: str
+    transport_duration: float  # minutes
+
+
+@dataclass(frozen=True)
+class WagonArrivedEvent(DomainEvent):
+    """Event when wagon arrives at destination track."""
+
+    wagon_id: str
+    track_id: str
+    wagon_status: str
+
+
+@dataclass(frozen=True)
 class BottleneckDetectedEvent(DomainEvent):
     """Event when bottleneck is detected."""
 

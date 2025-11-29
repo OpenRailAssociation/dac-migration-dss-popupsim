@@ -6,11 +6,11 @@
   },
   "locomotives": [
     {
-      "locomotive_id": "WS_01",
+      "id": "WS_01",
       "name": "First locomotive",
       "start_date": "2031-07-04 01:30:00",
       "end_date": "2031-07-05 02:00:00",
-      "track_id": "track_19"
+      "track": "track_19"
     }
   ]
 }

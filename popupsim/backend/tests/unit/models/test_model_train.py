@@ -29,8 +29,8 @@ class TestTrain:
         and wagon list, and that all fields are correctly assigned.
         """
         wagons = [
-            Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1'),
-            Wagon(wagon_id='W002', length=12.0, is_loaded=False, needs_retrofit=True, train_id='1'),
+            Wagon(id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1'),
+            Wagon(id='W002', length=12.0, is_loaded=False, needs_retrofit=True, train_id='1'),
         ]
         test_date = datetime(2024, 1, 15, tzinfo=UTC)
         train = Train(train_id='1', arrival_time=test_date, wagons=wagons)
@@ -38,7 +38,7 @@ class TestTrain:
         assert train.train_id == '1'
         assert train.arrival_time == test_date
         assert len(train.wagons) == 2
-        assert train.wagons[0].wagon_id == 'W001'
+        assert train.wagons[0].id == 'W001'
 
     def test_train_arrival_empty_wagons_validation(self) -> None:
         """
@@ -77,13 +77,13 @@ class TestTrain:
         Validates that trains with a single wagon are correctly created
         and the wagon details are accessible.
         """
-        wagon = Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')
+        wagon = Wagon(id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')
 
         test_date = datetime(2024, 1, 15, tzinfo=UTC)
         train = Train(train_id='1', arrival_time=test_date, wagons=[wagon])
 
         assert len(train.wagons) == 1
-        assert train.wagons[0].wagon_id == 'W001'
+        assert train.wagons[0].id == 'W001'
 
     def test_train_arrival_equality(self) -> None:
         """
@@ -94,7 +94,7 @@ class TestTrain:
         Validates that Train instances with identical field values are
         considered equal, while instances with different values are not.
         """
-        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')]
+        wagons = [Wagon(id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')]
 
         test_date = datetime(2024, 1, 15, tzinfo=UTC)
         train1 = Train(train_id='1', arrival_time=test_date, wagons=wagons)
@@ -115,7 +115,7 @@ class TestTrain:
         Validates that Train instances can be converted to dictionary format
         with all fields correctly represented, including nested wagon data.
         """
-        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')]
+        wagons = [Wagon(id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')]
 
         test_date = datetime(2024, 1, 15, tzinfo=UTC)
         train = Train(train_id='1', arrival_time=test_date, wagons=wagons)
@@ -125,7 +125,7 @@ class TestTrain:
         assert train_dict['train_id'] == '1'
         assert train_dict['arrival_time'] == test_date
         assert len(train_dict['wagons']) == 1
-        assert train_dict['wagons'][0]['wagon_id'] == 'W001'
+        assert train_dict['wagons'][0]['id'] == 'W001'
 
     def test_train_arrival_json_serialization(self) -> None:
         """
@@ -137,7 +137,7 @@ class TestTrain:
         the resulting JSON string contains expected field values and can
         be parsed back to a dictionary.
         """
-        wagons = [Wagon(wagon_id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')]
+        wagons = [Wagon(id='W001', length=15.5, is_loaded=True, needs_retrofit=False, train_id='1')]
 
         test_date = datetime(2024, 1, 15, tzinfo=UTC)
         train = Train(train_id='1', arrival_time=test_date, wagons=wagons)
@@ -165,16 +165,14 @@ class TestTrain:
         train_data = {
             'train_id': '1',
             'arrival_time': test_date.isoformat(),
-            'wagons': [
-                {'wagon_id': 'W001', 'train_id': '1', 'length': 15.5, 'is_loaded': True, 'needs_retrofit': False}
-            ],
+            'wagons': [{'id': 'W001', 'train_id': '1', 'length': 15.5, 'is_loaded': True, 'needs_retrofit': False}],
         }
 
         train = Train(**train_data)
         assert train.train_id == '1'
         assert train.arrival_time.date() == test_date.date()
         assert len(train.wagons) == 1
-        assert train.wagons[0].wagon_id == 'W001'
+        assert train.wagons[0].id == 'W001'
 
     def test_train_arrival_realistic_scenarios(self) -> None:
         """
@@ -188,9 +186,9 @@ class TestTrain:
         """
         # Early morning freight train
         freight_wagons = [
-            Wagon(wagon_id='FREIGHT_001', length=20.0, is_loaded=True, needs_retrofit=False, train_id='FREIGHT_001'),
-            Wagon(wagon_id='FREIGHT_002', length=20.0, is_loaded=True, needs_retrofit=True, train_id='FREIGHT_001'),
-            Wagon(wagon_id='FREIGHT_003', length=18.5, is_loaded=False, needs_retrofit=False, train_id='FREIGHT_001'),
+            Wagon(id='FREIGHT_001', length=20.0, is_loaded=True, needs_retrofit=False, train_id='FREIGHT_001'),
+            Wagon(id='FREIGHT_002', length=20.0, is_loaded=True, needs_retrofit=True, train_id='FREIGHT_001'),
+            Wagon(id='FREIGHT_003', length=18.5, is_loaded=False, needs_retrofit=False, train_id='FREIGHT_001'),
         ]
 
         test_date = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
@@ -202,7 +200,7 @@ class TestTrain:
 
         # Late night maintenance train
         maint_wagons = [
-            Wagon(wagon_id='MAINT_001', length=12.0, is_loaded=False, needs_retrofit=True, train_id='MAINT_SPECIAL')
+            Wagon(id='MAINT_001', length=12.0, is_loaded=False, needs_retrofit=True, train_id='MAINT_SPECIAL')
         ]
 
         main_arrival = test_date + timedelta(hours=8)
