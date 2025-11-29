@@ -1,15 +1,15 @@
-# ADR-003: Capacity Management Integration for SimPy Stores
+# ADR-016: Capacity Management Integration for SimPy Stores
 
 ## Status
-Proposed
+**IMPLEMENTED** - Resolved in MVP
 
 ## Context
 
-Currently we have dual capacity management systems:
+PopUpSim had dual capacity management systems:
 - **TrackCapacityManager**: Length-based physical capacity (75m track, wagons 10-20m each)
 - **SimPy Stores**: Count-based workflow coordination (unlimited capacity)
 
-This creates potential inconsistencies where SimPy stores could accept wagons that exceed physical track capacity.
+This created potential inconsistencies where SimPy stores could accept wagons that exceeded physical track capacity.
 
 ### Current Implementation
 ```python
@@ -24,7 +24,36 @@ yield retrofitted_wagons_ready.put(wagon)
 ### Problem
 No automatic validation between physical capacity and SimPy workflow stores.
 
-## Decision Options
+## Decision
+
+**IMPLEMENTED: Option A (SimPy Store with Capacity Validation)** - Added validation wrapper around existing SimPy stores.
+
+The MVP implements capacity validation for all SimPy store operations:
+
+### Implementation in MVP
+
+```python
+class WorkshopOrchestrator:
+    def put_wagon_if_fits_retrofitted(self, wagon: Wagon) -> Generator[Any, Any, bool]:
+        """Put wagon in retrofitted store only if track has physical capacity."""
+        retrofitted_track_id = self.retrofitted_tracks[0].id
+        if self.track_capacity.can_add_wagon(retrofitted_track_id, wagon.length):
+            # ✅ Capacity validation before SimPy store operation
+            yield self.retrofitted_wagons_ready.put(wagon)
+            return True
+        logger.warning('Cannot add wagon %s - track %s full', wagon.id, retrofitted_track_id)
+        return False
+        
+    def get_wagon_from_retrofitted(self) -> Generator[Any, Any, Wagon]:
+        """Get wagon from retrofitted store and update capacity tracking."""
+        wagon = yield self.retrofitted_wagons_ready.get()
+        # Physical capacity updated by transport job
+        return wagon
+```
+
+**Result**: No capacity inconsistencies - physical capacity always validated before SimPy operations.
+
+## Decision Options (Evaluated)
 
 ### Option A: SimPy Store with Capacity Validation
 
@@ -131,9 +160,16 @@ class LengthAwareStore:
 - Manual process prone to human error
 - May need refactoring to Option B later if complexity grows
 
-## Implementation Notes
+## Implementation Results
 
-Priority order for validation:
-1. `retrofitted_wagons_ready` store (W07 fix area)
-2. `wagons_ready_for_stations` stores
-3. `wagons_completed` stores (workshop capacity managed separately)
+### Achieved in MVP
+- ✅ **W07 Problem Solved**: Wagons no longer get lost between retrofit and parking
+- ✅ **Complete Workflow Chain**: Train → Collection → Retrofit → Workshop → Retrofitted → Parking
+- ✅ **Separation of Concerns**: WagonStateManager for tracking, SimPy stores for workflow
+- ✅ **Event-Driven Coordination**: No polling, all SimPy store-based coordination
+- ✅ **Capacity Integration**: Physical capacity validated before all store operations
+
+### Files Implementing This Decision
+- `workshop_operations/application/orchestrator.py` - Main workflow coordination
+- `workshop_operations/domain/services/wagon_operations.py` - WagonStateManager
+- `workshop_operations/infrastructure/resources/track_capacity_manager.py` - Capacity management

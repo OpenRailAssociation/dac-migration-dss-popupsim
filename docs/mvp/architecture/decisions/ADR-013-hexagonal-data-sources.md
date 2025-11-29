@@ -1,6 +1,6 @@
 # ADR-013: Hexagonal Architecture for Data Sources
 
-**Status:** Accepted - 2025-01-16
+**Status:** IMPLEMENTED - 2025-01-16
 
 ## Context
 
@@ -34,11 +34,58 @@ Implement **hexagonal architecture** specifically for the Configuration Context 
 - **Single JSON format**: Doesn't meet CSV requirement
 - **Full hexagonal everywhere**: Too complex for MVP timeline
 
+## Implementation in MVP
+
+### Hexagonal Architecture Components
+```python
+# configuration/domain/ports/data_source_port.py
+class DataSourcePort(ABC):
+    @abstractmethod
+    def load_scenario(self, source: Path) -> ScenarioInputDTO: ...
+
+# configuration/infrastructure/adapters/
+class JsonDataSourceAdapter(DataSourcePort):
+    def load_scenario(self, path: Path) -> ScenarioInputDTO:
+        with open(path) as f:
+            return ScenarioInputDTO.model_validate(json.load(f))
+
+class CsvDataSourceAdapter(DataSourcePort):
+    def load_scenario(self, directory: Path) -> ScenarioInputDTO:
+        return self._load_from_csv_directory(directory)
+
+# configuration/application/services/scenario_service.py
+class ScenarioService:
+    def __init__(self, data_source: DataSourcePort):
+        self._data_source = data_source  # Dependency injection
+```
+
+### Auto-Detection Factory
+```python
+class DataSourceFactory:
+    @staticmethod
+    def create_adapter(source: Path) -> DataSourcePort:
+        if source.is_file() and source.suffix == '.json':
+            return JsonDataSourceAdapter()
+        elif source.is_dir():
+            return CsvDataSourceAdapter()
+        else:
+            raise UnsupportedDataSourceError(f"Unsupported source: {source}")
+```
+
 ## Consequences
 
-- **Positive**: Multi-format support, future-ready, testable, maintainable
-- **Negative**: Additional complexity (justified by requirements)
-- **Benefit**: Foundation for full hexagonal architecture migration
+### Achieved
+- ✅ **Multi-Format Support**: JSON and CSV scenarios supported
+- ✅ **Future-Ready**: Easy to add REST API, database adapters
+- ✅ **Testable**: Mock adapters for unit testing
+- ✅ **Maintainable**: Clear separation between data access and business logic
+- ✅ **Type Safety**: Consistent DTOs across all adapters
+- ✅ **Auto-Detection**: Automatic format detection based on file/directory
+
+### Files Implementing This Decision
+- `configuration/domain/ports/data_source_port.py` - Port interface
+- `configuration/infrastructure/adapters/` - JSON and CSV adapters
+- `configuration/application/factories/data_source_factory.py` - Auto-detection
 
 ## CSV Directory Structure
 
