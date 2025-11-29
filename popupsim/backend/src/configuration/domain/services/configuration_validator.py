@@ -95,7 +95,7 @@ class ConfigurationValidator:  # pylint: disable=too-few-public-methods
     def _validate_strategies(self, scenario: Scenario) -> ValidationResult:
         """Validate strategy enum values."""
         result = ValidationResult(is_valid=True)
-
+        # pylint: disable=duplicate-code
         valid_track_strategies = ['round_robin', 'least_occupied', 'first_available', 'random']
         valid_loco_strategies = ['return_to_parking', 'direct_delivery']
 
