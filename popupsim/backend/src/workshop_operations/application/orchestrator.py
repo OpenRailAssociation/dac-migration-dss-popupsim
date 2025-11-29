@@ -17,7 +17,6 @@ from analytics.domain.events.simulation_events import WagonDeliveredEvent
 from analytics.domain.events.simulation_events import WagonRetrofittedEvent
 from analytics.domain.value_objects.timestamp import Timestamp
 from workshop_operations.application.factories.entity_factory import EntityFactory
-from workshop_operations.application.services.locomotive_service import DefaultLocomotiveService
 from workshop_operations.application.services.locomotive_service import LocomotiveService
 from workshop_operations.domain.aggregates.train import Train
 from workshop_operations.domain.entities.locomotive import Locomotive
@@ -76,7 +75,12 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         self.name: str = 'WorkshopOrchestrator'
         self.sim: SimulationAdapter = sim
         self.scenario: Scenario = scenario
-        self.locomotive_service = locomotive_service or DefaultLocomotiveService()
+        # Use enhanced shunting locomotive service for all yard operations
+        if locomotive_service is None:
+            from shunting_operations.application.shunting_locomotive_service import ShuntingLocomotiveService
+
+            locomotive_service = ShuntingLocomotiveService()
+        self.locomotive_service = locomotive_service
 
         # Convert DTOs to entities
 

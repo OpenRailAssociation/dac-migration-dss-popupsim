@@ -108,6 +108,7 @@ class IntegrityValidator:  # pylint: disable=too-few-public-methods
             if not (hasattr(train, 'arrival_time') and hasattr(train, 'departure_time')):
                 continue
             try:
+                # pylint: disable=duplicate-code
                 arrival = datetime.fromisoformat(str(train.arrival_time))
                 departure = datetime.fromisoformat(str(train.departure_time))
 

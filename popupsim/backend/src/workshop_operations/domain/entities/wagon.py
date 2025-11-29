@@ -18,10 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 class CouplerType(Enum):
-    """Coupler type for wagons."""
+    """Coupler type for wagons and locomotives."""
 
     SCREW = 'screw'
     DAC = 'dac'
+    HYBRID = 'hybrid'  # Can couple both SCREW and DAC
 
 
 class WagonStatus(Enum):
