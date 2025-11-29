@@ -1,6 +1,7 @@
 """Primary port for external train data sources."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from datetime import datetime
 
 from external_trains.domain.aggregates.external_train import ExternalTrain
