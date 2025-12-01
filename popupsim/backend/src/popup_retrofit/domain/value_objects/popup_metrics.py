@@ -49,7 +49,7 @@ class PopUpMetrics(BaseModel):
     def get_bottleneck_analysis(self) -> str:
         """Identify primary bottleneck in PopUp operations."""
         if self.bay_utilization_percentage < 60.0:
-            return "Low bay utilization - consider reducing bay count or increasing wagon flow"
+            return 'Low bay utilization - consider reducing bay count or increasing wagon flow'
         if self.wagons_per_hour < 2.0:
-            return "Low throughput - optimize retrofit procedures or add more bays"
-        return "Operations performing within normal parameters"
+            return 'Low throughput - optimize retrofit procedures or add more bays'
+        return 'Operations performing within normal parameters'

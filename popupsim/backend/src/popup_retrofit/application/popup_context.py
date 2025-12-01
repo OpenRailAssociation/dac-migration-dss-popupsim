@@ -10,6 +10,7 @@ from ..domain.entities.retrofit_bay import RetrofitBay
 
 if TYPE_CHECKING:
     from workshop_operations.infrastructure.simulation.simpy_adapter import SimulationAdapter
+
     from .services.retrofit_station_service import RetrofitStationService
 
 
@@ -19,7 +20,7 @@ class PopUpRetrofitContext:
     def __init__(self) -> None:
         """Initialize PopUp retrofit context."""
         self._workshops: dict[str, PopUpWorkshop] = {}
-        self._station_service: 'RetrofitStationService | None' = None
+        self._station_service: RetrofitStationService | None = None
 
     def create_workshop(self, workshop_id: str, location: str, num_bays: int = 2) -> PopUpWorkshop:
         """Create a new PopUp workshop.

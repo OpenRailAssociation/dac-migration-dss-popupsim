@@ -1,8 +1,8 @@
 """PopUp Retrofit Station Service for SimPy-based wagon processing."""
 
 from collections.abc import Generator
-from typing import Any
 import logging
+from typing import Any
 
 from analytics.domain.events.simulation_events import WagonRetrofittedEvent
 from analytics.domain.value_objects.timestamp import Timestamp
