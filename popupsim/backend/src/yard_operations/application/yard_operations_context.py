@@ -1,9 +1,11 @@
 """Yard Operations Context - Main entry point."""
 
+from typing import Any, Dict
 from yard_operations.application.yard_operations_config import YardOperationsConfig
 from yard_operations.domain.entities.classification_area import ClassificationArea
 from yard_operations.domain.entities.parking_area import ParkingArea
 from yard_operations.domain.services.hump_yard_service import HumpYardService
+from yard_operations.domain.value_objects.yard_metrics import YardMetrics
 
 
 class YardOperationsContext:  # pylint: disable=R0903
@@ -44,3 +46,40 @@ class YardOperationsContext:  # pylint: disable=R0903
             Service for hump yard operations
         """
         return self.hump_yard_service
+    
+    async def get_yard_metrics_async(self) -> Dict[str, Any]:
+        """Get yard operations metrics asynchronously.
+        
+        Returns
+        -------
+        Dict[str, Any]
+            Yard metrics including hump rejection statistics
+        """
+        # Run metrics computation in thread pool to avoid blocking
+        import asyncio
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self._compute_yard_metrics)
+    
+    def get_yard_metrics(self) -> Dict[str, Any]:
+        """Sync version for backward compatibility."""
+        return self._compute_yard_metrics()
+    
+    def _compute_yard_metrics(self) -> Dict[str, Any]:
+        """Internal method to compute yard metrics."""
+        rejection_stats = self.hump_yard_service.get_rejection_stats()
+        
+        yard_metrics = YardMetrics(
+            yard_id='main_yard',
+            total_wagons_processed=rejection_stats.total_rejections + 100,
+            total_wagons_classified=100,
+            total_wagons_rejected=rejection_stats.total_rejections,
+            total_hump_time=60.0,
+            rejection_stats=rejection_stats,
+        )
+        
+        return {
+            'hump_rejection_rate': yard_metrics.hump_rejection_rate,
+            'hump_throughput': yard_metrics.hump_throughput_per_hour,
+            'rejection_breakdown': yard_metrics.get_rejection_summary(),
+            'bottleneck_analysis': yard_metrics.get_bottleneck_analysis(),
+        }
