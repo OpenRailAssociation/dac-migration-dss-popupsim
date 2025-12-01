@@ -92,6 +92,16 @@ class PopUpRetrofitContext:
             return None
         return workshop.get_performance_summary()
 
+    async def get_all_workshop_metrics_async(self) -> dict[str, dict[str, float | str]]:
+        """Get performance metrics for all workshops asynchronously."""
+        import asyncio
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self._compute_all_workshop_metrics)
+    
     def get_all_workshop_metrics(self) -> dict[str, dict[str, float | str]]:
-        """Get performance metrics for all workshops."""
+        """Sync version for backward compatibility."""
+        return self._compute_all_workshop_metrics()
+    
+    def _compute_all_workshop_metrics(self) -> dict[str, dict[str, float | str]]:
+        """Internal method to compute all workshop metrics."""
         return {workshop_id: workshop.get_performance_summary() for workshop_id, workshop in self._workshops.items()}

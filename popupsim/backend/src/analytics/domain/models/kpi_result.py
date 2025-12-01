@@ -40,6 +40,15 @@ class BottleneckInfo:
 
 
 @dataclass
+class ContextMetrics:
+    """Context-specific metrics grouped together."""
+
+    popup_metrics: dict[str, Any] = field(default_factory=dict)
+    yard_metrics: dict[str, Any] = field(default_factory=dict)
+    shunting_metrics: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class KPIResult:
     """Complete KPI analysis result."""
 
@@ -49,4 +58,4 @@ class KPIResult:
     bottlenecks: list[BottleneckInfo] = field(default_factory=list)
     avg_flow_time_minutes: float = 0.0
     avg_waiting_time_minutes: float = 0.0
-    popup_metrics: dict[str, Any] = field(default_factory=dict)  # PopUp workshop metrics
+    context_metrics: ContextMetrics = field(default_factory=ContextMetrics)

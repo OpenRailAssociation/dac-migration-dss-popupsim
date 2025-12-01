@@ -13,6 +13,7 @@ from ..events.simulation_events import WagonDeliveredEvent
 from ..events.simulation_events import WagonRejectedEvent
 from ..events.simulation_events import WagonRetrofittedEvent
 from ..models.kpi_result import BottleneckInfo
+from ..models.kpi_result import ContextMetrics
 from ..models.kpi_result import KPIResult
 from ..models.kpi_result import ThroughputKPI
 from ..models.kpi_result import UtilizationKPI
@@ -151,7 +152,7 @@ class AnalyticsFactory:
             bottlenecks=analysis_data['bottlenecks'],
             avg_flow_time_minutes=analysis_data['avg_flow_time'],
             avg_waiting_time_minutes=analysis_data['avg_waiting_time'],
-            popup_metrics=analysis_data.get('popup_metrics', {}),
+            context_metrics=analysis_data.get('context_metrics', ContextMetrics()),
         )
 
     @staticmethod

@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Annotated
 from typing import Any
 
-from analytics.domain.services.kpi_calculator import KPICalculator
+import asyncio
+from analytics.application.async_analytics_service import AsyncAnalyticsService
 from analytics.infrastructure.exporters.csv_exporter import CSVExporter
 from analytics.infrastructure.visualization.matplotlib_visualizer import Visualizer
 import typer
@@ -124,8 +125,8 @@ def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | 
     return scenario
 
 
-def _run_simulation_and_display_metrics(scenario: Any) -> Any:  # type: ignore[misc]
-    """Run simulation and display metrics."""
+async def _run_simulation_and_display_metrics_async(scenario: Any) -> Any:  # type: ignore[misc]
+    """Run simulation and display metrics asynchronously."""
     typer.echo('\nStarting simulation...')
     sim_adapter = SimPyAdapter.create_simpy_adapter()
     popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
@@ -139,16 +140,18 @@ def _run_simulation_and_display_metrics(scenario: Any) -> Any:  # type: ignore[m
         for metric in category_metrics:
             typer.echo(f'  {metric["name"].replace("_", " ").title()}: {metric["value"]} {metric["unit"]}')
 
-    # Calculate KPIs
-    typer.echo('\n=== Calculating KPIs ===')
-    kpi_calculator = KPICalculator()
-    kpi_result = kpi_calculator.calculate_from_simulation(
+    # Calculate KPIs asynchronously
+    typer.echo('\n=== Calculating KPIs (Async) ===')
+    analytics_service = AsyncAnalyticsService()
+    kpi_result = await analytics_service.calculate_kpis_async(
         metrics,
         scenario,
         popup_sim.wagons_queue,
         popup_sim.rejected_wagons_queue,
         popup_sim.workshops_queue,
         popup_context=popup_sim.popup_retrofit,
+        yard_context=popup_sim.yard_operations,
+        shunting_context=None,  # Not implemented yet
     )
 
     # Display KPIs
@@ -238,7 +241,7 @@ def main(
         raise typer.Exit(1)
     try:
         scenario = _validate_and_load_scenario(scenario_path, output_path, debug, verbose)
-        kpi_result = _run_simulation_and_display_metrics(scenario)
+        kpi_result = asyncio.run(_run_simulation_and_display_metrics_async(scenario))
 
         # Export results to CSV
         typer.echo('\n=== Exporting Results ===')
