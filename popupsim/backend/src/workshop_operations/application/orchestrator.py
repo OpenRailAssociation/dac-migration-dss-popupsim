@@ -116,8 +116,21 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
         self.loco_state = LocomotiveStateManager()
         self.workshop_distributor = WorkshopDistributor()
 
+        # Extract parking and retrofitted tracks
+        self.parking_tracks = [t for t in (scenario.tracks or []) if t.type == TrackType.PARKING]
+        self.retrofitted_tracks = [t for t in (scenario.tracks or []) if t.type == TrackType.RETROFITTED]
+
         # Initialize Yard Operations Context
-        self.yard_operations = YardOperationsContext(self.track_capacity, self.wagon_state)
+        from yard_operations.application.yard_operations_config import YardOperationsConfig
+
+        yard_config = YardOperationsConfig(
+            track_capacity=self.track_capacity,
+            wagon_state=self.wagon_state,
+            wagon_selector=self.wagon_selector,
+            workshop_capacity=self.workshop_capacity,
+            parking_tracks=self.parking_tracks,
+        )
+        self.yard_operations = YardOperationsContext(yard_config)
 
         # Validate domain requirements
         domain_validator = ScenarioDomainValidator()
@@ -145,9 +158,6 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
             self.wagons_completed[workshop_track_id] = (
                 sim.create_store()
             )  # Unlimited - workshop stations manage capacity
-
-        self.parking_tracks = [t for t in (scenario.tracks or []) if t.type == TrackType.PARKING]
-        self.retrofitted_tracks = [t for t in (scenario.tracks or []) if t.type == TrackType.RETROFITTED]
 
         logger.info('Initialized %s with scenario: %s (domain validated)', self.name, self.scenario.id)
 
@@ -515,11 +525,16 @@ def pickup_wagons_to_retrofit(popupsim: WorkshopOrchestrator) -> Generator[Any, 
     logger.info('Starting wagon pickup process')
     while True:
         collection_track_id, collection_wagons = yield from _wait_for_wagons_ready(popupsim)
-        wagons_to_pickup = _find_wagons_for_retrofit(popupsim, collection_wagons)
+        tracks = popupsim.scenario.tracks or []
+        wagons_to_pickup = popupsim.yard_operations.classification_area.find_wagons_for_retrofit(
+            collection_wagons, tracks
+        )
         if not wagons_to_pickup:
             yield popupsim.sim.delay(1.0)
             continue
-        wagons_by_retrofit = _group_wagons_by_retrofit_track(wagons_to_pickup)
+        wagons_by_retrofit = popupsim.yard_operations.classification_area.group_wagons_by_retrofit_track(
+            wagons_to_pickup
+        )
         yield from _deliver_to_retrofit_tracks(popupsim, None, collection_track_id, wagons_by_retrofit)
         yield from _signal_wagons_ready(popupsim, wagons_by_retrofit)
 
@@ -856,8 +871,6 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
     logger.info('Starting move to parking process')
 
     retrofitted_track = popupsim.retrofitted_tracks[0]
-    parking_tracks = popupsim.parking_tracks
-    current_parking_index = 0
     wagons_batch: list[Wagon] = []
 
     while True:
@@ -870,15 +883,8 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
             additional_wagon: Wagon = yield from popupsim.get_wagon_from_retrofitted()
             wagons_batch.append(additional_wagon)
 
-        # Select parking track (sequential fill strategy)
-        parking_track = None
-        for i in range(len(parking_tracks)):
-            idx = (current_parking_index + i) % len(parking_tracks)
-            track = parking_tracks[idx]
-            if any(popupsim.track_capacity.can_add_wagon(track.id, w.length) for w in wagons_batch):
-                parking_track = track
-                current_parking_index = idx
-                break
+        # Use parking area to select track
+        parking_track = popupsim.yard_operations.parking_area.select_parking_track(wagons_batch)
 
         if not parking_track:
             # No parking capacity, put wagons back and wait
@@ -888,20 +894,10 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
             yield popupsim.sim.delay(1.0)
             continue
 
-        # Validate parking track capacity before transport
-        total_length_needed = sum(w.length for w in wagons_batch)
-        if popupsim.track_capacity.get_available_capacity(parking_track.id) < total_length_needed:
-            # Batch wagons that actually fit
-            wagons_to_move = []
-            remaining_capacity = popupsim.track_capacity.get_available_capacity(parking_track.id)
-            for wagon in wagons_batch:
-                if remaining_capacity >= wagon.length:
-                    wagons_to_move.append(wagon)
-                    remaining_capacity -= wagon.length
-            wagons_to_requeue = [w for w in wagons_batch if w not in wagons_to_move]
-        else:
-            wagons_to_move = wagons_batch
-            wagons_to_requeue = []
+        # Use parking area to determine which wagons fit
+        wagons_to_move, wagons_to_requeue = popupsim.yard_operations.parking_area.get_wagons_that_fit(
+            parking_track, wagons_batch
+        )
 
         # Put back wagons that don't fit
         for wagon in wagons_to_requeue:
@@ -910,7 +906,7 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
         wagons_batch = []
 
         if not wagons_to_move:
-            current_parking_index = (current_parking_index + 1) % len(parking_tracks)
+            popupsim.yard_operations.parking_area.advance_to_next_track()
             yield popupsim.sim.delay(1.0)
             continue
 
@@ -920,7 +916,7 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
             # Capacity changed since validation - requeue wagons
             for wagon in wagons_to_move:
                 yield from popupsim.put_wagon_if_fits_retrofitted(wagon)
-            current_parking_index = (current_parking_index + 1) % len(parking_tracks)
+            popupsim.yard_operations.parking_area.advance_to_next_track()
             yield popupsim.sim.delay(1.0)
             continue
 
@@ -939,63 +935,8 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
 
         # Check if current parking track is full, move to next
         if not any(popupsim.track_capacity.can_add_wagon(parking_track.id, 10.0) for _ in range(1)):
-            current_parking_index = (current_parking_index + 1) % len(parking_tracks)
+            popupsim.yard_operations.parking_area.advance_to_next_track()
             logger.debug('Parking track %s full, switching to next', parking_track.id)
-
-
-def _find_wagons_for_retrofit(
-    popupsim: WorkshopOrchestrator, collection_wagons: list[Wagon]
-) -> list[tuple[Wagon, str]]:
-    """Find wagons that can be moved to retrofit tracks with available stations.
-
-    Parameters
-    ----------
-    popupsim : WorkshopOrchestrator
-        The WorkshopOrchestrator instance containing simulation state.
-    collection_wagons : list[Wagon]
-        List of wagons available on the collection track.
-
-    Returns
-    -------
-    list[tuple[Wagon, str]]
-        List of (wagon, retrofit_track_id) tuples for wagons that can be moved.
-    """
-    wagons_to_pickup = []
-    # Find retrofit tracks (not workshop tracks)
-    tracks = popupsim.scenario.tracks or []
-    retrofit_tracks = [t for t in tracks if t.type == TrackType.RETROFIT]  # type: ignore[union-attr]
-    for wagon in collection_wagons:
-        for retrofit_track in retrofit_tracks:
-            retrofit_track_id = retrofit_track.id
-            # Check if any workshop has capacity
-            has_workshop_capacity = any(
-                popupsim.workshop_capacity.get_available_stations(w.track) > 0 for w in popupsim.workshops_queue
-            )
-            if has_workshop_capacity and popupsim.track_capacity.can_add_wagon(retrofit_track_id, wagon.length):
-                wagons_to_pickup.append((wagon, retrofit_track_id))
-                break
-    return wagons_to_pickup
-
-
-def _group_wagons_by_retrofit_track(wagons_to_pickup: list[tuple[Wagon, str]]) -> dict[str, list[Wagon]]:
-    """Group wagons by their destination retrofit track.
-
-    Parameters
-    ----------
-    wagons_to_pickup : list[tuple[Wagon, str]]
-        List of (wagon, retrofit_track_id) tuples.
-
-    Returns
-    -------
-    dict[str, list[Wagon]]
-        Dictionary mapping retrofit track IDs to lists of wagons.
-    """
-    result: dict[str, list[Wagon]] = {}
-    for wagon, track_id in wagons_to_pickup:
-        if track_id not in result:
-            result[track_id] = []
-        result[track_id].append(wagon)
-    return result
 
 
 def _return_loco_to_parking_and_release(popupsim: WorkshopOrchestrator, loco: Locomotive) -> Generator[Any]:
