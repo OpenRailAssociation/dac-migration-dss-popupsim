@@ -1,0 +1,1 @@
+"""Yard operations infrastructure layer."""

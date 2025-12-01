@@ -1,1 +1,1 @@
-"""Shunting Operations Infrastructure Layer."""
+"""Shunting operations infrastructure layer."""

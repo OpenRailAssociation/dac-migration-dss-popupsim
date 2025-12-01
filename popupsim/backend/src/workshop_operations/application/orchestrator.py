@@ -794,7 +794,9 @@ def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
             logger.info('Wagon %s moved to parking track %s', wagon.id, parking_track.id)
 
         # Check if current parking track is full, move to next
-        if not any(popupsim.track_capacity.can_add_wagon(parking_track.id, 10.0) for _ in range(1)):
+        # Use a reasonable minimum wagon length to check if track has any remaining capacity
+        min_wagon_length = 10.0  # Minimum expected wagon length
+        if not popupsim.track_capacity.can_add_wagon(parking_track.id, min_wagon_length):
             popupsim.yard_operations.parking_area.advance_to_next_track()
             logger.debug('Parking track %s full, switching to next', parking_track.id)
 

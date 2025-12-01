@@ -24,9 +24,10 @@ class WorkshopStatus(Enum):
 class RetrofitResult(BaseModel):
     """Result of DAC retrofit operation."""
 
-    wagon_id: str = Field(description='ID of retrofitted wagon')
     success: bool = Field(description='Whether retrofit was successful')
     duration: float = Field(description='Time taken for retrofit in minutes')
+    reason: str = Field(description='Reason for success or failure')
+    wagon_id: str | None = Field(default=None, description='ID of retrofitted wagon')
 
 
 class PopUpWorkshop(BaseModel):
@@ -82,7 +83,9 @@ class PopUpWorkshop(BaseModel):
         # Release bay
         available_bay.release()
 
-        return RetrofitResult(wagon_id=wagon.id, success=True, duration=retrofit_duration)
+        return RetrofitResult(
+            wagon_id=wagon.id, success=True, duration=retrofit_duration, reason='DAC installed successfully'
+        )
 
     def update_bay_utilization(self, occupied_hours: float, total_hours: float) -> None:
         """Update bay utilization metrics."""

@@ -7,7 +7,7 @@ from workshop_operations.domain.entities.workshop import Workshop
 
 from configuration.domain.models.scenario import Scenario
 
-from ..aggregates.analytics_session import AnalyticsSession
+
 from ..events.base_event import DomainEvent
 from ..events.simulation_events import WagonDeliveredEvent
 from ..events.simulation_events import WagonRejectedEvent
@@ -24,11 +24,6 @@ from ..value_objects.timestamp import Timestamp
 
 class AnalyticsFactory:
     """Factory for creating analytics domain objects."""
-
-    @staticmethod
-    def create_analytics_session(scenario_id: str) -> AnalyticsSession:
-        """Create analytics session for scenario."""
-        return AnalyticsSession(scenario_id=scenario_id)
 
     @staticmethod
     def create_simulation_started_event(_scenario: Scenario) -> DomainEvent:

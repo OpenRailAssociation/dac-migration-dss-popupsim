@@ -1,5 +1,6 @@
 """KPI Calculator - calculates performance metrics from simulation results."""
 
+import asyncio
 import logging
 from typing import Any
 
@@ -9,7 +10,10 @@ from workshop_operations.domain.entities.workshop import Workshop
 
 from configuration.domain.models.scenario import Scenario
 
+from ..exceptions import KPICalculationError
+from ..exceptions import MetricsCollectionError
 from ..factories.analytics_factory import AnalyticsFactory
+from ..models.bottleneck_config import BottleneckConfig
 from ..models.kpi_result import BottleneckInfo
 from ..models.kpi_result import ContextMetrics
 from ..models.kpi_result import KPIResult
@@ -28,6 +32,9 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
     Analyzes simulation data to compute throughput, utilization,
     bottlenecks, and other performance metrics.
     """
+
+    def __init__(self, bottleneck_config: BottleneckConfig | None = None) -> None:
+        self.bottleneck_config = bottleneck_config or BottleneckConfig()
 
     async def calculate_from_simulation(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
         self,
@@ -62,16 +69,19 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         """
         logger.info('Calculating KPIs for scenario %s', scenario.id)
 
-        throughput = self._calculate_throughput(scenario, wagons, rejected_wagons)
-        utilization = self._calculate_utilization(workshops, wagons)
-        bottlenecks = self._identify_bottlenecks(throughput, utilization)
-        avg_flow_time = self._calculate_avg_flow_time(metrics)
-        avg_waiting_time = self._calculate_avg_waiting_time(wagons)
+        try:
+            throughput = self._calculate_throughput(scenario, wagons, rejected_wagons)
+            utilization = self._calculate_utilization(workshops, wagons)
+            bottlenecks = self._identify_bottlenecks(throughput, utilization, scenario.id)
+            avg_flow_time = self._calculate_avg_flow_time(metrics)
+            avg_waiting_time = self._calculate_avg_waiting_time(wagons)
 
-        # Collect context-specific metrics asynchronously
-        context_metrics = await self._collect_all_context_metrics_async(
-            popup_context, yard_context, shunting_context
-        )
+            # Collect context-specific metrics asynchronously
+            context_metrics = await self._collect_all_context_metrics_async(
+                popup_context, yard_context, shunting_context
+            )
+        except Exception as e:
+            raise KPICalculationError(f'Failed to calculate KPIs for scenario {scenario.id}: {e}') from e
 
         analysis_data = {
             'utilization': utilization,
@@ -120,15 +130,18 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         return utilization_list
 
     def _identify_bottlenecks(
-        self, throughput: ThroughputKPI, utilization: list[UtilizationKPI]
+        self, throughput: ThroughputKPI, utilization: list[UtilizationKPI], scenario_id: str
     ) -> list[BottleneckInfo]:
         """Identify bottlenecks using specifications."""
         bottlenecks: list[BottleneckInfo] = []
 
+        # Create scenario-specific configuration
+        config = BottleneckConfig.create_for_scenario(scenario_id)
+
         # Use specifications for business rules
-        high_rejection_spec = HighRejectionRateSpec()
-        high_utilization_spec = HighUtilizationSpec()
-        critical_utilization_spec = CriticalUtilizationSpec()
+        high_rejection_spec = HighRejectionRateSpec(config)
+        high_utilization_spec = HighUtilizationSpec(config)
+        critical_utilization_spec = CriticalUtilizationSpec(config)
 
         # Check for high rejection rate
         if high_rejection_spec.is_satisfied_by(throughput):
@@ -183,8 +196,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
                 metrics = popup_context.get_all_workshop_metrics()
             return metrics
         except (AttributeError, TypeError, KeyError) as e:
-            logger.warning('Failed to collect PopUp metrics: %s', e)
-            return {}
+            raise MetricsCollectionError(f'Failed to collect PopUp metrics: {e}') from e
 
     async def _collect_yard_metrics_async(self, yard_context: Any) -> dict[str, Any]:
         """Collect Yard-specific metrics asynchronously."""
@@ -195,8 +207,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
                 metrics = yard_context.get_yard_metrics()
             return metrics
         except (AttributeError, TypeError, KeyError) as e:
-            logger.warning('Failed to collect Yard metrics: %s', e)
-            return {}
+            raise MetricsCollectionError(f'Failed to collect Yard metrics: {e}') from e
 
     def _collect_shunting_metrics(self, shunting_context: Any) -> dict[str, Any]:
         """Collect Shunting-specific metrics from Shunting context."""
@@ -204,9 +215,8 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
             metrics: dict[str, Any] = shunting_context.get_shunting_metrics()
             return metrics
         except (AttributeError, TypeError, KeyError) as e:
-            logger.warning('Failed to collect Shunting metrics: %s', e)
-            return {}
-    
+            raise MetricsCollectionError(f'Failed to collect Shunting metrics: {e}') from e
+
     async def _collect_all_context_metrics_async(
         self, popup_context: Any, yard_context: Any, shunting_context: Any
     ) -> ContextMetrics:
@@ -215,33 +225,42 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         popup_task = self._collect_popup_metrics_async(popup_context) if popup_context else None
         yard_task = self._collect_yard_metrics_async(yard_context) if yard_context else None
         shunting_task = self._collect_shunting_metrics_async(shunting_context) if shunting_context else None
-        
+
         # Wait for all tasks to complete
         tasks = [task for task in [popup_task, yard_task, shunting_task] if task is not None]
         if tasks:
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            popup_metrics = results[0] if popup_task else {}
-            yard_metrics = results[1] if yard_task else {}
-            shunting_metrics = results[2] if shunting_task else {}
+            try:
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                popup_metrics = results[0] if popup_task else {}
+                yard_metrics = results[1] if yard_task else {}
+                shunting_metrics = results[2] if shunting_task else {}
+            except Exception as e:
+                raise MetricsCollectionError(f'Failed to collect context metrics: {e}') from e
         else:
             popup_metrics, yard_metrics, shunting_metrics = {}, {}, {}
-        
+
         return ContextMetrics(
             popup_metrics=popup_metrics if isinstance(popup_metrics, dict) else {},
             yard_metrics=yard_metrics if isinstance(yard_metrics, dict) else {},
             shunting_metrics=shunting_metrics if isinstance(shunting_metrics, dict) else {},
         )
-    
-    def _collect_all_context_metrics(
-        self, popup_context: Any, yard_context: Any, shunting_context: Any
-    ) -> ContextMetrics:
-        """Sync version for backward compatibility."""
-        return ContextMetrics(
-            popup_metrics=self._collect_popup_metrics(popup_context) if popup_context else {},
-            yard_metrics=self._collect_yard_metrics(yard_context) if yard_context else {},
-            shunting_metrics=self._collect_shunting_metrics(shunting_context) if shunting_context else {},
-        )
-    
+
+    def _collect_popup_metrics(self, popup_context: Any) -> dict[str, Any]:
+        """Collect PopUp-specific metrics synchronously."""
+        try:
+            return popup_context.get_all_workshop_metrics()
+        except (AttributeError, TypeError, KeyError) as e:
+            logger.warning('Failed to collect PopUp metrics: %s', e)
+            return {}
+
+    def _collect_yard_metrics(self, yard_context: Any) -> dict[str, Any]:
+        """Collect Yard-specific metrics synchronously."""
+        try:
+            return yard_context.get_yard_metrics()
+        except (AttributeError, TypeError, KeyError) as e:
+            logger.warning('Failed to collect Yard metrics: %s', e)
+            return {}
+
     async def _collect_shunting_metrics_async(self, shunting_context: Any) -> dict[str, Any]:
         """Collect Shunting-specific metrics asynchronously."""
         try:
@@ -251,5 +270,4 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
                 metrics = shunting_context.get_shunting_metrics()
             return metrics
         except (AttributeError, TypeError, KeyError) as e:
-            logger.warning('Failed to collect Shunting metrics: %s', e)
-            return {}
+            raise MetricsCollectionError(f'Failed to collect Shunting metrics: {e}') from e

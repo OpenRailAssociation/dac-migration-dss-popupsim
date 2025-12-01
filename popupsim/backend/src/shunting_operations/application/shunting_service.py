@@ -323,6 +323,8 @@ class DefaultShuntingService(ShuntingService):
             logger.warning(
                 '⚠️ SHUNTING: Loco %s cannot couple %s wagons (incompatible coupler)', loco.id, coupler_type.value
             )
+            # Still yield a minimal delay to maintain generator behavior
+            yield popupsim.sim.delay(0.0)
             return
 
         # Check capacity constraints (for reporting)
@@ -338,6 +340,9 @@ class DefaultShuntingService(ShuntingService):
         process_times = popupsim.scenario.process_times
         time_per_coupling = process_times.get_coupling_time(coupler_type.value)
         coupling_time = wagon_count * time_per_coupling
+
+        # Update capacity tracking BEFORE the delay to ensure it's available for decoupling
+        loco.current_load.coupled_wagons += wagon_count
 
         # Only change state if coupling takes time
         if coupling_time > 0:
@@ -361,10 +366,10 @@ class DefaultShuntingService(ShuntingService):
                 coupling_time,
             )
             yield popupsim.sim.delay(coupling_time)
-
-            # Update capacity tracking
-            loco.current_load.coupled_wagons += wagon_count
             loco.movement_state.shunting_status = ShuntingStatus.IDLE
+        else:
+            # Even if no time delay, still yield to maintain generator behavior
+            yield popupsim.sim.delay(0.0)
 
     def execute_decoupling(
         self, popupsim: Any, loco: ShuntingLocomotive, wagon_count: int, coupler_type: CouplerType | None = None
@@ -395,7 +400,14 @@ class DefaultShuntingService(ShuntingService):
                 wagon_count,
                 loco.current_load.coupled_wagons,
             )
-            return
+            # Instead of returning, adjust the wagon count to what's actually available
+            # This prevents SimPy validation errors while maintaining simulation flow
+            actual_wagon_count = max(0, loco.current_load.coupled_wagons)
+            if actual_wagon_count == 0:
+                # No wagons to decouple, just yield a minimal delay and return
+                yield popupsim.sim.delay(0.0)
+                return
+            wagon_count = actual_wagon_count
 
         process_times = popupsim.scenario.process_times
         if coupler_type:

@@ -1,6 +1,7 @@
 """Yard Operations Context - Main entry point."""
 
-from typing import Any, Dict
+from typing import Any
+
 from yard_operations.application.yard_operations_config import YardOperationsConfig
 from yard_operations.domain.entities.classification_area import ClassificationArea
 from yard_operations.domain.entities.parking_area import ParkingArea
@@ -46,10 +47,10 @@ class YardOperationsContext:  # pylint: disable=R0903
             Service for hump yard operations
         """
         return self.hump_yard_service
-    
-    async def get_yard_metrics_async(self) -> Dict[str, Any]:
+
+    async def get_yard_metrics_async(self) -> dict[str, Any]:
         """Get yard operations metrics asynchronously.
-        
+
         Returns
         -------
         Dict[str, Any]
@@ -57,17 +58,18 @@ class YardOperationsContext:  # pylint: disable=R0903
         """
         # Run metrics computation in thread pool to avoid blocking
         import asyncio
+
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self._compute_yard_metrics)
-    
-    def get_yard_metrics(self) -> Dict[str, Any]:
+
+    def get_yard_metrics(self) -> dict[str, Any]:
         """Sync version for backward compatibility."""
         return self._compute_yard_metrics()
-    
-    def _compute_yard_metrics(self) -> Dict[str, Any]:
+
+    def _compute_yard_metrics(self) -> dict[str, Any]:
         """Internal method to compute yard metrics."""
         rejection_stats = self.hump_yard_service.get_rejection_stats()
-        
+
         yard_metrics = YardMetrics(
             yard_id='main_yard',
             total_wagons_processed=rejection_stats.total_rejections + 100,
@@ -76,7 +78,7 @@ class YardOperationsContext:  # pylint: disable=R0903
             total_hump_time=60.0,
             rejection_stats=rejection_stats,
         )
-        
+
         return {
             'hump_rejection_rate': yard_metrics.hump_rejection_rate,
             'hump_throughput': yard_metrics.hump_throughput_per_hour,

@@ -54,9 +54,11 @@ class PopUpRetrofitContext:
 
     def initialize_station_service(self, sim_adapter: 'SimulationAdapter') -> None:
         """Initialize the station service with SimPy adapter."""
+        from ..infrastructure.simpy_coordinator import PopUpSimPyCoordinator  # pylint: disable=import-outside-toplevel
         from .services.retrofit_station_service import RetrofitStationService  # pylint: disable=import-outside-toplevel
 
-        self._station_service = RetrofitStationService(sim_adapter, self)
+        self._simpy_coordinator = PopUpSimPyCoordinator(sim_adapter)
+        self._station_service = RetrofitStationService(self._simpy_coordinator)
 
     def get_station_service(self) -> 'RetrofitStationService':
         """Get the station service."""
@@ -95,13 +97,14 @@ class PopUpRetrofitContext:
     async def get_all_workshop_metrics_async(self) -> dict[str, dict[str, float | str]]:
         """Get performance metrics for all workshops asynchronously."""
         import asyncio
+
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, self._compute_all_workshop_metrics)
-    
+
     def get_all_workshop_metrics(self) -> dict[str, dict[str, float | str]]:
         """Sync version for backward compatibility."""
         return self._compute_all_workshop_metrics()
-    
+
     def _compute_all_workshop_metrics(self) -> dict[str, dict[str, float | str]]:
         """Internal method to compute all workshop metrics."""
         return {workshop_id: workshop.get_performance_summary() for workshop_id, workshop in self._workshops.items()}
