@@ -35,6 +35,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         wagons: list[Wagon],
         rejected_wagons: list[Wagon],
         workshops: list[Workshop],
+        popup_context: Any = None,  # PopUpRetrofitContext - optional for backward compatibility
     ) -> KPIResult:
         """Calculate all KPIs from simulation results.
 
@@ -64,11 +65,15 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         avg_flow_time = self._calculate_avg_flow_time(metrics)
         avg_waiting_time = self._calculate_avg_waiting_time(wagons)
 
+        # Collect PopUp metrics if context provided
+        popup_metrics = self._collect_popup_metrics(popup_context) if popup_context else {}
+
         analysis_data = {
             'utilization': utilization,
             'bottlenecks': bottlenecks,
             'avg_flow_time': avg_flow_time,
             'avg_waiting_time': avg_waiting_time,
+            'popup_metrics': popup_metrics,
         }
         return AnalyticsFactory.create_kpi_result(
             scenario_id=scenario.id,
@@ -163,3 +168,12 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         if not waiting_times:
             return 0.0
         return round(sum(waiting_times) / len(waiting_times) / 60.0, 1)  # Convert to minutes
+
+    def _collect_popup_metrics(self, popup_context: Any) -> dict[str, Any]:
+        """Collect PopUp-specific metrics from PopUp context."""
+        try:
+            metrics: dict[str, Any] = popup_context.get_all_workshop_metrics()
+            return metrics
+        except (AttributeError, TypeError, KeyError) as e:
+            logger.warning('Failed to collect PopUp metrics: %s', e)
+            return {}

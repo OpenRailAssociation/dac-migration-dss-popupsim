@@ -148,6 +148,7 @@ def _run_simulation_and_display_metrics(scenario: Any) -> Any:  # type: ignore[m
         popup_sim.wagons_queue,
         popup_sim.rejected_wagons_queue,
         popup_sim.workshops_queue,
+        popup_context=popup_sim.popup_retrofit,
     )
 
     # Display KPIs

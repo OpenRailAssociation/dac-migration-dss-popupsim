@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from dataclasses import field
+from typing import Any
 
 
 @dataclass
@@ -48,3 +49,4 @@ class KPIResult:
     bottlenecks: list[BottleneckInfo] = field(default_factory=list)
     avg_flow_time_minutes: float = 0.0
     avg_waiting_time_minutes: float = 0.0
+    popup_metrics: dict[str, Any] = field(default_factory=dict)  # PopUp workshop metrics
