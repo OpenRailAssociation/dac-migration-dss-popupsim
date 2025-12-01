@@ -1,10 +1,16 @@
 """PopUp Retrofit Context for coordinating DAC installation operations."""
 
+from typing import TYPE_CHECKING
+
 from workshop_operations.domain.entities.wagon import Wagon
 
 from ..domain.aggregates.popup_workshop import PopUpWorkshop
 from ..domain.aggregates.popup_workshop import RetrofitResult
 from ..domain.entities.retrofit_bay import RetrofitBay
+
+if TYPE_CHECKING:
+    from workshop_operations.infrastructure.simulation.simpy_adapter import SimulationAdapter
+    from .services.retrofit_station_service import RetrofitStationService
 
 
 class PopUpRetrofitContext:
@@ -13,6 +19,7 @@ class PopUpRetrofitContext:
     def __init__(self) -> None:
         """Initialize PopUp retrofit context."""
         self._workshops: dict[str, PopUpWorkshop] = {}
+        self._station_service: 'RetrofitStationService | None' = None
 
     def create_workshop(self, workshop_id: str, location: str, num_bays: int = 2) -> PopUpWorkshop:
         """Create a new PopUp workshop.
@@ -44,6 +51,18 @@ class PopUpRetrofitContext:
         if workshop:
             workshop.start_operations()
 
+    def initialize_station_service(self, sim_adapter: 'SimulationAdapter') -> None:
+        """Initialize the station service with SimPy adapter."""
+        from .services.retrofit_station_service import RetrofitStationService  # pylint: disable=import-outside-toplevel
+
+        self._station_service = RetrofitStationService(sim_adapter, self)
+
+    def get_station_service(self) -> 'RetrofitStationService':
+        """Get the station service."""
+        if not self._station_service:
+            raise ValueError('Station service not initialized. Call initialize_station_service first.')
+        return self._station_service
+
     def process_wagon_retrofit(self, workshop_id: str, wagon: Wagon) -> RetrofitResult:
         """Process wagon retrofit at specified workshop.
 
@@ -64,3 +83,14 @@ class PopUpRetrofitContext:
             raise ValueError(f'Workshop {workshop_id} not found')
 
         return workshop.process_wagon(wagon)
+
+    def get_workshop_metrics(self, workshop_id: str) -> dict[str, float | str] | None:
+        """Get performance metrics for a workshop."""
+        workshop = self.get_workshop(workshop_id)
+        if not workshop:
+            return None
+        return workshop.get_performance_summary()
+
+    def get_all_workshop_metrics(self) -> dict[str, dict[str, float | str]]:
+        """Get performance metrics for all workshops."""
+        return {workshop_id: workshop.get_performance_summary() for workshop_id, workshop in self._workshops.items()}

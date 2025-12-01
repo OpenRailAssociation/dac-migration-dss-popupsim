@@ -141,7 +141,8 @@ class AnalyticsFactory:
         throughput : ThroughputKPI
             Throughput metrics.
         analysis_data : dict[str, Any]
-            Dictionary containing 'utilization', 'bottlenecks', 'avg_flow_time', and 'avg_waiting_time'.
+            Dictionary containing 'utilization', 'bottlenecks', 'avg_flow_time',
+            'avg_waiting_time', and 'popup_metrics'.
         """
         return KPIResult(
             scenario_id=scenario_id,
@@ -150,6 +151,7 @@ class AnalyticsFactory:
             bottlenecks=analysis_data['bottlenecks'],
             avg_flow_time_minutes=analysis_data['avg_flow_time'],
             avg_waiting_time_minutes=analysis_data['avg_waiting_time'],
+            popup_metrics=analysis_data.get('popup_metrics', {}),
         )
 
     @staticmethod

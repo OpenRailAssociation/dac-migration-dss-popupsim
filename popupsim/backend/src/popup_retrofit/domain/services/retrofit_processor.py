@@ -9,7 +9,7 @@ from ..aggregates.popup_workshop import PopUpWorkshop
 from ..aggregates.popup_workshop import RetrofitResult
 
 
-class RetrofitProcessor(Protocol):
+class RetrofitProcessor(Protocol):  # pylint: disable=too-few-public-methods
     """Service for processing DAC retrofits."""
 
     def process_retrofit(self, workshop: PopUpWorkshop, wagon: Wagon) -> RetrofitResult:
