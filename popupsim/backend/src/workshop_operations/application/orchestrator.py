@@ -16,6 +16,7 @@ from analytics.domain.events.simulation_events import WagonArrivedEvent
 from analytics.domain.events.simulation_events import WagonDeliveredEvent
 from analytics.domain.events.simulation_events import WagonRetrofittedEvent
 from analytics.domain.value_objects.timestamp import Timestamp
+from popup_retrofit.application.popup_context import PopUpRetrofitContext
 from workshop_operations.application.factories.entity_factory import EntityFactory
 from workshop_operations.application.services.locomotive_service import LocomotiveService
 from workshop_operations.domain.aggregates.train import Train
@@ -131,6 +132,19 @@ class WorkshopOrchestrator:  # pylint: disable=too-few-public-methods,too-many-i
             parking_tracks=self.parking_tracks,
         )
         self.yard_operations = YardOperationsContext(yard_config)
+
+        # Initialize PopUp Retrofit Context
+        self.popup_retrofit = PopUpRetrofitContext()
+
+        # Create PopUp workshops for each workshop in scenario
+        for workshop in self.workshops_queue:
+            popup_workshop = self.popup_retrofit.create_workshop(
+                workshop_id=f'popup_{workshop.track}', location=workshop.track, num_bays=workshop.retrofit_stations
+            )
+            self.popup_retrofit.start_workshop_operations(popup_workshop.workshop_id)
+            logger.info(
+                'Created PopUp workshop %s with %d bays', popup_workshop.workshop_id, len(popup_workshop.retrofit_bays)
+            )
 
         # Validate domain requirements
         domain_validator = ScenarioDomainValidator()
@@ -680,9 +694,9 @@ def _process_track_batches(popupsim: WorkshopOrchestrator, workshop_track_id: st
 
 
 def process_single_wagon(popupsim: WorkshopOrchestrator, wagon: Wagon, track_id: str) -> Generator[Any, Any]:
-    """Process single wagon at workshop station using SimPy Resource.
+    """Process single wagon at PopUp workshop using PopUp Retrofit Context.
 
-    Blocks until station available, processes wagon, then signals completion.
+    Blocks until station available, processes wagon using PopUp facilities, then signals completion.
     """
     workshop_resource = popupsim.workshop_capacity.get_resource(track_id)
     process_times = popupsim.scenario.process_times
@@ -695,20 +709,39 @@ def process_single_wagon(popupsim: WorkshopOrchestrator, wagon: Wagon, track_id:
 
         # Station acquired
         current_time = popupsim.sim.current_time()
-        wagon.status = WagonStatus.RETROFITTING
         wagon.retrofit_start_time = current_time
         popupsim.workshop_capacity.record_station_occupied(track_id, wagon.id, current_time)
-        logger.debug('Wagon %s started retrofit at station (t=%.1f)', wagon.id, current_time)
+        logger.debug('Wagon %s started PopUp retrofit at station (t=%.1f)', wagon.id, current_time)
 
-        # Perform retrofit work
-        yield popupsim.sim.delay(process_times.wagon_retrofit_time)
+        # Use PopUp Retrofit Context for DAC installation
+        popup_workshop_id = f'popup_{track_id}'
+        try:
+            # Process wagon through PopUp workshop
+            retrofit_result = popupsim.popup_retrofit.process_wagon_retrofit(popup_workshop_id, wagon)
 
-        # Retrofit complete
+            # Simulate the actual retrofit time
+            yield popupsim.sim.delay(process_times.wagon_retrofit_time)
+
+            logger.info(
+                'PopUp retrofit result for wagon %s: success=%s, duration=%.1f min',
+                wagon.id,
+                retrofit_result.success,
+                retrofit_result.duration,
+            )
+
+        except Exception as e:
+            logger.error('PopUp retrofit failed for wagon %s: %s', wagon.id, e)
+            # Fallback to standard processing
+            wagon.status = WagonStatus.RETROFITTING
+            yield popupsim.sim.delay(process_times.wagon_retrofit_time)
+            wagon.status = WagonStatus.RETROFITTED
+            wagon.retrofit_end_time = popupsim.sim.current_time()
+            wagon.needs_retrofit = False
+            wagon.coupler_type = CouplerType.DAC
+
+        # Update final state
         current_time = popupsim.sim.current_time()
-        wagon.status = WagonStatus.RETROFITTED
         wagon.retrofit_end_time = current_time
-        wagon.needs_retrofit = False
-        wagon.coupler_type = CouplerType.DAC
         popupsim.workshop_capacity.record_station_released(track_id, current_time)
 
         # Record domain event
@@ -720,7 +753,9 @@ def process_single_wagon(popupsim: WorkshopOrchestrator, wagon: Wagon, track_id:
         )
         popupsim.metrics.record_event(event)
 
-        logger.info('Wagon %s retrofit completed at t=%s, coupler changed to DAC', wagon.id, wagon.retrofit_end_time)
+        logger.info(
+            'Wagon %s PopUp retrofit completed at t=%s, coupler changed to DAC', wagon.id, wagon.retrofit_end_time
+        )
 
         # Signal completion
         yield from popupsim.put_completed_wagon(track_id, wagon)
