@@ -1,33 +1,39 @@
 """Yard Operations Context - Main entry point."""
 
-from workshop_operations.domain.services.wagon_operations import WagonStateManager
-from workshop_operations.infrastructure.resources.track_capacity_manager import TrackCapacityManager
+from yard_operations.application.yard_operations_config import YardOperationsConfig
 from yard_operations.domain.entities.classification_area import ClassificationArea
+from yard_operations.domain.entities.parking_area import ParkingArea
 from yard_operations.domain.services.hump_yard_service import HumpYardService
 
 
-class YardOperationsContext:  # pylint: disable=too-few-public-methods
-    """Main context for yard operations.
-
-    Provides access to yard operational areas and services.
+class YardOperationsContext:  # pylint: disable=R0903
+    """Main context for yard operations including classification and parking.
 
     Parameters
     ----------
-    track_capacity : TrackCapacityManager
-        Track capacity manager for yard
-    wagon_state : WagonStateManager
-        Service for wagon state management
+    config : YardOperationsConfig
+        Configuration for yard operations
     """
 
-    def __init__(self, track_capacity: TrackCapacityManager, wagon_state: WagonStateManager) -> None:
-        self.track_capacity = track_capacity
-        self.wagon_state = wagon_state
+    def __init__(self, config: YardOperationsConfig) -> None:
+        self.config = config
 
-        # Create classification area
-        self.classification_area = ClassificationArea(area_id='hump_classification', track_capacity=track_capacity)
+        # Initialize classification area
+        self.classification_area = ClassificationArea(
+            area_id='main_classification',
+            track_capacity=config.track_capacity,
+            workshop_capacity=config.workshop_capacity,
+        )
 
-        # Create hump yard service
-        self.hump_yard_service = HumpYardService(classification_area=self.classification_area, wagon_state=wagon_state)
+        # Initialize parking area
+        self.parking_area = ParkingArea(parking_tracks=config.parking_tracks, track_capacity=config.track_capacity)
+
+        # Initialize hump yard service
+        self.hump_yard_service = HumpYardService(
+            classification_area=self.classification_area,
+            wagon_state=config.wagon_state,
+            wagon_selector=config.wagon_selector,
+        )
 
     def get_hump_yard_service(self) -> HumpYardService:
         """Get hump yard service for wagon classification.
