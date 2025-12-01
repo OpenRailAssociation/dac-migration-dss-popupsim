@@ -228,7 +228,21 @@ class SimPyAdapter(SimulationAdapter):
         """
         if until is None:
             until = self.run_until
-        return self._env.run(until)
+
+        try:
+            return self._env.run(until)
+        except TypeError as e:
+            # Handle Pydantic ValidationError constructor issue with SimPy
+            if 'ValidationError.__new__() missing' in str(e):
+                # This is likely a Pydantic ValidationError that SimPy can't recreate properly
+                # Convert it to a more generic RuntimeError that SimPy can handle
+                raise RuntimeError(
+                    'Simulation failed due to validation error. '
+                    'This is likely caused by invalid data in the simulation model. '
+                    f'Original error: {e}'
+                ) from e
+            # Re-raise other TypeErrors
+            raise
 
     def run_process(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Schedule a callable in the SimPy environment.

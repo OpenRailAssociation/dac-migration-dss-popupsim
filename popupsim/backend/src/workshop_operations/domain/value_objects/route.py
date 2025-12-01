@@ -10,6 +10,7 @@ import logging
 from typing import Any
 
 from pydantic import BaseModel
+from pydantic import ConfigDict
 from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
@@ -75,7 +76,4 @@ class Route(BaseModel):
         """Get the complete track sequence (alias for path)."""
         return self.path
 
-    class Config:
-        """Pydantic configuration."""
-
-        populate_by_name = True  # Allow both 'id' and 'route_id'
+    model_config = ConfigDict(populate_by_name=True)  # Allow both 'id' and 'route_id'

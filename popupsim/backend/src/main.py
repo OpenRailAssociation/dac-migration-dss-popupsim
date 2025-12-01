@@ -1,11 +1,12 @@
 """PopUp-Sim main entry point for freight rail DAC migration simulation tool."""
 
+import asyncio
 from pathlib import Path
 from typing import Annotated
 from typing import Any
 
-import asyncio
 from analytics.application.async_analytics_service import AsyncAnalyticsService
+from analytics.domain.exceptions import KPICalculationError
 from analytics.infrastructure.exporters.csv_exporter import CSVExporter
 from analytics.infrastructure.visualization.matplotlib_visualizer import Visualizer
 import typer
@@ -151,7 +152,7 @@ async def _run_simulation_and_display_metrics_async(scenario: Any) -> Any:  # ty
         popup_sim.workshops_queue,
         popup_context=popup_sim.popup_retrofit,
         yard_context=popup_sim.yard_operations,
-        shunting_context=None,  # Not implemented yet
+        shunting_context=None,
     )
 
     # Display KPIs
@@ -265,6 +266,9 @@ def main(
             typer.echo(f'  - {chart_path.name}')
     except BuilderError as e:
         typer.echo(f'Configuration error: {e}')
+        raise typer.Exit(1) from e
+    except KPICalculationError as e:
+        typer.echo(f'Analytics error: {e}')
         raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f'Unexpected error: {e}')

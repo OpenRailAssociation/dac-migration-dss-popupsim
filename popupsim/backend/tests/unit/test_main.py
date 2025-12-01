@@ -92,7 +92,7 @@ def test_main_with_valid_parameters(
     mock_scenario_builder = mocker.patch('main.ScenarioBuilder')
     mock_builder_instance = mocker.MagicMock()
     mock_scenario = mocker.MagicMock()
-    mock_scenario.scenario_id = 'test_scenario'
+    mock_scenario.id = 'test_scenario'
     mock_scenario.start_date = datetime(2024, 1, 1, tzinfo=UTC)
     mock_scenario.end_date = datetime(2024, 12, 31, tzinfo=UTC)
     mock_scenario.trains = []
@@ -102,8 +102,44 @@ def test_main_with_valid_parameters(
     mock_scenario_builder.return_value = mock_builder_instance
 
     # Mock the simulation components
-    mocker.patch('main.SimPyAdapter')
-    mocker.patch('main.WorkshopOrchestrator')
+    mock_sim_adapter = mocker.patch('main.SimPyAdapter')
+    mock_orchestrator = mocker.patch('main.WorkshopOrchestrator')
+    mock_orchestrator_instance = mocker.MagicMock()
+    mock_orchestrator.return_value = mock_orchestrator_instance
+    mock_orchestrator_instance.get_metrics.return_value = {}
+    mock_orchestrator_instance.wagons_queue = []
+    mock_orchestrator_instance.rejected_wagons_queue = []
+    mock_orchestrator_instance.workshops_queue = []
+    mock_orchestrator_instance.popup_retrofit = None
+    mock_orchestrator_instance.yard_operations = None
+
+    # Mock the async analytics service
+    mock_analytics_service = mocker.patch('main.AsyncAnalyticsService')
+    mock_analytics_instance = mocker.MagicMock()
+    mock_analytics_service.return_value = mock_analytics_instance
+
+    # Mock the KPI result
+    mock_kpi_result = mocker.MagicMock()
+    mock_kpi_result.throughput.total_wagons_processed = 0
+    mock_kpi_result.throughput.total_wagons_retrofitted = 0
+    mock_kpi_result.throughput.total_wagons_rejected = 0
+    mock_kpi_result.throughput.simulation_duration_hours = 0.0
+    mock_kpi_result.throughput.wagons_per_hour = 0.0
+    mock_kpi_result.throughput.wagons_per_day = 0.0
+    mock_kpi_result.utilization = []
+    mock_kpi_result.bottlenecks = []
+    mock_kpi_result.avg_flow_time_minutes = 0.0
+    mock_kpi_result.avg_waiting_time_minutes = 0.0
+
+    # Create an async mock that returns the KPI result
+    async def mock_calculate_kpis_async(*args, **kwargs):
+        return mock_kpi_result
+
+    mock_analytics_instance.calculate_kpis_async = mock_calculate_kpis_async
+
+    # Mock the exporters
+    mocker.patch('main.CSVExporter')
+    mocker.patch('main.Visualizer')
 
     result = runner.invoke(app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir)])
 
@@ -122,7 +158,7 @@ def test_main_with_verbose_flag(
     mock_scenario_builder = mocker.patch('main.ScenarioBuilder')
     mock_builder_instance = mocker.MagicMock()
     mock_scenario = mocker.MagicMock()
-    mock_scenario.scenario_id = 'test_scenario'
+    mock_scenario.id = 'test_scenario'
     mock_scenario.start_date = datetime(2024, 1, 1, tzinfo=UTC)
     mock_scenario.end_date = datetime(2024, 12, 31, tzinfo=UTC)
     mock_scenario.trains = []
@@ -132,8 +168,44 @@ def test_main_with_verbose_flag(
     mock_scenario_builder.return_value = mock_builder_instance
 
     # Mock the simulation components
-    mocker.patch('main.SimPyAdapter')
-    mocker.patch('main.WorkshopOrchestrator')
+    mock_sim_adapter = mocker.patch('main.SimPyAdapter')
+    mock_orchestrator = mocker.patch('main.WorkshopOrchestrator')
+    mock_orchestrator_instance = mocker.MagicMock()
+    mock_orchestrator.return_value = mock_orchestrator_instance
+    mock_orchestrator_instance.get_metrics.return_value = {}
+    mock_orchestrator_instance.wagons_queue = []
+    mock_orchestrator_instance.rejected_wagons_queue = []
+    mock_orchestrator_instance.workshops_queue = []
+    mock_orchestrator_instance.popup_retrofit = None
+    mock_orchestrator_instance.yard_operations = None
+
+    # Mock the async analytics service
+    mock_analytics_service = mocker.patch('main.AsyncAnalyticsService')
+    mock_analytics_instance = mocker.MagicMock()
+    mock_analytics_service.return_value = mock_analytics_instance
+
+    # Mock the KPI result
+    mock_kpi_result = mocker.MagicMock()
+    mock_kpi_result.throughput.total_wagons_processed = 0
+    mock_kpi_result.throughput.total_wagons_retrofitted = 0
+    mock_kpi_result.throughput.total_wagons_rejected = 0
+    mock_kpi_result.throughput.simulation_duration_hours = 0.0
+    mock_kpi_result.throughput.wagons_per_hour = 0.0
+    mock_kpi_result.throughput.wagons_per_day = 0.0
+    mock_kpi_result.utilization = []
+    mock_kpi_result.bottlenecks = []
+    mock_kpi_result.avg_flow_time_minutes = 0.0
+    mock_kpi_result.avg_waiting_time_minutes = 0.0
+
+    # Create an async mock that returns the KPI result
+    async def mock_calculate_kpis_async(*args, **kwargs):
+        return mock_kpi_result
+
+    mock_analytics_instance.calculate_kpis_async = mock_calculate_kpis_async
+
+    # Mock the exporters
+    mocker.patch('main.CSVExporter')
+    mocker.patch('main.Visualizer')
 
     result = runner.invoke(
         app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--verbose']
@@ -151,7 +223,7 @@ def test_main_with_custom_debug_level(
     mock_scenario_builder = mocker.patch('main.ScenarioBuilder')
     mock_builder_instance = mocker.MagicMock()
     mock_scenario = mocker.MagicMock()
-    mock_scenario.scenario_id = 'test_scenario'
+    mock_scenario.id = 'test_scenario'
     mock_scenario.start_date = datetime(2024, 1, 1, tzinfo=UTC)
     mock_scenario.end_date = datetime(2024, 12, 31, tzinfo=UTC)
     mock_scenario.trains = []
@@ -161,8 +233,44 @@ def test_main_with_custom_debug_level(
     mock_scenario_builder.return_value = mock_builder_instance
 
     # Mock the simulation components
-    mocker.patch('main.SimPyAdapter')
-    mocker.patch('main.WorkshopOrchestrator')
+    mock_sim_adapter = mocker.patch('main.SimPyAdapter')
+    mock_orchestrator = mocker.patch('main.WorkshopOrchestrator')
+    mock_orchestrator_instance = mocker.MagicMock()
+    mock_orchestrator.return_value = mock_orchestrator_instance
+    mock_orchestrator_instance.get_metrics.return_value = {}
+    mock_orchestrator_instance.wagons_queue = []
+    mock_orchestrator_instance.rejected_wagons_queue = []
+    mock_orchestrator_instance.workshops_queue = []
+    mock_orchestrator_instance.popup_retrofit = None
+    mock_orchestrator_instance.yard_operations = None
+
+    # Mock the async analytics service
+    mock_analytics_service = mocker.patch('main.AsyncAnalyticsService')
+    mock_analytics_instance = mocker.MagicMock()
+    mock_analytics_service.return_value = mock_analytics_instance
+
+    # Mock the KPI result
+    mock_kpi_result = mocker.MagicMock()
+    mock_kpi_result.throughput.total_wagons_processed = 0
+    mock_kpi_result.throughput.total_wagons_retrofitted = 0
+    mock_kpi_result.throughput.total_wagons_rejected = 0
+    mock_kpi_result.throughput.simulation_duration_hours = 0.0
+    mock_kpi_result.throughput.wagons_per_hour = 0.0
+    mock_kpi_result.throughput.wagons_per_day = 0.0
+    mock_kpi_result.utilization = []
+    mock_kpi_result.bottlenecks = []
+    mock_kpi_result.avg_flow_time_minutes = 0.0
+    mock_kpi_result.avg_waiting_time_minutes = 0.0
+
+    # Create an async mock that returns the KPI result
+    async def mock_calculate_kpis_async(*args, **kwargs):
+        return mock_kpi_result
+
+    mock_analytics_instance.calculate_kpis_async = mock_calculate_kpis_async
+
+    # Mock the exporters
+    mocker.patch('main.CSVExporter')
+    mocker.patch('main.Visualizer')
 
     result = runner.invoke(
         app, ['--scenarioPath', str(temp_scenario_file), '--outputPath', str(temp_output_dir), '--debug', 'DEBUG']
