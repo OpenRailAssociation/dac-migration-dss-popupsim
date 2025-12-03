@@ -2,76 +2,18 @@
 
 from typing import Any
 
-from workshop_operations.domain.entities.wagon import Wagon
 from workshop_operations.domain.entities.workshop import Workshop
 
-from configuration.domain.models.scenario import Scenario
-
-
-from ..events.base_event import DomainEvent
-from ..events.simulation_events import WagonDeliveredEvent
-from ..events.simulation_events import WagonRejectedEvent
-from ..events.simulation_events import WagonRetrofittedEvent
 from ..models.kpi_result import BottleneckInfo
 from ..models.kpi_result import ContextMetrics
 from ..models.kpi_result import KPIResult
 from ..models.kpi_result import ThroughputKPI
 from ..models.kpi_result import UtilizationKPI
-from ..value_objects.event_id import EventId
 from ..value_objects.metric_value import MetricValue
-from ..value_objects.timestamp import Timestamp
 
 
 class AnalyticsFactory:
     """Factory for creating analytics domain objects."""
-
-    @staticmethod
-    def create_simulation_started_event(_scenario: Scenario) -> DomainEvent:
-        """Create simulation started event."""
-        return DomainEvent(
-            event_id=EventId.generate(),
-            timestamp=Timestamp.now(),
-        )
-
-    @staticmethod
-    def create_wagon_delivered_event(wagon: Wagon) -> WagonDeliveredEvent:
-        """Create wagon delivered event."""
-        return WagonDeliveredEvent(
-            event_id=EventId.generate(),
-            timestamp=Timestamp.now(),
-            wagon_id=wagon.id,
-        )
-
-    @staticmethod
-    def create_wagon_retrofitted_event(wagon: Wagon, workshop_id: str) -> WagonRetrofittedEvent:
-        """Create wagon retrofitted event."""
-        return WagonRetrofittedEvent(
-            event_id=EventId.generate(),
-            timestamp=Timestamp.now(),
-            wagon_id=wagon.id,
-            workshop_id=workshop_id,
-            processing_duration=0.0,
-        )
-
-    @staticmethod
-    def create_wagon_rejected_event(wagon: Wagon, reason: str) -> WagonRejectedEvent:
-        """Create wagon rejected event."""
-        return WagonRejectedEvent(
-            event_id=EventId.generate(),
-            timestamp=Timestamp.now(),
-            wagon_id=wagon.id,
-            reason=reason,
-        )
-
-    @staticmethod
-    def create_simulation_completed_event(
-        _scenario_id: str, _total_processed: int, _total_rejected: int
-    ) -> DomainEvent:
-        """Create simulation completed event."""
-        return DomainEvent(
-            event_id=EventId.generate(),
-            timestamp=Timestamp.now(),
-        )
 
     @staticmethod
     def create_throughput_kpi(

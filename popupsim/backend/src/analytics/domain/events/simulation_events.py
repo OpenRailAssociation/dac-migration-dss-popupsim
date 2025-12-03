@@ -52,6 +52,8 @@ class WagonMovedEvent(DomainEvent):
 class WagonArrivedEvent(DomainEvent):
     """Event when wagon arrives at destination track."""
 
+    _context = 'workshop_operations'
+
     wagon_id: str
     track_id: str
     wagon_status: str

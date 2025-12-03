@@ -61,6 +61,16 @@ class MetricCollector(ABC):
         """Reset collector state."""
         raise NotImplementedError
 
+    def handled_event_types(self) -> set[type[DomainEvent]]:
+        """Return set of event types this collector handles.
+
+        Returns
+        -------
+        set[type[DomainEvent]]
+            Event types handled by this collector.
+        """
+        return set()
+
 
 @dataclass
 class ResourceUtilizationCollector(MetricCollector):

@@ -17,6 +17,10 @@ class LocomotiveCollector(ResourceUtilizationCollector):
 
     category: str = 'locomotive'
 
+    def handled_event_types(self) -> set[type[DomainEvent]]:
+        """Return locomotive event types."""
+        return {LocomotiveStatusChangeEvent}
+
     def record_event(self, event: DomainEvent) -> None:
         """Record locomotive domain events."""
         if isinstance(event, LocomotiveStatusChangeEvent):

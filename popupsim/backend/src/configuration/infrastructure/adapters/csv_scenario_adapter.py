@@ -57,25 +57,38 @@ class CsvScenarioAdapter(ScenarioPort):
         )
 
     def _process_trains(self, trains_df: Any, wagons_df: Any) -> list[TrainInputDTO]:
-        """Process trains and wagons DataFrames into DTOs."""
+        """Process trains and wagons DataFrames into DTOs.
+
+        Uses dict grouping for O(n+m) complexity instead of O(n*m) iterrows().
+        """
+        # Convert to dicts once - O(n + m)
+        trains_dict = trains_df.to_dict('records')
+        wagons_dict = wagons_df.to_dict('records')
+
+        # Group wagons by train_id - O(m)
+        wagons_by_train: dict[str, list[dict]] = {}
+        for wagon in wagons_dict:
+            train_id = str(wagon.get('train_id', wagon.get('id')))
+            wagons_by_train.setdefault(train_id, []).append(wagon)
+
+        # Build train DTOs - O(n)
         trains = []
-        for _, train_row in trains_df.iterrows():
-            # Get wagons for this train
-            train_wagons = wagons_df[wagons_df['id'] == train_row['id']]
+        for train_row in trains_dict:
+            train_id = str(train_row['id'])
             wagon_dtos = [
                 WagonInputDTO(
-                    id=str(wagon_row['id']),
-                    length=float(wagon_row['length']),
-                    is_loaded=bool(wagon_row.get('is_loaded', False)),
-                    needs_retrofit=bool(wagon_row.get('needs_retrofit', True)),
-                    track=wagon_row.get('track'),
+                    id=str(w.get('wagon_id', w.get('id'))),
+                    length=float(w['length']),
+                    is_loaded=bool(w.get('is_loaded', False)),
+                    needs_retrofit=bool(w.get('needs_retrofit', True)),
+                    track=w.get('track'),
                 )
-                for _, wagon_row in train_wagons.iterrows()
+                for w in wagons_by_train.get(train_id, [])
             ]
 
             trains.append(
                 TrainInputDTO(
-                    train_id=str(train_row['id']),
+                    train_id=train_id,
                     arrival_time=str(train_row['arrival_time']),
                     departure_time=str(train_row['departure_time']),
                     locomotive_id=str(train_row.get('locomotive_id', '')),
@@ -87,12 +100,15 @@ class CsvScenarioAdapter(ScenarioPort):
         return trains
 
     def _process_workshops(self, workshops_df: Any) -> list[WorkshopInputDTO]:
-        """Process workshops DataFrame into DTOs."""
+        """Process workshops DataFrame into DTOs.
+
+        Uses to_dict('records') instead of iterrows() for better performance.
+        """
         return [
             WorkshopInputDTO(
                 id=str(row['id']),
                 track=str(row['track_id']),
                 retrofit_stations=int(row['retrofit_stations']),
             )
-            for _, row in workshops_df.iterrows()
+            for row in workshops_df.to_dict('records')
         ]

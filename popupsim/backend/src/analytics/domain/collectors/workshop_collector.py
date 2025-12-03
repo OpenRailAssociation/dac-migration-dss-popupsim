@@ -22,6 +22,10 @@ class WorkshopCollector(MetricCollector):
     idle_time: dict[str, float] = field(default_factory=dict)
     last_event: dict[str, tuple[float, int]] = field(default_factory=dict)
 
+    def handled_event_types(self) -> set[type[DomainEvent]]:
+        """Return workshop event types."""
+        return {WorkshopUtilizationChangedEvent}
+
     def record_event(self, event: DomainEvent) -> None:
         """Record workshop domain events."""
         if isinstance(event, WorkshopUtilizationChangedEvent):
@@ -49,21 +53,25 @@ class WorkshopCollector(MetricCollector):
             total = active + idle
 
             if total > 0:
-                utilization = (active / total) * 100
-                results.append(
-                    MetricResult(
-                        f'{workshop_id}_utilization',
-                        MetricValue.percentage(utilization),
-                        'workshop',
+                try:
+                    utilization = (active / total) * 100
+                    results.append(
+                        MetricResult(
+                            f'{workshop_id}_utilization',
+                            MetricValue.percentage(utilization),
+                            'workshop',
+                        )
                     )
-                )
-                results.append(
-                    MetricResult(
-                        f'{workshop_id}_idle_time',
-                        MetricValue.duration_minutes(idle / 60.0),
-                        'workshop',
+                    results.append(
+                        MetricResult(
+                            f'{workshop_id}_idle_time',
+                            MetricValue.duration_minutes(idle / 60.0),
+                            'workshop',
+                        )
                     )
-                )
+                except (ValueError, ZeroDivisionError, TypeError):
+                    # Skip invalid metrics but continue processing other workshops
+                    continue
 
         return results
 
