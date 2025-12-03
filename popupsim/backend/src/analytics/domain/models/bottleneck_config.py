@@ -1,7 +1,9 @@
 """Bottleneck detection configuration models."""
 
-from typing import Dict
-from pydantic import BaseModel, Field
+from typing import Any
+
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class WorkshopThresholds(BaseModel):
@@ -39,7 +41,7 @@ class BottleneckConfig(BaseModel):
     global_rejection_rate_percent: float = Field(default=10.0, ge=0.0, le=100.0)
 
     @classmethod
-    def create_for_scenario(cls, scenario_id: str, overrides: Dict[str, any] = None) -> 'BottleneckConfig':
+    def create_for_scenario(cls, overrides: dict[str, Any] | None = None) -> 'BottleneckConfig':
         """Create configuration with scenario-specific overrides."""
         config = cls()
         if overrides:

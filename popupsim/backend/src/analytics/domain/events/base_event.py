@@ -14,8 +14,10 @@ class DomainEvent(ABC):
 
     event_id: EventId
     timestamp: Timestamp
+    context: str
 
     @classmethod
     def create(cls, timestamp: Timestamp, **kwargs: Any) -> 'DomainEvent':
-        """Create event with generated ID."""
-        return cls(event_id=EventId.generate(), timestamp=timestamp, **kwargs)
+        """Create event with generated ID and auto-derived context."""
+        context = getattr(cls, '_context', cls.__module__.split('.', maxsplit=1)[0])
+        return cls(event_id=EventId.generate(), timestamp=timestamp, context=context, **kwargs)

@@ -9,8 +9,8 @@ have been moved to workshop_operations context.
 """
 
 from collections.abc import Sequence
-from datetime import UTC
 from datetime import datetime
+from datetime import timedelta
 from enum import Enum
 import logging
 from typing import Any
@@ -19,6 +19,8 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
+from shared.value_objects.timezone_utils import ensure_utc
+from shared.value_objects.timezone_utils import validate_timezone_aware
 
 from configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from configuration.application.dtos.route_input_dto import RouteInputDTO
@@ -79,17 +81,16 @@ class Scenario(BaseModel):
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
-    def ensure_utc_timezone(cls, v: datetime | str) -> datetime:
+    def ensure_utc_timezone_validator(cls, v: datetime | str) -> datetime:
         """Ensure datetime has UTC timezone."""
-        dt = datetime.fromisoformat(v) if isinstance(v, str) else v
-
-        if dt.tzinfo is None:
-            return dt.replace(tzinfo=UTC)
-        return dt
+        return ensure_utc(v)
 
     @model_validator(mode='after')
     def validate_dates(self) -> 'Scenario':
         """Ensure end_date is after start_date and duration is reasonable."""
+        validate_timezone_aware(self.start_date, 'start_date')
+        validate_timezone_aware(self.end_date, 'end_date')
+
         if self.end_date <= self.start_date:
             raise ValueError(
                 f'Invalid date range: end_date ({self.end_date}) must be after start_date ({self.start_date}).'
@@ -103,6 +104,21 @@ class Scenario(BaseModel):
         elif duration < 1:
             raise ValueError(f'Simulation duration must be at least 1 day. Current duration: {duration} days.')
         return self
+
+    @property
+    def duration(self) -> timedelta:
+        """Get simulation duration as timedelta."""
+        return self.end_date - self.start_date
+
+    @property
+    def duration_hours(self) -> float:
+        """Get simulation duration in hours."""
+        return self.duration.total_seconds() / 3600.0
+
+    @property
+    def duration_minutes(self) -> float:
+        """Get simulation duration in minutes (for SimPy)."""
+        return self.duration.total_seconds() / 60.0
 
     def validate_simulation_requirements(self) -> 'Scenario':
         """Validate scenario has required resources for simulation.

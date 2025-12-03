@@ -21,7 +21,10 @@ class Topology:
             for edge in data['edges']:
                 edge_id = edge.get('edge_id') or edge.get('id')
                 if edge_id and 'length' in edge:
-                    self.edge_lengths[edge_id] = float(edge['length'])
+                    length = float(edge['length'])
+                    if length <= 0:
+                        raise ValueError(f"Edge '{edge_id}' has invalid length {length}. Length must be > 0.")
+                    self.edge_lengths[edge_id] = length
 
     def load_topology(self, file_path: str | Path) -> None:
         """Load edge lengths from topology JSON file."""
@@ -35,7 +38,10 @@ class Topology:
         if 'edges' in data:
             for edge_id, edge_data in data['edges'].items():
                 if 'length' in edge_data:
-                    self.edge_lengths[edge_id] = float(edge_data['length'])
+                    length = float(edge_data['length'])
+                    if length <= 0:
+                        raise ValueError(f"Edge '{edge_id}' has invalid length {length}. Length must be > 0.")
+                    self.edge_lengths[edge_id] = length
 
     def get_edge_length(self, edge_id: str) -> float:
         """Get length of an edge."""

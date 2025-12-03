@@ -36,7 +36,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
     def __init__(self, bottleneck_config: BottleneckConfig | None = None) -> None:
         self.bottleneck_config = bottleneck_config or BottleneckConfig()
 
-    async def calculate_from_simulation(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    async def calculate_from_simulation(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals  # noqa: PLR0913
         self,
         metrics: dict[str, list[dict[str, Any]]],
         scenario: Scenario,
@@ -72,7 +72,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         try:
             throughput = self._calculate_throughput(scenario, wagons, rejected_wagons)
             utilization = self._calculate_utilization(workshops, wagons)
-            bottlenecks = self._identify_bottlenecks(throughput, utilization, scenario.id)
+            bottlenecks = self._identify_bottlenecks(throughput, utilization)
             avg_flow_time = self._calculate_avg_flow_time(metrics)
             avg_waiting_time = self._calculate_avg_waiting_time(wagons)
 
@@ -130,13 +130,13 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
         return utilization_list
 
     def _identify_bottlenecks(
-        self, throughput: ThroughputKPI, utilization: list[UtilizationKPI], scenario_id: str
+        self, throughput: ThroughputKPI, utilization: list[UtilizationKPI]
     ) -> list[BottleneckInfo]:
         """Identify bottlenecks using specifications."""
         bottlenecks: list[BottleneckInfo] = []
 
         # Create scenario-specific configuration
-        config = BottleneckConfig.create_for_scenario(scenario_id)
+        config = BottleneckConfig.create_for_scenario()
 
         # Use specifications for business rules
         high_rejection_spec = HighRejectionRateSpec(config)
@@ -193,7 +193,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
             if hasattr(popup_context, 'get_all_workshop_metrics_async'):
                 metrics: dict[str, Any] = await popup_context.get_all_workshop_metrics_async()
             else:
-                metrics = popup_context.get_all_workshop_metrics()
+                metrics = dict(popup_context.get_all_workshop_metrics())
             return metrics
         except (AttributeError, TypeError, KeyError) as e:
             raise MetricsCollectionError(f'Failed to collect PopUp metrics: {e}') from e
@@ -204,7 +204,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
             if hasattr(yard_context, 'get_yard_metrics_async'):
                 metrics: dict[str, Any] = await yard_context.get_yard_metrics_async()
             else:
-                metrics = yard_context.get_yard_metrics()
+                metrics = dict(yard_context.get_yard_metrics())
             return metrics
         except (AttributeError, TypeError, KeyError) as e:
             raise MetricsCollectionError(f'Failed to collect Yard metrics: {e}') from e
@@ -248,7 +248,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
     def _collect_popup_metrics(self, popup_context: Any) -> dict[str, Any]:
         """Collect PopUp-specific metrics synchronously."""
         try:
-            return popup_context.get_all_workshop_metrics()
+            return dict(popup_context.get_all_workshop_metrics())
         except (AttributeError, TypeError, KeyError) as e:
             logger.warning('Failed to collect PopUp metrics: %s', e)
             return {}
@@ -256,7 +256,7 @@ class KPICalculator:  # pylint: disable=too-few-public-methods
     def _collect_yard_metrics(self, yard_context: Any) -> dict[str, Any]:
         """Collect Yard-specific metrics synchronously."""
         try:
-            return yard_context.get_yard_metrics()
+            return dict(yard_context.get_yard_metrics())
         except (AttributeError, TypeError, KeyError) as e:
             logger.warning('Failed to collect Yard metrics: %s', e)
             return {}

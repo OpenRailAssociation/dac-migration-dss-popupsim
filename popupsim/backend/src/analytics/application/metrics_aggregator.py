@@ -17,6 +17,7 @@ class SimulationMetrics:
 
     def __init__(self) -> None:
         self.collectors: list[MetricCollector] = []
+        self.collectors_by_event_type: dict[type, list[MetricCollector]] = {}
 
     def register(self, collector: MetricCollector) -> None:
         """Register a metric collector.
@@ -27,17 +28,24 @@ class SimulationMetrics:
             Collector to register.
         """
         self.collectors.append(collector)
+        for event_type in collector.handled_event_types():
+            if event_type not in self.collectors_by_event_type:
+                self.collectors_by_event_type[event_type] = []
+            self.collectors_by_event_type[event_type].append(collector)
 
     def record_event(self, event: 'DomainEvent') -> None:
-        """Record domain event to all collectors.
+        """Record domain event to relevant collectors only.
 
         Parameters
         ----------
         event : DomainEvent
             Domain event to record.
         """
-        for collector in self.collectors:
-            collector.record_event(event)
+        event_type = type(event)
+        collectors = self.collectors_by_event_type.get(event_type)
+        if collectors:
+            for collector in collectors:
+                collector.record_event(event)
 
     def get_results(self) -> dict[str, list[dict[str, Any]]]:
         """Get all metrics grouped by category.

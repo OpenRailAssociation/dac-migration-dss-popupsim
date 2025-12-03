@@ -2,23 +2,20 @@
 
 import asyncio
 from collections import deque
-from collections.abc import Callable
 import logging
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class MetricsQueue:
+class MetricsQueue:  # pylint: disable=too-few-public-methods
     """Async queue for collecting metrics without blocking simulation."""
 
     def __init__(self, max_size: int = 1000) -> None:
         self.queue: deque = deque(maxlen=max_size)
         self._processing = False
 
-    async def collect_context_metrics_async(
-        self, contexts: list[tuple[str, Any, Callable]]
-    ) -> dict[str, dict[str, Any]]:
+    async def collect_context_metrics_async(self, contexts: list[tuple[str, Any, str]]) -> dict[str, dict[str, Any]]:
         """Collect metrics from multiple contexts asynchronously."""
         tasks = []
 
@@ -51,6 +48,6 @@ class MetricsQueue:
             method = getattr(context, method_name)
             metrics = await loop.run_in_executor(None, method)
             return {context_name: metrics}
-        except (AttributeError, TypeError, Exception) as e:
+        except (AttributeError, TypeError, RuntimeError, ValueError) as e:
             logger.warning('Failed to collect %s metrics: %s', context_name, e)
             return {context_name: {}}
