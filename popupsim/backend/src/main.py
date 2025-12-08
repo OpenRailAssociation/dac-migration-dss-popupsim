@@ -1,280 +1,208 @@
-"""PopUp-Sim main entry point for freight rail DAC migration simulation tool."""
+"""PopUpSim New Architecture CLI - Bounded contexts implementation."""
 
-import asyncio
+from dataclasses import dataclass
+import logging
+from logging import StreamHandler
 from pathlib import Path
 from typing import Annotated
 from typing import Any
 
-from analytics.application.async_analytics_service import AsyncAnalyticsService
-from analytics.domain.exceptions import KPICalculationError
-from analytics.infrastructure.exporters.csv_exporter import CSVExporter
-from analytics.infrastructure.visualization.matplotlib_visualizer import Visualizer
+from application.simulation_service import SimulationApplicationService
+from contexts.analytics.application.analytics_context import AnalyticsContext
+from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
+from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
+from contexts.popup_retrofit.application.popup_context import PopUpRetrofitContext
+from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
+from contexts.yard_operations.application.yard_context import YardOperationsContext
+from infrastructure.logging import init_process_logger
 import typer
-from workshop_operations.application.orchestrator import WorkshopOrchestrator
-from workshop_operations.infrastructure.simulation.simpy_adapter import SimPyAdapter
 
-from configuration.application.scenario_builder import BuilderError
-from configuration.application.scenario_builder import ScenarioBuilder
-
-APP_NAME = 'popupsim'
-
-app = typer.Typer(
-    name=APP_NAME,
-    help='Main entry point for the popupsim application - freight rail DAC migration simulation tool.',
-    add_completion=True,
-)
+app = typer.Typer(name='popupsim-new', help='PopUpSim New Architecture - Bounded contexts')
 
 
-def validate_scenario_path(scenario_path: Path | None) -> Path:
-    """Validate that the scenario path is provided, exists, is a file, and is readable.
+@dataclass(frozen=True)
+class Contexts:
+    """Class containing all contexts."""
 
-    Parameters
-    ----------
-    scenario_path : Path | None
-        Path to the scenario file to validate.
-
-    Returns
-    -------
-    Path
-        Validated scenario path.
-
-    Raises
-    ------
-    typer.Exit
-        If validation fails.
-    """
-    if scenario_path is None:
-        typer.echo('Error: Scenario path is required but not provided')
-        raise typer.Exit(1)
-
-    if not scenario_path.exists():
-        typer.echo(f'Error: Scenario file does not exist: {scenario_path}')
-        raise typer.Exit(1)
-    if not scenario_path.is_file():
-        typer.echo(f'Error: Scenario path is not a file: {scenario_path}')
-        raise typer.Exit(1)
-    try:
-        with scenario_path.open('r'):
-            pass
-    except (PermissionError, OSError) as e:
-        typer.echo(f'Error: Scenario file is not readable: {scenario_path} ({e})')
-        raise typer.Exit(1) from None
-    return scenario_path
+    analytics: AnalyticsContext
+    external_trains: ExternalTrainsContext
+    yard: YardOperationsContext
+    popup_workshop: PopUpRetrofitContext
+    shunting: ShuntingOperationsContext
 
 
-def validate_output_path(output_path: Path | None) -> Path:
-    """Validate that the output path is provided, exists, is a directory, and is writable.
-
-    Parameters
-    ----------
-    output_path : Path | None
-        Path to the output directory to validate.
-
-    Returns
-    -------
-    Path
-        Validated output path.
-
-    Raises
-    ------
-    typer.Exit
-        If validation fails.
-    """
-    if output_path is None:
-        typer.echo('Error: Output path is required but not provided')
-        raise typer.Exit(1)
-
-    if not output_path.exists():
-        typer.echo(f'Error: Output directory does not exist: {output_path}')
-        raise typer.Exit(1)
-    if not output_path.is_dir():
-        typer.echo(f'Error: Output path is not a directory: {output_path}')
-        raise typer.Exit(1)
-    try:
-        test_file = output_path / '.write_test'
-        test_file.touch()
-        test_file.unlink()
-    except (PermissionError, OSError) as e:
-        typer.echo(f'Error: Output directory is not writable: {output_path} ({e})')
-        raise typer.Exit(1) from None
-    return output_path
+def print_wagon_metrics(external_trains: ExternalTrainsContext) -> None:
+    """Print metrics of wagons."""
+    ext_metrics = external_trains.get_metrics()
+    typer.echo('\nWAGON METRICS:')
+    typer.echo(f'  Total wagons arrived:     {ext_metrics.get("total_wagons", 0)}')
+    typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
 
 
-def _validate_and_load_scenario(scenario_path: Path | None, output_path: Path | None, debug: str, verbose: bool) -> Any:
-    """Validate inputs and load scenario."""
-    if debug not in ['ERROR', 'WARNING', 'INFO', 'DEBUG']:
-        typer.echo(f'Error: Invalid debug level: {debug}. Must be one of: ERROR, WARNING, INFO, DEBUG')
-        raise typer.Exit(1)
-    scenario_path = validate_scenario_path(scenario_path)
-    typer.echo(f'Using scenario file at: {scenario_path}')
-    output_path = validate_output_path(output_path)
-    typer.echo(f'Output will be saved to: {output_path}')
-    if verbose:
-        typer.echo('Verbose mode enabled.')
-    typer.echo(f'Debug level set to: {debug}')
-    scenario = ScenarioBuilder(scenario_path).build()
-    typer.echo('Scenario loaded and validated successfully.')
-    typer.echo(f'Scenario ID: {scenario.id}')
-    typer.echo(f'Start Date: {scenario.start_date}')
-    typer.echo(f'End Date: {scenario.end_date}')
-    if scenario.routes:
-        typer.echo(f'Number of Routes: {len(scenario.routes)}')
-    if scenario.trains:
-        typer.echo(f'Number of Trains: {len(scenario.trains)}')
-    if scenario.workshops:
-        typer.echo(f'Number of Workshops: {len(scenario.workshops)}')
-    return scenario
+def print_popup_workshop_metrics(popup: PopUpRetrofitContext) -> None:
+    """Print metrics of popup workshop."""
+    popup_metrics = popup.get_metrics()
+    typer.echo('\nWORKSHOP METRICS:')
+    typer.echo(f'  Workshops:                {popup_metrics.get("workshops", 0)}')
+    typer.echo(f'  Total retrofit bays:      {popup_metrics.get("total_bays", 0)}')
+    typer.echo(f'  Overall utilization:      {popup_metrics.get("utilization_percentage", 0):.1f}%')
+    per_workshop = popup_metrics.get('per_workshop_utilization', {})
+    # Filter out track-based workshop entries
+    filtered_workshops = {k: v for k, v in per_workshop.items() if not k.startswith('track_')}
+    for workshop_id, util in sorted(filtered_workshops.items()):
+        typer.echo(f'    {workshop_id}:             {util:.1f}%')
+    per_bay = popup_metrics.get('per_bay_utilization', {})
+    typer.echo('  Bay utilization:')
+    for bay_id, util in sorted(per_bay.items()):
+        typer.echo(f'    {bay_id}:    {util:.1f}%')
 
 
-async def _run_simulation_and_display_metrics_async(scenario: Any) -> Any:  # type: ignore[misc]
-    """Run simulation and display metrics asynchronously."""
-    typer.echo('\nStarting simulation...')
-    sim_adapter = SimPyAdapter.create_simpy_adapter()
-    popup_sim = WorkshopOrchestrator(sim_adapter, scenario)
-    popup_sim.run()
+def print_yard_metrics(yard: YardOperationsContext) -> None:
+    """Print metrics of Yard context."""
+    yard_metrics = yard.get_metrics()
+    typer.echo('\nYARD METRICS:')
+    typer.echo(f'  Wagons classified:        {yard_metrics.get("classified_wagons", 0)}')
+    typer.echo(f'  Wagons rejected:          {yard_metrics.get("rejected_wagons", 0)}')
+    typer.echo(f'  Wagons parked:            {yard_metrics.get("wagons_parked", 0)}')
+    typer.echo(f'  Wagons on collection:     {yard_metrics.get("wagons_on_collection", 0)}')
+    typer.echo(f'  Wagons on retrofit:       {yard_metrics.get("wagons_on_retrofit", 0)}')
+    typer.echo(f'  Wagons on retrofitted:    {yard_metrics.get("wagons_on_retrofitted", 0)}')
+    track_util = yard_metrics.get('track_utilization', {})
+    typer.echo('  Track utilization:')
+    for track_id, util in sorted(track_util.items()):
+        typer.echo(f'    {track_id}:          {util:.1f}%')
 
-    # Get raw metrics
-    metrics = popup_sim.get_metrics()
-    typer.echo('\n=== Raw Simulation Metrics ===')
-    for category, category_metrics in metrics.items():
-        typer.echo(f'\n{category.upper().replace("_", " ")}:')
-        for metric in category_metrics:
-            typer.echo(f'  {metric["name"].replace("_", " ").title()}: {metric["value"]} {metric["unit"]}')
 
-    # Calculate KPIs asynchronously
-    typer.echo('\n=== Calculating KPIs (Async) ===')
-    analytics_service = AsyncAnalyticsService()
-    kpi_result = await analytics_service.calculate_kpis_async(
-        metrics,
-        scenario,
-        popup_sim.wagons_queue,
-        popup_sim.rejected_wagons_queue,
-        popup_sim.workshops_queue,
-        popup_context=popup_sim.popup_retrofit,
-        yard_context=popup_sim.yard_operations,
-        shunting_context=None,
+def print_shunting_metrics(shunting: ShuntingOperationsContext) -> None:
+    """Print metrics of shunting context."""
+    shunt_metrics = shunting.get_metrics()
+    typer.echo('\nSHUNTING METRICS:')
+    typer.echo(f'  Total locomotives:        {shunt_metrics.get("total_locomotives", 0)}')
+    typer.echo(f'  Locomotive utilization:   {shunt_metrics.get("utilization_percentage", 0):.1f}%')
+    breakdown = shunt_metrics.get('utilization_breakdown', {})
+    typer.echo('  Utilization breakdown:')
+    for status, pct in sorted(breakdown.items()):
+        typer.echo(f'    {status}:          {pct:.1f}%')
+    per_loco = shunt_metrics.get('per_locomotive_breakdown', {})
+    typer.echo('  Per-locomotive breakdown:')
+    for loco_id, loco_breakdown in sorted(per_loco.items()):
+        typer.echo(f'    {loco_id}:')
+        for status, pct in sorted(loco_breakdown.items()):
+            typer.echo(f'      {status}:      {pct:.1f}%')
+
+
+def configure_event_logging(output_path: Path) -> Any:
+    """Configure the event logging."""
+    event_handler = logging.FileHandler(output_path / 'events.log', mode='w', encoding='utf-8')
+    event_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S'))
+    event_handler.setLevel(logging.INFO)
+    return event_handler
+
+
+def configure_console_logging() -> StreamHandler:
+    """Configure the console logging."""
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S'))
+    console_handler.setLevel(logging.ERROR)
+
+    return console_handler
+
+
+def output_visualization(contexts: Contexts, output_path: Path) -> None:
+    """Write files for visualization onto the disk."""
+    dashboard_files = contexts.analytics.export_dashboard_data(
+        output_dir=output_path,
+        yard_context=contexts.yard,
+        popup_context=contexts.popup_workshop,
+        shunting_context=contexts.shunting,
     )
 
-    # Display KPIs
-    typer.echo('\n=== THROUGHPUT KPIs ===')
-    typer.echo(f'  Total Wagons Processed: {kpi_result.throughput.total_wagons_processed}')
-    typer.echo(f'  Wagons Retrofitted: {kpi_result.throughput.total_wagons_retrofitted}')
-    typer.echo(f'  Wagons Rejected: {kpi_result.throughput.total_wagons_rejected}')
-    typer.echo(f'  Simulation Duration: {kpi_result.throughput.simulation_duration_hours:.1f} hours')
-    typer.echo(f'  Throughput: {kpi_result.throughput.wagons_per_hour:.2f} wagons/hour')
-    typer.echo(f'  Daily Throughput: {kpi_result.throughput.wagons_per_day:.2f} wagons/day')
+    typer.echo('\nDashboard data exported:')
+    for file_type, file_path in dashboard_files.items():
+        typer.echo(f'  - {file_type}: {file_path.name}')
 
-    typer.echo('\n=== UTILIZATION KPIs ===')
-    for util in kpi_result.utilization:
-        typer.echo(f'  Workshop {util.id}:')
-        typer.echo(f'    Capacity: {util.total_capacity} stations')
-        typer.echo(f'    Avg Utilization: {util.average_utilization_percent:.1f}%')
-        typer.echo(f'    Peak Utilization: {util.peak_utilization_percent:.1f}%')
-        typer.echo(f'    Idle Time: {util.idle_time_percent:.1f}%')
-
-    if kpi_result.bottlenecks:
-        typer.echo('\n=== BOTTLENECKS DETECTED ===')
-        for bottleneck in kpi_result.bottlenecks:
-            typer.echo(f'  [{bottleneck.severity.upper()}] {bottleneck.location} ({bottleneck.type})')
-            typer.echo(f'    {bottleneck.description}')
-            typer.echo(f'    Impact: {bottleneck.impact_wagons_per_hour:.2f} wagons/hour')
-    else:
-        typer.echo('\n=== No bottlenecks detected ===')
-
-    typer.echo('\n=== TIMING KPIs ===')
-    typer.echo(f'  Avg Flow Time: {kpi_result.avg_flow_time_minutes:.1f} minutes')
-    typer.echo(f'  Avg Waiting Time: {kpi_result.avg_waiting_time_minutes:.1f} minutes')
-
-    return kpi_result
+    # Generate visualizations
+    context_metrics = {
+        'external_trains': contexts.external_trains.get_metrics(),
+        'popup': contexts.popup_workshop.get_metrics(),
+        'yard': contexts.yard.get_metrics(),
+        'shunting': contexts.shunting.get_metrics(),
+    }
+    charts = contexts.analytics.visualizer.generate_all_charts(contexts.analytics, output_path, context_metrics)
+    typer.echo('\nVisualizations generated:')
+    for chart in charts:
+        typer.echo(f'  - {chart.name}')
 
 
 @app.command()
-def main(
-    ctx: typer.Context,
-    scenario_path: Annotated[
-        Path | None,
-        typer.Option(
-            '--scenarioPath', help='Path to the scenario file (required).', rich_help_panel='Required Parameters'
-        ),
-    ] = None,
-    output_path: Annotated[
-        Path | None,
-        typer.Option(
-            '--outputPath', help='Path to the output directory (required).', rich_help_panel='Required Parameters'
-        ),
-    ] = None,
-    verbose: Annotated[
-        bool, typer.Option('--verbose', help='Enable verbose output.', rich_help_panel='Optional Parameters')
-    ] = False,
-    debug: Annotated[
-        str,
-        typer.Option(
-            '--debug', help='Debug level (ERROR, WARNING, INFO, DEBUG).', rich_help_panel='Optional Parameters'
-        ),
-    ] = 'INFO',
+def run(
+    scenario_path: Annotated[Path, typer.Option('--scenario', help='Path to scenario file')],
+    output_path: Annotated[Path, typer.Option('--output', help='Output directory')] = Path('./output'),
+    verbose: Annotated[bool, typer.Option('--verbose', help='Verbose output')] = False,
 ) -> None:
-    """Main entry point for the popupsim application.
+    """Run PopUpSim with new bounded contexts architecture."""
+    # Create output directory
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    This tool performs freight rail DAC migration simulation processing.
-    Both scenario file and output directory paths are required.
+    # Configure event logging to file with UTF-8 encoding (always INFO level)
+    event_handler = configure_event_logging(output_path)
+    console_handler = configure_console_logging()
 
-    Parameters
-    ----------
-    ctx : typer.Context
-        Typer context for help display.
-    scenario_path : Path | None, optional
-        Path to the scenario file, by default None.
-    output_path : Path | None, optional
-        Path to the output directory, by default None.
-    verbose : bool, optional
-        Enable verbose output, by default False.
-    debug : str, optional
-        Debug level (ERROR, WARNING, INFO, DEBUG), by default 'INFO'.
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[event_handler, console_handler],
+    )
 
-    Examples
-    --------
-    >>> popupsim --scenarioPath ./scenario.json --outputPath ./output
-    >>> popupsim --scenarioPath ./scenario.json --outputPath ./output --verbose --debug DEBUG
-    """
-    if scenario_path is None and output_path is None:
-        typer.echo('No required parameters provided. Showing help:\n')
-        typer.echo(ctx.get_help(), color=ctx.color)
+    # Initialize process logger
+    init_process_logger(output_path)
+
+    if verbose:
+        typer.echo(f'Loading scenario: {scenario_path}')
+
+    # Load scenario
+    scenario = ConfigurationBuilder(scenario_path).build()
+
+    typer.echo(f'Loaded scenario: {scenario.id}')
+    typer.echo(f'  Trains: {len(scenario.trains)}')
+    typer.echo(f'  Total wagons: {sum(len(t.wagons) for t in scenario.trains)}')
+
+    service = SimulationApplicationService(scenario)
+    until = (scenario.end_date - scenario.start_date).total_seconds() / 60.0
+
+    typer.echo('Running simulation...\n')
+    result = service.execute(until)
+
+    if result.success:
+        typer.echo('\n' + '=' * 60)
+        typer.echo('SIMULATION COMPLETED SUCCESSFULLY')
+        typer.echo('=' * 60)
+
+        # Get metrics from contexts
+        contexts = Contexts(
+            analytics=service.context_registry.contexts.get('analytics'),  # type: ignore[arg-type]
+            external_trains=service.context_registry.contexts.get('external_trains'),  # type: ignore[arg-type]
+            yard=service.context_registry.contexts.get('yard'),  # type: ignore[arg-type]
+            popup_workshop=service.context_registry.contexts.get('popup'),  # type: ignore[arg-type]
+            shunting=service.context_registry.contexts.get('shunting'),  # type: ignore[arg-type]
+        )
+
+        # Generate outputs
+        typer.echo('\nGenerating outputs...')
+        output_visualization(contexts, output_path)
+
+        typer.echo('\n' + '=' * 60)
+        typer.echo('SIMULATION STATISTICS')
+        typer.echo('=' * 60)
+        print_wagon_metrics(contexts.external_trains)
+        print_popup_workshop_metrics(contexts.popup_workshop)
+        print_yard_metrics(contexts.yard)
+        print_shunting_metrics(contexts.shunting)
+        typer.echo(f'\nSIMULATION TIME:            {result.duration:.1f} minutes')
+        typer.echo('=' * 60)
+    else:
+        typer.echo('\nSIMULATION FAILED')
         raise typer.Exit(1)
-    try:
-        scenario = _validate_and_load_scenario(scenario_path, output_path, debug, verbose)
-        kpi_result = asyncio.run(_run_simulation_and_display_metrics_async(scenario))
-
-        # Export results to CSV
-        typer.echo('\n=== Exporting Results ===')
-        csv_exporter = CSVExporter()
-
-        # output_path is validated to not be None in _validate_and_load_scenario
-        if output_path is None:
-            typer.echo('Error: Output path validation failed')
-            raise typer.Exit(1)
-        csv_files = csv_exporter.export_all(kpi_result, output_path)
-        typer.echo(f'CSV files saved to: {output_path}')
-        for csv_file in csv_files:
-            typer.echo(f'  - {csv_file.name}')
-
-        # Generate visualization charts
-        typer.echo('\n=== Generating Charts ===')
-        visualizer = Visualizer()
-        chart_paths = visualizer.generate_all_charts(kpi_result, output_path)
-        typer.echo(f'Charts saved to: {output_path}')
-        for chart_path in chart_paths:
-            typer.echo(f'  - {chart_path.name}')
-    except BuilderError as e:
-        typer.echo(f'Configuration error: {e}')
-        raise typer.Exit(1) from e
-    except KPICalculationError as e:
-        typer.echo(f'Analytics error: {e}')
-        raise typer.Exit(1) from e
-    except Exception as e:
-        typer.echo(f'Unexpected error: {e}')
-        raise typer.Exit(1) from e
 
 
 if __name__ == '__main__':
-    # Run the Typer CLI app, but provide no arguments so Typer parses from sys.argv
     app()

@@ -1,5 +1,5 @@
 {
-  "scenario_id": "small",
+  "id": "small",
   "start_date": "2025-01-15",
   "end_date": "2025-01-16",
   "random_seed": 42,

@@ -1,0 +1,8 @@
+train_id;wagon_id;arrival_time;length;is_loaded;needs_retrofit;Track
+T1;W01;2025-01-01T00:00:00+00:00;15.0;False;True;collection
+T1;W02;2025-01-01T00:00:00+00:00;13.0;False;True;collection
+T1;W03;2025-01-01T00:00:00+00:00;15.0;False;True;collection
+T1;W04;2025-01-01T00:00:00+00:00;15.0;False;True;collection
+T1;W05;2025-01-01T00:00:00+00:00;17.0;False;True;collection
+T1;W06;2025-01-01T00:00:00+00:00;15.0;False;True;collection
+T1;W07;2025-01-01T00:00:00+00:00;15.0;False;True;collection

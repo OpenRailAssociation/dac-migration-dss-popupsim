@@ -1,0 +1,53 @@
+{
+  "trains": [
+    {
+      "id": "T001",
+      "arrival_time": "2025-01-15T08:00:00",
+      "departure_time": "2025-01-15T16:00:00",
+      "wagons": [
+        {
+          "id": "W001",
+          "length": 14.5,
+          "weight": 25.8,
+          "is_loaded": true,
+          "needs_retrofit": true
+        },
+        {
+          "id": "W002", 
+          "length": 12.0,
+          "weight": 18.2,
+          "is_loaded": false,
+          "needs_retrofit": true
+        },
+        {
+          "id": "W003",
+          "length": 16.8,
+          "weight": 32.1,
+          "is_loaded": true,
+          "needs_retrofit": false
+        }
+      ]
+    },
+    {
+      "id": "T002",
+      "arrival_time": "2025-01-15T14:00:00",
+      "departure_time": "2025-01-15T22:00:00",
+      "wagons": [
+        {
+          "id": "W004",
+          "length": 13.2,
+          "weight": 22.5,
+          "is_loaded": false,
+          "needs_retrofit": true
+        },
+        {
+          "id": "W005",
+          "length": 15.6,
+          "weight": 28.9,
+          "is_loaded": true,
+          "needs_retrofit": true
+        }
+      ]
+    }
+  ]
+}

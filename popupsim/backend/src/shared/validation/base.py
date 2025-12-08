@@ -124,7 +124,11 @@ class ValidationResult:
             logger.info('✅ Configuration valid - No issues found')
             return
 
-        logger.info('📋 Validation Summary: %d errors, %d warnings', len(self.get_errors()), len(self.get_warnings()))
+        logger.info(
+            '📋 Validation Summary: %d errors, %d warnings',
+            len(self.get_errors()),
+            len(self.get_warnings()),
+        )
 
         # Group by category
         for category in ValidationCategory:

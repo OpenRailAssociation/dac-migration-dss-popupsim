@@ -1,0 +1,9 @@
+{
+  "wagon_retrofit_time": 10.0,
+  "train_to_hump_delay": 0.0,
+  "wagon_hump_interval": 0.0,
+  "screw_coupling_time": 0.0,
+  "screw_decoupling_time": 0.0,
+  "dac_coupling_time": 0.0,
+  "dac_decoupling_time": 0.0
+}

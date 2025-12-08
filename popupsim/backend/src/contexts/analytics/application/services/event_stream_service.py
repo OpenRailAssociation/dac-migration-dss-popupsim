@@ -1,0 +1,74 @@
+"""Event stream application service."""
+
+# pylint: disable=duplicate-code
+from typing import Any
+
+from contexts.analytics.domain.entities.metrics_aggregator import MetricsAggregator
+from contexts.analytics.domain.services.event_collection_service import EventCollectionService
+from contexts.analytics.domain.services.track_occupancy_tracker import TrackOccupancyTracker
+from infrastructure.event_bus.event_bus import EventBus
+from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
+
+
+class EventStreamService:
+    """Application service for event stream management."""
+
+    def __init__(
+        self,
+        event_bus: EventBus,
+        collector: EventCollectionService,  # | None = None
+    ) -> None:
+        self.event_bus = event_bus
+        self.collector = collector  # or EventCollectionService(event_bus)
+        self.track_occupancy = TrackOccupancyTracker()
+        self._subscribe_to_all_events()
+        self._subscribe_to_wagon_events()
+        self._wagon_tracks: dict[str, str] = {}
+
+    def _subscribe_to_all_events(self) -> None:
+        """Subscribe to all domain events."""
+        self.collector.subscribe_to_all_events(self.collector.collect_event)
+
+    def _subscribe_to_wagon_events(self) -> None:
+        """Subscribe to wagon movement events for track occupancy."""
+        self.event_bus.subscribe(TrainArrivedEvent, self._handle_train_arrived)
+        # Subscribe to all events to track wagon movements
+        self.collector.subscribe_to_all_events(self._track_wagon_locations)
+
+    def _handle_train_arrived(self, event: Any) -> None:
+        """Handle train arrived event."""
+        if hasattr(event, 'arrival_track') and hasattr(event, 'wagons'):
+            for _ in event.wagons:
+                self.track_occupancy.record_wagon_arrival(event.arrival_track, event.event_timestamp)
+
+    def _track_wagon_locations(self, event: Any) -> None:
+        """Track wagon locations from all events."""
+        if hasattr(event, 'wagon') and hasattr(event, 'event_timestamp'):
+            wagon = event.wagon
+            if hasattr(wagon, 'track'):
+                track = wagon.track
+                if track and track not in ['', 'unknown']:
+                    wagon_id = wagon.id
+                    if wagon_id not in self._wagon_tracks or self._wagon_tracks[wagon_id] != track:
+                        if wagon_id in self._wagon_tracks:
+                            old_track = self._wagon_tracks[wagon_id]
+                            self.track_occupancy.record_wagon_departure(old_track, event.event_timestamp)
+                        self.track_occupancy.record_wagon_arrival(track, event.event_timestamp)
+                        self._wagon_tracks[wagon_id] = track
+
+    def register_custom_event(self, event_type: type[Any]) -> None:
+        """Register and subscribe to custom event type."""
+        self.collector.subscribe_to_event(event_type, self.collector.collect_event)
+
+    def compute_statistics(self) -> dict[str, Any]:
+        """Compute all statistics from collected events."""
+        aggregator = MetricsAggregator(
+            self.collector.get_events(),
+            self.collector.get_event_counts(),
+            self.collector.get_start_time(),
+        )
+        return aggregator.compute_all_metrics()
+
+    def clear(self) -> None:
+        """Clear all collected events."""
+        self.collector.clear()
