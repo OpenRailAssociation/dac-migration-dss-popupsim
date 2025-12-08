@@ -133,7 +133,12 @@ class Localizer:
         return translated_msg
 
     def ngettext(
-        self, singular_msg: str, plural_msg: str, count: int, locale_code: str | None = None, **format_kwargs: Any
+        self,
+        singular_msg: str,
+        plural_msg: str,
+        count: int,
+        locale_code: str | None = None,
+        **format_kwargs: Any,
     ) -> str:
         """Translate message with plural forms.
 
@@ -258,11 +263,14 @@ def get_localizer() -> Localizer:
     if not hasattr(_thread_local, 'localizer'):
         if _global_config:
             new_localizer = Localizer(
-                _global_config['locale_dir'], _global_config['domain'], _global_config['default_locale']
+                _global_config['locale_dir'],
+                _global_config['domain'],
+                _global_config['default_locale'],
             )
             _thread_local.localizer = new_localizer
         else:
-            raise RuntimeError('Localizer not initialized. Call init_i18n() first.')
+            msg = 'Localizer not initialized. Call init_i18n() first.'
+            raise RuntimeError(msg)
 
     current_localizer: Localizer = _thread_local.localizer
     return current_localizer

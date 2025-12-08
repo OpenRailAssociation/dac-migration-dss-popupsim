@@ -21,7 +21,10 @@ def test_locales_dir():
         de_catalog = Catalog(locale='de')
         de_catalog.add('Hello World', 'Hallo Welt')
         de_catalog.add('Hello %(name)s', 'Hallo %(name)s')
-        de_catalog.add(('%(n)d error found', '%(n)d errors found'), ('%(n)d Fehler gefunden', '%(n)d Fehler gefunden'))
+        de_catalog.add(
+            ('%(n)d error found', '%(n)d errors found'),
+            ('%(n)d Fehler gefunden', '%(n)d Fehler gefunden'),
+        )
 
         with open(de_dir / 'messages.mo', 'wb') as f:
             write_mo(f, de_catalog)
@@ -33,7 +36,10 @@ def test_locales_dir():
         fr_catalog = Catalog(locale='fr')
         fr_catalog.add('Hello World', 'Bonjour le monde')
         fr_catalog.add('Hello %(name)s', 'Bonjour %(name)s')
-        fr_catalog.add(('%(n)d error found', '%(n)d errors found'), ('%(n)d erreur trouvée', '%(n)d erreurs trouvées'))
+        fr_catalog.add(
+            ('%(n)d error found', '%(n)d errors found'),
+            ('%(n)d erreur trouvée', '%(n)d erreurs trouvées'),
+        )
 
         with open(fr_dir / 'messages.mo', 'wb') as f:
             write_mo(f, fr_catalog)

@@ -1,0 +1,6 @@
+{
+  "workshops": [
+    {"id": "WS1", "track": "WS1", "retrofit_stations": 2},
+    {"id": "WS2", "track": "WS2", "retrofit_stations": 2}
+  ]
+}

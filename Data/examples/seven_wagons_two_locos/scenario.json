@@ -1,0 +1,17 @@
+{
+  "id": "seven_wagons_two_workshops",
+  "start_date": "2025-12-01T00:00:00+00:00",
+  "end_date": "2025-12-02T00:00:00+00:00",
+  "references": {
+    "locomotives": "locomotives.json",
+    "workshops": "workshops.json",
+    "routes": "routes.json",
+    "process_times": "process_times.json",
+    "trains": "trains.csv",
+    "tracks": "tracks.json",
+    "topology": "topology.json"
+  },
+  "train_schedule_file": "trains.csv",
+  "routes_file": "routes.json",
+  "workshop_tracks_file": "tracks.json"
+}
