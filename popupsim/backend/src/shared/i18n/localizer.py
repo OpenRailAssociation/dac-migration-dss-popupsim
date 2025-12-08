@@ -20,8 +20,8 @@ localizer instance. When `init_i18n()` is called, it stores models in
 auto-initializes using the stored models.
 """
 
-from pathlib import Path
 import threading
+from pathlib import Path
 from typing import Any
 
 from babel.support import Translations
@@ -66,7 +66,9 @@ class Localizer:
     'Hallo Welt'
     """
 
-    def __init__(self, locale_dir: Path, domain: str = 'messages', default_locale: str = 'en'):
+    def __init__(
+        self, locale_dir: Path, domain: str = "messages", default_locale: str = "en"
+    ):
         self.locale_dir = locale_dir
         self.domain = domain
         self.default_locale = default_locale
@@ -90,14 +92,18 @@ class Localizer:
         locale_code : str
             Locale code (e.g., 'en', 'de', 'fr')
         """
-        mo_file_path = self.locale_dir / locale_code / 'LC_MESSAGES' / f'{self.domain}.mo'
+        mo_file_path = (
+            self.locale_dir / locale_code / "LC_MESSAGES" / f"{self.domain}.mo"
+        )
         if mo_file_path.exists():
-            with open(mo_file_path, 'rb') as mo_file:
+            with open(mo_file_path, "rb") as mo_file:
                 self._translations[locale_code] = Translations(mo_file)
         else:
             self._translations[locale_code] = Translations()
 
-    def translate(self, message: str, locale_code: str | None = None, **format_kwargs: Any) -> str:
+    def translate(
+        self, message: str, locale_code: str | None = None, **format_kwargs: Any
+    ) -> str:
         """Translate message with optional parameter substitution.
 
         Parameters
@@ -133,7 +139,12 @@ class Localizer:
         return translated_msg
 
     def ngettext(
-        self, singular_msg: str, plural_msg: str, count: int, locale_code: str | None = None, **format_kwargs: Any
+        self,
+        singular_msg: str,
+        plural_msg: str,
+        count: int,
+        locale_code: str | None = None,
+        **format_kwargs: Any,
     ) -> str:
         """Translate message with plural forms.
 
@@ -168,7 +179,7 @@ class Localizer:
         )
         translated_msg: str = translations.ngettext(singular_msg, plural_msg, count)
         if format_kwargs:
-            format_kwargs['n'] = count
+            format_kwargs["n"] = count
             try:
                 return translated_msg % format_kwargs
             except (KeyError, TypeError):
@@ -194,7 +205,9 @@ class Localizer:
             self._load_locale(locale_code)
 
 
-def init_i18n(locale_dir: Path, domain: str = 'messages', default_locale: str = 'en') -> Localizer:
+def init_i18n(
+    locale_dir: Path, domain: str = "messages", default_locale: str = "en"
+) -> Localizer:
     """Initialize internationalization system.
 
     Sets up thread-safe translation system with compiled .mo files.
@@ -228,9 +241,9 @@ def init_i18n(locale_dir: Path, domain: str = 'messages', default_locale: str = 
     """
     _global_config.update(
         {
-            'locale_dir': locale_dir,
-            'domain': domain,
-            'default_locale': default_locale,
+            "locale_dir": locale_dir,
+            "domain": domain,
+            "default_locale": default_locale,
         }
     )
     localizer = Localizer(locale_dir, domain, default_locale)
@@ -255,14 +268,17 @@ def get_localizer() -> Localizer:
     Uses thread-local storage for thread safety. See module docstring
     for details on `_thread_local` and `_global_config` variables.
     """
-    if not hasattr(_thread_local, 'localizer'):
+    if not hasattr(_thread_local, "localizer"):
         if _global_config:
             new_localizer = Localizer(
-                _global_config['locale_dir'], _global_config['domain'], _global_config['default_locale']
+                _global_config["locale_dir"],
+                _global_config["domain"],
+                _global_config["default_locale"],
             )
             _thread_local.localizer = new_localizer
         else:
-            raise RuntimeError('Localizer not initialized. Call init_i18n() first.')
+            msg = "Localizer not initialized. Call init_i18n() first."
+            raise RuntimeError(msg)
 
     current_localizer: Localizer = _thread_local.localizer
     return current_localizer
@@ -291,7 +307,9 @@ def _(message: str, **format_kwargs: Any) -> str:
     return get_localizer().translate(message, **format_kwargs)
 
 
-def ngettext(singular_msg: str, plural_msg: str, count: int, **format_kwargs: Any) -> str:
+def ngettext(
+    singular_msg: str, plural_msg: str, count: int, **format_kwargs: Any
+) -> str:
     """Translate message with plural forms.
 
     Parameters

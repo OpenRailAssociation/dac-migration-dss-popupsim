@@ -6,10 +6,9 @@ integration.
 """
 
 from collections.abc import Callable
-from typing import Any
-from typing import TypeVar
+from typing import Any, TypeVar
 
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 def translatable(message_key: str) -> Callable[[F], F]:

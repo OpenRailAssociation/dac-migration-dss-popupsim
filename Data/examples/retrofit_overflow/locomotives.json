@@ -1,0 +1,5 @@
+{
+  "locomotives": [
+    {"id": "L1", "track": "locoparking"}
+  ]
+}

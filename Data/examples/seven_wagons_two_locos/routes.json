@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {"id": "r1", "duration": 1.0, "path": ["loco_parking", "collection"]},
+    {"id": "r2", "duration": 1.0, "path": ["collection", "retrofit"]},
+    {"id": "r3", "duration": 1.0, "path": ["retrofit", "loco_parking"]},
+    {"id": "r4", "duration": 1.0, "path": ["loco_parking", "retrofit"]},
+    {"id": "r5", "duration": 1.0, "path": ["loco_parking", "retrofitted"]},
+    {"id": "r6", "duration": 1.0, "path": ["retrofitted", "loco_parking"]},
+    {"id": "r7", "duration": 1.0, "path": ["retrofit", "WS1"]},
+    {"id": "r8", "duration": 1.0, "path": ["WS1", "loco_parking"]},
+    {"id": "r9", "duration": 1.0, "path": ["WS1", "retrofitted"]},
+    {"id": "r10", "duration": 1.0, "path": ["retrofitted", "loco_parking"]},
+    {"id": "r11", "duration": 1.0, "path": ["retrofit", "WS2"]},
+    {"id": "r12", "duration": 1.0, "path": ["WS2", "loco_parking"]},
+    {"id": "r13", "duration": 1.0, "path": ["WS2", "retrofitted"]},
+    {"id": "r14", "duration": 1.0, "path": ["loco_parking", "WS1"]},
+    {"id": "r15", "duration": 1.0, "path": ["loco_parking", "WS2"]},
+    {"id": "r16", "duration": 1.0, "path": ["retrofitted", "parking"]}
+  ]
+}

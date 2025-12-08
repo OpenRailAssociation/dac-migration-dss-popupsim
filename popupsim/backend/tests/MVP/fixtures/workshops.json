@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "description": "Workshop configurations for DAC retrofit operations",
+    "version": "1.0.0",
+    "created": "2024-01-15"
+  },
+  "workshops": [
+    {
+      "id": "WS_01",
+      "name": "Secondary Workshop",
+      "start_date": "2031-07-04 01:30:00",
+      "end_date": "2031-07-05 02:00:00",
+      "retrofit_stations": 1,
+      "track": "track_Z1",
+      "worker": 2
+    },
+    {
+      "id": "WS_02",
+      "name": "Emergency Overflow Workshop",
+      "start_date": "2031-07-05 01:30:00",
+      "end_date": "2031-07-05 02:00:00",
+      "retrofit_stations": 3,
+      "track": "track_10",
+      "worker": 6
+    }
+  ]
+}

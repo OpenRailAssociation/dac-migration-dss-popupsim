@@ -1,0 +1,6 @@
+{
+  "train_to_hump_delay": 10.0,
+  "wagon_hump_interval": 2.0,
+  "wagon_coupling_time": 1.0,
+  "wagon_decoupling_time": 1.0
+}

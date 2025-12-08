@@ -1,0 +1,27 @@
+{
+  "tracks": [
+    {"id": "parking1", "name": "Parking track", "edges": ["parking1"], "type": "parking"},
+    {"id": "parking2", "name": "Parking track", "edges": ["parking2"], "type": "parking"},
+    {"id": "parking3", "name": "Parking track", "edges": ["parking3"], "type": "parking"},
+    {"id": "parking5", "name": "Parking track", "edges": ["parking5"], "type": "parking"},
+    {"id": "parking6", "name": "Parking track", "edges": ["parking6"], "type": "parking"},
+    {"id": "parking7", "name": "Parking track", "edges": ["parking7"], "type": "parking"},
+    {"id": "parking8", "name": "Parking track", "edges": ["parking8"], "type": "parking"},
+    {"id": "parking9", "name": "Parking track", "edges": ["parking9"], "type": "parking"},
+    {"id": "parking10", "name": "Parking track", "edges": ["parking10"], "type": "parking"},
+    {"id": "parking11", "name": "Parking track", "edges": ["parking11"], "type": "parking"},
+    {"id": "parking12", "name": "Parking track", "edges": ["parking12"], "type": "parking"},
+    {"id": "parking13", "name": "Parking track", "edges": ["parking13"], "type": "parking"},
+    {"id": "parking14", "name": "Parking track", "edges": ["parking14"], "type": "parking"},
+    {"id": "parking15", "name": "Parking track", "edges": ["parking15"], "type": "parking"},
+    {"id": "parking16", "name": "Parking track", "edges": ["parking16"], "type": "parking"},
+    {"id": "loco_parking", "edges": ["loco_parking"], "type": "rescource_parking"},
+    {"id": "collection1", "name": "Collection track", "edges": ["collection1"], "type": "collection"},
+    {"id": "collection2", "name": "Collection track", "edges": ["collection2"], "type": "collection"},
+    {"id": "retrofit", "edges": ["retrofit"], "type": "retrofit"},
+    {"id": "retrofitted", "edges": ["retrofitted"], "type": "retrofitted"},
+    {"id": "WS1", "edges": ["WS1"], "type": "workshop"},
+    {"id": "WS2", "edges": ["WS2"], "type": "workshop"},
+    {"id": "Mainline", "name": "Mainline connecting yards", "edges": ["Mainline"], "type": "mainline"}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "nodes": [1, 2],
+  "edges": {
+    "parking1": {"nodes": [1, 2], "length": 150.0},
+    "parking2": {"nodes": [1, 2], "length": 270.0},
+    "parking3": {"nodes": [1, 2], "length": 257.0},
+    "parking5": {"nodes": [1, 2], "length": 216.0},
+    "parking6": {"nodes": [1, 2], "length": 266.0},
+    "parking7": {"nodes": [1, 2], "length": 212.0},
+    "parking8": {"nodes": [1, 2], "length": 203.0},
+    "parking9": {"nodes": [1, 2], "length": 400.0},
+    "parking10": {"nodes": [1, 2], "length": 600.0},
+    "parking11": {"nodes": [1, 2], "length": 400.0},
+    "parking12": {"nodes": [1, 2], "length": 400.0},
+    "parking13": {"nodes": [1, 2], "length": 400.0},
+    "parking14": {"nodes": [1, 2], "length": 400.0},
+    "parking15": {"nodes": [1, 2], "length": 400.0},
+    "parking16": {"nodes": [1, 2], "length": 100.0},
+    "loco_parking": {"nodes": [1, 2], "length": 169.0},
+    "collection1": {"nodes": [1, 2], "length": 500.0},
+    "collection2": {"nodes": [1, 2], "length": 500.0},
+    "retrofit": {"nodes": [1, 2], "length": 426.0},
+    "retrofitted": {"nodes": [1, 2], "length": 352.0},
+    "WS1": {"nodes": [1, 2], "length": 260.0},
+    "WS2": {"nodes": [1, 2], "length": 260.0},
+    "Mainline": {"nodes": [1, 2], "length": 8000.0}
+  }
+}

@@ -1,9 +1,8 @@
 """Validation coordinator using 4-layer pipeline."""
 
+from MVP.configuration.domain.models.scenario import Scenario
 from shared.validation.base import ValidationResult
 from shared.validation.pipeline import ValidationPipeline
-
-from configuration.domain.models.scenario import Scenario
 
 
 class ValidationCoordinator:
@@ -28,7 +27,8 @@ class ValidationCoordinator:
 
     def add_validator(self, validator: object) -> None:
         """Add a new context validator."""
-        if hasattr(validator, 'validate'):
+        if hasattr(validator, "validate"):
             self.context_validators.append(validator)
         else:
-            raise ValueError("Validator must have a 'validate' method")
+            msg = "Validator must have a 'validate' method"
+            raise ValueError(msg)

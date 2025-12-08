@@ -1,0 +1,467 @@
+"""Dashboard data exporter for Streamlit frontend integration."""
+
+import csv
+import json
+from pathlib import Path
+from typing import Any
+
+from infrastructure.event_bus.event_bus import InMemoryEventBus
+
+
+class DashboardExporter:
+    """Export all data required for Streamlit dashboard."""
+
+    def export_all(
+        self, analytics_context: Any, output_dir: Path, interval_seconds: float = 3600.0, yard_context: Any = None
+    ) -> dict[str, Path]:
+        """Export all dashboard data files.
+
+        Parameters
+        ----------
+        analytics_context : AnalyticsContext
+            Analytics context with collected data.
+        output_dir : Path
+            Output directory for all files.
+        interval_seconds : float
+            Time granularity for time-series data (default: 1 hour).
+
+        Returns
+        -------
+        dict[str, Path]
+            Mapping of file type to generated file path.
+        """
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        exported_files = {}
+
+        # 1. Comprehensive metrics JSON
+        metrics_path = output_dir / "comprehensive_metrics.json"
+        self._export_comprehensive_metrics(analytics_context, metrics_path)
+        exported_files["comprehensive_metrics"] = metrics_path
+
+        # 2. Events CSV (temporal event stream)
+        events_path = output_dir / "events.csv"
+        self._export_events_csv(analytics_context, events_path)
+        exported_files["events"] = events_path
+
+        # 3. Process log (resource state changes)
+        process_log_path = output_dir / "process.log"
+        self._export_process_log(analytics_context, process_log_path)
+        exported_files["process_log"] = process_log_path
+
+        # 4. Locomotive utilization CSV
+        loco_path = output_dir / "locomotive_utilization.csv"
+        self._export_locomotive_utilization(analytics_context, loco_path)
+        exported_files["locomotive_utilization"] = loco_path
+
+        # 5. Workshop metrics CSV
+        workshop_path = output_dir / "workshop_metrics.csv"
+        self._export_workshop_metrics(analytics_context, workshop_path)
+        exported_files["workshop_metrics"] = workshop_path
+
+        # 6. Bottlenecks CSV
+        bottlenecks_path = output_dir / "bottlenecks.csv"
+        self._export_bottlenecks(analytics_context, bottlenecks_path)
+        exported_files["bottlenecks"] = bottlenecks_path
+
+        # 7. Track capacity time-series CSV
+        track_path = output_dir / "track_capacity.csv"
+        self._export_track_capacity(analytics_context, track_path, yard_context)
+        exported_files["track_capacity"] = track_path
+
+        # 8. Timeline CSV (time-series metrics)
+        timeline_path = output_dir / "timeline.csv"
+        self._export_timeline(analytics_context, timeline_path, interval_seconds)
+        exported_files["timeline"] = timeline_path
+
+        return exported_files
+
+    def _export_comprehensive_metrics(
+        self, analytics_context: Any, output_path: Path
+    ) -> None:
+        """Export comprehensive metrics to JSON."""
+        metrics = analytics_context.get_metrics()
+        
+        # Remove event_history from metrics as it's exported separately
+        if "event_history" in metrics:
+            del metrics["event_history"]
+
+        # Convert to JSON-serializable format
+        serializable_metrics = self._make_serializable(metrics)
+
+        with output_path.open("w", encoding="utf-8") as f:
+            json.dump(serializable_metrics, f, indent=2)
+
+    def _export_events_csv(self, analytics_context: Any, output_path: Path) -> None:
+        """Export event stream to CSV."""
+        events = analytics_context.event_stream.collector.get_events()
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                ["timestamp", "event_type", "resource_type", "resource_id", "details"]
+            )
+
+            for timestamp, event in events:
+                event_type = event.__class__.__name__
+                resource_type = self._extract_resource_type(event)
+                resource_id = self._extract_resource_id(event)
+                details = self._extract_event_details(event)
+
+                writer.writerow(
+                    [timestamp, event_type, resource_type, resource_id, details]
+                )
+
+    def _export_process_log(
+        self, analytics_context: Any, output_path: Path
+    ) -> None:
+        """Export process state changes to log file."""
+        events = analytics_context.event_stream.collector.get_events()
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "process", "resource_type", "resource_id", "state", "details"])
+
+            for timestamp, event in events:
+                process = self._extract_process_name(event)
+                resource_type = self._extract_resource_type(event)
+                resource_id = self._extract_resource_id(event)
+                state = self._extract_state(event)
+                details = self._extract_event_details(event)
+
+                writer.writerow([timestamp, process, resource_type, resource_id, state, details])
+
+    def _export_locomotive_utilization(
+        self, analytics_context: Any, output_path: Path
+    ) -> None:
+        """Export locomotive utilization breakdown to CSV."""
+        events = analytics_context.event_stream.collector.get_events()
+        
+        # Calculate per-locomotive metrics from events
+        loco_times = {}
+        loco_last_event = {}
+        loco_movements = {}
+        
+        for timestamp, event in events:
+            event_type = event.__class__.__name__
+            
+            if event_type == "LocomotiveAllocatedEvent":
+                loco_id = getattr(event, "locomotive_id", None)
+                if loco_id:
+                    loco_last_event[loco_id] = (timestamp, "allocated")
+                    if loco_id not in loco_times:
+                        loco_times[loco_id] = {"parking": 0, "moving": 0, "coupling": 0, "decoupling": 0}
+                        loco_movements[loco_id] = []
+            
+            elif event_type == "LocomotiveMovementStartedEvent":
+                loco_id = getattr(event, "locomotive_id", None)
+                from_track = getattr(event, "from_track", "")
+                to_track = getattr(event, "to_track", "")
+                if loco_id and loco_id in loco_last_event:
+                    last_time, _ = loco_last_event[loco_id]
+                    # Estimate coupling time before movement (if picking up wagons)
+                    if any(track in to_track for track in ["WS", "retrofit", "collection"]):
+                        loco_times[loco_id]["coupling"] += 0.5  # Estimate 0.5 min coupling
+                    loco_times[loco_id]["parking"] += timestamp - last_time
+                    loco_last_event[loco_id] = (timestamp, "moving")
+                    loco_movements[loco_id].append((from_track, to_track))
+            
+            elif event_type == "LocomotiveMovementCompletedEvent":
+                loco_id = getattr(event, "locomotive_id", None)
+                from_track = getattr(event, "from_track", "")
+                to_track = getattr(event, "to_track", "")
+                if loco_id and loco_id in loco_last_event:
+                    last_time, _ = loco_last_event[loco_id]
+                    loco_times[loco_id]["moving"] += timestamp - last_time
+                    # Estimate decoupling time after movement (if dropping off wagons)
+                    if any(track in from_track for track in ["WS", "retrofit", "parking", "retrofitted"]):
+                        loco_times[loco_id]["decoupling"] += 0.5  # Estimate 0.5 min decoupling
+                    loco_last_event[loco_id] = (timestamp, "idle")
+            
+            elif event_type == "LocomotiveReleasedEvent":
+                loco_id = getattr(event, "locomotive_id", None)
+                if loco_id and loco_id in loco_last_event:
+                    last_time, _ = loco_last_event[loco_id]
+                    loco_times[loco_id]["parking"] += timestamp - last_time
+                    loco_last_event[loco_id] = (timestamp, "parking")
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "locomotive_id",
+                    "parking_time",
+                    "moving_time",
+                    "coupling_time",
+                    "decoupling_time",
+                    "parking_percent",
+                    "moving_percent",
+                    "coupling_percent",
+                    "decoupling_percent",
+                ]
+            )
+
+            for loco_id, times in sorted(loco_times.items()):
+                total_time = sum(times.values())
+                if total_time > 0:
+                    writer.writerow(
+                        [
+                            loco_id,
+                            times["parking"],
+                            times["moving"],
+                            times["coupling"],
+                            times["decoupling"],
+                            (times["parking"] / total_time) * 100,
+                            (times["moving"] / total_time) * 100,
+                            (times["coupling"] / total_time) * 100,
+                            (times["decoupling"] / total_time) * 100,
+                        ]
+                    )
+
+    def _export_workshop_metrics(
+        self, analytics_context: Any, output_path: Path
+    ) -> None:
+        """Export workshop performance metrics to CSV."""
+        metrics = analytics_context.get_metrics()
+        workshop_stats = metrics.get("workshop_statistics", {}).get("workshops", {})
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "workshop_id",
+                    "completed_retrofits",
+                    "total_retrofit_time",
+                    "total_waiting_time",
+                    "throughput_per_hour",
+                    "utilization_percent",
+                ]
+            )
+
+            for workshop_id, stats in workshop_stats.items():
+                if isinstance(stats, dict):
+                    # Use wagons_processed as completed count
+                    completed = stats.get("wagons_processed", stats.get("completed_retrofits", 0))
+                    retrofit_time = stats.get("total_retrofit_time", 0)
+                    waiting_time = stats.get("total_waiting_time", 0)
+                    utilization_pct = stats.get("utilization_percent", 0)
+                    total_time = retrofit_time + waiting_time
+
+                    throughput = (
+                        (completed / (total_time / 3600)) if total_time > 0 else 0
+                    )
+
+                    writer.writerow(
+                        [
+                            workshop_id,
+                            completed,
+                            retrofit_time,
+                            waiting_time,
+                            throughput,
+                            utilization_pct,
+                        ]
+                    )
+
+    def _export_bottlenecks(
+        self, analytics_context: Any, output_path: Path
+    ) -> None:
+        """Export detected bottlenecks to CSV."""
+        # Get bottlenecks from metrics report if available
+        try:
+            metrics_report = analytics_context.get_metrics_report()
+            bottlenecks = metrics_report.get("bottlenecks", [])
+        except Exception:
+            bottlenecks = []
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "resource_type",
+                    "resource_id",
+                    "severity",
+                    "utilization",
+                    "threshold",
+                    "description",
+                ]
+            )
+
+            for bottleneck in bottlenecks:
+                if hasattr(bottleneck, "resource_type"):
+                    writer.writerow(
+                        [
+                            bottleneck.resource_type,
+                            bottleneck.resource_id,
+                            bottleneck.severity,
+                            bottleneck.utilization,
+                            bottleneck.threshold,
+                            bottleneck.description,
+                        ]
+                    )
+
+    def _export_track_capacity(
+        self, analytics_context: Any, output_path: Path, yard_context: Any = None
+    ) -> None:
+        """Export track capacity from analytics context."""
+        # Get track metrics from analytics context
+        track_metrics = analytics_context.get_track_metrics()
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "track_id",
+                    "max_capacity_m",
+                    "current_occupancy_m",
+                    "utilization_percent",
+                    "state",
+                ]
+            )
+
+            # Export all track capacity data
+            for track_id, metrics in sorted(track_metrics.items()):
+                writer.writerow([
+                    track_id,
+                    metrics["max_capacity"],
+                    metrics["current_occupancy"],
+                    metrics["utilization_percent"],
+                    metrics["state"],
+                ])
+
+    def _export_timeline(
+        self, analytics_context: Any, output_path: Path, interval_seconds: float
+    ) -> None:
+        """Export time-series metrics to CSV."""
+        time_series = analytics_context.get_all_time_series(interval_seconds)
+
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "metric", "value"])
+
+            for metric_name, data_points in time_series.items():
+                for timestamp, value in data_points:
+                    writer.writerow([timestamp, metric_name, value])
+
+    def _extract_resource_type(self, event: Any) -> str:
+        """Extract resource type from event."""
+        if hasattr(event, "wagon_id"):
+            return "wagon"
+        if hasattr(event, "train_id"):
+            return "train"
+        if hasattr(event, "workshop_id"):
+            return "workshop"
+        if hasattr(event, "locomotive_id"):
+            return "locomotive"
+        if hasattr(event, "track_id"):
+            return "track"
+        if hasattr(event, "rake_id"):
+            return "rake"
+        return "unknown"
+
+    def _extract_resource_id(self, event: Any) -> str:
+        """Extract resource ID from event."""
+        for attr in [
+            "wagon_id",
+            "train_id",
+            "workshop_id",
+            "locomotive_id",
+            "track_id",
+            "rake_id",
+        ]:
+            if hasattr(event, attr):
+                return str(getattr(event, attr))
+        return "unknown"
+
+    def _extract_process_name(self, event: Any) -> str:
+        """Extract process name from event type."""
+        event_name = event.__class__.__name__
+        if "Train" in event_name:
+            return "train_arrival"
+        if "Retrofit" in event_name:
+            return "retrofit"
+        if "Locomotive" in event_name:
+            return "shunting"
+        if "Workshop" in event_name:
+            return "workshop"
+        if "Track" in event_name:
+            return "track"
+        if "Wagon" in event_name:
+            return "wagon"
+        return "unknown"
+
+    def _extract_state(self, event: Any) -> str:
+        """Extract state from event."""
+        event_name = event.__class__.__name__.lower()
+        if "start" in event_name:
+            return "started"
+        if "complete" in event_name or "end" in event_name:
+            return "completed"
+        if "arrive" in event_name:
+            return "arrived"
+        if "depart" in event_name:
+            return "departed"
+        if "reject" in event_name:
+            return "rejected"
+        return "in_progress"
+
+    def _extract_event_details(self, event: Any) -> str:
+        """Extract additional details from event as JSON string."""
+        details = {}
+        for attr in dir(event):
+            if not attr.startswith("_") and attr not in [
+                "event_timestamp",
+                "wagon_id",
+                "train_id",
+                "workshop_id",
+                "locomotive_id",
+                "track_id",
+                "rake_id",
+            ]:
+                value = getattr(event, attr, None)
+                if value is not None and not callable(value):
+                    details[attr] = str(value)
+        return json.dumps(details) if details else ""
+
+    def _make_serializable(self, obj: Any, seen: set[int] | None = None) -> Any:
+        """Convert object to JSON-serializable format."""
+        if seen is None:
+            seen = set()
+        
+        # Check for circular references
+        obj_id = id(obj)
+        if obj_id in seen:
+            return "<circular reference>"
+        
+        # Basic types
+        if isinstance(obj, (int, float, str, bool)) or obj is None:
+            return obj
+        
+        # Skip known non-serializable types
+        type_name = type(obj).__name__
+        if any(skip in type_name.lower() for skip in ["simpy", "environment", "timeout", "process", "event", "bound", "function", "method", "iterator", "generator"]):
+            return f"<{type_name}>"
+        
+        seen.add(obj_id)
+        
+        try:
+            if isinstance(obj, dict):
+                return {k: self._make_serializable(v, seen) for k, v in obj.items()}
+            if isinstance(obj, (list, tuple)):
+                return [self._make_serializable(item, seen) for item in obj]
+            if hasattr(obj, "__dict__"):
+                return self._make_serializable(obj.__dict__, seen)
+            return str(obj)
+        finally:
+            seen.discard(obj_id)
+
+    def export_timeline(
+        self, analytics_context: Any, output_path: Path, interval_seconds: float = 3600.0
+    ) -> None:
+        """Export timeline data to CSV (public method for standalone use)."""
+        self._export_timeline(analytics_context, output_path, interval_seconds)
+    
+    def export_track_capacity(
+        self, analytics_context: Any, output_path: Path, yard_context: Any = None
+    ) -> None:
+        """Export track capacity data to CSV (public method for standalone use)."""
+        self._export_track_capacity(analytics_context, output_path, yard_context)
