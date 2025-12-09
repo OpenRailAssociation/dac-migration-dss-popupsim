@@ -1,6 +1,7 @@
 """Shunting locomotive entity."""
 
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -29,6 +30,7 @@ class ShuntingLocomotive(BaseModel):
     )
     max_capacity: int = Field(default=10, description="Maximum wagon capacity")
     current_load: int = Field(default=0, description="Current number of coupled wagons")
+    track_request: Any | None = Field(default=None, description="Current track resource request")
 
     def is_available(self) -> bool:
         """Check if locomotive is available for operations."""

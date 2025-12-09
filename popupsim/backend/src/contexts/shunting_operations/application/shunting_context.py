@@ -28,6 +28,8 @@ from shared.domain.services.rake_formation_service import RakeFormationService
 from shared.domain.services.rake_registry import RakeRegistry
 from shared.infrastructure.time_converters import to_ticks
 
+from shared.infrastructure.track_resource_manager import TrackResourceManager
+
 from .locomotive_status_tracker import LocomotiveStatusTracker
 from .ports.shunting_context_port import ShuntingContextPort
 
@@ -49,6 +51,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
         self.rake_registry = rake_registry or RakeRegistry()
         self._rake_transport_service = None  # Will be initialized after self is created
         self._event_handlers: list = []
+        self.track_resource_manager: TrackResourceManager | None = None
 
     def initialize(self, infra: Any, scenario: Any) -> None:
         """Initialize with infrastructure and scenario."""
@@ -68,6 +71,13 @@ class ShuntingOperationsContext(ShuntingContextPort):
             # Add all locomotives to SimPy store
             for loco in self._locomotive_pool.locomotives:
                 self._simpy_locomotive_store.put(loco)
+
+        # Initialize track resource manager
+        if scenario.tracks:
+            loco_count = len(scenario.locomotives) if scenario.locomotives else 3
+            self.track_resource_manager = TrackResourceManager(
+                infra.engine, scenario.tracks, loco_count
+            )
 
         # Initialize rake transport service
         self._rake_transport_service = RakeTransportService(self)
@@ -153,7 +163,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
             if loco.id.value in self._allocated_locos:
                 del self._allocated_locos[loco.id.value]
                 loco.status = "IDLE"
-                
+
                 # Record status change to PARKING
                 current_time = context.infra.engine.current_time()
                 self.status_tracker.record_status_change(
@@ -184,9 +194,14 @@ class ShuntingOperationsContext(ShuntingContextPort):
         return release_gen()
 
     def move_locomotive(
-        self, context: Any, loco: Any, from_track: str, to_track: str, wagon_ids: list[str] | None = None
+        self,
+        context: Any,
+        loco: Any,
+        from_track: str,
+        to_track: str,
+        wagon_ids: list[str] | None = None,
     ) -> Any:
-        """Move locomotive between tracks."""
+        """Move locomotive between tracks with track blocking."""
 
         def move_gen():
             from infrastructure.logging import get_process_logger
@@ -210,20 +225,30 @@ class ShuntingOperationsContext(ShuntingContextPort):
             )
             context.infra.event_bus.publish(start_event)
 
-            # Calculate move time based on route
-            move_time = to_ticks(timedelta(minutes=1))  # Default 1 minute
-            if context.scenario.routes:
-                for route in context.scenario.routes:
-                    if route.track_sequence and len(route.track_sequence) >= 2:
-                        if (
-                            route.track_sequence[0] == from_track
-                            and route.track_sequence[1] == to_track
-                        ) or (
-                            route.track_sequence[1] == from_track
-                            and route.track_sequence[0] == to_track
-                        ):
-                            move_time = to_ticks(timedelta(minutes=route.duration))
-                            break
+            # Get route and calculate move time
+            route_path = self._get_route_path(context, from_track, to_track)
+            move_time = self._get_move_time(context, from_track, to_track)
+
+            # Track blocking: only enabled with multiple locomotives
+            track_requests = []
+            if self.track_resource_manager and len(self._locomotive_pool.locomotives) > 1:
+                # Release source track first
+                if (
+                    hasattr(loco, "track_request")
+                    and loco.track_request
+                    and from_track in self.track_resource_manager.track_resources
+                ):
+                    self.track_resource_manager.release_track(from_track, loco.track_request)
+                    loco.track_request = None
+
+                # Request tracks in path (blocking)
+                for track_id in route_path:
+                    if track_id == from_track:
+                        continue
+                    if track_id not in self.track_resource_manager.track_resources:
+                        continue
+                    request = yield self.track_resource_manager.request_track(track_id)
+                    track_requests.append((track_id, request))
 
             # Log process with wagon info if available
             try:
@@ -247,6 +272,17 @@ class ShuntingOperationsContext(ShuntingContextPort):
 
             # Update track after movement completes
             loco.current_track = to_track
+
+            # Release intermediate tracks and store destination
+            if self.track_resource_manager and len(self._locomotive_pool.locomotives) > 1:
+                for track_id, request in track_requests:
+                    if track_id != to_track:
+                        self.track_resource_manager.release_track(track_id, request)
+
+                for track_id, request in track_requests:
+                    if track_id == to_track:
+                        loco.track_request = request
+                        break
 
             # Log arrival
             try:
@@ -273,6 +309,42 @@ class ShuntingOperationsContext(ShuntingContextPort):
 
         return move_gen()
 
+    def _get_route_path(
+        self, context: Any, from_track: str, to_track: str
+    ) -> list[str]:
+        """Get route path between tracks."""
+        if context.scenario.routes:
+            for route in context.scenario.routes:
+                if route.track_sequence and len(route.track_sequence) >= 2:
+                    if (
+                        route.track_sequence[0] == from_track
+                        and route.track_sequence[-1] == to_track
+                    ):
+                        return route.track_sequence
+                    if (
+                        route.track_sequence[-1] == from_track
+                        and route.track_sequence[0] == to_track
+                    ):
+                        return list(reversed(route.track_sequence))
+        return [from_track, to_track]
+
+    def _get_move_time(self, context: Any, from_track: str, to_track: str) -> float:
+        """Get movement time between tracks."""
+        move_time = to_ticks(timedelta(minutes=1))  # Default 1 minute
+        if context.scenario.routes:
+            for route in context.scenario.routes:
+                if route.track_sequence and len(route.track_sequence) >= 2:
+                    if (
+                        route.track_sequence[0] == from_track
+                        and route.track_sequence[1] == to_track
+                    ) or (
+                        route.track_sequence[1] == from_track
+                        and route.track_sequence[0] == to_track
+                    ):
+                        move_time = to_ticks(timedelta(minutes=route.duration))
+                        break
+        return move_time
+
     def couple_wagons(
         self,
         context: Any,
@@ -291,7 +363,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
                 coupling_time = context.scenario.process_times.get_coupling_ticks(
                     coupler_type
                 )
-            
+
             # Track coupling status if time > 0
             current_time = context.infra.engine.current_time()
             if coupling_time > 0:
@@ -303,7 +375,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
 
             for _ in range(wagon_count):
                 yield from context.infra.engine.delay(coupling_time)
-            
+
             # Return to moving status
             if coupling_time > 0:
                 current_time = context.infra.engine.current_time()
@@ -350,7 +422,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
                 decoupling_time = context.scenario.process_times.get_coupling_ticks(
                     coupler_type
                 )
-            
+
             # Track decoupling status if time > 0
             current_time = context.infra.engine.current_time()
             if decoupling_time > 0:
@@ -362,7 +434,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
 
             for _ in range(wagon_count):
                 yield from context.infra.engine.delay(decoupling_time)
-            
+
             # Return to moving status
             if decoupling_time > 0:
                 current_time = context.infra.engine.current_time()
@@ -452,7 +524,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
             yield from self.decouple_wagons(self, len(event.wagons), "SCREW", wagon_ids)
 
             # Return to home track
-            home_track = getattr(loco, 'home_track', 'locoparking')
+            home_track = getattr(loco, "home_track", "locoparking")
             yield from self.move_locomotive(self, loco, event.to_track, home_track)
 
         finally:
@@ -525,7 +597,12 @@ class ShuntingOperationsContext(ShuntingContextPort):
         if total_time == 0:
             return {}
 
-        status_times = {"MOVING": 0.0, "PARKING": 0.0, "COUPLING": 0.0, "DECOUPLING": 0.0}
+        status_times = {
+            "MOVING": 0.0,
+            "PARKING": 0.0,
+            "COUPLING": 0.0,
+            "DECOUPLING": 0.0,
+        }
 
         for loco in self._locomotive_pool.locomotives:
             history = self.status_tracker.get_status_history(loco.id.value)
@@ -566,7 +643,12 @@ class ShuntingOperationsContext(ShuntingContextPort):
         per_loco = {}
 
         for loco in self._locomotive_pool.locomotives:
-            status_times = {"MOVING": 0.0, "PARKING": 0.0, "COUPLING": 0.0, "DECOUPLING": 0.0}
+            status_times = {
+                "MOVING": 0.0,
+                "PARKING": 0.0,
+                "COUPLING": 0.0,
+                "DECOUPLING": 0.0,
+            }
             history = self.status_tracker.get_status_history(loco.id.value)
 
             if not history:
@@ -576,7 +658,9 @@ class ShuntingOperationsContext(ShuntingContextPort):
                     start_time, status = history[i]
                     end_time = history[i + 1][0] if i + 1 < len(history) else total_time
                     duration = end_time - start_time
-                    status_name = status.name if hasattr(status, "name") else str(status)
+                    status_name = (
+                        status.name if hasattr(status, "name") else str(status)
+                    )
 
                     if status_name not in status_times:
                         status_times[status_name] = 0.0
@@ -584,7 +668,9 @@ class ShuntingOperationsContext(ShuntingContextPort):
 
             breakdown = {}
             for status, time_spent in status_times.items():
-                breakdown[status] = (time_spent / total_time) * 100.0 if total_time > 0 else 0.0
+                breakdown[status] = (
+                    (time_spent / total_time) * 100.0 if total_time > 0 else 0.0
+                )
 
             per_loco[loco.id.value] = breakdown
 
@@ -652,7 +738,7 @@ class ShuntingOperationsContext(ShuntingContextPort):
             )
 
             # Return locomotive to home track
-            home_track = getattr(loco, 'home_track', 'locoparking')
+            home_track = getattr(loco, "home_track", "locoparking")
             yield from self.move_locomotive(self, loco, event.to_track, home_track)
 
         finally:
