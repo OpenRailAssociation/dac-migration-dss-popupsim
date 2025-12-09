@@ -355,7 +355,7 @@ class AnalyticsContext:
         csv_exporter.export_utilization_breakdown(breakdown_data, output_path)
 
     def export_dashboard_data(
-        self, output_dir: Path, interval_seconds: float = 3600.0, yard_context: Any = None
+        self, output_dir: Path, interval_seconds: float = 3600.0, yard_context: Any = None, popup_context: Any = None, shunting_context: Any = None
     ) -> dict[str, Path]:
         """Export all data required for Streamlit dashboard.
 
@@ -380,7 +380,7 @@ class AnalyticsContext:
         >>> files = context.export_dashboard_data(Path("output/dashboard"))
         >>> print(f"Exported {len(files)} files")
         """
-        return self.dashboard_exporter.export_all(self, output_dir, interval_seconds, yard_context)
+        return self.dashboard_exporter.export_all(self, output_dir, interval_seconds, yard_context, popup_context, shunting_context)
 
     def start_real_time_visualization(self) -> None:
         """Start real-time visualization updates."""

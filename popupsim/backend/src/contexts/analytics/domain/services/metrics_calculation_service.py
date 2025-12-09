@@ -46,7 +46,12 @@ class MetricsCalculationService:
         wagons_classified = self.event_counts.get("WagonClassifiedEvent", 0)
         wagons_distributed = self.event_counts.get("WagonDistributedEvent", 0)
         wagons_parked = self.event_counts.get("WagonParkedEvent", 0)
-        wagons_rejected = max(0, wagons_arrived - retrofits_completed)
+        # Count actual wagon rejections from events
+        wagons_rejected = sum(
+            1
+            for _, e in self.events
+            if type(e).__name__ == "WagonRejectedEvent"
+        )
 
         return {
             "trains_arrived": trains_arrived,
@@ -74,7 +79,6 @@ class MetricsCalculationService:
             lambda: {
                 "wagons_processed": 0,
                 "retrofits_started": 0,
-                "utilization_percent": 0.0,
             }
         )
 
@@ -90,12 +94,6 @@ class MetricsCalculationService:
                     workshop_data[workshop_id]["wagons_processed"] += 1
                 elif event_type == "RetrofitStartedEvent":
                     workshop_data[workshop_id]["retrofits_started"] += 1
-
-        for workshop_id in workshop_data:
-            processed = workshop_data[workshop_id]["wagons_processed"]
-            workshop_data[workshop_id]["utilization_percent"] = min(
-                processed / max(self.duration_hours, 0.1) * 100, 100.0
-            )
 
         return {
             "total_workshops": len(workshop_data),
