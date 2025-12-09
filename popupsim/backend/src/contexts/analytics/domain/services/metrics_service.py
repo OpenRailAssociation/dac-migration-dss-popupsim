@@ -107,6 +107,7 @@ class MetricsService:
         duration_hours: float,
         current_state: dict[str, Any],
         thresholds: BottleneckThresholds | None = None,
+        workshop_stats: dict[str, Any] | None = None,
     ) -> None:
         """Initialize comprehensive metrics service.
 
@@ -122,12 +123,15 @@ class MetricsService:
             Current system state from StateTrackingService.
         thresholds : BottleneckThresholds | None
             Bottleneck detection thresholds.
+        workshop_stats : dict[str, Any] | None
+            Pre-computed workshop statistics from metrics_calculation_service.
         """
         self.events = events
         self.event_counts = event_counts
         self.duration_hours = duration_hours
         self.current_state = current_state
         self.thresholds = thresholds or BottleneckThresholds()
+        self.workshop_stats = workshop_stats or {}
 
     def get_train_arrival_metrics(
         self, interval_seconds: float = 3600.0
@@ -225,11 +229,9 @@ class MetricsService:
             interval_seconds
         )
 
-        # Average utilization based on non-parking time
-        non_parking_percentage = 100 - loco_breakdown.action_percentages.get(
-            "parking", 0
-        )
-        avg_utilization = non_parking_percentage / 100
+        # Average utilization based on non-parking time (100 - parking%)
+        parking_percentage = loco_breakdown.action_percentages.get("parking", 0)
+        avg_utilization = (100 - parking_percentage) / 100
 
         return LocomotiveMetrics(
             total_locomotives=total_locomotives,
@@ -246,55 +248,27 @@ class MetricsService:
         list[WorkshopMetrics]
             Metrics for each workshop.
         """
-        workshop_states = self.current_state.get("workshop_states", {})
         workshop_metrics_list = []
-
-        # Track retrofit times per workshop
-        retrofit_times: dict[str, list[float]] = defaultdict(list)
-        waiting_times: dict[str, float] = defaultdict(float)
-
-        for _ts, event in self.events:
-            event_type = type(event).__name__
-            workshop_id = getattr(event, "workshop_id", None)
-
-            if not workshop_id:
+        
+        # Use pre-computed workshop statistics if available
+        for workshop_id, stats in self.workshop_stats.items():
+            # Skip non-workshop IDs
+            if workshop_id.lower() in ('retrofitted', 'retrofit', 'collection', 'parking'):
                 continue
-
-            if event_type == "RetrofitCompletedEvent":
-                duration = getattr(event, "duration", 0.0)
-                retrofit_times[workshop_id].append(duration)
-            elif event_type == "WagonWaitingEvent":
-                wait_duration = getattr(event, "duration", 0.0)
-                waiting_times[workshop_id] += wait_duration
-
-        # Get detailed workshop breakdowns
-        from .utilization_breakdown_service import UtilizationBreakdownService
-
-        breakdown_service = UtilizationBreakdownService(
-            self.events, self.duration_hours
-        )
-        workshop_breakdowns = breakdown_service.get_workshop_breakdown()
-
-        for workshop_id, state in workshop_states.items():
-            completed = len(retrofit_times.get(workshop_id, []))
-            total_retrofit_time = sum(retrofit_times.get(workshop_id, []))
-            total_waiting = waiting_times.get(workshop_id, 0.0)
-
+            if not workshop_id.startswith('WS'):
+                continue
+            
+            completed = stats.get("wagons_processed", 0)
+            total_retrofit_time = stats.get("total_retrofit_time", 0.0)
+            total_waiting = stats.get("total_waiting_time", 0.0)
+            utilization_percent = stats.get("utilization_percent", 0.0)
+            
             wagons_per_hour = completed / max(self.duration_hours, 0.1)
-
-            # Use detailed breakdown if available
-            breakdown = workshop_breakdowns.get(workshop_id)
-            if breakdown:
-                utilization_breakdown = breakdown.action_percentages
-                utilization_percent = breakdown.action_percentages.get("working", 0)
-            else:
-                working_bays = state.get("working", 0)
-                total_bays = state.get("total_bays", 1)
-                utilization_percent = (working_bays / max(total_bays, 1)) * 100
-                utilization_breakdown = {
-                    "working": utilization_percent,
-                    "waiting": 100 - utilization_percent,
-                }
+            
+            utilization_breakdown = {
+                "working": utilization_percent,
+                "waiting": 100.0 - utilization_percent,
+            }
 
             workshop_metrics_list.append(
                 WorkshopMetrics(
@@ -360,8 +334,22 @@ class MetricsService:
 
         return track_metrics_list
 
-    def detect_bottlenecks(self) -> list[BottleneckDetection]:
+    def detect_bottlenecks(
+        self,
+        workshop_metrics: list[WorkshopMetrics] | None = None,
+        track_metrics: list[TrackStateMetrics] | None = None,
+        loco_metrics: LocomotiveMetrics | None = None,
+    ) -> list[BottleneckDetection]:
         """Detect bottlenecks across all resources.
+
+        Parameters
+        ----------
+        workshop_metrics : list[WorkshopMetrics] | None
+            Pre-computed workshop metrics (computed if None).
+        track_metrics : list[TrackStateMetrics] | None
+            Pre-computed track metrics (computed if None).
+        loco_metrics : LocomotiveMetrics | None
+            Pre-computed locomotive metrics (computed if None).
 
         Returns
         -------
@@ -370,8 +358,15 @@ class MetricsService:
         """
         bottlenecks = []
 
+        # Use pre-computed metrics or compute if not provided
+        if workshop_metrics is None:
+            workshop_metrics = self.get_workshop_metrics()
+        if track_metrics is None:
+            track_metrics = self.get_track_state_metrics()
+        if loco_metrics is None:
+            loco_metrics = self.get_locomotive_metrics()
+
         # Workshop bottlenecks
-        workshop_metrics = self.get_workshop_metrics()
         for workshop in workshop_metrics:
             utilization = workshop.utilization_percent / 100
 
@@ -399,7 +394,6 @@ class MetricsService:
                 )
 
         # Track bottlenecks
-        track_metrics = self.get_track_state_metrics()
         for track in track_metrics:
             utilization = track.utilization_percent / 100
 
@@ -427,7 +421,6 @@ class MetricsService:
                 )
 
         # Locomotive bottlenecks
-        loco_metrics = self.get_locomotive_metrics()
         if loco_metrics.total_locomotives > 0:
             utilization = loco_metrics.average_utilization
 
@@ -439,7 +432,7 @@ class MetricsService:
                         severity="overutilization",
                         utilization=utilization,
                         threshold=self.thresholds.locomotive_overutilization,
-                        description=f"Locomotive fleet is overutilized at {utilization:.1%}",
+                        description=f"Locomotive fleet is overutilized at {utilization:.1%} (active time)",
                     )
                 )
             elif utilization < self.thresholds.locomotive_underutilization:
@@ -450,7 +443,7 @@ class MetricsService:
                         severity="underutilization",
                         utilization=utilization,
                         threshold=self.thresholds.locomotive_underutilization,
-                        description=f"Locomotive fleet is underutilized at {utilization:.1%}",
+                        description=f"Locomotive fleet is underutilized at {utilization:.1%} (active time)",
                     )
                 )
 
@@ -484,13 +477,18 @@ class MetricsService:
         dict[str, Any]
             Complete metrics report with all KPIs and statistics.
         """
+        # Compute metrics once
+        workshop_metrics = self.get_workshop_metrics()
+        track_metrics = self.get_track_state_metrics()
+        loco_metrics = self.get_locomotive_metrics()
+        
         return {
             "train_arrivals": self.get_train_arrival_metrics(),
             "wagon_states": self.get_wagon_state_metrics(),
-            "locomotive_metrics": self.get_locomotive_metrics(),
-            "workshop_metrics": self.get_workshop_metrics(),
-            "track_metrics": self.get_track_state_metrics(),
-            "bottlenecks": self.detect_bottlenecks(),
+            "locomotive_metrics": loco_metrics,
+            "workshop_metrics": workshop_metrics,
+            "track_metrics": track_metrics,
+            "bottlenecks": self.detect_bottlenecks(workshop_metrics, track_metrics, loco_metrics),
             "utilization_breakdowns": self.get_utilization_breakdowns(),
             "simulation_duration_hours": self.duration_hours,
         }
