@@ -126,12 +126,13 @@ class UtilizationBreakdownService:
                 if event_workshop_id != workshop_id:
                     continue
 
-                if event_type == "RetrofitStartedEvent":
-                    action_starts[f"{workshop_id}_working"] = timestamp
-                    total_actions += 1
-                elif event_type == "RetrofitCompletedEvent":
-                    start_time = action_starts.pop(f"{workshop_id}_working", timestamp)
-                    action_times["working"] += timestamp - start_time
+                # Track retrofit completion events (actual events used in simulation)
+                if event_type in ("WagonRetrofitCompletedEvent", "BatchRetrofittedEvent", "WagonRetrofittedEvent"):
+                    # Estimate working time from completion_time or use default retrofit duration *removed guard!)
+                    completion_time = getattr(event, "completion_time") # timestamp
+                    duration = getattr(event, "duration")  # Default 15 min per wagon , 15.0
+                    start_time = completion_time - duration if hasattr(event, "completion_time") else timestamp - duration
+                    action_times["working"] += duration
                     total_actions += 1
 
             # Calculate waiting time as remaining time
