@@ -69,7 +69,11 @@ class ParkingSimPyCoordinator:  # pylint: disable=too-few-public-methods
             logger.info("Wagon %s moved to parking track %s", wagon.id, to_track_id)
 
     def move_to_parking_simpy(self) -> Generator[Any]:
-        """SimPy process for moving wagons to parking tracks."""
+        """SimPy process for moving wagons to parking tracks.
+        
+        Note: This process should only move wagons that are ready for parking,
+        not flush all wagons at simulation end.
+        """
         logger.info("Starting move to parking process")
         retrofitted_track = self.orchestrator.retrofitted_tracks[0]
 
