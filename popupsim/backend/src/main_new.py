@@ -98,7 +98,7 @@ def run(
         # Dashboard export and visualizations
         if analytics:
             # Export dashboard data
-            dashboard_files = analytics.export_dashboard_data(output_path, yard_context=yard)
+            dashboard_files = analytics.export_dashboard_data(output_path, yard_context=yard, popup_context=popup, shunting_context=shunting)
             typer.echo(f"\nDashboard data exported:")
             for file_type, file_path in dashboard_files.items():
                 typer.echo(f"  - {file_type}: {file_path.name}")
@@ -155,16 +155,15 @@ def run(
             )
             per_workshop = popup_metrics.get("per_workshop_utilization", {})
             if per_workshop:
-                for workshop_id, util in per_workshop.items():
+                # Filter out track-based workshop entries
+                filtered_workshops = {k: v for k, v in per_workshop.items() if not k.startswith("track_")}
+                for workshop_id, util in sorted(filtered_workshops.items()):
                     typer.echo(f"    {workshop_id}:             {util:.1f}%")
             per_bay = popup_metrics.get("per_bay_utilization", {})
             if per_bay:
-                # Filter out workshop tracks that have no utilization
-                filtered_bays = {k: v for k, v in per_bay.items() if not k.startswith("track_")}
-                if filtered_bays:
-                    typer.echo(f"  Bay utilization:")
-                    for bay_id, util in sorted(filtered_bays.items()):
-                        typer.echo(f"    {bay_id}:    {util:.1f}%")
+                typer.echo(f"  Bay utilization:")
+                for bay_id, util in sorted(per_bay.items()):
+                    typer.echo(f"    {bay_id}:    {util:.1f}%")
 
         # Yard metrics
         if yard:
