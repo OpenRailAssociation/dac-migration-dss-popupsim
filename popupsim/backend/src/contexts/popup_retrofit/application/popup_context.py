@@ -104,6 +104,10 @@ class PopUpRetrofitContext(PopUpContextPort):
 
     def create_workshop(self, workshop_id: str, location: str, num_bays: int) -> None:
         """Create a new PopUp workshop."""
+        # Skip track-based IDs (these are tracks, not workshops)
+        if workshop_id.startswith('track_'):
+            return
+            
         # Prevent duplicate creation
         if workshop_id in self._workshops:
             return
@@ -600,11 +604,16 @@ class PopUpRetrofitContext(PopUpContextPort):
         if not per_workshop:
             return 0.0
         
-        # Average utilization across all workshops
-        return sum(per_workshop.values()) / len(per_workshop)
+        # Filter out track-based workshops (only count actual workshops)
+        actual_workshops = {k: v for k, v in per_workshop.items() if not k.startswith('track_')}
+        if not actual_workshops:
+            return 0.0
+        
+        # Average utilization across actual workshops only
+        return sum(actual_workshops.values()) / len(actual_workshops)
 
     def _calculate_per_workshop_utilization(self) -> dict[str, float]:
-        """Calculate utilization per workshop."""
+        """Calculate utilization per workshop (average of all bays)."""
         if not self.infra or not self._bay_status_history:
             return {}
 
@@ -615,32 +624,23 @@ class PopUpRetrofitContext(PopUpContextPort):
         workshop_utilization = {}
 
         for workshop_id, workshop in self._workshops.items():
-            # Collect all busy periods for this workshop
-            busy_periods = []
+            # Calculate average utilization across all bays in this workshop
+            bay_utils = []
             for bay_id, history in self._bay_status_history.items():
                 if bay_id.startswith(workshop_id):
+                    busy_time = 0.0
                     for i in range(0, len(history), 2):
                         if i + 1 < len(history):
                             start_time = history[i][0]
                             end_time = history[i + 1][0]
-                            busy_periods.append((start_time, end_time))
+                            busy_time += end_time - start_time
+                    
+                    bay_util = (busy_time / total_time) * 100.0 if total_time > 0 else 0.0
+                    bay_utils.append(bay_util)
             
-            # Merge overlapping periods to get workshop busy time
-            if busy_periods:
-                busy_periods.sort()
-                merged = [busy_periods[0]]
-                for start, end in busy_periods[1:]:
-                    if start <= merged[-1][1]:
-                        merged[-1] = (merged[-1][0], max(merged[-1][1], end))
-                    else:
-                        merged.append((start, end))
-                
-                busy_time = sum(end - start for start, end in merged)
-            else:
-                busy_time = 0.0
-
+            # Average utilization across all bays
             workshop_utilization[workshop_id] = (
-                (busy_time / total_time) * 100.0 if total_time > 0 else 0.0
+                sum(bay_utils) / len(bay_utils) if bay_utils else 0.0
             )
 
         return workshop_utilization
