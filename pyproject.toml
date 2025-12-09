@@ -1,110 +1,229 @@
+[project]
+name = "PopUpSim"
+description = "Freight rail transport simulation tool for Digital Automatic Coupler retrofit"
+version = "0.0.1"
+license = "Apache-2.0"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "Jan-Hendrik Wendisch", email = "jan-hendrik.wendisch@deutschebahn.com" },
+    { name = "Volker Kuehn", email = "volker.kuehn@deutschebahn.com" },
+    { name = "Hueseyin H. Guerbuez", email = "Hueseyin.H.Guerbuez@deutschebahn.com"}
+]
+keywords = ["railway", "digital automatic coupler", "simulation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "babel>=2.17.0",
+    "matplotlib>=3.10.7",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.3",
+    "simpy>=4.1.1",
+    "streamlit>=1.52.1",
+    "typer>=0.20.0",
+]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[project]
-name = "popupsim"
-version = "0.1.0"
-description = "PopUpSim - DAC Migration Simulation Tool"
-authors = [{name = "PopUpSim Team", email = "team@popupsim.org"}]
-license = {text = "Apache-2.0"}
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "simpy>=4.0.0",
-    "pydantic>=2.0.0",
-    "matplotlib>=3.7.0",
-    "pandas>=2.0.0",
-    "typer>=0.9.0",
-    "rich>=13.0.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
-    "pytest-benchmark>=4.0.0",
-    "mypy>=1.5.0",
-    "ruff>=0.1.0",
-    "pylint>=3.0.0",
-    "pre-commit>=3.0.0",
-]
-
-[project.scripts]
-popupsim = "popupsim.backend.src.main:main"
-
 [tool.setuptools.packages.find]
-where = ["popupsim/backend/src"]
+where = ["popupsim/backend"]
+include = ["*"]
 
-[tool.pytest.ini_options]
-testpaths = ["popupsim/backend/tests"]
-pythonpath = ["popupsim/backend/src"]
-norecursedirs = ["*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__", "MVP"]
-addopts = [
-    "--tb=short",
-    "--strict-markers",
-    "--disable-warnings",
-    "--no-cov",
-    "-p", "no:benchmark"
+[tool.setuptools.package-dir]
+"" = "popupsim/backend/src"
+
+# Preserving all tool configurations
+[tool.ruff]
+indent-width = 4
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+force-single-line = true
+force-sort-within-sections = true
+known-first-party = ["configuration"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint]
+select = [
+"A",     # flake8-builtins
+"ANN",   # flake8-annotations
+"ARG",   # flake8-unused-arguments
+"B",     # flake8-bugbear
+"C4",    # flake8-comprehensions
+"C90",   # mccabe complexity
+"D",     # pydocstyle
+"DTZ",   # flake8-datetimez
+"E",     # pycodestyle errors
+"F",     # pyflakes
+"FIX",   # flake8-fixme
+"G",     # flake8-logging-format
+"I",     # isort
+"N",     # pep8-naming
+"NPY",   # numpy-specific rules
+"PLR09", # pylint refactor rules
+"PT",    # flake8-pytest-style
+"Q",     # flake8-quotes
+"RUF",   # ruff-specific rules
+"S",     # flake8-bandit
+"SIM",   # flake8-simplify
+"TID251", # flake8-tidy-imports
+"UP",    # pyupgrade
 ]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
-    "performance: marks tests as performance tests"
+ignore = [
+"D203",   # incompatible with D211
+"D213",   # incompatible with D212
+"Q000",   # incompatible with single quote format
+"Q003",   # incompatible with single quote format
+"ANN001", # missing type annotation for function argument (Pydantic validators)
+"ANN204", # missing return type annotation for __init__ (always None)
+"ANN206", # missing return type annotation for classmethod (Pydantic validators)
+"ANN401", # dynamically typed expressions (pandas/Any types)
+"FIX002", # TODO/FIXME without issue reference
+"G004",   # logging format string should use lazy % formatting
 ]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning"
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"popupsim/backend/tests/**/*.py" = [
+    "S101",    # Allow use of assert in tests
+    "PLR2004", # Allow magic values in tests (common in assertions)
+    "ANN201",  # Missing return type annotation for test methods (always None)
+]
+"popupsim/backend/src/main.py" = [
+    "D401",    # Allow descriptive docstrings in main entry point
+    "TID251", # Allow relative imports in main entry point
+]
+"popupsim/backend/src/core/i18n/decorators.py" = [
+    "B010",    # Allow setattr for type safety with generic types
+]
+
+[tool.ruff.lint.pylint]
+max-args = 5
+max-branches = 12
+max-returns = 6
+max-statements = 50
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint]
+load-plugins = "pylint_pydantic"
+init-hook = "import sys; sys.path.append('popupsim/backend/src')"
+source-roots = ["popupsim/backend/src"] # Default to src folder only
+disable = [
+    "W0511",  # Disable fixme warnings (TODO/FIXME comments)
+    "R1708",  # stop-iteration-return: Using return in generator is valid Python 3.3+ for SimPy patterns
 ]
 
 [tool.mypy]
 python_version = "3.13"
-mypy_path = "popupsim/backend/src"
-packages = ["popupsim.backend.src"]
-disallow_untyped_defs = true
 warn_return_any = true
 warn_unused_configs = true
-no_implicit_optional = true
-strict_optional = true
+disallow_untyped_defs = true
+files = ["popupsim/backend/src", "popupsim/backend/tests"]
+mypy_path = "popupsim/backend/src"
+namespace_packages = true
+explicit_package_bases = true
+show_column_numbers = true
+show_error_codes = true
+plugins = ['pydantic.mypy']
 
-[tool.ruff]
-target-version = "py313"
-line-length = 88
-src = ["popupsim/backend/src"]
 
-[tool.ruff.lint]
-select = ["E", "F", "W", "C90", "I", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "TD", "FIX", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
-ignore = ["E501", "COM812", "ISC001"]
+# Third-party libraries without stubs
+[[tool.mypy.overrides]]
+module = ["typer.*", "simpy.*", "matplotlib.*", "pytest.*", "pytest_mock.*", "numpy.*"]
+ignore_missing_imports = true
+disallow_untyped_defs = false
 
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
+# Libraries with stubs
+[[tool.mypy.overrides]]
+module = ["pandas.*", "pydantic.*"]
+ignore_missing_imports = false
 
-[tool.pylint.main]
-init-hook = 'import sys; sys.path.append("popupsim/backend/src")'
-source-roots = ["popupsim/backend/src"]
+# Relaxed checking for simulation generators (complex SimPy code)
+[[tool.mypy.overrides]]
+module = ["simulation.popupsim", "simulation.jobs", "simulation.services", "workshop_operations.application.orchestrator"]
+disallow_untyped_defs = false
+disable_error_code = ["func-returns-value", "return-value", "has-type", "misc", "arg-type", "attr-defined", "union-attr", "var-annotated", "return"]
 
-[tool.pylint.messages_control]
-disable = ["C0114", "C0115", "C0116", "R0903", "R0913", "W0613"]
+# Relaxed checking for tests only
+[[tool.mypy.overrides]]
+module = ["popupsim.backend.tests.*"]
+ignore_missing_imports = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+warn_return_any = false
+disable_error_code = ["var-annotated", "call-arg", "union-attr", "assignment", "import-untyped", "no-untyped-def"]
+
+[tool.pytest.ini_options]
+testpaths = ["popupsim/backend/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+pythonpath = ["popupsim/backend/src"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--cov=popupsim/backend/src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=50",
+]
+markers = [
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (external APIs)",
+    "pending: Tests written before implementation (TDD)",
+    "xfail: Expected to fail (temporary - will be fixed in future commits)",
+]
 
 [tool.coverage.run]
 source = ["popupsim/backend/src"]
-omit = ["*/tests/*", "*/test_*"]
+omit = ["tests/*", "popupsim/backend/tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
     "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
+    "raise NotImplementedError"
+]
+show_missing = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "pre-commit-hooks>=6.0.0",
+    "pylint>=3.3.8",
+    "pylint-pydantic>=0.3.2",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.14.1",
+    "pandas-stubs>=2.3.2.240528",
+]
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocs-mermaid2-plugin>=1.1.0",
 ]
