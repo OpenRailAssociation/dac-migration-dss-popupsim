@@ -33,6 +33,7 @@ from shared.domain.events.wagon_lifecycle_events import (
     WagonReadyForRetrofitEvent,
     WagonRetrofitCompletedEvent,
     WagonsClassifiedEvent,
+    WagonsReadyForPickupEvent,
 )
 from shared.domain.services.railway_capacity_service import RailwayCapacityService
 from shared.domain.services.rake_formation_service import RakeFormationService
@@ -142,9 +143,10 @@ class YardOperationsContext:
         self.infra.event_bus.subscribe(
             WagonRetrofitCompletedEvent, self._handle_wagon_retrofit_completed
         )
+        self.infra.event_bus.subscribe(
+            WagonsReadyForPickupEvent, self._handle_wagons_ready_for_pickup
+        )
 
-        self.infra.engine.schedule_process(self._pickup_wagons_to_retrofit())
-        self.infra.engine.schedule_process(self._continuous_pickup_check())
         self.infra.engine.schedule_process(
             self._trigger_initial_movement()
         )  # For test compatibility
@@ -158,74 +160,71 @@ class YardOperationsContext:
             RakeTransportRequestedEvent, self._handle_rake_transport_request
         )
 
-    def _pickup_wagons_to_retrofit(self) -> Generator[Any, Any]:
-        """Process for picking up wagons from each collection track."""
+    def _handle_wagons_ready_for_pickup(self, event: WagonsReadyForPickupEvent) -> None:
+        """Handle wagons ready for pickup event."""
+        self.infra.engine.schedule_process(self._pickup_wagons_from_track(event.track_id))
+
+    def _pickup_wagons_from_track(self, track_id: str) -> Generator[Any, Any]:
+        """Process for picking up wagons from a specific collection track."""
         from infrastructure.logging import get_process_logger
 
-        while True:
-            # Wait for train processed signal
-            yield self.train_processed_event
-            current_time = self.infra.engine.current_time()
+        current_time = self.infra.engine.current_time()
+        queue = self.collection_queues.get(track_id)
+        
+        if not queue or len(queue.items) == 0:
+            return
 
-            # Pick up wagons from each collection track separately
-            for track_id, queue in self.collection_queues.items():
-                # Skip if queue is empty
-                if len(queue.items) == 0:
-                    continue
+        # Collect all wagons from this track
+        wagons_to_pickup = []
+        queue_size = len(queue.items)
+        for _ in range(queue_size):
+            wagon = yield queue.get()
+            wagons_to_pickup.append(wagon)
 
-                wagons_to_pickup = []
-                queue_size = len(queue.items)
-                for _ in range(queue_size):
-                    wagon = yield queue.get()
-                    wagons_to_pickup.append(wagon)
+        if not wagons_to_pickup:
+            return
 
-                if not wagons_to_pickup:
-                    continue
+        # Log pickup from collection track
+        try:
+            plog = get_process_logger()
+            wagon_ids = ', '.join([w.id for w in wagons_to_pickup])
+            plog.log(f"PICKUP: {len(wagons_to_pickup)} wagons from {track_id} [{wagon_ids}]", sim_time=current_time)
+        except RuntimeError:
+            pass
 
-                # Log pickup from collection track
-                try:
-                    plog = get_process_logger()
-                    wagon_ids = ', '.join([w.id for w in wagons_to_pickup])
-                    plog.log(f"PICKUP: {len(wagons_to_pickup)} wagons from {track_id} [{wagon_ids}]", sim_time=current_time)
-                except RuntimeError:
-                    pass
+        # Use domain service to create pickup plan
+        workshop_capacities = self._get_workshop_capacities()
+        pickup_plan = self.wagon_pickup_service.create_pickup_plan(
+            wagons_to_pickup, workshop_capacities
+        )
 
-                # Use domain service to create pickup plan
-                workshop_capacities = self._get_workshop_capacities()
-                pickup_plan = self.wagon_pickup_service.create_pickup_plan(
-                    wagons_to_pickup, workshop_capacities
-                )
+        # Validate pickup feasibility
+        available_locomotives = self._get_available_locomotive_count()
+        is_feasible, _issues = (
+            self.wagon_pickup_service.validate_pickup_feasibility(
+                pickup_plan, available_locomotives
+            )
+        )
 
-                # Validate pickup feasibility
-                available_locomotives = self._get_available_locomotive_count()
-                is_feasible, _issues = (
-                    self.wagon_pickup_service.validate_pickup_feasibility(
-                        pickup_plan, available_locomotives
-                    )
-                )
+        if not is_feasible:
+            return
 
-                if not is_feasible:
-                    continue
+        # Execute pickup plan using application service
+        yield from self._execute_pickup_plan(pickup_plan, track_id)
 
-                # Execute pickup plan using application service
-                yield from self._execute_pickup_plan(pickup_plan, track_id)
+        # Log capacity status after pickup
+        if self.railway_capacity_service:
+            self.railway_capacity_service.get_capacity_info(track_id)
 
-                # Log capacity status after pickup
-                if self.railway_capacity_service:
-                    self.railway_capacity_service.get_capacity_info(track_id)
-
-                # Log remaining wagons on this collection track
-                remaining_count = len(queue.items)
-                if remaining_count > 0:
-                    try:
-                        plog = get_process_logger()
-                        current_time = self.infra.engine.current_time()
-                        plog.log(f"WAITING: {remaining_count} wagons still on {track_id}", sim_time=current_time)
-                    except RuntimeError:
-                        pass
-
-            # Reset event for next train (after ALL tracks processed)
-            self.train_processed_event = self.infra.engine.create_event()
+        # Log remaining wagons on this collection track
+        remaining_count = len(queue.items)
+        if remaining_count > 0:
+            try:
+                plog = get_process_logger()
+                current_time = self.infra.engine.current_time()
+                plog.log(f"WAITING: {remaining_count} wagons still on {track_id}", sim_time=current_time)
+            except RuntimeError:
+                pass
 
     def _execute_transport_job(self, wagons: list[Any]) -> Generator[Any, Any]:
         """Execute transport job following MVP pattern."""
@@ -383,6 +382,15 @@ class YardOperationsContext:
         if collection_track_id in self.collection_queues:
             for wagon in classification_result.accepted_wagons:
                 yield self.collection_queues[collection_track_id].put(wagon)
+            
+            # Publish event to trigger pickup process
+            if classification_result.accepted_wagons:
+                pickup_event = WagonsReadyForPickupEvent(
+                    track_id=collection_track_id,
+                    wagon_count=len(classification_result.accepted_wagons),
+                    event_timestamp=self.infra.engine.current_time()
+                )
+                self.infra.event_bus.publish(pickup_event)
 
         # 5. Update rejected wagons and log rejections
         if classification_result.rejected_wagons:
@@ -391,6 +399,11 @@ class YardOperationsContext:
                 plog = get_process_logger()
                 current_time = self.infra.engine.current_time()
                 for wagon in classification_result.rejected_wagons:
+                    # Add train_id, rejection_time, and collection_track_id for export
+                    wagon.train_id = train_id
+                    wagon.rejection_time = current_time
+                    wagon.collection_track_id = collection_track_id
+                    
                     reason = getattr(wagon, 'rejection_reason', 'UNKNOWN')
                     detailed_reason = getattr(wagon, 'detailed_rejection_reason', '')
 
@@ -427,9 +440,7 @@ class YardOperationsContext:
         )
         self.infra.event_bus.publish(departure_event)
 
-        # 8. Signal train processed for coordination
-        if not self.train_processed_event.triggered:
-            self.train_processed_event.succeed()
+        # 8. Train processing complete
 
     def _handle_wagon_retrofit_completed(self, event) -> None:
         """Handle wagon retrofit completed event - batch wagons completing at same time."""
@@ -486,10 +497,16 @@ class YardOperationsContext:
                 wagons_to_transport, workshop_id
             )
 
-            # Trigger pickup of more wagons from collection tracks by succeeding the event
-            # The pickup process will create a new event after processing
-            if hasattr(self, 'train_processed_event') and not self.train_processed_event.triggered:
-                self.train_processed_event.succeed()
+            # Check if there are wagons waiting on collection tracks
+            for track_id, queue in self.collection_queues.items():
+                if len(queue.items) > 0:
+                    pickup_event = WagonsReadyForPickupEvent(
+                        track_id=track_id,
+                        wagon_count=len(queue.items),
+                        event_timestamp=self.infra.engine.current_time()
+                    )
+                    self.infra.event_bus.publish(pickup_event)
+                    break  # Only trigger one pickup at a time
 
     def _form_and_transport_retrofitted_rake(
         self, wagons: list[Any], workshop_id: str
@@ -1514,22 +1531,7 @@ class YardOperationsContext:
             self._execute_retrofit_track_transport(wagons)
         )
 
-    def _continuous_pickup_check(self) -> Generator[Any, Any]:
-        """Continuously check for wagons on collection tracks and trigger pickup.
-        Also flush retrofitted wagons if idle.
-        """
-        while True:
-            yield from self.infra.engine.delay(15.0)  # Check every 15 minutes
 
-            current_time = self.infra.engine.current_time()
-
-            # Check if any collection tracks have wagons
-            has_wagons = any(len(queue.items) > 0 for queue in self.collection_queues.values())
-
-            if has_wagons and hasattr(self, 'train_processed_event') and not self.train_processed_event.triggered:
-                self.train_processed_event.succeed()
-
-            # Retrofitted wagons are now handled in _transport_retrofitted_rake
 
     def _trigger_initial_movement(self) -> Any:
         """Trigger initial locomotive movement for test compatibility."""
