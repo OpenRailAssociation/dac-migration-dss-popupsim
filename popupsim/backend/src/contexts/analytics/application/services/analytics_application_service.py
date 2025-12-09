@@ -157,14 +157,19 @@ class AnalyticsApplicationService:
         event_counts = self.event_stream.get_event_counts()
         duration_hours = self.event_stream.get_duration_hours()
         current_state = self.event_stream.get_current_state()
+        
+        # Get already-computed workshop statistics (correct utilization)
+        computed_metrics = self.event_stream.compute_statistics()
+        workshop_stats = computed_metrics.get("workshop_statistics", {}).get("workshops", {})
 
-        # Create metrics service
+        # Create metrics service with pre-computed workshop data
         metrics_service = MetricsService(
             events=events,
             event_counts=event_counts,
             duration_hours=duration_hours,
             current_state=current_state,
             thresholds=thresholds,
+            workshop_stats=workshop_stats,
         )
 
         # Get all metrics
