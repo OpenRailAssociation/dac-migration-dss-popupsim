@@ -12,7 +12,7 @@ class DashboardExporter:
     """Export all data required for Streamlit dashboard."""
 
     def export_all(
-        self, analytics_context: Any, output_dir: Path, interval_seconds: float = 3600.0, yard_context: Any = None
+        self, analytics_context: Any, output_dir: Path, interval_seconds: float = 3600.0, yard_context: Any = None, popup_context: Any = None, shunting_context: Any = None
     ) -> dict[str, Path]:
         """Export all dashboard data files.
 
@@ -34,10 +34,10 @@ class DashboardExporter:
 
         exported_files = {}
 
-        # 1. Comprehensive metrics JSON
-        metrics_path = output_dir / "comprehensive_metrics.json"
-        self._export_comprehensive_metrics(analytics_context, metrics_path)
-        exported_files["comprehensive_metrics"] = metrics_path
+        # 1. Summary metrics JSON
+        metrics_path = output_dir / "summary_metrics.json"
+        self._export_summary_metrics(analytics_context, metrics_path, popup_context)
+        exported_files["summary_metrics"] = metrics_path
 
         # 2. Events CSV (temporal event stream)
         events_path = output_dir / "events.csv"
@@ -56,35 +56,57 @@ class DashboardExporter:
 
         # 5. Workshop metrics CSV
         workshop_path = output_dir / "workshop_metrics.csv"
-        self._export_workshop_metrics(analytics_context, workshop_path)
+        self._export_workshop_metrics(analytics_context, workshop_path, popup_context)
         exported_files["workshop_metrics"] = workshop_path
 
-        # 6. Bottlenecks CSV
-        bottlenecks_path = output_dir / "bottlenecks.csv"
-        self._export_bottlenecks(analytics_context, bottlenecks_path)
-        exported_files["bottlenecks"] = bottlenecks_path
-
-        # 7. Track capacity time-series CSV
+        # 6. Track capacity time-series CSV
         track_path = output_dir / "track_capacity.csv"
         self._export_track_capacity(analytics_context, track_path, yard_context)
         exported_files["track_capacity"] = track_path
 
-        # 8. Timeline CSV (time-series metrics)
+        # 7. Timeline CSV (time-series metrics)
         timeline_path = output_dir / "timeline.csv"
         self._export_timeline(analytics_context, timeline_path, interval_seconds)
         exported_files["timeline"] = timeline_path
 
+        # 8. Rejected wagons CSV
+        rejected_path = output_dir / "rejected_wagons.csv"
+        self._export_rejected_wagons(analytics_context, rejected_path, yard_context)
+        exported_files["rejected_wagons"] = rejected_path
+
+        # 9. Wagon locations CSV (current state)
+        locations_path = output_dir / "wagon_locations.csv"
+        self._export_wagon_locations(analytics_context, locations_path, yard_context)
+        exported_files["wagon_locations"] = locations_path
+
+        # 10. Wagon journey CSV (complete history)
+        journey_path = output_dir / "wagon_journey.csv"
+        self._export_wagon_journey(analytics_context, journey_path)
+        exported_files["wagon_journey"] = journey_path
+
         return exported_files
 
-    def _export_comprehensive_metrics(
-        self, analytics_context: Any, output_path: Path
+    def _export_summary_metrics(
+        self, analytics_context: Any, output_path: Path, popup_context: Any = None
     ) -> None:
-        """Export comprehensive metrics to JSON."""
+        """Export summary metrics to JSON."""
         metrics = analytics_context.get_metrics()
         
         # Remove event_history from metrics as it's exported separately
         if "event_history" in metrics:
             del metrics["event_history"]
+        
+        # Add simulation duration in minutes
+        events = analytics_context.event_stream.collector.get_events()
+        if events:
+            timestamps = [ts for ts, _ in events]
+            duration_minutes = max(timestamps) - min(timestamps) if len(timestamps) > 1 else 0
+            metrics["simulation_duration_minutes"] = duration_minutes
+        
+        # Add correct workshop utilization from popup context
+        if popup_context:
+            popup_metrics = popup_context.get_metrics()
+            metrics["workshop_utilization"] = popup_metrics.get("utilization_percentage", 0.0)
 
         # Convert to JSON-serializable format
         serializable_metrics = self._make_serializable(metrics)
@@ -119,7 +141,7 @@ class DashboardExporter:
         events = analytics_context.event_stream.collector.get_events()
 
         with output_path.open("w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
             writer.writerow(["timestamp", "process", "resource_type", "resource_id", "state", "details"])
 
             for timestamp, event in events:
@@ -219,9 +241,16 @@ class DashboardExporter:
                     )
 
     def _export_workshop_metrics(
-        self, analytics_context: Any, output_path: Path
+        self, analytics_context: Any, output_path: Path, popup_context: Any = None
     ) -> None:
         """Export workshop performance metrics to CSV."""
+        # Use popup context metrics if available (correct utilization)
+        if popup_context:
+            popup_metrics = popup_context.get_metrics()
+            per_workshop_util = popup_metrics.get("per_workshop_utilization", {})
+        else:
+            per_workshop_util = {}
+        
         metrics = analytics_context.get_metrics()
         workshop_stats = metrics.get("workshop_statistics", {}).get("workshops", {})
 
@@ -242,60 +271,35 @@ class DashboardExporter:
                 if isinstance(stats, dict):
                     # Use wagons_processed as completed count
                     completed = stats.get("wagons_processed", stats.get("completed_retrofits", 0))
-                    retrofit_time = stats.get("total_retrofit_time", 0)
-                    waiting_time = stats.get("total_waiting_time", 0)
-                    utilization_pct = stats.get("utilization_percent", 0)
-                    total_time = retrofit_time + waiting_time
-
-                    throughput = (
-                        (completed / (total_time / 3600)) if total_time > 0 else 0
-                    )
+                    
+                    # Use correct utilization from popup context if available
+                    utilization_pct = per_workshop_util.get(workshop_id, stats.get("utilization_percent", 0))
+                    
+                    # Calculate times from utilization and simulation duration
+                    events = analytics_context.event_stream.collector.get_events()
+                    if events:
+                        sim_duration_min = max(ts for ts, _ in events)
+                        # Total retrofit time = utilization% * duration * num_bays
+                        # Estimate 2 bays per workshop (from scenario)
+                        num_bays = 2
+                        total_retrofit_time = (utilization_pct / 100) * sim_duration_min * num_bays
+                        total_waiting_time = ((100 - utilization_pct) / 100) * sim_duration_min * num_bays
+                        
+                        # Throughput = wagons per hour
+                        throughput = (completed / (sim_duration_min / 60)) if sim_duration_min > 0 else 0
+                    else:
+                        total_retrofit_time = 0
+                        total_waiting_time = 0
+                        throughput = 0
 
                     writer.writerow(
                         [
                             workshop_id,
                             completed,
-                            retrofit_time,
-                            waiting_time,
+                            total_retrofit_time,
+                            total_waiting_time,
                             throughput,
                             utilization_pct,
-                        ]
-                    )
-
-    def _export_bottlenecks(
-        self, analytics_context: Any, output_path: Path
-    ) -> None:
-        """Export detected bottlenecks to CSV."""
-        # Get bottlenecks from metrics report if available
-        try:
-            metrics_report = analytics_context.get_metrics_report()
-            bottlenecks = metrics_report.get("bottlenecks", [])
-        except Exception:
-            bottlenecks = []
-
-        with output_path.open("w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(
-                [
-                    "resource_type",
-                    "resource_id",
-                    "severity",
-                    "utilization",
-                    "threshold",
-                    "description",
-                ]
-            )
-
-            for bottleneck in bottlenecks:
-                if hasattr(bottleneck, "resource_type"):
-                    writer.writerow(
-                        [
-                            bottleneck.resource_type,
-                            bottleneck.resource_id,
-                            bottleneck.severity,
-                            bottleneck.utilization,
-                            bottleneck.threshold,
-                            bottleneck.description,
                         ]
                     )
 
@@ -465,3 +469,294 @@ class DashboardExporter:
     ) -> None:
         """Export track capacity data to CSV (public method for standalone use)."""
         self._export_track_capacity(analytics_context, output_path, yard_context)
+    
+    def export_wagon_locations(
+        self, analytics_context: Any, output_path: Path, yard_context: Any = None
+    ) -> None:
+        """Export wagon locations to CSV (public method for standalone use)."""
+        self._export_wagon_locations(analytics_context, output_path, yard_context)
+    
+    def _export_wagon_journey(
+        self, analytics_context: Any, output_path: Path
+    ) -> None:
+        """Export complete wagon journey history to CSV."""
+        wagon_journey = []
+        
+        events = analytics_context.event_stream.collector.get_events()
+        
+        for timestamp, event in events:
+            event_type = type(event).__name__
+            
+            # Track all wagon-related events
+            if "TrainArrived" in event_type:
+                train_id = getattr(event, "train_id", None)
+                wagons = getattr(event, "wagons", [])
+                for wagon in wagons:
+                    wagon_id = getattr(wagon, "id", None)
+                    if wagon_id:
+                        wagon_journey.append({
+                            "timestamp": timestamp,
+                            "wagon_id": wagon_id,
+                            "train_id": train_id,
+                            "event": "ARRIVED",
+                            "location": "collection",
+                            "status": "ARRIVED",
+                        })
+            
+            elif "WagonReadyForRetrofit" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                track = getattr(event, "track", None)
+                if wagon_id:
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "READY_FOR_RETROFIT",
+                        "location": track or "retrofit",
+                        "status": "WAITING_RETROFIT",
+                    })
+            
+            elif "RetrofitStarted" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                workshop_id = getattr(event, "workshop_id", None)
+                if wagon_id:
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "RETROFIT_STARTED",
+                        "location": workshop_id or "workshop",
+                        "status": "RETROFITTING",
+                    })
+            
+            elif "RetrofitCompleted" in event_type or "WagonRetrofitCompleted" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                workshop_id = getattr(event, "workshop_id", None)
+                if wagon_id:
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "RETROFIT_COMPLETED",
+                        "location": workshop_id or "workshop",
+                        "status": "COMPLETED",
+                    })
+            
+            elif "WagonRetrofitted" in event_type:
+                wagon_id = getattr(event, "wagon", None)
+                if wagon_id and hasattr(wagon_id, "id"):
+                    wagon_id = wagon_id.id
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "RETROFITTED",
+                        "location": "retrofitted",
+                        "status": "RETROFITTED",
+                    })
+            
+            elif "WagonDistributed" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                if wagon_id:
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "DISTRIBUTED",
+                        "location": "distribution",
+                        "status": "DISTRIBUTED",
+                    })
+            
+            elif "WagonParked" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                if wagon_id:
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "PARKED",
+                        "location": "parking",
+                        "status": "PARKED",
+                    })
+            
+            elif "WagonRejected" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                if wagon_id:
+                    wagon_journey.append({
+                        "timestamp": timestamp,
+                        "wagon_id": wagon_id,
+                        "train_id": "",
+                        "event": "REJECTED",
+                        "location": "rejected",
+                        "status": "REJECTED",
+                    })
+        
+        # Post-process: Move rejected wagons to "rejected" track
+        # Get rejected wagon IDs from rejected_wagons if available
+        rejected_wagon_ids = set()
+        rejected_file = output_path.parent / "rejected_wagons.csv"
+        if rejected_file.exists():
+            import csv as csv_module
+            with rejected_file.open("r", encoding="utf-8") as f:
+                reader = csv_module.DictReader(f)
+                for row in reader:
+                    rejected_wagon_ids.add(row["wagon_id"])
+        
+        # Update location for rejected wagons
+        for entry in wagon_journey:
+            if entry["wagon_id"] in rejected_wagon_ids and entry["location"] in ["collection", "collection1", "collection2"]:
+                entry["location"] = "rejected"
+                entry["status"] = "REJECTED"
+        
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "wagon_id", "train_id", "event", "location", "status"])
+            
+            for entry in sorted(wagon_journey, key=lambda x: (x["wagon_id"], x["timestamp"])):
+                writer.writerow([
+                    entry["timestamp"],
+                    entry["wagon_id"],
+                    entry["train_id"],
+                    entry["event"],
+                    entry["location"],
+                    entry["status"],
+                ])
+
+    def _export_rejected_wagons(
+        self, analytics_context: Any, output_path: Path, yard_context: Any = None
+    ) -> None:
+        """Export rejected wagons with reasons to CSV."""
+        rejected_wagons = []
+        
+        # Get rejected wagons from yard context if available
+        if yard_context and hasattr(yard_context, "rejected_wagons"):
+            rejected_wagons = yard_context.rejected_wagons
+        
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "wagon_id",
+                    "train_id",
+                    "rejection_time",
+                    "rejection_type",
+                    "detailed_reason",
+                    "collection_track_id",
+                ]
+            )
+            
+            for wagon in rejected_wagons:
+                wagon_id = getattr(wagon, "id", "unknown")
+                train_id = getattr(wagon, "train_id", "unknown")
+                rejection_time = getattr(wagon, "rejection_time", 0.0)
+                detailed_reason = getattr(wagon, "detailed_rejection_reason", "Collection track full")
+                collection_track_id = getattr(wagon, "collection_track_id", "")
+                
+                # Determine rejection type from detailed reason
+                if "loaded" in detailed_reason.lower():
+                    rejection_type = "Loaded"
+                elif "doesn't need retrofit" in detailed_reason.lower() or "no retrofit" in detailed_reason.lower():
+                    rejection_type = "No Retrofit Needed"
+                elif "capacity exceeded" in detailed_reason.lower() or "track full" in detailed_reason.lower():
+                    rejection_type = "Collection Track Full"
+                else:
+                    rejection_type = "Other"
+                
+                writer.writerow(
+                    [
+                        wagon_id,
+                        train_id,
+                        rejection_time,
+                        rejection_type,
+                        detailed_reason,
+                        collection_track_id,
+                    ]
+                )
+
+    def _export_wagon_locations(
+        self, analytics_context: Any, output_path: Path, yard_context: Any = None
+    ) -> None:
+        """Export current wagon locations to CSV."""
+        wagon_locations = []
+        
+        # Get all wagons from events to ensure we track everyone
+        events = analytics_context.event_stream.collector.get_events()
+        all_wagon_ids = set()
+        wagon_status_map = {}
+        wagon_track_map = {}
+        wagon_train_map = {}
+        
+        # Build wagon state from events
+        for timestamp, event in events:
+            event_type = type(event).__name__
+            
+            if "TrainArrived" in event_type:
+                train_id = getattr(event, "train_id", None)
+                arrival_track = getattr(event, "arrival_track", "collection")
+                wagons = getattr(event, "wagons", [])
+                for wagon in wagons:
+                    wagon_id = getattr(wagon, "id", None)
+                    if wagon_id:
+                        all_wagon_ids.add(wagon_id)
+                        wagon_train_map[wagon_id] = train_id
+                        wagon_status_map[wagon_id] = "ARRIVED"
+                        wagon_track_map[wagon_id] = arrival_track
+            
+            elif "WagonReadyForRetrofit" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                track = getattr(event, "track", "retrofit")
+                if wagon_id:
+                    wagon_status_map[wagon_id] = "WAITING_RETROFIT"
+                    wagon_track_map[wagon_id] = track
+            
+            elif "RetrofitStarted" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                workshop_id = getattr(event, "workshop_id", None)
+                if wagon_id:
+                    wagon_status_map[wagon_id] = "RETROFITTING"
+                    wagon_track_map[wagon_id] = workshop_id or "workshop"
+            
+            elif "RetrofitCompleted" in event_type or "Retrofitted" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                if wagon_id:
+                    wagon_status_map[wagon_id] = "COMPLETED"
+            
+            elif "WagonParked" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                parking_area = getattr(event, "parking_area_id", None)
+                if wagon_id:
+                    wagon_status_map[wagon_id] = "PARKED"
+                    wagon_track_map[wagon_id] = parking_area or "parking"
+            
+            elif "WagonRejected" in event_type:
+                wagon_id = getattr(event, "wagon_id", None)
+                collection_track = getattr(event, "collection_track_id", None)
+                if wagon_id:
+                    wagon_status_map[wagon_id] = "REJECTED"
+                    if collection_track:
+                        wagon_track_map[wagon_id] = collection_track
+        
+        # Export all wagons
+        for wagon_id in all_wagon_ids:
+            status = wagon_status_map.get(wagon_id, "UNKNOWN")
+            track = wagon_track_map.get(wagon_id, "unknown")
+            train_id = wagon_train_map.get(wagon_id, "unknown")
+            
+            wagon_locations.append({
+                "wagon_id": wagon_id,
+                "train_id": train_id,
+                "current_track": track,
+                "status": status,
+            })
+        
+        with output_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["wagon_id", "train_id", "current_track", "status"])
+            
+            for location in sorted(wagon_locations, key=lambda x: x["wagon_id"]):
+                writer.writerow([
+                    location["wagon_id"],
+                    location["train_id"],
+                    location["current_track"],
+                    location["status"],
+                ])

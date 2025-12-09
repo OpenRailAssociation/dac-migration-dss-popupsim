@@ -31,23 +31,24 @@ class Visualizer:
     def generate_operational_dashboard(
         self, metrics: dict[str, Any], output_path: Path
     ) -> None:
-        """Generate comprehensive operational dashboard."""
-        fig, (ax1, ax2, ax3) = plt.subplots(
-            1, 3, figsize=(15, 5)
-        )
+        """Generate comprehensive operational dashboard with high-quality graphs."""
+        fig = plt.figure(figsize=(18, 6))
+        gs = fig.add_gridspec(1, 3, hspace=0.3, wspace=0.3)
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[0, 1])
+        ax3 = fig.add_subplot(gs[0, 2])
 
-        # Throughput metrics
-        self._plot_throughput_metrics(ax1, metrics)
+        # Wagon flow metrics
+        self._plot_wagon_flow(ax1, metrics)
 
-        # Locomotive activity breakdown
-        self._plot_locomotive_activity(ax2, metrics)
+        # Locomotive activity breakdown per locomotive
+        self._plot_locomotive_breakdown(ax2, metrics)
 
-        # Bay utilization
-        self._plot_capacity_utilization(ax3, metrics)
+        # Workshop bay utilization
+        self._plot_bay_utilization(ax3, metrics)
 
-        plt.suptitle("PopUpSim Operational Dashboard", fontsize=16, fontweight="bold")
-        plt.tight_layout()
-        plt.savefig(output_path, dpi=self.config.chart_dpi, bbox_inches="tight")
+        plt.suptitle("PopUpSim Operational Dashboard", fontsize=18, fontweight="bold", y=0.98)
+        plt.savefig(output_path, dpi=300, bbox_inches="tight", facecolor='white')
         plt.close(fig)
 
     def generate_kpi_status_chart(
@@ -153,29 +154,33 @@ class Visualizer:
         plt.savefig(output_path, dpi=self.config.chart_dpi, bbox_inches="tight")
         plt.close(fig)
 
-    def _plot_throughput_metrics(self, ax: plt.Axes, metrics: dict[str, Any]) -> None:
-        """Plot throughput metrics."""
-        categories = ["Arrived", "Completed", "Rejected"]
+    def _plot_wagon_flow(self, ax: plt.Axes, metrics: dict[str, Any]) -> None:
+        """Plot wagon flow with arrived, retrofitted, parking, and rejected."""
+        categories = ["Arrived", "Retrofitted", "Parking", "Rejected"]
         values = [
             metrics.get("wagons_arrived", 0),
             metrics.get("retrofits_completed", 0),
+            metrics.get("wagons_parked", 0),
             metrics.get("wagons_rejected", 0),
         ]
-        colors = [self.colors["info"], self.colors["success"], self.colors["error"]]
+        colors = ["#3498db", "#2ecc71", "#f39c12", "#e74c3c"]
 
-        bars = ax.bar(categories, values, color=colors, alpha=0.8)
-        ax.set_ylabel("Number of Wagons")
-        ax.set_title("Wagon Throughput")
-        ax.grid(axis="y", alpha=0.3)
+        bars = ax.bar(categories, values, color=colors, edgecolor='black', linewidth=0.8, alpha=0.85)
+        ax.set_ylabel("Number of Wagons", fontsize=11, fontweight='bold')
+        ax.set_title("Wagon Flow", fontsize=13, fontweight="bold", pad=15)
+        ax.grid(axis="y", alpha=0.3, linestyle='--')
+        ax.set_axisbelow(True)
 
-        # Add value labels
+        # Add value labels on top of bars
         for bar, value in zip(bars, values, strict=False):
+            height = bar.get_height()
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + max(values) * 0.02,
-                str(value),
+                height + max(values) * 0.02,
+                f"{int(value)}",
                 ha="center",
                 va="bottom",
+                fontsize=10,
                 fontweight="bold",
             )
 
@@ -215,58 +220,77 @@ class Visualizer:
             )
             ax.set_title("Workshop Utilization")
 
-    def _plot_locomotive_activity(self, ax: plt.Axes, metrics: dict[str, Any]) -> None:
-        """Plot locomotive activity breakdown per locomotive."""
+    def _plot_locomotive_breakdown(self, ax: plt.Axes, metrics: dict[str, Any]) -> None:
+        """Plot locomotive activity breakdown with grouped bars per locomotive."""
         shunting = metrics.get("shunting", {})
         per_loco = shunting.get("per_locomotive_breakdown", {})
 
         if per_loco:
-            locos = list(per_loco.keys())
-            statuses = ["MOVING", "PARKING", "COUPLING", "DECOUPLING"]
+            locos = sorted(per_loco.keys())
+            activities = ["MOVING", "PARKING", "COUPLING", "DECOUPLING"]
             colors_map = {
-                "MOVING": self.colors["primary"],
-                "PARKING": self.colors["secondary"],
-                "COUPLING": self.colors["success"],
-                "DECOUPLING": self.colors["warning"],
+                "MOVING": "#3498db",
+                "PARKING": "#95a5a6",
+                "COUPLING": "#2ecc71",
+                "DECOUPLING": "#f39c12",
             }
             
-            x = range(len(locos))
+            # Create grouped bar chart
+            x = np.arange(len(locos))
             width = 0.2
-            for i, status in enumerate(statuses):
-                values = [per_loco[loco].get(status, 0) for loco in locos]
-                ax.bar([xi + i * width for xi in x], values, width, label=status, color=colors_map[status], alpha=0.8)
             
-            ax.set_ylabel("Time (%)")
-            ax.set_title("Locomotive Activity Breakdown")
-            ax.set_xticks([xi + width * 1.5 for xi in x])
-            ax.set_xticklabels(locos)
-            ax.set_ylim(0, 100)
-            ax.legend()
-            ax.grid(axis="y", alpha=0.3)
+            for i, activity in enumerate(activities):
+                values = [per_loco[loco].get(activity, 0) for loco in locos]
+                offset = (i - 1.5) * width
+                ax.bar(x + offset, values, width, label=activity, 
+                      color=colors_map[activity], edgecolor='black', linewidth=0.8, alpha=0.85)
+            
+            ax.set_ylabel("Utilization (%)", fontsize=11, fontweight='bold')
+            ax.set_title("Locomotive Activity Breakdown", fontsize=13, fontweight="bold", pad=15)
+            ax.set_xticks(x)
+            ax.set_xticklabels(locos, fontsize=10)
+            ax.set_ylim(0, 105)
+            ax.legend(loc='upper right', fontsize=9, framealpha=0.9)
+            ax.grid(axis="y", alpha=0.3, linestyle='--')
+            ax.set_axisbelow(True)
         else:
-            ax.text(0.5, 0.5, "No locomotive data", ha="center", va="center", transform=ax.transAxes)
-            ax.set_title("Locomotive Activity Breakdown")
+            ax.text(0.5, 0.5, "No locomotive data", ha="center", va="center", 
+                   transform=ax.transAxes, fontsize=12)
+            ax.set_title("Locomotive Activity Breakdown", fontsize=13, fontweight="bold", pad=15)
 
-    def _plot_capacity_utilization(self, ax: plt.Axes, metrics: dict[str, Any]) -> None:
-        """Plot bay utilization."""
+    def _plot_bay_utilization(self, ax: plt.Axes, metrics: dict[str, Any]) -> None:
+        """Plot workshop bay utilization with horizontal bars."""
         popup = metrics.get("popup", {})
         per_bay = popup.get("per_bay_utilization", {})
 
         if per_bay:
-            bays = list(per_bay.keys())
-            utilizations = list(per_bay.values())
+            bays = sorted(per_bay.keys())
+            utilizations = [per_bay[bay] for bay in bays]
+            
+            # Color bars based on utilization level
+            colors = []
+            for util in utilizations:
+                if util >= 80:
+                    colors.append("#2ecc71")  # Green for high utilization
+                elif util >= 50:
+                    colors.append("#f39c12")  # Orange for medium
+                else:
+                    colors.append("#e74c3c")  # Red for low
 
-            bars = ax.barh(bays, utilizations, color=self.colors["success"], alpha=0.8)
-            ax.set_xlabel("Utilization (%)")
-            ax.set_title("Bay Utilization")
-            ax.set_xlim(0, 100)
-            ax.grid(axis="x", alpha=0.3)
+            bars = ax.barh(bays, utilizations, color=colors, edgecolor='black', linewidth=0.8, alpha=0.85)
+            ax.set_xlabel("Utilization (%)", fontsize=11, fontweight='bold')
+            ax.set_title("Workshop Bay Utilization", fontsize=13, fontweight="bold", pad=15)
+            ax.set_xlim(0, 105)
+            ax.grid(axis="x", alpha=0.3, linestyle='--')
+            ax.set_axisbelow(True)
 
-            for i, util in enumerate(utilizations):
-                ax.text(util + 2, i, f"{util:.1f}%", va="center", fontweight="bold")
+            # Add value labels at the end of bars
+            for i, (bar, util) in enumerate(zip(bars, utilizations, strict=False)):
+                ax.text(util + 2, i, f"{util:.1f}%", va="center", fontsize=10, fontweight="bold")
         else:
-            ax.text(0.5, 0.5, "No bay data", ha="center", va="center", transform=ax.transAxes)
-            ax.set_title("Bay Utilization")
+            ax.text(0.5, 0.5, "No bay data", ha="center", va="center", 
+                   transform=ax.transAxes, fontsize=12)
+            ax.set_title("Workshop Bay Utilization", fontsize=13, fontweight="bold", pad=15)
 
     def generate_all_charts(
         self, analytics_context: Any, output_dir: Path, context_metrics: dict[str, Any] | None = None
