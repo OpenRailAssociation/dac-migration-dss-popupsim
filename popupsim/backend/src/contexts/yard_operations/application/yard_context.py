@@ -83,7 +83,7 @@ class YardOperationsContext:
         self._tracks_by_type: dict[str, list[Any]] = {}
         self._track_selectors: dict[str, Any] = {}
         self._round_robin_index: dict[str, int] = {}
-        
+
         if scenario and hasattr(scenario, "tracks") and scenario.tracks:
             for track in scenario.tracks:
                 track_type = getattr(track, "type", "unknown")
@@ -112,7 +112,7 @@ class YardOperationsContext:
 
         # Get all collection track IDs
         collection_track_ids = [t.id for t in self._tracks_by_type.get("collection", [])]
-        
+
         self.yard_config = YardConfiguration(
             yard_id="main_yard",
             yard_type=YardType.HUMP_YARD,
@@ -172,7 +172,7 @@ class YardOperationsContext:
                 # Skip if queue is empty
                 if len(queue.items) == 0:
                     continue
-                    
+
                 wagons_to_pickup = []
                 queue_size = len(queue.items)
                 for _ in range(queue_size):
@@ -248,7 +248,7 @@ class YardOperationsContext:
             # Select retrofit track and move to retrofit area
             selected_retrofit = self._select_track_by_type("retrofit")
             retrofit_track_id = selected_retrofit.id if selected_retrofit else "retrofit"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, "collection", retrofit_track_id
             )
@@ -277,7 +277,7 @@ class YardOperationsContext:
             # Select retrofit track and move to retrofit area
             selected_retrofit = self._select_track_by_type("retrofit")
             retrofit_track_id = selected_retrofit.id if selected_retrofit else "retrofit"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco2, loco2.current_track, retrofit_track_id
             )
@@ -366,7 +366,7 @@ class YardOperationsContext:
         # 2. Select collection track using strategy and classify wagons
         selected_track = self._select_track_by_type("collection")
         collection_track_id = selected_track.id if selected_track else "collection"
-        
+
         classification_result = self.hump_yard_service.classify_wagons(
             wagons, self.yard_config, collection_track_id
         )
@@ -393,14 +393,14 @@ class YardOperationsContext:
                 for wagon in classification_result.rejected_wagons:
                     reason = getattr(wagon, 'rejection_reason', 'UNKNOWN')
                     detailed_reason = getattr(wagon, 'detailed_rejection_reason', '')
-                    
+
                     if reason == "COLLECTION_TRACK_FULL":
                         reason_text = "Collection track full"
                     elif detailed_reason:
                         reason_text = detailed_reason
                     else:
                         reason_text = "Classification rejected"
-                    
+
                     plog.log(f"REJECTED: Wagon {wagon.id} from {train_id} at {current_time:.1f}min - {reason_text}", sim_time=current_time)
             except RuntimeError:
                 pass
@@ -485,7 +485,7 @@ class YardOperationsContext:
             self._form_and_transport_retrofitted_rake(
                 wagons_to_transport, workshop_id
             )
-            
+
             # Trigger pickup of more wagons from collection tracks by succeeding the event
             # The pickup process will create a new event after processing
             if hasattr(self, 'train_processed_event') and not self.train_processed_event.triggered:
@@ -552,7 +552,7 @@ class YardOperationsContext:
             # Select retrofitted track and move to retrofitted area
             selected_retrofitted = self._select_track_by_type("retrofitted")
             retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, "WS1", retrofitted_track_id
             )
@@ -568,7 +568,7 @@ class YardOperationsContext:
             # Select parking track and update wagon status
             selected_parking = self._select_track_by_type("parking")
             parking_track_id = selected_parking.id if selected_parking else "parking"
-            
+
             for wagon in wagons:
                 wagon.status = "PARKED"
                 wagon.track = parking_track_id
@@ -598,7 +598,7 @@ class YardOperationsContext:
             # Select retrofitted track and move to retrofitted area
             selected_retrofitted = self._select_track_by_type("retrofitted")
             retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, workshop_id, retrofitted_track_id
             )
@@ -607,7 +607,7 @@ class YardOperationsContext:
             for wagon in wagons:
                 wagon.status = "RETROFITTED"
                 wagon.track = retrofitted_track_id
-                
+
                 # Release workshop resource after pickup
                 if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):
                     wagon._workshop_resource.release(wagon._workshop_request)
@@ -653,7 +653,7 @@ class YardOperationsContext:
             # Select retrofit track and move to retrofit track to get wagon
             selected_retrofit = self._select_track_by_type("retrofit")
             retrofit_track_id = selected_retrofit.id if selected_retrofit else "retrofit"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, loco.current_track, retrofit_track_id
             )
@@ -696,7 +696,7 @@ class YardOperationsContext:
             # Select retrofit track and move to retrofit track
             selected_retrofit = self._select_track_by_type("retrofit")
             retrofit_track_id = selected_retrofit.id if selected_retrofit else "retrofit"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, loco.current_track, retrofit_track_id
             )
@@ -761,7 +761,7 @@ class YardOperationsContext:
             # Select retrofitted track and update completed wagon status
             selected_retrofitted = self._select_track_by_type("retrofitted")
             retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-            
+
             for wagon in completed_wagons:
                 wagon.status = "PARKED"
                 wagon.track = retrofitted_track_id
@@ -796,7 +796,7 @@ class YardOperationsContext:
                     # Select retrofit track and move from parking to retrofit track to get next batch (MVP flow)
                     selected_retrofit = self._select_track_by_type("retrofit")
                     retrofit_track_id = selected_retrofit.id if selected_retrofit else "retrofit"
-                    
+
                     yield from shunting_context.move_locomotive(
                         self, loco, loco.home_track, retrofit_track_id
                     )
@@ -831,7 +831,7 @@ class YardOperationsContext:
                     # No more wagons for this workshop - add final movement for MVP compatibility
                     selected_retrofitted = self._select_track_by_type("retrofitted")
                     retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-                    
+
                     yield from shunting_context.move_locomotive(
                         self, loco, loco.home_track, retrofitted_track_id
                     )
@@ -843,7 +843,7 @@ class YardOperationsContext:
                 # No waiting wagons at all - add final movement for MVP compatibility
                 selected_retrofitted = self._select_track_by_type("retrofitted")
                 retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-                
+
                 yield from shunting_context.move_locomotive(
                     self, loco, loco.home_track, retrofitted_track_id
                 )
@@ -858,153 +858,162 @@ class YardOperationsContext:
 
     def _transport_retrofitted_rake(self, rake: Any) -> Generator[Any, Any]:
         """Transport retrofitted rake: workshop -> retrofitted -> parking."""
-        shunting_context = getattr(self.infra, "shunting_context", None)
-        if not shunting_context:
-            return
-
-        # Step 1: workshop -> retrofitted
-        loco = yield from shunting_context.allocate_locomotive(self)
         try:
-            # Select retrofitted track
-            selected_retrofitted = self._select_track_by_type("retrofitted")
-            retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-            
-            yield from shunting_context.move_locomotive(
-                self, loco, loco.current_track, rake.formation_track
-            )
-            yield from shunting_context.couple_wagons(self, rake.wagon_count, "DAC")
-            yield from shunting_context.move_locomotive(
-                self, loco, rake.formation_track, retrofitted_track_id
-            )
-            yield from shunting_context.decouple_wagons(self, rake.wagon_count, "DAC")
+            shunting_context = getattr(self.infra, "shunting_context", None)
+            if not shunting_context:
+                return
 
-            # Update wagon locations, release workshop resources, and publish distributed events
-            current_time = self.infra.engine.current_time()
-            for wagon in rake.wagons:
-                wagon.track = retrofitted_track_id
-                
-                # Release workshop resource after pickup
-                if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):
-                    wagon._workshop_resource.release(wagon._workshop_request)
-                    delattr(wagon, '_workshop_resource')
-                    delattr(wagon, '_workshop_request')
-                
-                distributed_event = WagonDistributedEvent(
-                    wagon_id=wagon.id, workshop_id=retrofitted_track_id, batch_id=rake.rake_id
-                )
-                distributed_event.track_id = retrofitted_track_id
-                distributed_event.event_timestamp = current_time
-                self.infra.event_bus.publish(distributed_event)
-
-            yield from shunting_context.move_locomotive(
-                self, loco, retrofitted_track_id, loco.home_track
-            )
-        finally:
-            yield from shunting_context.release_locomotive(self, loco)
-
-        # Track wagons on retrofitted track for batching
-        if not hasattr(self, '_retrofitted_accumulator'):
-            self._retrofitted_accumulator = []
-        
-        self._retrofitted_accumulator.extend(rake.wagons)
-        
-        # Check if there are more wagons waiting to be retrofitted
-        workshop_id = rake.formation_track
-        has_more_wagons = (
-            workshop_id in self._waiting_at_retrofit
-            and self._waiting_at_retrofit[workshop_id]
-        )
-        
-        # Calculate retrofitted track utilization
-        retrofitted_capacity = self._get_retrofitted_track_capacity()
-        total_length = sum(getattr(w, 'length', 20.0) for w in self._retrofitted_accumulator)
-        utilization = total_length / retrofitted_capacity if retrofitted_capacity > 0 else 0
-        
-        # Move to parking if: (1) no more wagons waiting, OR (2) retrofitted track >= 80% full
-        should_move_to_parking = not has_more_wagons or utilization >= 0.8
-        
-        if should_move_to_parking:
-            wagons_to_park = self._retrofitted_accumulator[:]
-            self._retrofitted_accumulator = []
-            
-            # Calculate total length BEFORE selecting track
-            total_length = sum(getattr(w, 'length', 15.0) for w in wagons_to_park)
-            
-            # Initialize track occupancy tracking
-            if not hasattr(self, '_track_occupancy_m'):
-                self._track_occupancy_m = {}
-            
-            # Check if parking capacity is available for these wagons
-            selected_parking = self._select_track_by_type("parking")
-            if not selected_parking:
-                raise RuntimeError(
-                    f"CAPACITY EXCEEDED: No parking tracks available. "
-                    f"Yard layout cannot handle the wagon volume. "
-                    f"{len(wagons_to_park)} wagons ({total_length:.0f}m) cannot be parked."
-                )
-            
-            parking_track_id = selected_parking.id
-            
-            loco2 = yield from shunting_context.allocate_locomotive(self)
+            # Step 1: workshop -> retrofitted
+            loco = yield from shunting_context.allocate_locomotive(self)
+            loco_allocated = True
             try:
+                # Select retrofitted track
                 selected_retrofitted = self._select_track_by_type("retrofitted")
                 retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-                
-                yield from shunting_context.move_locomotive(
-                    self, loco2, loco2.current_track, retrofitted_track_id
-                )
-                yield from shunting_context.couple_wagons(self, len(wagons_to_park), "DAC")
-                yield from shunting_context.move_locomotive(
-                    self, loco2, retrofitted_track_id, parking_track_id
-                )
-                yield from shunting_context.decouple_wagons(self, len(wagons_to_park), "DAC")
 
+                yield from shunting_context.move_locomotive(
+                    self, loco, loco.current_track, rake.formation_track
+                )
+                yield from shunting_context.couple_wagons(self, rake.wagon_count, "DAC")
+                yield from shunting_context.move_locomotive(
+                    self, loco, rake.formation_track, retrofitted_track_id
+                )
+                yield from shunting_context.decouple_wagons(self, rake.wagon_count, "DAC")
+
+                # Update wagon locations, release workshop resources, and publish distributed events
                 current_time = self.infra.engine.current_time()
-                for wagon in wagons_to_park:
-                    wagon.status = "PARKED"
-                    wagon.track = parking_track_id
-                    parked_event = WagonParkedEvent(
-                        wagon_id=wagon.id, parking_area_id=parking_track_id
-                    )
-                    parked_event.event_timestamp = current_time
-                    self.infra.event_bus.publish(parked_event)
-                
-                # Update track occupancy
-                self._track_occupancy_m[parking_track_id] = self._track_occupancy_m.get(parking_track_id, 0.0) + total_length
-                
-                yield from shunting_context.move_locomotive(
-                    self, loco2, parking_track_id, loco2.home_track
-                )
-            finally:
-                yield from shunting_context.release_locomotive(self, loco2)
-        
-        # After transporting retrofitted wagons, check if there are wagons waiting at retrofit track
-        # Extract workshop_id from rake (it's the formation_track for retrofitted rakes)
-        workshop_id = rake.formation_track
-        if (
-            workshop_id in self._waiting_at_retrofit
-            and self._waiting_at_retrofit[workshop_id]
-        ):
-            # Bring next batch from retrofit to workshop
-            workshop_capacity = self._get_workshop_capacity_for_batching(workshop_id)
-            waiting_count = len(self._waiting_at_retrofit[workshop_id])
-            next_batch_size = min(workshop_capacity, waiting_count)
-            next_batch = self._waiting_at_retrofit[workshop_id][:next_batch_size]
-            self._waiting_at_retrofit[workshop_id] = self._waiting_at_retrofit[
-                workshop_id
-            ][next_batch_size:]
+                for wagon in rake.wagons:
+                    wagon.track = retrofitted_track_id
 
-            # Schedule transport of next batch
-            yield from self._bring_next_batch_from_retrofit(next_batch, workshop_id)
+                    # Release workshop resource after pickup
+                    if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):
+                        wagon._workshop_resource.release(wagon._workshop_request)
+                        delattr(wagon, '_workshop_resource')
+                        delattr(wagon, '_workshop_request')
+
+                    distributed_event = WagonDistributedEvent(
+                        wagon_id=wagon.id, workshop_id=retrofitted_track_id, batch_id=rake.rake_id
+                    )
+                    distributed_event.track_id = retrofitted_track_id
+                    distributed_event.event_timestamp = current_time
+                    self.infra.event_bus.publish(distributed_event)
+
+                yield from shunting_context.move_locomotive(
+                    self, loco, retrofitted_track_id, loco.home_track
+                )
+                yield from shunting_context.release_locomotive(self, loco)
+                loco_allocated = False
+            except GeneratorExit:
+                raise
+
+            # Track wagons on retrofitted track for batching
+            if not hasattr(self, '_retrofitted_accumulator'):
+                self._retrofitted_accumulator = []
+
+            self._retrofitted_accumulator.extend(rake.wagons)
+
+            # Check if there are more wagons waiting to be retrofitted
+            workshop_id = rake.formation_track
+            has_more_wagons = (
+                workshop_id in self._waiting_at_retrofit
+                and self._waiting_at_retrofit[workshop_id]
+            )
+
+            # Calculate retrofitted track utilization
+            retrofitted_capacity = self._get_retrofitted_track_capacity()
+            total_length = sum(getattr(w, 'length', 20.0) for w in self._retrofitted_accumulator)
+            utilization = total_length / retrofitted_capacity if retrofitted_capacity > 0 else 0
+
+            # Move to parking if: (1) no more wagons waiting, OR (2) retrofitted track >= 80% full
+            should_move_to_parking = not has_more_wagons or utilization >= 0.8
+
+            if should_move_to_parking:
+                wagons_to_park = self._retrofitted_accumulator[:]
+                self._retrofitted_accumulator = []
+
+                # Calculate total length BEFORE selecting track
+                total_length = sum(getattr(w, 'length', 15.0) for w in wagons_to_park)
+
+                # Initialize track occupancy tracking
+                if not hasattr(self, '_track_occupancy_m'):
+                    self._track_occupancy_m = {}
+
+                # Check if parking capacity is available for these wagons
+                selected_parking = self._select_track_by_type("parking")
+                if not selected_parking:
+                    raise RuntimeError(
+                        f"CAPACITY EXCEEDED: No parking tracks available. "
+                        f"Yard layout cannot handle the wagon volume. "
+                        f"{len(wagons_to_park)} wagons ({total_length:.0f}m) cannot be parked."
+                    )
+
+                parking_track_id = selected_parking.id
+
+                loco2 = yield from shunting_context.allocate_locomotive(self)
+                loco2_allocated = True
+                try:
+                    selected_retrofitted = self._select_track_by_type("retrofitted")
+                    retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
+
+                    yield from shunting_context.move_locomotive(
+                        self, loco2, loco2.current_track, retrofitted_track_id
+                    )
+                    yield from shunting_context.couple_wagons(self, len(wagons_to_park), "DAC")
+                    yield from shunting_context.move_locomotive(
+                        self, loco2, retrofitted_track_id, parking_track_id
+                    )
+                    yield from shunting_context.decouple_wagons(self, len(wagons_to_park), "DAC")
+
+                    current_time = self.infra.engine.current_time()
+                    for wagon in wagons_to_park:
+                        wagon.status = "PARKED"
+                        wagon.track = parking_track_id
+                        parked_event = WagonParkedEvent(
+                            wagon_id=wagon.id, parking_area_id=parking_track_id
+                        )
+                        parked_event.event_timestamp = current_time
+                        self.infra.event_bus.publish(parked_event)
+
+                    # Update track occupancy
+                    self._track_occupancy_m[parking_track_id] = self._track_occupancy_m.get(parking_track_id, 0.0) + total_length
+
+                    yield from shunting_context.move_locomotive(
+                        self, loco2, parking_track_id, loco2.home_track
+                    )
+                    yield from shunting_context.release_locomotive(self, loco2)
+                    loco2_allocated = False
+                except GeneratorExit:
+                    raise
+
+            # After transporting retrofitted wagons, check if there are wagons waiting at retrofit track
+            # Extract workshop_id from rake (it's the formation_track for retrofitted rakes)
+            workshop_id = rake.formation_track
+            if (
+                workshop_id in self._waiting_at_retrofit
+                and self._waiting_at_retrofit[workshop_id]
+            ):
+                # Bring next batch from retrofit to workshop
+                workshop_capacity = self._get_workshop_capacity_for_batching(workshop_id)
+                waiting_count = len(self._waiting_at_retrofit[workshop_id])
+                next_batch_size = min(workshop_capacity, waiting_count)
+                next_batch = self._waiting_at_retrofit[workshop_id][:next_batch_size]
+                self._waiting_at_retrofit[workshop_id] = self._waiting_at_retrofit[
+                    workshop_id
+                ][next_batch_size:]
+
+                # Schedule transport of next batch
+                yield from self._bring_next_batch_from_retrofit(next_batch, workshop_id)
+        except GeneratorExit:
+            return
 
     def get_metrics(self) -> dict[str, Any]:
         """Get yard operations metrics."""
         track_util = self._calculate_track_utilization()
-        
+
         # Count wagons by status
         wagons_on_retrofitted = sum(1 for w in self.wagons if getattr(w, 'track', '') == 'retrofitted')
         wagons_parked = sum(1 for w in self.wagons if getattr(w, 'status', '') == 'PARKED')
-        
+
         return {
             "classified_wagons": len(self.wagons),
             "rejected_wagons": len(self.rejected_wagons),
@@ -1014,18 +1023,18 @@ class YardOperationsContext:
             "wagons_on_retrofitted": wagons_on_retrofitted,
             "wagons_parked": wagons_parked,
         }
-    
+
     def _calculate_track_utilization(self) -> dict[str, float]:
         """Calculate track utilization based on wagon occupancy."""
         if not self.infra or not hasattr(self, 'scenario'):
             return {}
-        
+
         total_time = self.infra.engine.current_time()
         if total_time == 0:
             return {}
-        
+
         track_util = {}
-        
+
         # Calculate utilization for collection tracks
         for track_id, queue in self.collection_queues.items():
             if hasattr(queue, '_items'):
@@ -1033,7 +1042,7 @@ class YardOperationsContext:
                 avg_occupancy = len(queue._items) if queue._items else 0
                 capacity = getattr(queue, 'capacity', 10)
                 track_util[track_id] = (avg_occupancy / capacity * 100.0) if capacity > 0 else 0.0
-        
+
         return track_util
 
     def _handle_wagons_classified_for_rakes(self, event: WagonsClassifiedEvent) -> None:
@@ -1063,7 +1072,7 @@ class YardOperationsContext:
             # Also check hardcoded name for backward compatibility
             if event.to_track == "retrofitted":
                 is_retrofitted_destination = True
-        
+
         if is_retrofitted_destination:
             # Retrofitted rake: workshop -> retrofitted -> parking
             self.infra.engine.schedule_process(self._transport_retrofitted_rake(rake))
@@ -1073,100 +1082,103 @@ class YardOperationsContext:
 
     def _transport_rake_to_workshop(self, rake: Any) -> Generator[Any, Any]:
         """Transport rake following professional process: collection → retrofit → workshop."""
-        shunting_context = getattr(self.infra, "shunting_context", None)
-        if not shunting_context:
-            yield from self._direct_rake_to_workshop(rake)
-            return
-
-        # Step 1: Move ALL wagons from collection to retrofit staging track
-        loco = yield from shunting_context.allocate_locomotive(self)
         try:
-            yield from shunting_context.move_locomotive(
-                self, loco, loco.current_track, rake.formation_track
-            )
-            yield from shunting_context.couple_wagons(self, rake.wagon_count, "SCREW")
-            yield from shunting_context.move_locomotive(
-                self, loco, rake.formation_track, rake.target_track
-            )
-            yield from shunting_context.decouple_wagons(self, rake.wagon_count, "SCREW")
-            yield from shunting_context.move_locomotive(
-                self, loco, rake.target_track, loco.home_track
-            )
-        finally:
-            yield from shunting_context.release_locomotive(self, loco)
+            shunting_context = getattr(self.infra, "shunting_context", None)
+            if not shunting_context:
+                yield from self._direct_rake_to_workshop(rake)
+                return
 
-        # Step 2: Transport FIRST batch only from retrofit to workshops in SEQUENCE order
-        # Remaining wagons stay on retrofit track and are picked up when workshop capacity frees
-        workshop_ids = [w.id for w in self.scenario.workshops] if self.scenario and hasattr(self.scenario, "workshops") else ["WS1"]
-        
-        # Log rake wagons before distribution
-        wagon_ids = ', '.join([w.id for w in rake.wagons])
-        print(f"DEBUG: DISTRIBUTING {len(rake.wagons)} wagons [{wagon_ids}]")
-        
-        # Get workshop capacities
-        workshop_capacities = {ws_id: self._get_workshop_capacity_for_batching(ws_id) for ws_id in workshop_ids}
-        
-        # Distribute wagons using workshop-specific strategy
-        strategy = getattr(self.scenario, "workshop_selection_strategy", "round_robin")
-        if hasattr(strategy, "value"):
-            strategy = strategy.value
-        
-        # Initialize workshop tracking
-        if not hasattr(self, '_workshop_round_robin_index'):
-            self._workshop_round_robin_index = 0
-        if not hasattr(self, '_workshop_wagon_counts'):
-            self._workshop_wagon_counts = {ws_id: 0 for ws_id in workshop_ids}
-        
-        # Assign workshops to wagons using strategy
-        for wagon in rake.wagons:
-            if strategy == "round_robin":
-                workshop_id = workshop_ids[self._workshop_round_robin_index % len(workshop_ids)]
-                self._workshop_round_robin_index += 1
-            else:  # least_occupied
-                workshop_id = min(self._workshop_wagon_counts.keys(), 
-                                 key=lambda ws: self._workshop_wagon_counts[ws])
-            
-            wagon.workshop_id = workshop_id
-            self._workshop_wagon_counts[workshop_id] += 1
-        
-        # Group wagons by assigned workshop
-        workshop_batches = {ws_id: [] for ws_id in workshop_ids}
-        for wagon in rake.wagons:
-            workshop_batches[wagon.workshop_id].append(wagon)
-        
-        # Log workshop assignments
-        for ws_id, ws_wagons in workshop_batches.items():
-            if ws_wagons:
-                wagon_ids = ', '.join([w.id for w in ws_wagons])
-                print(f"DEBUG: ASSIGNED {len(ws_wagons)} wagons to {ws_id} [{wagon_ids}]")
-        
-        # Transport first batch to each workshop, store rest as waiting
-        for workshop_id in workshop_ids:
-            batch_wagons = workshop_batches[workshop_id]
-            if not batch_wagons:
-                continue
-            
-            batch_size = workshop_capacities[workshop_id]
-            first_batch = batch_wagons[:batch_size]
-            remaining = batch_wagons[batch_size:]
-            
-            # Log batch split
-            first_ids = ', '.join([w.id for w in first_batch])
-            print(f"DEBUG: FIRST BATCH {len(first_batch)} wagons to {workshop_id} [{first_ids}]")
-            if remaining:
-                remaining_ids = ', '.join([w.id for w in remaining])
-                print(f"DEBUG: WAITING {len(remaining)} wagons for {workshop_id} [{remaining_ids}]")
-            
-            # Transport first batch
-            yield from self._transport_wagon_batch_to_workshop(
-                first_batch, workshop_id, shunting_context
-            )
-            
-            # Store remaining wagons for this workshop
-            if remaining:
-                if workshop_id not in self._waiting_at_retrofit:
-                    self._waiting_at_retrofit[workshop_id] = []
-                self._waiting_at_retrofit[workshop_id].extend(remaining)
+            # Step 1: Move ALL wagons from collection to retrofit staging track
+            loco = yield from shunting_context.allocate_locomotive(self)
+            try:
+                yield from shunting_context.move_locomotive(
+                    self, loco, loco.current_track, rake.formation_track
+                )
+                yield from shunting_context.couple_wagons(self, rake.wagon_count, "SCREW")
+                yield from shunting_context.move_locomotive(
+                    self, loco, rake.formation_track, rake.target_track
+                )
+                yield from shunting_context.decouple_wagons(self, rake.wagon_count, "SCREW")
+                yield from shunting_context.move_locomotive(
+                    self, loco, rake.target_track, loco.home_track
+                )
+            finally:
+                yield from shunting_context.release_locomotive(self, loco)
+
+            # Step 2: Transport FIRST batch only from retrofit to workshops in SEQUENCE order
+            # Remaining wagons stay on retrofit track and are picked up when workshop capacity frees
+            workshop_ids = [w.id for w in self.scenario.workshops] if self.scenario and hasattr(self.scenario, "workshops") else ["WS1"]
+
+            # Log rake wagons before distribution
+            wagon_ids = ', '.join([w.id for w in rake.wagons])
+            print(f"DEBUG: DISTRIBUTING {len(rake.wagons)} wagons [{wagon_ids}]")
+
+            # Get workshop capacities
+            workshop_capacities = {ws_id: self._get_workshop_capacity_for_batching(ws_id) for ws_id in workshop_ids}
+
+            # Distribute wagons using workshop-specific strategy
+            strategy = getattr(self.scenario, "workshop_selection_strategy", "round_robin")
+            if hasattr(strategy, "value"):
+                strategy = strategy.value
+
+            # Initialize workshop tracking
+            if not hasattr(self, '_workshop_round_robin_index'):
+                self._workshop_round_robin_index = 0
+            if not hasattr(self, '_workshop_wagon_counts'):
+                self._workshop_wagon_counts = {ws_id: 0 for ws_id in workshop_ids}
+
+            # Assign workshops to wagons using strategy
+            for wagon in rake.wagons:
+                if strategy == "round_robin":
+                    workshop_id = workshop_ids[self._workshop_round_robin_index % len(workshop_ids)]
+                    self._workshop_round_robin_index += 1
+                else:  # least_occupied
+                    workshop_id = min(self._workshop_wagon_counts.keys(),
+                                     key=lambda ws: self._workshop_wagon_counts[ws])
+
+                wagon.workshop_id = workshop_id
+                self._workshop_wagon_counts[workshop_id] += 1
+
+            # Group wagons by assigned workshop
+            workshop_batches = {ws_id: [] for ws_id in workshop_ids}
+            for wagon in rake.wagons:
+                workshop_batches[wagon.workshop_id].append(wagon)
+
+            # Log workshop assignments
+            for ws_id, ws_wagons in workshop_batches.items():
+                if ws_wagons:
+                    wagon_ids = ', '.join([w.id for w in ws_wagons])
+                    print(f"DEBUG: ASSIGNED {len(ws_wagons)} wagons to {ws_id} [{wagon_ids}]")
+
+            # Transport first batch to each workshop, store rest as waiting
+            for workshop_id in workshop_ids:
+                batch_wagons = workshop_batches[workshop_id]
+                if not batch_wagons:
+                    continue
+
+                batch_size = workshop_capacities[workshop_id]
+                first_batch = batch_wagons[:batch_size]
+                remaining = batch_wagons[batch_size:]
+
+                # Log batch split
+                first_ids = ', '.join([w.id for w in first_batch])
+                print(f"DEBUG: FIRST BATCH {len(first_batch)} wagons to {workshop_id} [{first_ids}]")
+                if remaining:
+                    remaining_ids = ', '.join([w.id for w in remaining])
+                    print(f"DEBUG: WAITING {len(remaining)} wagons for {workshop_id} [{remaining_ids}]")
+
+                # Transport first batch
+                yield from self._transport_wagon_batch_to_workshop(
+                    first_batch, workshop_id, shunting_context
+                )
+
+                # Store remaining wagons for this workshop
+                if remaining:
+                    if workshop_id not in self._waiting_at_retrofit:
+                        self._waiting_at_retrofit[workshop_id] = []
+                    self._waiting_at_retrofit[workshop_id].extend(remaining)
+        except GeneratorExit:
+            return
 
     def _direct_rake_to_workshop(self, rake: Any) -> Generator[Any, Any]:
         """Direct rake assignment to workshop without shunting."""
@@ -1194,7 +1206,7 @@ class YardOperationsContext:
             # Select retrofit track
             selected_retrofit = self._select_track_by_type("retrofit")
             retrofit_track_id = selected_retrofit.id if selected_retrofit else "retrofit"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, loco.current_track, retrofit_track_id
             )
@@ -1291,18 +1303,18 @@ class YardOperationsContext:
                 # Track occupancy based on length capacity with fill factor
                 if not hasattr(self, '_track_occupancy_m'):
                     self._track_occupancy_m = {}
-                
+
                 # Get fill factor from scenario (default 0.75)
                 fill_factor = 0.75
                 if self.scenario and hasattr(self.scenario, 'fill_factor'):
                     fill_factor = self.scenario.fill_factor
-                
+
                 # Get track lengths from scenario
                 track_lengths = {}
                 if self.scenario and hasattr(self.scenario, 'tracks'):
                     for t in self.scenario.tracks:
                         track_lengths[t.id] = getattr(t, 'length', 200.0)
-                
+
                 # Calculate available capacity for each track (respecting fill factor)
                 track_info = []
                 for track in tracks:
@@ -1312,18 +1324,18 @@ class YardOperationsContext:
                     available_usable = max_usable - occupied  # Available within fill factor
                     available_absolute = track_length - occupied  # Available absolute capacity
                     track_info.append((track, available_usable, available_absolute, occupied, track_length))
-                
+
                 # First try: Select track with most available capacity within fill factor
                 available_tracks = [(t, avail_usable) for t, avail_usable, avail_abs, occ, tlen in track_info if avail_usable > 0]
                 if available_tracks:
                     return max(available_tracks, key=lambda x: x[1])[0]
-                
+
                 # Second try: All tracks at/over fill factor - check if ANY absolute capacity remains
                 tracks_with_absolute_capacity = [(t, avail_abs) for t, avail_usable, avail_abs, occ, tlen in track_info if avail_abs > 0]
                 if tracks_with_absolute_capacity:
                     # Use track with most absolute capacity remaining
                     return max(tracks_with_absolute_capacity, key=lambda x: x[1])[0]
-                
+
                 # No capacity available - return None to signal capacity exceeded
                 return None
             elif self.railway_context:
@@ -1351,7 +1363,7 @@ class YardOperationsContext:
                 if workshop_id not in workshop_allocations:
                     workshop_allocations[workshop_id] = []
                 workshop_allocations[workshop_id].append(wagon)
-        
+
         wagon_ids = ', '.join([w.id for w in all_wagons])
         print(f"DEBUG: EXECUTE_PICKUP_PLAN: {len(all_wagons)} wagons to process [{wagon_ids}]")
 
@@ -1405,7 +1417,7 @@ class YardOperationsContext:
             )
             rake.formation_track = from_track_id
             self.rake_registry.register_rake(rake)
-            
+
             # Log rake formation
             wagon_ids = ', '.join([w.id for w in rake_wagons])
             print(f"DEBUG: RAKE FORMED with {len(rake_wagons)} wagons [{wagon_ids}]")
@@ -1444,7 +1456,7 @@ class YardOperationsContext:
                 f"Check topology.json for track length definition."
             )
         return track_capacity
-    
+
     def _get_retrofitted_track_capacity(self) -> float:
         """Get retrofitted track capacity in meters."""
         retrofitted_tracks = self._tracks_by_type.get("retrofitted", [])
@@ -1508,17 +1520,17 @@ class YardOperationsContext:
         """
         while True:
             yield from self.infra.engine.delay(15.0)  # Check every 15 minutes
-            
+
             current_time = self.infra.engine.current_time()
-            
+
             # Check if any collection tracks have wagons
             has_wagons = any(len(queue.items) > 0 for queue in self.collection_queues.values())
-            
+
             if has_wagons and hasattr(self, 'train_processed_event') and not self.train_processed_event.triggered:
                 self.train_processed_event.succeed()
-            
+
             # Retrofitted wagons are now handled in _transport_retrofitted_rake
-    
+
     def _trigger_initial_movement(self) -> Any:
         """Trigger initial locomotive movement for test compatibility."""
         yield from self.infra.engine.delay(0)
@@ -1532,18 +1544,18 @@ class YardOperationsContext:
         shunting_context = getattr(self.infra, "shunting_context", None)
         if not shunting_context or not self._retrofitted_accumulator:
             return
-        
+
         wagons_to_park = self._retrofitted_accumulator[:]
         self._retrofitted_accumulator = []
-        
+
         loco = yield from shunting_context.allocate_locomotive(self)
         try:
             selected_retrofitted = self._select_track_by_type("retrofitted")
             retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else "retrofitted"
-            
+
             selected_parking = self._select_track_by_type("parking")
             parking_track_id = selected_parking.id if selected_parking else "parking"
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, loco.current_track, retrofitted_track_id
             )
@@ -1562,7 +1574,7 @@ class YardOperationsContext:
                 )
                 parked_event.event_timestamp = current_time
                 self.infra.event_bus.publish(parked_event)
-            
+
             yield from shunting_context.move_locomotive(
                 self, loco, parking_track_id, loco.home_track
             )
@@ -1576,9 +1588,8 @@ class YardOperationsContext:
         """Handle simulation started."""
 
     def on_simulation_ended(self, event: Any) -> None:
-        """Handle simulation ended - flush remaining wagons."""
-        if hasattr(self, '_retrofitted_accumulator') and self._retrofitted_accumulator:
-            self.infra.engine.schedule_process(self._flush_retrofitted_to_parking())
+        """Handle simulation ended."""
+
 
     def on_simulation_failed(self, event: Any) -> None:
         """Handle simulation failed."""
