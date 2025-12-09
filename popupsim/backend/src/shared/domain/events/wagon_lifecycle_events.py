@@ -34,6 +34,15 @@ class WagonsClassifiedEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
+class WagonsReadyForPickupEvent(DomainEvent):
+    """Wagons are ready for pickup from collection track."""
+
+    track_id: str = ""
+    wagon_count: int = 0
+    event_timestamp: float = 0.0
+
+
+@dataclass(frozen=True)
 class TrainDepartedEvent(DomainEvent):
     """Train has departed after wagon classification."""
 
