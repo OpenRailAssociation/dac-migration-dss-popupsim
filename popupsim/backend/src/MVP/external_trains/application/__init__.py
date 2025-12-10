@@ -1,1 +1,0 @@
-"""External Trains application layer."""

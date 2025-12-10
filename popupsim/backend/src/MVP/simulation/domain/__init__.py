@@ -1,1 +1,0 @@
-"""Simulation domain layer."""

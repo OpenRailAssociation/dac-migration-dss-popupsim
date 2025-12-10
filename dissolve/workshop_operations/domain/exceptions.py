@@ -1,1 +1,0 @@
-"""Workshop Operations domain exceptions."""

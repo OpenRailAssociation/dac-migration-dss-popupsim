@@ -1,1 +1,0 @@
-"""Factories for workshop operations context."""

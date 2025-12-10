@@ -1,1 +1,0 @@
-"""Workshop operations unit tests."""

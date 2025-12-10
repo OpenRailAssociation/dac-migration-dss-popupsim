@@ -1,1 +1,0 @@
-"""Shunting Operations Application Layer."""

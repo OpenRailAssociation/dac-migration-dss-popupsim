@@ -1,1 +1,0 @@
-"""PopUp Retrofit domain layer."""
