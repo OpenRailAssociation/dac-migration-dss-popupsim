@@ -1,11 +1,7 @@
 """In-memory implementation of analytics repository."""
 
-from contexts.analytics.domain.aggregates.analytics_session import (
-    AnalyticsSession,
-)
-from contexts.analytics.domain.repositories.analytics_repository import (
-    AnalyticsRepository,
-)
+from contexts.analytics.domain.aggregates.analytics_session import AnalyticsSession
+from contexts.analytics.domain.repositories.analytics_repository import AnalyticsRepository
 
 
 class InMemoryAnalyticsRepository(AnalyticsRepository):

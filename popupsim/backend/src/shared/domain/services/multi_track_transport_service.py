@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from shared.domain.entities.wagon import Wagon
-    from shared.domain.services.retrofit_track_allocation_service import (
-        RetrofitAllocation,
-    )
+    from shared.domain.services.retrofit_track_allocation_service import RetrofitAllocation
 
 
 @dataclass
@@ -35,9 +33,7 @@ class TransportPlan:
 class MultiTrackTransportService:
     """Domain service for planning multi-track transport."""
 
-    def create_transport_plan(
-        self, allocation: RetrofitAllocation, from_track: str = "collection"
-    ) -> TransportPlan:
+    def create_transport_plan(self, allocation: RetrofitAllocation, from_track: str = 'collection') -> TransportPlan:
         """Create optimal transport plan for retrofit allocation."""
         jobs = []
 
@@ -86,8 +82,7 @@ class MultiTrackTransportService:
         total_wagon_time = sum(len(job.wagons) * job.estimated_duration for job in jobs)
 
         return (
-            total_wagon_time
-            / (total_transport_time * max(len(job.wagons) for job in jobs))
+            total_wagon_time / (total_transport_time * max(len(job.wagons) for job in jobs))
             if total_transport_time > 0
             else 0.0
         )
@@ -110,13 +105,11 @@ class MultiTrackTransportService:
         issues = []
 
         if max_duration and plan.total_duration > max_duration:
-            issues.append(
-                f"Total duration {plan.total_duration:.1f} exceeds limit {max_duration:.1f}"
-            )
+            issues.append(f'Total duration {plan.total_duration:.1f} exceeds limit {max_duration:.1f}')
 
         if plan.locomotive_utilization < min_utilization:
             issues.append(
-                f"Locomotive utilization {plan.locomotive_utilization:.2f} below minimum {min_utilization:.2f}"
+                f'Locomotive utilization {plan.locomotive_utilization:.2f} below minimum {min_utilization:.2f}'
             )
 
         return len(issues) == 0, issues

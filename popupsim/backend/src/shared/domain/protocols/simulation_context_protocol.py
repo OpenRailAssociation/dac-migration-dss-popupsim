@@ -1,7 +1,8 @@
 """Protocol for contexts participating in simulation."""
 
 from abc import abstractmethod
-from typing import Any, Protocol
+from typing import Any
+from typing import Protocol
 
 
 class SimulationContextProtocol(Protocol):
@@ -21,7 +22,7 @@ class SimulationContextProtocol(Protocol):
 
     def get_status(self) -> dict[str, Any]:
         """Get current context status."""
-        return {"status": "unknown"}
+        return {'status': 'unknown'}
 
     def cleanup(self) -> None:
         """Cleanup context resources."""

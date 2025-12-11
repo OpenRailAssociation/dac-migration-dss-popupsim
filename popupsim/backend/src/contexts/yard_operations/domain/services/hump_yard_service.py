@@ -4,9 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from contexts.configuration.domain.models.process_times import (
-    ProcessTimes,
-)
+from contexts.configuration.domain.models.process_times import ProcessTimes
 from shared.domain.services.railway_capacity_service import RailwayCapacityService
 from shared.infrastructure.time_converters import to_ticks
 
@@ -14,9 +12,9 @@ from shared.infrastructure.time_converters import to_ticks
 class YardType(Enum):
     """Types of yards with different capabilities."""
 
-    HUMP_YARD = "hump_yard"
-    FLAT_YARD = "flat_yard"
-    CLASSIFICATION_YARD = "classification_yard"
+    HUMP_YARD = 'hump_yard'
+    FLAT_YARD = 'flat_yard'
+    CLASSIFICATION_YARD = 'classification_yard'
 
 
 @dataclass
@@ -37,8 +35,8 @@ class ClassificationResult:
 
     accepted_wagons: list[Any]
     rejected_wagons: list[Any]
-    classification_track: str = "collection"
-    yard_id: str = "main_yard"
+    classification_track: str = 'collection'
+    yard_id: str = 'main_yard'
 
 
 @dataclass
@@ -53,9 +51,7 @@ class ProcessingSchedule:
 class HumpYardService:
     """Domain service for yard operations - supports multiple yard types."""
 
-    def __init__(
-        self, railway_capacity_service: RailwayCapacityService | None = None
-    ) -> None:
+    def __init__(self, railway_capacity_service: RailwayCapacityService | None = None) -> None:
         self._railway_capacity_service = railway_capacity_service
 
     def classify_wagons(
@@ -67,27 +63,29 @@ class HumpYardService:
 
         # Use selected track or determine from config
         collection_track = selected_track or self._determine_classification_track(yard_config)
-        
+
         # Check collection track capacity using railway infrastructure for the SELECTED track
         available_capacity = self._get_available_capacity_from_railway(yard_config, collection_track)
 
         for i, wagon in enumerate(wagons):
             # Check if we have capacity and wagon should be accepted
             if i < available_capacity and self._should_accept_wagon(wagon):
-                wagon.status = "COLLECTION"
+                wagon.status = 'COLLECTION'
                 wagon.track = collection_track
                 accepted_wagons.append(wagon)
             else:
-                wagon.status = "REJECTED"
+                wagon.status = 'REJECTED'
                 if i >= available_capacity:
-                    wagon.rejection_reason = "COLLECTION_TRACK_FULL"
-                    wagon.detailed_rejection_reason = f"Collection track capacity exceeded ({available_capacity} wagons max)"
+                    wagon.rejection_reason = 'COLLECTION_TRACK_FULL'
+                    wagon.detailed_rejection_reason = (
+                        f'Collection track capacity exceeded ({available_capacity} wagons max)'
+                    )
                 else:
-                    wagon.rejection_reason = "CLASSIFICATION_REJECTED"
+                    wagon.rejection_reason = 'CLASSIFICATION_REJECTED'
                     # detailed_rejection_reason already set by _should_accept_wagon
                 rejected_wagons.append(wagon)
 
-        yard_id = yard_config.yard_id if yard_config else "main_yard"
+        yard_id = yard_config.yard_id if yard_config else 'main_yard'
         classification_track = self._determine_classification_track(yard_config)
 
         return ClassificationResult(
@@ -136,13 +134,13 @@ class HumpYardService:
         """Business rule for wagon acceptance."""
         needs_retrofit = getattr(wagon, 'needs_retrofit', True)
         is_loaded = getattr(wagon, 'is_loaded', False)
-        
+
         # Set detailed rejection reason on wagon
         if not needs_retrofit:
             wagon.detailed_rejection_reason = "Wagon doesn't need retrofit"
         elif is_loaded:
-            wagon.detailed_rejection_reason = "Wagon is loaded"
-        
+            wagon.detailed_rejection_reason = 'Wagon is loaded'
+
         return needs_retrofit and not is_loaded
 
     def _has_hump_capability(self, yard_config: YardConfiguration | None) -> bool:
@@ -158,9 +156,7 @@ class HumpYardService:
         # Use railway capacity service if available
         if self._railway_capacity_service:
             classification_track = track_id or self._determine_classification_track(yard_config)
-            available_meters = self._railway_capacity_service.get_maximum_acceptable_count(
-                classification_track
-            )
+            available_meters = self._railway_capacity_service.get_maximum_acceptable_count(classification_track)
             # Return meters directly - caller will handle wagon-specific sizing
             return int(available_meters)
 
@@ -168,8 +164,7 @@ class HumpYardService:
         if yard_config:
             return max(
                 0,
-                yard_config.collection_track_capacity
-                - yard_config.current_collection_count,
+                yard_config.collection_track_capacity - yard_config.current_collection_count,
             )
 
         return 100  # Default large capacity for backward compatibility
@@ -181,32 +176,25 @@ class HumpYardService:
 
         return max(
             0,
-            yard_config.collection_track_capacity
-            - yard_config.current_collection_count,
+            yard_config.collection_track_capacity - yard_config.current_collection_count,
         )
 
-    def update_collection_track_count(
-        self, yard_config: YardConfiguration, change: int
-    ) -> None:
+    def update_collection_track_count(self, yard_config: YardConfiguration, change: int) -> None:
         """Update current collection track count."""
-        yard_config.current_collection_count = max(
-            0, yard_config.current_collection_count + change
-        )
+        yard_config.current_collection_count = max(0, yard_config.current_collection_count + change)
 
-    def _determine_classification_track(
-        self, yard_config: YardConfiguration | None
-    ) -> str:
+    def _determine_classification_track(self, yard_config: YardConfiguration | None) -> str:
         """Determine appropriate classification track based on yard type."""
         if not yard_config:
-            return "collection"
+            return 'collection'
 
         # Use first classification track from config
         if yard_config.classification_tracks:
             return yard_config.classification_tracks[0]
-        
+
         # Fallback based on yard type
         if yard_config.yard_type == YardType.HUMP_YARD:
-            return "collection"
+            return 'collection'
         if yard_config.yard_type == YardType.FLAT_YARD:
-            return "staging"
-        return "collection"
+            return 'staging'
+        return 'collection'

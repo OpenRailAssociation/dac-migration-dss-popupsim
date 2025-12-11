@@ -3,4 +3,4 @@
 from .locomotive_id import LocomotiveId
 from .shunting_metrics import ShuntingMetrics
 
-__all__ = ["LocomotiveId", "ShuntingMetrics"]
+__all__ = ['LocomotiveId', 'ShuntingMetrics']

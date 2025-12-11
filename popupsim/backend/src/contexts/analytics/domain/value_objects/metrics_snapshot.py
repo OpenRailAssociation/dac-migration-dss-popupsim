@@ -36,29 +36,19 @@ class LocomotiveUtilization:
 
     @property
     def parking_percentage(self) -> float:
-        return (
-            (self.parking_time / self.total_time * 100) if self.total_time > 0 else 0.0
-        )
+        return (self.parking_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
     @property
     def moving_percentage(self) -> float:
-        return (
-            (self.moving_time / self.total_time * 100) if self.total_time > 0 else 0.0
-        )
+        return (self.moving_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
     @property
     def coupling_percentage(self) -> float:
-        return (
-            (self.coupling_time / self.total_time * 100) if self.total_time > 0 else 0.0
-        )
+        return (self.coupling_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
     @property
     def decoupling_percentage(self) -> float:
-        return (
-            (self.decoupling_time / self.total_time * 100)
-            if self.total_time > 0
-            else 0.0
-        )
+        return (self.decoupling_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
 
 @dataclass(frozen=True)
@@ -92,20 +82,16 @@ class TrackCapacitySnapshot:
 
     @property
     def utilization_percentage(self) -> float:
-        return (
-            (self.used_capacity / self.total_capacity * 100)
-            if self.total_capacity > 0
-            else 0.0
-        )
+        return (self.used_capacity / self.total_capacity * 100) if self.total_capacity > 0 else 0.0
 
     @property
     def status(self) -> str:
         """Track status: green (empty), yellow (nearly full), red (full)."""
         if self.utilization_percentage >= 95:
-            return "red"
+            return 'red'
         if self.utilization_percentage >= 70:
-            return "yellow"
-        return "green"
+            return 'yellow'
+        return 'green'
 
 
 @dataclass(frozen=True)
@@ -126,12 +112,10 @@ class BottleneckDetection:
         utilization: float,
         over_threshold: float = 90.0,
         under_threshold: float = 20.0,
-    ) -> "BottleneckDetection":
+    ) -> 'BottleneckDetection':
         """Detect bottleneck based on utilization thresholds."""
         if utilization > over_threshold:
-            return cls(resource_type, resource_id, utilization, True, "overutilization")
+            return cls(resource_type, resource_id, utilization, True, 'overutilization')
         if utilization < under_threshold:
-            return cls(
-                resource_type, resource_id, utilization, True, "underutilization"
-            )
-        return cls(resource_type, resource_id, utilization, False, "normal")
+            return cls(resource_type, resource_id, utilization, True, 'underutilization')
+        return cls(resource_type, resource_id, utilization, False, 'normal')

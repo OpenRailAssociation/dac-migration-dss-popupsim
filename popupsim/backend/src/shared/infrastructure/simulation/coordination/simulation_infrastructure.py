@@ -1,17 +1,13 @@
 """Enhanced simulation coordination infrastructure."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Any
 
-from infrastructure.event_bus.event_bus import (
-    EventBus,
-    InMemoryEventBus,
-)
+from infrastructure.event_bus.event_bus import EventBus
+from infrastructure.event_bus.event_bus import InMemoryEventBus
 from infrastructure.events.base_event import DomainEvent
-from shared.infrastructure.simulation.engines.simulation_engine_port import (
-    SimulationEnginePort,
-)
+from shared.infrastructure.simulation.engines.simulation_engine_port import SimulationEnginePort
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +25,7 @@ class SimulationInfrastructure:
     retrofitted_wagons: Any  # Store - PopUp  Yard
 
     @classmethod
-    def create(
-        cls, engine: SimulationEnginePort, workshop_ids: list[str] | None = None
-    ) -> "SimulationInfrastructure":
+    def create(cls, engine: SimulationEnginePort, workshop_ids: list[str] | None = None) -> 'SimulationInfrastructure':
         """Create enhanced simulation infrastructure with monitoring."""
         if workshop_ids is None:
             workshop_ids = []
@@ -41,27 +35,25 @@ class SimulationInfrastructure:
 
         # Add simulation-specific error handler
         def simulation_event_error_handler(error: Exception) -> None:
-            logger.error(
-                "Simulation event error at t=%.1f: %s", engine.current_time(), error
-            )
+            logger.error('Simulation event error at t=%.1f: %s', engine.current_time(), error)
 
         event_bus.add_error_handler(simulation_event_error_handler)
 
         # Add simulation time logging hook
         def simulation_event_logger(event: DomainEvent) -> None:
-            logger.debug("t=%.1f - %s", engine.current_time(), event.__class__.__name__)
+            logger.debug('t=%.1f - %s', engine.current_time(), event.__class__.__name__)
 
         event_bus.add_pre_publish_hook(simulation_event_logger)
 
         # Configure engine hooks
         def pre_run_hook() -> None:
-            logger.info(" Starting simulation at t=%.1f", engine.current_time())
+            logger.info(' Starting simulation at t=%.1f', engine.current_time())
             event_bus.reset_metrics()
 
         def post_run_hook() -> None:
-            logger.info(" Simulation completed at t=%.1f", engine.current_time())
+            logger.info(' Simulation completed at t=%.1f', engine.current_time())
             metrics = event_bus.get_metrics()
-            logger.info("Event metrics: %s", metrics)
+            logger.info('Event metrics: %s', metrics)
 
         engine.add_pre_run_hook(pre_run_hook)
         engine.add_post_run_hook(post_run_hook)
@@ -70,17 +62,10 @@ class SimulationInfrastructure:
             engine=engine,
             event_bus=event_bus,
             incoming_wagons=engine.create_store(),
-            wagons_for_retrofit={
-                workshop_id: engine.create_store() for workshop_id in workshop_ids
-            },
+            wagons_for_retrofit={workshop_id: engine.create_store() for workshop_id in workshop_ids},
             retrofitted_wagons=engine.create_store(),
         )
 
     def get_comprehensive_metrics(self) -> dict[str, Any]:
-        """Get comprehensive infrastructure metrics."""
-        return {
-            "event_bus": self.event_bus.get_metrics(),
-            "engine": self.engine.get_simulation_stats(),
-            "event_history": self.event_bus.get_event_history(50),
-            "subscriber_stats": self.event_bus.get_subscriber_stats(),
-        }
+        """Get infrastructure metrics."""
+        return {'event_bus': self.event_bus.get_metrics(), 'engine': self.engine.get_simulation_stats()}

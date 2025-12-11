@@ -11,3 +11,4 @@ class TrackInputDTO(BaseModel):
     edges: list[str] | None = None
     name: str | None = None
     length: float = 100.0
+    fillfactor: float = 0.75

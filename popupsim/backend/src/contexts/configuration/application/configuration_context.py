@@ -3,17 +3,16 @@
 from typing import Any
 
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
-from contexts.configuration.domain.models import (
-    ConfigurationState,
-    LocomotiveConfig,
-    ProcessTimesConfig,
-    ScenarioMetadata,
-    StrategiesConfig,
-    TopologyConfig,
-    TrackConfig,
-    WorkshopConfig,
-)
+from contexts.configuration.domain.models import ConfigurationState
+from contexts.configuration.domain.models import LocomotiveConfig
+from contexts.configuration.domain.models import ProcessTimesConfig
+from contexts.configuration.domain.models import ScenarioMetadata
+from contexts.configuration.domain.models import StrategiesConfig
+from contexts.configuration.domain.models import TopologyConfig
+from contexts.configuration.domain.models import TrackConfig
+from contexts.configuration.domain.models import WorkshopConfig
 from infrastructure.event_bus.event_bus import EventBus
+from shared.domain.events.configuration_events import ConfigurationLoadedEvent
 from shared.validation.base import ValidationResult
 
 
@@ -33,22 +32,16 @@ class ConfigurationContext:
     def create_scenario(self, metadata: ScenarioMetadata) -> ValidationResult:
         """Create new scenario configuration."""
         if metadata.id in self._builders:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {metadata.id} already exists"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {metadata.id} already exists'])
 
         self._builders[metadata.id] = ConfigurationBuilder(metadata)
         return ValidationResult(is_valid=True, issues=[])
 
-    def add_workshop(
-        self, scenario_id: str, workshop: WorkshopConfig
-    ) -> ValidationResult:
+    def add_workshop(self, scenario_id: str, workshop: WorkshopConfig) -> ValidationResult:
         """Add workshop to scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.add_workshop(workshop)
 
@@ -56,57 +49,39 @@ class ConfigurationContext:
         """Add track to scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.add_track(track)
 
-    def add_locomotive(
-        self, scenario_id: str, locomotive: LocomotiveConfig
-    ) -> ValidationResult:
+    def add_locomotive(self, scenario_id: str, locomotive: LocomotiveConfig) -> ValidationResult:
         """Add locomotive to scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.add_locomotive(locomotive)
 
-    def set_process_times(
-        self, scenario_id: str, times: ProcessTimesConfig
-    ) -> ValidationResult:
+    def set_process_times(self, scenario_id: str, times: ProcessTimesConfig) -> ValidationResult:
         """Set process times for scenario."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.set_process_times(times)
 
-    def set_topology(
-        self, scenario_id: str, topology: TopologyConfig
-    ) -> ValidationResult:
+    def set_topology(self, scenario_id: str, topology: TopologyConfig) -> ValidationResult:
         """Set topology for scenario."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.set_topology(topology)
 
-    def set_strategies(
-        self, scenario_id: str, strategies: StrategiesConfig
-    ) -> ValidationResult:
+    def set_strategies(self, scenario_id: str, strategies: StrategiesConfig) -> ValidationResult:
         """Set selection strategies for scenario."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.set_strategies(strategies)
 
@@ -119,9 +94,7 @@ class ConfigurationContext:
         """Validate scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         return builder.validate_completeness()
 
@@ -129,9 +102,7 @@ class ConfigurationContext:
         """Finalize scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return None, ValidationResult(
-                is_valid=False, issues=[f"Scenario {scenario_id} not found"]
-            )
+            return None, ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
 
         validation = builder.validate_completeness()
         if not validation.is_valid:
@@ -141,8 +112,6 @@ class ConfigurationContext:
         self._finalized_scenarios[scenario_id] = scenario
 
         # Publish configuration loaded event
-        from shared.domain.events.configuration_events import ConfigurationLoadedEvent
-
         event = ConfigurationLoadedEvent(scenario=scenario)
         self.event_bus.publish(event)
 
@@ -168,11 +137,11 @@ class ConfigurationContext:
 
     def get_metrics(self) -> dict[str, Any]:
         """Get metrics."""
-        return {"scenarios": len(self._finalized_scenarios)}
+        return {'scenarios': len(self._finalized_scenarios)}
 
     def get_status(self) -> dict[str, Any]:
         """Get status."""
-        return {"status": "ready"}
+        return {'status': 'ready'}
 
     def cleanup(self) -> None:
         """Cleanup (no-op)."""

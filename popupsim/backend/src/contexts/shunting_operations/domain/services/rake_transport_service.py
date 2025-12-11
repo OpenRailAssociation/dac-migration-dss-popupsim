@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from contexts.shunting_operations.application.shunting_context import (
-        ShuntingOperationsContext,
-    )
+    from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
     from shared.domain.entities.rake import Rake
 
 
@@ -23,7 +22,7 @@ class RakeTransportJob:
     to_track: str
 
 
-class RakeTransportService:
+class RakeTransportService:  # pylint: disable=too-few-public-methods
     """Service for executing rake transport operations."""
 
     def __init__(self, shunting_context: ShuntingOperationsContext) -> None:
@@ -34,9 +33,7 @@ class RakeTransportService:
         rake = job.rake
 
         # Allocate locomotive
-        loco = yield from self.shunting_context.allocate_locomotive(
-            self.shunting_context
-        )
+        loco = yield from self.shunting_context.allocate_locomotive(self.shunting_context)
 
         try:
             # Move to pickup location
@@ -45,32 +42,24 @@ class RakeTransportService:
             )
 
             # Couple entire rake
-            yield from self.shunting_context.couple_wagons(
-                self.shunting_context, loco, rake.wagon_count, "SCREW"
-            )
+            yield from self.shunting_context.couple_wagons(self.shunting_context, loco, rake.wagon_count, 'SCREW')
 
             # Update rake status
             rake.locomotive_id = loco.id.value
-            rake.status = "MOVING"
+            rake.status = 'MOVING'
 
             # Transport rake
-            yield from self.shunting_context.move_locomotive(
-                self.shunting_context, loco, job.from_track, job.to_track
-            )
+            yield from self.shunting_context.move_locomotive(self.shunting_context, loco, job.from_track, job.to_track)
 
             # Decouple rake
-            yield from self.shunting_context.decouple_wagons(
-                self.shunting_context, loco, rake.wagon_count, "SCREW"
-            )
+            yield from self.shunting_context.decouple_wagons(self.shunting_context, loco, rake.wagon_count, 'SCREW')
 
             # Update rake and wagon states
             rake.formation_track = job.to_track
             rake.locomotive_id = None
-            rake.status = "DELIVERED"
+            rake.status = 'DELIVERED'
             rake.update_wagon_tracks(job.to_track)
 
         finally:
             # Release locomotive
-            yield from self.shunting_context.release_locomotive(
-                self.shunting_context, loco
-            )
+            yield from self.shunting_context.release_locomotive(self.shunting_context, loco)

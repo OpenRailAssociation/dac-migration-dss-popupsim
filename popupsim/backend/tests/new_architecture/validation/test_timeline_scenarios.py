@@ -30,10 +30,8 @@ def test_single_wagon_single_station() -> None:
     service = SimulationApplicationService(scenario)
     result = service.execute(until=50.0)
 
-    analytics_context = service.contexts.get("analytics")
-    validate_timeline_from_docstring(
-        result, test_single_wagon_single_station, analytics_context
-    )
+    analytics_context = service.contexts.get('analytics')
+    validate_timeline_from_docstring(result, test_single_wagon_single_station, analytics_context)
     assert result.success
 
 
@@ -67,10 +65,8 @@ def test_two_wagons_one_station() -> None:
     service = SimulationApplicationService(scenario)
     result = service.execute(until=50.0)
 
-    analytics_context = service.contexts.get("analytics")
-    validate_timeline_from_docstring(
-        result, test_two_wagons_one_station, analytics_context
-    )
+    analytics_context = service.contexts.get('analytics')
+    validate_timeline_from_docstring(result, test_two_wagons_one_station, analytics_context)
     assert result.success
 
 
@@ -98,10 +94,8 @@ def test_two_wagons_two_stations() -> None:
     service = SimulationApplicationService(scenario)
     result = service.execute(until=50.0)
 
-    analytics_context = service.contexts.get("analytics")
-    validate_timeline_from_docstring(
-        result, test_two_wagons_two_stations, analytics_context
-    )
+    analytics_context = service.contexts.get('analytics')
+    validate_timeline_from_docstring(result, test_two_wagons_two_stations, analytics_context)
     assert result.success
 
 
@@ -141,10 +135,8 @@ def test_four_wagons_two_stations() -> None:
     service = SimulationApplicationService(scenario)
     result = service.execute(until=50.0)
 
-    analytics_context = service.contexts.get("analytics")
-    validate_timeline_from_docstring(
-        result, test_four_wagons_two_stations, analytics_context
-    )
+    analytics_context = service.contexts.get('analytics')
+    validate_timeline_from_docstring(result, test_four_wagons_two_stations, analytics_context)
     assert result.success
 
 
@@ -191,16 +183,12 @@ def test_six_wagons_two_workshops() -> None:
     t=32: wagon[W06] RETROFITTED track=retrofitted
     t=32->33: loco[L1] MOVING retrofitted->parking
     """
-    scenario = create_minimal_scenario(
-        num_wagons=6, num_stations=2, retrofit_time=10.0, num_workshops=2
-    )
+    scenario = create_minimal_scenario(num_wagons=6, num_stations=2, retrofit_time=10.0, num_workshops=2)
     service = SimulationApplicationService(scenario)
     result = service.execute(until=60.0)
 
-    analytics_context = service.contexts.get("analytics")
-    validate_timeline_from_docstring(
-        result, test_six_wagons_two_workshops, analytics_context
-    )
+    analytics_context = service.contexts.get('analytics')
+    validate_timeline_from_docstring(result, test_six_wagons_two_workshops, analytics_context)
     assert result.success
 
 
@@ -253,14 +241,10 @@ def test_seven_wagons_two_workshops() -> None:
     t=35->36: loco[L1] MOVING WS1->parking
     t=45: wagon[W07] RETROFITTED retrofit_end
     """
-    scenario = create_minimal_scenario(
-        num_wagons=7, num_stations=2, retrofit_time=10.0, num_workshops=2
-    )
+    scenario = create_minimal_scenario(num_wagons=7, num_stations=2, retrofit_time=10.0, num_workshops=2)
     service = SimulationApplicationService(scenario)
     result = service.execute(until=100.0)
 
-    analytics_context = service.contexts.get("analytics")
-    validate_timeline_from_docstring(
-        result, test_seven_wagons_two_workshops, analytics_context
-    )
+    analytics_context = service.contexts.get('analytics')
+    validate_timeline_from_docstring(result, test_seven_wagons_two_workshops, analytics_context)
     assert result.success

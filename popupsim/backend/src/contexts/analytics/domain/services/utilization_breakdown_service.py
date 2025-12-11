@@ -30,31 +30,31 @@ class UtilizationBreakdownService:
 
         for timestamp, event in self.events:
             event_type = type(event).__name__
-            loco_id = getattr(event, "locomotive_id", None)
+            loco_id = getattr(event, 'locomotive_id', None)
 
             if not loco_id:
                 continue
 
-            if event_type == "LocomotiveAllocatedEvent":
-                action_starts[f"{loco_id}_moving"] = timestamp
+            if event_type == 'LocomotiveAllocatedEvent':
+                action_starts[f'{loco_id}_moving'] = timestamp
                 total_actions += 1
-            elif event_type == "LocomotiveReleasedEvent":
-                start_time = action_starts.pop(f"{loco_id}_moving", timestamp)
-                action_times["moving"] += timestamp - start_time
-                action_starts[f"{loco_id}_parking"] = timestamp
+            elif event_type == 'LocomotiveReleasedEvent':
+                start_time = action_starts.pop(f'{loco_id}_moving', timestamp)
+                action_times['moving'] += timestamp - start_time
+                action_starts[f'{loco_id}_parking'] = timestamp
                 total_actions += 1
-            elif event_type in ("CouplingStartedEvent", "DecouplingStartedEvent"):
-                action = "coupling" if "Coupling" in event_type else "decoupling"
-                action_starts[f"{loco_id}_{action}"] = timestamp
+            elif event_type in ('CouplingStartedEvent', 'DecouplingStartedEvent'):
+                action = 'coupling' if 'Coupling' in event_type else 'decoupling'
+                action_starts[f'{loco_id}_{action}'] = timestamp
                 total_actions += 1
-            elif event_type in ("CouplingCompletedEvent", "DecouplingCompletedEvent"):
-                action = "coupling" if "Coupling" in event_type else "decoupling"
-                start_time = action_starts.pop(f"{loco_id}_{action}", timestamp)
+            elif event_type in ('CouplingCompletedEvent', 'DecouplingCompletedEvent'):
+                action = 'coupling' if 'Coupling' in event_type else 'decoupling'
+                start_time = action_starts.pop(f'{loco_id}_{action}', timestamp)
                 action_times[action] += timestamp - start_time
 
         # Calculate parking time as remaining time
         total_active_time = sum(action_times.values())
-        action_times["parking"] = max(0, self.total_duration - total_active_time)
+        action_times['parking'] = max(0, self.total_duration - total_active_time)
 
         # Calculate percentages
         action_percentages = {
@@ -77,30 +77,29 @@ class UtilizationBreakdownService:
 
         for timestamp, event in self.events:
             event_type = type(event).__name__
-            wagon_id = getattr(event, "wagon_id", None)
+            wagon_id = getattr(event, 'wagon_id', None)
 
             if not wagon_id:
                 continue
 
-            if event_type == "WagonDistributedEvent":
-                action_starts[f"{wagon_id}_on_track"] = timestamp
+            if event_type == 'WagonDistributedEvent':
+                action_starts[f'{wagon_id}_on_track'] = timestamp
                 total_actions += 1
-            elif event_type == "RetrofitStartedEvent":
-                start_time = action_starts.pop(f"{wagon_id}_on_track", timestamp)
-                action_times["waiting"] += timestamp - start_time
-                action_starts[f"{wagon_id}_retrofitting"] = timestamp
+            elif event_type == 'RetrofitStartedEvent':
+                start_time = action_starts.pop(f'{wagon_id}_on_track', timestamp)
+                action_times['waiting'] += timestamp - start_time
+                action_starts[f'{wagon_id}_retrofitting'] = timestamp
                 total_actions += 1
-            elif event_type == "RetrofitCompletedEvent":
-                start_time = action_starts.pop(f"{wagon_id}_retrofitting", timestamp)
-                action_times["retrofitting"] += timestamp - start_time
-                action_starts[f"{wagon_id}_completed"] = timestamp
+            elif event_type == 'RetrofitCompletedEvent':
+                start_time = action_starts.pop(f'{wagon_id}_retrofitting', timestamp)
+                action_times['retrofitting'] += timestamp - start_time
+                action_starts[f'{wagon_id}_completed'] = timestamp
                 total_actions += 1
 
         # Calculate percentages
         total_time = sum(action_times.values())
         action_percentages = {
-            action: (time / total_time * 100) if total_time > 0 else 0
-            for action, time in action_times.items()
+            action: (time / total_time * 100) if total_time > 0 else 0 for action, time in action_times.items()
         }
 
         return UtilizationBreakdown(
@@ -121,29 +120,29 @@ class UtilizationBreakdownService:
 
             for timestamp, event in self.events:
                 event_type = type(event).__name__
-                event_workshop_id = getattr(event, "workshop_id", None)
+                event_workshop_id = getattr(event, 'workshop_id', None)
 
                 if event_workshop_id != workshop_id:
                     continue
 
                 # Track retrofit completion events (actual events used in simulation)
-                if event_type in ("WagonRetrofitCompletedEvent", "BatchRetrofittedEvent", "WagonRetrofittedEvent"):
-                    # Estimate working time from completion_time or use default retrofit duration *removed guard!)
-                    completion_time = getattr(event, "completion_time") # timestamp
-                    duration = getattr(event, "duration")  # Default 15 min per wagon , 15.0
-                    start_time = completion_time - duration if hasattr(event, "completion_time") else timestamp - duration
-                    action_times["working"] += duration
+                if event_type in ('WagonRetrofitCompletedEvent', 'BatchRetrofittedEvent', 'WagonRetrofittedEvent'):
+                    # Estimate working time from completion_time or use default retrofit duration
+                    completion_time = getattr(event, 'completion_time', timestamp)
+                    duration = getattr(event, 'duration', 15.0)  # Default 15 min per wagon
+                    start_time = (
+                        completion_time - duration if hasattr(event, 'completion_time') else timestamp - duration
+                    )
+                    action_times['working'] += duration
                     total_actions += 1
 
             # Calculate waiting time as remaining time
-            total_working_time = action_times["working"]
-            action_times["waiting"] = max(0, self.total_duration - total_working_time)
+            total_working_time = action_times['working']
+            action_times['waiting'] = max(0, self.total_duration - total_working_time)
 
             # Calculate percentages
             action_percentages = {
-                action: (time / self.total_duration * 100)
-                if self.total_duration > 0
-                else 0
+                action: (time / self.total_duration * 100) if self.total_duration > 0 else 0
                 for action, time in action_times.items()
             }
 
@@ -160,7 +159,7 @@ class UtilizationBreakdownService:
         """Extract unique workshop IDs from events."""
         workshop_ids = set()
         for _, event in self.events:
-            workshop_id = getattr(event, "workshop_id", None)
+            workshop_id = getattr(event, 'workshop_id', None)
             if workshop_id:
                 workshop_ids.add(workshop_id)
         return workshop_ids

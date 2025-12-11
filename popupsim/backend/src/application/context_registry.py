@@ -3,13 +3,9 @@
 import logging
 from typing import Any
 
-from shared.domain.events.simulation_lifecycle_events import (
-    ContextInitializedEvent,
-    ContextStartedEvent,
-)
-from shared.domain.protocols.simulation_context_protocol import (
-    SimulationContextProtocol,
-)
+from shared.domain.events.simulation_lifecycle_events import ContextInitializedEvent
+from shared.domain.events.simulation_lifecycle_events import ContextStartedEvent
+from shared.domain.protocols.simulation_context_protocol import SimulationContextProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -29,19 +25,19 @@ class ContextRegistry:
             msg = f"Context '{name}' already registered"
             raise ValueError(msg)
 
-        logger.info(" Registering context: %s", name)
+        logger.info(' Registering context: %s', name)
         self.contexts[name] = context
         self._initialization_order.append(name)
 
     def initialize_all(self, infrastructure: Any, scenario: Any) -> None:
         """Initialize all registered contexts in order."""
-        logger.info(" Initializing %d contexts", len(self.contexts))
+        logger.info(' Initializing %d contexts', len(self.contexts))
 
         for name in self._initialization_order:
             context = self.contexts[name]
             current_time = self.engine.current_time()
 
-            logger.info(" Initializing context: %s", name)
+            logger.info(' Initializing context: %s', name)
             context.initialize(infrastructure, scenario)
 
             # Publish context initialized event
@@ -73,8 +69,8 @@ class ContextRegistry:
             try:
                 metrics[name] = context.get_metrics()
             except Exception as e:
-                logger.exception("Failed to get metrics from %s", name)
-                metrics[name] = {"error": str(e)}
+                logger.exception('Failed to get metrics from %s', name)
+                metrics[name] = {'error': str(e)}
         return metrics
 
     def get_all_status(self) -> dict[str, Any]:
@@ -84,36 +80,36 @@ class ContextRegistry:
             try:
                 status[name] = context.get_status()
             except Exception as e:
-                logger.exception("Failed to get status from %s", name)
-                status[name] = {"status": "error", "error": str(e)}
+                logger.exception('Failed to get status from %s', name)
+                status[name] = {'status': 'error', 'error': str(e)}
         return status
 
     def cleanup_all(self) -> None:
         """Cleanup all contexts."""
-        logger.info(" Cleaning up %d contexts", len(self.contexts))
+        logger.info(' Cleaning up %d contexts', len(self.contexts))
 
         for name, context in self.contexts.items():
             try:
                 context.cleanup()
-                logger.debug(" Cleaned up context: %s", name)
+                logger.debug(' Cleaned up context: %s', name)
             except Exception:
-                logger.exception("Failed to cleanup %s", name)
+                logger.exception('Failed to cleanup %s', name)
 
     def broadcast_lifecycle_event(self, event: Any) -> None:
         """Broadcast lifecycle event to all contexts."""
         for name, context in self.contexts.items():
             try:
-                if hasattr(event, "__class__"):
+                if hasattr(event, '__class__'):
                     event_name = event.__class__.__name__
-                    if event_name == "SimulationStartedEvent":
+                    if event_name == 'SimulationStartedEvent':
                         context.on_simulation_started(event)
-                    elif event_name == "SimulationEndedEvent":
+                    elif event_name == 'SimulationEndedEvent':
                         context.on_simulation_ended(event)
-                    elif event_name == "SimulationFailedEvent":
+                    elif event_name == 'SimulationFailedEvent':
                         context.on_simulation_failed(event)
             except Exception:
                 logger.exception(
-                    "Failed to broadcast %s to %s",
+                    'Failed to broadcast %s to %s',
                     event.__class__.__name__,
                     name,
                 )

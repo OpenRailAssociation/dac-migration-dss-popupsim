@@ -8,17 +8,17 @@ from enum import Enum
 class ComponentStatus(str, Enum):
     """Status of configuration component."""
 
-    MISSING = "missing"
-    INCOMPLETE = "incomplete"
-    COMPLETE = "complete"
+    MISSING = 'missing'
+    INCOMPLETE = 'incomplete'
+    COMPLETE = 'complete'
 
 
 class ConfigurationStatus(str, Enum):
     """Overall configuration status."""
 
-    DRAFT = "draft"
-    INVALID = "invalid"
-    READY = "ready"
+    DRAFT = 'draft'
+    INVALID = 'invalid'
+    READY = 'ready'
 
 
 @dataclass
@@ -46,7 +46,7 @@ class TrackConfig:
     """Track configuration."""
 
     id: str
-    capacity: int
+    # capacity: int
 
 
 @dataclass
@@ -68,7 +68,7 @@ class ProcessTimesConfig:
 class TopologyConfig:
     """Topology configuration."""
 
-    connections: list["ConnectionConfig"]
+    connections: list['ConnectionConfig']
 
 
 @dataclass

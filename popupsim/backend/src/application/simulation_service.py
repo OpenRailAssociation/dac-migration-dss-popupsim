@@ -1,6 +1,5 @@
 """Enhanced simulation application service with context registry and lifecycle events.
 
-
 Todo
 -----
     Check if te context registry is still needed or can be removed. The

@@ -2,4 +2,4 @@
 
 from .shunting_context import ShuntingOperationsContext
 
-__all__ = ["ShuntingOperationsContext"]
+__all__ = ['ShuntingOperationsContext']

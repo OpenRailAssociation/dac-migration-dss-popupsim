@@ -1,7 +1,8 @@
 """Railway capacity domain service for cross-context capacity management."""
 
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any
+from typing import Protocol
 
 
 @dataclass
@@ -19,15 +20,12 @@ class RailwayCapacityPort(Protocol):
 
     def get_available_capacity(self, track_id: str) -> int:
         """Get available capacity on a track."""
-        ...
 
     def get_total_capacity(self, track_id: str) -> int:
         """Get total capacity of a track."""
-        ...
 
     def request_track_capacity(self, track_id: str) -> Any:
         """Request capacity on a track."""
-        ...
 
 
 class RailwayCapacityService:

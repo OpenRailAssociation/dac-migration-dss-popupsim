@@ -4,16 +4,17 @@ SimPy is unit-agnostic - it just counts 'ticks'. We define what a tick means.
 This module provides the SINGLE SOURCE OF TRUTH for time unit conversions.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from enum import Enum
 
 
 class SimulationTimeUnit(Enum):
     """Simulation time unit for SimPy ticks."""
 
-    SECONDS = "seconds"
-    MINUTES = "minutes"
-    HOURS = "hours"
+    SECONDS = 'seconds'
+    MINUTES = 'minutes'
+    HOURS = 'hours'
 
 
 # Global configuration - SINGLE SOURCE OF TRUTH
@@ -45,7 +46,7 @@ def timedelta_to_sim_ticks(td: timedelta) -> float:
         return total_seconds / 60.0
     if SIMULATION_TIME_UNIT == SimulationTimeUnit.HOURS:
         return total_seconds / 3600.0
-    msg = f"Unknown time unit: {SIMULATION_TIME_UNIT}"
+    msg = f'Unknown time unit: {SIMULATION_TIME_UNIT}'
     raise ValueError(msg)
 
 
@@ -70,7 +71,7 @@ def sim_ticks_to_timedelta(ticks: float) -> timedelta:
         return timedelta(minutes=ticks)
     if SIMULATION_TIME_UNIT == SimulationTimeUnit.HOURS:
         return timedelta(hours=ticks)
-    msg = f"Unknown time unit: {SIMULATION_TIME_UNIT}"
+    msg = f'Unknown time unit: {SIMULATION_TIME_UNIT}'
     raise ValueError(msg)
 
 
@@ -90,7 +91,7 @@ def datetime_to_sim_delay(target_time: datetime, current_time: datetime) -> floa
         Delay in SimPy ticks
     """
     if target_time.tzinfo is None or current_time.tzinfo is None:
-        msg = "Both datetimes must be timezone-aware"
+        msg = 'Both datetimes must be timezone-aware'
         raise ValueError(msg)
 
     delay = target_time - current_time

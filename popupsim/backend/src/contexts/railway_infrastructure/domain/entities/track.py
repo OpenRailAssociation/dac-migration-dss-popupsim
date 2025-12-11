@@ -1,19 +1,20 @@
 """Track entity for railway infrastructure."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from enum import Enum
 
 
 class TrackType(Enum):
     """Track types in railway infrastructure."""
 
-    LOCOPARKING = "loco_parking"
-    COLLECTION = "collection"
-    MAINLINE = "mainline"
-    PARKING = "parking_area"
-    RETROFIT = "retrofit"
-    RETROFITTED = "retrofitted"
-    WORKSHOP = "workshop_area"
+    LOCOPARKING = 'loco_parking'
+    COLLECTION = 'collection'
+    MAINLINE = 'mainline'
+    PARKING = 'parking_area'
+    RETROFIT = 'retrofit'
+    RETROFITTED = 'retrofitted'
+    WORKSHOP = 'workshop_area'
 
 
 @dataclass
@@ -44,11 +45,7 @@ class Track:
     @property
     def utilization_percentage(self) -> float:
         """Get utilization as percentage."""
-        return (
-            (self._current_occupancy / self.capacity * 100)
-            if self.capacity > 0
-            else 0.0
-        )
+        return (self._current_occupancy / self.capacity * 100) if self.capacity > 0 else 0.0
 
     def can_accommodate(self, length: float) -> bool:
         """Check if track can accommodate given length."""
@@ -58,8 +55,8 @@ class Track:
         """Add wagon to track."""
         if not self.can_accommodate(wagon_length):
             msg = (
-                f"Track {self.track_id} cannot accommodate wagon of length {wagon_length}. "
-                f"Available: {self.available_capacity}, Required: {wagon_length}"
+                f'Track {self.track_id} cannot accommodate wagon of length {wagon_length}. '
+                f'Available: {self.available_capacity}, Required: {wagon_length}'
             )
             raise ValueError(msg)
         self._current_occupancy += wagon_length

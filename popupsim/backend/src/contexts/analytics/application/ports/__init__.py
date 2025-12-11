@@ -2,4 +2,4 @@
 
 from .analytics_context_port import AnalyticsContextPort
 
-__all__ = ["AnalyticsContextPort"]
+__all__ = ['AnalyticsContextPort']

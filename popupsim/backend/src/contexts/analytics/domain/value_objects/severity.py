@@ -7,11 +7,11 @@ from enum import Enum
 class SeverityLevel(Enum):
     """Severity levels for alerts and violations."""
 
-    INFO = "info"
-    WARNING = "warning"
-    CRITICAL = "critical"
+    INFO = 'info'
+    WARNING = 'warning'
+    CRITICAL = 'critical'
 
-    def __lt__(self, other: "SeverityLevel") -> bool:
+    def __lt__(self, other: 'SeverityLevel') -> bool:
         order = {
             SeverityLevel.INFO: 0,
             SeverityLevel.WARNING: 1,
@@ -29,7 +29,7 @@ class Severity:
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.score <= 1.0:
-            msg = "Severity score must be between 0.0 and 1.0"
+            msg = 'Severity score must be between 0.0 and 1.0'
             raise ValueError(msg)
 
     def is_critical(self) -> bool:
@@ -41,7 +41,7 @@ class Severity:
         return self.level == SeverityLevel.WARNING
 
     @classmethod
-    def from_score(cls, score: float) -> "Severity":
+    def from_score(cls, score: float) -> 'Severity':
         """Create severity from score."""
         if score >= 0.8:
             return cls(SeverityLevel.CRITICAL, score)

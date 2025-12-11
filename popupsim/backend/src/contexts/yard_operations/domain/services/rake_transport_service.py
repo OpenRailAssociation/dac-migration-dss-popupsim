@@ -13,10 +13,10 @@ if TYPE_CHECKING:
 class TransportPriority(Enum):
     """Priority levels for rake transport."""
 
-    LOW = "low"
-    NORMAL = "normal"
-    HIGH = "high"
-    URGENT = "urgent"
+    LOW = 'low'
+    NORMAL = 'normal'
+    HIGH = 'high'
+    URGENT = 'urgent'
 
 
 @dataclass
@@ -88,9 +88,7 @@ class RakeTransportService:
             execution_sequence=execution_sequence,
         )
 
-    def _determine_priority(
-        self, rake: Rake, priority_rules: dict[str, TransportPriority] | None
-    ) -> TransportPriority:
+    def _determine_priority(self, rake: Rake, priority_rules: dict[str, TransportPriority] | None) -> TransportPriority:
         """Determine transport priority for rake."""
         if not priority_rules:
             return TransportPriority.NORMAL
@@ -100,7 +98,7 @@ class RakeTransportService:
             return priority_rules[rake.target_track]
 
         # Check rake type priorities
-        rake_type_key = f"rake_type_{rake.rake_type.value}"
+        rake_type_key = f'rake_type_{rake.rake_type.value}'
         if rake_type_key in priority_rules:
             return priority_rules[rake_type_key]
 
@@ -136,9 +134,7 @@ class RakeTransportService:
 
         return [job.rake.rake_id for job in sorted_jobs]
 
-    def _calculate_total_duration(
-        self, jobs: list[TransportJob], available_locomotives: int
-    ) -> float:
+    def _calculate_total_duration(self, jobs: list[TransportJob], available_locomotives: int) -> float:
         """Calculate total duration considering parallel execution."""
         if not jobs:
             return 0.0
@@ -152,11 +148,7 @@ class RakeTransportService:
 
         # Apply parallelization factor
         parallelization_factor = min(available_locomotives, len(jobs)) / len(jobs)
-        return total_duration * (
-            1.0
-            - parallelization_factor
-            + parallelization_factor / available_locomotives
-        )
+        return total_duration * (1.0 - parallelization_factor + parallelization_factor / available_locomotives)
 
     def validate_transport_feasibility(
         self,
@@ -173,40 +165,26 @@ class RakeTransportService:
                 # Check source track
                 if job.from_track in track_constraints:
                     constraints = track_constraints[job.from_track]
-                    if "max_concurrent_operations" in constraints:
-                        track_usage[job.from_track] = (
-                            track_usage.get(job.from_track, 0) + 1
-                        )
-                        if (
-                            track_usage[job.from_track]
-                            > constraints["max_concurrent_operations"]
-                        ):
-                            issues.append(
-                                f"Track {job.from_track} exceeds concurrent operation limit"
-                            )
+                    if 'max_concurrent_operations' in constraints:
+                        track_usage[job.from_track] = track_usage.get(job.from_track, 0) + 1
+                        if track_usage[job.from_track] > constraints['max_concurrent_operations']:
+                            issues.append(f'Track {job.from_track} exceeds concurrent operation limit')
 
                 # Check destination track
                 if job.to_track in track_constraints:
                     constraints = track_constraints[job.to_track]
-                    if "max_concurrent_arrivals" in constraints:
+                    if 'max_concurrent_arrivals' in constraints:
                         track_usage[job.to_track] = track_usage.get(job.to_track, 0) + 1
-                        if (
-                            track_usage[job.to_track]
-                            > constraints["max_concurrent_arrivals"]
-                        ):
-                            issues.append(
-                                f"Track {job.to_track} exceeds concurrent arrival limit"
-                            )
+                        if track_usage[job.to_track] > constraints['max_concurrent_arrivals']:
+                            issues.append(f'Track {job.to_track} exceeds concurrent arrival limit')
 
         # Check locomotive requirements
         if schedule.locomotive_requirements == 0 and schedule.jobs:
-            issues.append("No locomotives available for transport operations")
+            issues.append('No locomotives available for transport operations')
 
         return len(issues) == 0, issues
 
-    def calculate_workshop_delivery_times(
-        self, schedule: TransportSchedule
-    ) -> dict[str, float]:
+    def calculate_workshop_delivery_times(self, schedule: TransportSchedule) -> dict[str, float]:
         """Calculate expected delivery times for each workshop."""
         delivery_times = {}
         current_time = 0.0
@@ -219,8 +197,6 @@ class RakeTransportService:
                 delivery_times[job.to_track] = current_time
             else:
                 # Update with latest delivery time for this workshop
-                delivery_times[job.to_track] = max(
-                    delivery_times[job.to_track], current_time
-                )
+                delivery_times[job.to_track] = max(delivery_times[job.to_track], current_time)
 
         return delivery_times

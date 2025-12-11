@@ -1,7 +1,7 @@
 """PopUpSim New Architecture CLI - Bounded contexts implementation."""
 
-import logging
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 from typing import Annotated
 
@@ -56,8 +56,10 @@ def print_yard_metrics(yard):
     typer.echo('\nYARD METRICS:')
     typer.echo(f'  Wagons classified:        {yard_metrics.get("classified_wagons", 0)}')
     typer.echo(f'  Wagons rejected:          {yard_metrics.get("rejected_wagons", 0)}')
-    typer.echo(f'  Wagons on retrofitted:    {yard_metrics.get("wagons_on_retrofitted", 0)}')
     typer.echo(f'  Wagons parked:            {yard_metrics.get("wagons_parked", 0)}')
+    typer.echo(f'  Wagons on collection:     {yard_metrics.get("wagons_on_collection", 0)}')
+    typer.echo(f'  Wagons on retrofit:       {yard_metrics.get("wagons_on_retrofit", 0)}')
+    typer.echo(f'  Wagons on retrofitted:    {yard_metrics.get("wagons_on_retrofitted", 0)}')
     track_util = yard_metrics.get('track_utilization', {})
     typer.echo('  Track utilization:')
     for track_id, util in sorted(track_util.items()):
@@ -134,7 +136,6 @@ def run(
     verbose: Annotated[bool, typer.Option('--verbose', help='Verbose output')] = False,
 ) -> None:
     """Run PopUpSim with new bounded contexts architecture."""
-
     # Create output directory
     output_path.mkdir(parents=True, exist_ok=True)
 

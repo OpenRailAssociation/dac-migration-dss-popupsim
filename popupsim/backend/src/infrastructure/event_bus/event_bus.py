@@ -1,11 +1,13 @@
 """Enhanced event bus interface and implementation."""
 
-import logging
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC
+from datetime import datetime
+import logging
 from typing import Any
 
 from infrastructure.events.base_event import DomainEvent
@@ -32,9 +34,7 @@ class EventBus(ABC):
         """Publish event to subscribers."""
 
     @abstractmethod
-    def subscribe(
-        self, event_type: type, handler: Callable[[DomainEvent], None]
-    ) -> None:
+    def subscribe(self, event_type: type, handler: Callable[[DomainEvent], None]) -> None:
         """Subscribe handler to event type."""
 
     @abstractmethod
@@ -42,9 +42,7 @@ class EventBus(ABC):
         """Get event bus metrics."""
 
     @abstractmethod
-    def add_error_handler(
-        self, handler: Callable[[Exception, DomainEvent], None]
-    ) -> None:
+    def add_error_handler(self, handler: Callable[[Exception, DomainEvent], None]) -> None:
         """Add global error handler."""
 
 
@@ -52,9 +50,7 @@ class InMemoryEventBus(EventBus):
     """Enhanced in-memory event bus with monitoring and error handling."""
 
     def __init__(self) -> None:
-        self._subscribers: dict[type, list[Callable[[DomainEvent], None]]] = (
-            defaultdict(list)
-        )
+        self._subscribers: dict[type, list[Callable[[DomainEvent], None]]] = defaultdict(list)
         self._metrics = EventMetrics()
         self._event_history: list[tuple[datetime, DomainEvent]] = []
         self._error_handlers: list[Callable[[Exception, DomainEvent], None]] = []
@@ -71,15 +67,15 @@ class InMemoryEventBus(EventBus):
             try:
                 hook(event)
             except Exception:
-                logger.exception("Pre-publish hook error")
+                logger.exception('Pre-publish hook error')
 
         # Log event with context
         event_data = self._extract_event_data(event)
-        logger.info("EVENT_PUBLISHED: %s | %s", event.__class__.__name__, event_data)
+        logger.info('EVENT_PUBLISHED: %s | %s', event.__class__.__name__, event_data)
 
         handlers = self._subscribers[type(event)]
         if not handlers:
-            logger.warning("EVENT_NO_SUBSCRIBERS: %s", event.__class__.__name__)
+            logger.warning('EVENT_NO_SUBSCRIBERS: %s', event.__class__.__name__)
             return
 
         # Execute handlers with error handling
@@ -87,19 +83,17 @@ class InMemoryEventBus(EventBus):
             try:
                 handler_context = self._get_handler_context(handler)
                 logger.info(
-                    "EVENT_HANDLING: %s -> %s",
+                    'EVENT_HANDLING: %s -> %s',
                     event.__class__.__name__,
                     handler_context,
                 )
                 handler(event)
                 self._metrics.events_processed += 1
-                logger.info(
-                    "EVENT_HANDLED: %s by %s", event.__class__.__name__, handler_context
-                )
+                logger.info('EVENT_HANDLED: %s by %s', event.__class__.__name__, handler_context)
             except Exception as e:
                 self._metrics.handler_errors += 1
                 logger.exception(
-                    "EVENT_ERROR: %s in %s",
+                    'EVENT_ERROR: %s in %s',
                     event.__class__.__name__,
                     self._get_handler_context(handler),
                 )
@@ -109,18 +103,16 @@ class InMemoryEventBus(EventBus):
                     try:
                         error_handler(e, event)
                     except Exception:
-                        logger.exception("Error handler failed")
+                        logger.exception('Error handler failed')
 
         # Execute post-publish hooks
         for hook in self._post_publish_hooks:
             try:
                 hook(event)
             except Exception:
-                logger.exception("Post-publish hook error")
+                logger.exception('Post-publish hook error')
 
-    def subscribe(
-        self, event_type: type, handler: Callable[[DomainEvent], None]
-    ) -> None:
+    def subscribe(self, event_type: type, handler: Callable[[DomainEvent], None]) -> None:
         """Subscribe handler with monitoring."""
         self._subscribers[event_type].append(handler)
         self._metrics.subscribers_count += 1
@@ -130,15 +122,13 @@ class InMemoryEventBus(EventBus):
 
         handler_context = self._get_handler_context(handler)
         logger.info(
-            "EVENT_SUBSCRIBED: %s -> %s (total: %d)",
+            'EVENT_SUBSCRIBED: %s -> %s (total: %d)',
             event_type.__name__,
             handler_context,
             len(self._subscribers[event_type]),
         )
 
-    def add_error_handler(
-        self, handler: Callable[[Exception, DomainEvent], None]
-    ) -> None:
+    def add_error_handler(self, handler: Callable[[Exception, DomainEvent], None]) -> None:
         """Add global error handler."""
         self._error_handlers.append(handler)
 
@@ -153,28 +143,21 @@ class InMemoryEventBus(EventBus):
     def get_metrics(self) -> dict[str, Any]:
         """Get event bus metrics."""
         return {
-            "events_published": self._metrics.events_published,
-            "events_processed": self._metrics.events_processed,
-            "handler_errors": self._metrics.handler_errors,
-            "subscribers_count": self._metrics.subscribers_count,
-            "event_types_count": self._metrics.event_types_count,
-            "error_rate": self._metrics.handler_errors
-            / max(1, self._metrics.events_processed),
+            'events_published': self._metrics.events_published,
+            'events_processed': self._metrics.events_processed,
+            'handler_errors': self._metrics.handler_errors,
+            'subscribers_count': self._metrics.subscribers_count,
+            'event_types_count': self._metrics.event_types_count,
+            'error_rate': self._metrics.handler_errors / max(1, self._metrics.events_processed),
         }
 
     def get_event_history(self, limit: int = 100) -> list[tuple[datetime, str]]:
         """Get recent event history."""
-        return [
-            (timestamp, event.__class__.__name__)
-            for timestamp, event in self._event_history[-limit:]
-        ]
+        return [(timestamp, event.__class__.__name__) for timestamp, event in self._event_history[-limit:]]
 
     def get_subscriber_stats(self) -> dict[str, int]:
         """Get subscriber statistics by event type."""
-        return {
-            event_type.__name__: len(handlers)
-            for event_type, handlers in self._subscribers.items()
-        }
+        return {event_type.__name__: len(handlers) for event_type, handlers in self._subscribers.items()}
 
     def clear_history(self) -> None:
         """Clear event history."""
@@ -186,21 +169,21 @@ class InMemoryEventBus(EventBus):
 
     def _get_handler_context(self, handler: Callable) -> str:
         """Extract context information from handler."""
-        if hasattr(handler, "__self__"):
-            return f"{handler.__self__.__class__.__name__}.{handler.__name__}"
+        if hasattr(handler, '__self__'):
+            return f'{handler.__self__.__class__.__name__}.{handler.__name__}'
         return handler.__name__
 
     def _extract_event_data(self, event: DomainEvent) -> str:
         """Extract relevant data from event for logging."""
         data_parts = []
-        if hasattr(event, "wagon_id"):
-            data_parts.append(f"wagon={event.wagon_id}")
-        if hasattr(event, "train_id"):
-            data_parts.append(f"train={event.train_id}")
-        if hasattr(event, "workshop_id"):
-            data_parts.append(f"workshop={event.workshop_id}")
-        if hasattr(event, "rake_id"):
-            data_parts.append(f"rake={event.rake_id}")
-        if hasattr(event, "event_timestamp"):
-            data_parts.append(f"time={event.event_timestamp:.1f}")
-        return " | ".join(data_parts) if data_parts else "no_data"
+        if hasattr(event, 'wagon_id'):
+            data_parts.append(f'wagon={event.wagon_id}')
+        if hasattr(event, 'train_id'):
+            data_parts.append(f'train={event.train_id}')
+        if hasattr(event, 'workshop_id'):
+            data_parts.append(f'workshop={event.workshop_id}')
+        if hasattr(event, 'rake_id'):
+            data_parts.append(f'rake={event.rake_id}')
+        if hasattr(event, 'event_timestamp'):
+            data_parts.append(f'time={event.event_timestamp:.1f}')
+        return ' | '.join(data_parts) if data_parts else 'no_data'

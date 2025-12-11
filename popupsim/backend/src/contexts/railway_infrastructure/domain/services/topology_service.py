@@ -16,16 +16,16 @@ class TopologyService:
     def find_path(self, from_node: str, to_node: str) -> list[str]:
         """Find path between two nodes."""
         # Simple implementation - contexts can copy and enhance
-        routes = self._topology.get("routes", [])
+        routes = self._topology.get('routes', [])
         for route in routes:
-            if route.get("from") == from_node and route.get("to") == to_node:
+            if route.get('from') == from_node and route.get('to') == to_node:
                 return [from_node, to_node]
         return []
 
     def get_track_info(self, track_id: str) -> dict[str, Any] | None:
         """Get track information."""
-        tracks = self._topology.get("tracks", [])
+        tracks = self._topology.get('tracks', [])
         for track in tracks:
-            if track.get("id") == track_id:
+            if track.get('id') == track_id:
                 return track.copy()
         return None

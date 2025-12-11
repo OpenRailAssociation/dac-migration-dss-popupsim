@@ -22,7 +22,7 @@ def fixtures_path() -> Path:
     ...     scenario_file = fixtures_config_path / 'test_scenario.json'
     ...     assert scenario_file.exists()
     """
-    return Path(__file__).parent / "fixtures"
+    return Path(__file__).parent / 'fixtures'
 
 
 @pytest.fixture
@@ -40,4 +40,4 @@ def test_scenario_json_path(fixtures_path: Path) -> Path:
     ...     assert test_scenario_json_path.exists()
     ...     assert test_scenario_json_path.name == 'test_scenario.json'
     """
-    return fixtures_path / "scenario.json"
+    return fixtures_path / 'scenario.json'

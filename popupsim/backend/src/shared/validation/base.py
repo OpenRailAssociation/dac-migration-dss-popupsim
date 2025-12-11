@@ -1,27 +1,28 @@
 """Base validation components shared across contexts."""
 
-import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from enum import Enum
+import logging
 
-logger = logging.getLogger("validation")
+logger = logging.getLogger('validation')
 
 
 class ValidationLevel(Enum):
     """Severity level of a validation message."""
 
-    ERROR = "ERROR"
-    WARNING = "WARNING"
-    INFO = "INFO"
+    ERROR = 'ERROR'
+    WARNING = 'WARNING'
+    INFO = 'INFO'
 
 
 class ValidationCategory(Enum):
     """Validation layer category."""
 
-    SYNTAX = "SYNTAX"
-    SEMANTIC = "SEMANTIC"
-    INTEGRITY = "INTEGRITY"
-    FEASIBILITY = "FEASIBILITY"
+    SYNTAX = 'SYNTAX'
+    SEMANTIC = 'SEMANTIC'
+    INTEGRITY = 'INTEGRITY'
+    FEASIBILITY = 'FEASIBILITY'
 
 
 @dataclass
@@ -37,12 +38,12 @@ class ValidationIssue:
 
     def __str__(self) -> str:
         """Return formatted string representation."""
-        category_str = f"{self.category.value}: " if self.category else ""
-        result = f"[{self.level.value}] {category_str}{self.message}"
+        category_str = f'{self.category.value}: ' if self.category else ''
+        result = f'[{self.level.value}] {category_str}{self.message}'
         if self.field:
-            result += f" (Field: {self.field})"
+            result += f' (Field: {self.field})'
         if self.suggestion:
-            result += f"\n  → Suggestion: {self.suggestion}"
+            result += f'\n  → Suggestion: {self.suggestion}'
         return result
 
 
@@ -69,7 +70,7 @@ class ValidationResult:
         """Check if there are any WARNING-level issues."""
         return any(i.level == ValidationLevel.WARNING for i in self.issues)
 
-    def merge(self, other: "ValidationResult") -> None:
+    def merge(self, other: 'ValidationResult') -> None:
         """Merge another validation result into this one."""
         self.issues.extend(other.issues)
         # Keep is_valid as False if either result has errors
@@ -113,20 +114,18 @@ class ValidationResult:
             )
         )
 
-    def get_issues_by_category(
-        self, category: ValidationCategory
-    ) -> list[ValidationIssue]:
+    def get_issues_by_category(self, category: ValidationCategory) -> list[ValidationIssue]:
         """Get issues filtered by category."""
         return [i for i in self.issues if i.category == category]
 
     def print_summary(self) -> None:
         """Print formatted summary of validation results grouped by category."""
         if not self.issues:
-            logger.info("✅ Configuration valid - No issues found")
+            logger.info('✅ Configuration valid - No issues found')
             return
 
         logger.info(
-            "📋 Validation Summary: %d errors, %d warnings",
+            '📋 Validation Summary: %d errors, %d warnings',
             len(self.get_errors()),
             len(self.get_warnings()),
         )
@@ -135,6 +134,6 @@ class ValidationResult:
         for category in ValidationCategory:
             category_issues = self.get_issues_by_category(category)
             if category_issues:
-                logger.info("\n%s ISSUES:", category.value)
+                logger.info('\n%s ISSUES:', category.value)
                 for issue in category_issues:
-                    logger.info("  %s", issue)
+                    logger.info('  %s', issue)

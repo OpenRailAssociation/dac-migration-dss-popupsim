@@ -4,21 +4,17 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from contexts.external_trains.domain.value_objects.arrival_metrics import (
-    ArrivalMetrics,
-)
-from contexts.external_trains.domain.value_objects.train_id import (
-    TrainId,
-)
+from contexts.external_trains.domain.value_objects.arrival_metrics import ArrivalMetrics
+from contexts.external_trains.domain.value_objects.train_id import TrainId
 
 
 class TrainStatus(Enum):
     """Status of external train."""
 
-    SCHEDULED = "scheduled"
-    ARRIVING = "arriving"
-    ARRIVED = "arrived"
-    DEPARTED = "departed"
+    SCHEDULED = 'scheduled'
+    ARRIVING = 'arriving'
+    ARRIVED = 'arrived'
+    DEPARTED = 'departed'
 
 
 @dataclass

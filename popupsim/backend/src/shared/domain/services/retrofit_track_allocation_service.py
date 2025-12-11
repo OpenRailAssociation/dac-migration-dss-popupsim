@@ -40,9 +40,7 @@ class RetrofitTrackAllocationService:
         remaining_wagons = list(wagons)
 
         # Sort tracks by available capacity (largest first)
-        sorted_tracks = sorted(
-            available_tracks.items(), key=lambda x: x[1], reverse=True
-        )
+        sorted_tracks = sorted(available_tracks.items(), key=lambda x: x[1], reverse=True)
 
         for track_id, capacity in sorted_tracks:
             if not remaining_wagons:
@@ -53,7 +51,7 @@ class RetrofitTrackAllocationService:
             used_capacity = 0.0
 
             for wagon in remaining_wagons[:]:
-                wagon_length = getattr(wagon, "length", 10.0)
+                wagon_length = getattr(wagon, 'length', 10.0)
                 if used_capacity + wagon_length <= capacity:
                     track_wagons.append(wagon)
                     used_capacity += wagon_length
@@ -69,9 +67,7 @@ class RetrofitTrackAllocationService:
             track_assignments=assignments,
             overflow_wagons=remaining_wagons,
             total_capacity_used=float(allocated_wagons),
-            allocation_efficiency=allocated_wagons / total_wagons
-            if total_wagons > 0
-            else 0.0,
+            allocation_efficiency=allocated_wagons / total_wagons if total_wagons > 0 else 0.0,
         )
 
     def validate_allocation(
@@ -82,12 +78,10 @@ class RetrofitTrackAllocationService:
 
         if allocation.allocation_efficiency < min_efficiency:
             issues.append(
-                f"Allocation efficiency {allocation.allocation_efficiency:.2f} below minimum {min_efficiency:.2f}"
+                f'Allocation efficiency {allocation.allocation_efficiency:.2f} below minimum {min_efficiency:.2f}'
             )
 
         if allocation.overflow_wagons:
-            issues.append(
-                f"{len(allocation.overflow_wagons)} wagons could not be allocated"
-            )
+            issues.append(f'{len(allocation.overflow_wagons)} wagons could not be allocated')
 
         return len(issues) == 0, issues

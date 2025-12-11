@@ -1,7 +1,9 @@
 """Enhanced port for simulation engine abstraction."""
 
-from abc import ABC, abstractmethod
-from collections.abc import Callable, Generator
+from abc import ABC
+from abc import abstractmethod
+from collections.abc import Callable
+from collections.abc import Generator
 from datetime import timedelta
 from typing import Any
 
@@ -38,13 +40,4 @@ class SimulationEnginePort(ABC):
     # Enhanced capabilities (optional - provide default implementations)
     def get_simulation_stats(self) -> dict[str, Any]:
         """Get simulation statistics."""
-        return {"current_time": self.current_time()}
-
-    def add_error_handler(self, handler: Callable[[Exception], None]) -> None:
-        """Add global error handler."""
-
-    def add_pre_run_hook(self, hook: Callable[[], None]) -> None:
-        """Add pre-run hook."""
-
-    def add_post_run_hook(self, hook: Callable[[], None]) -> None:
-        """Add post-run hook."""
+        return {'current_time': self.current_time()}

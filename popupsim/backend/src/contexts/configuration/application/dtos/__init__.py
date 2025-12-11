@@ -5,7 +5,7 @@ from .route_input_dto import RouteInputDTO
 from .workshop_input_dto import WorkshopInputDTO
 
 __all__ = [
-    "LocomotiveInputDTO",
-    "RouteInputDTO",
-    "WorkshopInputDTO",
+    'LocomotiveInputDTO',
+    'RouteInputDTO',
+    'WorkshopInputDTO',
 ]

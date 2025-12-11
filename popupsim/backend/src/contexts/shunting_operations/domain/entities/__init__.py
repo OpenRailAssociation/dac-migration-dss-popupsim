@@ -1,5 +1,6 @@
 """Shunting Operations Context entities."""
 
-from .shunting_locomotive import ShuntingLocomotive, ShuntingStatus
+from .shunting_locomotive import ShuntingLocomotive
+from .shunting_locomotive import ShuntingStatus
 
-__all__ = ["ShuntingLocomotive", "ShuntingStatus"]
+__all__ = ['ShuntingLocomotive', 'ShuntingStatus']

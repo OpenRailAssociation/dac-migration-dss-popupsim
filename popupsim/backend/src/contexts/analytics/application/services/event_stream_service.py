@@ -3,15 +3,9 @@
 import time
 from typing import Any
 
-from contexts.analytics.domain.entities.metrics_aggregator import (
-    MetricsAggregator,
-)
-from contexts.analytics.domain.services.event_collection_service import (
-    EventCollectionService,
-)
-from contexts.analytics.domain.services.track_occupancy_tracker import (
-    TrackOccupancyTracker,
-)
+from contexts.analytics.domain.entities.metrics_aggregator import MetricsAggregator
+from contexts.analytics.domain.services.event_collection_service import EventCollectionService
+from contexts.analytics.domain.services.track_occupancy_tracker import TrackOccupancyTracker
 from infrastructure.event_bus.event_bus import EventBus
 
 
@@ -36,7 +30,7 @@ class EventStreamService:
     def _subscribe_to_wagon_events(self) -> None:
         """Subscribe to wagon movement events for track occupancy."""
         from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
-        
+
         self.event_bus.subscribe(TrainArrivedEvent, self._handle_train_arrived)
         # Subscribe to all events to track wagon movements
         self.collector.subscribe_to_all_events(self._track_wagon_locations)

@@ -1,12 +1,8 @@
 """Yard aggregate - root of yard operations."""
 
-from contexts.yard_operations.domain.entities.classification_area import (
-    ClassificationArea,
-)
+from contexts.yard_operations.domain.entities.classification_area import ClassificationArea
 from contexts.yard_operations.domain.entities.parking_area import ParkingArea
-from contexts.yard_operations.domain.value_objects.classification_decision import (
-    ClassificationDecision,
-)
+from contexts.yard_operations.domain.value_objects.classification_decision import ClassificationDecision
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from shared.domain.entities.wagon import Wagon
 

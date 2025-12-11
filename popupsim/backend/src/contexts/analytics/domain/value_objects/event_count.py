@@ -12,19 +12,19 @@ class EventCount:
 
     def __post_init__(self) -> None:
         if self.count < 0:
-            msg = "Event count cannot be negative"
+            msg = 'Event count cannot be negative'
             raise ValueError(msg)
         if not self.event_type or not self.event_type.strip():
-            msg = "Event type cannot be empty"
+            msg = 'Event type cannot be empty'
             raise ValueError(msg)
 
-    def increment(self) -> "EventCount":
+    def increment(self) -> 'EventCount':
         """Create new EventCount with incremented value."""
         return EventCount(self.event_type, self.count + 1)
 
-    def add(self, amount: int) -> "EventCount":
+    def add(self, amount: int) -> 'EventCount':
         """Create new EventCount with added amount."""
         if amount < 0:
-            msg = "Cannot add negative amount"
+            msg = 'Cannot add negative amount'
             raise ValueError(msg)
         return EventCount(self.event_type, self.count + amount)

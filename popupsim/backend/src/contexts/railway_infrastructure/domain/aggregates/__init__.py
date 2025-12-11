@@ -2,4 +2,4 @@
 
 from .track_group import TrackGroup
 
-__all__ = ["TrackGroup"]
+__all__ = ['TrackGroup']

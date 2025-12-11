@@ -1,25 +1,18 @@
 """Analytics session aggregate for Analytics Context."""
 
+from dataclasses import dataclass
+from dataclasses import field
 import time
-from dataclasses import dataclass, field
 from typing import Any
 
-from contexts.analytics.domain.entities.metric_collector import (
-    MetricCollector,
-)
-from contexts.analytics.domain.events.analytics_events import (
-    AnalysisCompletedEvent,
-    CollectorAddedEvent,
-    MetricsCollectedEvent,
-    ThresholdSetEvent,
-)
-from contexts.analytics.domain.value_objects.analytics_metrics import (
-    AnalyticsMetrics,
-    Threshold,
-)
-from contexts.analytics.domain.value_objects.metric_id import (
-    MetricId,
-)
+from contexts.analytics.domain.entities.metric_collector import MetricCollector
+from contexts.analytics.domain.events.analytics_events import AnalysisCompletedEvent
+from contexts.analytics.domain.events.analytics_events import CollectorAddedEvent
+from contexts.analytics.domain.events.analytics_events import MetricsCollectedEvent
+from contexts.analytics.domain.events.analytics_events import ThresholdSetEvent
+from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
+from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
+from contexts.analytics.domain.value_objects.metric_id import MetricId
 
 
 @dataclass
@@ -35,7 +28,7 @@ class AnalyticsSession:
     def add_collector(self, collector_id: str) -> MetricCollector:
         """Add a metric collector (entity)."""
         if collector_id in self._collectors:
-            msg = f"Collector {collector_id} already exists"
+            msg = f'Collector {collector_id} already exists'
             raise ValueError(msg)
 
         collector = MetricCollector(MetricId(collector_id))
@@ -70,7 +63,7 @@ class AnalyticsSession:
     ) -> MetricsCollectedEvent:
         """Record metric with validation and return event."""
         if not isinstance(value, (int, float, str, bool)):
-            msg = f"Invalid metric value type: {type(value)}"
+            msg = f'Invalid metric value type: {type(value)}'
             raise ValueError(msg)
 
         collector = self.get_collector(collector_id)
@@ -87,12 +80,8 @@ class AnalyticsSession:
 
     def check_threshold_violations(self) -> list[Any]:
         """Check violations and add to domain events (aggregate controls events)."""
-        from contexts.analytics.domain.events.analytics_events import (
-            ThresholdViolatedEvent,
-        )
-        from contexts.analytics.domain.value_objects.severity import (
-            SeverityLevel,
-        )
+        from contexts.analytics.domain.events.analytics_events import ThresholdViolatedEvent
+        from contexts.analytics.domain.value_objects.severity import SeverityLevel
 
         violations = []
 
@@ -137,18 +126,10 @@ class AnalyticsSession:
         duration = self.calculate_session_duration()
 
         throughput = total_events / max(duration / 3600, 0.1)  # Events per hour
-        utilization = (
-            min(1.0, total_events / (len(self._collectors) * 100))
-            if self._collectors
-            else 0.0
-        )
+        utilization = min(1.0, total_events / (len(self._collectors) * 100)) if self._collectors else 0.0
 
-        total_wagons = sum(
-            c.get_latest("total_wagons") or 0 for c in self._collectors.values()
-        )
-        processed_wagons = sum(
-            c.get_latest("processed_wagons") or 0 for c in self._collectors.values()
-        )
+        total_wagons = sum(c.get_latest('total_wagons') or 0 for c in self._collectors.values())
+        processed_wagons = sum(c.get_latest('processed_wagons') or 0 for c in self._collectors.values())
 
         metrics = AnalyticsMetrics(
             throughput=throughput,
@@ -157,9 +138,7 @@ class AnalyticsSession:
             processed_wagons=processed_wagons,
         )
 
-        return AnalysisCompletedEvent(
-            analysis_id=self.session_id, results=metrics, duration=duration
-        )
+        return AnalysisCompletedEvent(analysis_id=self.session_id, results=metrics, duration=duration)
 
     def get_all_collectors(self) -> dict[str, MetricCollector]:
         """Get all collectors (for read-only access)."""

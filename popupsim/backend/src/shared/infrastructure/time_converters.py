@@ -1,6 +1,8 @@
 """Streamlined time conversion functions."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC
+from datetime import datetime
+from datetime import timedelta
 
 from .time_config import SIMULATION_TIME_UNIT_SECONDS
 
@@ -18,7 +20,7 @@ def from_ticks(ticks: float) -> timedelta:
 def datetime_to_ticks(target_time: datetime, current_time: datetime) -> float:
     """Calculate simulation ticks between two timezone-aware datetimes."""
     if target_time.tzinfo is None or current_time.tzinfo is None:
-        msg = "Both datetimes must be timezone-aware"
+        msg = 'Both datetimes must be timezone-aware'
         raise ValueError(msg)
 
     # Convert to UTC for consistent calculation

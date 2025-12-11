@@ -2,12 +2,8 @@
 
 from typing import Any
 
-from contexts.analytics.domain.entities.metrics_aggregator import (
-    MetricsAggregator,
-)
-from contexts.analytics.domain.services.event_collection_service import (
-    EventCollectionService,
-)
+from contexts.analytics.domain.entities.metrics_aggregator import MetricsAggregator
+from contexts.analytics.domain.services.event_collection_service import EventCollectionService
 from infrastructure.event_bus.event_bus import EventBus
 
 

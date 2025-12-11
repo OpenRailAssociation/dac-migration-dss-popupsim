@@ -2,21 +2,22 @@
 
 from typing import Any
 
+from contexts.configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
+from contexts.configuration.domain.models.scenario import Scenario
+from contexts.configuration.infrastructure.file_loader import FileLoader
 from shared.validation.base import ValidationResult
 
-from .models import (
-    ComponentInfo,
-    ComponentStatus,
-    ConfigurationState,
-    ConfigurationStatus,
-    LocomotiveConfig,
-    ProcessTimesConfig,
-    ScenarioMetadata,
-    StrategiesConfig,
-    TopologyConfig,
-    TrackConfig,
-    WorkshopConfig,
-)
+from .models import ComponentInfo
+from .models import ComponentStatus
+from .models import ConfigurationState
+from .models import ConfigurationStatus
+from .models import LocomotiveConfig
+from .models import ProcessTimesConfig
+from .models import ScenarioMetadata
+from .models import StrategiesConfig
+from .models import TopologyConfig
+from .models import TrackConfig
+from .models import WorkshopConfig
 
 
 class ConfigurationBuilder:
@@ -41,15 +42,11 @@ class ConfigurationBuilder:
         """Add workshop configuration."""
         # Validate workshop
         if workshop.retrofit_stations <= 0:
-            return ValidationResult(
-                is_valid=False, issues=["retrofit_stations must be greater than 0"]
-            )
+            return ValidationResult(is_valid=False, issues=['retrofit_stations must be greater than 0'])
 
         # Check for duplicates
         if any(w.id == workshop.id for w in self._workshops):
-            return ValidationResult(
-                is_valid=False, issues=[f"Workshop {workshop.id} already exists"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Workshop {workshop.id} already exists'])
 
         self._workshops.append(workshop)
         return ValidationResult(is_valid=True, issues=[])
@@ -58,15 +55,11 @@ class ConfigurationBuilder:
         """Add track configuration."""
         # Validate track
         if track.capacity <= 0:
-            return ValidationResult(
-                is_valid=False, issues=["capacity must be greater than 0"]
-            )
+            return ValidationResult(is_valid=False, issues=['capacity must be greater than 0'])
 
         # Check for duplicates
         if any(t.id == track.id for t in self._tracks):
-            return ValidationResult(
-                is_valid=False, issues=[f"Track {track.id} already exists"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Track {track.id} already exists'])
 
         self._tracks.append(track)
         return ValidationResult(is_valid=True, issues=[])
@@ -75,15 +68,11 @@ class ConfigurationBuilder:
         """Add locomotive configuration."""
         # Validate locomotive
         if locomotive.max_wagons <= 0:
-            return ValidationResult(
-                is_valid=False, issues=["max_wagons must be greater than 0"]
-            )
+            return ValidationResult(is_valid=False, issues=['max_wagons must be greater than 0'])
 
         # Check for duplicates
         if any(loco.id == locomotive.id for loco in self._locomotives):
-            return ValidationResult(
-                is_valid=False, issues=[f"Locomotive {locomotive.id} already exists"]
-            )
+            return ValidationResult(is_valid=False, issues=[f'Locomotive {locomotive.id} already exists'])
 
         self._locomotives.append(locomotive)
         return ValidationResult(is_valid=True, issues=[])
@@ -101,9 +90,9 @@ class ConfigurationBuilder:
 
         for conn in topology.connections:
             if conn.from_track not in track_ids:
-                issues.append(f"Track {conn.from_track} not found")
+                issues.append(f'Track {conn.from_track} not found')
             if conn.to_track not in track_ids:
-                issues.append(f"Track {conn.to_track} not found")
+                issues.append(f'Track {conn.to_track} not found')
 
         if issues:
             return ValidationResult(is_valid=False, issues=issues)
@@ -123,9 +112,7 @@ class ConfigurationBuilder:
         validation_issues = self._get_validation_issues()
         can_finalize = self._can_finalize(components, validation_issues)
 
-        status = (
-            ConfigurationStatus.READY if can_finalize else ConfigurationStatus.DRAFT
-        )
+        status = ConfigurationStatus.READY if can_finalize else ConfigurationStatus.DRAFT
         if validation_issues:
             status = ConfigurationStatus.INVALID
 
@@ -150,33 +137,28 @@ class ConfigurationBuilder:
         issues = []
 
         if not self._workshops:
-            issues.append("At least one workshop is required")
+            issues.append('At least one workshop is required')
         if not self._tracks:
-            issues.append("At least one track is required")
+            issues.append('At least one track is required')
         if not self._locomotives:
-            issues.append("At least one locomotive is required")
+            issues.append('At least one locomotive is required')
         if not self._process_times:
-            issues.append("Process times must be configured")
+            issues.append('Process times must be configured')
         if not self._topology:
-            issues.append("Topology must be configured")
+            issues.append('Topology must be configured')
 
         return ValidationResult(is_valid=len(issues) == 0, issues=issues)
 
     def build(self) -> Any:
         """Build scenario from file path."""
         if self._path:
-            from contexts.configuration.infrastructure.file_loader import FileLoader
             return FileLoader(self._path).load()
         return self.build_scenario()
 
     def build_scenario(self) -> Any:
         """Build final scenario object (MVP compatible)."""
-        from configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
-        from configuration.domain.models.scenario import Scenario
-
         workshop_dtos = [
-            WorkshopInputDTO(id=w.id, track=w.track, retrofit_stations=w.retrofit_stations)
-            for w in self._workshops
+            WorkshopInputDTO(id=w.id, track=w.track, retrofit_stations=w.retrofit_stations) for w in self._workshops
         ]
 
         return Scenario(
@@ -195,83 +177,59 @@ class ConfigurationBuilder:
     def _calculate_component_status(self) -> dict[str, ComponentInfo]:
         """Calculate status for each component."""
         return {
-            "workshops": ComponentInfo(
-                name="workshops",
-                status=ComponentStatus.COMPLETE
-                if self._workshops
-                else ComponentStatus.MISSING,
+            'workshops': ComponentInfo(
+                name='workshops',
+                status=ComponentStatus.COMPLETE if self._workshops else ComponentStatus.MISSING,
                 count=len(self._workshops),
                 validation_issues=[],
             ),
-            "tracks": ComponentInfo(
-                name="tracks",
-                status=ComponentStatus.COMPLETE
-                if self._tracks
-                else ComponentStatus.MISSING,
+            'tracks': ComponentInfo(
+                name='tracks',
+                status=ComponentStatus.COMPLETE if self._tracks else ComponentStatus.MISSING,
                 count=len(self._tracks),
                 validation_issues=[],
             ),
-            "locomotives": ComponentInfo(
-                name="locomotives",
-                status=ComponentStatus.COMPLETE
-                if self._locomotives
-                else ComponentStatus.MISSING,
+            'locomotives': ComponentInfo(
+                name='locomotives',
+                status=ComponentStatus.COMPLETE if self._locomotives else ComponentStatus.MISSING,
                 count=len(self._locomotives),
                 validation_issues=[],
             ),
-            "process_times": ComponentInfo(
-                name="process_times",
-                status=ComponentStatus.COMPLETE
-                if self._process_times
-                else ComponentStatus.MISSING,
+            'process_times': ComponentInfo(
+                name='process_times',
+                status=ComponentStatus.COMPLETE if self._process_times else ComponentStatus.MISSING,
                 count=1 if self._process_times else 0,
                 validation_issues=[],
             ),
-            "topology": ComponentInfo(
-                name="topology",
-                status=ComponentStatus.COMPLETE
-                if self._topology
-                else ComponentStatus.MISSING,
+            'topology': ComponentInfo(
+                name='topology',
+                status=ComponentStatus.COMPLETE if self._topology else ComponentStatus.MISSING,
                 count=len(self._topology.connections) if self._topology else 0,
                 validation_issues=[],
             ),
         }
 
-    def _calculate_completion_percentage(
-        self, components: dict[str, ComponentInfo]
-    ) -> int:
+    def _calculate_completion_percentage(self, components: dict[str, ComponentInfo]) -> int:
         """Calculate completion percentage."""
         total_components = len(components)
-        completed_components = sum(
-            1 for c in components.values() if c.status == ComponentStatus.COMPLETE
-        )
-        return (
-            int((completed_components / total_components) * 100)
-            if total_components > 0
-            else 0
-        )
+        completed_components = sum(1 for c in components.values() if c.status == ComponentStatus.COMPLETE)
+        return int((completed_components / total_components) * 100) if total_components > 0 else 0
 
     def _get_validation_issues(self) -> list[str]:
         """Get current validation issues."""
         issues = []
 
         if len(self._locomotives) < len(self._workshops):
-            issues.append(
-                f"Only {len(self._locomotives)} locomotive(s) for {len(self._workshops)} workshop(s)"
-            )
+            issues.append(f'Only {len(self._locomotives)} locomotive(s) for {len(self._workshops)} workshop(s)')
 
         return issues
 
-    def _can_finalize(
-        self, components: dict[str, ComponentInfo], validation_issues: list[str]
-    ) -> bool:
+    def _can_finalize(self, components: dict[str, ComponentInfo], validation_issues: list[str]) -> bool:
         """Check if configuration can be finalized."""
         required_complete = all(
             c.status == ComponentStatus.COMPLETE
             for name, c in components.items()
-            if name in ["workshops", "tracks", "locomotives", "process_times"]
+            if name in ['workshops', 'tracks', 'locomotives', 'process_times']
         )
-        no_critical_issues = not any(
-            "required" in issue.lower() for issue in validation_issues
-        )
+        no_critical_issues = not any('required' in issue.lower() for issue in validation_issues)
         return required_complete and no_critical_issues

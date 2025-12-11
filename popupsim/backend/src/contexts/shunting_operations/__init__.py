@@ -3,4 +3,4 @@
 from .application.ports.shunting_context_port import ShuntingContextPort
 from .application.shunting_context import ShuntingOperationsContext
 
-__all__ = ["ShuntingContextPort", "ShuntingOperationsContext"]
+__all__ = ['ShuntingContextPort', 'ShuntingOperationsContext']

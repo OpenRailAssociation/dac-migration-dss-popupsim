@@ -1,11 +1,10 @@
 """PopUp Retrofit Context port definition."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from typing import Any
 
-from contexts.popup_retrofit.domain.value_objects.retrofit_result import (
-    RetrofitResult,
-)
+from contexts.popup_retrofit.domain.value_objects.retrofit_result import RetrofitResult
 
 
 class PopUpContextPort(ABC):
@@ -20,9 +19,7 @@ class PopUpContextPort(ABC):
         """Start operations for a workshop."""
 
     @abstractmethod
-    def process_wagon_retrofit(
-        self, workshop_id: str, wagon_id: str, current_time: float
-    ) -> RetrofitResult:
+    def process_wagon_retrofit(self, workshop_id: str, wagon_id: str, current_time: float) -> RetrofitResult:
         """Process wagon retrofit at specified workshop."""
 
     @abstractmethod

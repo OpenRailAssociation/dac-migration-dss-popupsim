@@ -1,8 +1,9 @@
 """Shunting operations domain events."""
 
+from dataclasses import dataclass
+from dataclasses import field
 import time
 import uuid
-from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -30,7 +31,7 @@ class LocomotiveReleasedEvent:
 
 
 @dataclass(frozen=True)
-class ShuntingOperationCompletedEvent:
+class ShuntingOperationCompletedEvent:  # pylint: disable=too-many-instance-attributes
     """Event fired when shunting operation completes."""
 
     locomotive_id: str

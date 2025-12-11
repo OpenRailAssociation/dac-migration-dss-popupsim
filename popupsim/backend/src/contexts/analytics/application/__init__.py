@@ -2,4 +2,4 @@
 
 from .analytics_context import AnalyticsContext
 
-__all__ = ["AnalyticsContext"]
+__all__ = ['AnalyticsContext']

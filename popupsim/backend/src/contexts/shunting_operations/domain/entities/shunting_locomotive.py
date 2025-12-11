@@ -3,34 +3,30 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
-
-from contexts.shunting_operations.domain.value_objects.locomotive_id import (
-    LocomotiveId,
-)
+from contexts.shunting_operations.domain.value_objects.locomotive_id import LocomotiveId
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class ShuntingStatus(Enum):
     """Shunting locomotive status."""
 
-    IDLE = "idle"
-    MOVING = "moving"
-    COUPLING = "coupling"
-    DECOUPLING = "decoupling"
+    IDLE = 'idle'
+    MOVING = 'moving'
+    COUPLING = 'coupling'
+    DECOUPLING = 'decoupling'
 
 
 class ShuntingLocomotive(BaseModel):
     """Locomotive for shunting operations."""
 
-    id: LocomotiveId = Field(description="Locomotive identifier")
-    current_track: str = Field(description="Current track location")
-    home_track: str = Field(description="Home parking track")
-    status: ShuntingStatus = Field(
-        default=ShuntingStatus.IDLE, description="Current status"
-    )
-    max_capacity: int = Field(default=10, description="Maximum wagon capacity")
-    current_load: int = Field(default=0, description="Current number of coupled wagons")
-    track_request: Any | None = Field(default=None, description="Current track resource request")
+    id: LocomotiveId = Field(description='Locomotive identifier')
+    current_track: str = Field(description='Current track location')
+    home_track: str = Field(description='Home parking track')
+    status: ShuntingStatus = Field(default=ShuntingStatus.IDLE, description='Current status')
+    max_capacity: int = Field(default=10, description='Maximum wagon capacity')
+    current_load: int = Field(default=0, description='Current number of coupled wagons')
+    track_request: Any | None = Field(default=None, description='Current track resource request')
 
     def is_available(self) -> bool:
         """Check if locomotive is available for operations."""
@@ -39,7 +35,7 @@ class ShuntingLocomotive(BaseModel):
     def start_operation(self, operation_type: ShuntingStatus) -> None:
         """Start a shunting operation."""
         if not self.is_available():
-            msg = f"Locomotive {self.id.value} is not available"
+            msg = f'Locomotive {self.id.value} is not available'
             raise ValueError(msg)
         self.status = operation_type
 

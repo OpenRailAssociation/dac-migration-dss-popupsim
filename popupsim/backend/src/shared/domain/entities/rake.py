@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Rake:
+class Rake:  # pylint: disable=too-many-instance-attributes
     """A set of wagons coupled together for movement/operation."""
 
     rake_id: str
@@ -21,7 +21,7 @@ class Rake:
     formation_track: str
     target_track: str | None = None
     locomotive_id: str | None = None
-    status: str = "FORMED"
+    status: str = 'FORMED'
 
     @property
     def total_length(self) -> float:

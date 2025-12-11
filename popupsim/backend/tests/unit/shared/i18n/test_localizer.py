@@ -1,19 +1,16 @@
 """Tests for i18n localizer functionality."""
 
-import tempfile
 from collections.abc import Generator
 from pathlib import Path
+import tempfile
 
 import pytest
-
-from shared.i18n.localizer import (
-    Localizer,
-    _,
-    get_localizer,
-    init_i18n,
-    ngettext,
-    set_locale,
-)
+from shared.i18n.localizer import Localizer
+from shared.i18n.localizer import _
+from shared.i18n.localizer import get_localizer
+from shared.i18n.localizer import init_i18n
+from shared.i18n.localizer import ngettext
+from shared.i18n.localizer import set_locale
 
 pytestmark = pytest.mark.unit
 

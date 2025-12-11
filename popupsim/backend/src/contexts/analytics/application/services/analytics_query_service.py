@@ -3,12 +3,8 @@
 from dataclasses import dataclass
 from typing import Any
 
-from contexts.analytics.domain.aggregates.analytics_session import (
-    AnalyticsSession,
-)
-from contexts.analytics.domain.repositories.analytics_repository import (
-    AnalyticsRepository,
-)
+from contexts.analytics.domain.aggregates.analytics_session import AnalyticsSession
+from contexts.analytics.domain.repositories.analytics_repository import AnalyticsRepository
 
 
 @dataclass
@@ -43,9 +39,7 @@ class AnalyticsQueryService:
     def get_all_sessions(self) -> list[AnalyticsSession]:
         return self.repository.find_all()
 
-    def get_metrics_for_period(
-        self, session_id: str, start: float, end: float
-    ) -> TimeSeriesMetrics | None:
+    def get_metrics_for_period(self, session_id: str, start: float, end: float) -> TimeSeriesMetrics | None:
         session = self.repository.find_by_id(session_id)
         if not session:
             return None
@@ -56,7 +50,7 @@ class AnalyticsQueryService:
                 time_series = collector.get_time_series(key)
                 filtered = [(ts, val) for ts, val in time_series if start <= ts <= end]
                 if filtered:
-                    metric_key = f"{collector_id}_{key}"
+                    metric_key = f'{collector_id}_{key}'
                     filtered_metrics[metric_key] = filtered
 
         return TimeSeriesMetrics(
@@ -66,9 +60,7 @@ class AnalyticsQueryService:
             metrics=filtered_metrics,
         )
 
-    def get_trend_analysis(
-        self, metric_name: str, session_ids: list[str]
-    ) -> TrendAnalysis:
+    def get_trend_analysis(self, metric_name: str, session_ids: list[str]) -> TrendAnalysis:
         values: list[float] = []
         valid_sessions: list[str] = []
 
@@ -84,19 +76,17 @@ class AnalyticsQueryService:
 
         trend = self._calculate_trend(values)
 
-        return TrendAnalysis(
-            metric_name=metric_name, sessions=valid_sessions, values=values, trend=trend
-        )
+        return TrendAnalysis(metric_name=metric_name, sessions=valid_sessions, values=values, trend=trend)
 
     def _calculate_trend(self, values: list[float]) -> str:
         if len(values) < 2:
-            return "stable"
+            return 'stable'
 
         increases = sum(1 for i in range(1, len(values)) if values[i] > values[i - 1])
         decreases = sum(1 for i in range(1, len(values)) if values[i] < values[i - 1])
 
         if increases > decreases * 1.5:
-            return "increasing"
+            return 'increasing'
         if decreases > increases * 1.5:
-            return "decreasing"
-        return "stable"
+            return 'decreasing'
+        return 'stable'

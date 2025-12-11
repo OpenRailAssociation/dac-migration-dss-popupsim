@@ -8,7 +8,7 @@ class ProcessLogger:
     """Logger for tracking detailed process operations."""
 
     def __init__(self, output_dir: Path) -> None:
-        self.logger = logging.getLogger("process")
+        self.logger = logging.getLogger('process')
         self.logger.setLevel(logging.INFO)
         self.logger.propagate = False
 
@@ -17,14 +17,8 @@ class ProcessLogger:
 
         # File handler for process log
         output_dir.mkdir(parents=True, exist_ok=True)
-        handler = logging.FileHandler(
-            output_dir / "process.log", mode="w", encoding="utf-8"
-        )
-        handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s | t=%(sim_time)6.1f | %(message)s", datefmt="%H:%M:%S"
-            )
-        )
+        handler = logging.FileHandler(output_dir / 'process.log', mode='w', encoding='utf-8')
+        handler.setFormatter(logging.Formatter('%(asctime)s | t=%(sim_time)6.1f | %(message)s', datefmt='%H:%M:%S'))
         self.logger.addHandler(handler)
         self.current_time = 0.0
 
@@ -34,9 +28,7 @@ class ProcessLogger:
 
     def log(self, message: str, **kwargs: float) -> None:
         """Log process message with simulation time."""
-        self.logger.info(
-            message, extra={"sim_time": kwargs.get("sim_time", self.current_time)}
-        )
+        self.logger.info(message, extra={'sim_time': kwargs.get('sim_time', self.current_time)})
 
 
 # Global process logger instance
@@ -45,7 +37,6 @@ _process_logger: ProcessLogger | None = None
 
 def init_process_logger(output_dir: Path) -> ProcessLogger:
     """Initialize global process logger."""
-    global _process_logger
     _process_logger = ProcessLogger(output_dir)
     return _process_logger
 
@@ -53,6 +44,6 @@ def init_process_logger(output_dir: Path) -> ProcessLogger:
 def get_process_logger() -> ProcessLogger:
     """Get global process logger instance."""
     if _process_logger is None:
-        msg = "Process logger not initialized"
+        msg = 'Process logger not initialized'
         raise RuntimeError(msg)
     return _process_logger

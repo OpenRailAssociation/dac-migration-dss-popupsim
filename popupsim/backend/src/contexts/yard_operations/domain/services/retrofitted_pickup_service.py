@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 
 from shared.domain.services.rake_formation_service import RakeFormationService
 
@@ -46,15 +47,11 @@ class RetrofittedPickupService:
         pickup_rakes = []
         for workshop_id, wagons in completed_wagons_by_workshop.items():
             if wagons:
-                rake = self._rake_formation_service.form_retrofitted_rake(
-                    wagons, workshop_id
-                )
+                rake = self._rake_formation_service.form_retrofitted_rake(wagons, workshop_id)
                 pickup_rakes.append(rake)
 
         # Optimize pickup sequence
-        optimized_rakes = self._optimize_pickup_sequence(
-            pickup_rakes, workshop_capacities
-        )
+        optimized_rakes = self._optimize_pickup_sequence(pickup_rakes, workshop_capacities)
 
         total_wagon_count = sum(rake.wagon_count for rake in optimized_rakes)
         estimated_duration = self._estimate_pickup_duration(optimized_rakes)
@@ -88,19 +85,15 @@ class RetrofittedPickupService:
         # MVP processes one workshop at a time sequentially
         return 1  # One locomotive per pickup operation
 
-    def _estimate_pickup_duration(
-        self, pickup_rakes: list[Rake], process_times: Any = None
-    ) -> float:
+    def _estimate_pickup_duration(self, pickup_rakes: list[Rake], process_times: Any = None) -> float:
         """Estimate duration using actual process times from scenario."""
         if not pickup_rakes:
             return 0.0
 
         # Use process times from scenario if available
         if process_times:
-            coupling_time = getattr(process_times, "get_coupling_ticks", lambda _: 1.0)(
-                "DAC"
-            )
-            move_time = getattr(process_times, "wagon_move_to_next_station", 0.5)
+            coupling_time = getattr(process_times, 'get_coupling_ticks', lambda _: 1.0)('DAC')
+            move_time = getattr(process_times, 'wagon_move_to_next_station', 0.5)
             base_time = coupling_time + move_time
         else:
             base_time = 1.5  # Default fallback
@@ -119,22 +112,18 @@ class RetrofittedPickupService:
 
         if pickup_plan.required_locomotives > available_locomotives:
             issues.append(
-                f"Insufficient locomotives: need {pickup_plan.required_locomotives}, have {available_locomotives}"
+                f'Insufficient locomotives: need {pickup_plan.required_locomotives}, have {available_locomotives}'
             )
 
         if track_capacity and pickup_plan.total_wagon_count > track_capacity:
-            issues.append(
-                f"Track capacity exceeded: {pickup_plan.total_wagon_count} > {track_capacity}"
-            )
+            issues.append(f'Track capacity exceeded: {pickup_plan.total_wagon_count} > {track_capacity}')
 
         if not pickup_plan.pickup_rakes:
-            issues.append("No rakes to pickup")
+            issues.append('No rakes to pickup')
 
         return len(issues) == 0, issues
 
-    def determine_pickup_priority(
-        self, wagon_count: int, workshop_capacity: int
-    ) -> float:
+    def determine_pickup_priority(self, wagon_count: int, workshop_capacity: int) -> float:
         """Calculate pickup priority based on MVP logic."""
         # MVP uses workshop.retrofit_stations as batch size
         # Priority = how close to full batch capacity

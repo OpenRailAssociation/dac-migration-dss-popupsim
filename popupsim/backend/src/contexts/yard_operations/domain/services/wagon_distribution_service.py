@@ -10,9 +10,7 @@ class WagonDistributionService:
         self, available_wagons: list[Wagon], workshop_capacities: dict[str, int]
     ) -> dict[str, list[Wagon]]:
         """Distribute wagons to workshops based on capacity."""
-        distribution: dict[str, list[Wagon]] = {
-            ws_id: [] for ws_id in workshop_capacities
-        }
+        distribution: dict[str, list[Wagon]] = {ws_id: [] for ws_id in workshop_capacities}
 
         for wagon in available_wagons:
             # Find workshop with most available capacity

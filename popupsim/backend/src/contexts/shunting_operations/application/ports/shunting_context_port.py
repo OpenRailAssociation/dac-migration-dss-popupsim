@@ -1,21 +1,21 @@
 """Shunting Operations Context port definition."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
+from typing import Any
 
-from contexts.shunting_operations.domain.entities.shunting_locomotive import (
-    ShuntingLocomotive,
-)
+from contexts.shunting_operations.domain.entities.shunting_locomotive import ShuntingLocomotive
 
 
 class ShuntingContextPort(ABC):
     """Port for Shunting Operations Context."""
 
     @abstractmethod
-    def allocate_locomotive(self, requester: str) -> ShuntingLocomotive | None:
+    def allocate_locomotive(self, context: Any) -> ShuntingLocomotive | None:
         """Allocate an available locomotive."""
 
     @abstractmethod
-    def release_locomotive(self, locomotive_id: str) -> bool:
+    def release_locomotive(self, context: Any, loco: Any) -> bool:
         """Release an allocated locomotive."""
 
     @abstractmethod

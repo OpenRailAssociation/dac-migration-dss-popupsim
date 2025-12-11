@@ -1,8 +1,9 @@
 """Minimal base domain event - contexts define their own."""
 
+from dataclasses import dataclass
+from dataclasses import field
 import time
 import uuid
-from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)

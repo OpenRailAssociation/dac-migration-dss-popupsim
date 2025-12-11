@@ -12,7 +12,7 @@ class YardMetricsCalculator:
     def calculate(self) -> dict[str, Any]:
         """Calculate yard statistics."""
         return {
-            "wagons_classified": self.event_counts.get("WagonClassifiedEvent", 0),
-            "wagons_distributed": self.event_counts.get("WagonDistributedEvent", 0),
-            "wagons_parked": self.event_counts.get("WagonParkedEvent", 0),
+            'wagons_classified': self.event_counts.get('WagonClassifiedEvent', 0),
+            'wagons_distributed': self.event_counts.get('WagonDistributedEvent', 0),
+            'wagons_parked': self.event_counts.get('WagonParkedEvent', 0),
         }

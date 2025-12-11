@@ -1,10 +1,9 @@
 """Repository interface for Analytics Context."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 
-from contexts.analytics.domain.aggregates.analytics_session import (
-    AnalyticsSession,
-)
+from contexts.analytics.domain.aggregates.analytics_session import AnalyticsSession
 
 
 class AnalyticsRepository(ABC):

@@ -19,25 +19,23 @@ class TimeGranularity(Enum):
 class TimeGranularityConfig:
     """Configuration for time granularity with custom intervals."""
 
-    def __init__(
-        self, granularity: TimeGranularity | float = TimeGranularity.HOUR
-    ) -> None:
+    def __init__(self, granularity: TimeGranularity | float = TimeGranularity.HOUR) -> None:
         if isinstance(granularity, TimeGranularity):
             self.interval_seconds = granularity.value
         else:
             self.interval_seconds = float(granularity)
 
     @classmethod
-    def custom(cls, seconds: float) -> "TimeGranularityConfig":
+    def custom(cls, seconds: float) -> 'TimeGranularityConfig':
         """Create custom time granularity."""
         return cls(seconds)
 
     @classmethod
-    def minutes(cls, minutes: int) -> "TimeGranularityConfig":
+    def minutes(cls, minutes: int) -> 'TimeGranularityConfig':
         """Create granularity in minutes."""
         return cls(minutes * 60.0)
 
     @classmethod
-    def hours(cls, hours: int) -> "TimeGranularityConfig":
+    def hours(cls, hours: int) -> 'TimeGranularityConfig':
         """Create granularity in hours."""
         return cls(hours * 3600.0)

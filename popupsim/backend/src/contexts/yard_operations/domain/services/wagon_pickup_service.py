@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass
+import time
 from typing import TYPE_CHECKING
 
 from shared.domain.entities.rake import Rake
@@ -57,12 +57,12 @@ class WagonPickupService:
 
         # Create single rake with all wagons in sequence
         rake = Rake(
-            rake_id=f"pickup_rake_{int(time.time() * 1000)}",
+            rake_id=f'pickup_rake_{int(time.time() * 1000)}',
             wagons=available_wagons,
             rake_type=RakeType.TRANSPORT_RAKE,
             formation_time=time.time(),
-            formation_track="collection",
-            target_track="retrofit",
+            formation_track='collection',
+            target_track='retrofit',
         )
         rake.assign_to_wagons()
         rakes = [rake]
@@ -109,21 +109,19 @@ class WagonPickupService:
             best_allocation = max(allocations, key=lambda a: a.remaining_capacity)
             best_allocation.allocated_wagons.extend(remaining_wagons)
             best_allocation.capacity_used += len(remaining_wagons)
-            best_allocation.remaining_capacity = max(
-                0, best_allocation.remaining_capacity - len(remaining_wagons)
-            )
+            best_allocation.remaining_capacity = max(0, best_allocation.remaining_capacity - len(remaining_wagons))
 
         return allocations
 
     def _create_workshop_rake(self, allocation: WorkshopAllocation) -> Rake:
         """Create rake for workshop allocation - goes to retrofit staging first."""
         rake = Rake(
-            rake_id=f"pickup_rake_{allocation.workshop_id}_{int(time.time() * 1000)}",
+            rake_id=f'pickup_rake_{allocation.workshop_id}_{int(time.time() * 1000)}',
             wagons=allocation.allocated_wagons,
             rake_type=RakeType.TRANSPORT_RAKE,
             formation_time=time.time(),
-            formation_track="collection",
-            target_track="retrofit",  # Go to retrofit staging track first
+            formation_track='collection',
+            target_track='retrofit',  # Go to retrofit staging track first
         )
         # Store workshop_id for later transport to workshop
         for wagon in allocation.allocated_wagons:
@@ -132,17 +130,15 @@ class WagonPickupService:
         rake.assign_to_wagons()
         return rake
 
-    def create_single_retrofit_rake(
-        self, wagons: list[Wagon], workshop_allocations: dict[str, list[Wagon]]
-    ) -> Rake:
+    def create_single_retrofit_rake(self, wagons: list[Wagon], workshop_allocations: dict[str, list[Wagon]]) -> Rake:
         """Create single rake to retrofit track, with workshop assignments stored on wagons."""
         rake = Rake(
-            rake_id=f"retrofit_rake_{int(time.time() * 1000)}",
+            rake_id=f'retrofit_rake_{int(time.time() * 1000)}',
             wagons=wagons,
             rake_type=RakeType.TRANSPORT_RAKE,
             formation_time=time.time(),
-            formation_track="collection",
-            target_track="retrofit",
+            formation_track='collection',
+            target_track='retrofit',
         )
         # Store workshop assignments on wagons
         for workshop_id, workshop_wagons in workshop_allocations.items():
@@ -161,7 +157,7 @@ class WagonPickupService:
         """Estimate total duration for pickup operations."""
         if not rakes:
             return 0.0
-
+        # TODO: Remove this old assumption. We should use here coupling times, prepartion and so on!
         # Base time per rake + time per wagon
         base_time_per_rake = 5.0  # minutes
         time_per_wagon = 0.5  # minutes
@@ -184,15 +180,13 @@ class WagonPickupService:
         # Check locomotive availability
         if len(pickup_plan.rakes_to_pickup) > available_locomotives:
             issues.append(
-                f"Insufficient locomotives: need {len(pickup_plan.rakes_to_pickup)}, have {available_locomotives}"
+                f'Insufficient locomotives: need {len(pickup_plan.rakes_to_pickup)}, have {available_locomotives}'
             )
 
         # Check time constraints
-        if time_constraints and "max_pickup_time" in time_constraints:
-            max_time = time_constraints["max_pickup_time"]
+        if time_constraints and 'max_pickup_time' in time_constraints:
+            max_time = time_constraints['max_pickup_time']
             if pickup_plan.estimated_duration > max_time:
-                issues.append(
-                    f"Pickup duration {pickup_plan.estimated_duration:.1f} exceeds limit {max_time:.1f}"
-                )
+                issues.append(f'Pickup duration {pickup_plan.estimated_duration:.1f} exceeds limit {max_time:.1f}')
 
         return len(issues) == 0, issues

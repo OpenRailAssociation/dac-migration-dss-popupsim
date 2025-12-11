@@ -3,9 +3,7 @@
 import time
 from typing import Any
 
-from contexts.analytics.domain.services.metrics_calculation_service import (
-    MetricsCalculationService,
-)
+from contexts.analytics.domain.services.metrics_calculation_service import MetricsCalculationService
 
 
 class MetricsAggregator:
@@ -27,14 +25,12 @@ class MetricsAggregator:
         """Compute all metrics from events."""
         duration_hours = self._get_duration_hours()
 
-        calc = MetricsCalculationService(
-            self.events, self.event_counts, duration_hours, self.current_state
-        )
+        calc = MetricsCalculationService(self.events, self.event_counts, duration_hours, self.current_state)
         metrics = calc.calculate_all()
 
         return {
-            "total_events": len(self.events),
-            "event_counts": dict(self.event_counts),
+            'total_events': len(self.events),
+            'event_counts': dict(self.event_counts),
             **metrics,
         }
 

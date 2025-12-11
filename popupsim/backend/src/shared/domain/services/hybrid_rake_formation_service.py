@@ -29,9 +29,7 @@ class HybridRakeFormationService:
     def __init__(self) -> None:
         self._strategic_planner = RakeFormationService()
 
-    def form_rakes(
-        self, context: FormationContext, rake_type: RakeType = RakeType.WORKSHOP_RAKE
-    ) -> list[Rake]:
+    def form_rakes(self, context: FormationContext, rake_type: RakeType = RakeType.WORKSHOP_RAKE) -> list[Rake]:
         """Form rakes using hybrid approach."""
         if self._should_use_strategic_plan(context):
             return self._execute_strategic_plan(context, rake_type)
@@ -50,18 +48,14 @@ class HybridRakeFormationService:
         tolerance_threshold = planned_count * context.completion_tolerance
         return abs(available_count - planned_count) <= tolerance_threshold
 
-    def _execute_strategic_plan(
-        self, context: FormationContext, rake_type: RakeType
-    ) -> list[Rake]:
+    def _execute_strategic_plan(self, context: FormationContext, rake_type: RakeType) -> list[Rake]:
         """Execute strategic pre-planned rake formation."""
         constraints = {
-            "workshop_capacities": context.workshop_capacities,
-            "group_by_cargo": False,
+            'workshop_capacities': context.workshop_capacities,
+            'group_by_cargo': False,
         }
 
-        rakes = self._strategic_planner.form_rakes(
-            context.available_wagons, "workshop_capacity", constraints
-        )
+        rakes = self._strategic_planner.form_rakes(context.available_wagons, 'workshop_capacity', constraints)
 
         # Update rake types
         for rake in rakes:
@@ -69,9 +63,7 @@ class HybridRakeFormationService:
 
         return rakes
 
-    def _execute_tactical_fallback(
-        self, context: FormationContext, rake_type: RakeType
-    ) -> list[Rake]:
+    def _execute_tactical_fallback(self, context: FormationContext, rake_type: RakeType) -> list[Rake]:
         """Execute tactical immediate rake formation (MVP pattern)."""
         rakes = []
         remaining_wagons = list(context.available_wagons)
@@ -91,9 +83,7 @@ class HybridRakeFormationService:
                     break  # Immediate break - MVP pattern
 
             if workshop_wagons:
-                rake = self._strategic_planner.form_transport_rake(
-                    workshop_wagons, "collection", workshop_id
-                )
+                rake = self._strategic_planner.form_transport_rake(workshop_wagons, 'collection', workshop_id)
                 rake.rake_type = rake_type
                 rakes.append(rake)
 
@@ -105,9 +95,7 @@ class HybridRakeFormationService:
                 key=lambda w: context.workshop_capacities[w],
             )
 
-            overflow_rake = self._strategic_planner.form_transport_rake(
-                remaining_wagons, "collection", best_workshop
-            )
+            overflow_rake = self._strategic_planner.form_transport_rake(remaining_wagons, 'collection', best_workshop)
             overflow_rake.rake_type = rake_type
             rakes.append(overflow_rake)
 
@@ -115,4 +103,4 @@ class HybridRakeFormationService:
 
     def get_formation_strategy(self, context: FormationContext) -> str:
         """Get the formation strategy that would be used."""
-        return "strategic" if self._should_use_strategic_plan(context) else "tactical"
+        return 'strategic' if self._should_use_strategic_plan(context) else 'tactical'

@@ -17,11 +17,11 @@ class Topology:
 
     def _load_from_dict(self, data: dict) -> None:
         """Load edge lengths from dict."""
-        if "edges" in data:
-            for edge in data["edges"]:
-                edge_id = edge.get("edge_id") or edge.get("id")
-                if edge_id and "length" in edge:
-                    length = float(edge["length"])
+        if 'edges' in data:
+            for edge in data['edges']:
+                edge_id = edge.get('edge_id') or edge.get('id')
+                if edge_id and 'length' in edge:
+                    length = float(edge['length'])
                     if length <= 0:
                         msg = f"Edge '{edge_id}' has invalid length {length}. Length must be > 0."
                         raise ValueError(msg)
@@ -31,16 +31,16 @@ class Topology:
         """Load edge lengths from topology JSON file."""
         path = Path(file_path)
         if not path.exists():
-            msg = f"Topology file not found: {path}"
+            msg = f'Topology file not found: {path}'
             raise FileNotFoundError(msg)
 
-        with path.open("r", encoding="utf-8") as f:
+        with path.open('r', encoding='utf-8') as f:
             data = json.load(f)
 
-        if "edges" in data:
-            for edge_id, edge_data in data["edges"].items():
-                if "length" in edge_data:
-                    length = float(edge_data["length"])
+        if 'edges' in data:
+            for edge_id, edge_data in data['edges'].items():
+                if 'length' in edge_data:
+                    length = float(edge_data['length'])
                     if length <= 0:
                         msg = f"Edge '{edge_id}' has invalid length {length}. Length must be > 0."
                         raise ValueError(msg)
@@ -49,6 +49,6 @@ class Topology:
     def get_edge_length(self, edge_id: str) -> float:
         """Get length of an edge."""
         if edge_id not in self.edge_lengths:
-            msg = f"Edge not found: {edge_id}"
+            msg = f'Edge not found: {edge_id}'
             raise KeyError(msg)
         return self.edge_lengths[edge_id]

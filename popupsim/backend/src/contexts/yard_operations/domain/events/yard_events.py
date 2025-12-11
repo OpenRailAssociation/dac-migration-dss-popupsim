@@ -22,9 +22,7 @@ class WagonClassifiedEvent(DomainEvent):
 class WagonDistributedEvent(DomainEvent):
     """Event fired when wagon is distributed to workshop."""
 
-    def __init__(
-        self, wagon_id: str, workshop_id: str, batch_id: str, **kwargs
-    ) -> None:
+    def __init__(self, wagon_id: str, workshop_id: str, batch_id: str, **kwargs) -> None:
         super().__init__(**kwargs)
         self.wagon_id = wagon_id
         self.workshop_id = workshop_id

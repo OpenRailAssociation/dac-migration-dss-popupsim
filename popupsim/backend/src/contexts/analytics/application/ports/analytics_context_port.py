@@ -1,12 +1,11 @@
 """Port interface for Analytics Context."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from typing import Any
 
-from contexts.analytics.domain.value_objects.analytics_metrics import (
-    AnalyticsMetrics,
-    Threshold,
-)
+from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
+from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 
 
 class AnalyticsContextPort(ABC):
@@ -21,9 +20,7 @@ class AnalyticsContextPort(ABC):
         """End current analytics session."""
 
     @abstractmethod
-    def record_metric(
-        self, collector_id: str, key: str, value: Any, timestamp: float | None = None
-    ) -> None:
+    def record_metric(self, collector_id: str, key: str, value: Any, timestamp: float | None = None) -> None:
         """Record metric value with optional timestamp."""
 
     @abstractmethod
@@ -67,13 +64,9 @@ class AnalyticsContextPort(ABC):
         """Get current system state snapshot."""
 
     @abstractmethod
-    def get_time_series(
-        self, metric_name: str, interval_seconds: float = 3600.0
-    ) -> list[tuple[float, Any]]:
+    def get_time_series(self, metric_name: str, interval_seconds: float = 3600.0) -> list[tuple[float, Any]]:
         """Get time-series data for metric."""
 
     @abstractmethod
-    def get_all_time_series(
-        self, interval_seconds: float = 3600.0
-    ) -> dict[str, list[tuple[float, Any]]]:
+    def get_all_time_series(self, interval_seconds: float = 3600.0) -> dict[str, list[tuple[float, Any]]]:
         """Get all time-series metrics."""

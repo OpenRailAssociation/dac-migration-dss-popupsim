@@ -1,8 +1,10 @@
 """Track group aggregate for managing related tracks."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 
-from ..entities.track import Track, TrackType
+from ..entities.track import Track
+from ..entities.track import TrackType
 from ..services.track_selector import TrackSelector
 from ..value_objects.track_selection_strategy import TrackSelectionStrategy
 
@@ -27,7 +29,7 @@ class TrackGroup:
     def add_track(self, track: Track) -> None:
         """Add track to group."""
         if track.track_type != self.track_type:
-            msg = f"Track type mismatch: expected {self.track_type}, got {track.track_type}"
+            msg = f'Track type mismatch: expected {self.track_type}, got {track.track_type}'
             raise ValueError(msg)
         self.tracks[track.track_id] = track
 
@@ -51,9 +53,7 @@ class TrackGroup:
         """Get average utilization percentage across all tracks."""
         if not self.tracks:
             return 0.0
-        return sum(t.utilization_percentage for t in self.tracks.values()) / len(
-            self.tracks
-        )
+        return sum(t.utilization_percentage for t in self.tracks.values()) / len(self.tracks)
 
     def get_available_tracks(self, min_length: float) -> list[Track]:
         """Get all tracks that can accommodate minimum length."""

@@ -1,7 +1,7 @@
 """Domain service for track selection."""
 
-import random
 from collections.abc import Sequence
+import random
 
 from ..entities.track import Track
 from ..value_objects.track_selection_strategy import TrackSelectionStrategy
@@ -14,9 +14,7 @@ class TrackSelector:
         self._strategy = strategy
         self._round_robin_index = 0
 
-    def select_track(
-        self, tracks: Sequence[Track], required_length: float
-    ) -> Track | None:
+    def select_track(self, tracks: Sequence[Track], required_length: float) -> Track | None:
         """Select track from available tracks based on strategy."""
         available = [t for t in tracks if t.can_accommodate(required_length)]
 
@@ -35,6 +33,6 @@ class TrackSelector:
             return track
 
         if self._strategy == TrackSelectionStrategy.RANDOM:
-            return random.choice(available)
+            return random.choice(available)  # noqa: S311
 
         return None

@@ -2,4 +2,4 @@
 
 from .track_selector import TrackSelector
 
-__all__ = ["TrackSelector"]
+__all__ = ['TrackSelector']

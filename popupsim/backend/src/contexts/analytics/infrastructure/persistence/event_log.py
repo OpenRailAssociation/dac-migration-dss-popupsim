@@ -15,15 +15,15 @@ class EventLog:
     def append(self, timestamp: float, event: Any) -> None:
         """Append event to log."""
         event_data = {
-            "timestamp": timestamp,
-            "event_type": type(event).__name__,
-            "event_data": self._serialize(event),
+            'timestamp': timestamp,
+            'event_type': type(event).__name__,
+            'event_data': self._serialize(event),
         }
-        with open(self.log_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(event_data) + "\n")
+        with open(self.log_path, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(event_data) + '\n')
 
     def _serialize(self, event: Any) -> dict[str, Any]:
         """Serialize event."""
-        if hasattr(event, "__dict__"):
-            return {k: v for k, v in event.__dict__.items() if not k.startswith("_")}
-        return {"value": str(event)}
+        if hasattr(event, '__dict__'):
+            return {k: v for k, v in event.__dict__.items() if not k.startswith('_')}
+        return {'value': str(event)}

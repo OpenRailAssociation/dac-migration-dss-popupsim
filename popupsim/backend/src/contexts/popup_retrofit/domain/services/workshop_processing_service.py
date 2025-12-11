@@ -13,9 +13,9 @@ if TYPE_CHECKING:
 class ProcessingStrategy(Enum):
     """Processing strategies for workshop operations."""
 
-    INDIVIDUAL = "individual"
-    BATCH = "batch"
-    RAKE = "rake"
+    INDIVIDUAL = 'individual'
+    BATCH = 'batch'
+    RAKE = 'rake'
 
 
 @dataclass
@@ -49,12 +49,8 @@ class WorkshopProcessingService:
                 required_stations=0,
             )
 
-        wagon_groups = self._group_wagons_by_strategy(
-            wagons, processing_strategy, workshop_capacity
-        )
-        required_stations = self._calculate_required_stations(
-            wagon_groups, processing_strategy
-        )
+        wagon_groups = self._group_wagons_by_strategy(wagons, processing_strategy, workshop_capacity)
+        required_stations = self._calculate_required_stations(wagon_groups, processing_strategy)
         estimated_duration = self._estimate_processing_duration(wagon_groups)
 
         return ProcessingPlan(
@@ -91,7 +87,7 @@ class WorkshopProcessingService:
         if strategy == ProcessingStrategy.RAKE:
             rake_groups = {}
             for wagon in wagons:
-                rake_id = getattr(wagon, "rake_id", f"single_{wagon.id}")
+                rake_id = getattr(wagon, 'rake_id', f'single_{wagon.id}')
                 if rake_id not in rake_groups:
                     rake_groups[rake_id] = []
                 rake_groups[rake_id].append(wagon)
@@ -100,9 +96,7 @@ class WorkshopProcessingService:
 
         return [wagons]
 
-    def _calculate_required_stations(
-        self, wagon_groups: list[list[Wagon]], strategy: ProcessingStrategy
-    ) -> int:
+    def _calculate_required_stations(self, wagon_groups: list[list[Wagon]], strategy: ProcessingStrategy) -> int:
         """Calculate required workshop stations."""
         if not wagon_groups:
             return 0
@@ -134,11 +128,9 @@ class WorkshopProcessingService:
         issues = []
 
         if processing_plan.required_stations > available_capacity:
-            issues.append(
-                f"Insufficient capacity: need {processing_plan.required_stations}, have {available_capacity}"
-            )
+            issues.append(f'Insufficient capacity: need {processing_plan.required_stations}, have {available_capacity}')
 
         if not processing_plan.wagon_groups:
-            issues.append("No wagon groups to process")
+            issues.append('No wagon groups to process')
 
         return len(issues) == 0, issues

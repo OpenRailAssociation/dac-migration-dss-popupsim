@@ -1,17 +1,14 @@
 """Unified event collection service."""
 
-import time
-from collections import defaultdict, deque
+from collections import defaultdict
+from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+import time
 from typing import Any
 
-from contexts.analytics.domain.value_objects.analytics_config import (
-    AnalyticsConfig,
-)
-from contexts.analytics.infrastructure.persistence.event_log import (
-    EventLog,
-)
+from contexts.analytics.domain.value_objects.analytics_config import AnalyticsConfig
+from contexts.analytics.infrastructure.persistence.event_log import EventLog
 
 from .incremental_statistics import IncrementalStatistics
 from .state_tracking_service import StateTrackingService
@@ -46,22 +43,18 @@ class EventCollectionService:
             for event_type in event_types:
                 self.event_bus.subscribe(event_type, handler)
         except Exception as e:
-            print(f"ERROR: Failed to subscribe to events: {e}")
+            print(f'ERROR: Failed to subscribe to events: {e}')
             import traceback
 
             traceback.print_exc()
 
-    def subscribe_to_event(
-        self, event_type: type[Any], handler: Callable[[Any], None]
-    ) -> None:
+    def subscribe_to_event(self, event_type: type[Any], handler: Callable[[Any], None]) -> None:
         """Subscribe to specific event type."""
         self.event_bus.subscribe(event_type, handler)
 
     def collect_event(self, event: Any) -> None:
         """Collect event with persistence and incremental stats."""
-        timestamp = getattr(
-            event, "event_timestamp", getattr(event, "timestamp", time.time())
-        )
+        timestamp = getattr(event, 'event_timestamp', getattr(event, 'timestamp', time.time()))
         self.events.append((timestamp, event))
         event_type = type(event).__name__
         self.event_counts[event_type] += 1
@@ -91,7 +84,7 @@ class EventCollectionService:
 
     def get_event_counts(self) -> dict[str, int]:
         """Get event counts (cached)."""
-        return self._get_cached("event_counts", lambda: dict(self.event_counts))
+        return self._get_cached('event_counts', lambda: dict(self.event_counts))
 
     def get_events_by_type(self, event_type: str) -> list[Any]:
         """Get events of specific type."""

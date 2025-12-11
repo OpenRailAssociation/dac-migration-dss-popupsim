@@ -11,7 +11,7 @@ class Duration:
 
     def __post_init__(self) -> None:
         if self.seconds < 0:
-            msg = "Duration cannot be negative"
+            msg = 'Duration cannot be negative'
             raise ValueError(msg)
 
     def to_minutes(self) -> float:
@@ -27,18 +27,18 @@ class Duration:
         return self.seconds / 86400
 
     @classmethod
-    def from_minutes(cls, minutes: float) -> "Duration":
+    def from_minutes(cls, minutes: float) -> 'Duration':
         """Create from minutes."""
         return cls(minutes * 60)
 
     @classmethod
-    def from_hours(cls, hours: float) -> "Duration":
+    def from_hours(cls, hours: float) -> 'Duration':
         """Create from hours."""
         return cls(hours * 3600)
 
     def __str__(self) -> str:
         if self.seconds < 60:
-            return f"{self.seconds:.1f}s"
+            return f'{self.seconds:.1f}s'
         if self.seconds < 3600:
-            return f"{self.to_minutes():.1f}m"
-        return f"{self.to_hours():.1f}h"
+            return f'{self.to_minutes():.1f}m'
+        return f'{self.to_hours():.1f}h'

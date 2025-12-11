@@ -2,31 +2,25 @@
 
 from enum import Enum
 
-from pydantic import BaseModel, Field
-
-from contexts.popup_retrofit.domain.value_objects.bay_id import (
-    BayId,
-)
+from contexts.popup_retrofit.domain.value_objects.bay_id import BayId
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class BayStatus(Enum):
     """Status of a retrofit bay."""
 
-    AVAILABLE = "available"
-    OCCUPIED = "occupied"
-    MAINTENANCE = "maintenance"
+    AVAILABLE = 'available'
+    OCCUPIED = 'occupied'
+    MAINTENANCE = 'maintenance'
 
 
 class RetrofitBay(BaseModel):
     """Individual work position for DAC installation."""
 
-    id: BayId = Field(description="Unique identifier for the retrofit bay")
-    status: BayStatus = Field(
-        default=BayStatus.AVAILABLE, description="Current status of the bay"
-    )
-    current_wagon_id: str | None = Field(
-        default=None, description="ID of wagon currently in bay"
-    )
+    id: BayId = Field(description='Unique identifier for the retrofit bay')
+    status: BayStatus = Field(default=BayStatus.AVAILABLE, description='Current status of the bay')
+    current_wagon_id: str | None = Field(default=None, description='ID of wagon currently in bay')
 
     def is_available(self) -> bool:
         """Check if bay is available."""
@@ -35,7 +29,7 @@ class RetrofitBay(BaseModel):
     def occupy(self, wagon_id: str) -> None:
         """Occupy bay with a wagon."""
         if not self.is_available():
-            msg = f"Bay {self.id.value} is not available"
+            msg = f'Bay {self.id.value} is not available'
             raise ValueError(msg)
         self.status = BayStatus.OCCUPIED
         self.current_wagon_id = wagon_id

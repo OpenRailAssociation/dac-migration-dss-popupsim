@@ -1,8 +1,9 @@
 """PopUp retrofit domain events."""
 
+from dataclasses import dataclass
+from dataclasses import field
 import time
 import uuid
-from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)

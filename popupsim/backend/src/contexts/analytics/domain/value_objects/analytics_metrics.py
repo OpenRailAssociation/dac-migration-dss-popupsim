@@ -15,18 +15,16 @@ class AnalyticsMetrics:
 
     def efficiency(self) -> float:
         """Calculate efficiency ratio."""
-        return (
-            self.processed_wagons / self.total_wagons if self.total_wagons > 0 else 0.0
-        )
+        return self.processed_wagons / self.total_wagons if self.total_wagons > 0 else 0.0
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            "throughput": self.throughput,
-            "utilization": self.utilization,
-            "total_wagons": self.total_wagons,
-            "processed_wagons": self.processed_wagons,
-            "efficiency": self.efficiency(),
+            'throughput': self.throughput,
+            'utilization': self.utilization,
+            'total_wagons': self.total_wagons,
+            'processed_wagons': self.processed_wagons,
+            'efficiency': self.efficiency(),
         }
 
 
@@ -55,7 +53,7 @@ class Threshold:
     def evaluate(self, value: float) -> str:
         """Evaluate value against thresholds."""
         if value <= self.critical_value:
-            return "critical"
+            return 'critical'
         if value <= self.warning_value:
-            return "warning"
-        return "normal"
+            return 'warning'
+        return 'normal'

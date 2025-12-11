@@ -15,9 +15,7 @@ class RakeRegistry:
 
     def __init__(self) -> None:
         self._rakes: dict[str, Rake] = {}
-        self._rakes_by_type: dict[RakeType, list[str]] = {
-            rake_type: [] for rake_type in RakeType
-        }
+        self._rakes_by_type: dict[RakeType, list[str]] = {rake_type: [] for rake_type in RakeType}
         self._rakes_by_track: dict[str, list[str]] = {}
 
     def register_rake(self, rake: Rake) -> None:
@@ -57,10 +55,7 @@ class RakeRegistry:
 
         # Remove from old track index
         old_track = rake.formation_track
-        if (
-            old_track in self._rakes_by_track
-            and rake_id in self._rakes_by_track[old_track]
-        ):
+        if old_track in self._rakes_by_track and rake_id in self._rakes_by_track[old_track]:
             self._rakes_by_track[old_track].remove(rake_id)
 
         # Add to new track index

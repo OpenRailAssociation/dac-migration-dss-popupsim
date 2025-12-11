@@ -1,6 +1,8 @@
 """Timezone utilities for consistent datetime handling."""
 
-from datetime import UTC, datetime, timezone
+from datetime import UTC
+from datetime import datetime
+from datetime import timezone
 
 
 def ensure_utc(dt: datetime | str) -> datetime:
@@ -35,8 +37,8 @@ def from_timestamp(timestamp: float, tz: timezone = UTC) -> datetime:
     return datetime.fromtimestamp(timestamp, tz=tz)
 
 
-def validate_timezone_aware(dt: datetime, field_name: str = "datetime") -> None:
+def validate_timezone_aware(dt: datetime, field_name: str = 'datetime') -> None:
     """Validate that datetime is timezone-aware."""
     if dt.tzinfo is None:
-        msg = f"{field_name} must be timezone-aware (UTC)"
+        msg = f'{field_name} must be timezone-aware (UTC)'
         raise ValueError(msg)

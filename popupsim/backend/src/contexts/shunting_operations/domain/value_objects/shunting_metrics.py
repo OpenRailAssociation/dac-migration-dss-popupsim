@@ -1,21 +1,16 @@
 """Shunting operations metrics."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class ShuntingMetrics(BaseModel):
     """Metrics for shunting operations."""
 
-    total_operations: int = Field(
-        default=0, description="Total shunting operations performed"
-    )
-    successful_operations: int = Field(default=0, description="Successful operations")
-    total_operation_time: float = Field(
-        default=0.0, description="Total time spent on operations (minutes)"
-    )
-    locomotives_allocated: int = Field(
-        default=0, description="Number of locomotives allocated"
-    )
+    total_operations: int = Field(default=0, description='Total shunting operations performed')
+    successful_operations: int = Field(default=0, description='Successful operations')
+    total_operation_time: float = Field(default=0.0, description='Total time spent on operations (minutes)')
+    locomotives_allocated: int = Field(default=0, description='Number of locomotives allocated')
 
     def record_operation(self, duration: float, success: bool = True) -> None:
         """Record a shunting operation."""

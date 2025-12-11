@@ -1,6 +1,7 @@
 """Yard Operations Port - public interface."""
 
-from typing import Any, Protocol
+from typing import Any
+from typing import Protocol
 
 
 class YardOperationsPort(Protocol):
@@ -8,8 +9,6 @@ class YardOperationsPort(Protocol):
 
     def get_parking_capacity(self) -> int:
         """Get available parking capacity."""
-        ...
 
     def receive_train(self, train: Any) -> None:
         """Receive incoming train for classification."""
-        ...

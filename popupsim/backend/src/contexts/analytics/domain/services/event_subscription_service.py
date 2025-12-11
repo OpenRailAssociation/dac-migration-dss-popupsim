@@ -28,9 +28,7 @@ class EventSubscriptionService:
         for event_type in event_types:
             self.event_bus.subscribe(event_type, handler)
 
-    def subscribe_to_event(
-        self, event_type: type[Any], handler: Callable[[Any], None]
-    ) -> None:
+    def subscribe_to_event(self, event_type: type[Any], handler: Callable[[Any], None]) -> None:
         """Subscribe handler to specific event type."""
         self.event_registry.register_event(event_type)
         self.event_bus.subscribe(event_type, handler)
