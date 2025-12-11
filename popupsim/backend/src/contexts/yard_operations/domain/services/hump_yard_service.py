@@ -131,7 +131,7 @@ class HumpYardService:
         )
 
     def _should_accept_wagon(self, wagon: Any) -> bool:
-        """Business rule for wagon acceptance."""
+        """Check if wagon should be accepted."""
         needs_retrofit = getattr(wagon, 'needs_retrofit', True)
         is_loaded = getattr(wagon, 'is_loaded', False)
 

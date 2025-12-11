@@ -10,6 +10,9 @@ Todo
         - Execute rakes
         - Shedule remaining wagons (current implementation is still odd)
 """
+# pylint: disable=too-many-lines
+# ruff: noqa: C901, PLR0911, PLR0912, PLR0915
+# TODO: Refactoring is needed here. This is just for the MVP to get it running
 
 from collections.abc import Generator
 from typing import Any
@@ -38,7 +41,7 @@ from shared.domain.services.rake_formation_service import RakeFormationService
 from shared.domain.services.rake_registry import RakeRegistry
 
 
-class YardOperationsContext:
+class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
     """Yard Operations bounded context - application layer."""
 
     def __init__(self, infra: Any, rake_registry: RakeRegistry | None = None) -> None:
@@ -71,17 +74,26 @@ class YardOperationsContext:
         self._waiting_at_retrofit: dict[str, list[Any]] = {}
         # Track pending transport checks to avoid duplicate transports
         self._pending_transport_checks: dict[str, bool] = {}
+        # Build track index by type and initialize selectors
+        self._tracks_by_type: dict[str, list[Any]] = {}
+        self._track_selectors: dict[str, Any] = {}
+        self._round_robin_index: dict[str, int] = {}
+        # Get railway infrastructure context for capacity management
+
+        self.railway_context = None
+        self.railway_capacity_service = None
+        self._expected_wagon_count = 0
+        self.all_wagons = []
+        self._retrofitted_accumulator = []
+        self._track_occupancy_m = {}
+        self._workshop_round_robin_index = 0
+        self._workshop_wagon_counts = {}
 
     def initialize(self, infrastructure: Any, scenario: Any) -> None:
         """Initialize with infrastructure and scenario."""
         self.infra = infrastructure
         self.scenario = scenario
         self.train_processed_event = self.infra.engine.create_event()
-
-        # Build track index by type and initialize selectors
-        self._tracks_by_type: dict[str, list[Any]] = {}
-        self._track_selectors: dict[str, Any] = {}
-        self._round_robin_index: dict[str, int] = {}
 
         if scenario and hasattr(scenario, 'tracks') and scenario.tracks:
             for track in scenario.tracks:
@@ -92,10 +104,9 @@ class YardOperationsContext:
                 self._tracks_by_type[track_type].append(track)
 
         # Get railway infrastructure context for capacity management
-        railway_context = getattr(self.infra, 'contexts', {}).get('railway')
-        self.railway_context = railway_context
-        if railway_context:
-            self.railway_capacity_service = RailwayCapacityService(railway_context)
+        # railway_context = getattr(self.infra, 'contexts', {}).get('railway')
+        self.railway_context = self.infra.contexts['railway']
+        self.railway_capacity_service = RailwayCapacityService(self.railway_context)
 
         # Initialize hump yard service with railway capacity service
         self.hump_yard_service = HumpYardService(self.railway_capacity_service)
@@ -104,8 +115,8 @@ class YardOperationsContext:
         # Get collection track capacity from railway infrastructure
         collection_capacity = 50  # Default
         collection_tracks = self._tracks_by_type.get('collection', [])
-        if railway_context and collection_tracks:
-            collection_capacity = railway_context.get_track_capacity(collection_tracks[0].id)
+        if self.railway_context and collection_tracks:
+            collection_capacity = self.railway_context.get_track_capacity(collection_tracks[0].id)
             if collection_capacity == 0:  # Track not found, use default
                 collection_capacity = 50
 
@@ -239,8 +250,6 @@ class YardOperationsContext:
         self.infra.engine.current_time()
 
         # Store wagons for access
-        if not hasattr(self, 'all_wagons'):
-            self.all_wagons = []
         self.all_wagons.extend(event.wagons)
 
         # Set expected wagon count for this train
@@ -249,7 +258,7 @@ class YardOperationsContext:
         # Schedule classification process
         self.infra.engine.schedule_process(self._classify_train_wagons(event.wagons, event.train_id))
 
-    def _classify_train_wagons(self, wagons, train_id) -> Any:
+    def _classify_train_wagons(self, wagons, train_id) -> Any:  # pylint: disable=too-many-locals, too-many-branches
         """Classify train wagons through hump yard with timing using domain service."""
         # Calculate processing schedule using domain service
         process_times = self.scenario.process_times if self.scenario else None
@@ -365,6 +374,7 @@ class YardOperationsContext:
         for workshop in self.scenario.workshops:
             if workshop.id == workshop_id:
                 return workshop.retrofit_stations
+        return 0
 
     def _check_and_transport_batch(self, workshop_id: str) -> Generator[Any, Any]:
         """Check if batch should be transported after allowing same-time completions to accumulate."""
@@ -497,8 +507,9 @@ class YardOperationsContext:
                 wagon.track = retrofitted_track_id
 
                 # Release workshop resource after pickup
-                if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):
-                    wagon._workshop_resource.release(wagon._workshop_request)
+                # TODO: This is currently a hack and needs to be improved
+                if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):  # pylint: disable=protected-access
+                    wagon._workshop_resource.release(wagon._workshop_request)  # pylint: disable=protected-access
                     delattr(wagon, '_workshop_resource')
                     delattr(wagon, '_workshop_request')
 
@@ -603,8 +614,8 @@ class YardOperationsContext:
             # Release locomotive
             yield from shunting_context.release_locomotive(self, loco)
 
-    def _pickup_and_process_next_batch(self, completed_wagons: list[Any], workshop_id: str) -> Any:
-        """Combined pickup of completed wagons and processing of next batch to eliminate timing gaps."""
+    def _pickup_and_process_next_batch(self, completed_wagons: list[Any], workshop_id: str) -> Any:  # pylint: disable=too-many-locals
+        """Combine pickup of completed wagons and processing of next batch to eliminate timing gaps."""
         shunting_context = getattr(self.infra, 'shunting_context', None)
         if not shunting_context:
             return
@@ -631,15 +642,16 @@ class YardOperationsContext:
                 wagon.track = retrofitted_track_id
 
             # Return to parking first (MVP expects this)
+
             yield from shunting_context.move_locomotive(self, loco, retrofitted_track_id, loco.home_track)
 
             # Check if there are waiting wagons for this specific workshop
-            if hasattr(self, '_waiting_wagons') and self._waiting_wagons:
+            if hasattr(self, '_waiting_wagons') and self._waiting_wagons:  # pylint: disable=no-member
                 # Filter wagons assigned to this workshop (for multi-workshop) or all wagons (for single workshop)
                 if len(self.scenario.workshops) > 1:
-                    workshop_wagons = [w for w in self._waiting_wagons if w.workshop_id == workshop_id]
+                    workshop_wagons = [w for w in self._waiting_wagons if w.workshop_id == workshop_id]  # pylint: disable=no-member
                 else:
-                    workshop_wagons = self._waiting_wagons[:]
+                    workshop_wagons = self._waiting_wagons[:]  # pylint: disable=no-member
 
                 if workshop_wagons:
                     workshop_capacity = len(completed_wagons)  # Same capacity as completed batch
@@ -648,8 +660,8 @@ class YardOperationsContext:
 
                     # Remove processed wagons from waiting list
                     for wagon in next_batch:
-                        if wagon in self._waiting_wagons:
-                            self._waiting_wagons.remove(wagon)
+                        if wagon in self._waiting_wagons:  # pylint: disable=no-member
+                            self._waiting_wagons.remove(wagon)  # pylint: disable=no-member
 
                     # Select retrofit track and move from parking to retrofit track to get next batch (MVP flow)
                     selected_retrofit = self._select_track_by_type('retrofit')
@@ -694,7 +706,7 @@ class YardOperationsContext:
             # Release locomotive
             yield from shunting_context.release_locomotive(self, loco)
 
-    def _transport_retrofitted_rake(self, rake: Any) -> Generator[Any, Any]:
+    def _transport_retrofitted_rake(self, rake: Any) -> Generator[Any, Any]:  # pylint: disable=too-many-locals, too-many-statements
         """Transport retrofitted rake: workshop -> retrofitted -> parking."""
         try:
             shunting_context = getattr(self.infra, 'shunting_context', None)
@@ -703,7 +715,6 @@ class YardOperationsContext:
 
             # Step 1: workshop -> retrofitted
             loco = yield from shunting_context.allocate_locomotive(self)
-            loco_allocated = True
             try:
                 # Select retrofitted track
                 selected_retrofitted = self._select_track_by_type('retrofitted')
@@ -720,8 +731,9 @@ class YardOperationsContext:
                     wagon.track = retrofitted_track_id
 
                     # Release workshop resource after pickup
-                    if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):
-                        wagon._workshop_resource.release(wagon._workshop_request)
+                    # TODO:  This is still the hack of the MVP.
+                    if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):  # pylint: disable=protected-access
+                        wagon._workshop_resource.release(wagon._workshop_request)  # pylint: disable=protected-access
                         delattr(wagon, '_workshop_resource')
                         delattr(wagon, '_workshop_request')
 
@@ -734,12 +746,9 @@ class YardOperationsContext:
 
                 yield from shunting_context.move_locomotive(self, loco, retrofitted_track_id, loco.home_track)
                 yield from shunting_context.release_locomotive(self, loco)
-            except GeneratorExit:
+            # Raising immediately is currently intended to avoid issues in premature shutdown of simulation
+            except GeneratorExit:  # pylint: disable=try-except-raise
                 raise
-
-            # Track wagons on retrofitted track for batching
-            if not hasattr(self, '_retrofitted_accumulator'):
-                self._retrofitted_accumulator = []
 
             self._retrofitted_accumulator.extend(rake.wagons)
 
@@ -760,11 +769,7 @@ class YardOperationsContext:
                 self._retrofitted_accumulator = []
 
                 # Calculate total length BEFORE selecting track
-                total_length = sum(getattr(w, 'length', 15.0) for w in wagons_to_park)
-
-                # Initialize track occupancy tracking
-                if not hasattr(self, '_track_occupancy_m'):
-                    self._track_occupancy_m = {}
+                total_length = sum(getattr(wagon, 'length', 15.0) for wagon in wagons_to_park)
 
                 # Check if parking capacity is available for these wagons
                 selected_parking = self._select_track_by_type('parking')
@@ -778,7 +783,6 @@ class YardOperationsContext:
                 parking_track_id = selected_parking.id
 
                 loco2 = yield from shunting_context.allocate_locomotive(self)
-                loco2_allocated = True
                 try:
                     selected_retrofitted = self._select_track_by_type('retrofitted')
                     retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else 'retrofitted'
@@ -803,7 +807,7 @@ class YardOperationsContext:
 
                     yield from shunting_context.move_locomotive(self, loco2, parking_track_id, loco2.home_track)
                     yield from shunting_context.release_locomotive(self, loco2)
-                except GeneratorExit:
+                except GeneratorExit:  # pylint: disable=try-except-raise
                     raise
 
             # After transporting retrofitted wagons, check if there are wagons waiting at retrofit track
@@ -819,7 +823,7 @@ class YardOperationsContext:
 
                 # Schedule transport of next batch
                 yield from self._bring_next_batch_from_retrofit(next_batch, workshop_id)
-        except GeneratorExit:
+        except GeneratorExit:  # pylint: disable=try-except-raise
             return
 
     def get_metrics(self) -> dict[str, Any]:
@@ -857,19 +861,21 @@ class YardOperationsContext:
 
         # Calculate utilization for collection tracks
         for track_id, queue in self.collection_queues.items():
-            if hasattr(queue, '_items'):
+            if hasattr(queue, '_items'):  # pylint: disable=protected-access
                 # Estimate utilization based on average queue length
-                avg_occupancy = len(queue._items) if queue._items else 0
+                avg_occupancy = len(queue._items) if queue._items else 0  # pylint: disable=protected-access
                 capacity = getattr(queue, 'capacity', 10)
                 track_util[track_id] = (avg_occupancy / capacity * 100.0) if capacity > 0 else 0.0
 
         return track_util
 
     def _handle_wagons_classified_for_rakes(self, event: WagonsClassifiedEvent) -> None:
-        """Handle wagons classified event by forming workshop rakes."""
-        if not event.accepted_wagons:
-            return
-        # Rakes are now formed in _pickup_wagons_to_retrofit for better timing
+        """Handle wagons classified event by forming workshop rakes.
+
+        Note
+        ----
+            Rakes are now formed in _pickup_wagons_to_retrofit for better timing
+        """
 
     def _handle_rake_transport_request(self, event: RakeTransportRequestedEvent) -> None:
         """Handle rake transport request by scheduling shunting operations."""
@@ -932,11 +938,8 @@ class YardOperationsContext:
             if hasattr(strategy, 'value'):
                 strategy = strategy.value
 
-            # Initialize workshop tracking
-            if not hasattr(self, '_workshop_round_robin_index'):
-                self._workshop_round_robin_index = 0
-            if not hasattr(self, '_workshop_wagon_counts'):
-                self._workshop_wagon_counts = dict.fromkeys(workshop_ids, 0)
+            self._workshop_round_robin_index = 0
+            self._workshop_wagon_counts = dict.fromkeys(workshop_ids, 0)
 
             # Assign workshops to wagons using strategy
             for wagon in rake.wagons:
@@ -1060,7 +1063,7 @@ class YardOperationsContext:
             return len(shunting_context.locomotive_pool.available_locomotives)
         return 2  # Default assumption
 
-    def _select_track_by_type(self, track_type: str, strategy: str | None = None) -> Any | None:
+    def _select_track_by_type(self, track_type: str, strategy: str | None = None) -> Any | None:  # pylint: disable=too-many-locals, too-many-return-statements, too-many-branches
         """Select track by type using configured strategy."""
         tracks = self._tracks_by_type.get(track_type, [])
         if not tracks:
@@ -1134,7 +1137,7 @@ class YardOperationsContext:
 
         return tracks[0]
 
-    def _execute_pickup_plan(self, pickup_plan: Any, from_track_id: str) -> Generator[Any, Any]:
+    def _execute_pickup_plan(self, pickup_plan: Any, from_track_id: str) -> Generator[Any, Any]:  # pylint: disable=too-many-locals
         """Execute pickup plan - form rakes limited by retrofit track capacity."""
         if not pickup_plan.rakes_to_pickup:
             return
@@ -1183,7 +1186,10 @@ class YardOperationsContext:
             # Form rake from specific collection track
             rake = self.wagon_pickup_service.create_single_retrofit_rake(
                 rake_wagons,
-                {ws: [w for w in rake_wagons if getattr(w, 'workshop_id', None) == ws] for ws in workshop_allocations},
+                {
+                    ws: [wagon for wagon in rake_wagons if getattr(wagon, 'workshop_id', None) == ws]
+                    for ws in workshop_allocations
+                },
             )
             rake.formation_track = from_track_id
             self.rake_registry.register_rake(rake)
