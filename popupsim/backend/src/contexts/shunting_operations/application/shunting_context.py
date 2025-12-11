@@ -241,12 +241,11 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
     def _get_move_time(self, context: Any, from_track: str, to_track: str) -> float:
         """Get movement time between tracks."""
         move_time = to_ticks(timedelta(minutes=1))  # Default 1 minute
+
         if context.scenario.routes:
             for route in context.scenario.routes:
                 if route.track_sequence and len(route.track_sequence) >= 2:
-                    if (route.track_sequence[0] == from_track and route.track_sequence[1] == to_track) or (
-                        route.track_sequence[1] == from_track and route.track_sequence[0] == to_track
-                    ):
+                    if (route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track):
                         move_time = to_ticks(timedelta(minutes=route.duration))
                         break
         return move_time
