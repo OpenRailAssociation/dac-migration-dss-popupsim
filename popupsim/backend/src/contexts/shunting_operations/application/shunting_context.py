@@ -243,7 +243,6 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         move_time = to_ticks(timedelta(minutes=1))  # Default 1 minute
         if context.scenario.routes:
             for route in context.scenario.routes:
-
                 if route.track_sequence and len(route.track_sequence) >= 2:
                     if (route.track_sequence[0] == from_track and route.track_sequence[1] == to_track) or (
                         route.track_sequence[1] == from_track and route.track_sequence[0] == to_track
@@ -284,23 +283,14 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log coupling completion
             try:
                 plog = get_process_logger()
-                if wagon_ids:
-                    wagon_str = ', '.join(wagon_ids)
-                    plog.log(
-                        (
-                            f'COUPLING: [{wagon_str}] with {coupler_type} couplers '
-                            f'(total={wagon_count * coupling_time:.1f}min)'
-                        ),
-                        sim_time=context.infra.engine.current_time(),
-                    )
-                else:
-                    plog.log(
-                        (
-                            f'COUPLING: {wagon_count} wagons with {coupler_type} couplers'
-                            f' (total={wagon_count * coupling_time:.1f}min)'
-                        ),
-                        sim_time=context.infra.engine.current_time(),
-                    )
+                wagon_str = ', '.join(wagon_ids)
+                plog.log(
+                    (
+                        f'COUPLING: [{wagon_str}] with {coupler_type} couplers '
+                        f'(total={wagon_count * coupling_time:.1f}min)'
+                    ),
+                    sim_time=context.infra.engine.current_time(),
+                )
             except RuntimeError:
                 pass
 
@@ -312,7 +302,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         wagon_count: int,
         coupler_type: str | None = None,
         wagon_ids: list[str] | None = None,
-    ) -> Any: # ruff: C901
+    ) -> Any:  # ruff: C901
         """Decouple wagons from locomotive."""
 
         def decouple_gen() -> float:
@@ -340,23 +330,14 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log decoupling completion
             try:
                 plog = get_process_logger()
-                if wagon_ids:
-                    wagon_str = ', '.join(wagon_ids)
-                    plog.log(
-                        (
-                            f'DECOUPLING: [{wagon_str}] with {coupler_type or "SCREW"} couplers'
-                            f'(total={wagon_count * decoupling_time:.1f}min)'
-                        ),
-                        sim_time=context.infra.engine.current_time(),
-                    )
-                else:
-                    plog.log(
-                        (
-                            f'DECOUPLING: {wagon_count} wagons with {coupler_type or "SCREW"} couplers '
-                            f'(total={wagon_count * decoupling_time:.1f}min)'
-                        ),
-                        sim_time=context.infra.engine.current_time(),
-                    )
+                wagon_str = ', '.join(wagon_ids)
+                plog.log(
+                    (
+                        f'DECOUPLING: [{wagon_str}] with {coupler_type or "SCREW"} couplers'
+                        f'(total={wagon_count * decoupling_time:.1f}min)'
+                    ),
+                    sim_time=context.infra.engine.current_time(),
+                )
             except RuntimeError:
                 pass
 

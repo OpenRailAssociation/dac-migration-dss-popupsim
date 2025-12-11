@@ -98,7 +98,7 @@ class SimulationApplicationService:
             logger.info(' Simulation completed successfully for scenario %s', self.scenario.id)
             return result
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             failure_time = self.engine.current_time()
             logger.exception(' Simulation failed for scenario %s: %s', self.scenario.id, e)
 

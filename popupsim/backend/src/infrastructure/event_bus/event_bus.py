@@ -66,7 +66,7 @@ class InMemoryEventBus(EventBus):
         for hook in self._pre_publish_hooks:
             try:
                 hook(event)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 logger.exception('Pre-publish hook error')
 
         # Log event with context
@@ -90,7 +90,7 @@ class InMemoryEventBus(EventBus):
                 handler(event)
                 self._metrics.events_processed += 1
                 logger.info('EVENT_HANDLED: %s by %s', event.__class__.__name__, handler_context)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 self._metrics.handler_errors += 1
                 logger.exception(
                     'EVENT_ERROR: %s in %s',
@@ -102,14 +102,14 @@ class InMemoryEventBus(EventBus):
                 for error_handler in self._error_handlers:
                     try:
                         error_handler(e, event)
-                    except Exception:
+                    except Exception:  # pylint: disable=broad-exception-caught
                         logger.exception('Error handler failed')
 
         # Execute post-publish hooks
         for hook in self._post_publish_hooks:
             try:
                 hook(event)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 logger.exception('Post-publish hook error')
 
     def subscribe(self, event_type: type, handler: Callable[[DomainEvent], None]) -> None:

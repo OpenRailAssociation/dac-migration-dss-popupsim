@@ -68,7 +68,7 @@ class ContextRegistry:
         for name, context in self.contexts.items():
             try:
                 metrics[name] = context.get_metrics()
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.exception('Failed to get metrics from %s', name)
                 metrics[name] = {'error': str(e)}
         return metrics
@@ -79,7 +79,7 @@ class ContextRegistry:
         for name, context in self.contexts.items():
             try:
                 status[name] = context.get_status()
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.exception('Failed to get status from %s', name)
                 status[name] = {'status': 'error', 'error': str(e)}
         return status
@@ -92,7 +92,7 @@ class ContextRegistry:
             try:
                 context.cleanup()
                 logger.debug(' Cleaned up context: %s', name)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 logger.exception('Failed to cleanup %s', name)
 
     def broadcast_lifecycle_event(self, event: Any) -> None:
@@ -107,7 +107,7 @@ class ContextRegistry:
                         context.on_simulation_ended(event)
                     elif event_name == 'SimulationFailedEvent':
                         context.on_simulation_failed(event)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 logger.exception(
                     'Failed to broadcast %s to %s',
                     event.__class__.__name__,
