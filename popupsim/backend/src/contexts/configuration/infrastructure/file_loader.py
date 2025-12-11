@@ -128,10 +128,13 @@ class FileLoader:  # pylint: disable=too-few-public-methods
                 route_data = json.load(f)
             routes = []
             for r in route_data['routes']:
-                path = r['path']
-                duration = sum(edge_lengths.get(edge, 0.0) for edge in path) / 1000.0
                 routes.append(
-                    RouteInputDTO(id=r['id'], description=r.get('description'), duration=duration, track_sequence=path)
+                    RouteInputDTO(
+                        id=r.get('id') or r.get('route_id'),
+                        description=r.get('description'),
+                        duration=r['duration'],
+                        track_sequence=r['path'],
+                    )
                 )
             scenario.routes = routes
 

@@ -95,7 +95,7 @@ class RailwayInfrastructureContext:
             'tracks_count': len(self.track_resources),
             'routes_count': len(self.scenario.routes or []),
             'workshops_count': len(self.scenario.workshops or []),
-            'track occupancy': capacity
+            'track occupancy': capacity,
         }
 
     def get_status(self) -> dict[str, Any]:

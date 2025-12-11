@@ -218,16 +218,16 @@ class AnalyticsContext:
         """
         metrics = {}
         for track_id, capacity_info in self.track_capacities.items():
-            max_capacity = capacity_info.get("max_capacity", 0)
+            max_capacity = capacity_info.get('max_capacity', 0)
             current = self.track_occupancy.get(track_id, 0)
             utilization = (current / max_capacity * 100) if max_capacity > 0 else 0
-            state = "green" if utilization < 70 else "yellow" if utilization < 90 else "red"
+            state = 'green' if utilization < 70 else 'yellow' if utilization < 90 else 'red'
 
             metrics[track_id] = {
-                "max_capacity": max_capacity,
-                "current_occupancy": current,
-                "utilization_percent": utilization,
-                "state": state,
+                'max_capacity': max_capacity,
+                'current_occupancy': current,
+                'utilization_percent': utilization,
+                'state': state,
             }
         return metrics
 
