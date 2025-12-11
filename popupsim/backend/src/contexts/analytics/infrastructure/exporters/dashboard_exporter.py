@@ -1,5 +1,6 @@
 """Dashboard data exporter for Streamlit frontend integration."""
 
+# ruff: noqa: PLR0911, PLR0912, PLR0915, C901
 import csv
 import json
 from pathlib import Path
@@ -16,7 +17,6 @@ class DashboardExporter:
         interval_seconds: float = 3600.0,
         yard_context: Any = None,
         popup_context: Any = None,
-        shunting_context: Any = None,
     ) -> dict[str, Path]:
         """Export all dashboard data files.
 
@@ -65,7 +65,7 @@ class DashboardExporter:
 
         # 6. Track capacity time-series CSV
         track_path = output_dir / 'track_capacity.csv'
-        self._export_track_capacity(analytics_context, track_path, yard_context)
+        self._export_track_capacity(analytics_context, track_path)
         exported_files['track_capacity'] = track_path
 
         # 7. Timeline CSV (time-series metrics)
@@ -75,12 +75,12 @@ class DashboardExporter:
 
         # 8. Rejected wagons CSV
         rejected_path = output_dir / 'rejected_wagons.csv'
-        self._export_rejected_wagons(analytics_context, rejected_path, yard_context)
+        self._export_rejected_wagons(rejected_path, yard_context)
         exported_files['rejected_wagons'] = rejected_path
 
         # 9. Wagon locations CSV (current state)
         locations_path = output_dir / 'wagon_locations.csv'
-        self._export_wagon_locations(analytics_context, locations_path, yard_context)
+        self._export_wagon_locations(analytics_context, locations_path)
         exported_files['wagon_locations'] = locations_path
 
         # 10. Wagon journey CSV (complete history)
@@ -289,7 +289,7 @@ class DashboardExporter:
                         ]
                     )
 
-    def _export_track_capacity(self, analytics_context: Any, output_path: Path, yard_context: Any = None) -> None:
+    def _export_track_capacity(self, analytics_context: Any, output_path: Path) -> None:
         """Export track capacity from analytics context."""
         # Get track metrics from analytics context
         track_metrics = analytics_context.get_track_metrics()
@@ -464,9 +464,9 @@ class DashboardExporter:
         """Export track capacity data to CSV (public method for standalone use)."""
         self._export_track_capacity(analytics_context, output_path, yard_context)
 
-    def export_wagon_locations(self, analytics_context: Any, output_path: Path, yard_context: Any = None) -> None:
+    def export_wagon_locations(self, analytics_context: Any, output_path: Path) -> None:
         """Export wagon locations to CSV (public method for standalone use)."""
-        self._export_wagon_locations(analytics_context, output_path, yard_context)
+        self._export_wagon_locations(analytics_context, output_path)
 
     def _export_wagon_journey(self, analytics_context: Any, output_path: Path) -> None:
         """Export complete wagon journey history to CSV."""
@@ -633,7 +633,7 @@ class DashboardExporter:
                     ]
                 )
 
-    def _export_rejected_wagons(self, analytics_context: Any, output_path: Path, yard_context: Any = None) -> None:
+    def _export_rejected_wagons(self, output_path: Path, yard_context: Any = None) -> None:
         """Export rejected wagons with reasons to CSV."""
         rejected_wagons = []
 
@@ -682,7 +682,7 @@ class DashboardExporter:
                     ]
                 )
 
-    def _export_wagon_locations(self, analytics_context: Any, output_path: Path, yard_context: Any = None) -> None:
+    def _export_wagon_locations(self, analytics_context: Any, output_path: Path) -> None:
         """Export current wagon locations to CSV."""
         wagon_locations = []
 
@@ -694,7 +694,8 @@ class DashboardExporter:
         wagon_train_map = {}
 
         # Build wagon state from events
-        for timestamp, event in events:
+        for _event in events:
+            event = _event[1]  # event[0] is the timestamp
             event_type = type(event).__name__
 
             if 'TrainArrived' in event_type:

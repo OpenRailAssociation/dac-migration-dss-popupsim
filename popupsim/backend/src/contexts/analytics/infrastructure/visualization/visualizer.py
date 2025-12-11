@@ -285,7 +285,6 @@ class Visualizer:
                 else:
                     colors.append('#e74c3c')  # Red for low
 
-            bars = ax.barh(bays, utilizations, color=colors, edgecolor='black', linewidth=0.8, alpha=0.85)
             ax.set_xlabel('Utilization (%)', fontsize=11, fontweight='bold')
             ax.set_title('Workshop Bay Utilization', fontsize=13, fontweight='bold', pad=15)
             ax.set_xlim(0, 105)
@@ -293,7 +292,7 @@ class Visualizer:
             ax.set_axisbelow(True)
 
             # Add value labels at the end of bars
-            for i, (bar, util) in enumerate(zip(bars, utilizations, strict=False)):
+            for i, util in enumerate(utilizations):
                 ax.text(util + 2, i, f'{util:.1f}%', va='center', fontsize=10, fontweight='bold')
         else:
             ax.text(0.5, 0.5, 'No bay data', ha='center', va='center', transform=ax.transAxes, fontsize=12)

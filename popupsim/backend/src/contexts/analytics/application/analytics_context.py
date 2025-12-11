@@ -16,6 +16,8 @@ from contexts.analytics.infrastructure.exporters.dashboard_exporter import Dashb
 from contexts.analytics.infrastructure.exporters.json_exporter import JSONExporter
 from contexts.analytics.infrastructure.visualization import Visualizer
 from contexts.analytics.infrastructure.visualization.rake_visualizer import RakeVisualizer
+from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
+from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from infrastructure.event_bus.event_bus import EventBus
 from shared.domain.events.rake_events import RakeFormedEvent
 from shared.domain.events.rake_events import RakeProcessingCompletedEvent
@@ -56,6 +58,8 @@ class AnalyticsContext:
         # Track capacity monitoring
         self.track_capacities: dict[str, dict[str, float]] = {}
         self.track_occupancy: dict[str, float] = {}
+        self.infra = None
+        self.scenario = None
 
         self._sync_track_capacities()
         self._subscribe_to_rake_events()
@@ -63,6 +67,8 @@ class AnalyticsContext:
 
     def initialize(self, infrastructure: Any, scenario: Any) -> None:
         """Initialize context."""
+        self.infra = infrastructure
+        self.scenario = scenario
 
     def start_processes(self) -> None:
         """Start processes."""
@@ -171,6 +177,7 @@ class AnalyticsContext:
     def _sync_track_capacities(self) -> None:
         """Calculate and sync track capacities from configuration."""
         # Initialize with default track capacities (will be updated from scenario)
+
         default_tracks = {
             'parking1': 150.0,
             'parking2': 270.0,
@@ -211,16 +218,16 @@ class AnalyticsContext:
         """
         metrics = {}
         for track_id, capacity_info in self.track_capacities.items():
-            max_capacity = capacity_info.get('max_capacity', 0)
+            max_capacity = capacity_info.get("max_capacity", 0)
             current = self.track_occupancy.get(track_id, 0)
             utilization = (current / max_capacity * 100) if max_capacity > 0 else 0
-            state = 'green' if utilization < 70 else 'yellow' if utilization < 90 else 'red'
+            state = "green" if utilization < 70 else "yellow" if utilization < 90 else "red"
 
             metrics[track_id] = {
-                'max_capacity': max_capacity,
-                'current_occupancy': current,
-                'utilization_percent': utilization,
-                'state': state,
+                "max_capacity": max_capacity,
+                "current_occupancy": current,
+                "utilization_percent": utilization,
+                "state": state,
             }
         return metrics
 
@@ -360,9 +367,7 @@ class AnalyticsContext:
         >>> files = context.export_dashboard_data(Path('output/dashboard'))
         >>> print(f'Exported {len(files)} files')
         """
-        return self.dashboard_exporter.export_all(
-            self, output_dir, interval_seconds, yard_context, popup_context, shunting_context
-        )
+        return self.dashboard_exporter.export_all(self, output_dir, interval_seconds, yard_context, popup_context)
 
     def start_real_time_visualization(self) -> None:
         """Start real-time visualization updates."""
@@ -439,9 +444,6 @@ class AnalyticsContext:
 
     def _subscribe_to_wagon_events(self) -> None:
         """Subscribe to wagon events for track capacity monitoring."""
-        from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
-        from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
-
         self.event_bus.subscribe(WagonParkedEvent, self._handle_wagon_parked)
         self.event_bus.subscribe(WagonDistributedEvent, self._handle_wagon_distributed)
 

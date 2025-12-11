@@ -13,6 +13,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
+from .utilization_breakdown_service import UtilizationBreakdownService
+
 
 @dataclass(frozen=True)
 class BottleneckThresholds:
@@ -202,8 +204,6 @@ class MetricsService:
         LocomotiveMetrics
             Locomotive utilization breakdown and time-series.
         """
-        from .utilization_breakdown_service import UtilizationBreakdownService
-
         # Get detailed utilization breakdown
         breakdown_service = UtilizationBreakdownService(self.events, self.duration_hours)
         loco_breakdown = breakdown_service.get_locomotive_breakdown()

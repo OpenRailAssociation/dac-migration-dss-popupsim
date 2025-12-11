@@ -20,7 +20,7 @@ from .models import TrackConfig
 from .models import WorkshopConfig
 
 
-class ConfigurationBuilder:
+class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
     """Builds scenario configuration step-by-step."""
 
     def __init__(self, path_or_metadata: Any) -> None:

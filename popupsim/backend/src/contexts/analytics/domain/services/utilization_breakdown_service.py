@@ -115,10 +115,10 @@ class UtilizationBreakdownService:
 
         for workshop_id in self._get_workshop_ids():
             action_times = defaultdict(float)
-            action_starts: dict[str, float] = {}
             total_actions = 0
 
-            for timestamp, event in self.events:
+            for _event in self.events:
+                event = _event[1]
                 event_type = type(event).__name__
                 event_workshop_id = getattr(event, 'workshop_id', None)
 
@@ -128,11 +128,7 @@ class UtilizationBreakdownService:
                 # Track retrofit completion events (actual events used in simulation)
                 if event_type in ('WagonRetrofitCompletedEvent', 'BatchRetrofittedEvent', 'WagonRetrofittedEvent'):
                     # Estimate working time from completion_time or use default retrofit duration
-                    completion_time = getattr(event, 'completion_time', timestamp)
                     duration = getattr(event, 'duration', 15.0)  # Default 15 min per wagon
-                    start_time = (
-                        completion_time - duration if hasattr(event, 'completion_time') else timestamp - duration
-                    )
                     action_times['working'] += duration
                     total_actions += 1
 

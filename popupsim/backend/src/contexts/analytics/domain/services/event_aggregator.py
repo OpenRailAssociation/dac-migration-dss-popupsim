@@ -1,4 +1,5 @@
 """Domain service for aggregating events into statistics."""
+# ruff: noqa: C901, PLR0912, PLR0915
 
 from collections import defaultdict
 from typing import Any

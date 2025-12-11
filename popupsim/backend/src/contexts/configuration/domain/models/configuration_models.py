@@ -99,7 +99,7 @@ class ComponentInfo:
 
 
 @dataclass
-class ConfigurationState:
+class ConfigurationState:  # pylint: disable=too-many-instance-attributes
     """Configuration state."""
 
     scenario_id: str

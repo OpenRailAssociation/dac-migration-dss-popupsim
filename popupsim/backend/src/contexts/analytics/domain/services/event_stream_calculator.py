@@ -28,7 +28,7 @@ class EventStreamCalculator:
         }
 
     def calculate_overall_equipment_effectiveness(self) -> KPIResult:
-        """Calculate OEE = Availability × Performance × Quality."""
+        """Calculate OEE = Availability * Performance × Quality."""
         stats = self.event_collector.compute_statistics()
 
         availability = 0.95  # Assume 95% availability

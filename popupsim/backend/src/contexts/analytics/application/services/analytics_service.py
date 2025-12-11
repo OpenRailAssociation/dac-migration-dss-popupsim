@@ -4,6 +4,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Any
 
+from contexts.analytics.domain.events.analytics_events import BottleneckDetectedEvent
 from contexts.analytics.domain.value_objects.analytics_config import AnalyticsConfig
 
 
@@ -64,8 +65,6 @@ class AnalyticsService:
                 bottlenecks.append(bottleneck)
 
                 if self.event_bus:
-                    from contexts.analytics.domain.events.analytics_events import BottleneckDetectedEvent
-
                     event = BottleneckDetectedEvent(
                         bottleneck_type=bottleneck.bottleneck_type,
                         severity=bottleneck.severity,

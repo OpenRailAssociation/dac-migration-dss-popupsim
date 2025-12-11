@@ -1086,10 +1086,6 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if strategy == 'least_occupied':
             # For parking tracks, always use length-based occupancy tracking
             if track_type == 'parking':
-                # Track occupancy based on length capacity with fill factor
-                if not hasattr(self, '_track_occupancy_m'):
-                    self._track_occupancy_m = {}
-
                 # Get fill factor from scenario (default 0.75)
                 fill_factor = 0.75
                 if self.scenario and hasattr(self.scenario, 'fill_factor'):

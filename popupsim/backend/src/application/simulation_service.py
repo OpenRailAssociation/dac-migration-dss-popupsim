@@ -231,7 +231,7 @@ class SimulationApplicationService:
             all_metrics.update(enhanced_metrics)
 
         # Add infrastructure metrics
-        all_metrics['infrastructure'] = self.infra.get_comprehensive_metrics()
+        all_metrics['infrastructure'] = self.infra.get_metrics()
 
         return SimulationResult(metrics=all_metrics, duration=duration, success=True)
 

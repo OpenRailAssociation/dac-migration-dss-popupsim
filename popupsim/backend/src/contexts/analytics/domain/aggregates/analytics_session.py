@@ -13,6 +13,7 @@ from contexts.analytics.domain.events.analytics_events import ThresholdSetEvent
 from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
 from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 from contexts.analytics.domain.value_objects.metric_id import MetricId
+from contexts.analytics.domain.value_objects.severity import SeverityLevel
 
 
 @dataclass
@@ -80,8 +81,6 @@ class AnalyticsSession:
 
     def check_threshold_violations(self) -> list[Any]:
         """Check violations and add to domain events (aggregate controls events)."""
-        from contexts.analytics.domain.events.analytics_events import ThresholdViolatedEvent
-        from contexts.analytics.domain.value_objects.severity import SeverityLevel
 
         violations = []
 

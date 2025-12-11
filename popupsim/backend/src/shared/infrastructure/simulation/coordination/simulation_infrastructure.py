@@ -66,6 +66,6 @@ class SimulationInfrastructure:
             retrofitted_wagons=engine.create_store(),
         )
 
-    def get_comprehensive_metrics(self) -> dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get infrastructure metrics."""
         return {'event_bus': self.event_bus.get_metrics(), 'engine': self.engine.get_simulation_stats()}

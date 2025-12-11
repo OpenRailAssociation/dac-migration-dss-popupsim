@@ -1,5 +1,6 @@
 """File-based scenario loader."""
 
+# ruff: noqa: C901, PLR0912, PLR0915
 import json
 from pathlib import Path
 from typing import Any
@@ -18,14 +19,14 @@ from contexts.configuration.domain.models.topology import Topology
 import pandas as pd
 
 
-class FileLoader:
+class FileLoader:  # pylint: disable=too-few-public-methods
     """Load scenario from file system."""
 
     def __init__(self, path: Path) -> None:
         self.path = path if path.is_dir() else path.parent
         self.scenario_file = path if path.is_file() else path / 'scenario.json'
 
-    def load(self) -> Any:
+    def load(self) -> Any:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Load scenario from files."""
         with open(self.scenario_file, encoding='utf-8') as f:
             data = json.load(f)
@@ -109,7 +110,9 @@ class FileLoader:
 
         # Load routes (inline or from file)
         if 'routes' in data:
-            routes = ([],)
+            routes = [
+                [],
+            ]
             for r in data['routes']:
                 routes.append(
                     RouteInputDTO(

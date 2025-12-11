@@ -104,7 +104,6 @@ class RakeVisualizer:
 
         _fig, ax = plt.subplots(figsize=(14, max(6, len(rake_timelines) * 0.5)))
 
-        y_pos = 0
         rake_labels = []
         status_colors = {
             'formed': 'lightblue',
@@ -113,7 +112,7 @@ class RakeVisualizer:
             'completed': 'lightgreen',
         }
 
-        for rake_id, timeline in rake_timelines.items():
+        for y_pos, rake_id, timeline in enumerate(rake_timelines.items()):
             timeline.sort(key=lambda x: x.timestamp)
             rake_labels.append(f'{rake_id} ({timeline[0].wagon_count}w)')
 
@@ -132,8 +131,6 @@ class RakeVisualizer:
                     alpha=0.7,
                 )
                 ax.add_patch(rect)
-
-            y_pos += 1
 
         ax.set_xlim(0, max(s.timestamp for s in snapshots) * 1.1)
         ax.set_ylim(-0.5, len(rake_timelines) - 0.5)

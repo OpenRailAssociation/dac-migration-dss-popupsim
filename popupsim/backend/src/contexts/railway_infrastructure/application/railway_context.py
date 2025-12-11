@@ -57,6 +57,7 @@ class RailwayInfrastructureContext:
     def request_track_capacity(self, track_id: str) -> Any:
         """Request capacity on a track (returns SimPy resource request)."""
         if track_id in self.track_resources:
+            print('REQUEST', track_id, self.get_track_capacity(track_id))
             return self.track_resources[track_id].request()
         return None
 
@@ -86,10 +87,15 @@ class RailwayInfrastructureContext:
 
     def get_metrics(self) -> dict[str, Any]:
         """Get railway infrastructure metrics."""
+        # Get current capacity of all tracks
+        capacity = {}
+        for track in self.track_resources:
+            capacity[track] = self.get_track_capacity(track) - self.get_available_capacity(track)
         return {
             'tracks_count': len(self.track_resources),
             'routes_count': len(self.scenario.routes or []),
             'workshops_count': len(self.scenario.workshops or []),
+            'track occupancy': capacity
         }
 
     def get_status(self) -> dict[str, Any]:
