@@ -8,11 +8,14 @@ from typing import Any
 
 from contexts.analytics.domain.value_objects.metric_id import MetricId
 from infrastructure.event_bus.event_bus import EventBus
+from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
+from shared.domain.events.wagon_lifecycle_events import WagonReadyForRetrofitEvent
+from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEvent
 
 from .metric_collector import MetricCollector
 
 
-class ContextCollector(ABC):
+class ContextCollector(ABC):  # pylint: disable=too-few-public-methods
     """Base class for context-specific collectors."""
 
     def __init__(self, context_name: str, event_bus: EventBus) -> None:
@@ -26,14 +29,11 @@ class ContextCollector(ABC):
         """Subscribe to context-specific events."""
 
 
-class ExternalTrainsCollector(ContextCollector):
+class ExternalTrainsCollector(ContextCollector):  # pylint: disable=too-few-public-methods
     """Collector for External Trains Context metrics."""
 
     def _subscribe_to_events(self) -> None:
         """Subscribe to external trains events."""
-        from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
-        from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEvent
-
         self.event_bus.subscribe(TrainArrivedEvent, self._handle_train_arrived)
         self.event_bus.subscribe(WagonRetrofitCompletedEvent, self._handle_wagon_completed)
 
@@ -51,14 +51,11 @@ class ExternalTrainsCollector(ContextCollector):
         self.collector.record_metric('wagons_completed', current + 1)
 
 
-class PopupRetrofitCollector(ContextCollector):
+class PopupRetrofitCollector(ContextCollector):  # pylint: disable=too-few-public-methods
     """Collector for Popup Retrofit Context metrics."""
 
     def _subscribe_to_events(self) -> None:
         """Subscribe to popup retrofit events."""
-        from shared.domain.events.wagon_lifecycle_events import WagonReadyForRetrofitEvent
-        from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEvent
-
         self.event_bus.subscribe(WagonReadyForRetrofitEvent, self._handle_retrofit_started)
         self.event_bus.subscribe(WagonRetrofitCompletedEvent, self._handle_retrofit_completed)
 
@@ -73,7 +70,7 @@ class PopupRetrofitCollector(ContextCollector):
         self.collector.record_metric('retrofits_completed', current + 1)
 
 
-class ConfigurationCollector(ContextCollector):
+class ConfigurationCollector(ContextCollector):  # pylint: disable=too-few-public-methods
     """Collector for Configuration Context metrics."""
 
     def _subscribe_to_events(self) -> None:

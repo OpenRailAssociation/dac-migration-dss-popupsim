@@ -5,6 +5,7 @@ from typing import Any
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.railway_infrastructure.domain.services.topology_service import TopologyService
 
+# ruff: noqa: ARG002
 
 class RailwayInfrastructureContext:
     """Railway Infrastructure bounded context - track capacity management with SimPy."""

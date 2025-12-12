@@ -34,12 +34,15 @@ class AnalyticsQueryService:
         self.repository = repository
 
     def get_session(self, session_id: str) -> AnalyticsSession | None:
+        """Get analytics session."""
         return self.repository.find_by_id(session_id)
 
     def get_all_sessions(self) -> list[AnalyticsSession]:
+        """Get all open analysis sessions."""
         return self.repository.find_all()
 
     def get_metrics_for_period(self, session_id: str, start: float, end: float) -> TimeSeriesMetrics | None:
+        """Get metrics of the specified time period."""
         session = self.repository.find_by_id(session_id)
         if not session:
             return None
@@ -61,6 +64,7 @@ class AnalyticsQueryService:
         )
 
     def get_trend_analysis(self, metric_name: str, session_ids: list[str]) -> TrendAnalysis:
+        """Return trent analyis of collectors."""
         values: list[float] = []
         valid_sessions: list[str] = []
 

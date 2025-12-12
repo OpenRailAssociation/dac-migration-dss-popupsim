@@ -43,7 +43,8 @@ class TimeSeriesService:
 
         return sorted(time_series.items())
 
-    def _calculate_metric(self, metric_name: str, events: list[Any]) -> Any:
+    # ruff: noqa: PLR0911
+    def _calculate_metric(self, metric_name: str, events: list[Any]) -> Any:  # pylint: disable=too-many-return-statements
         """Calculate metric value for time bucket."""
         if metric_name == 'train_arrivals':
             return self._count_train_arrivals(events)

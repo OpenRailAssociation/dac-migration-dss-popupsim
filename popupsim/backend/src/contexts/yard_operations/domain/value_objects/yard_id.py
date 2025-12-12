@@ -10,4 +10,5 @@ class YardId:
     id: str
 
     def __str__(self) -> str:
+        """Return id."""
         return self.id

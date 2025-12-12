@@ -36,18 +36,22 @@ class LocomotiveUtilization:
 
     @property
     def parking_percentage(self) -> float:
+        """Return the percentage of parking time."""
         return (self.parking_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
     @property
     def moving_percentage(self) -> float:
+        """Return the percentage of moving tiem."""
         return (self.moving_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
     @property
     def coupling_percentage(self) -> float:
+        """Return the percentage of coupling time."""
         return (self.coupling_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
     @property
     def decoupling_percentage(self) -> float:
+        """Return percentage of decoupling time."""
         return (self.decoupling_time / self.total_time * 100) if self.total_time > 0 else 0.0
 
 
@@ -62,11 +66,13 @@ class WorkshopMetrics:
 
     @property
     def working_percentage(self) -> float:
+        """Return the percentage of working time."""
         total = self.total_working_time + self.total_waiting_time
         return (self.total_working_time / total * 100) if total > 0 else 0.0
 
     @property
     def waiting_percentage(self) -> float:
+        """Return the percentage of waiting time."""
         total = self.total_working_time + self.total_waiting_time
         return (self.total_waiting_time / total * 100) if total > 0 else 0.0
 
@@ -82,6 +88,7 @@ class TrackCapacitySnapshot:
 
     @property
     def utilization_percentage(self) -> float:
+        """Return utilization in percentage of the track."""
         return (self.used_capacity / self.total_capacity * 100) if self.total_capacity > 0 else 0.0
 
     @property
@@ -104,6 +111,7 @@ class BottleneckDetection:
     threshold_exceeded: bool
     severity: str  # overutilization, underutilization, normal
 
+    # pylint: disable=too-many-positional-arguments, too-many-arguments
     @classmethod
     def detect(
         cls,

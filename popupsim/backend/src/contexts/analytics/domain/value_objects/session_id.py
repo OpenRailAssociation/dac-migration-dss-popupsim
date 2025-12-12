@@ -10,9 +10,11 @@ class SessionId:
     value: str
 
     def __post_init__(self) -> None:
+        """Validate session id."""
         if not self.value or not self.value.strip():
             msg = 'Session ID cannot be empty'
             raise ValueError(msg)
 
     def __str__(self) -> str:
+        """Return string representation."""
         return self.value

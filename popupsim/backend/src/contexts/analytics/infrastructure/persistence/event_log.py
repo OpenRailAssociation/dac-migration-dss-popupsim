@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 
-class EventLog:
+class EventLog:  # pylint: disable=too-few-public-methods
     """Append-only event log using JSONL."""
 
     def __init__(self, log_path: Path) -> None:

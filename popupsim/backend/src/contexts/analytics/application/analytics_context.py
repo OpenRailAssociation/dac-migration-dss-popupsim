@@ -28,9 +28,11 @@ from .services.analytics_query_service import AnalyticsQueryService
 from .services.event_stream_service import EventStreamService
 
 
-class AnalyticsContext:
+# ruff: noqa: ARG002
+class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-instance-attributes
     """Analytics Context facade."""
 
+    # pylint: disable=too-many-arguments, too-many-positional-arguments
     def __init__(
         self,
         event_bus: EventBus,
@@ -88,10 +90,6 @@ class AnalyticsContext:
     def set_threshold(self, threshold: Threshold) -> None:
         """Set threshold for metric monitoring."""
         self.app_service.set_threshold(threshold)
-
-    def subscribe_to_event(self, event_type: type[Any]) -> None:
-        """Subscribe to specific event type."""
-        self.event_bus.subscribe(event_type, self.event_collector._collect_event)
 
     def analyze_session(self) -> AnalyticsMetrics:
         """Analyze current session."""
@@ -305,10 +303,6 @@ class AnalyticsContext:
         """Generate all visualization charts."""
         return self.visualizer.generate_all_charts(self, output_dir)
 
-    def export_to_json(self, output_path: Any) -> None:
-        """Export analytics report to JSON."""
-        self.json_exporter.export_report(self, output_path)
-
     def export_dashboard_json(self, output_path: Any) -> None:
         """Export dashboard-ready data to JSON."""
         self.json_exporter.export_dashboard_data(self, output_path)
@@ -332,10 +326,11 @@ class AnalyticsContext:
 
     def export_utilization_breakdown_csv(self, output_path: Any) -> None:
         """Export utilization breakdown to CSV."""
-        breakdown_data = self.get_comprehensive_metrics()['utilization_breakdowns']
+        breakdown_data = self.get_metrics()['utilization_breakdowns']
         csv_exporter = CSVExporter()
         csv_exporter.export_utilization_breakdown(breakdown_data, output_path)
 
+    # pylint: disable=unused-argument
     def export_dashboard_data(
         self,
         output_dir: Path,
@@ -539,10 +534,6 @@ class AnalyticsContext:
         generated_files.append(dashboard_path)
 
         return generated_files
-
-    def get_status(self) -> dict[str, Any]:
-        """Get status."""
-        return {'status': 'ready'}
 
     def cleanup(self) -> None:
         """Cleanup."""

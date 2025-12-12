@@ -10,6 +10,7 @@ from contexts.analytics.domain.events.analytics_events import AnalysisCompletedE
 from contexts.analytics.domain.events.analytics_events import CollectorAddedEvent
 from contexts.analytics.domain.events.analytics_events import MetricsCollectedEvent
 from contexts.analytics.domain.events.analytics_events import ThresholdSetEvent
+from contexts.analytics.domain.events.analytics_events import ThresholdViolatedEvent
 from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
 from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 from contexts.analytics.domain.value_objects.metric_id import MetricId
@@ -81,7 +82,6 @@ class AnalyticsSession:
 
     def check_threshold_violations(self) -> list[Any]:
         """Check violations and add to domain events (aggregate controls events)."""
-
         violations = []
 
         for metric_name, threshold in self._thresholds.items():

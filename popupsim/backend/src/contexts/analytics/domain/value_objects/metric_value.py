@@ -12,6 +12,7 @@ class MetricValue:
     timestamp: float
 
     def __post_init__(self) -> None:
+        """Validate timestamp."""
         if self.timestamp < 0:
             msg = 'Timestamp cannot be negative'
             raise ValueError(msg)

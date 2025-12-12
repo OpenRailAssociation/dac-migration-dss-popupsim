@@ -12,7 +12,7 @@ from .json_analytics_repository import JSONAnalyticsRepository
 RepositoryType = Literal['memory', 'csv', 'json']
 
 
-class AnalyticsRepositoryFactory:
+class AnalyticsRepositoryFactory:  # pylint: disable=too-few-public-methods
     """Factory for creating analytics repositories."""
 
     @staticmethod

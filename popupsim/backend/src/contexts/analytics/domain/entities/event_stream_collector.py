@@ -1,5 +1,5 @@
 """Event stream collector - orchestrates event collection and analysis."""
-
+# pylint: disable=duplicate-code
 from typing import Any
 
 from contexts.analytics.domain.entities.metrics_aggregator import MetricsAggregator

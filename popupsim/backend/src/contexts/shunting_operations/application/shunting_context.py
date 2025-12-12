@@ -231,11 +231,11 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         """Get route path between tracks."""
         if context.scenario.routes:
             for route in context.scenario.routes:
-                if route.track_sequence and len(route.track_sequence) >= 2:
-                    if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
-                        return route.track_sequence
-                    if route.track_sequence[-1] == from_track and route.track_sequence[0] == to_track:
-                        return list(reversed(route.track_sequence))
+                #if route.track_sequence and len(route.track_sequence) >= 2:
+                if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
+                    return route.track_sequence
+                if route.track_sequence[-1] == from_track and route.track_sequence[0] == to_track:
+                    return list(reversed(route.track_sequence))
         return [from_track, to_track]
 
     def _get_move_time(self, context: Any, from_track: str, to_track: str) -> float:
@@ -244,10 +244,10 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
 
         if context.scenario.routes:
             for route in context.scenario.routes:
-                if route.track_sequence and len(route.track_sequence) >= 2:
-                    if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
-                        move_time = to_ticks(timedelta(minutes=route.duration))
-                        break
+                #if route.track_sequence and len(route.track_sequence) >= 2:
+                if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
+                    move_time = to_ticks(timedelta(minutes=route.duration))
+                    break
         return move_time
 
     def couple_wagons(

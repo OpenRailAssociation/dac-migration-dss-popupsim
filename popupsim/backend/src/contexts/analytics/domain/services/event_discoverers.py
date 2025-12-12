@@ -24,7 +24,6 @@ from shared.domain.events.wagon_lifecycle_events import WagonRetrofittedEvent
 
 def discover_shared_events() -> list[type[Any]]:
     """Discover shared domain events."""
-
     return [
         TrainArrivedEvent,
         WagonClassifiedEvent,
@@ -39,13 +38,11 @@ def discover_shared_events() -> list[type[Any]]:
 
 def discover_yard_events() -> list[type[Any]]:
     """Discover yard operations events."""
-
     return [WagonDistributedEvent, WagonParkedEvent]
 
 
 def discover_shunting_events() -> list[type[Any]]:
     """Discover shunting operations events."""
-
     return [
         LocomotiveAllocatedEvent,
         LocomotiveReleasedEvent,
@@ -57,13 +54,11 @@ def discover_shunting_events() -> list[type[Any]]:
 
 def discover_popup_events() -> list[type[Any]]:
     """Discover popup retrofit events."""
-
     return [RetrofitStartedEvent, RetrofitCompletedEvent]
 
 
 def discover_external_trains_events() -> list[type[Any]]:
     """Discover external trains events."""
-
     return [TrainDepartedEvent]
 
 

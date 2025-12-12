@@ -20,6 +20,7 @@ class TrainArrivedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'train_arrived'
 
 
@@ -34,4 +35,5 @@ class TrainDepartedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'train_departed'

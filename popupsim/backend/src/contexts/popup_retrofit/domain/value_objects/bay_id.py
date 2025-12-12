@@ -10,4 +10,5 @@ class BayId(BaseModel):
     value: str = Field(description='Bay identifier value')
 
     def __str__(self) -> str:
+        """Return string representation."""
         return self.value

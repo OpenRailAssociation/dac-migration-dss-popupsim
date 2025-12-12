@@ -12,6 +12,7 @@ class SeverityLevel(Enum):
     CRITICAL = 'critical'
 
     def __lt__(self, other: 'SeverityLevel') -> bool:
+        """Compare severity levels."""
         order = {
             SeverityLevel.INFO: 0,
             SeverityLevel.WARNING: 1,
@@ -28,6 +29,7 @@ class Severity:
     score: float
 
     def __post_init__(self) -> None:
+        """Validate severity error."""
         if not 0.0 <= self.score <= 1.0:
             msg = 'Severity score must be between 0.0 and 1.0'
             raise ValueError(msg)

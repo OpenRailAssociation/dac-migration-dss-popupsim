@@ -30,7 +30,7 @@ from shared.infrastructure.time_converters import to_ticks
 from .ports.popup_context_port import PopUpContextPort
 
 
-class PopUpRetrofitContext(PopUpContextPort):  # pytlint: disable=too-many-instance-attributes
+class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instance-attributes
     """PopUp Retrofit Context for managing DAC installation operations."""
 
     def __init__(self, event_bus: EventBus, rake_registry: RakeRegistry | None = None) -> None:

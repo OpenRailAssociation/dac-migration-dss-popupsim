@@ -1,12 +1,12 @@
 """Aggregates metrics from collected events."""
-
+# pylint: disable=duplicate-code
 import time
 from typing import Any
 
 from contexts.analytics.domain.services.metrics_calculation_service import MetricsCalculationService
 
 
-class MetricsAggregator:
+class MetricsAggregator:  # pylint: disable=R0903
     """Aggregates metrics from event stream."""
 
     def __init__(

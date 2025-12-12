@@ -9,39 +9,10 @@ class EventAggregator:
     """Aggregates domain events into statistical data for metrics calculation."""
 
     def __init__(self) -> None:
-        self._stats: dict[str, Any] = {
-            'train_arrivals': 0,
-            'wagons_arrived': 0,
-            'wagons_retrofitted': 0,
-            'wagons_rejected': 0,
-            'wagons_in_parking': 0,
-            'wagons_retrofitting': 0,
-            'wagons_on_retrofit_track': 0,
-            'wagons_on_retrofitted_track': 0,
-            'arrivals_by_time': {},
-            'locomotives': defaultdict(
-                lambda: {
-                    'parking_time': 0.0,
-                    'moving_time': 0.0,
-                    'coupling_time': 0.0,
-                    'decoupling_time': 0.0,
-                    'total_time': 0.0,
-                }
-            ),
-            'workshops': defaultdict(
-                lambda: {
-                    'completed_retrofits': 0,
-                    'working_time': 0.0,
-                    'waiting_time': 0.0,
-                    'wagons_per_hour': 0.0,
-                }
-            ),
-            'tracks': defaultdict(lambda: {'used_capacity': 0, 'total_capacity': 0}),
-            'track_timelines': defaultdict(list),
-            'current_time': 0.0,
-        }
+        self._stats: dict[str, Any] = {}
+        self._initialize_stats()
 
-    def aggregate_event(self, event: Any) -> None:
+    def aggregate_event(self, event: Any) -> None:  # pylint: disable=too-many-branches, too-many-statements
         """Aggregate a single domain event into statistics."""
         event_type = type(event).__name__
 
@@ -133,4 +104,38 @@ class EventAggregator:
 
     def reset(self) -> None:
         """Reset all statistics."""
-        self.__init__()  # type: ignore[misc]
+        self._initialize_stats()
+
+    def _initialize_stats(self) -> None:
+        """Initialize statisctics."""
+        self._stats: dict[str, Any] = {
+            'train_arrivals': 0,
+            'wagons_arrived': 0,
+            'wagons_retrofitted': 0,
+            'wagons_rejected': 0,
+            'wagons_in_parking': 0,
+            'wagons_retrofitting': 0,
+            'wagons_on_retrofit_track': 0,
+            'wagons_on_retrofitted_track': 0,
+            'arrivals_by_time': {},
+            'locomotives': defaultdict(
+                lambda: {
+                    'parking_time': 0.0,
+                    'moving_time': 0.0,
+                    'coupling_time': 0.0,
+                    'decoupling_time': 0.0,
+                    'total_time': 0.0,
+                }
+            ),
+            'workshops': defaultdict(
+                lambda: {
+                    'completed_retrofits': 0,
+                    'working_time': 0.0,
+                    'waiting_time': 0.0,
+                    'wagons_per_hour': 0.0,
+                }
+            ),
+            'tracks': defaultdict(lambda: {'used_capacity': 0, 'total_capacity': 0}),
+            'track_timelines': defaultdict(list),
+            'current_time': 0.0,
+        }

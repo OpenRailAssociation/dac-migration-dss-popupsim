@@ -10,6 +10,7 @@ class CollectorId:
     value: str
 
     def __post_init__(self) -> None:
+        """Validate collector id."""
         if not self.value or not self.value.strip():
             msg = 'Collector ID cannot be empty'
             raise ValueError(msg)
@@ -18,4 +19,5 @@ class CollectorId:
             raise ValueError(msg)
 
     def __str__(self) -> str:
+        """Return string representation."""
         return self.value

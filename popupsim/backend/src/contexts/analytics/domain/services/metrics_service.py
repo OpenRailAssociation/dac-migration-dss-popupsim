@@ -8,7 +8,7 @@ This service provides all metrics, KPIs, and statistics required by the analytic
 - Track capacity utilization and state visualization
 - Bottleneck detection across all resources
 """
-
+# pylint: disable=duplicate-code
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
@@ -100,6 +100,8 @@ class TrackStateMetrics:
 class MetricsService:
     """Domain service for analytics metrics."""
 
+    # pylint: disable=too-many-positional-arguments, too-many-arguments
+    # ruff: noqa: PLR0913
     def __init__(
         self,
         events: list[tuple[float, Any]],
@@ -314,6 +316,7 @@ class MetricsService:
 
         return track_metrics_list
 
+    # ruff: noqa: C901
     def detect_bottlenecks(
         self,
         workshop_metrics: list[WorkshopMetrics] | None = None,
@@ -437,8 +440,6 @@ class MetricsService:
         dict[str, Any]
             Utilization breakdowns with time and percentages.
         """
-        from .utilization_breakdown_service import UtilizationBreakdownService
-
         breakdown_service = UtilizationBreakdownService(self.events, self.duration_hours)
 
         return {

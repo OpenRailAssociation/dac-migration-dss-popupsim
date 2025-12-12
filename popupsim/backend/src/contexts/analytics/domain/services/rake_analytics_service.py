@@ -8,7 +8,7 @@ from shared.domain.value_objects.rake_type import RakeType
 
 
 @dataclass
-class RakeSnapshot:
+class RakeSnapshot:  # pylint: disable=too-many-instance-attributes
     """Snapshot of rake state at a specific time."""
 
     timestamp: float

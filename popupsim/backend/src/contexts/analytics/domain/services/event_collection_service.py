@@ -1,20 +1,22 @@
 """Unified event collection service."""
-
+# pylint: disable=duplicate-code
 from collections import defaultdict
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 import time
+import traceback
 from typing import Any
 
 from contexts.analytics.domain.value_objects.analytics_config import AnalyticsConfig
 from contexts.analytics.infrastructure.persistence.event_log import EventLog
 
+from .event_discoverers import discover_all_events
 from .incremental_statistics import IncrementalStatistics
 from .state_tracking_service import StateTrackingService
 
 
-class EventCollectionService:
+class EventCollectionService:  # pylint: disable=too-many-instance-attributes
     """Collects events with persistence, incremental stats, and caching."""
 
     def __init__(
@@ -37,14 +39,11 @@ class EventCollectionService:
     def subscribe_to_all_events(self, handler: Callable[[Any], None]) -> None:
         """Subscribe to all domain events."""
         try:
-            from .event_discoverers import discover_all_events
-
             event_types = discover_all_events()
             for event_type in event_types:
                 self.event_bus.subscribe(event_type, handler)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=(broad-exception-caught
             print(f'ERROR: Failed to subscribe to events: {e}')
-            import traceback
 
             traceback.print_exc()
 

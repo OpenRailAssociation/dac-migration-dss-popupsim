@@ -10,6 +10,7 @@ from typing import Any
 class DashboardExporter:
     """Export all data required for Streamlit dashboard."""
 
+    # pylint: disable=too-many-locals, too-many-positional-arguments, too-many-arguments
     def export_all(
         self,
         analytics_context: Any,
@@ -143,7 +144,7 @@ class DashboardExporter:
 
                 writer.writerow([timestamp, process, resource_type, resource_id, state, details])
 
-    def _export_locomotive_utilization(self, analytics_context: Any, output_path: Path) -> None:
+    def _export_locomotive_utilization(self, analytics_context: Any, output_path: Path) -> None:  # pylint: disable=too-many-branches, too-many-locals
         """Export locomotive utilization breakdown to CSV."""
         events = analytics_context.event_stream.collector.get_events()
 
@@ -228,7 +229,7 @@ class DashboardExporter:
                         ]
                     )
 
-    def _export_workshop_metrics(self, analytics_context: Any, output_path: Path, popup_context: Any = None) -> None:
+    def _export_workshop_metrics(self, analytics_context: Any, output_path: Path, popup_context: Any = None) -> None:  # pylint: disable=too-many-branches, too-many-locals
         """Export workshop performance metrics to CSV."""
         # Use popup context metrics if available (correct utilization)
         if popup_context:
@@ -330,7 +331,7 @@ class DashboardExporter:
                 for timestamp, value in data_points:
                     writer.writerow([timestamp, metric_name, value])
 
-    def _extract_resource_type(self, event: Any) -> str:
+    def _extract_resource_type(self, event: Any) -> str:  # pylint: disable=too-many-return-statements
         """Extract resource type from event."""
         if hasattr(event, 'wagon_id'):
             return 'wagon'
@@ -360,7 +361,7 @@ class DashboardExporter:
                 return str(getattr(event, attr))
         return 'unknown'
 
-    def _extract_process_name(self, event: Any) -> str:
+    def _extract_process_name(self, event: Any) -> str:  # pylint: disable=too-many-return-statements
         """Extract process name from event type."""
         event_name = event.__class__.__name__
         if 'Train' in event_name:
@@ -410,7 +411,7 @@ class DashboardExporter:
                     details[attr] = str(value)
         return json.dumps(details) if details else ''
 
-    def _make_serializable(self, obj: Any, seen: set[int] | None = None) -> Any:
+    def _make_serializable(self, obj: Any, seen: set[int] | None = None) -> Any:  # pylint: disable=too-many-return-statements
         """Convert object to JSON-serializable format."""
         if seen is None:
             seen = set()
@@ -460,15 +461,16 @@ class DashboardExporter:
         """Export timeline data to CSV (public method for standalone use)."""
         self._export_timeline(analytics_context, output_path, interval_seconds)
 
-    def export_track_capacity(self, analytics_context: Any, output_path: Path, yard_context: Any = None) -> None:
+    # ruff: noqa: ARG002
+    def export_track_capacity(self, analytics_context: Any, output_path: Path, yard_context: Any = None) -> None:  # pylint: disable=unused-argument
         """Export track capacity data to CSV (public method for standalone use)."""
-        self._export_track_capacity(analytics_context, output_path, yard_context)
+        self._export_track_capacity(analytics_context, output_path)
 
     def export_wagon_locations(self, analytics_context: Any, output_path: Path) -> None:
         """Export wagon locations to CSV (public method for standalone use)."""
         self._export_wagon_locations(analytics_context, output_path)
 
-    def _export_wagon_journey(self, analytics_context: Any, output_path: Path) -> None:
+    def _export_wagon_journey(self, analytics_context: Any, output_path: Path) -> None:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Export complete wagon journey history to CSV."""
         wagon_journey = []
 
@@ -604,10 +606,8 @@ class DashboardExporter:
         rejected_wagon_ids = set()
         rejected_file = output_path.parent / 'rejected_wagons.csv'
         if rejected_file.exists():
-            import csv as csv_module
-
             with rejected_file.open('r', encoding='utf-8') as f:
-                reader = csv_module.DictReader(f)
+                reader = csv.DictReader(f)
                 for row in reader:
                     rejected_wagon_ids.add(row['wagon_id'])
 
@@ -682,7 +682,7 @@ class DashboardExporter:
                     ]
                 )
 
-    def _export_wagon_locations(self, analytics_context: Any, output_path: Path) -> None:
+    def _export_wagon_locations(self, analytics_context: Any, output_path: Path) -> None:  # pylint: disable=too-many-statements, too-many-branches, too-many-locals
         """Export current wagon locations to CSV."""
         wagon_locations = []
 

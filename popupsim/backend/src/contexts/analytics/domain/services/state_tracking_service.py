@@ -1,10 +1,11 @@
 """State tracking service for real-time system state."""
-
 from collections import defaultdict
 from typing import Any
 
+from .track_capacity_calculator import TrackCapacityCalculator
 
-class StateTrackingService:
+
+class StateTrackingService:  # pylint: disable=too-many-instance-attributes
     """Tracks current system state from events."""
 
     def __init__(self) -> None:
@@ -22,77 +23,27 @@ class StateTrackingService:
         self.wagon_lengths: dict[str, float] = {}
         self.track_capacities: dict[str, float] = {}
 
-    def process_event(self, event: Any) -> None:
+
+    # ruff: noqa:  PLR0912, C901
+    def process_event(self, event: Any) -> None:  # pylint: disable=too-many-branches
         """Update state based on event."""
         event_type = type(event).__name__
         timestamp = getattr(event, 'timestamp', 0.0)
 
         if event_type == 'RetrofitStartedEvent':
-            wagon_id = getattr(event, 'wagon_id', None)
-            workshop_id = getattr(event, 'workshop_id', None)
-            if wagon_id:
-                self.wagons_retrofitting.add(wagon_id)
-                self.retrofit_start_times[wagon_id] = timestamp
-            if workshop_id:
-                self.workshop_states[workshop_id]['working'] += 1
-                self.workshop_states[workshop_id]['occupied_bays'] += 1
-                if workshop_id in self.workshop_idle_start:
-                    del self.workshop_idle_start[workshop_id]
+            self._retrofit_started_event(event, timestamp)
 
         elif event_type == 'RetrofitCompletedEvent':
-            wagon_id = getattr(event, 'wagon_id', None)
-            workshop_id = getattr(event, 'workshop_id', None)
-            if wagon_id:
-                self.wagons_retrofitting.discard(wagon_id)
-                if wagon_id in self.retrofit_start_times:
-                    del self.retrofit_start_times[wagon_id]
-            if workshop_id:
-                if self.workshop_states[workshop_id]['working'] > 0:
-                    self.workshop_states[workshop_id]['working'] -= 1
-                if self.workshop_states[workshop_id]['occupied_bays'] > 0:
-                    self.workshop_states[workshop_id]['occupied_bays'] -= 1
-                if self.workshop_states[workshop_id]['occupied_bays'] == 0:
-                    self.workshop_idle_start[workshop_id] = timestamp
+            self._retrofit_completed_event(event, timestamp)
 
         elif event_type == 'WagonLocationChangedEvent':
-            wagon_id = getattr(event, 'wagon_id', None)
-            from_location = getattr(event, 'from_location', None)
-            to_location = getattr(event, 'to_location', None)
-            if wagon_id and to_location:
-                self.wagon_locations[wagon_id] = to_location
-                if from_location:
-                    self.track_occupancy[from_location].discard(wagon_id)
-                self.track_occupancy[to_location].add(wagon_id)
-                if 'retrofit_track' in to_location.lower():
-                    self.wagons_on_retrofit_track.add(wagon_id)
-                elif 'retrofitted_track' in to_location.lower():
-                    self.wagons_on_retrofitted_track.add(wagon_id)
-                    self.wagons_on_retrofit_track.discard(wagon_id)
+            self._wagon_location_changed_event(event)
 
         elif event_type == 'WagonDistributedEvent':
-            wagon_id = getattr(event, 'wagon_id', None)
-            track_id = getattr(event, 'track_id', None)
-            if wagon_id:
-                self.wagons_on_retrofit_track.add(wagon_id)
-                wagon_length = getattr(event, 'wagon_length', None)
-                if wagon_length is not None:
-                    self.wagon_lengths[wagon_id] = wagon_length
-                if track_id:
-                    self.wagon_locations[wagon_id] = track_id
-                    self.track_occupancy[track_id].add(wagon_id)
+            self._wagon_distributed_event(event)
 
         elif event_type == 'WagonParkedEvent':
-            wagon_id = getattr(event, 'wagon_id', None)
-            track_id = getattr(event, 'track_id', None)
-            if wagon_id:
-                self.wagons_on_retrofitted_track.add(wagon_id)
-                self.wagons_on_retrofit_track.discard(wagon_id)
-                wagon_length = getattr(event, 'wagon_length', None)
-                if wagon_length is not None:
-                    self.wagon_lengths[wagon_id] = wagon_length
-                if track_id:
-                    self.wagon_locations[wagon_id] = track_id
-                    self.track_occupancy[track_id].add(wagon_id)
+            self._wagon_parked_event(event)
 
         elif event_type in ('LocomotiveAllocatedEvent', 'ResourceAllocatedEvent'):
             loco_id = getattr(event, 'locomotive_id', None) or getattr(event, 'resource_id', None)
@@ -172,8 +123,6 @@ class StateTrackingService:
         dict[str, Any]
             Track metrics with utilization and state.
         """
-        from .track_capacity_calculator import TrackCapacityCalculator
-
         calculator = TrackCapacityCalculator(self.track_capacities, self.track_occupancy, self.wagon_lengths)
         return calculator.calculate()
 
@@ -190,3 +139,75 @@ class StateTrackingService:
         self.workshop_idle_start.clear()
         self.wagon_lengths.clear()
         self.track_capacities.clear()
+
+    def _retrofit_started_event(self, event: Any, timestamp: Any) -> None:
+        """Set workshop states (retrofit started)."""
+        wagon_id = getattr(event, 'wagon_id', None)
+        workshop_id = getattr(event, 'workshop_id', None)
+        if wagon_id:
+            self.wagons_retrofitting.add(wagon_id)
+            self.retrofit_start_times[wagon_id] = timestamp
+        if workshop_id:
+            self.workshop_states[workshop_id]['working'] += 1
+            self.workshop_states[workshop_id]['occupied_bays'] += 1
+            if workshop_id in self.workshop_idle_start:
+                del self.workshop_idle_start[workshop_id]
+
+    def _retrofit_completed_event(self, event: Any, timestamp: Any) -> None:
+        """Set workshop states (retrofit completed)."""
+        wagon_id = getattr(event, 'wagon_id', None)
+        workshop_id = getattr(event, 'workshop_id', None)
+        if wagon_id:
+            self.wagons_retrofitting.discard(wagon_id)
+            if wagon_id in self.retrofit_start_times:
+                del self.retrofit_start_times[wagon_id]
+        if workshop_id:
+            if self.workshop_states[workshop_id]['working'] > 0:
+                self.workshop_states[workshop_id]['working'] -= 1
+            if self.workshop_states[workshop_id]['occupied_bays'] > 0:
+                self.workshop_states[workshop_id]['occupied_bays'] -= 1
+            if self.workshop_states[workshop_id]['occupied_bays'] == 0:
+                self.workshop_idle_start[workshop_id] = timestamp
+
+    def _wagon_location_changed_event(self, event: Any) -> None:
+        """Set location of wagon."""
+        wagon_id = getattr(event, 'wagon_id', None)
+        from_location = getattr(event, 'from_location', None)
+        to_location = getattr(event, 'to_location', None)
+        if wagon_id and to_location:
+            self.wagon_locations[wagon_id] = to_location
+            if from_location:
+                self.track_occupancy[from_location].discard(wagon_id)
+            self.track_occupancy[to_location].add(wagon_id)
+            if 'retrofit_track' in to_location.lower():
+                self.wagons_on_retrofit_track.add(wagon_id)
+            elif 'retrofitted_track' in to_location.lower():
+                self.wagons_on_retrofitted_track.add(wagon_id)
+                self.wagons_on_retrofit_track.discard(wagon_id)
+
+    def _wagon_distributed_event(self, event: Any) -> None:
+        """Process wagon distibuted event."""
+        wagon_id = getattr(event, 'wagon_id', None)
+        track_id = getattr(event, 'track_id', None)
+        if wagon_id:
+            self.wagons_on_retrofit_track.add(wagon_id)
+            wagon_length = getattr(event, 'wagon_length', None)
+            if wagon_length is not None:
+                self.wagon_lengths[wagon_id] = wagon_length
+            if track_id:
+                self.wagon_locations[wagon_id] = track_id
+                self.track_occupancy[track_id].add(wagon_id)
+
+    def _wagon_parked_event(self, event: Any) -> None:
+        """Process wagon parked event."""
+        wagon_id = getattr(event, 'wagon_id', None)
+        track_id = getattr(event, 'track_id', None)
+        if wagon_id:
+            self.wagons_on_retrofitted_track.add(wagon_id)
+            self.wagons_on_retrofit_track.discard(wagon_id)
+            wagon_length = getattr(event, 'wagon_length', None)
+            if wagon_length is not None:
+                self.wagon_lengths[wagon_id] = wagon_length
+            if track_id:
+                self.wagon_locations[wagon_id] = track_id
+                self.track_occupancy[track_id].add(wagon_id)

@@ -19,7 +19,7 @@ class RetrofitStartedEvent:
 
 
 @dataclass(frozen=True)
-class RetrofitCompletedEvent:  # pytlint: disable=too-many-instance-attributes
+class RetrofitCompletedEvent:  # pylint: disable=too-many-instance-attributes
     """Event fired when wagon retrofit completes."""
 
     wagon_id: str

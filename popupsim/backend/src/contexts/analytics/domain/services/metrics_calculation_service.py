@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Any
 
 
-class MetricsCalculationService:
+class MetricsCalculationService:  # pylint: disable=too-few-public-methods
     """Calculates all metrics from events in one pass."""
 
     def __init__(

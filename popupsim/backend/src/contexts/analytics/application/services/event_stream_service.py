@@ -1,5 +1,5 @@
 """Event stream application service."""
-
+# pylint: disable=duplicate-code
 import time
 from typing import Any
 
@@ -7,6 +7,7 @@ from contexts.analytics.domain.entities.metrics_aggregator import MetricsAggrega
 from contexts.analytics.domain.services.event_collection_service import EventCollectionService
 from contexts.analytics.domain.services.track_occupancy_tracker import TrackOccupancyTracker
 from infrastructure.event_bus.event_bus import EventBus
+from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
 
 
 class EventStreamService:
@@ -22,6 +23,7 @@ class EventStreamService:
         self.track_occupancy = TrackOccupancyTracker()
         self._subscribe_to_all_events()
         self._subscribe_to_wagon_events()
+        self._wagon_tracks = {}
 
     def _subscribe_to_all_events(self) -> None:
         """Subscribe to all domain events."""
@@ -29,8 +31,6 @@ class EventStreamService:
 
     def _subscribe_to_wagon_events(self) -> None:
         """Subscribe to wagon movement events for track occupancy."""
-        from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
-
         self.event_bus.subscribe(TrainArrivedEvent, self._handle_train_arrived)
         # Subscribe to all events to track wagon movements
         self.collector.subscribe_to_all_events(self._track_wagon_locations)
@@ -49,8 +49,6 @@ class EventStreamService:
                 track = wagon.track
                 if track and track not in ['', 'unknown']:
                     wagon_id = wagon.id
-                    if not hasattr(self, '_wagon_tracks'):
-                        self._wagon_tracks = {}
                     if wagon_id not in self._wagon_tracks or self._wagon_tracks[wagon_id] != track:
                         if wagon_id in self._wagon_tracks:
                             old_track = self._wagon_tracks[wagon_id]

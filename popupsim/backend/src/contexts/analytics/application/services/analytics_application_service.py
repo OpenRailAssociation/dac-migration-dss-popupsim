@@ -1,5 +1,5 @@
 """Main application service for analytics operations."""
-
+# pylint: disable=duplicate-code
 from typing import Any
 
 from contexts.analytics.domain.aggregates.analytics_session import AnalyticsSession
@@ -16,6 +16,7 @@ from .analytics_query_service import AnalyticsQueryService
 from .event_stream_service import EventStreamService
 
 
+# ruff: noqa: ARG002
 class AnalyticsApplicationService:
     """Orchestrates analytics operations."""
 
@@ -33,6 +34,7 @@ class AnalyticsApplicationService:
         self.current_session: AnalyticsSession | None = None
 
     def start_session(self, session_id: str) -> None:
+        """Start an analytics session."""
         self.current_session = AnalyticsSession(session_id)
         self.repository.save(self.current_session)
 
@@ -40,10 +42,10 @@ class AnalyticsApplicationService:
         self.event_bus.publish(event)
 
     def record_metric(self, collector_id: str, key: str, value: Any, timestamp: float | None = None) -> None:
+        """Record metrics."""
         if not self.current_session:
             self.start_session('default')
 
-        assert self.current_session is not None
         event = self.current_session.record_metric(collector_id, key, value, timestamp)
         self.event_bus.publish(event)
 
@@ -53,10 +55,9 @@ class AnalyticsApplicationService:
         self.repository.save(self.current_session)
 
     def set_threshold(self, threshold: Threshold) -> None:
+        """Define threshold for bottleneck detection."""
         if not self.current_session:
             self.start_session('default')
-
-        assert self.current_session is not None
         self.current_session.set_threshold(threshold)
 
         for domain_event in self.current_session.collect_domain_events():
@@ -65,6 +66,7 @@ class AnalyticsApplicationService:
         self.repository.save(self.current_session)
 
     def analyze_session(self) -> AnalyticsMetrics:
+        """Analyze current session and publish event."""
         if not self.current_session:
             return AnalyticsMetrics(0.0, 0.0, 0, 0)
 
@@ -74,6 +76,7 @@ class AnalyticsApplicationService:
         return event.results
 
     def get_metrics(self) -> dict[str, Any]:
+        """Return all metrics of the event stream."""
         return self.event_stream.compute_statistics()
 
     def end_session(self) -> None:
@@ -107,14 +110,16 @@ class AnalyticsApplicationService:
         return violations
 
     def clear_all_metrics(self) -> None:
+        """Clear all metrics."""
         self.event_stream.clear()
 
+    # pylint: disable=unused-argument
     def get_metrics_report(
         self,
         interval_seconds: float = 3600.0,
         thresholds: BottleneckThresholds | None = None,
     ) -> dict[str, Any]:
-        """Get comprehensive metrics including all KPIs, statistics, and bottlenecks.
+        """Get metrics including all KPIs, statistics, and bottlenecks.
 
         Parameters
         ----------

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import logging
 from pathlib import Path
 from typing import Annotated
+from typing import Any
 
 from application.simulation_service import SimulationApplicationService
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
@@ -15,7 +16,7 @@ app = typer.Typer(name='popupsim-new', help='PopUpSim New Architecture - Bounded
 
 @dataclass(frozen=True)
 class Contexts:
-    """Class containing all contexts"""
+    """Class containing all contexts."""
 
     analytics: None
     external_trains: None
@@ -24,16 +25,16 @@ class Contexts:
     shunting: None
 
 
-def print_wagon_metrics(external_trains):
-    """Print wagon metrics"""
+def print_wagon_metrics(external_trains) -> None:
+    """Print metrics of wagons."""
     ext_metrics = external_trains.get_metrics()
     typer.echo('\nWAGON METRICS:')
     typer.echo(f'  Total wagons arrived:     {ext_metrics.get("total_wagons", 0)}')
     typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
 
 
-def print_popup_workshop_metrics(popup):
-    """Print metrics of popup workshops"""
+def print_popup_workshop_metrics(popup) -> None:
+    """Print metrics of popup workshop."""
     popup_metrics = popup.get_metrics()
     typer.echo('\nWORKSHOP METRICS:')
     typer.echo(f'  Workshops:                {popup_metrics.get("workshops", 0)}')
@@ -50,8 +51,8 @@ def print_popup_workshop_metrics(popup):
         typer.echo(f'    {bay_id}:    {util:.1f}%')
 
 
-def print_yard_metrics(yard):
-    """Yard metrics"""
+def print_yard_metrics(yard) -> None:
+    """Print metrics of Yard context."""
     yard_metrics = yard.get_metrics()
     typer.echo('\nYARD METRICS:')
     typer.echo(f'  Wagons classified:        {yard_metrics.get("classified_wagons", 0)}')
@@ -66,8 +67,8 @@ def print_yard_metrics(yard):
         typer.echo(f'    {track_id}:          {util:.1f}%')
 
 
-def print_shunting_metrics(shunting):
-    """Shunting metrics"""
+def print_shunting_metrics(shunting) -> None:
+    """Print metrics of shunting context."""
     shunt_metrics = shunting.get_metrics()
     typer.echo('\nSHUNTING METRICS:')
     typer.echo(f'  Total locomotives:        {shunt_metrics.get("total_locomotives", 0)}')
@@ -84,17 +85,16 @@ def print_shunting_metrics(shunting):
             typer.echo(f'      {status}:      {pct:.1f}%')
 
 
-def configure_event_logging(output_path: str):
-    """"""
+def configure_event_logging(output_path: str) -> Any:
+    """Configure the event logging."""
     event_handler = logging.FileHandler(output_path / 'events.log', mode='w', encoding='utf-8')
     event_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S'))
     event_handler.setLevel(logging.INFO)
     return event_handler
 
 
-def configure_console_logging():
-    """"""
-    # Configure console logging (only warnings and errors)
+def configure_console_logging() -> None:
+    """Configure the console logging."""
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S'))
     console_handler.setLevel(logging.ERROR)
@@ -102,9 +102,8 @@ def configure_console_logging():
     return console_handler
 
 
-def output_visualization(contexts: Contexts, output_path):
-    """"""
-
+def output_visualization(contexts: Contexts, output_path) -> None:
+    """Write files for visualization onto the disk."""
     dashboard_files = contexts.analytics.export_dashboard_data(
         output_dir=output_path,
         yard_context=contexts.yard,

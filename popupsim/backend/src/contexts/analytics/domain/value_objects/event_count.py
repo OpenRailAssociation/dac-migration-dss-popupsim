@@ -11,6 +11,7 @@ class EventCount:
     count: int
 
     def __post_init__(self) -> None:
+        """Validate event count."""
         if self.count < 0:
             msg = 'Event count cannot be negative'
             raise ValueError(msg)

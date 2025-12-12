@@ -20,6 +20,7 @@ class MetricsCollectedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'metrics_collected'
 
 
@@ -35,6 +36,7 @@ class AnalysisCompletedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'analysis_completed'
 
 
@@ -51,6 +53,7 @@ class ThresholdViolatedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'threshold_violated'
 
     @property
@@ -74,6 +77,7 @@ class BottleneckDetectedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'bottleneck_detected'
 
 
@@ -87,6 +91,7 @@ class SessionStartedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'session_started'
 
 
@@ -102,6 +107,7 @@ class SessionEndedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'session_ended'
 
 
@@ -116,6 +122,7 @@ class CollectorAddedEvent:
 
     @property
     def event_type(self) -> str:
+        """Return event type."""
         return 'collector_added'
 
 
@@ -132,4 +139,5 @@ class ThresholdSetEvent:
 
     @property
     def event_type(self) -> str:
+        """Return type of element."""
         return 'threshold_set'

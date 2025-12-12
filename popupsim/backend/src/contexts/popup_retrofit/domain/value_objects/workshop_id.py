@@ -10,4 +10,5 @@ class WorkshopId(BaseModel):
     value: str = Field(description='Workshop identifier value')
 
     def __str__(self) -> str:
+        """Return string representation."""
         return self.value

@@ -36,9 +36,11 @@ class TimeRange:
     end: float
 
     def duration(self) -> float:
+        """Get duration."""
         return self.end - self.start
 
     def contains(self, timestamp: float) -> bool:
+        """Check if timestamp is contained in time range."""
         return self.start <= timestamp <= self.end
 
 

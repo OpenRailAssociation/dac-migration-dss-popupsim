@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class AnalyticsConfig:
+class AnalyticsConfig:  # pylint: disable=too-many-instance-attributes
     """Configuration for Analytics Context."""
 
     # Event collection

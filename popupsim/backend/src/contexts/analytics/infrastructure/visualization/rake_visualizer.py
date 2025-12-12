@@ -11,7 +11,7 @@ class RakeVisualizer:
     def __init__(self, analytics_service: RakeAnalyticsService) -> None:
         self.analytics_service = analytics_service
 
-    def plot_rake_formations_timeline(self, save_path: str | None = None) -> None:
+    def plot_rake_formations_timeline(self, save_path: str | None = None) -> None:  # pylint: disable= too-many-locals
         """Plot rake formations over time."""
         formations = self.analytics_service.get_rake_formations_by_time()
 
@@ -88,7 +88,7 @@ class RakeVisualizer:
         else:
             plt.show()
 
-    def plot_rake_gantt_chart(self, save_path: str | None = None) -> None:
+    def plot_rake_gantt_chart(self, save_path: str | None = None) -> None:  # pylint: disable=too-many-locals
         """Plot Gantt chart showing rake lifecycles."""
         snapshots = self.analytics_service.rake_snapshots
 
@@ -166,10 +166,10 @@ class RakeVisualizer:
         bars = ax.bar(sizes, counts, alpha=0.7, color='skyblue', edgecolor='navy')
 
         # Add value labels on bars
-        for bar, count in zip(bars, counts, strict=False):
-            height = bar.get_height()
+        for bar, count in zip(bars, counts, strict=False):  # pylint: disable=disallowed-name
+            height = bar.get_height()  # pylint: disable=disallowed-name
             ax.text(
-                bar.get_x() + bar.get_width() / 2.0,
+                bar.get_x() + bar.get_width() / 2.0,  # pylint: disable=disallowed-name
                 height + 0.1,
                 f'{count}',
                 ha='center',
@@ -186,7 +186,7 @@ class RakeVisualizer:
         else:
             plt.show()
 
-    def create_rake_dashboard(self, tracks: list[str], save_path: str | None = None) -> None:
+    def create_rake_dashboard(self, tracks: list[str], save_path: str | None = None) -> None:  # pylint: disable=too-many-locals
         """Create comprehensive rake analytics dashboard."""
         fig = plt.figure(figsize=(16, 12))
 

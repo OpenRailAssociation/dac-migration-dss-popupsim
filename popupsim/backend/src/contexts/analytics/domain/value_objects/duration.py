@@ -10,6 +10,7 @@ class Duration:
     seconds: float
 
     def __post_init__(self) -> None:
+        """Validate duration."""
         if self.seconds < 0:
             msg = 'Duration cannot be negative'
             raise ValueError(msg)
@@ -37,6 +38,7 @@ class Duration:
         return cls(hours * 3600)
 
     def __str__(self) -> str:
+        """Return string representation."""
         if self.seconds < 60:
             return f'{self.seconds:.1f}s'
         if self.seconds < 3600:
