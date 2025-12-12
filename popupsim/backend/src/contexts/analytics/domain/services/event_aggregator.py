@@ -108,7 +108,7 @@ class EventAggregator:
 
     def _initialize_stats(self) -> None:
         """Initialize statisctics."""
-        self._stats: dict[str, Any] = {
+        self._stats = {
             'train_arrivals': 0,
             'wagons_arrived': 0,
             'wagons_retrofitted': 0,

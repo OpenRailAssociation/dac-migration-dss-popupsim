@@ -529,7 +529,7 @@ class MetricsService:
             bucket_end = current_time + interval_seconds
             bucket_events = [e for ts, e in loco_events if current_time <= ts < bucket_end]
 
-            breakdown = defaultdict(int)
+            breakdown: dict[str, int] = defaultdict(int)
             for event in bucket_events:
                 event_type = type(event).__name__
                 if event_type == 'LocomotiveAllocatedEvent':

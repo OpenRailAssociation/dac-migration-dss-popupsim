@@ -80,7 +80,7 @@ class StateTrackingService:  # pylint: disable=too-many-instance-attributes
 
     def get_current_state(self) -> dict[str, Any]:
         """Get current system state snapshot."""
-        loco_breakdown = defaultdict(int)
+        loco_breakdown: dict[str, int] = defaultdict(int)
         for action in self.locomotive_actions.values():
             loco_breakdown[action] += 1
 

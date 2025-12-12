@@ -77,7 +77,7 @@ class TimeSeriesService:
 
     def _calculate_locomotive_utilization(self, events: list[Any]) -> dict[str, int]:
         """Calculate locomotive utilization breakdown."""
-        breakdown = defaultdict(int)
+        breakdown: dict[str, int] = defaultdict(int)
         for e in events:
             event_type = type(e).__name__
             if event_type == 'LocomotiveAllocatedEvent':
@@ -94,7 +94,7 @@ class TimeSeriesService:
 
     def _calculate_track_occupancy(self, events: list[Any]) -> dict[str, int]:
         """Calculate track occupancy changes."""
-        occupancy = defaultdict(int)
+        occupancy: dict[str, int] = defaultdict(int)
         for e in events:
             event_type = type(e).__name__
             if event_type == 'WagonDistributedEvent':

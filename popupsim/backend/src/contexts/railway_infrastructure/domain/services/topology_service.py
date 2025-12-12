@@ -27,5 +27,5 @@ class TopologyService:
         tracks = self._topology.get('tracks', [])
         for track in tracks:
             if track.get('id') == track_id:
-                return track.copy()
+                return dict(track).copy()
         return None

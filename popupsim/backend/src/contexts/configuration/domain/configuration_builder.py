@@ -5,6 +5,7 @@ from typing import Any
 from contexts.configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.configuration.infrastructure.file_loader import FileLoader
+from shared.validation.base import ValidationIssue
 from shared.validation.base import ValidationResult
 
 from .models import ComponentInfo
@@ -18,6 +19,7 @@ from .models import StrategiesConfig
 from .models import TopologyConfig
 from .models import TrackConfig
 from .models import WorkshopConfig
+
 
 
 class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
@@ -41,8 +43,10 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
     def add_workshop(self, workshop: WorkshopConfig) -> ValidationResult:
         """Add workshop configuration."""
         # Validate workshop
+
         if workshop.retrofit_stations <= 0:
-            return ValidationResult(is_valid=False, issues=['retrofit_stations must be greater than 0'])
+            issue = ValidationIssue(message='retrofit_stations must be greater than 0')
+            return ValidationResult(is_valid=False, issues=[])
 
         # Check for duplicates
         if any(w.id == workshop.id for w in self._workshops):
@@ -134,7 +138,7 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
 
     def validate_completeness(self) -> ValidationResult:
         """Validate configuration completeness."""
-        issues = []
+        issues: list[ValidationIssue] = []
 
         if not self._workshops:
             issues.append('At least one workshop is required')

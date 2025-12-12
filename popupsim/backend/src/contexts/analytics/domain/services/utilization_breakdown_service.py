@@ -24,7 +24,7 @@ class UtilizationBreakdownService:
 
     def get_locomotive_breakdown(self) -> UtilizationBreakdown:
         """Get locomotive utilization breakdown with time tracking."""
-        action_times = defaultdict(float)
+        action_times: dict[str, float] = defaultdict(float)
         action_starts: dict[str, float] = {}
         total_actions = 0
 
@@ -71,7 +71,7 @@ class UtilizationBreakdownService:
 
     def get_wagon_breakdown(self) -> UtilizationBreakdown:
         """Get wagon utilization breakdown with time tracking."""
-        action_times = defaultdict(float)
+        action_times: dict[str, float] = defaultdict(float)
         action_starts: dict[str, float] = {}
         total_actions = 0
 
@@ -114,7 +114,7 @@ class UtilizationBreakdownService:
         workshop_breakdowns = {}
 
         for workshop_id in self._get_workshop_ids():
-            action_times = defaultdict(float)
+            action_times: dict[str, float]= defaultdict(float)
             total_actions = 0
 
             for _event in self.events:

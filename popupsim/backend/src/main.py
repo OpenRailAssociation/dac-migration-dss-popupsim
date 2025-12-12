@@ -2,12 +2,18 @@
 
 from dataclasses import dataclass
 import logging
+from logging import StreamHandler
 from pathlib import Path
 from typing import Annotated
 from typing import Any
 
 from application.simulation_service import SimulationApplicationService
+from contexts.analytics.application.analytics_context import AnalyticsContext
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
+from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
+from contexts.popup_retrofit.application.popup_context import PopUpRetrofitContext
+from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
+from contexts.yard_operations.application.yard_context import YardOperationsContext
 from infrastructure.logging import init_process_logger
 import typer
 
@@ -18,14 +24,14 @@ app = typer.Typer(name='popupsim-new', help='PopUpSim New Architecture - Bounded
 class Contexts:
     """Class containing all contexts."""
 
-    analytics: None
-    external_trains: None
-    yard: None
-    popup_workshop: None
-    shunting: None
+    analytics: AnalyticsContext
+    external_trains: ExternalTrainsContext
+    yard: YardOperationsContext
+    popup_workshop: PopUpRetrofitContext
+    shunting: ShuntingOperationsContext
 
 
-def print_wagon_metrics(external_trains) -> None:
+def print_wagon_metrics(external_trains: ExternalTrainsContext) -> None:
     """Print metrics of wagons."""
     ext_metrics = external_trains.get_metrics()
     typer.echo('\nWAGON METRICS:')
@@ -33,7 +39,7 @@ def print_wagon_metrics(external_trains) -> None:
     typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
 
 
-def print_popup_workshop_metrics(popup) -> None:
+def print_popup_workshop_metrics(popup: PopUpRetrofitContext) -> None:
     """Print metrics of popup workshop."""
     popup_metrics = popup.get_metrics()
     typer.echo('\nWORKSHOP METRICS:')
@@ -51,7 +57,7 @@ def print_popup_workshop_metrics(popup) -> None:
         typer.echo(f'    {bay_id}:    {util:.1f}%')
 
 
-def print_yard_metrics(yard) -> None:
+def print_yard_metrics(yard: YardOperationsContext) -> None:
     """Print metrics of Yard context."""
     yard_metrics = yard.get_metrics()
     typer.echo('\nYARD METRICS:')
@@ -67,7 +73,7 @@ def print_yard_metrics(yard) -> None:
         typer.echo(f'    {track_id}:          {util:.1f}%')
 
 
-def print_shunting_metrics(shunting) -> None:
+def print_shunting_metrics(shunting: ShuntingOperationsContext) -> None:
     """Print metrics of shunting context."""
     shunt_metrics = shunting.get_metrics()
     typer.echo('\nSHUNTING METRICS:')
@@ -85,7 +91,7 @@ def print_shunting_metrics(shunting) -> None:
             typer.echo(f'      {status}:      {pct:.1f}%')
 
 
-def configure_event_logging(output_path: str) -> Any:
+def configure_event_logging(output_path: Path) -> Any:
     """Configure the event logging."""
     event_handler = logging.FileHandler(output_path / 'events.log', mode='w', encoding='utf-8')
     event_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S'))
@@ -93,7 +99,7 @@ def configure_event_logging(output_path: str) -> Any:
     return event_handler
 
 
-def configure_console_logging() -> None:
+def configure_console_logging() -> StreamHandler:
     """Configure the console logging."""
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)-8s | %(message)s', datefmt='%H:%M:%S'))
@@ -102,7 +108,7 @@ def configure_console_logging() -> None:
     return console_handler
 
 
-def output_visualization(contexts: Contexts, output_path) -> None:
+def output_visualization(contexts: Contexts, output_path: Path) -> None:
     """Write files for visualization onto the disk."""
     dashboard_files = contexts.analytics.export_dashboard_data(
         output_dir=output_path,
@@ -173,11 +179,11 @@ def run(
 
         # Get metrics from contexts
         contexts = Contexts(
-            analytics=service.contexts.get('analytics'),
-            external_trains=service.contexts.get('external_trains'),
-            yard=service.contexts.get('yard'),
-            popup_workshop=service.contexts.get('popup'),
-            shunting=service.contexts.get('shunting'),
+            analytics=service.context_registry.contexts.get('analytics'),
+            external_trains=service.context_registry.contexts.get('external_trains'),
+            yard=service.context_registry.contexts.get('yard'),
+            popup_workshop=service.context_registry.contexts.get('popup'),
+            shunting=service.context_registry.contexts.get('shunting'),
         )
 
         # Generate outputs

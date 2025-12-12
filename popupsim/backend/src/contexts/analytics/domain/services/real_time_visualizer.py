@@ -10,7 +10,7 @@ class RealTimeVisualizer:
 
     def __init__(self, update_callback: Callable[[dict[str, Any]], None] | None = None) -> None:
         self.update_callback = update_callback
-        self.metrics_buffer = deque(maxlen=100)  # Keep last 100 data points
+        self.metrics_buffer : deque[dict[str, Any]] = deque(maxlen=100)  # Keep last 100 data points
         self.is_active = False
 
     def start_real_time_updates(self) -> None:
