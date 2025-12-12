@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -153,7 +154,7 @@ class RakeTransportService:
     def validate_transport_feasibility(
         self,
         schedule: TransportSchedule,
-        track_constraints: dict[str, dict[str, any]] | None = None,
+        track_constraints: dict[str, dict[str, Any]] | None = None,
     ) -> tuple[bool, list[str]]:
         """Validate if transport schedule is feasible."""
         issues = []

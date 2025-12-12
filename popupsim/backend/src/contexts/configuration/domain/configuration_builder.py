@@ -6,6 +6,7 @@ from contexts.configuration.application.dtos.workshop_input_dto import WorkshopI
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.configuration.infrastructure.file_loader import FileLoader
 from shared.validation.base import ValidationIssue
+from shared.validation.base import ValidationLevel
 from shared.validation.base import ValidationResult
 
 from .models import ComponentInfo
@@ -19,7 +20,6 @@ from .models import StrategiesConfig
 from .models import TopologyConfig
 from .models import TrackConfig
 from .models import WorkshopConfig
-
 
 
 class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
@@ -45,12 +45,13 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
         # Validate workshop
 
         if workshop.retrofit_stations <= 0:
-            issue = ValidationIssue(message='retrofit_stations must be greater than 0')
-            return ValidationResult(is_valid=False, issues=[])
+            issue = ValidationIssue(message='retrofit_stations must be greater than 0', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         # Check for duplicates
         if any(w.id == workshop.id for w in self._workshops):
-            return ValidationResult(is_valid=False, issues=[f'Workshop {workshop.id} already exists'])
+            issue = ValidationIssue(message=f'Workshop {workshop.id} already exists', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         self._workshops.append(workshop)
         return ValidationResult(is_valid=True, issues=[])
@@ -59,11 +60,13 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
         """Add track configuration."""
         # Validate track
         if track.capacity <= 0:
-            return ValidationResult(is_valid=False, issues=['capacity must be greater than 0'])
+            issue = ValidationIssue(message='capacity must be greater than 0.', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         # Check for duplicates
         if any(t.id == track.id for t in self._tracks):
-            return ValidationResult(is_valid=False, issues=[f'Track {track.id} already exists'])
+            issue = ValidationIssue(message=f'Track {track.id} already exists', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         self._tracks.append(track)
         return ValidationResult(is_valid=True, issues=[])
@@ -72,11 +75,13 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
         """Add locomotive configuration."""
         # Validate locomotive
         if locomotive.max_wagons <= 0:
-            return ValidationResult(is_valid=False, issues=['max_wagons must be greater than 0'])
+            issue = ValidationIssue(message='max_wagons must be greater than 0', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         # Check for duplicates
         if any(loco.id == locomotive.id for loco in self._locomotives):
-            return ValidationResult(is_valid=False, issues=[f'Locomotive {locomotive.id} already exists'])
+            issue = ValidationIssue(message=f'Locomotive {locomotive.id} already exists', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         self._locomotives.append(locomotive)
         return ValidationResult(is_valid=True, issues=[])
@@ -90,13 +95,15 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
         """Set topology configuration."""
         # Validate topology connections reference existing tracks
         track_ids = {t.id for t in self._tracks}
-        issues = []
+        issues: list[ValidationIssue] = []
 
         for conn in topology.connections:
             if conn.from_track not in track_ids:
-                issues.append(f'Track {conn.from_track} not found')
+                issue = ValidationIssue(message=f'Track {conn.from_track} not found', level=ValidationLevel.ERROR)
+                issues.append(issue)
             if conn.to_track not in track_ids:
-                issues.append(f'Track {conn.to_track} not found')
+                issue = ValidationIssue(message=f'Track {conn.to_track} not found', level=ValidationLevel.ERROR)
+                issues.append(issue)
 
         if issues:
             return ValidationResult(is_valid=False, issues=issues)
@@ -141,15 +148,20 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
         issues: list[ValidationIssue] = []
 
         if not self._workshops:
-            issues.append('At least one workshop is required')
+            issue = ValidationIssue(message='At least one workshop is required', level=ValidationLevel.ERROR)
+            issues.append(issue)
         if not self._tracks:
-            issues.append('At least one track is required')
+            issue = ValidationIssue(message='At least one track is required', level=ValidationLevel.ERROR)
+            issues.append(issue)
         if not self._locomotives:
-            issues.append('At least one locomotive is required')
+            issue = ValidationIssue(message='At least one locomotive is required', level=ValidationLevel.ERROR)
+            issues.append(issue)
         if not self._process_times:
-            issues.append('Process times must be configured')
+            issue = ValidationIssue(message='Process times must be configured', level=ValidationLevel.ERROR)
+            issues.append(issue)
         if not self._topology:
-            issues.append('Topology must be configured')
+            issue = ValidationIssue(message='Topology must be configured', level=ValidationLevel.ERROR)
+            issues.append(issue)
 
         return ValidationResult(is_valid=len(issues) == 0, issues=issues)
 

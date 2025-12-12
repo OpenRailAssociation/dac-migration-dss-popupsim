@@ -13,6 +13,8 @@ from contexts.configuration.domain.models import TrackConfig
 from contexts.configuration.domain.models import WorkshopConfig
 from infrastructure.event_bus.event_bus import EventBus
 from shared.domain.events.configuration_events import ConfigurationLoadedEvent
+from shared.validation.base import ValidationIssue
+from shared.validation.base import ValidationLevel
 from shared.validation.base import ValidationResult
 
 
@@ -32,7 +34,8 @@ class ConfigurationContext:
     def create_scenario(self, metadata: ScenarioMetadata) -> ValidationResult:
         """Create new scenario configuration."""
         if metadata.id in self._builders:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {metadata.id} already exists'])
+            issue = ValidationIssue(message=f'Scenario {metadata.id} already exists', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         self._builders[metadata.id] = ConfigurationBuilder(metadata)
         return ValidationResult(is_valid=True, issues=[])
@@ -41,7 +44,8 @@ class ConfigurationContext:
         """Add workshop to scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.add_workshop(workshop)
 
@@ -49,7 +53,8 @@ class ConfigurationContext:
         """Add track to scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.add_track(track)
 
@@ -57,7 +62,8 @@ class ConfigurationContext:
         """Add locomotive to scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.add_locomotive(locomotive)
 
@@ -65,7 +71,8 @@ class ConfigurationContext:
         """Set process times for scenario."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.set_process_times(times)
 
@@ -73,7 +80,8 @@ class ConfigurationContext:
         """Set topology for scenario."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.set_topology(topology)
 
@@ -81,7 +89,8 @@ class ConfigurationContext:
         """Set selection strategies for scenario."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.set_strategies(strategies)
 
@@ -94,7 +103,8 @@ class ConfigurationContext:
         """Validate scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return ValidationResult(is_valid=False, issues=[issue])
 
         return builder.validate_completeness()
 
@@ -102,7 +112,8 @@ class ConfigurationContext:
         """Finalize scenario configuration."""
         builder = self._builders.get(scenario_id)
         if not builder:
-            return None, ValidationResult(is_valid=False, issues=[f'Scenario {scenario_id} not found'])
+            issue = ValidationIssue(message=f'Scenario {scenario_id} not found', level=ValidationLevel.WARNING)
+            return None, ValidationResult(is_valid=False, issues=[issue])
 
         validation = builder.validate_completeness()
         if not validation.is_valid:

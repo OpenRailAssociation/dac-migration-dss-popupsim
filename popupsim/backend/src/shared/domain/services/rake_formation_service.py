@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from typing import Any
 from typing import TYPE_CHECKING
 
 from shared.domain.entities.rake import Rake
@@ -28,7 +29,7 @@ class RakeFormationService:
             'retrofit_tracks': RetrofitTrackStrategy(),
         }
 
-    def form_rakes(self, wagons: list[Wagon], strategy: str, constraints: dict[str, any]) -> list[Rake]:
+    def form_rakes(self, wagons: list[Wagon], strategy: str, constraints: dict[str, Anzy]) -> list[Rake]:
         """Form rakes using specified strategy and constraints."""
         if strategy not in self._strategies:
             msg = f'Unknown strategy: {strategy}. Available: {list(self._strategies.keys())}'

@@ -11,7 +11,7 @@ class TrainArrivedEvent(DomainEvent):
     """Train has arrived with wagons."""
 
     train_id: str = ''
-    wagons: list[Any] = None
+    wagons: list[Any] = ()
     arrival_track: str = ''
     event_timestamp: float = 0.0
 

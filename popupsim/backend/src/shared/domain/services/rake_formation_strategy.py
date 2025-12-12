@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 import time
+from typing import Any
 from typing import TYPE_CHECKING
 
 from shared.domain.entities.rake import Rake
@@ -18,14 +19,14 @@ class RakeFormationStrategy(ABC):  # pylint: disable=too-few-public-methods
     """Abstract base class for rake formation strategies."""
 
     @abstractmethod
-    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, any]) -> list[Rake]:
+    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, Any]) -> list[Rake]:
         """Form rakes based on strategy-specific logic."""
 
 
 class WorkshopCapacityStrategy(RakeFormationStrategy):  # pylint: disable=too-few-public-methods
     """Form rakes based on workshop bay capacity (MVP algorithm)."""
 
-    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, any]) -> list[Rake]:
+    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, Any]) -> list[Rake]:
         """Form rakes optimized for workshop bay capacity."""
         workshop_capacities = constraints.get('workshop_capacities', {})
         group_by_cargo = constraints.get('group_by_cargo', False)

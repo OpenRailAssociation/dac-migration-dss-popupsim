@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 from typing import Any
+from typing import TYPE_CHECKING
 
 from contexts.popup_retrofit.domain.aggregates.popup_workshop import PopUpWorkshop
 from contexts.popup_retrofit.domain.entities.retrofit_bay import RetrofitBay
@@ -29,6 +30,8 @@ from shared.infrastructure.time_converters import to_ticks
 
 from .ports.popup_context_port import PopUpContextPort
 
+if TYPE_CHECKING:
+    from shared.infrastructure.simulation.coordination.simulation_infrastructure import SimulationInfrastructure
 
 class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instance-attributes
     """PopUp Retrofit Context for managing DAC installation operations."""
@@ -37,13 +40,12 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
         """Initialize PopUp retrofit context."""
         self._workshops: dict[str, PopUpWorkshop] = {}
         self._event_bus = event_bus
-        self.infra = None
+        self.infra: SimulationInfrastructure = None
         self.scenario = None
         self._workshop_resources = {}
         self._batch_tracking = {}  # Track batch completion
         self._rake_tracking = {}  # Track rake completion
         self.rake_registry = rake_registry or RakeRegistry()
-        self._event_handlers: list = []
         # Domain service - pure business logic
         self._processing_service = WorkshopProcessingService()
         # Track bay utilization

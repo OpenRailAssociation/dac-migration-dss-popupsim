@@ -9,6 +9,7 @@ Notes
 
 from datetime import datetime
 from typing import Any
+from typing import TYPE_CHECKING
 
 from contexts.external_trains.domain.aggregates.train_schedule import TrainSchedule
 from contexts.external_trains.domain.entities.external_train import ExternalTrain
@@ -22,6 +23,8 @@ from shared.infrastructure.time_converters import datetime_to_ticks
 
 from .ports.external_trains_context_port import ExternalTrainsContextPort
 
+if TYPE_CHECKING:
+    from shared.infrastructure.simulation.coordination.simulation_infrastructure import SimulationInfrastructure
 
 class ExternalTrainsContext(ExternalTrainsContextPort):
     """External Trains Context managing train arrivals - Single Source of Truth for wagons."""
@@ -29,7 +32,7 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
     def __init__(self, event_bus: EventBus) -> None:
         self.event_bus = event_bus
         self.train_schedule = TrainSchedule()
-        self.infra = None
+        self.infra: SimulationInfrastructure = None
         self.scenario = None
         self._wagons: dict[str, Any] = {}  # Single source of truth for wagon state
 

@@ -110,8 +110,8 @@ class FileLoader:  # pylint: disable=too-few-public-methods
 
         # Load routes (inline or from file)
         if 'routes' in data:
-            routes = [
-                [],
+            routes : list[RouteInputDTO] = [
+
             ]
             for r in data['routes']:
                 routes.append(
