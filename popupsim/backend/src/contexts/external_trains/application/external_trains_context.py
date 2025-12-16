@@ -8,8 +8,8 @@ Notes
 """
 
 from datetime import datetime
-from typing import Any
 from typing import TYPE_CHECKING
+from typing import Any
 
 from contexts.external_trains.domain.aggregates.train_schedule import TrainSchedule
 from contexts.external_trains.domain.entities.external_train import ExternalTrain
@@ -26,13 +26,14 @@ from .ports.external_trains_context_port import ExternalTrainsContextPort
 if TYPE_CHECKING:
     from shared.infrastructure.simulation.coordination.simulation_infrastructure import SimulationInfrastructure
 
+
 class ExternalTrainsContext(ExternalTrainsContextPort):
     """External Trains Context managing train arrivals - Single Source of Truth for wagons."""
 
     def __init__(self, event_bus: EventBus) -> None:
         self.event_bus = event_bus
         self.train_schedule = TrainSchedule()
-        self.infra: SimulationInfrastructure = None
+        self.infra: SimulationInfrastructure | None = None
         self.scenario = None
         self._wagons: dict[str, Any] = {}  # Single source of truth for wagon state
 
@@ -50,8 +51,8 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
 
         # Subscribe to completion events to update wagon state
         # TODO: Check if this is really necessary
-        self.event_bus.subscribe(WagonRetrofitCompletedEvent, self._handle_wagon_completed)
-        self.event_bus.subscribe(WagonParkedEvent, self._handle_wagon_parked)
+        self.event_bus.subscribe(WagonRetrofitCompletedEvent, self._handle_wagon_completed)  # type: ignore[arg-type]
+        self.event_bus.subscribe(WagonParkedEvent, self._handle_wagon_parked)  # type: ignore[arg-type]
 
     def _process_single_train_arrival(self, train: Any) -> Any:
         """Process a single train arrival."""
@@ -61,15 +62,15 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
             if isinstance(train.arrival_time, datetime)
             else datetime.fromisoformat(train.arrival_time)
         )
-        arrival_delay = datetime_to_ticks(arrival_time, self.scenario.start_date)
+        arrival_delay = datetime_to_ticks(arrival_time, self.scenario.start_date)  # type: ignore[attr-defined]
 
         if arrival_delay > 0:
-            yield from self.infra.engine.delay(arrival_delay)
+            yield from self.infra.engine.delay(arrival_delay)  # type: ignore[union-attr]
 
         # Get arrival track from first wagon
         arrival_track = train.wagons[0].track if train.wagons else 'collection'
 
-        current_time = self.infra.engine.current_time()
+        current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
 
         # Log train arrival
         try:
@@ -82,7 +83,7 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
             pass
 
         # Create actual wagon entities and store as single source of truth
-        train_wagons = []
+        train_wagons: list[Any] = []
         for wagon_dto in train.wagons:
             wagon = type(
                 'Wagon',
@@ -121,7 +122,7 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
         self.event_bus.publish(event)
 
         # Minimal delay to allow event processing
-        yield from self.infra.engine.delay(0.0)
+        yield from self.infra.engine.delay(0.0)  # type: ignore[union-attr]
 
     def schedule_train(self, train_id: str, arrival_time: float, wagons: list[Any]) -> None:
         """Schedule external train arrival."""
@@ -135,20 +136,20 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
         for train in scheduled_trains:
             if train.scheduled_arrival <= current_time:
                 event = self.train_schedule.process_arrival(train.id, current_time)
-                self.event_bus.publish(event)
+                self.event_bus.publish(event)  # type: ignore[arg-type]
 
     def get_scheduled_count(self) -> int:
         """Get count of scheduled trains."""
         return len(self.train_schedule.get_scheduled_trains())
 
-    def _handle_wagon_completed(self, event) -> None:
+    def _handle_wagon_completed(self, event: WagonRetrofitCompletedEvent) -> None:
         """Handle wagon retrofit completion - update wagon state."""
         wagon = self._wagons.get(event.wagon_id)
         if wagon:
             wagon.status = 'RETROFITTED'
             wagon.retrofit_end_time = event.completion_time
 
-    def _handle_wagon_parked(self, event) -> None:
+    def _handle_wagon_parked(self, event: WagonParkedEvent) -> None:
         """Handle wagon parked - update wagon state."""
         wagon = self._wagons.get(event.wagon_id)
         if wagon:

@@ -20,6 +20,7 @@ class WagonStatus(Enum):
     WAITING = 'waiting'
     RETROFITTING = 'retrofitting'
     DEPARTING = 'departing'
+    PARKED = 'parking'
 
 
 class WorkshopStatus(Enum):

@@ -70,7 +70,7 @@ class WorkshopProcessingService:
 
         if strategy == ProcessingStrategy.BATCH:
             groups = []
-            current_group = []
+            current_group: list[Wagon] = []
 
             for wagon in wagons:
                 if len(current_group) < workshop_capacity:
@@ -85,7 +85,7 @@ class WorkshopProcessingService:
             return groups
 
         if strategy == ProcessingStrategy.RAKE:
-            rake_groups = {}
+            rake_groups: dict[str, list[Wagon]] = {}
             for wagon in wagons:
                 rake_id = getattr(wagon, 'rake_id', f'single_{wagon.id}')
                 if rake_id not in rake_groups:

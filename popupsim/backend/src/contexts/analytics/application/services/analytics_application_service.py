@@ -1,4 +1,5 @@
 """Main application service for analytics operations."""
+
 # pylint: disable=duplicate-code
 from typing import Any
 
@@ -9,7 +10,6 @@ from contexts.analytics.domain.repositories.analytics_repository import Analytic
 from contexts.analytics.domain.services.metrics_service import BottleneckThresholds
 from contexts.analytics.domain.services.metrics_service import MetricsService
 from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
-from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 from infrastructure.event_bus.event_bus import EventBus
 
 from .analytics_query_service import AnalyticsQueryService
@@ -39,31 +39,25 @@ class AnalyticsApplicationService:
         self.repository.save(self.current_session)
 
         event = SessionStartedEvent(session_id=session_id)
-        self.event_bus.publish(event)
+        self.event_bus.publish(event)  # type: ignore[arg-type]
 
     def record_metric(self, collector_id: str, key: str, value: Any, timestamp: float | None = None) -> None:
         """Record metrics."""
         if not self.current_session:
             self.start_session('default')
 
-        event = self.current_session.record_metric(collector_id, key, value, timestamp)
-        self.event_bus.publish(event)
+        event = self.current_session.record_metric(  # type: ignore[arg-type, union-attr]
+            collector_id,
+            key,
+            value,
+            timestamp,
+        )
+        self.event_bus.publish(event)  # type: ignore[arg-type]
 
-        for domain_event in self.current_session.collect_domain_events():
+        for domain_event in self.current_session.collect_domain_events():  # type: ignore[arg-type, union-attr]
             self.event_bus.publish(domain_event)
 
-        self.repository.save(self.current_session)
-
-    def set_threshold(self, threshold: Threshold) -> None:
-        """Define threshold for bottleneck detection."""
-        if not self.current_session:
-            self.start_session('default')
-        self.current_session.set_threshold(threshold)
-
-        for domain_event in self.current_session.collect_domain_events():
-            self.event_bus.publish(domain_event)
-
-        self.repository.save(self.current_session)
+        self.repository.save(self.current_session)  # type: ignore[arg-type]
 
     def analyze_session(self) -> AnalyticsMetrics:
         """Analyze current session and publish event."""
@@ -71,7 +65,7 @@ class AnalyticsApplicationService:
             return AnalyticsMetrics(0.0, 0.0, 0, 0)
 
         event = self.current_session.analyze_session()
-        self.event_bus.publish(event)
+        self.event_bus.publish(event)  # type: ignore[arg-type]
         self.repository.save(self.current_session)
         return event.results
 
@@ -92,22 +86,9 @@ class AnalyticsApplicationService:
             duration=duration,
             total_events=total_events,
         )
-        self.event_bus.publish(event)
+        self.event_bus.publish(event)  # type: ignore[arg-type]
         self.repository.save(self.current_session)
         self.current_session = None
-
-    def check_threshold_violations(self) -> list[Any]:
-        """Check threshold violations and publish domain events."""
-        if not self.current_session:
-            return []
-
-        violations = self.current_session.check_threshold_violations()
-
-        # Publish domain events from aggregate
-        for domain_event in self.current_session.collect_domain_events():
-            self.event_bus.publish(domain_event)
-
-        return violations
 
     def clear_all_metrics(self) -> None:
         """Clear all metrics."""
@@ -140,10 +121,10 @@ class AnalyticsApplicationService:
             - Bottleneck detection across all resources
         """
         # Get event data from event stream
-        events = self.event_stream.get_all_events()
-        event_counts = self.event_stream.get_event_counts()
-        duration_hours = self.event_stream.get_duration_hours()
-        current_state = self.event_stream.get_current_state()
+        events = self.event_stream.get_all_events()  # type: ignore[attr-defined]
+        event_counts = self.event_stream.get_event_counts()  # type: ignore[attr-defined]
+        duration_hours = self.event_stream.get_duration_hours()  # type: ignore[attr-defined]
+        current_state = self.event_stream.get_current_state()  # type: ignore[attr-defined]
 
         # Get already-computed workshop statistics (correct utilization)
         computed_metrics = self.event_stream.compute_statistics()

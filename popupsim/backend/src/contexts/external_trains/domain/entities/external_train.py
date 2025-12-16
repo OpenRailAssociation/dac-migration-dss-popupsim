@@ -2,10 +2,10 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 from contexts.external_trains.domain.value_objects.arrival_metrics import ArrivalMetrics
 from contexts.external_trains.domain.value_objects.train_id import TrainId
+from shared.domain.entities.wagon import Wagon
 
 
 class TrainStatus(Enum):
@@ -23,7 +23,7 @@ class ExternalTrain:
 
     id: TrainId
     scheduled_arrival: float
-    wagons: list[Any]  # Wagon entities from MVP
+    wagons: list[Wagon]  # Wagon entities from MVP
     status: TrainStatus = TrainStatus.SCHEDULED
     actual_arrival: float | None = None
 

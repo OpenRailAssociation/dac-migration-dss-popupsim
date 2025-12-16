@@ -83,7 +83,7 @@ class SimPyEngineAdapter(SimulationEnginePort):
 
             def _wrap() -> Generator[Any]:
                 try:
-                    process()
+                    process()  # type: ignore[arg-type, operator]
                 except (RuntimeError, ValueError, TypeError, AttributeError) as e:
                     self._handle_process_error(e)
                 yield from ()
@@ -130,7 +130,7 @@ class SimPyEngineAdapter(SimulationEnginePort):
                 except Exception:  # pylint: disable=broad-exception-caught
                     logger.exception('Post-run hook error')
 
-    def create_resource(self, capacity: int, name: str | None = None) -> Any:
+    def create_resource(self, capacity: int, name: str | None = None) -> simpy.Resource:
         """Create named resource with monitoring."""
         self._stats.resources_created += 1
         resource = simpy.Resource(self._env, capacity=capacity)

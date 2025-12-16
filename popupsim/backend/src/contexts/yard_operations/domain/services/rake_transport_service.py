@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 from typing import TYPE_CHECKING
+from typing import Any
 
 if TYPE_CHECKING:
     from shared.domain.entities.rake import Rake
@@ -161,7 +161,7 @@ class RakeTransportService:
 
         # Check track capacity constraints
         if track_constraints:
-            track_usage = {}
+            track_usage: dict[str, float] = {}
             for job in schedule.jobs:
                 # Check source track
                 if job.from_track in track_constraints:

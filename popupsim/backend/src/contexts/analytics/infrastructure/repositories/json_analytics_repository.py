@@ -6,7 +6,6 @@ from typing import Any
 
 from contexts.analytics.domain.aggregates.analytics_session import AnalyticsSession
 from contexts.analytics.domain.repositories.analytics_repository import AnalyticsRepository
-from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 
 
 class JSONAnalyticsRepository(AnalyticsRepository):
@@ -24,7 +23,6 @@ class JSONAnalyticsRepository(AnalyticsRepository):
             'session_id': session.session_id,
             'start_time': session.start_time,
             'collectors': self._serialize_collectors(session),
-            'thresholds': self._serialize_thresholds(session),
         }
 
         with open(session_file, 'w', encoding='utf-8') as f:
@@ -39,7 +37,7 @@ class JSONAnalyticsRepository(AnalyticsRepository):
 
         with open(session_file, encoding='utf-8') as f:
             data = json.load(f)
-            return self._deserialize_session(data)
+            return self._deserialize_session(data)  # type: ignore[no-any-return]
 
     def find_all(self) -> list[AnalyticsSession]:
         """Find all sessions from JSON files."""
@@ -78,17 +76,6 @@ class JSONAnalyticsRepository(AnalyticsRepository):
 
         return collectors_data
 
-    def _serialize_thresholds(self, session: AnalyticsSession) -> list[dict[str, Any]]:
-        """Serialize thresholds to list."""
-        return [
-            {
-                'metric_name': threshold.metric_name,
-                'warning_value': threshold.warning_value,
-                'critical_value': threshold.critical_value,
-            }
-            for threshold in session.get_all_thresholds().values()
-        ]
-
     def _deserialize_session(self, data: dict[str, Any]) -> AnalyticsSession:
         """Deserialize session from dict."""
         session = AnalyticsSession(session_id=data['session_id'], start_time=data['start_time'])
@@ -102,14 +89,5 @@ class JSONAnalyticsRepository(AnalyticsRepository):
             for entries_data in collector_data.get('metrics', {}).values():
                 for entry_data in entries_data:
                     collector.record_metric(entry_data['key'], entry_data['value'], entry_data['timestamp'])
-
-        # Restore thresholds
-        for threshold_data in data.get('thresholds', []):
-            threshold = Threshold(
-                metric_name=threshold_data['metric_name'],
-                warning_value=threshold_data['warning_value'],
-                critical_value=threshold_data['critical_value'],
-            )
-            session.set_threshold(threshold)
 
         return session

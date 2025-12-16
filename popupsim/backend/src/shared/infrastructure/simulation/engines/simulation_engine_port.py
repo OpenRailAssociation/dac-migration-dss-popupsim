@@ -37,6 +37,14 @@ class SimulationEnginePort(ABC):
     def create_store(self, capacity: int | None = None) -> Any:
         """Create a store with optional capacity."""
 
+    @abstractmethod
+    def add_pre_run_hook(self, hook: Callable[..., None]) -> None:
+        """Execute function before simulation run."""
+
+    @abstractmethod
+    def add_post_run_hook(self, hook: Callable[..., None]) -> None:
+        """Execute function after simulation run."""
+
     # Enhanced capabilities (optional - provide default implementations)
     def get_simulation_stats(self) -> dict[str, Any]:
         """Get simulation statistics."""

@@ -21,7 +21,7 @@ class TestRetrofitTrackAllocationService:
         wagons = [MockWagon(f'W{i}') for i in range(5)]  # 5 wagons, 50m total
         tracks = {'retrofit_1': 60.0}  # 60m capacity
 
-        allocation = service.allocate_wagons(wagons, tracks)
+        allocation = service.allocate_wagons(wagons, tracks)  # type: ignore[arg-type]
 
         assert len(allocation.track_assignments['retrofit_1']) == 5
         assert len(allocation.overflow_wagons) == 0
@@ -36,7 +36,7 @@ class TestRetrofitTrackAllocationService:
             'retrofit_2': 30.0,  # Can fit 3 wagons
         }
 
-        allocation = service.allocate_wagons(wagons, tracks)
+        allocation = service.allocate_wagons(wagons, tracks)  # type: ignore[arg-type]
 
         assert len(allocation.track_assignments['retrofit_1']) == 6
         assert len(allocation.track_assignments['retrofit_2']) == 3
@@ -49,7 +49,7 @@ class TestRetrofitTrackAllocationService:
         wagons = [MockWagon(f'W{i}') for i in range(20)]  # 20 wagons, 200m total
         tracks = {'retrofit_1': 50.0}  # Only 50m capacity
 
-        allocation = service.allocate_wagons(wagons, tracks)
+        allocation = service.allocate_wagons(wagons, tracks)  # type: ignore[arg-type]
 
         assert len(allocation.track_assignments['retrofit_1']) == 5
         assert len(allocation.overflow_wagons) == 15
@@ -59,7 +59,7 @@ class TestRetrofitTrackAllocationService:
         """Test successful allocation validation."""
         service = RetrofitTrackAllocationService()
         allocation = RetrofitAllocation(
-            track_assignments={'retrofit_1': [MockWagon('W1')]},
+            track_assignments={'retrofit_1': [MockWagon('W1')]},  # type: ignore[list-item]
             overflow_wagons=[],
             total_capacity_used=1.0,
             allocation_efficiency=1.0,
@@ -74,8 +74,8 @@ class TestRetrofitTrackAllocationService:
         """Test allocation validation with low efficiency."""
         service = RetrofitTrackAllocationService()
         allocation = RetrofitAllocation(
-            track_assignments={'retrofit_1': [MockWagon('W1')]},
-            overflow_wagons=[MockWagon('W2'), MockWagon('W3')],
+            track_assignments={'retrofit_1': [MockWagon('W1')]},  # type: ignore[list-item]
+            overflow_wagons=[MockWagon('W2'), MockWagon('W3')],  # type: ignore[list-item]
             total_capacity_used=1.0,
             allocation_efficiency=0.33,  # Below 0.8 threshold
         )

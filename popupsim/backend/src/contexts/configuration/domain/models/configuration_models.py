@@ -46,7 +46,7 @@ class TrackConfig:
     """Track configuration."""
 
     id: str
-    # capacity: int
+    capacity: int
 
 
 @dataclass

@@ -1,4 +1,5 @@
 """Unified event collection service."""
+
 # pylint: disable=duplicate-code
 from collections import defaultdict
 from collections import deque
@@ -81,7 +82,7 @@ class EventCollectionService:  # pylint: disable=too-many-instance-attributes
         """Get all collected events."""
         return list(self.events)
 
-    def get_event_counts(self) -> dict[str, int]:
+    def get_event_counts(self) -> Any:
         """Get event counts (cached)."""
         return self._get_cached('event_counts', lambda: dict(self.event_counts))
 

@@ -1,4 +1,5 @@
 """Event stream collector - orchestrates event collection and analysis."""
+
 # pylint: disable=duplicate-code
 from typing import Any
 

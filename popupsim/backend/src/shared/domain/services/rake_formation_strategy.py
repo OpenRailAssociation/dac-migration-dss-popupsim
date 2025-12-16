@@ -5,8 +5,8 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 import time
-from typing import Any
 from typing import TYPE_CHECKING
+from typing import Any
 
 from shared.domain.entities.rake import Rake
 from shared.domain.value_objects.rake_type import RakeType
@@ -29,41 +29,22 @@ class WorkshopCapacityStrategy(RakeFormationStrategy):  # pylint: disable=too-fe
     def form_rakes(self, wagons: list[Wagon], constraints: dict[str, Any]) -> list[Rake]:
         """Form rakes optimized for workshop bay capacity."""
         workshop_capacities = constraints.get('workshop_capacities', {})
-        group_by_cargo = constraints.get('group_by_cargo', False)
 
         if not workshop_capacities:
             msg = "WorkshopCapacityStrategy requires 'workshop_capacities' constraint"
             raise ValueError(msg)
 
-        rakes = []
-
-        # Group by cargo type if requested
-        if group_by_cargo:
-            cargo_groups = self._group_by_cargo(wagons)
-            for cargo_wagons in cargo_groups.values():
-                cargo_rakes = self._form_workshop_rakes(cargo_wagons, workshop_capacities, len(rakes))
-                rakes.extend(cargo_rakes)
-        else:
-            rakes = self._form_workshop_rakes(wagons, workshop_capacities, 0)
+        rakes: list[Rake] = []
+        rakes = self._form_workshop_rakes(wagons, workshop_capacities, 0)
 
         return rakes
-
-    def _group_by_cargo(self, wagons: list[Wagon]) -> dict[str, list[Wagon]]:
-        """Group wagons by cargo type."""
-        cargo_groups = {}
-        for wagon in wagons:
-            cargo_type = getattr(wagon, 'cargo_type', 'general')
-            if cargo_type not in cargo_groups:
-                cargo_groups[cargo_type] = []
-            cargo_groups[cargo_type].append(wagon)
-        return cargo_groups
 
     def _form_workshop_rakes(
         self, wagons: list[Wagon], workshop_capacities: dict[str, int], rake_offset: int
     ) -> list[Rake]:
         """Form rakes using MVP's capacity-based algorithm."""
-        rakes = []
-        remaining_wagons = list(wagons)
+        rakes: list[Rake] = []
+        remaining_wagons: list[Wagon] = list(wagons)
 
         while remaining_wagons:
             # Find best workshop (capacity-based algorithm from MVP)
@@ -114,14 +95,14 @@ class WorkshopCapacityStrategy(RakeFormationStrategy):  # pylint: disable=too-fe
 class TrackCapacityStrategy(RakeFormationStrategy):  # pylint: disable=too-few-public-methods
     """Form rakes based on track length/capacity constraints."""
 
-    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, any]) -> list[Rake]:
+    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, Any]) -> list[Rake]:
         """Form rakes optimized for track capacity."""
         track_capacity = constraints.get('track_capacity', 100.0)  # Default 100m
         formation_track = constraints.get('formation_track', 'collection')
         rake_type = constraints.get('rake_type', RakeType.COLLECTION_RAKE)
 
-        rakes = []
-        current_length = 0.0
+        rakes: list[Rake] = []
+        current_length: float = 0.0
         current_wagons = []
 
         for wagon in wagons:
@@ -170,13 +151,13 @@ class TrackCapacityStrategy(RakeFormationStrategy):  # pylint: disable=too-few-p
 class FixedSizeStrategy(RakeFormationStrategy):  # pylint: disable=too-few-public-methods
     """Form rakes with fixed number of wagons."""
 
-    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, any]) -> list[Rake]:
+    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, Any]) -> list[Rake]:
         """Form rakes with fixed size."""
         rake_size = constraints.get('rake_size', 5)
         formation_track = constraints.get('formation_track', 'yard')
         rake_type = constraints.get('rake_type', RakeType.TRANSPORT_RAKE)
 
-        rakes = []
+        rakes: list[Rake] = []
         remaining_wagons = list(wagons)
 
         while remaining_wagons:

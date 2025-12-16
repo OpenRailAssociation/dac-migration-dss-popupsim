@@ -52,6 +52,7 @@ class SimulationApplicationService:
         # Create context registry for dynamic context management
         self.context_registry = ContextRegistry(self.infra.event_bus, self.engine)
         self.contexts: dict[str, Any] = {}  # Keep for backward compatibility
+        self._rake_registry = None
 
     def execute(self, until: float) -> SimulationResult:
         """Execute simulation with enhanced lifecycle management and events."""
@@ -160,7 +161,7 @@ class SimulationApplicationService:
         self.contexts['railway'] = railway_context
 
         # Register Shunting Operations Context
-        shunting_context = ShuntingOperationsContext(self.infra.event_bus)
+        shunting_context = ShuntingOperationsContext(self.infra.event_bus, self._rake_registry)
         self.context_registry.register_context('shunting', shunting_context)
         self.contexts['shunting'] = shunting_context
 
@@ -170,12 +171,12 @@ class SimulationApplicationService:
         self.contexts['external_trains'] = external_trains_context
 
         # Register Yard Operations Context
-        yard_context = YardOperationsContext(self.infra)
+        yard_context = YardOperationsContext(self.infra, self._rake_registry)
         self.context_registry.register_context('yard', yard_context)
         self.contexts['yard'] = yard_context
 
         # Register PopUp Retrofit Context
-        popup_context = PopUpRetrofitContext(self.infra.event_bus)
+        popup_context = PopUpRetrofitContext(self.infra.event_bus, self._rake_registry)
         self.context_registry.register_context('popup', popup_context)
         self.contexts['popup'] = popup_context
 

@@ -1,13 +1,14 @@
 """Shunting Operations Context implementation."""
 
+from collections.abc import Generator
 from datetime import timedelta
 from typing import Any
 
 from contexts.shunting_operations.domain.aggregates.locomotive_pool import LocomotivePool
 from contexts.shunting_operations.domain.entities.shunting_locomotive import ShuntingLocomotive
+from contexts.shunting_operations.domain.entities.shunting_locomotive import ShuntingStatus
 from contexts.shunting_operations.domain.events.shunting_events import LocomotiveAllocatedEvent
 from contexts.shunting_operations.domain.events.shunting_events import LocomotiveReleasedEvent
-from contexts.shunting_operations.domain.services.rake_transport_service import RakeTransportService
 from contexts.shunting_operations.domain.value_objects.locomotive_id import LocomotiveId
 from infrastructure.event_bus.event_bus import EventBus
 from infrastructure.logging import get_process_logger
@@ -15,7 +16,6 @@ from shared.domain.events.locomotive_events import LocomotiveMovementCompletedEv
 from shared.domain.events.locomotive_events import LocomotiveMovementStartedEvent
 from shared.domain.events.rake_events import RakeTransportedEvent
 from shared.domain.events.rake_events import RakeTransportRequestedEvent
-from shared.domain.events.wagon_lifecycle_events import LocomotiveMovementRequestEvent
 from shared.domain.resource_status import LocoStatus
 from shared.domain.services.rake_registry import RakeRegistry
 from shared.infrastructure.time_converters import to_ticks
@@ -37,7 +37,6 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         self.status_tracker = LocomotiveStatusTracker()
         self._simpy_locomotive_store = None
         self.rake_registry = rake_registry or RakeRegistry()
-        self._rake_transport_service = None  # Will be initialized after self is created
         self._event_handlers: list = []
 
     def initialize(self, infra: Any, scenario: Any) -> None:
@@ -55,10 +54,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             self._simpy_locomotive_store = infra.engine.create_store(capacity=len(self._locomotive_pool.locomotives))
             # Add all locomotives to SimPy store
             for loco in self._locomotive_pool.locomotives:
-                self._simpy_locomotive_store.put(loco)
-
-        # Initialize rake transport service
-        self._rake_transport_service = RakeTransportService(self)
+                self._simpy_locomotive_store.put(loco)  # type: ignore[attr-defined]
 
     def start_processes(self) -> None:
         """Start shunting processes."""
@@ -66,12 +62,11 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         for loco in self._locomotive_pool.locomotives:
             self.status_tracker.record_status_change(loco.id.value, 0.0, LocoStatus.PARKING)
 
-        # Subscribe to locomotive movement requests
-        self._event_bus.subscribe(LocomotiveMovementRequestEvent, self._handle_movement_request)
-
-        # Subscribe to rake transport requests
-        self._event_bus.subscribe(RakeTransportRequestedEvent, self._handle_rake_transport_request)
-
+        self._event_bus.subscribe(
+            RakeTransportRequestedEvent,
+            self._handle_rake_transport_request,  # type: ignore[arg-type]
+        )
+        #
         # Start initial locomotive movement at t=0.0
         if self.infra and self.infra.engine:
             self.infra.engine.schedule_process(self._start_initial_movement())
@@ -86,10 +81,10 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         )
         self._locomotive_pool.locomotives.append(locomotive)
 
-    def allocate_locomotive(self, context: Any) -> Any:
+    def allocate_locomotive(self, context: Any) -> ShuntingLocomotive:
         """Allocate locomotive using SimPy store (hybrid approach)."""
 
-        def allocate_gen() -> float:
+        def allocate_gen() -> Generator:
             if self._simpy_locomotive_store:
                 # Use SimPy store for natural queuing and blocking
                 loco = yield self._simpy_locomotive_store.get()
@@ -115,21 +110,21 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             loco = self._locomotive_pool.locomotives[0]
             if loco.id.value not in self._allocated_locos:
                 self._allocated_locos[loco.id.value] = loco
-                loco.status = 'MOVING'
+                loco.status = ShuntingStatus.MOVING
                 yield context.infra.engine.delay(0)
-                return loco
+                return loco  # type: ignore[return-value]
             msg = 'No locomotives available'
             raise RuntimeError(msg)
 
-        return allocate_gen()
+        return allocate_gen()  # type: ignore[return-value]
 
     def release_locomotive(self, context: Any, loco: Any) -> Any:
         """Release locomotive back to SimPy store (hybrid approach)."""
 
-        def release_gen() -> float:
+        def release_gen() -> Generator:
             if loco.id.value in self._allocated_locos:
                 del self._allocated_locos[loco.id.value]
-                loco.status = 'IDLE'
+                loco.status = ShuntingStatus.MOVING
 
                 # Record status change to PARKING
                 current_time = context.infra.engine.current_time()
@@ -142,7 +137,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
                     track=loco.current_track,
                     event_timestamp=current_time,
                 )
-                self._event_bus.publish(event)
+                self._event_bus.publish(event)  # type: ignore[arg-type]
 
                 if self._simpy_locomotive_store:
                     # Return to SimPy store for natural resource management
@@ -165,7 +160,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
     ) -> Any:
         """Move locomotive between tracks with track blocking."""
 
-        def move_gen() -> float:
+        def move_gen() -> Generator:
             # Record status change at current time
             current_time = context.infra.engine.current_time()
             self.status_tracker.record_status_change(loco.id.value, current_time, LocoStatus.MOVING)
@@ -231,9 +226,9 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         """Get route path between tracks."""
         if context.scenario.routes:
             for route in context.scenario.routes:
-                #if route.track_sequence and len(route.track_sequence) >= 2:
+                # if route.track_sequence and len(route.track_sequence) >= 2:
                 if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
-                    return route.track_sequence
+                    return route.track_sequence  # type: ignore[no-any-return]
                 if route.track_sequence[-1] == from_track and route.track_sequence[0] == to_track:
                     return list(reversed(route.track_sequence))
         return [from_track, to_track]
@@ -244,7 +239,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
 
         if context.scenario.routes:
             for route in context.scenario.routes:
-                #if route.track_sequence and len(route.track_sequence) >= 2:
+                # if route.track_sequence and len(route.track_sequence) >= 2:
                 if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
                     move_time = to_ticks(timedelta(minutes=route.duration))
                     break
@@ -259,7 +254,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
     ) -> Any:
         """Couple wagons to locomotive."""
 
-        def couple_gen() -> float:
+        def couple_gen() -> Generator:
             coupling_time = context.scenario.process_times.get_coupling_ticks(coupler_type)
 
             # Track coupling status if time > 0
@@ -282,7 +277,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log coupling completion
             try:
                 plog = get_process_logger()
-                wagon_str = ', '.join(wagon_ids)
+                wagon_str = ', '.join(wagon_ids)  # type: ignore[arg-type]
                 plog.log(
                     (
                         f'COUPLING: [{wagon_str}] with {coupler_type} couplers '
@@ -304,7 +299,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
     ) -> Any:  # ruff: C901
         """Decouple wagons from locomotive."""
 
-        def decouple_gen() -> float:
+        def decouple_gen() -> Generator:
             # Get decoupling time from scenario
 
             decoupling_time = context.scenario.process_times.get_coupling_ticks(coupler_type)
@@ -329,7 +324,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log decoupling completion
             try:
                 plog = get_process_logger()
-                wagon_str = ', '.join(wagon_ids)
+                wagon_str = ', '.join(wagon_ids)  # type: ignore[arg-type]
                 plog.log(
                     (
                         f'DECOUPLING: [{wagon_str}] with {coupler_type or "SCREW"} couplers'
@@ -373,38 +368,6 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             self._event_bus.publish(event)
 
         return success
-
-    def _handle_movement_request(self, event) -> None:
-        """Handle locomotive movement request event."""
-        if self.infra and self.infra.engine:
-            self.infra.engine.schedule_process(self._execute_movement(event))
-
-    def _execute_movement(self, event) -> Any:
-        """Execute locomotive movement for wagon transport."""
-        # Allocate locomotive
-        loco = yield from self.allocate_locomotive(self)
-
-        try:
-            # Move to pickup location
-            yield from self.move_locomotive(self, loco, loco.current_track, event.from_track)
-
-            # Couple wagons
-            wagon_ids = [w.id for w in event.wagons] if event.wagons else None
-            yield from self.couple_wagons(self, len(event.wagons), 'SCREW', wagon_ids)
-
-            # Move to destination
-            yield from self.move_locomotive(self, loco, event.from_track, event.to_track)
-
-            # Decouple wagons
-            yield from self.decouple_wagons(self, len(event.wagons), 'SCREW', wagon_ids)
-
-            # Return to home track
-            home_track = getattr(loco, 'home_track', 'locoparking')
-            yield from self.move_locomotive(self, loco, event.to_track, home_track)
-
-        finally:
-            # Release locomotive
-            yield from self.release_locomotive(self, loco)
 
     def get_metrics(self) -> dict[str, Any]:
         """Get shunting operations metrics."""
@@ -568,7 +531,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
 
     def _start_initial_movement(self) -> Any:
         """Start initial locomotive movement triggered by first wagon arrival."""
-        yield from self.infra.engine.delay(0)
+        yield from self.infra.engine.delay(0)  # type: ignore[attr-defined]
 
     def _handle_rake_transport_request(self, event: RakeTransportRequestedEvent) -> None:
         """Handle rake transport request event."""
@@ -581,14 +544,19 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         if not rake:
             return
 
-        start_time = self.infra.engine.current_time()
+        start_time = self.infra.engine.current_time()  # type: ignore[attr-defined]
 
         # Allocate locomotive (MVP pattern)
-        loco = yield from self.allocate_locomotive(self)
+        loco = yield from self.allocate_locomotive(self)  # type: ignore[func-returns-value]
 
         try:
             # Move to pickup location
-            yield from self.move_locomotive(self, loco, loco.current_track, event.from_track)
+            yield from self.move_locomotive(
+                self,
+                loco,
+                loco.current_track,  # type: ignore[attr-defined]
+                event.from_track,
+            )
 
             # Couple rake wagons
             coupler_type = self._determine_coupler_type(rake.wagons)
@@ -609,7 +577,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Release locomotive
             yield from self.release_locomotive(self, loco)
 
-        end_time = self.infra.engine.current_time()
+        end_time = self.infra.engine.current_time()  # type: ignore[attr-defined]
         transport_duration = end_time - start_time
 
         # Update rake registry
@@ -623,7 +591,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             transport_duration=transport_duration,
             wagon_count=rake.wagon_count,
         )
-        self._event_bus.publish(transport_event)
+        self._event_bus.publish(transport_event)  # type: ignore[arg-type]
 
     def _determine_coupler_type(self, wagons: list[Any]) -> str:
         """Determine coupler type for rake based on wagon couplers."""

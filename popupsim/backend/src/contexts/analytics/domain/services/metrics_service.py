@@ -8,6 +8,7 @@ This service provides all metrics, KPIs, and statistics required by the analytic
 - Track capacity utilization and state visualization
 - Bottleneck detection across all resources
 """
+
 # pylint: disable=duplicate-code
 from collections import defaultdict
 from dataclasses import dataclass
@@ -67,7 +68,7 @@ class LocomotiveMetrics:
     """Locomotive utilization metrics."""
 
     total_locomotives: int
-    utilization_breakdown: dict[str, int]  # {parking, moving, coupling, decoupling}
+    utilization_breakdown: dict[str, float]  # {parking, moving, coupling, decoupling}
     utilization_over_time: list[tuple[float, dict[str, int]]]
     average_utilization: float
 
@@ -210,14 +211,14 @@ class MetricsService:
         breakdown_service = UtilizationBreakdownService(self.events, self.duration_hours)
         loco_breakdown = breakdown_service.get_locomotive_breakdown()
 
-        total_locomotives = self.current_state.get('total_active_locomotives', 0)
+        total_locomotives = self.current_state.get('total_active_locomotives', 0.0)
 
         # Calculate utilization over time
         utilization_over_time = self._calculate_locomotive_utilization_over_time(interval_seconds)
 
         # Average utilization based on non-parking time (100 - parking%)
-        parking_percentage = loco_breakdown.action_percentages.get('parking', 0)
-        avg_utilization = (100 - parking_percentage) / 100
+        parking_percentage = loco_breakdown.action_percentages.get('parking', 0.0)
+        avg_utilization = (100.0 - parking_percentage) / 100.0
 
         return LocomotiveMetrics(
             total_locomotives=total_locomotives,

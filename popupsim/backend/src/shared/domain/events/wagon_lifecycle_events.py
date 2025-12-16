@@ -1,9 +1,11 @@
 """Domain events for wagon lifecycle orchestration."""
 
 from dataclasses import dataclass
+from dataclasses import field
 from typing import Any
 
 from infrastructure.events.base_event import DomainEvent
+from shared.domain.entities.wagon import Wagon
 
 
 @dataclass(frozen=True)
@@ -11,7 +13,7 @@ class TrainArrivedEvent(DomainEvent):
     """Train has arrived with wagons."""
 
     train_id: str = ''
-    wagons: list[Any] = ()
+    wagons: list[Wagon] = field(default_factory=list)
     arrival_track: str = ''
     event_timestamp: float = 0.0
 
@@ -29,8 +31,8 @@ class WagonsClassifiedEvent(DomainEvent):
     """Train wagons have been classified through hump yard."""
 
     train_id: str = ''
-    accepted_wagons: list[Any] = None
-    rejected_wagons: list[Any] = None
+    accepted_wagons: list[Any] = field(default_factory=list)
+    rejected_wagons: list[Any] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -85,7 +87,7 @@ class BatchRetrofittedEvent(DomainEvent):
     """All wagons in a batch have completed retrofit."""
 
     batch_id: str = ''
-    wagons: list[Any] = None
+    wagons: list[Any] = field(default_factory=list)
     workshop_id: str = ''
     event_timestamp: float = 0.0
 
@@ -102,7 +104,7 @@ class WagonReadyForParkingEvent(DomainEvent):
 class LocomotiveMovementRequestEvent(DomainEvent):
     """Request locomotive movement for wagon transport."""
 
-    wagons: list[Any] = None
+    wagons: list[Any] = field(default_factory=list)
     from_track: str = ''
     to_track: str = ''
     operation_type: str = ''  # 'pickup', 'delivery', 'parking'

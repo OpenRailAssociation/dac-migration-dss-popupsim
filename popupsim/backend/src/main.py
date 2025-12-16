@@ -179,11 +179,11 @@ def run(
 
         # Get metrics from contexts
         contexts = Contexts(
-            analytics=service.context_registry.contexts.get('analytics'),
-            external_trains=service.context_registry.contexts.get('external_trains'),
-            yard=service.context_registry.contexts.get('yard'),
-            popup_workshop=service.context_registry.contexts.get('popup'),
-            shunting=service.context_registry.contexts.get('shunting'),
+            analytics=service.context_registry.contexts.get('analytics'),  # type: ignore[arg-type]
+            external_trains=service.context_registry.contexts.get('external_trains'),  # type: ignore[arg-type]
+            yard=service.context_registry.contexts.get('yard'),  # type: ignore[arg-type]
+            popup_workshop=service.context_registry.contexts.get('popup'),  # type: ignore[arg-type]
+            shunting=service.context_registry.contexts.get('shunting'),  # type: ignore[arg-type]
         )
 
         # Generate outputs

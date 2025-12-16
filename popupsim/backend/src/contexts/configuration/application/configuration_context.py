@@ -124,7 +124,7 @@ class ConfigurationContext:
 
         # Publish configuration loaded event
         event = ConfigurationLoadedEvent(scenario=scenario)
-        self.event_bus.publish(event)
+        self.event_bus.publish(event)  # type: ignore[arg-type]
 
         return scenario, ValidationResult(is_valid=True, issues=[])
 

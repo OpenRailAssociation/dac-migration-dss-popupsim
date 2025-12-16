@@ -36,6 +36,8 @@ class WorkshopAllocation:
 class WagonPickupService:
     """Domain service for wagon pickup operations - pure business logic."""
 
+    wagons: list[Wagon]
+
     def create_pickup_plan(
         self,
         available_wagons: list[Wagon],

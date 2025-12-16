@@ -1,4 +1,5 @@
 """Unified analytics service for cross-context analysis and monitoring."""
+
 # pylint: disable=duplicate-code
 from collections import deque
 from dataclasses import dataclass

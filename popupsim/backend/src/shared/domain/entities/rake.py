@@ -19,8 +19,8 @@ class Rake:  # pylint: disable=too-many-instance-attributes
     rake_type: RakeType
     formation_time: float
     formation_track: str
-    target_track: str | None = None
-    locomotive_id: str | None = None
+    target_track: str = ''
+    locomotive_id: str = ''
     status: str = 'FORMED'
 
     @property

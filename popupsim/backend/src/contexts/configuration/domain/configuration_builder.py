@@ -31,7 +31,7 @@ class ConfigurationBuilder:  # pylint: disable=too-many-instance-attributes
             self._path = None
         else:
             self._path = path_or_metadata
-            self.metadata = None
+            self.metadata = None  # type: ignore[assignment]
         self._workshops: list[WorkshopConfig] = []
         self._tracks: list[TrackConfig] = []
         self._locomotives: list[LocomotiveConfig] = []

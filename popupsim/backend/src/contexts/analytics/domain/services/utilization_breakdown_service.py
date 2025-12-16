@@ -114,7 +114,7 @@ class UtilizationBreakdownService:
         workshop_breakdowns = {}
 
         for workshop_id in self._get_workshop_ids():
-            action_times: dict[str, float]= defaultdict(float)
+            action_times: dict[str, float] = defaultdict(float)
             total_actions = 0
 
             for _event in self.events:

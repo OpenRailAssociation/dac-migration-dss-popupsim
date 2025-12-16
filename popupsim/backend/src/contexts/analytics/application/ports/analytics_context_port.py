@@ -5,7 +5,6 @@ from abc import abstractmethod
 from typing import Any
 
 from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
-from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 
 
 class AnalyticsContextPort(ABC):
@@ -22,10 +21,6 @@ class AnalyticsContextPort(ABC):
     @abstractmethod
     def record_metric(self, collector_id: str, key: str, value: Any, timestamp: float | None = None) -> None:
         """Record metric value with optional timestamp."""
-
-    @abstractmethod
-    def set_threshold(self, threshold: Threshold) -> None:
-        """Set threshold for metric monitoring."""
 
     @abstractmethod
     def subscribe_to_event(self, event_type: type[Any]) -> None:

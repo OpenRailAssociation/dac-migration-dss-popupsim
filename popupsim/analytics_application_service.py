@@ -52,18 +52,6 @@ class AnalyticsApplicationService:
 
         self.repository.save(self.current_session)
 
-    def set_threshold(self, threshold: Threshold) -> None:
-        if not self.current_session:
-            self.start_session('default')
-
-        assert self.current_session is not None
-        self.current_session.set_threshold(threshold)
-
-        for domain_event in self.current_session.collect_domain_events():
-            self.event_bus.publish(domain_event)
-
-        self.repository.save(self.current_session)
-
     def analyze_session(self) -> AnalyticsMetrics:
         if not self.current_session:
             return AnalyticsMetrics(0.0, 0.0, 0, 0)

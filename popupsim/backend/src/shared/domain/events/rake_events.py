@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from shared.domain.entities.rake import Rake
+    from shared.domain.value_objects.rake_type import RakeType
 
 
 @dataclass(frozen=True)
@@ -56,4 +57,4 @@ class RakeTransportRequestedEvent:
     rake_id: str
     from_track: str
     to_track: str
-    rake_type: str
+    rake_type: RakeType

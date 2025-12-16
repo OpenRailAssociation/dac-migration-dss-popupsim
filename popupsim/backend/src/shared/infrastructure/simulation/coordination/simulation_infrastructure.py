@@ -23,6 +23,8 @@ class SimulationInfrastructure:
     incoming_wagons: Any  # Store - External Trains  Yard
     wagons_for_retrofit: dict[str, Any]  # Store per workshop - Yard  PopUp
     retrofitted_wagons: Any  # Store - PopUp  Yard
+    contexts: Any = None
+    shunting_context: Any = None
 
     @classmethod
     def create(cls, engine: SimulationEnginePort, workshop_ids: list[str] | None = None) -> 'SimulationInfrastructure':
@@ -37,7 +39,7 @@ class SimulationInfrastructure:
         def simulation_event_error_handler(error: Exception) -> None:
             logger.error('Simulation event error at t=%.1f: %s', engine.current_time(), error)
 
-        event_bus.add_error_handler(simulation_event_error_handler)
+        event_bus.add_error_handler(simulation_event_error_handler)  # type: ignore[arg-type]
 
         # Add simulation time logging hook
         def simulation_event_logger(event: DomainEvent) -> None:

@@ -9,8 +9,8 @@ class RouteInputDTO(BaseModel):
     id: str
     description: str | None = None
     duration: float
-    track_sequence: list[str] | None = None
-    path: list[str] | None = None
+    track_sequence: list[str] = []
+    path: list[str] = []
 
     @property
     def from_track(self) -> str:

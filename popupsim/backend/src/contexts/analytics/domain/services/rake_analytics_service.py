@@ -108,7 +108,7 @@ class RakeAnalyticsService:
 
     def get_rake_size_distribution(self) -> dict[int, int]:
         """Get distribution of rake sizes."""
-        size_counts = {}
+        size_counts: dict[int, int] = {}
         for event in self.formation_events:
             size = event.wagon_count
             size_counts[size] = size_counts.get(size, 0) + 1
@@ -116,7 +116,7 @@ class RakeAnalyticsService:
 
     def get_formation_strategy_stats(self) -> dict[str, dict[str, Any]]:
         """Get statistics by formation strategy."""
-        strategy_stats = {}
+        strategy_stats: dict[str, Any] = {}
 
         for event in self.formation_events:
             strategy = event.formation_strategy
@@ -149,7 +149,7 @@ class RakeAnalyticsService:
         active_rakes = []
 
         # Group snapshots by rake_id
-        rake_timelines = {}
+        rake_timelines: dict[str, list[RakeSnapshot]] = {}
         for snapshot in self.rake_snapshots:
             if snapshot.rake_id not in rake_timelines:
                 rake_timelines[snapshot.rake_id] = []

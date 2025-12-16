@@ -54,7 +54,7 @@ class PopUpWorkshop(BaseModel):
         if not available_bay:
             return RetrofitResult.failed(wagon_id=wagon_id, reason='No available bay for retrofit'), []
 
-        events = []
+        events: list[Any] = []
 
         # Fire retrofit started event
         start_event = RetrofitStartedEvent(

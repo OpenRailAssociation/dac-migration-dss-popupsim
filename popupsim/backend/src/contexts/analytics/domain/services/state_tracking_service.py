@@ -1,4 +1,5 @@
 """State tracking service for real-time system state."""
+
 from collections import defaultdict
 from typing import Any
 
@@ -22,7 +23,6 @@ class StateTrackingService:  # pylint: disable=too-many-instance-attributes
         self.workshop_idle_start: dict[str, float] = {}
         self.wagon_lengths: dict[str, float] = {}
         self.track_capacities: dict[str, float] = {}
-
 
     # ruff: noqa:  PLR0912, C901
     def process_event(self, event: Any) -> None:  # pylint: disable=too-many-branches

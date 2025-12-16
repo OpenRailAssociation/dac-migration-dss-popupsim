@@ -54,6 +54,8 @@ class Wagon(BaseModel):
     retrofit_end_time: float | None = Field(default=None, description='Retrofit end time as counter')
     status: WagonStatus = Field(default=WagonStatus.UNKNOWN, description='Status of the wagon')
     coupler_type: CouplerType = Field(default=CouplerType.SCREW, description='Type of coupler on the wagon')
+    workshop_id: str | None = Field(default=None, description='ID of the workshop the wagon is assigned to')
+    rake_id: str | None = Field(default=None, description='ID of the rake the wagon is assigned to')
 
     @property
     def waiting_time(self) -> float | None:

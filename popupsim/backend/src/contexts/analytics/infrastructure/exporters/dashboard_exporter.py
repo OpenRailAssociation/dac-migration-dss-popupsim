@@ -149,9 +149,9 @@ class DashboardExporter:
         events = analytics_context.event_stream.collector.get_events()
 
         # Calculate per-locomotive metrics from events
-        loco_times = {}
+        loco_times: dict[str, dict[str, float]] = {}
         loco_last_event = {}
-        loco_movements = {}
+        loco_movements: dict[str, list[()]] = {}
 
         for timestamp, event in events:
             event_type = event.__class__.__name__

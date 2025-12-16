@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from typing import TYPE_CHECKING
+from typing import Any
 
 from shared.domain.entities.rake import Rake
 from shared.domain.services.multi_track_transport_service import MultiTrackTransportService
@@ -13,6 +14,7 @@ from shared.domain.value_objects.rake_type import RakeType
 
 if TYPE_CHECKING:
     from shared.domain.entities.wagon import Wagon
+    from shared.domain.services.multi_track_transport_service import TransportJob
 
 
 class RetrofitTrackStrategy(RakeFormationStrategy):  # pylint: disable=too-few-public-methods
@@ -22,7 +24,7 @@ class RetrofitTrackStrategy(RakeFormationStrategy):  # pylint: disable=too-few-p
         self.allocation_service = RetrofitTrackAllocationService()
         self.transport_service = MultiTrackTransportService()
 
-    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, any]) -> list[Rake]:
+    def form_rakes(self, wagons: list[Wagon], constraints: dict[str, Any]) -> list[Rake]:
         """Form rakes based on retrofit track capacities."""
         retrofit_tracks = constraints.get('retrofit_tracks', {})
         from_track = constraints.get('from_track', 'collection')
@@ -60,7 +62,7 @@ class RetrofitTrackStrategy(RakeFormationStrategy):  # pylint: disable=too-few-p
 
         return rakes
 
-    def _create_transport_rake(self, job) -> Rake:
+    def _create_transport_rake(self, job: TransportJob) -> Rake:
         """Create rake from transport job."""
         rake = Rake(
             rake_id=f'retrofit_rake_{job.to_track}_{int(time.time())}',

@@ -1,6 +1,6 @@
 """Event stream application service."""
+
 # pylint: disable=duplicate-code
-import time
 from typing import Any
 
 from contexts.analytics.domain.entities.metrics_aggregator import MetricsAggregator
@@ -16,14 +16,14 @@ class EventStreamService:
     def __init__(
         self,
         event_bus: EventBus,
-        collector: EventCollectionService | None = None,
+        collector: EventCollectionService,  # | None = None
     ) -> None:
         self.event_bus = event_bus
-        self.collector = collector or EventCollectionService(event_bus)
+        self.collector = collector  # or EventCollectionService(event_bus)
         self.track_occupancy = TrackOccupancyTracker()
         self._subscribe_to_all_events()
         self._subscribe_to_wagon_events()
-        self._wagon_tracks = {}
+        self._wagon_tracks: dict[str, str] = {}
 
     def _subscribe_to_all_events(self) -> None:
         """Subscribe to all domain events."""
@@ -69,59 +69,6 @@ class EventStreamService:
         )
         return aggregator.compute_all_metrics()
 
-    def get_events_by_type(self, event_type: str) -> list[Any]:
-        """Get events of specific type."""
-        return self.collector.get_events_by_type(event_type)
-
     def clear(self) -> None:
         """Clear all collected events."""
         self.collector.clear()
-
-    def get_all_events(self) -> list[tuple[float, Any]]:
-        """Get all collected events with timestamps.
-
-        Returns
-        -------
-        list[tuple[float, Any]]
-            List of (timestamp, event) tuples.
-        """
-        return self.collector.get_events()
-
-    def get_event_counts(self) -> dict[str, int]:
-        """Get count of each event type.
-
-        Returns
-        -------
-        dict[str, int]
-            Event type name to count mapping.
-        """
-        return self.collector.get_event_counts()
-
-    def get_duration_hours(self) -> float:
-        """Get simulation duration in hours.
-
-        Returns
-        -------
-        float
-            Duration in hours since start.
-        """
-        start_time = self.collector.get_start_time()
-        if start_time == 0.0:
-            return 0.0
-        return (time.time() - start_time) / 3600.0
-
-    def get_current_state(self) -> dict[str, Any]:
-        """Get current system state from state tracking.
-
-        Returns
-        -------
-        dict[str, Any]
-            Current state snapshot including:
-            - wagons_retrofitting: Number of wagons currently being retrofitted
-            - wagons_on_retrofit_track: Number of wagons on retrofit tracks
-            - wagons_on_retrofitted_track: Number of wagons on retrofitted tracks
-            - workshop_states: Workshop utilization states
-            - locomotive_action_breakdown: Locomotive activity breakdown
-            - track_occupancy: Track occupancy information
-        """
-        return self.collector.get_current_state()

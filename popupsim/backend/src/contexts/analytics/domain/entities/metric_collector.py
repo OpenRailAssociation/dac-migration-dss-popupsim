@@ -1,4 +1,5 @@
 """Metric collector entity for Analytics Context."""
+
 # pylint: disable=duplicate-code
 from dataclasses import dataclass
 from dataclasses import field

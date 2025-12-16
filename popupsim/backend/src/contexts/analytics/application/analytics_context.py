@@ -5,17 +5,16 @@ from typing import Any
 
 from contexts.analytics.domain.repositories.analytics_repository import AnalyticsRepository
 from contexts.analytics.domain.services.analytics_service import AnalyticsService
+from contexts.analytics.domain.services.event_collection_service import EventCollectionService
 from contexts.analytics.domain.services.event_stream_calculator import EventStreamCalculator
 from contexts.analytics.domain.services.rake_analytics_service import RakeAnalyticsService
 from contexts.analytics.domain.services.real_time_visualizer import RealTimeVisualizer
 from contexts.analytics.domain.services.time_series_service import TimeSeriesService
 from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
-from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 from contexts.analytics.infrastructure.exporters.csv_exporter import CSVExporter
 from contexts.analytics.infrastructure.exporters.dashboard_exporter import DashboardExporter
 from contexts.analytics.infrastructure.exporters.json_exporter import JSONExporter
 from contexts.analytics.infrastructure.visualization import Visualizer
-from contexts.analytics.infrastructure.visualization.rake_visualizer import RakeVisualizer
 from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
 from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from infrastructure.event_bus.event_bus import EventBus
@@ -42,7 +41,7 @@ class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-ins
         real_time_callback: Any = None,
     ) -> None:
         self.event_bus = event_bus
-        self.event_stream = EventStreamService(event_bus)
+        self.event_stream = EventStreamService(event_bus, EventCollectionService(event_bus))
         self.app_service = AnalyticsApplicationService(event_bus, repository, self.event_stream)
         self.query_service = AnalyticsQueryService(repository)
         self.analytics_service = AnalyticsService(self.event_stream, event_bus)
@@ -87,10 +86,6 @@ class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-ins
         """Record metric value with optional timestamp."""
         self.app_service.record_metric(collector_id, key, value, timestamp)
 
-    def set_threshold(self, threshold: Threshold) -> None:
-        """Set threshold for metric monitoring."""
-        self.app_service.set_threshold(threshold)
-
     def analyze_session(self) -> AnalyticsMetrics:
         """Analyze current session."""
         return self.app_service.analyze_session()
@@ -101,10 +96,6 @@ class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-ins
         # Add event history for timeline validation
         metrics['event_history'] = self.event_stream.collector.get_events()
         return metrics
-
-    def check_threshold_violations(self) -> list[Any]:
-        """Check for threshold violations."""
-        return self.app_service.check_threshold_violations()
 
     def compute_all_metrics(self, scenario: Any) -> dict[str, Any]:
         """Compute all system metrics from scenario + events."""
@@ -433,9 +424,12 @@ class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-ins
 
     def _subscribe_to_rake_events(self) -> None:
         """Subscribe to rake domain events for analytics."""
-        self.event_bus.subscribe(RakeFormedEvent, self._handle_rake_formed)
-        self.event_bus.subscribe(RakeTransportedEvent, self._handle_rake_transported)
-        self.event_bus.subscribe(RakeProcessingCompletedEvent, self._handle_rake_processing_completed)
+        self.event_bus.subscribe(RakeFormedEvent, self._handle_rake_formed)  # type: ignore[arg-type]
+        self.event_bus.subscribe(RakeTransportedEvent, self._handle_rake_transported)  # type: ignore[arg-type]
+        self.event_bus.subscribe(
+            RakeProcessingCompletedEvent,
+            self._handle_rake_processing_completed,  # type: ignore[arg-type]
+        )
 
     def _subscribe_to_wagon_events(self) -> None:
         """Subscribe to wagon events for track capacity monitoring."""
@@ -501,39 +495,6 @@ class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-ins
                 for track in ['classification', 'WS1', 'WS2', 'collection']
             },
         }
-
-    def generate_rake_visualizations(self, output_dir: str) -> list[str]:
-        """Generate rake-specific visualizations."""
-        visualizer = RakeVisualizer(self.rake_analytics_service)
-        generated_files = []
-
-        # Generate timeline plot
-        timeline_path = f'{output_dir}/rake_formations_timeline.png'
-        visualizer.plot_rake_formations_timeline(timeline_path)
-        generated_files.append(timeline_path)
-
-        # Generate track occupancy plot
-        occupancy_path = f'{output_dir}/track_occupancy.png'
-        tracks = ['classification', 'WS1', 'WS2', 'collection']
-        visualizer.plot_track_occupancy(tracks, occupancy_path)
-        generated_files.append(occupancy_path)
-
-        # Generate Gantt chart
-        gantt_path = f'{output_dir}/rake_gantt_chart.png'
-        visualizer.plot_rake_gantt_chart(gantt_path)
-        generated_files.append(gantt_path)
-
-        # Generate size distribution
-        size_dist_path = f'{output_dir}/rake_size_distribution.png'
-        visualizer.plot_rake_size_distribution(size_dist_path)
-        generated_files.append(size_dist_path)
-
-        # Generate comprehensive dashboard
-        dashboard_path = f'{output_dir}/rake_dashboard.png'
-        visualizer.create_rake_dashboard(tracks, dashboard_path)
-        generated_files.append(dashboard_path)
-
-        return generated_files
 
     def cleanup(self) -> None:
         """Cleanup."""

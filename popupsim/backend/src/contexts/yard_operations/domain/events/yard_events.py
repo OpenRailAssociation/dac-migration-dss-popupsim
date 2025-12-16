@@ -29,6 +29,8 @@ class WagonDistributedEvent(DomainEvent):
         self.wagon_id = wagon_id
         self.workshop_id = workshop_id
         self.batch_id = batch_id
+        self.track_id = str
+        self.event_timestamp = Any
 
 
 class WagonParkedEvent(DomainEvent):
@@ -38,3 +40,4 @@ class WagonParkedEvent(DomainEvent):
         super().__init__(**kwargs)
         self.wagon_id = wagon_id
         self.parking_area_id = parking_area_id
+        self.event_timestamp = ''

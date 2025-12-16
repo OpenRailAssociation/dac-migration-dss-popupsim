@@ -23,11 +23,12 @@ from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from contexts.yard_operations.domain.services.hump_yard_service import HumpYardService
 from contexts.yard_operations.domain.services.hump_yard_service import YardConfiguration
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
-from contexts.yard_operations.domain.services.rake_transport_service import RakeTransportService
 from contexts.yard_operations.domain.services.wagon_distribution_service import WagonDistributionService
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from infrastructure.logging import get_process_logger
+from shared.domain.entities.wagon import Wagon
+from shared.domain.entities.wagon import WagonStatus
 from shared.domain.events.rake_events import RakeFormedEvent
 from shared.domain.events.rake_events import RakeTransportRequestedEvent
 from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
@@ -39,6 +40,7 @@ from shared.domain.events.wagon_lifecycle_events import WagonsReadyForPickupEven
 from shared.domain.services.railway_capacity_service import RailwayCapacityService
 from shared.domain.services.rake_formation_service import RakeFormationService
 from shared.domain.services.rake_registry import RakeRegistry
+from shared.infrastructure.simulation.coordination.simulation_infrastructure import SimulationInfrastructure
 
 
 class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
@@ -50,13 +52,12 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.distribution_service = WagonDistributionService()
         # Domain services - pure business logic
         self.wagon_pickup_service = WagonPickupService()
-        self.rake_transport_service = RakeTransportService()
         # Railway capacity service will be injected during initialization
-        self.hump_yard_service = None
-        self.railway_capacity_service = None
+        self.hump_yard_service: HumpYardService | None = None
+        self.railway_capacity_service: RailwayCapacityService | None = None
         # Remove local yard_config as we'll use railway infrastructure
-        self.yard_config = None
-        self.scenario = None
+        self.yard_config: YardConfiguration | None = None
+        self.scenario: SimulationInfrastructure | None = None
         self.wagons: list[Any] = []
         self.rejected_wagons: list[Any] = []
         self.train_processed_event = None
@@ -83,11 +84,11 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.railway_context = None
         self.railway_capacity_service = None
         self._expected_wagon_count = 0
-        self.all_wagons = []
-        self._retrofitted_accumulator = []
-        self._track_occupancy_m = {}
-        self._workshop_round_robin_index = 0
-        self._workshop_wagon_counts = {}
+        self.all_wagons: list[Wagon] = []
+        self._retrofitted_accumulator: list[Wagon] = []
+        self._track_occupancy_m: dict[str, float] = {}
+        self._workshop_round_robin_index: int = 0
+        self._workshop_wagon_counts: dict[str, int] = {}
 
     def initialize(self, infrastructure: Any, scenario: Any) -> None:
         """Initialize with infrastructure and scenario."""
@@ -106,10 +107,10 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Get railway infrastructure context for capacity management
         # railway_context = getattr(self.infra, 'contexts', {}).get('railway')
         self.railway_context = self.infra.contexts['railway']
-        self.railway_capacity_service = RailwayCapacityService(self.railway_context)
+        self.railway_capacity_service = RailwayCapacityService(self.railway_context)  # type: ignore[arg-type]
 
         # Initialize hump yard service with railway capacity service
-        self.hump_yard_service = HumpYardService(self.railway_capacity_service)
+        self.hump_yard_service = HumpYardService(self.railway_capacity_service)  # type: ignore[arg-type]
 
         # Initialize yard configuration using railway infrastructure capacity
         # Get collection track capacity from railway infrastructure
@@ -204,7 +205,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if not is_feasible:
             return
 
-        pickup_plan.wagons = wagons_to_pickup
+        pickup_plan.wagons = wagons_to_pickup  # type: ignore[attr-defined]
 
         # Execute pickup plan using application service
         yield from self._execute_pickup_plan(pickup_plan, track_id)
@@ -245,7 +246,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
             yield from self.infra.engine.delay(0.1)  # Small delay between distributions
 
-    def _handle_train_arrived(self, event) -> None:
+    def _handle_train_arrived(self, event: TrainArrivedEvent) -> None:
         """Handle train arrived event - start classification process."""
         self.infra.engine.current_time()
 
@@ -256,13 +257,21 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self._expected_wagon_count = len(event.wagons)
 
         # Schedule classification process
-        self.infra.engine.schedule_process(self._classify_train_wagons(event.wagons, event.train_id))
+        self.infra.engine.schedule_process(
+            self._classify_train_wagons(
+                event.wagons,
+                event.train_id,
+            )
+        )  # type: ignore[func-returns-value]
 
-    def _classify_train_wagons(self, wagons, train_id) -> Any:  # pylint: disable=too-many-locals, too-many-branches
+    def _classify_train_wagons(self, wagons: list[Wagon], train_id: str) -> Generator:  # pylint: disable=too-many-locals, too-many-branches
         """Classify train wagons through hump yard with timing using domain service."""
         # Calculate processing schedule using domain service
-        process_times = self.scenario.process_times if self.scenario else None
-        schedule = self.hump_yard_service.calculate_processing_schedule(len(wagons), process_times)
+        process_times = self.scenario.process_times  # type: ignore[attr-defined, union-attr]
+        schedule = self.hump_yard_service.calculate_processing_schedule(  # type: ignore[attr-defined, union-attr]
+            len(wagons),
+            process_times,
+        )
 
         # 1. Delay from train arrival to hump yard
         if schedule.train_to_hump_delay > 0:
@@ -272,8 +281,11 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         selected_track = self._select_track_by_type('collection')
         collection_track_id = selected_track.id if selected_track else 'collection'
 
-        classification_result = self.hump_yard_service.classify_wagons(wagons, self.yard_config, collection_track_id)
-
+        classification_result = self.hump_yard_service.classify_wagons(  # type: ignore[attr-defined, union-attr]
+            wagons,
+            self.yard_config,
+            collection_track_id,
+        )
         # 3. Process each wagon with timing intervals
         for i, wagon in enumerate(classification_result.accepted_wagons):
             self.wagons.append(wagon)
@@ -346,7 +358,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # 8. Train processing complete
 
-    def _handle_wagon_retrofit_completed(self, event) -> None:
+    def _handle_wagon_retrofit_completed(self, event: WagonRetrofitCompletedEvent) -> None:
         """Handle wagon retrofit completed event - batch wagons completing at same time."""
         # Find the wagon
         wagon = None
@@ -371,9 +383,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
     def _get_workshop_capacity_for_batching(self, workshop_id: str) -> int:
         """Get workshop capacity for determining batch size."""
-        for workshop in self.scenario.workshops:
+        for workshop in self.scenario.workshops:  # type: ignore[attr-defined, union-attr]
             if workshop.id == workshop_id:
-                return workshop.retrofit_stations
+                return workshop.retrofit_stations  # type: ignore[no-any-return]
         return 0
 
     def _check_and_transport_batch(self, workshop_id: str) -> Generator[Any, Any]:
@@ -648,7 +660,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             # Check if there are waiting wagons for this specific workshop
             if hasattr(self, '_waiting_wagons') and self._waiting_wagons:  # pylint: disable=no-member
                 # Filter wagons assigned to this workshop (for multi-workshop) or all wagons (for single workshop)
-                if len(self.scenario.workshops) > 1:
+                if len(self.scenario.workshops) > 1:  # type: ignore[attr-defined, union-attr]
                     workshop_wagons = [w for w in self._waiting_wagons if w.workshop_id == workshop_id]  # pylint: disable=no-member
                 else:
                     workshop_wagons = self._waiting_wagons[:]  # pylint: disable=no-member
@@ -740,7 +752,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     distributed_event = WagonDistributedEvent(
                         wagon_id=wagon.id, workshop_id=retrofitted_track_id, batch_id=rake.rake_id
                     )
-                    distributed_event.track_id = retrofitted_track_id
+                    distributed_event.track_id = retrofitted_track_id  # type: ignore[assignment]
                     distributed_event.event_timestamp = current_time
                     self.infra.event_bus.publish(distributed_event)
 
@@ -794,7 +806,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
                     current_time = self.infra.engine.current_time()
                     for wagon in wagons_to_park:
-                        wagon.status = 'PARKED'
+                        wagon.status = WagonStatus.PARKING
                         wagon.track = parking_track_id
                         parked_event = WagonParkedEvent(wagon_id=wagon.id, parking_area_id=parking_track_id)
                         parked_event.event_timestamp = current_time
@@ -955,7 +967,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 self._workshop_wagon_counts[workshop_id] += 1
 
             # Group wagons by assigned workshop
-            workshop_batches = {ws_id: [] for ws_id in workshop_ids}
+            workshop_batches: dict[str, list[Wagon]] = {ws_id: [] for ws_id in workshop_ids}
             for wagon in rake.wagons:
                 workshop_batches[wagon.workshop_id].append(wagon)
 
@@ -1024,7 +1036,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
     def _get_workshop_capacities(self) -> dict[str, int]:
         """Get workshop capacities from scenario configuration."""
-        workshop_capacities = {}
+        workshop_capacities: dict[str, int] = {}
         if self.scenario and hasattr(self.scenario, 'workshops'):
             for workshop in self.scenario.workshops:
                 workshop_capacities[workshop.id] = getattr(workshop, 'retrofit_stations', 1)
@@ -1037,7 +1049,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
     def _get_retrofit_track_capacities(self) -> dict[str, float]:
         """Get available capacities for retrofit tracks from railway infrastructure."""
         # Todo: Get track capacities from railway infrastructure context
-        retrofit_tracks = {}
+        retrofit_tracks: dict[str, float] = {}
 
         if self.railway_capacity_service:
             # Get retrofit tracks from scenario or use defaults
@@ -1092,7 +1104,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     fill_factor = self.scenario.fill_factor
 
                 # Get track lengths from scenario
-                track_lengths = {}
+                track_lengths: dict[str, float] = {}
                 if self.scenario and hasattr(self.scenario, 'tracks'):
                     for t in self.scenario.tracks:
                         track_lengths[t.id] = getattr(t, 'length', 200.0)
@@ -1141,7 +1153,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Collect all wagons in sequence (physical order on collection track)
         # Todo: Check the allocation here. It looks like it is just workkshop
         all_wagons = []
-        workshop_allocations = {}
+        workshop_allocations: dict[str, list[Wagon]] = {}
         for rake in pickup_plan.rakes_to_pickup:
             all_wagons.extend(rake.wagons)
             for wagon in rake.wagons:
@@ -1307,7 +1319,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
             current_time = self.infra.engine.current_time()
             for wagon in wagons_to_park:
-                wagon.status = 'PARKED'
+                wagon.status = WagonStatus.PARKING
                 wagon.track = parking_track_id
                 parked_event = WagonParkedEvent(wagon_id=wagon.id, parking_area_id=parking_track_id)
                 parked_event.event_timestamp = current_time

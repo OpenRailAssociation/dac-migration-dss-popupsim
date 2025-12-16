@@ -7,6 +7,7 @@ from contexts.railway_infrastructure.domain.services.topology_service import Top
 
 # ruff: noqa: ARG002
 
+
 class RailwayInfrastructureContext:
     """Railway Infrastructure bounded context - track capacity management with SimPy."""
 
@@ -68,7 +69,7 @@ class RailwayInfrastructureContext:
             for track in self.scenario.tracks:
                 if track.id == track_id:
                     fill_factor = track.fillfactor
-                    track_length = getattr(track, 'length', 200.0)
+                    track_length = track.length
                     return track_length * fill_factor
         return 0.0
 
@@ -80,7 +81,7 @@ class RailwayInfrastructureContext:
         """Get available capacity on a track in meters."""
         if track_id in self.track_resources:
             resource = self.track_resources[track_id]
-            available_wagons = resource.capacity - resource.count
+            available_wagons: int = resource.capacity - resource.count
             # Convert wagon count to meters
             avg_wagon_length = 20.0
             return available_wagons * avg_wagon_length

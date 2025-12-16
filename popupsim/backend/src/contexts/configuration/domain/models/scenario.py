@@ -9,6 +9,7 @@ from typing import Any
 
 from contexts.configuration.application.dtos import LocomotiveInputDTO
 from contexts.configuration.application.dtos import RouteInputDTO
+from contexts.configuration.application.dtos import TrackInputDTO
 from contexts.configuration.application.dtos import WorkshopInputDTO
 from pydantic import BaseModel
 from pydantic import Field
@@ -54,7 +55,7 @@ class Scenario(BaseModel):
     routes: list[RouteInputDTO] | None = None
     topology: Any = None
     trains: Any | None = None
-    tracks: Sequence[Any] | None = None
+    tracks: Sequence[TrackInputDTO] = []
     workshops: list[WorkshopInputDTO] | None = None
 
     @field_validator('start_date', 'end_date', mode='before')

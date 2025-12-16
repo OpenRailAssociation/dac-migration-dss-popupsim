@@ -1,4 +1,5 @@
 """Aggregates metrics from collected events."""
+
 # pylint: disable=duplicate-code
 import time
 from typing import Any
