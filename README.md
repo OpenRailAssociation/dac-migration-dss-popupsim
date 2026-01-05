@@ -41,7 +41,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run example simulation
-uv run python popupsim/backend/src/main.py --config Data/examples/small_scenario/
+uv run python popupsim/backend/src/main.py --scenario ./Data/examples/small_scenario/ --output output/small_scenario
 ```
 
 ### Example Scenarios
