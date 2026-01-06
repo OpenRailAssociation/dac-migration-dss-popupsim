@@ -2,10 +2,9 @@
 
 from uuid import uuid4
 
+from contexts.railway_infrastructure.domain.entities.track import Track
+from contexts.railway_infrastructure.domain.entities.track import TrackType
 import pytest
-
-from popupsim.backend.src.contexts.railway_infrastructure.domain.entities.track import Track
-from popupsim.backend.src.contexts.railway_infrastructure.domain.entities.track import TrackType
 
 
 def test_track_creation() -> None:

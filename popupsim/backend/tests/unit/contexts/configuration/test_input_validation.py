@@ -1,12 +1,9 @@
 """Test input validation for zero-length edges and wagons."""
 
-import pytest
-from pydantic import ValidationError
-
-
 from contexts.configuration.application.dtos.wagon_input_dto import WagonInputDTO
-
 from contexts.configuration.domain.models.topology import Topology
+from pydantic import ValidationError
+import pytest
 
 
 def test_wagon_zero_length_rejected() -> None:
@@ -31,7 +28,7 @@ def test_topology_zero_edge_length_rejected_from_dict() -> None:
     """Test that topology with zero edge length is rejected when loading from dict."""
     topology_data = {'edges': [{'edge_id': 'E1', 'length': 0.0}]}
 
-    with pytest.raises(ValueError, match="Edge 'E1' has invalid length 0.0"):
+    with pytest.raises(ValueError, match=r"Edge 'E1' has invalid length 0\.0"):
         Topology(topology_data)
 
 
@@ -39,7 +36,7 @@ def test_topology_negative_edge_length_rejected_from_dict() -> None:
     """Test that topology with negative edge length is rejected when loading from dict."""
     topology_data = {'edges': [{'edge_id': 'E1', 'length': -10.0}]}
 
-    with pytest.raises(ValueError, match="Edge 'E1' has invalid length -10.0"):
+    with pytest.raises(ValueError, match=r"Edge 'E1' has invalid length -10\.0"):
         Topology(topology_data)
 
 
@@ -61,5 +58,5 @@ def test_topology_multiple_edges_one_invalid() -> None:
         ]
     }
 
-    with pytest.raises(ValueError, match="Edge 'E2' has invalid length 0.0"):
+    with pytest.raises(ValueError, match=r"Edge 'E2' has invalid length 0\.0"):
         Topology(topology_data)

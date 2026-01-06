@@ -2,13 +2,10 @@
 
 from uuid import uuid4
 
+from contexts.railway_infrastructure.domain.entities.track import Track
+from contexts.railway_infrastructure.domain.entities.track import TrackType
+from contexts.railway_infrastructure.domain.services.track_occupancy_manager import TrackOccupancyManager
 import pytest
-
-from popupsim.backend.src.contexts.railway_infrastructure.domain.entities.track import Track
-from popupsim.backend.src.contexts.railway_infrastructure.domain.entities.track import TrackType
-from popupsim.backend.src.contexts.railway_infrastructure.domain.services.track_occupancy_manager import (
-    TrackOccupancyManager,
-)
 
 
 @pytest.fixture

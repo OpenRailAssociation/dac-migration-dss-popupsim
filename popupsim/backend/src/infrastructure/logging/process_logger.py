@@ -32,18 +32,20 @@ class ProcessLogger:
 
 
 # Global process logger instance
-_process_logger: ProcessLogger | None = None
+_PROCESS_LOGGER: ProcessLogger | None = None
 
 
 def init_process_logger(output_dir: Path) -> ProcessLogger:
     """Initialize global process logger."""
-    _process_logger = ProcessLogger(output_dir)
-    return _process_logger
+    # pylint: disable=global-statement
+    global _PROCESS_LOGGER
+    _PROCESS_LOGGER = ProcessLogger(output_dir)
+    return _PROCESS_LOGGER
 
 
 def get_process_logger() -> ProcessLogger:
     """Get global process logger instance."""
-    if _process_logger is None:
+    if _PROCESS_LOGGER is None:
         msg = 'Process logger not initialized'
         raise RuntimeError(msg)
-    return _process_logger
+    return _PROCESS_LOGGER

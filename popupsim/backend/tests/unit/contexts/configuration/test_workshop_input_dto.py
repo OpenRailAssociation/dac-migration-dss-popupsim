@@ -1,9 +1,8 @@
 """Tests for WorkshopInputDTO."""
 
-import pytest
-from pydantic import ValidationError
-
 from contexts.configuration.application.dtos.workshop_input_dto import WorkshopInputDTO
+from pydantic import ValidationError
+import pytest
 
 
 class TestWorkshopInputDTO:

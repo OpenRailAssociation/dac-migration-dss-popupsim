@@ -5,17 +5,17 @@ Tests the Scenario model validation logic, date validation,
 workshop integration, and file reference validation.
 """
 
+from datetime import UTC
+from datetime import datetime
 import json
-import tempfile
-from datetime import UTC, datetime
 from pathlib import Path
+import tempfile
 from typing import Any
-
-import pytest
-from pydantic import ValidationError
 
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.configuration.domain.models.scenario import TrackSelectionStrategy
+from pydantic import ValidationError
+import pytest
 
 
 @pytest.fixture
@@ -340,7 +340,6 @@ class TestScenario:
         -----
         Validates that valid strategy values are accepted and default is applied.
         """
-
         config = Scenario(
             id='test_scenario',
             start_date=datetime(2024, 1, 1, tzinfo=UTC),

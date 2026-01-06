@@ -1,8 +1,7 @@
 """Timeline validation scenarios for new architecture."""
 
-import pytest
-
 from application.simulation_service import SimulationApplicationService
+import pytest
 
 from .scenario_builder import create_minimal_scenario
 from .timeline_validator import validate_timeline_from_docstring

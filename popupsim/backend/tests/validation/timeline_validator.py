@@ -2,9 +2,20 @@
 
 import re
 from typing import Any
+from typing import NamedTuple
 
 
-def validate_timeline_from_docstring(result: Any, test_func: Any, analytics_context: Any = None) -> None:
+class LocoValidationParams(NamedTuple):
+    """Parameters for locomotive validation."""
+
+    loco_id: str
+    time: float
+    status_name: str
+    rest: str
+    end_time: float | None = None
+
+
+def validate_timeline_from_docstring(_result: Any, test_func: Any, analytics_context: Any = None) -> None:
     """Extract TIMELINE from test docstring and validate against simulation result.
 
     Args:
@@ -104,31 +115,28 @@ def validate_timeline(events: list[tuple[float, Any]], timeline_spec: str) -> No
         rest = match.group(7) or ''
 
         if resource_type == 'loco':
-            _validate_loco(events, resource_id, time, status_name, rest, end_time)
+            params = LocoValidationParams(resource_id, time, status_name, rest, end_time)
+            _validate_loco(events, params)
         elif resource_type == 'wagon':
             _validate_wagon(events, resource_id, time, status_name, rest)
 
 
 def _validate_loco(
     events: list[tuple[float, Any]],
-    loco_id: str,
-    time: float,
-    status_name: str,
-    rest: str,
-    end_time: float | None = None,
+    params: LocoValidationParams,
 ) -> None:
     """Validate locomotive state at specific time."""
-    if status_name == 'MOVING':
-        track_match = re.search(r'(\w+)->(\w+)', rest)
+    if params.status_name == 'MOVING':
+        track_match = re.search(r'(\w+)->(\w+)', params.rest)
         if track_match:
             from_track = track_match.group(1)
             to_track = track_match.group(2)
             # Check if movement started within time window
             found = any(
-                time <= t <= (end_time if end_time else time + 1.0)
+                params.time <= t <= (params.end_time if params.end_time else params.time + 1.0)
                 and type(e).__name__ == 'LocomotiveMovementStartedEvent'
                 and hasattr(e, 'locomotive_id')
-                and e.locomotive_id == loco_id
+                and e.locomotive_id == params.loco_id
                 and hasattr(e, 'from_track')
                 and hasattr(e, 'to_track')
                 and e.from_track == from_track
@@ -136,7 +144,8 @@ def _validate_loco(
                 for t, e in events
             )
             assert found, (
-                f'No MOVING event for loco {loco_id} from {from_track} to {to_track} in window t={time}-{end_time or time + 1.0}'
+                f'No MOVING event for loco {params.loco_id} from {from_track} to {to_track} '
+                f'in window t={params.time}-{params.end_time or params.time + 1.0}'
             )
 
 

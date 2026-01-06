@@ -1,10 +1,9 @@
 """Tests for TrainInputDTO."""
 
-import pytest
-from pydantic import ValidationError
-
 from contexts.configuration.application.dtos.train_input_dto import TrainInputDTO
 from contexts.configuration.application.dtos.wagon_input_dto import WagonInputDTO
+from pydantic import ValidationError
+import pytest
 
 
 class TestTrainInputDTO:

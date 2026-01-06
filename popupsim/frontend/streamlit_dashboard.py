@@ -1,5 +1,6 @@
 """PopUpSim Streamlit Dashboard - Comprehensive post-simulation analysis."""
 
+import contextlib
 import json
 from pathlib import Path
 from typing import Any
@@ -29,11 +30,8 @@ def load_dashboard_data(output_dir: Path) -> dict[str, Any]:
     # Load process log
     process_log_file = output_dir / 'process.log'
     if process_log_file.exists():
-        try:
+        with contextlib.suppress(pd.errors.ParserError, pd.errors.EmptyDataError):
             data['process_log'] = pd.read_csv(process_log_file)
-        except (pd.errors.ParserError, pd.errors.EmptyDataError):
-            # Process log may have inconsistent formatting or be empty, skip it
-            pass
 
     # Load locomotive utilization
     loco_file = output_dir / 'locomotive_utilization.csv'
@@ -95,7 +93,7 @@ def render_header(data: dict[str, Any]) -> None:
     st.markdown('---')
 
 
-def render_overview_tab(data: dict[str, Any]) -> None:
+def render_overview_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915
     """Render overview dashboard with KPI cards and charts."""
     st.header('📊 Overview Dashboard')
 
@@ -237,7 +235,7 @@ def render_overview_tab(data: dict[str, Any]) -> None:
             st.info('No workshop data available')
 
 
-def render_wagon_flow_tab(data: dict[str, Any]) -> None:
+def render_wagon_flow_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915, C901, PLR0912
     """Render wagon flow analysis."""
     st.header('🚃 Wagon Flow Analysis')
 
@@ -256,10 +254,7 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:
                 'View by:', ['By Track (see track utilization)', 'By Wagon (see individual journeys)'], horizontal=True
             )
         with col2:
-            if 'Wagon' in view_type:
-                show_all = st.checkbox('Show all wagons', value=False)
-            else:
-                show_all = True
+            show_all = st.checkbox('Show all wagons', value=False) if 'Wagon' in view_type else True
 
         if 'Track' in view_type:
             _render_track_gantt(data['wagon_journey'])
@@ -350,13 +345,11 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:
     with col1:
         # Get rejection breakdown if available
         rejection_counts = {'Loaded': 0, 'No Retrofit Needed': 0, 'Collection Track Full': 0}
-        total_rejected = 0
         if 'rejected_wagons' in data and not data['rejected_wagons'].empty:
             rejection_type_counts = data['rejected_wagons']['rejection_type'].value_counts()
             for rtype, count in rejection_type_counts.items():
                 if rtype in rejection_counts:
                     rejection_counts[rtype] = int(count)
-            total_rejected = len(data['rejected_wagons'])
 
         # Calculate wagon states from events and locations
         total_arrived = metrics.get('wagons_arrived', 0)
@@ -646,7 +639,7 @@ def render_locomotive_tab(data: dict[str, Any]) -> None:
     else:
         display_df = loco_df[['locomotive_id', 'parking_percent', 'moving_percent']]
         chart_cols = ['parking_percent', 'moving_percent']
-        st.info('ℹ️ Coupling/decoupling operations not tracked in this simulation')
+        st.info('i Coupling/decoupling operations not tracked in this simulation')
 
     st.dataframe(display_df, use_container_width=True)
 
@@ -800,7 +793,7 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
         # Show wagons that either:
         # 1. Moved beyond collection track, OR
         # 2. Were rejected (moved to rejected track)
-        def wagon_has_journey(locations):
+        def wagon_has_journey(locations) -> bool:
             unique_locs = locations.unique()
             # Has journey if: more than 1 location OR has rejected track
             return len(unique_locs) > 1 or 'rejected' in unique_locs.tolist()
@@ -894,7 +887,8 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
 
     if not show_all:
         st.caption(
-            f'Showing {len(wagon_ids)} wagons with journeys (excludes wagons stuck on collection track). Each color represents a different track/location.'
+            f'Showing {len(wagon_ids)} wagons with journeys (excludes wagons stuck on collection track). '
+            'Each color represents a different track/location.'
         )
     else:
         st.caption(f'Showing all {len(wagon_ids)} wagons. Each color represents a different track/location.')
@@ -976,7 +970,7 @@ def _render_track_gantt(journey_df: pd.DataFrame) -> None:
     st.caption(f'Showing {len(wagon_ids)} wagons across {len(tracks)} tracks. Each color represents a different wagon.')
 
 
-def _get_wagon_status_timeline(events_df: pd.DataFrame) -> dict[str, list[tuple[float, str]]]:
+def _get_wagon_status_timeline(events_df: pd.DataFrame) -> dict[str, list[tuple[float, str]]]:  # noqa: C901
     """Extract wagon status timeline from events."""
     wagon_events = events_df[events_df['resource_type'] == 'wagon'].copy()
     train_events = events_df[events_df['resource_type'] == 'train'].copy()
@@ -1024,7 +1018,7 @@ def _get_final_wagon_status(events_df: pd.DataFrame, rejected_df: pd.DataFrame |
     status_counts = {}
 
     # Get final status for wagons with events
-    for wagon_id, timeline in wagon_status_timeline.items():
+    for _wagon_id, timeline in wagon_status_timeline.items():
         if timeline:
             final_status = sorted(timeline)[-1][1]
             # Map intermediate states to final states
@@ -1071,7 +1065,7 @@ def _render_temporal_flow_old(events_df: pd.DataFrame) -> None:
     for t in time_points:
         counts = dict.fromkeys(status_counts.keys(), 0)
 
-        for wagon_id, timeline in wagon_status_timeline.items():
+        for _wagon_id, timeline in wagon_status_timeline.items():
             # Find current status at time t
             current_status = None
             for timestamp, status in sorted(timeline):
@@ -1115,7 +1109,7 @@ def _render_temporal_flow_old(events_df: pd.DataFrame) -> None:
 
 
 def main() -> None:
-    """Main dashboard application."""
+    """Run main dashboard application."""
     # Sidebar
     st.sidebar.header('📁 Load Simulation Results')
 
