@@ -45,7 +45,7 @@ class AnalyticsApplicationService:
             self.start_session('default')
 
         if self.current_session is None:
-            msg = "Session not initialized"
+            msg = 'Session not initialized'
             raise RuntimeError(msg)
         event = self.current_session.record_metric(collector_id, key, value, timestamp)
         self.event_bus.publish(event)
