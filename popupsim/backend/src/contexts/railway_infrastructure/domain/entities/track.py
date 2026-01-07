@@ -1,8 +1,8 @@
 """Track specification and capacity management for railway infrastructure.
 
 This module provides the Track value object representing immutable railway
-infrastructure specifications. Runtime occupancy state is managed separately
-by the TrackOccupancyManager domain service.
+infrastructure specifications. Runtime occupancy state is managed by
+the RailwayYard aggregate root.
 """
 
 from dataclasses import dataclass

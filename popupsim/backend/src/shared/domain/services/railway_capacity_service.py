@@ -1,7 +1,6 @@
 """Railway capacity domain service for cross-context capacity management."""
 
 from dataclasses import dataclass
-from typing import Any
 from typing import Protocol
 
 
@@ -10,22 +9,19 @@ class CapacityInfo:
     """Information about track capacity."""
 
     track_id: str
-    total_capacity: int
-    available_capacity: int
-    current_usage: int
+    total_capacity: float
+    available_capacity: float
+    current_usage: float
 
 
 class RailwayCapacityPort(Protocol):
     """Port for railway capacity management."""
 
-    def get_available_capacity(self, track_id: str) -> int:
-        """Get available capacity on a track."""
+    def get_available_capacity(self, track_id: str) -> float:
+        """Get available capacity on a track in meters."""
 
-    def get_total_capacity(self, track_id: str) -> int:
-        """Get total capacity of a track."""
-
-    def request_track_capacity(self, track_id: str) -> Any:
-        """Request capacity on a track."""
+    def get_total_capacity(self, track_id: str) -> float:
+        """Get total capacity of a track in meters."""
 
 
 class RailwayCapacityService:
@@ -47,11 +43,11 @@ class RailwayCapacityService:
             current_usage=current,
         )
 
-    def can_accept_wagons(self, track_id: str, wagon_count: int) -> bool:
-        """Check if track can accept specified number of wagons."""
+    def can_accept_wagons(self, track_id: str, total_length: float) -> bool:
+        """Check if track can accept wagons with total length."""
         available = self._railway_port.get_available_capacity(track_id)
-        return available >= wagon_count
+        return available >= total_length
 
-    def get_maximum_acceptable_count(self, track_id: str) -> int:
-        """Get maximum number of wagons that can be accepted on track."""
+    def get_maximum_acceptable_length(self, track_id: str) -> float:
+        """Get maximum length that can be accepted on track."""
         return self._railway_port.get_available_capacity(track_id)

@@ -245,7 +245,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
                     break
         return move_time
 
-    def couple_wagons(
+    def couple_wagons(  # noqa: C901
         self,
         context: Any,
         wagon_count: int,
@@ -277,20 +277,29 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log coupling completion
             try:
                 plog = get_process_logger()
-                wagon_str = ', '.join(wagon_ids)  # type: ignore[arg-type]
-                plog.log(
-                    (
-                        f'COUPLING: [{wagon_str}] with {coupler_type} couplers '
-                        f'(total={wagon_count * coupling_time:.1f}min)'
-                    ),
-                    sim_time=context.infra.engine.current_time(),
-                )
+                if wagon_ids:
+                    wagon_str = ', '.join(wagon_ids)
+                    plog.log(
+                        (
+                            f'COUPLING: [{wagon_str}] with {coupler_type} couplers '
+                            f'(total={wagon_count * coupling_time:.1f}min)'
+                        ),
+                        sim_time=context.infra.engine.current_time(),
+                    )
+                else:
+                    plog.log(
+                        (
+                            f'COUPLING: {wagon_count} wagons with {coupler_type} couplers '
+                            f'(total={wagon_count * coupling_time:.1f}min)'
+                        ),
+                        sim_time=context.infra.engine.current_time(),
+                    )
             except RuntimeError:
                 pass
 
         return couple_gen()
 
-    def decouple_wagons(
+    def decouple_wagons(  # noqa: C901
         self,
         context: Any,
         wagon_count: int,
@@ -324,14 +333,23 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log decoupling completion
             try:
                 plog = get_process_logger()
-                wagon_str = ', '.join(wagon_ids)  # type: ignore[arg-type]
-                plog.log(
-                    (
-                        f'DECOUPLING: [{wagon_str}] with {coupler_type or "SCREW"} couplers'
-                        f'(total={wagon_count * decoupling_time:.1f}min)'
-                    ),
-                    sim_time=context.infra.engine.current_time(),
-                )
+                if wagon_ids:
+                    wagon_str = ', '.join(wagon_ids)
+                    plog.log(
+                        (
+                            f'DECOUPLING: [{wagon_str}] with {coupler_type or "SCREW"} couplers'
+                            f'(total={wagon_count * decoupling_time:.1f}min)'
+                        ),
+                        sim_time=context.infra.engine.current_time(),
+                    )
+                else:
+                    plog.log(
+                        (
+                            f'DECOUPLING: {wagon_count} wagons with {coupler_type or "SCREW"} couplers '
+                            f'(total={wagon_count * decoupling_time:.1f}min)'
+                        ),
+                        sim_time=context.infra.engine.current_time(),
+                    )
             except RuntimeError:
                 pass
 

@@ -156,7 +156,7 @@ class HumpYardService:
         # Use railway capacity service if available
         if self._railway_capacity_service:
             classification_track = track_id or self._determine_classification_track(yard_config)
-            available_meters = self._railway_capacity_service.get_maximum_acceptable_count(classification_track)
+            available_meters = self._railway_capacity_service.get_maximum_acceptable_length(classification_track)
             # Return meters directly - caller will handle wagon-specific sizing
             return int(available_meters)
 
