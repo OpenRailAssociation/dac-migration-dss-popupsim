@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 import sys
 
+from scenario_builder import create_minimal_scenario  # type: ignore[import-not-found]
+
 src_path = Path(__file__).parent.parent.parent.parent / 'src'
 sys.path.insert(0, str(src_path))
-
-from scenario_builder import create_minimal_scenario  # type: ignore[import-not-found]
 
 
 def export_scenario_to_json(scenario, output_dir: Path) -> None:
@@ -23,13 +23,13 @@ def export_scenario_to_json(scenario, output_dir: Path) -> None:
     (output_dir / 'routes.json').write_text(json.dumps(routes, indent=2))
 
     # Locomotives
-    locomotives = [{'id': l.id, 'track': l.track} for l in scenario.locomotives]
+    locomotives = [{'id': locomotive.id, 'track': locomotive.track} for locomotive in scenario.locomotives]
     (output_dir / 'locomotives.json').write_text(json.dumps(locomotives, indent=2))
 
     # Process times (convert timedelta to seconds)
     pt = scenario.process_times
 
-    def to_seconds(val):
+    def to_seconds(val) -> float:
         return val.total_seconds() if hasattr(val, 'total_seconds') else val
 
     process_times = {

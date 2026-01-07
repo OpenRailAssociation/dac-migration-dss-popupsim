@@ -9,7 +9,6 @@ from contexts.analytics.domain.repositories.analytics_repository import Analytic
 from contexts.analytics.domain.services.metrics_service import BottleneckThresholds
 from contexts.analytics.domain.services.metrics_service import MetricsService
 from contexts.analytics.domain.value_objects.analytics_metrics import AnalyticsMetrics
-from contexts.analytics.domain.value_objects.analytics_metrics import Threshold
 from infrastructure.event_bus.event_bus import EventBus
 
 from .analytics_query_service import AnalyticsQueryService
@@ -33,6 +32,7 @@ class AnalyticsApplicationService:
         self.current_session: AnalyticsSession | None = None
 
     def start_session(self, session_id: str) -> None:
+        """Start new analytics session."""
         self.current_session = AnalyticsSession(session_id)
         self.repository.save(self.current_session)
 
@@ -40,10 +40,13 @@ class AnalyticsApplicationService:
         self.event_bus.publish(event)
 
     def record_metric(self, collector_id: str, key: str, value: Any, timestamp: float | None = None) -> None:
+        """Record metric in current session."""
         if not self.current_session:
             self.start_session('default')
 
-        assert self.current_session is not None
+        if self.current_session is None:
+            msg = 'Session not initialized'
+            raise RuntimeError(msg)
         event = self.current_session.record_metric(collector_id, key, value, timestamp)
         self.event_bus.publish(event)
 
@@ -53,6 +56,7 @@ class AnalyticsApplicationService:
         self.repository.save(self.current_session)
 
     def analyze_session(self) -> AnalyticsMetrics:
+        """Analyze current session and return metrics."""
         if not self.current_session:
             return AnalyticsMetrics(0.0, 0.0, 0, 0)
 
@@ -62,6 +66,7 @@ class AnalyticsApplicationService:
         return event.results
 
     def get_metrics(self) -> dict[str, Any]:
+        """Get computed metrics from event stream."""
         return self.event_stream.compute_statistics()
 
     def end_session(self) -> None:
@@ -95,11 +100,12 @@ class AnalyticsApplicationService:
         return violations
 
     def clear_all_metrics(self) -> None:
+        """Clear all metrics from event stream."""
         self.event_stream.clear()
 
     def get_metrics_report(
         self,
-        interval_seconds: float = 3600.0,
+        _interval_seconds: float = 3600.0,
         thresholds: BottleneckThresholds | None = None,
     ) -> dict[str, Any]:
         """Get comprehensive metrics including all KPIs, statistics, and bottlenecks.
