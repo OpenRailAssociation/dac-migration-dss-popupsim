@@ -17,7 +17,7 @@ from contexts.configuration.application.configuration_context import Configurati
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.popup_retrofit.application.popup_context import PopUpRetrofitContext
-from contexts.railway_infrastructure.application.railway_context import RailwayInfrastructureContext
+from contexts.railway_infrastructure.infrastructure.di_container import create_railway_context
 from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
 from contexts.yard_operations.application.yard_context import YardOperationsContext
 from shared.domain.events.simulation_lifecycle_events import SimulationEndedEvent
@@ -156,7 +156,7 @@ class SimulationApplicationService:
         self.contexts['configuration'] = config_context  # Backward compatibility
 
         # Register Railway Infrastructure Context
-        railway_context = RailwayInfrastructureContext(self.scenario)
+        railway_context = create_railway_context(self.scenario)
         self.context_registry.register_context('railway', railway_context)
         self.contexts['railway'] = railway_context
 
