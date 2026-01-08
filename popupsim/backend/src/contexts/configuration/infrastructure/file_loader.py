@@ -163,9 +163,13 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             scenario.trains = train_dtos
         else:
             # Load from CSV file
-            df = pd.read_csv(
-                self.path / data.get('train_schedule_file', refs.get('trains')), sep=';', parse_dates=['arrival_time']
-            )
+            csv_file = self.path / data.get('train_schedule_file', refs.get('trains'))
+            # Detect delimiter by checking first line
+            with open(csv_file, encoding='utf-8') as f:
+                first_line = f.readline()
+                delimiter = ';' if ';' in first_line else ','
+
+            df = pd.read_csv(csv_file, sep=delimiter, parse_dates=['arrival_time'])
             df['train_id'] = df['train_id'].fillna('NO_ID').astype(str)
             train_dtos = []
             for train_id, group in df.groupby('train_id'):

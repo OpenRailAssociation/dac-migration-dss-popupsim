@@ -927,7 +927,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             loco = yield from shunting_context.allocate_locomotive(self)
             try:
                 yield from shunting_context.move_locomotive(self, loco, loco.current_track, rake.formation_track)
-                yield from shunting_context.couple_wagons(self, rake.wagon_count, 'SCREW')
+                yield from shunting_context.couple_wagons(self, rake.wagon_count, 'SCREW', [])
                 yield from shunting_context.move_locomotive(self, loco, rake.formation_track, rake.target_track)
                 yield from shunting_context.decouple_wagons(self, rake.wagon_count, 'SCREW')
                 yield from shunting_context.move_locomotive(self, loco, rake.target_track, loco.home_track)
