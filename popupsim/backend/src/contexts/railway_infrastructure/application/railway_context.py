@@ -1,8 +1,10 @@
 """Railway Infrastructure Context with dependency injection."""
 
+from functools import cached_property
 from typing import Any
 
 from contexts.configuration.domain.models.scenario import Scenario
+from contexts.railway_infrastructure.domain.aggregates.railway_yard import RailwayYard
 from contexts.railway_infrastructure.domain.aggregates.track_group import TrackGroup
 from contexts.railway_infrastructure.domain.entities.track import Track
 from contexts.railway_infrastructure.domain.entities.track import TrackType
@@ -48,13 +50,30 @@ class RailwayInfrastructureContext:
         self._metrics_port = metrics_port
         self._occupancy_repository = occupancy_repository or TrackOccupancyRepository()
 
-        # Initialize domain services
-        self._topology_service = TopologyService(self._build_topology_data())
-        self._track_group_service = TrackGroupService(self._occupancy_repository)
+    @cached_property
+    def _topology_service(self) -> TopologyService:
+        """Get topology service (cached)."""
+        return TopologyService(self._build_topology_data())
 
-        # Build domain model
-        self._tracks = self._build_tracks()
-        self._track_groups = self._build_track_groups()
+    @cached_property
+    def _track_group_service(self) -> TrackGroupService:
+        """Get track group service (cached)."""
+        return TrackGroupService(self._occupancy_repository)
+
+    @cached_property
+    def _tracks(self) -> dict[str, Track]:
+        """Get tracks dictionary (cached)."""
+        return self._build_tracks()
+
+    @cached_property
+    def _track_groups(self) -> dict[str, TrackGroup]:
+        """Get track groups dictionary (cached)."""
+        return self._build_track_groups()
+
+    @cached_property
+    def _railway_yard(self) -> RailwayYard:
+        """Get railway yard aggregate (cached)."""
+        return self._build_railway_yard()
 
     def get_topology_service(self) -> TopologyService:
         """Get topology service.
@@ -75,6 +94,16 @@ class RailwayInfrastructureContext:
             Service for track group operations
         """
         return self._track_group_service
+
+    def get_railway_yard(self) -> RailwayYard:
+        """Get railway yard aggregate.
+
+        Returns
+        -------
+        RailwayYard
+            Railway yard aggregate managing all tracks
+        """
+        return self._railway_yard
 
     def get_track_groups(self) -> dict[str, TrackGroup]:
         """Get all track groups.
@@ -256,6 +285,19 @@ class RailwayInfrastructureContext:
                 groups[group_id] = TrackGroup(group_id, track.type)
             groups[group_id].add_track(track)
         return groups
+
+    def _build_railway_yard(self) -> RailwayYard:
+        """Build railway yard from tracks.
+
+        Returns
+        -------
+        RailwayYard
+            Railway yard aggregate containing all tracks
+        """
+        yard = RailwayYard('main_yard', 'Main Railway Yard')
+        for track in self._tracks.values():
+            yard.add_track(track)
+        return yard
 
     def _track_to_dict(self, track: Any) -> dict[str, Any]:
         """Convert track to dictionary.
