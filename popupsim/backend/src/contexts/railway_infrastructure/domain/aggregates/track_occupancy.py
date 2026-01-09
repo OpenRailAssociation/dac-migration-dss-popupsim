@@ -53,7 +53,12 @@ class TrackOccupancy:
         return self.get_wagon_count() < self.track_specification.max_wagons
 
     def find_optimal_position(self, required_length: float) -> float | None:
-        """Find position respecting track access direction (realistic railway coupling)."""
+        """Find position respecting track access direction (simple position-based)."""
+        # Check if track can accommodate the length first
+        if not self.can_accommodate_length(required_length):
+            return None
+
+        # For empty track, start at position 0
         if not self._occupants:
             return 0.0
 
@@ -61,17 +66,16 @@ class TrackOccupancy:
         sorted_occupants = sorted(self._occupants, key=lambda x: x.position_start)
 
         # Check track access constraints
-
         can_add_front = self.track_specification.access in (TrackAccess.FRONT_ONLY, TrackAccess.BOTH_ENDS)
         can_add_rear = self.track_specification.access in (TrackAccess.REAR_ONLY, TrackAccess.BOTH_ENDS)
 
-        # Try front (position 0) if allowed
+        # Try front (position 0) if allowed and space available
         if can_add_front and sorted_occupants[0].position_start >= required_length:
             return 0.0
 
-        # Try rear (end of track) if allowed
+        # Try rear (end of track) if allowed and space available
         if can_add_rear:
-            last_end = sorted_occupants[-1].position_end
+            last_end = sorted_occupants[-1].position_start + sorted_occupants[-1].effective_length
             if self.track_specification.capacity - last_end >= required_length:
                 return last_end
 
