@@ -167,12 +167,12 @@ class RailwayInfrastructureContext:
 
     def get_track(self, track_id: str) -> Track | None:
         """Get track by ID.
-        
+
         Parameters
         ----------
         track_id : str
             Track identifier
-            
+
         Returns
         -------
         Track | None

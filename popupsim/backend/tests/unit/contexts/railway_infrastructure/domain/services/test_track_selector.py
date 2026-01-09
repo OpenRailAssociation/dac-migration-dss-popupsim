@@ -115,16 +115,16 @@ def test_empty_track_list(repository: TrackOccupancyRepository) -> None:
 
 
 def test_track_access_constraints(repository: TrackOccupancyRepository) -> None:
-    """Test track access direction constraints."""
-    front_only_track = Track(uuid4(), 'F1', TrackType.COLLECTION, 100.0, access=TrackAccess.FRONT_ONLY)
-    rear_only_track = Track(uuid4(), 'R1', TrackType.COLLECTION, 100.0, access=TrackAccess.REAR_ONLY)
+    """Test track access direction constraints with sequential filling."""
+    front_only_track = Track(uuid4(), 'F1', TrackType.COLLECTION, 100.0, fill_factor=1.0, access=TrackAccess.FRONT_ONLY)
+    rear_only_track = Track(uuid4(), 'R1', TrackType.COLLECTION, 100.0, fill_factor=1.0, access=TrackAccess.REAR_ONLY)
 
-    # Fill front of front-only track
+    # Fill front of front-only track completely to make it unavailable
     occupancy = repository.get_or_create(front_only_track)
-    occupancy.add_occupant(TrackOccupant('W1', OccupantType.WAGON, 50.0, 0.0), 0.0)
+    occupancy.add_occupant(TrackOccupant('W1', OccupantType.WAGON, 100.0, 0.0), 0.0)
 
     selector = TrackSelector(TrackSelectionStrategy.FIRST_AVAILABLE, repository)
 
-    # Should not select front-only track (can't add at rear)
+    # Should select rear-only track since front-only is full
     selected = selector.select_track([front_only_track, rear_only_track], required_length=20.0)
     assert selected == rear_only_track

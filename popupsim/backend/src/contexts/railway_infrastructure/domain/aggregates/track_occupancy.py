@@ -53,33 +53,42 @@ class TrackOccupancy:
         return self.get_wagon_count() < self.track_specification.max_wagons
 
     def find_optimal_position(self, required_length: float) -> float | None:
-        """Find position respecting track access direction (simple position-based)."""
+        """Find position using simple sequential filling from track access point.
+
+        For railway operations, wagons are typically added sequentially from one end.
+        This implements a simple, robust algorithm that respects track access constraints.
+        """
         # Check if track can accommodate the length first
         if not self.can_accommodate_length(required_length):
             return None
 
-        # For empty track, start at position 0
+        # For empty track, start at position 0 (standard railway practice)
         if not self._occupants:
             return 0.0
 
-        # Sort occupants by position
+        # Sort occupants by position for sequential processing
         sorted_occupants = sorted(self._occupants, key=lambda x: x.position_start)
 
-        # Check track access constraints
-        can_add_front = self.track_specification.access in (TrackAccess.FRONT_ONLY, TrackAccess.BOTH_ENDS)
-        can_add_rear = self.track_specification.access in (TrackAccess.REAR_ONLY, TrackAccess.BOTH_ENDS)
+        # Determine filling direction based on track access
+        # Most collection tracks fill from front (position 0) sequentially
+        if self.track_specification.access in (TrackAccess.FRONT_ONLY, TrackAccess.BOTH_ENDS):
+            # Fill from front: find the end of the last occupant and add there
+            last_occupant_end = max(occ.position_start + occ.effective_length for occ in sorted_occupants)
 
-        # Try front (position 0) if allowed and space available
-        if can_add_front and sorted_occupants[0].position_start >= required_length:
-            return 0.0
+            # Check if there's space at the end
+            if last_occupant_end + required_length <= self.track_specification.capacity:
+                return last_occupant_end
 
-        # Try rear (end of track) if allowed and space available
-        if can_add_rear:
-            last_end = sorted_occupants[-1].position_start + sorted_occupants[-1].effective_length
-            if self.track_specification.capacity - last_end >= required_length:
-                return last_end
+        # If front filling failed or track is REAR_ONLY, try rear filling
+        if self.track_specification.access in (TrackAccess.REAR_ONLY, TrackAccess.BOTH_ENDS):
+            # Fill from rear: find space before the first occupant
+            first_occupant_start = min(occ.position_start for occ in sorted_occupants)
 
-        return None  # No valid position available
+            # Check if there's space at the beginning
+            if first_occupant_start >= required_length:
+                return first_occupant_start - required_length
+
+        return None  # No space available
 
     def get_current_occupancy_meters(self) -> float:
         """Get total occupied length in meters."""

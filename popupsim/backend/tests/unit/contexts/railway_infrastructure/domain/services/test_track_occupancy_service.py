@@ -1,5 +1,6 @@
 """Tests for TrackOccupancyService."""
 
+from uuid import UUID
 from uuid import uuid4
 
 from contexts.railway_infrastructure.domain.entities.track import Track
@@ -145,7 +146,9 @@ def test_reset_track(service: TrackOccupancyService, track: Track) -> None:
     """Test resetting specific track."""
     service.allocate_wagon(track, 'W1', 20.0, 1.0)
 
-    service.reset_track(track.id)
+    # Ensure track.id is UUID for the service call
+    track_id = track.id if isinstance(track.id, UUID) else UUID(track.id)
+    service.reset_track(track_id)
 
     # Should create new empty occupancy
     assert service.get_current_occupancy(track) == 0.0

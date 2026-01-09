@@ -17,6 +17,8 @@ Todo
 from collections.abc import Generator
 from typing import Any
 
+from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
+from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
 from contexts.yard_operations.domain.aggregates.yard import Yard
 from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
 from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
@@ -79,8 +81,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self._round_robin_index: dict[str, int] = {}
         # Get railway infrastructure context for capacity management
 
-        self.railway_context = None
-        self.railway_capacity_service = None
+        self.railway_context = None  # Set in initialize() - always called before other methods
+        self.railway_capacity_service = None  # Set in initialize() - always called before other methods
         self._expected_wagon_count = 0
         self.all_wagons: list[Wagon] = []
         self._retrofitted_accumulator: list[Wagon] = []
@@ -169,7 +171,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # Clear wagons from track and update Railway Context
         self._track_wagons[track_id] = []
-        occupancy_repo = self.railway_context.get_occupancy_repository()
+        occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
         for wagon in wagons_to_pickup:
             track_occupancy = occupancy_repo.get(track_id)
             if track_occupancy:
@@ -291,7 +293,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # 4. Add all train wagons to the selected collection track via Railway Context
         if classification_result.accepted_wagons:
-            occupancy_repo = self.railway_context.get_occupancy_repository()
+            occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
             for wagon in classification_result.accepted_wagons:
                 # Add to track wagon list
                 if collection_track_id not in self._track_wagons:
@@ -300,17 +302,28 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
                 # Update Railway Context occupancy using proper aggregate pattern
                 wagon_length = getattr(wagon, 'length', 15.0)
-                track = self.railway_context.get_track(collection_track_id)
+                track = self.railway_context.get_track(collection_track_id)  # type: ignore[attr-defined]
                 if track:
                     track_occupancy = occupancy_repo.get_or_create(track)
-                    
-                    from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant, OccupantType
-                    
+
+                    # Check if track can accommodate the wagon
+                    optimal_position = track_occupancy.find_optimal_position(wagon_length)
+                    if optimal_position is None:
+                        # Track is full - reject this wagon with specific track name
+                        wagon.status = 'REJECTED'
+                        wagon.rejection_reason = f'{collection_track_id}_FULL'
+                        wagon.detailed_rejection_reason = (
+                            f'Collection track {collection_track_id} has no space for wagon {wagon.id}'
+                        )
+                        classification_result.rejected_wagons.append(wagon)
+                        classification_result.accepted_wagons.remove(wagon)
+                        continue
+
                     occupant = TrackOccupant(
                         id=wagon.id,
                         type=OccupantType.WAGON,
                         length=wagon_length,
-                        position_start=track_occupancy.find_optimal_position(wagon_length) or 0.0,
+                        position_start=optimal_position,
                     )
                     track_occupancy.add_occupant(occupant, self.infra.engine.current_time())
 
@@ -336,8 +349,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     reason = getattr(wagon, 'rejection_reason', 'UNKNOWN')
                     detailed_reason = getattr(wagon, 'detailed_rejection_reason', '')
 
-                    if reason == 'COLLECTION_TRACK_FULL':
-                        reason_text = 'Collection track full'
+                    if '_FULL' in reason:
+                        track_name = reason.replace('_FULL', '')
+                        reason_text = f'{track_name} full'
                     elif detailed_reason:
                         reason_text = detailed_reason
                     else:
@@ -888,8 +902,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Calculate utilization for collection tracks using Railway Context
         for track_id in self._track_wagons:
             if 'collection' in track_id:
-                available_capacity = self.railway_context.get_available_capacity(track_id)
-                total_capacity = self.railway_context.get_total_capacity(track_id)
+                available_capacity = self.railway_context.get_available_capacity(track_id)  # type: ignore[attr-defined]
+                total_capacity = self.railway_context.get_total_capacity(track_id)  # type: ignore[attr-defined]
                 if total_capacity > 0:
                     utilization = ((total_capacity - available_capacity) / total_capacity) * 100.0
                     track_util[track_id] = utilization
