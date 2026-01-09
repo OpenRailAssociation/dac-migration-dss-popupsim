@@ -165,6 +165,21 @@ class RailwayInfrastructureContext:
         track = self._tracks[track_id]
         return track.total_length * track.fill_factor
 
+    def get_track(self, track_id: str) -> Track | None:
+        """Get track by ID.
+        
+        Parameters
+        ----------
+        track_id : str
+            Track identifier
+            
+        Returns
+        -------
+        Track | None
+            Track if found, None otherwise
+        """
+        return self._tracks.get(track_id)
+
     def get_total_capacity(self, track_id: str) -> float:
         """Get total capacity in meters."""
         if track_id not in self._tracks:

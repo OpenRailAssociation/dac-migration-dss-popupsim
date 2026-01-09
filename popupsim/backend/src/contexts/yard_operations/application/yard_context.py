@@ -171,7 +171,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self._track_wagons[track_id] = []
         occupancy_repo = self.railway_context.get_occupancy_repository()
         for wagon in wagons_to_pickup:
-            occupancy_repo.remove_wagon(track_id, wagon.id)
+            track_occupancy = occupancy_repo.get(track_id)
+            if track_occupancy:
+                track_occupancy.remove_occupant(wagon.id, self.infra.engine.current_time())
 
         yield from self.infra.engine.delay(0.1)  # Small processing delay
 
@@ -296,9 +298,21 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     self._track_wagons[collection_track_id] = []
                 self._track_wagons[collection_track_id].append(wagon)
 
-                # Update Railway Context occupancy
+                # Update Railway Context occupancy using proper aggregate pattern
                 wagon_length = getattr(wagon, 'length', 15.0)
-                occupancy_repo.add_wagon(collection_track_id, wagon.id, wagon_length)
+                track = self.railway_context.get_track(collection_track_id)
+                if track:
+                    track_occupancy = occupancy_repo.get_or_create(track)
+                    
+                    from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant, OccupantType
+                    
+                    occupant = TrackOccupant(
+                        id=wagon.id,
+                        type=OccupantType.WAGON,
+                        length=wagon_length,
+                        position_start=track_occupancy.find_optimal_position(wagon_length) or 0.0,
+                    )
+                    track_occupancy.add_occupant(occupant, self.infra.engine.current_time())
 
             # Publish event to trigger pickup process
             pickup_event = WagonsReadyForPickupEvent(
