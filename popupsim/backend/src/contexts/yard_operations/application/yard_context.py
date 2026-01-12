@@ -261,7 +261,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             )
         )  # type: ignore[func-returns-value]
 
-    def _classify_train_wagons(self, wagons: list[Wagon], train_id: str) -> Generator:  # pylint: disable=too-many-locals, too-many-branches
+    def _classify_train_wagons(self, wagons: list[Wagon], train_id: str) -> Generator:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Classify train wagons through hump yard with timing using domain service."""
         # Calculate processing schedule using domain service
         process_times = self.scenario.process_times  # type: ignore[attr-defined, union-attr]
