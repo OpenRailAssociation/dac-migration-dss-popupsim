@@ -10,6 +10,14 @@ from enum import Enum
 from uuid import UUID
 
 
+class TrackAccess(Enum):
+    """Track access direction for realistic coupling."""
+
+    FRONT_ONLY = 'front_only'  # Can only add at position 0
+    REAR_ONLY = 'rear_only'  # Can only add at end
+    BOTH_ENDS = 'both_ends'  # Can add at either end
+
+
 class TrackType(Enum):
     """Track types in railway infrastructure.
 
@@ -60,6 +68,8 @@ class Track:
         Usable capacity factor (default 0.75 = 75%)
     max_wagons : int | None, optional
         Maximum wagon count for workshop tracks (equals retrofit bays), None for other tracks
+    access : TrackAccess, optional
+        Track access direction for realistic coupling (default BOTH_ENDS)
 
     Attributes
     ----------
@@ -78,12 +88,13 @@ class Track:
     5
     """
 
-    id: UUID
+    id: UUID | str
     name: str
     type: TrackType
     total_length: float
     fill_factor: float = 0.75
     max_wagons: int | None = None
+    access: TrackAccess = TrackAccess.BOTH_ENDS
 
     @property
     def capacity(self) -> float:

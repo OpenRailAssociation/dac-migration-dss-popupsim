@@ -17,6 +17,8 @@ Todo
 from collections.abc import Generator
 from typing import Any
 
+from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
+from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
 from contexts.yard_operations.domain.aggregates.yard import Yard
 from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
 from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
@@ -61,10 +63,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.wagons: list[Any] = []
         self.rejected_wagons: list[Any] = []
         self.train_processed_event = None
-        # SimPy stores for hybrid approach - per-track queues
-        self.collection_queues: dict[str, Any] = {}
-        self.retrofit_queues: dict[str, Any] = {}
-        self.retrofitted_queues: dict[str, Any] = {}
+        # Track wagon lists - managed through Railway Context
+        self._track_wagons: dict[str, list[Any]] = {}
         # Rake services
         self._rake_formation_service = RakeFormationService()
         self.rake_registry = rake_registry or RakeRegistry()
@@ -81,8 +81,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self._round_robin_index: dict[str, int] = {}
         # Get railway infrastructure context for capacity management
 
-        self.railway_context = None
-        self.railway_capacity_service = None
+        self.railway_context = None  # Set in initialize() - always called before other methods
+        self.railway_capacity_service = None  # Set in initialize() - always called before other methods
         self._expected_wagon_count = 0
         self.all_wagons: list[Wagon] = []
         self._retrofitted_accumulator: list[Wagon] = []
@@ -133,18 +133,15 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             current_collection_count=0,
         )
 
-        # Create per-track queues for collection, retrofit, and retrofitted tracks
+        # Initialize track wagon lists
         for track_type in ['collection', 'retrofit', 'retrofitted']:
             tracks = self._tracks_by_type.get(track_type, [])
-            queue_dict = getattr(self, f'{track_type}_queues')
             if tracks:
                 for track in tracks:
-                    capacity = collection_capacity if track_type == 'collection' else 100
-                    queue_dict[track.id] = self.infra.engine.create_store(capacity=capacity)
+                    self._track_wagons[track.id] = []
             else:
-                # Create default queue for backward compatibility when tracks not provided
-                capacity = collection_capacity if track_type == 'collection' else 100
-                queue_dict[track_type] = self.infra.engine.create_store(capacity=capacity)
+                # Create default track for backward compatibility
+                self._track_wagons[track_type] = []
 
     def start_processes(self) -> None:
         """Start yard operation processes."""
@@ -167,20 +164,20 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
     def _pickup_wagons_from_track(self, track_id: str) -> Generator[Any, Any]:
         """Process for picking up wagons from a specific collection track."""
         current_time = self.infra.engine.current_time()
-        queue = self.collection_queues.get(track_id)
-
-        if not queue or len(queue.items) == 0:
-            return
-
-        # Collect all wagons from this track
-        wagons_to_pickup = []
-        queue_size = len(queue.items)
-        for _ in range(queue_size):
-            wagon = yield queue.get()
-            wagons_to_pickup.append(wagon)
+        wagons_to_pickup = self._track_wagons.get(track_id, [])
 
         if not wagons_to_pickup:
             return
+
+        # Clear wagons from track and update Railway Context
+        self._track_wagons[track_id] = []
+        occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
+        for wagon in wagons_to_pickup:
+            track_occupancy = occupancy_repo.get(track_id)
+            if track_occupancy:
+                track_occupancy.remove_occupant(wagon.id, self.infra.engine.current_time())
+
+        yield from self.infra.engine.delay(0.1)  # Small processing delay
 
         # Log pickup from collection track
         try:
@@ -215,7 +212,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             self.railway_capacity_service.get_capacity_info(track_id)
 
         # Log remaining wagons on this collection track
-        remaining_count = len(queue.items)
+        remaining_count = len(self._track_wagons.get(track_id, []))
         if remaining_count > 0:
             try:
                 plog = get_process_logger()
@@ -264,7 +261,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             )
         )  # type: ignore[func-returns-value]
 
-    def _classify_train_wagons(self, wagons: list[Wagon], train_id: str) -> Generator:  # pylint: disable=too-many-locals, too-many-branches
+    def _classify_train_wagons(self, wagons: list[Wagon], train_id: str) -> Generator:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Classify train wagons through hump yard with timing using domain service."""
         # Calculate processing schedule using domain service
         process_times = self.scenario.process_times  # type: ignore[attr-defined, union-attr]
@@ -294,19 +291,49 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             if i < len(schedule.wagon_intervals) and schedule.wagon_intervals[i] > 0:
                 yield from self.infra.engine.delay(schedule.wagon_intervals[i])
 
-        # 4. Add all train wagons to the selected collection track queue
-        if collection_track_id in self.collection_queues:
+        # 4. Add all train wagons to the selected collection track via Railway Context
+        if classification_result.accepted_wagons:
+            occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
             for wagon in classification_result.accepted_wagons:
-                yield self.collection_queues[collection_track_id].put(wagon)
+                # Add to track wagon list
+                if collection_track_id not in self._track_wagons:
+                    self._track_wagons[collection_track_id] = []
+                self._track_wagons[collection_track_id].append(wagon)
+
+                # Update Railway Context occupancy using proper aggregate pattern
+                wagon_length = getattr(wagon, 'length', 15.0)
+                track = self.railway_context.get_track(collection_track_id)  # type: ignore[attr-defined]
+                if track:
+                    track_occupancy = occupancy_repo.get_or_create(track)
+
+                    # Check if track can accommodate the wagon
+                    optimal_position = track_occupancy.find_optimal_position(wagon_length)
+                    if optimal_position is None:
+                        # Track is full - reject this wagon with specific track name
+                        wagon.status = 'REJECTED'
+                        wagon.rejection_reason = f'{collection_track_id}_FULL'
+                        wagon.detailed_rejection_reason = (
+                            f'Collection track {collection_track_id} has no space for wagon {wagon.id}'
+                        )
+                        classification_result.rejected_wagons.append(wagon)
+                        classification_result.accepted_wagons.remove(wagon)
+                        continue
+
+                    occupant = TrackOccupant(
+                        id=wagon.id,
+                        type=OccupantType.WAGON,
+                        length=wagon_length,
+                        position_start=optimal_position,
+                    )
+                    track_occupancy.add_occupant(occupant, self.infra.engine.current_time())
 
             # Publish event to trigger pickup process
-            if classification_result.accepted_wagons:
-                pickup_event = WagonsReadyForPickupEvent(
-                    track_id=collection_track_id,
-                    wagon_count=len(classification_result.accepted_wagons),
-                    event_timestamp=self.infra.engine.current_time(),
-                )
-                self.infra.event_bus.publish(pickup_event)
+            pickup_event = WagonsReadyForPickupEvent(
+                track_id=collection_track_id,
+                wagon_count=len(classification_result.accepted_wagons),
+                event_timestamp=self.infra.engine.current_time(),
+            )
+            self.infra.event_bus.publish(pickup_event)
 
         # 5. Update rejected wagons and log rejections
         if classification_result.rejected_wagons:
@@ -322,8 +349,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     reason = getattr(wagon, 'rejection_reason', 'UNKNOWN')
                     detailed_reason = getattr(wagon, 'detailed_rejection_reason', '')
 
-                    if reason == 'COLLECTION_TRACK_FULL':
-                        reason_text = 'Collection track full'
+                    if '_FULL' in reason:
+                        track_name = reason.replace('_FULL', '')
+                        reason_text = f'{track_name} full'
                     elif detailed_reason:
                         reason_text = detailed_reason
                     else:
@@ -407,11 +435,11 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             self._form_and_transport_retrofitted_rake(wagons_to_transport, workshop_id)
 
             # Check if there are wagons waiting on collection tracks
-            for track_id, queue in self.collection_queues.items():
-                if len(queue.items) > 0:
+            for track_id, wagons in self._track_wagons.items():
+                if 'collection' in track_id and wagons:
                     pickup_event = WagonsReadyForPickupEvent(
                         track_id=track_id,
-                        wagon_count=len(queue.items),
+                        wagon_count=len(wagons),
                         event_timestamp=self.infra.engine.current_time(),
                     )
                     self.infra.event_bus.publish(pickup_event)
@@ -871,13 +899,14 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         track_util = {}
 
-        # Calculate utilization for collection tracks
-        for track_id, queue in self.collection_queues.items():
-            if hasattr(queue, '_items'):  # pylint: disable=protected-access
-                # Estimate utilization based on average queue length
-                avg_occupancy = len(queue._items) if queue._items else 0  # pylint: disable=protected-access
-                capacity = getattr(queue, 'capacity', 10)
-                track_util[track_id] = (avg_occupancy / capacity * 100.0) if capacity > 0 else 0.0
+        # Calculate utilization for collection tracks using Railway Context
+        for track_id in self._track_wagons:
+            if 'collection' in track_id:
+                available_capacity = self.railway_context.get_available_capacity(track_id)  # type: ignore[attr-defined]
+                total_capacity = self.railway_context.get_total_capacity(track_id)  # type: ignore[attr-defined]
+                if total_capacity > 0:
+                    utilization = ((total_capacity - available_capacity) / total_capacity) * 100.0
+                    track_util[track_id] = utilization
 
         return track_util
 
@@ -927,7 +956,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             loco = yield from shunting_context.allocate_locomotive(self)
             try:
                 yield from shunting_context.move_locomotive(self, loco, loco.current_track, rake.formation_track)
-                yield from shunting_context.couple_wagons(self, rake.wagon_count, 'SCREW')
+                yield from shunting_context.couple_wagons(self, rake.wagon_count, 'SCREW', [])
                 yield from shunting_context.move_locomotive(self, loco, rake.formation_track, rake.target_track)
                 yield from shunting_context.decouple_wagons(self, rake.wagon_count, 'SCREW')
                 yield from shunting_context.move_locomotive(self, loco, rake.target_track, loco.home_track)
