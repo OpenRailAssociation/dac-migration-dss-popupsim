@@ -87,3 +87,84 @@ class CollectionToRetrofitPlanner:
                 break
 
         return selected
+
+
+class RetrofitToWorkshopPlanner:
+    """Plans retrofit → workshop transport (Step 3)."""
+
+    def __init__(self, railway_context: 'RailwayInfrastructureContext') -> None:
+        self._railway_context = railway_context
+
+    def plan_transport(self, wagons: list[Wagon], from_track: str) -> RakeTransportPlan | None:
+        """Plan transport from retrofit to workshop."""
+        if not wagons:
+            return None
+
+        # Select workshop with least occupancy
+        track_service = self._railway_context.get_track_selection_service()
+        workshop_track = track_service.select_track('workshop')
+
+        if not workshop_track:
+            return None
+
+        return RakeTransportPlan(
+            wagons=wagons,
+            from_track=from_track,
+            to_track=str(workshop_track.id),
+            rake_id=f'retrofit_to_workshop_{len(wagons)}w',
+            capacity_validated=True,
+        )
+
+
+class WorkshopToRetrofittedPlanner:
+    """Plans workshop → retrofitted transport (Step 4)."""
+
+    def __init__(self, railway_context: 'RailwayInfrastructureContext') -> None:
+        self._railway_context = railway_context
+
+    def plan_transport(self, wagons: list[Wagon], from_track: str) -> RakeTransportPlan | None:
+        """Plan transport from workshop to retrofitted track."""
+        if not wagons:
+            return None
+
+        # Select retrofitted track with most available capacity
+        track_service = self._railway_context.get_track_selection_service()
+        retrofitted_track = track_service.select_track('retrofitted')
+
+        if not retrofitted_track:
+            return None
+
+        return RakeTransportPlan(
+            wagons=wagons,
+            from_track=from_track,
+            to_track=str(retrofitted_track.id),
+            rake_id=f'workshop_to_retrofitted_{len(wagons)}w',
+            capacity_validated=True,
+        )
+
+
+class RetrofittedToParkingPlanner:
+    """Plans retrofitted → parking transport (Step 5)."""
+
+    def __init__(self, railway_context: 'RailwayInfrastructureContext') -> None:
+        self._railway_context = railway_context
+
+    def plan_transport(self, wagons: list[Wagon], from_track: str) -> RakeTransportPlan | None:
+        """Plan transport from retrofitted to parking track."""
+        if not wagons:
+            return None
+
+        # Select parking track with most available capacity
+        track_service = self._railway_context.get_track_selection_service()
+        parking_track = track_service.select_track('parking')
+
+        if not parking_track:
+            return None
+
+        return RakeTransportPlan(
+            wagons=wagons,
+            from_track=from_track,
+            to_track=str(parking_track.id),
+            rake_id=f'retrofitted_to_parking_{len(wagons)}w',
+            capacity_validated=True,
+        )
