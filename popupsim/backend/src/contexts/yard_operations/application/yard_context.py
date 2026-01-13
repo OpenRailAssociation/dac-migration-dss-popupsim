@@ -26,9 +26,9 @@ from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from contexts.yard_operations.domain.services.hump_yard_service import HumpYardService
 from contexts.yard_operations.domain.services.hump_yard_service import YardConfiguration
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
+from contexts.yard_operations.domain.services.retrofitted_pickup_service import RetrofittedPickupService
 from contexts.yard_operations.domain.services.step_planners import CollectionToRetrofitPlanner
 from contexts.yard_operations.domain.services.wagon_distribution_service import WagonDistributionService
-from contexts.yard_operations.domain.services.retrofitted_pickup_service import RetrofittedPickupService
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from infrastructure.logging import get_process_logger
@@ -289,28 +289,6 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         yield from self.infra.engine.delay(0.1)  # Small delay for processing
 
-    def _group_wagons_by_retrofit_track(self, wagons: list[Any]) -> dict[str, list[Any]]:
-        """Group wagons by their assigned retrofit track."""
-        # Simple grouping - all wagons go to first retrofit track
-        if not wagons:
-            return {}
-        return {'retrofit_track_1': wagons}
-
-    def _distribute_wagons_to_workshops(self, wagons: list[Any]) -> Generator[Any, Any]:
-        """Distribute wagons to workshops based on available capacity."""
-        workshop_ids = getattr(self.infra, 'workshop_ids', ['workshop_1'])
-
-        # Simple distribution - alternate between workshops
-        for i, wagon in enumerate(wagons):
-            workshop_id = workshop_ids[i % len(workshop_ids)]
-            wagon.status = 'READY_FOR_RETROFIT'
-
-            # Signal workshop via event bus
-            event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=workshop_id)
-            self.infra.event_bus.publish(event)
-
-            yield from self.infra.engine.delay(0.1)  # Small delay between distributions
-
     def _handle_train_arrived(self, event: TrainArrivedEvent) -> None:
         """Handle train arrived event - start classification process."""
         self.infra.engine.current_time()
@@ -479,7 +457,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Use RetrofittedPickupService for optimized pickup planning
         workshop_capacities = self._get_workshop_capacities()
         completed_wagons_by_workshop = {workshop_id: completed_wagons}
-        
+
         pickup_plan = self.retrofitted_pickup_service.create_pickup_plan(
             completed_wagons_by_workshop, workshop_capacities
         )
@@ -488,11 +466,11 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if pickup_plan.pickup_rakes:
             for rake in pickup_plan.pickup_rakes:
                 self.rake_registry.register_rake(rake)
-                
+
                 # Publish rake formed event
                 rake_event = RakeFormedEvent(rake=rake)
                 self.infra.event_bus.publish(rake_event)
-                
+
                 # Request transport: workshop -> retrofitted -> parking
                 transport_event = RakeTransportRequestedEvent(
                     rake_id=rake.rake_id,
@@ -524,104 +502,6 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             return
 
         yield from self._transport_wagon_batch_to_workshop(wagons, workshop_id, shunting_context)
-
-    def _pickup_retrofitted_batch(self, wagons: list[Any]) -> Any:
-        """Pickup retrofitted batch and move to parking."""
-        shunting_context = getattr(self.infra, 'shunting_context', None)
-        if not shunting_context:
-            return
-
-        # Allocate locomotive for pickup
-        loco = yield from shunting_context.allocate_locomotive(self)
-
-        try:
-            # Move to first workshop (WS1) to collect wagons
-            yield from shunting_context.move_locomotive(self, loco, loco.current_track, 'WS1')
-
-            # Couple wagons
-            yield from shunting_context.couple_wagons(self, len(wagons), 'DAC')
-
-            # Select retrofitted track and move to retrofitted area
-            selected_retrofitted = self._select_track_by_type('retrofitted')
-            retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else 'retrofitted'
-
-            yield from shunting_context.move_locomotive(self, loco, 'WS1', retrofitted_track_id)
-
-            # Decouple wagons
-            yield from shunting_context.decouple_wagons(self, len(wagons), 'DAC')
-
-            # Move to parking
-            yield from shunting_context.move_locomotive(self, loco, retrofitted_track_id, loco.home_track)
-
-            # Select parking track and update wagon status
-            selected_parking = self._select_track_by_type('parking')
-            parking_track_id = selected_parking.id if selected_parking else 'parking'
-
-            for wagon in wagons:
-                wagon.status = 'PARKED'
-                wagon.track = parking_track_id
-
-        finally:
-            # Release locomotive
-            yield from shunting_context.release_locomotive(self, loco)
-
-    def _pickup_individual_wagon(self, wagons: list[Any], workshop_id: str) -> Any:
-        """Pickup individual wagon for MVP timeline compatibility."""
-        shunting_context = getattr(self.infra, 'shunting_context', None)
-        if not shunting_context:
-            return
-
-        # Allocate locomotive for individual pickup
-        loco = yield from shunting_context.allocate_locomotive(self)
-
-        try:
-            # Move to workshop to collect wagon
-            yield from shunting_context.move_locomotive(self, loco, loco.current_track, workshop_id)
-
-            # Couple wagon
-            yield from shunting_context.couple_wagons(self, len(wagons), 'DAC')
-
-            # Select retrofitted track and move to retrofitted area
-            selected_retrofitted = self._select_track_by_type('retrofitted')
-            retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else 'retrofitted'
-
-            yield from shunting_context.move_locomotive(self, loco, workshop_id, retrofitted_track_id)
-
-            # Update wagon status and release workshop resources
-            for wagon in wagons:
-                wagon.status = 'RETROFITTED'
-                wagon.track = retrofitted_track_id
-
-                # Release workshop resource after pickup
-                # TODO: This is currently a hack and needs to be improved
-                if hasattr(wagon, '_workshop_resource') and hasattr(wagon, '_workshop_request'):  # pylint: disable=protected-access
-                    wagon._workshop_resource.release(wagon._workshop_request)  # pylint: disable=protected-access
-                    delattr(wagon, '_workshop_resource')
-                    delattr(wagon, '_workshop_request')
-
-            # Return to parking
-            yield from shunting_context.move_locomotive(self, loco, retrofitted_track_id, loco.home_track)
-
-        finally:
-            # Release locomotive
-            yield from shunting_context.release_locomotive(self, loco)
-
-    def _process_individual_wagons(self, wagons: list[Any]) -> Any:
-        """Process wagons individually, respecting workshop bay capacity."""
-        shunting_context = getattr(self.infra, 'shunting_context', None)
-        if not shunting_context:
-            return
-
-        for wagon in wagons:
-            # Wait for workshop bay to be available (listen for bay free event)
-            # For now, process immediately for first wagon, then wait for completion events
-            if wagon == wagons[0]:
-                # First wagon can start immediately
-                yield from self._move_wagon_to_workshop(wagon, 'WS1')
-            else:
-                # Subsequent wagons wait for previous wagon to complete and be picked up
-                # This will be triggered by individual wagon retrofitted events
-                pass
 
     def _move_wagon_to_workshop(self, wagon: Any, workshop_id: str) -> Any:
         """Move individual wagon from retrofit track to workshop bay."""
@@ -1141,13 +1021,6 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             retrofit_tracks = {'retrofit': 150.0}  # Default 150m capacity
 
         return retrofit_tracks
-
-    def _get_available_locomotive_count(self) -> int:
-        """Get number of available locomotives for pickup operations."""
-        shunting_context = getattr(self.infra, 'shunting_context', None)
-        if shunting_context and hasattr(shunting_context, 'locomotive_pool'):
-            return len(shunting_context.locomotive_pool.available_locomotives)
-        return 2  # Default assumption
 
     def _select_track_by_type(self, track_type: str, strategy: str | None = None) -> Any | None:
         """Select track by type using railway context's track selection service."""
