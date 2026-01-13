@@ -163,6 +163,15 @@ class RailwayInfrastructureContext:
 
     def initialize(self, infrastructure: Any, scenario: Scenario) -> None:
         """Initialize context."""
+        self._infra = infrastructure
+
+        # Set up track occupancy event handler
+        from contexts.railway_infrastructure.application.track_occupancy_event_handler import TrackOccupancyEventHandler
+        from shared.domain.events.wagon_movement_events import WagonMovedEvent
+
+        self._occupancy_handler = TrackOccupancyEventHandler(self)
+        if hasattr(infrastructure, 'event_bus'):
+            infrastructure.event_bus.subscribe(WagonMovedEvent, self._occupancy_handler.handle_wagon_moved)
 
     def start_processes(self) -> None:
         """Start context processes."""

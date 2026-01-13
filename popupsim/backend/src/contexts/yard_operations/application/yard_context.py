@@ -258,6 +258,20 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Execute transport plan
         yield from self._execute_transport_plan(plan)
 
+        # Publish wagon moved events for wagons going to retrofit track
+        current_time = self.infra.engine.current_time()
+        from shared.domain.events.wagon_movement_events import WagonMovedEvent
+
+        for wagon in wagons_to_pickup:
+            moved_event = WagonMovedEvent(
+                wagon_id=wagon.id,
+                from_track=track_id,
+                to_track=plan.to_track,  # retrofit track
+                timestamp=current_time,
+                movement_type='shunting',
+            )
+            self.infra.event_bus.publish(moved_event)
+
         # Log capacity status after pickup
         if self.railway_capacity_service:
             self.railway_capacity_service.get_capacity_info(track_id)
@@ -686,10 +700,23 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 yield from shunting_context.move_locomotive(self, loco, rake.formation_track, retrofitted_track_id)
                 yield from shunting_context.decouple_wagons(self, rake.wagon_count, 'DAC')
 
-                # Update wagon locations, release workshop resources, and publish distributed events
+                # Update wagon locations and publish distributed events
                 current_time = self.infra.engine.current_time()
                 for wagon in rake.wagons:
+                    old_track = wagon.track
                     wagon.move_to_track(retrofitted_track_id)
+
+                    # Publish wagon moved event for track occupancy sync
+                    from shared.domain.events.wagon_movement_events import WagonMovedEvent
+
+                    moved_event = WagonMovedEvent(
+                        wagon_id=wagon.id,
+                        from_track=old_track,
+                        to_track=retrofitted_track_id,
+                        timestamp=current_time,
+                        movement_type='shunting',
+                    )
+                    self.infra.event_bus.publish(moved_event)
 
                     # Release workshop resource after pickup
                     # TODO:  This is still the hack of the MVP.
@@ -761,8 +788,17 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                         parked_event.event_timestamp = current_time
                         self.infra.event_bus.publish(parked_event)
 
-                    # Add wagons to parking track via railway context
-                    self._add_wagons_to_track(wagons_to_park, parking_track_id)
+                        # Publish wagon moved event for track occupancy sync
+                        from shared.domain.events.wagon_movement_events import WagonMovedEvent
+
+                        moved_event = WagonMovedEvent(
+                            wagon_id=wagon.id,
+                            from_track=retrofitted_track_id,
+                            to_track=parking_track_id,
+                            timestamp=current_time,
+                            movement_type='shunting',
+                        )
+                        self.infra.event_bus.publish(moved_event)
 
                     yield from shunting_context.move_locomotive(self, loco2, parking_track_id, loco2.home_track)
                     yield from shunting_context.release_locomotive(self, loco2)
@@ -972,8 +1008,22 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
             # Update wagon status and publish ready events
             for wagon in wagons:
+                old_track = wagon.track
                 wagon.workshop_id = workshop_id
                 wagon.move_to_track(workshop_id)
+
+                # Publish wagon moved event for track occupancy sync
+                from shared.domain.events.wagon_movement_events import WagonMovedEvent
+
+                moved_event = WagonMovedEvent(
+                    wagon_id=wagon.id,
+                    from_track=old_track,
+                    to_track=workshop_id,
+                    timestamp=self.infra.engine.current_time(),
+                    movement_type='shunting',
+                )
+                self.infra.event_bus.publish(moved_event)
+
                 event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=workshop_id)
                 self.infra.event_bus.publish(event)
 
