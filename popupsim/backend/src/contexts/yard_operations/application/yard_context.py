@@ -28,6 +28,7 @@ from contexts.yard_operations.domain.services.hump_yard_service import HumpYardS
 from contexts.yard_operations.domain.services.hump_yard_service import YardConfiguration
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
 from contexts.yard_operations.domain.services.step_planners import CollectionToRetrofitPlanner
+from contexts.yard_operations.domain.services.step_planners import RetrofitToWorkshopPlanner
 from contexts.yard_operations.domain.services.step_planners import RetrofittedToParkingPlanner
 from contexts.yard_operations.domain.services.step_planners import WorkshopToRetrofittedPlanner
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
@@ -86,6 +87,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.track_selection_strategy = SelectionStrategy.ROUND_ROBIN
         # Step-specific planners
         self.collection_to_retrofit_planner: CollectionToRetrofitPlanner
+        self.retrofit_to_workshop_planner: RetrofitToWorkshopPlanner
         self.workshop_to_retrofitted_planner: WorkshopToRetrofittedPlanner
         self.retrofitted_to_parking_planner: RetrofittedToParkingPlanner
         self._expected_wagon_count = 0
@@ -107,6 +109,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # Initialize step-specific planners
         self.collection_to_retrofit_planner = CollectionToRetrofitPlanner(self.railway_context)
+        self.retrofit_to_workshop_planner = RetrofitToWorkshopPlanner(self.railway_context)
         self.workshop_to_retrofitted_planner = WorkshopToRetrofittedPlanner(self.railway_context)
         self.retrofitted_to_parking_planner = RetrofittedToParkingPlanner(self.railway_context)
 
@@ -750,28 +753,22 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 wagons_to_park = self._retrofitted_accumulator[:]
                 self._retrofitted_accumulator = []
 
-                # Calculate total length BEFORE selecting track
-                total_length = sum(getattr(wagon, 'length', 15.0) for wagon in wagons_to_park)
-
-                # Check if parking capacity is available for these wagons
-                selected_parking = self._select_track_by_type('parking')
-                if not selected_parking:
+                # Use step planner for retrofitted -> parking transport
+                parking_plan = self.retrofitted_to_parking_planner.plan_transport(wagons_to_park, retrofitted_track_id)
+                if not parking_plan:
                     raise RuntimeError(
                         f'CAPACITY EXCEEDED: No parking tracks available. '
                         f'Yard layout cannot handle the wagon volume. '
-                        f'{len(wagons_to_park)} wagons ({total_length:.0f}m) cannot be parked.'
+                        f'{len(wagons_to_park)} wagons cannot be parked.'
                     )
 
-                parking_track_id = selected_parking.id
+                parking_track_id = parking_plan.to_track
 
                 loco2 = yield from shunting_context.allocate_locomotive(self)
                 try:
-                    selected_retrofitted = self._select_track_by_type('retrofitted')
-                    retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else 'retrofitted'
-
-                    yield from shunting_context.move_locomotive(self, loco2, loco2.current_track, retrofitted_track_id)
+                    yield from shunting_context.move_locomotive(self, loco2, loco2.current_track, parking_plan.from_track)
                     yield from shunting_context.couple_wagons(self, len(wagons_to_park), 'DAC')
-                    yield from shunting_context.move_locomotive(self, loco2, retrofitted_track_id, parking_track_id)
+                    yield from shunting_context.move_locomotive(self, loco2, parking_plan.from_track, parking_track_id)
                     yield from shunting_context.decouple_wagons(self, len(wagons_to_park), 'DAC')
 
                     current_time = self.infra.engine.current_time()
@@ -974,17 +971,19 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
     def _transport_wagon_batch_to_workshop(
         self, wagons: list[Any], workshop_id: str, shunting_context: Any
     ) -> Generator[Any, Any]:
-        """Transport a batch of wagons from retrofit to workshop."""
+        """Transport a batch of wagons from retrofit to workshop using step planner."""
+        # Use step planner for capacity-aware transport planning
+        transport_plan = self.retrofit_to_workshop_planner.plan_transport(wagons, 'retrofit')
+        
+        if not transport_plan:
+            return
+            
         loco = yield from shunting_context.allocate_locomotive(self)
         try:
-            # Select retrofit track
-            selected_retrofit = self._select_track_by_type('retrofit')
-            retrofit_track_id = selected_retrofit.id if selected_retrofit else 'retrofit'
-
-            yield from shunting_context.move_locomotive(self, loco, loco.current_track, retrofit_track_id)
+            yield from shunting_context.move_locomotive(self, loco, loco.current_track, transport_plan.from_track)
             wagon_ids = [w.id for w in wagons]
             yield from shunting_context.couple_wagons(self, len(wagons), 'SCREW', wagon_ids)
-            yield from shunting_context.move_locomotive(self, loco, retrofit_track_id, workshop_id, wagon_ids)
+            yield from shunting_context.move_locomotive(self, loco, transport_plan.from_track, workshop_id, wagon_ids)
             yield from shunting_context.decouple_wagons(self, len(wagons), 'SCREW', wagon_ids)
 
             # Update wagon status and publish ready events
