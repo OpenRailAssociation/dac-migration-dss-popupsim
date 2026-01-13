@@ -26,9 +26,9 @@ from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from contexts.yard_operations.domain.services.hump_yard_service import HumpYardService
 from contexts.yard_operations.domain.services.hump_yard_service import YardConfiguration
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
-from contexts.yard_operations.domain.services.retrofitted_pickup_service import RetrofittedPickupService
 from contexts.yard_operations.domain.services.step_planners import CollectionToRetrofitPlanner
-from contexts.yard_operations.domain.services.wagon_distribution_service import WagonDistributionService
+from contexts.yard_operations.domain.services.step_planners import RetrofittedToParkingPlanner
+from contexts.yard_operations.domain.services.step_planners import WorkshopToRetrofittedPlanner
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from infrastructure.logging import get_process_logger
@@ -54,10 +54,10 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
     def __init__(self, infra: Any, rake_registry: RakeRegistry | None = None) -> None:
         self.yard = Yard(YardId('main_yard'))
         self.infra = infra
-        self.distribution_service = WagonDistributionService()
+
         # Domain services - pure business logic
         self.wagon_pickup_service = WagonPickupService()
-        self.retrofitted_pickup_service = RetrofittedPickupService()
+
         # Railway capacity service will be injected during initialization
         self.hump_yard_service: HumpYardService | None = None
         self.railway_capacity_service: RailwayCapacityService | None = None
@@ -84,6 +84,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.track_selection_strategy = SelectionStrategy.ROUND_ROBIN
         # Step-specific planners
         self.collection_to_retrofit_planner: CollectionToRetrofitPlanner
+        self.workshop_to_retrofitted_planner: WorkshopToRetrofittedPlanner
+        self.retrofitted_to_parking_planner: RetrofittedToParkingPlanner
         self._expected_wagon_count = 0
         self.all_wagons: list[Wagon] = []
         self._retrofitted_accumulator: list[Wagon] = []
@@ -106,6 +108,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # Initialize step-specific planners
         self.collection_to_retrofit_planner = CollectionToRetrofitPlanner(self.railway_context)
+        self.workshop_to_retrofitted_planner = WorkshopToRetrofittedPlanner(self.railway_context)
+        self.retrofitted_to_parking_planner = RetrofittedToParkingPlanner(self.railway_context)
 
         # Initialize yard configuration using railway infrastructure capacity
         track_selection_service = self.railway_context.get_track_selection_service()
@@ -437,7 +441,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         return 0
 
     def _check_and_transport_batch(self, workshop_id: str) -> Generator[Any, Any]:
-        """Check if batch should be transported using RetrofittedPickupService."""
+        """Check if batch should be transported using step planners."""
         # Yield to allow all wagons completing at same time to be added to batch
         yield from self.infra.engine.delay(0)
 
@@ -454,31 +458,28 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if not completed_wagons:
             return
 
-        # Use RetrofittedPickupService for optimized pickup planning
-        workshop_capacities = self._get_workshop_capacities()
-        completed_wagons_by_workshop = {workshop_id: completed_wagons}
+        # Use step planners for capacity-aware transport planning
+        transport_plan = self.workshop_to_retrofitted_planner.plan_transport(completed_wagons, workshop_id)
 
-        pickup_plan = self.retrofitted_pickup_service.create_pickup_plan(
-            completed_wagons_by_workshop, workshop_capacities
-        )
+        if transport_plan:
+            # Form rake using RakeFormationService directly
+            rake = self._rake_formation_service.form_transport_rake(
+                transport_plan.wagons, transport_plan.from_track, transport_plan.to_track
+            )
+            self.rake_registry.register_rake(rake)
 
-        # Execute pickup plan
-        if pickup_plan.pickup_rakes:
-            for rake in pickup_plan.pickup_rakes:
-                self.rake_registry.register_rake(rake)
+            # Publish rake formed event
+            rake_event = RakeFormedEvent(rake=rake)
+            self.infra.event_bus.publish(rake_event)
 
-                # Publish rake formed event
-                rake_event = RakeFormedEvent(rake=rake)
-                self.infra.event_bus.publish(rake_event)
-
-                # Request transport: workshop -> retrofitted -> parking
-                transport_event = RakeTransportRequestedEvent(
-                    rake_id=rake.rake_id,
-                    from_track=workshop_id,
-                    to_track='retrofitted',
-                    rake_type=rake.rake_type,
-                )
-                self.infra.event_bus.publish(transport_event)
+            # Request transport: workshop -> retrofitted -> parking
+            transport_event = RakeTransportRequestedEvent(
+                rake_id=rake.rake_id,
+                from_track=transport_plan.from_track,
+                to_track=transport_plan.to_track,
+                rake_type=rake.rake_type,
+            )
+            self.infra.event_bus.publish(transport_event)
 
         # Check if there are wagons waiting on collection tracks
         collection_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('collection')
