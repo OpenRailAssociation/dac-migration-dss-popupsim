@@ -271,7 +271,7 @@ class RailwayInfrastructureContext:
         return type_mapping.get(track_type_str.lower(), TrackType.COLLECTION)
 
     def _build_tracks(self) -> dict[str, Track]:
-        """Build tracks from scenario.
+        """Build tracks from scenario using topology data for lengths.
 
         Returns
         -------
@@ -279,6 +279,21 @@ class RailwayInfrastructureContext:
             Dictionary of tracks by name
         """
         tracks = {}
+
+        # Get topology data for track lengths
+        topology_data = self._build_topology_data()
+        edge_lengths = {}
+        if 'tracks' in topology_data:
+            for track_data in topology_data['tracks']:
+                track_id = track_data['id']
+                # Get length from topology edges if available
+                if hasattr(self._scenario, 'topology') and self._scenario.topology:
+                    topology = self._scenario.topology
+                    if hasattr(topology, 'edges') and track_id in topology.edges:
+                        edge_lengths[track_id] = topology.edges[track_id]['length']
+                    elif isinstance(topology, dict) and 'edges' in topology and track_id in topology['edges']:
+                        edge_lengths[track_id] = topology['edges'][track_id]['length']
+
         for track_config in self._scenario.tracks or []:
             track_type = track_config.type
             if track_type is not None and hasattr(track_type, 'value'):
@@ -290,11 +305,14 @@ class RailwayInfrastructureContext:
 
             track_id = track_config.id
 
+            # Use topology length if available, otherwise use config length
+            track_length = edge_lengths.get(track_id, track_config.length)
+
             track = Track(
                 id=track_id,
                 name=track_config.id,  # Use ID as name
                 type=self._map_track_type(type_str),
-                total_length=track_config.length,
+                total_length=track_length,
                 fill_factor=track_config.fillfactor,
                 max_wagons=getattr(track_config, 'max_wagons', None),
             )

@@ -150,7 +150,7 @@ class TestYardOperationsContext:
 
         assert len(accepted) == 0
         assert len(rejected) == 1
-        assert rejected[0].status == 'REJECTED'
+        assert rejected[0].status.value == 'rejected'
 
     def test_handle_train_arrived(self, initialized_yard_context: YardOperationsContext) -> None:
         """Test handling train arrival event."""
@@ -161,7 +161,6 @@ class TestYardOperationsContext:
         initialized_yard_context._handle_train_arrived(event)
 
         assert len(initialized_yard_context.all_wagons) == 1
-        assert initialized_yard_context._expected_wagon_count == 1
         initialized_yard_context.infra.engine.schedule_process.assert_called()
 
     def test_handle_wagons_ready_for_pickup(self, initialized_yard_context: YardOperationsContext) -> None:
@@ -180,10 +179,12 @@ class TestYardOperationsContext:
         initialized_yard_context.infra.engine.current_time.return_value = 10.0
 
         # Add some test wagons
+        from shared.domain.entities.wagon import WagonStatus
+
         wagon1 = Mock()
-        wagon1.status = 'RETROFITTED'
+        wagon1.status = WagonStatus.RETROFITTED
         wagon2 = Mock()
-        wagon2.status = 'PARKED'
+        wagon2.status = WagonStatus.PARKING
         initialized_yard_context.wagons = [wagon1, wagon2]
 
         metrics = initialized_yard_context.get_metrics()

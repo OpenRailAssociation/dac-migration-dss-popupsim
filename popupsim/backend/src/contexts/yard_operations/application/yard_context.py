@@ -28,10 +28,12 @@ from contexts.yard_operations.domain.services.hump_yard_service import HumpYardS
 from contexts.yard_operations.domain.services.hump_yard_service import YardConfiguration
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
 from contexts.yard_operations.domain.services.step_planners import CollectionToRetrofitPlanner
-from contexts.yard_operations.domain.services.step_planners import RetrofitToWorkshopPlanner
 from contexts.yard_operations.domain.services.step_planners import RetrofittedToParkingPlanner
+from contexts.yard_operations.domain.services.step_planners import RetrofitToWorkshopPlanner
 from contexts.yard_operations.domain.services.step_planners import WorkshopToRetrofittedPlanner
+from contexts.yard_operations.domain.services.wagon_classification_service import WagonClassificationService
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
+from contexts.yard_operations.domain.services.workshop_batching_service import WorkshopBatchingService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from infrastructure.logging import get_process_logger
 from shared.domain.entities.rake import Rake
@@ -60,6 +62,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # Domain services - pure business logic
         self.wagon_pickup_service = WagonPickupService()
+        self.wagon_classification_service: WagonClassificationService
+        self.workshop_batching_service: WorkshopBatchingService
 
         # Railway capacity service will be injected during initialization
         self.hump_yard_service: HumpYardService | None = None
@@ -74,12 +78,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Rake services
 
         self.rake_registry = rake_registry or RakeRegistry()
-        # Batch tracking for retrofitted wagons
-        self._retrofitted_batches: dict[str, list[Any]] = {}
         # Track wagons waiting at retrofit track for each workshop
         self._waiting_at_retrofit: dict[str, list[Any]] = {}
-        # Track pending transport checks to avoid duplicate transports
-        self._pending_transport_checks: dict[str, bool] = {}
         # Get railway infrastructure context for capacity management
         self.railway_context: Any = None  # Set in initialize() - always called before other methods
         # Step-specific planners
@@ -102,6 +102,10 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # Initialize hump yard service with railway capacity service
         self.hump_yard_service = HumpYardService(self.railway_capacity_service)  # type: ignore[arg-type]
+
+        # Initialize domain services
+        self.wagon_classification_service = WagonClassificationService(self.hump_yard_service)
+        self.workshop_batching_service = WorkshopBatchingService()
 
         # Initialize step-specific planners
         self.collection_to_retrofit_planner = CollectionToRetrofitPlanner(self.railway_context)
@@ -188,7 +192,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
             if optimal_position is None:
                 # Track is full - reject this wagon
-                wagon.status = 'REJECTED'
+                wagon.status = WagonStatus.REJECTED
                 wagon.rejection_reason = f'{track_id}_FULL'
                 wagon.detailed_rejection_reason = f'Track {track_id} has no space for wagon {wagon.id}'
                 rejected_wagons.append(wagon)
@@ -319,6 +323,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         schedule = self.hump_yard_service.calculate_processing_schedule(  # type: ignore[attr-defined, union-attr]
             len(wagons),
             process_times,
+            self.yard_config,
         )
 
         # 1. Delay from train arrival to hump yard
@@ -329,10 +334,12 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         selected_track = self._select_track_by_type('collection')
         collection_track_id = selected_track.id if selected_track else 'collection'
 
-        classification_result = self.hump_yard_service.classify_wagons(  # type: ignore[attr-defined, union-attr]
+        # Use domain service for classification
+        classification_result = self.wagon_classification_service.classify_train(
             wagons,
+            train_id,
             self.yard_config,
-            collection_track_id,
+            collection_track_id,  # type: ignore[arg-type]
         )
         # 3. Process each wagon with timing intervals
         for i, wagon in enumerate(classification_result.accepted_wagons):
@@ -371,7 +378,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     wagon.rejection_time = current_time
                     wagon.collection_track_id = collection_track_id
 
-                    reason = wagon.rejection_reason
+                    reason = wagon.rejection_reason or ''
                     detailed_reason = wagon.detailed_rejection_reason
 
                     if '_FULL' in reason:
@@ -392,9 +399,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # Log capacity status using railway infrastructure
         if self.railway_capacity_service:
-            self.railway_capacity_service.get_capacity_info('collection')
-        else:
-            pass
+            self.railway_capacity_service.get_capacity_info(collection_track_id)
 
         # 6. Publish classification complete event
         current_time = self.infra.engine.current_time()
@@ -423,18 +428,11 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if not wagon:
             return
 
-        # Add to batch for this workshop
-        if event.workshop_id not in self._retrofitted_batches:
-            self._retrofitted_batches[event.workshop_id] = []
+        # Use domain service for batching
+        batch = self.workshop_batching_service.add_completed_wagon(wagon, event.workshop_id)
 
-        self._retrofitted_batches[event.workshop_id].append(wagon)
-
-        # Schedule deferred check only once per workshop per time step
-        if event.workshop_id not in self._pending_transport_checks:
-            self._pending_transport_checks[event.workshop_id] = False
-        if not self._pending_transport_checks[event.workshop_id]:
-            self._pending_transport_checks[event.workshop_id] = True
-            self.infra.engine.schedule_process(self._check_and_transport_batch(event.workshop_id))
+        if batch:
+            self.infra.engine.schedule_process(self._transport_batch(batch))
 
     def _get_workshop_capacity_for_batching(self, workshop_id: str) -> int:
         """Get workshop capacity for determining batch size."""
@@ -443,26 +441,13 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 return workshop.retrofit_stations  # type: ignore[no-any-return]
         return 0
 
-    def _check_and_transport_batch(self, workshop_id: str) -> Generator[Any, Any]:
-        """Check if batch should be transported using step planners."""
+    def _transport_batch(self, batch: Any) -> Generator[Any, Any]:
+        """Transport batch using step planners."""
         # Yield to allow all wagons completing at same time to be added to batch
         yield from self.infra.engine.delay(0)
 
-        # Clear pending flag
-        self._pending_transport_checks[workshop_id] = False
-
-        if workshop_id not in self._retrofitted_batches or not self._retrofitted_batches[workshop_id]:
-            return
-
-        # Get completed wagons for this workshop
-        completed_wagons = self._retrofitted_batches[workshop_id][:]
-        self._retrofitted_batches[workshop_id] = []
-
-        if not completed_wagons:
-            return
-
         # Use step planners for capacity-aware transport planning
-        transport_plan = self.workshop_to_retrofitted_planner.plan_transport(completed_wagons, workshop_id)
+        transport_plan = self.workshop_to_retrofitted_planner.plan_transport(batch.wagons, batch.workshop_id)
 
         if transport_plan:
             # Form rake using direct Rake construction
@@ -542,7 +527,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             yield from shunting_context.move_locomotive(self, loco, workshop_id, loco.home_track)
 
             # Now wagon is at workshop and can start retrofitting
-            wagon.track = workshop_id
+            wagon.move_to_track(workshop_id)
             event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=workshop_id)
             self.infra.event_bus.publish(event)
 
@@ -581,7 +566,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             # Now wagons are at workshop and can start retrofitting
             batch_id = f'batch_{self.infra.engine.current_time():.1f}'
             for wagon in wagons:
-                wagon.track = workshop_id
+                wagon.move_to_track(workshop_id)
                 wagon.batch_id = batch_id
                 event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=workshop_id)
                 self.infra.event_bus.publish(event)
@@ -590,7 +575,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             # Release locomotive
             yield from shunting_context.release_locomotive(self, loco)
 
-    def _pickup_and_process_next_batch(self, completed_wagons: list[Any], workshop_id: str) -> Any:  # pylint: disable=too-many-locals
+    def _pickup_and_process_next_batch(self, completed_wagons: list[Any], workshop_id: str) -> Any:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         """Combine pickup of completed wagons and processing of next batch to eliminate timing gaps."""
         shunting_context = self.infra.shunting_context
         if not shunting_context:
@@ -614,8 +599,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             retrofitted_track_id = selected_retrofitted.id if selected_retrofitted else 'retrofitted'
 
             for wagon in completed_wagons:
-                wagon.status = 'PARKED'
-                wagon.track = retrofitted_track_id
+                wagon.status = WagonStatus.PARKING
+                wagon.move_to_track(retrofitted_track_id)
 
             # Return to parking first (MVP expects this)
 
@@ -682,7 +667,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             # Release locomotive
             yield from shunting_context.release_locomotive(self, loco)
 
-    def _transport_retrofitted_rake(self, rake: Any) -> Generator[Any, Any]:  # pylint: disable=too-many-locals, too-many-statements
+    def _transport_retrofitted_rake(self, rake: Any) -> Generator[Any, Any]:  # pylint: disable=too-many-locals,too-many-statements,too-many-branches
         """Transport retrofitted rake: workshop -> retrofitted -> parking."""
         try:
             shunting_context = self.infra.shunting_context
@@ -704,7 +689,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 # Update wagon locations, release workshop resources, and publish distributed events
                 current_time = self.infra.engine.current_time()
                 for wagon in rake.wagons:
-                    wagon.track = retrofitted_track_id
+                    wagon.move_to_track(retrofitted_track_id)
 
                     # Release workshop resource after pickup
                     # TODO:  This is still the hack of the MVP.
@@ -761,7 +746,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
                 loco2 = yield from shunting_context.allocate_locomotive(self)
                 try:
-                    yield from shunting_context.move_locomotive(self, loco2, loco2.current_track, parking_plan.from_track)
+                    yield from shunting_context.move_locomotive(
+                        self, loco2, loco2.current_track, parking_plan.from_track
+                    )
                     yield from shunting_context.couple_wagons(self, len(wagons_to_park), 'DAC')
                     yield from shunting_context.move_locomotive(self, loco2, parking_plan.from_track, parking_track_id)
                     yield from shunting_context.decouple_wagons(self, len(wagons_to_park), 'DAC')
@@ -769,7 +756,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     current_time = self.infra.engine.current_time()
                     for wagon in wagons_to_park:
                         wagon.status = WagonStatus.PARKING
-                        wagon.track = parking_track_id
+                        wagon.move_to_track(parking_track_id)
                         parked_event = WagonParkedEvent(wagon_id=wagon.id, parking_area_id=parking_track_id)
                         parked_event.event_timestamp = current_time
                         self.infra.event_bus.publish(parked_event)
@@ -805,10 +792,10 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         track_util = self._calculate_track_utilization()
 
         # Count wagons by status
-        wagons_on_retrofitted = sum(1 for w in self.wagons if w.status == 'RETROFITTED')
-        wagons_on_retrofit = sum(1 for w in self.wagons if w.status == 'READY_FOR_RETROFIT')
-        wagons_on_collection = sum(1 for w in self.wagons if w.status == 'COLLECTION')
-        wagons_parked = sum(1 for w in self.wagons if w.status == 'PARKED')
+        wagons_on_retrofitted = sum(1 for w in self.wagons if w.status == WagonStatus.RETROFITTED)
+        wagons_on_retrofit = sum(1 for w in self.wagons if w.status == WagonStatus.TO_BE_RETROFFITED)
+        wagons_on_collection = sum(1 for w in self.wagons if w.status == WagonStatus.TO_BE_RETROFFITED)
+        wagons_parked = sum(1 for w in self.wagons if w.status == WagonStatus.PARKING)
 
         return {
             'classified_wagons': len(self.wagons),
@@ -912,7 +899,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             }
 
             # Distribute wagons using workshop-specific strategy
-            strategy = self.scenario.workshop_selection_strategy
+            strategy = self.scenario.workshop_selection_strategy  # type: ignore[union-attr]
             if hasattr(strategy, 'value'):
                 strategy = strategy.value
 
@@ -956,8 +943,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Find wagons in the rake and update their status
         for wagon in self.wagons:
             if hasattr(wagon, 'rake_id') and wagon.rake_id == rake.rake_id:
-                wagon.status = 'READY_FOR_RETROFIT'
-                wagon.track = rake.target_track
+                wagon.mark_classified()
+                wagon.move_to_track(rake.target_track)
                 wagon.workshop_id = rake.target_track
 
                 event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=rake.target_track)
@@ -971,10 +958,10 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         """Transport a batch of wagons from retrofit to workshop using step planner."""
         # Use step planner for capacity-aware transport planning
         transport_plan = self.retrofit_to_workshop_planner.plan_transport(wagons, 'retrofit')
-        
+
         if not transport_plan:
             return
-            
+
         loco = yield from shunting_context.allocate_locomotive(self)
         try:
             yield from shunting_context.move_locomotive(self, loco, loco.current_track, transport_plan.from_track)
@@ -985,9 +972,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
             # Update wagon status and publish ready events
             for wagon in wagons:
-                wagon.status = 'READY_FOR_RETROFIT'
-                wagon.track = workshop_id
                 wagon.workshop_id = workshop_id
+                wagon.move_to_track(workshop_id)
                 event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=workshop_id)
                 self.infra.event_bus.publish(event)
 
@@ -1012,9 +998,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Use scenario strategy if not specified
         if strategy is None:
             if track_type == 'parking':
-                strategy = self.scenario.parking_selection_strategy
+                strategy = self.scenario.parking_selection_strategy  # type: ignore[union-attr]
             else:
-                strategy = self.scenario.track_selection_strategy
+                strategy = self.scenario.track_selection_strategy  # type: ignore[union-attr]
             if hasattr(strategy, 'value'):
                 strategy = strategy.value
 
@@ -1029,7 +1015,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Use railway context's track selection service (centralized implementation)
         return self.railway_context.get_track_selection_service().select_track(track_type, strategy_enum)
 
-    def _execute_pickup_plan(self, pickup_plan: Any, from_track_id: str) -> Generator[Any, Any]:  # pylint: disable=too-many-locals  # noqa: PLR0912
+    def _execute_pickup_plan(self, pickup_plan: Any, from_track_id: str) -> Generator[Any, Any]:  # pylint: disable=too-many-locals,too-many-branches  # noqa: PLR0912
         """Execute pickup plan - form rakes limited by retrofit track capacity."""
         if not pickup_plan.rakes_to_pickup:
             return
@@ -1081,10 +1067,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             # Form rake from specific collection track
             rake = self.wagon_pickup_service.create_single_retrofit_rake(
                 rake_wagons,
-                {
-                    ws: [wagon for wagon in rake_wagons if wagon.workshop_id == ws]
-                    for ws in workshop_allocations
-                },
+                {ws: [wagon for wagon in rake_wagons if wagon.workshop_id == ws] for ws in workshop_allocations},
             )
             rake.formation_track = from_track_id
             self.rake_registry.register_rake(rake)
