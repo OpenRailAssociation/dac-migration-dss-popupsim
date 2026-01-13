@@ -15,6 +15,7 @@ Todo
 # TODO: Refactoring is needed here. This is just for the MVP to get it running
 
 from collections.abc import Generator
+import time
 from typing import Any
 
 from contexts.railway_infrastructure.domain.services.track_selection_service import SelectionStrategy
@@ -32,6 +33,7 @@ from contexts.yard_operations.domain.services.step_planners import WorkshopToRet
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from infrastructure.logging import get_process_logger
+from shared.domain.entities.rake import Rake
 from shared.domain.entities.wagon import Wagon
 from shared.domain.entities.wagon import WagonStatus
 from shared.domain.events.rake_events import RakeFormedEvent
@@ -43,8 +45,8 @@ from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEv
 from shared.domain.events.wagon_lifecycle_events import WagonsClassifiedEvent
 from shared.domain.events.wagon_lifecycle_events import WagonsReadyForPickupEvent
 from shared.domain.services.railway_capacity_service import RailwayCapacityService
-from shared.domain.services.rake_formation_service import RakeFormationService
 from shared.domain.services.rake_registry import RakeRegistry
+from shared.domain.value_objects.rake_type import RakeType
 from shared.infrastructure.simulation.coordination.simulation_infrastructure import SimulationInfrastructure
 
 
@@ -69,7 +71,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.train_processed_event = None
         # Track wagons managed through Railway Context only - no local tracking
         # Rake services
-        self._rake_formation_service = RakeFormationService()
+
         self.rake_registry = rake_registry or RakeRegistry()
         self._event_handlers: list = []
         # Batch tracking for retrofitted wagons
@@ -273,9 +275,15 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
     def _execute_transport_plan(self, transport_plan: Any) -> Generator[Any, Any]:
         """Execute transport plan using capacity-validated rake."""
         # Form rake from transport plan
-        rake = self._rake_formation_service.form_transport_rake(
-            transport_plan.wagons, transport_plan.from_track, transport_plan.to_track
+        rake = Rake(
+            rake_id=f'transport_rake_{transport_plan.from_track}_{transport_plan.to_track}_{int(time.time())}',
+            wagons=transport_plan.wagons,
+            rake_type=RakeType.TRANSPORT_RAKE,
+            formation_time=time.time(),
+            formation_track=transport_plan.from_track,
+            target_track=transport_plan.to_track,
         )
+        rake.assign_to_wagons()
         self.rake_registry.register_rake(rake)
 
         # Publish rake formed event
@@ -462,10 +470,16 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         transport_plan = self.workshop_to_retrofitted_planner.plan_transport(completed_wagons, workshop_id)
 
         if transport_plan:
-            # Form rake using RakeFormationService directly
-            rake = self._rake_formation_service.form_transport_rake(
-                transport_plan.wagons, transport_plan.from_track, transport_plan.to_track
+            # Form rake using direct Rake construction
+            rake = Rake(
+                rake_id=f'transport_rake_{transport_plan.from_track}_{transport_plan.to_track}_{int(time.time())}',
+                wagons=transport_plan.wagons,
+                rake_type=RakeType.TRANSPORT_RAKE,
+                formation_time=time.time(),
+                formation_track=transport_plan.from_track,
+                target_track=transport_plan.to_track,
             )
+            rake.assign_to_wagons()
             self.rake_registry.register_rake(rake)
 
             # Publish rake formed event
@@ -1217,8 +1231,36 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         """Execute transport to retrofit tracks using new strategy."""
         retrofit_tracks = self._get_retrofit_track_capacities()
 
-        # Use convenience method for retrofit track rake formation
-        retrofit_rakes = self._rake_formation_service.form_retrofit_track_rakes(wagons, retrofit_tracks, 'collection')
+        # Form rakes directly instead of using service
+        # This replaces: self._rake_formation_service.form_retrofit_track_rakes(wagons, retrofit_tracks, 'collection')
+        retrofit_rakes = []
+        # Simple implementation: create one rake per track with capacity-based splitting
+        for track_id, capacity in retrofit_tracks.items():
+            if not wagons:
+                break
+            # Take wagons that fit in this track's capacity
+            track_wagons = []
+            used_capacity = 0.0
+            remaining_wagons = []
+            for wagon in wagons:
+                wagon_length = getattr(wagon, 'length', 15.0)
+                if used_capacity + wagon_length <= capacity:
+                    track_wagons.append(wagon)
+                    used_capacity += wagon_length
+                else:
+                    remaining_wagons.append(wagon)
+            if track_wagons:
+                rake = Rake(
+                    rake_id=f'retrofit_track_rake_{track_id}_{int(time.time())}',
+                    wagons=track_wagons,
+                    rake_type=RakeType.TRANSPORT_RAKE,
+                    formation_time=time.time(),
+                    formation_track='collection',
+                    target_track=track_id,
+                )
+                rake.assign_to_wagons()
+                retrofit_rakes.append(rake)
+            wagons = remaining_wagons
 
         # Execute transport for each rake
         for rake in retrofit_rakes:

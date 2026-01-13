@@ -1,6 +1,7 @@
 """PopUp Retrofit Context implementation."""
 
 from datetime import timedelta
+import time
 from typing import TYPE_CHECKING
 from typing import Any
 
@@ -14,6 +15,7 @@ from contexts.popup_retrofit.domain.value_objects.retrofit_result import Retrofi
 from contexts.popup_retrofit.domain.value_objects.workshop_id import WorkshopId
 from infrastructure.event_bus.event_bus import EventBus
 from infrastructure.logging import get_process_logger
+from shared.domain.entities.rake import Rake
 from shared.domain.events.rake_events import RakeProcessingStartedEvent
 from shared.domain.events.rake_events import RakeTransportedEvent
 from shared.domain.events.rake_events import RakeTransportRequestedEvent
@@ -23,7 +25,6 @@ from shared.domain.events.wagon_lifecycle_events import BatchRetrofittedEvent
 from shared.domain.events.wagon_lifecycle_events import WagonReadyForRetrofitEvent
 from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEvent
 from shared.domain.events.wagon_lifecycle_events import WagonRetrofittedEvent
-from shared.domain.services.rake_formation_service import RakeFormationService
 from shared.domain.services.rake_registry import RakeRegistry
 from shared.domain.value_objects.rake_type import RakeType
 from shared.infrastructure.time_converters import to_ticks
@@ -472,10 +473,16 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
         """Handle rake retrofit completion - trigger pickup process."""
         self.infra.engine.current_time()  # type: ignore[union-attr]
 
-        # Form retrofitted rake for pickup
-        formation_service = RakeFormationService()
-
-        retrofitted_rake = formation_service.form_retrofitted_rake(event.completed_wagons, event.workshop_id)
+        # Form retrofitted rake directly
+        retrofitted_rake = Rake(
+            rake_id=f'retrofitted_rake_{event.workshop_id}_{int(time.time())}',
+            wagons=event.completed_wagons,
+            rake_type=RakeType.RETROFITTED_RAKE,
+            formation_time=time.time(),
+            formation_track=event.workshop_id,
+            target_track='retrofitted',
+        )
+        retrofitted_rake.assign_to_wagons()
 
         # Register rake and publish transport request
         self.rake_registry.register_rake(retrofitted_rake)
