@@ -28,6 +28,7 @@ from contexts.yard_operations.domain.services.hump_yard_service import YardConfi
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
 from contexts.yard_operations.domain.services.step_planners import CollectionToRetrofitPlanner
 from contexts.yard_operations.domain.services.wagon_distribution_service import WagonDistributionService
+from contexts.yard_operations.domain.services.retrofitted_pickup_service import RetrofittedPickupService
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
 from infrastructure.logging import get_process_logger
@@ -56,6 +57,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.distribution_service = WagonDistributionService()
         # Domain services - pure business logic
         self.wagon_pickup_service = WagonPickupService()
+        self.retrofitted_pickup_service = RetrofittedPickupService()
         # Railway capacity service will be injected during initialization
         self.hump_yard_service: HumpYardService | None = None
         self.railway_capacity_service: RailwayCapacityService | None = None
@@ -457,7 +459,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         return 0
 
     def _check_and_transport_batch(self, workshop_id: str) -> Generator[Any, Any]:
-        """Check if batch should be transported after allowing same-time completions to accumulate."""
+        """Check if batch should be transported using RetrofittedPickupService."""
         # Yield to allow all wagons completing at same time to be added to batch
         yield from self.infra.engine.delay(0)
 
@@ -467,49 +469,51 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if workshop_id not in self._retrofitted_batches or not self._retrofitted_batches[workshop_id]:
             return
 
-        # Transport all wagons that completed together as one batch
-        wagons_to_transport = self._retrofitted_batches[workshop_id][:]
+        # Get completed wagons for this workshop
+        completed_wagons = self._retrofitted_batches[workshop_id][:]
         self._retrofitted_batches[workshop_id] = []
 
-        if wagons_to_transport:
-            self._form_and_transport_retrofitted_rake(wagons_to_transport, workshop_id)
+        if not completed_wagons:
+            return
 
-            # Check if there are wagons waiting on collection tracks
-            collection_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('collection')
-            for track in collection_tracks:
-                wagons_on_track = self._get_wagons_on_track(track.id)
-                if wagons_on_track:
-                    pickup_event = WagonsReadyForPickupEvent(
-                        track_id=track.id,
-                        wagon_count=len(wagons_on_track),
-                        event_timestamp=self.infra.engine.current_time(),
-                    )
-                    self.infra.event_bus.publish(pickup_event)
-                    break  # Only trigger one pickup at a time
-
-    def _form_and_transport_retrofitted_rake(self, wagons: list[Any], workshop_id: str) -> None:
-        """Form rake from retrofitted wagons and request transport."""
-        # Form rake
-        rake = self._rake_formation_service.form_retrofitted_rake(wagons, workshop_id)
-        self.rake_registry.register_rake(rake)
-
-        # Publish rake formed event
-        rake_event = RakeFormedEvent(rake=rake)
-        self.infra.event_bus.publish(rake_event)
-
-        # Request transport: workshop -> retrofitted -> parking
-        transport_event = RakeTransportRequestedEvent(
-            rake_id=rake.rake_id,
-            from_track=workshop_id,
-            to_track='retrofitted',
-            rake_type=rake.rake_type,
+        # Use RetrofittedPickupService for optimized pickup planning
+        workshop_capacities = self._get_workshop_capacities()
+        completed_wagons_by_workshop = {workshop_id: completed_wagons}
+        
+        pickup_plan = self.retrofitted_pickup_service.create_pickup_plan(
+            completed_wagons_by_workshop, workshop_capacities
         )
-        self.infra.event_bus.publish(transport_event)
 
-        # Remove from tracking
-        for w in wagons:
-            if w in self._retrofitted_batches[workshop_id]:
-                self._retrofitted_batches[workshop_id].remove(w)
+        # Execute pickup plan
+        if pickup_plan.pickup_rakes:
+            for rake in pickup_plan.pickup_rakes:
+                self.rake_registry.register_rake(rake)
+                
+                # Publish rake formed event
+                rake_event = RakeFormedEvent(rake=rake)
+                self.infra.event_bus.publish(rake_event)
+                
+                # Request transport: workshop -> retrofitted -> parking
+                transport_event = RakeTransportRequestedEvent(
+                    rake_id=rake.rake_id,
+                    from_track=workshop_id,
+                    to_track='retrofitted',
+                    rake_type=rake.rake_type,
+                )
+                self.infra.event_bus.publish(transport_event)
+
+        # Check if there are wagons waiting on collection tracks
+        collection_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('collection')
+        for track in collection_tracks:
+            wagons_on_track = self._get_wagons_on_track(track.id)
+            if wagons_on_track:
+                pickup_event = WagonsReadyForPickupEvent(
+                    track_id=track.id,
+                    wagon_count=len(wagons_on_track),
+                    event_timestamp=self.infra.engine.current_time(),
+                )
+                self.infra.event_bus.publish(pickup_event)
+                break  # Only trigger one pickup at a time
 
     def _bring_next_batch_from_retrofit(self, wagons: list[Any], workshop_id: str) -> Generator[Any, Any]:
         """Bring next batch of wagons from retrofit track to workshop."""
