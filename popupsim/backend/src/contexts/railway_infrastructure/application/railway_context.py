@@ -12,6 +12,7 @@ from contexts.railway_infrastructure.domain.ports import MetricsPort
 from contexts.railway_infrastructure.domain.repositories.track_occupancy_repository import TrackOccupancyRepository
 from contexts.railway_infrastructure.domain.services.topology_service import TopologyService
 from contexts.railway_infrastructure.domain.services.track_group_service import TrackGroupService
+from contexts.railway_infrastructure.domain.services.track_selection_service import TrackSelectionService
 
 
 class RailwayInfrastructureContext:
@@ -75,6 +76,11 @@ class RailwayInfrastructureContext:
         """Get railway yard aggregate (cached)."""
         return self._build_railway_yard()
 
+    @cached_property
+    def _track_selection_service(self) -> TrackSelectionService:
+        """Get track selection service (cached)."""
+        return TrackSelectionService(self)
+
     def get_topology_service(self) -> TopologyService:
         """Get topology service.
 
@@ -94,6 +100,16 @@ class RailwayInfrastructureContext:
             Service for track group operations
         """
         return self._track_group_service
+
+    def get_track_selection_service(self) -> TrackSelectionService:
+        """Get track selection service.
+
+        Returns
+        -------
+        TrackSelectionService
+            Service for track selection operations
+        """
+        return self._track_selection_service
 
     def get_railway_yard(self) -> RailwayYard:
         """Get railway yard aggregate.

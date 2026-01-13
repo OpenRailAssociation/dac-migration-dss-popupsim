@@ -120,6 +120,10 @@ class TrackOccupancy:
         """Check if track cannot accommodate minimum length."""
         return not self.can_accommodate_length(min_length) or not self.can_accommodate_wagon_count()
 
+    def get_occupants(self) -> list[TrackOccupant]:
+        """Get list of current occupants."""
+        return self._occupants.copy()
+
     def _can_accommodate(self, occupant: TrackOccupant) -> bool:
         """Check if occupant can be accommodated (length + position + count)."""
         # Check length capacity

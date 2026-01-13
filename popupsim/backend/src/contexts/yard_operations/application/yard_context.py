@@ -11,12 +11,13 @@ Todo
         - Shedule remaining wagons (current implementation is still odd)
 """
 # pylint: disable=too-many-lines
-# ruff: noqa: C901, PLR0911, PLR0912, PLR0915
+# ruff: noqa: C901, PLR0915
 # TODO: Refactoring is needed here. This is just for the MVP to get it running
 
 from collections.abc import Generator
 from typing import Any
 
+from contexts.railway_infrastructure.domain.services.track_selection_service import SelectionStrategy
 from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
 from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
 from contexts.yard_operations.domain.aggregates.yard import Yard
@@ -25,6 +26,7 @@ from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from contexts.yard_operations.domain.services.hump_yard_service import HumpYardService
 from contexts.yard_operations.domain.services.hump_yard_service import YardConfiguration
 from contexts.yard_operations.domain.services.hump_yard_service import YardType
+from contexts.yard_operations.domain.services.step_planners import CollectionToRetrofitPlanner
 from contexts.yard_operations.domain.services.wagon_distribution_service import WagonDistributionService
 from contexts.yard_operations.domain.services.wagon_pickup_service import WagonPickupService
 from contexts.yard_operations.domain.value_objects.yard_id import YardId
@@ -63,8 +65,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.wagons: list[Any] = []
         self.rejected_wagons: list[Any] = []
         self.train_processed_event = None
-        # Track wagon lists - managed through Railway Context
-        self._track_wagons: dict[str, list[Any]] = {}
+        # Track wagons managed through Railway Context only - no local tracking
         # Rake services
         self._rake_formation_service = RakeFormationService()
         self.rake_registry = rake_registry or RakeRegistry()
@@ -75,18 +76,16 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self._waiting_at_retrofit: dict[str, list[Any]] = {}
         # Track pending transport checks to avoid duplicate transports
         self._pending_transport_checks: dict[str, bool] = {}
-        # Build track index by type and initialize selectors
-        self._tracks_by_type: dict[str, list[Any]] = {}
-        self._track_selectors: dict[str, Any] = {}
-        self._round_robin_index: dict[str, int] = {}
         # Get railway infrastructure context for capacity management
-
-        self.railway_context = None  # Set in initialize() - always called before other methods
-        self.railway_capacity_service = None  # Set in initialize() - always called before other methods
+        self.railway_context: Any = None  # Set in initialize() - always called before other methods
+        # Track selection strategy for this yard
+        self.track_selection_strategy = SelectionStrategy.ROUND_ROBIN
+        # Step-specific planners
+        self.collection_to_retrofit_planner: CollectionToRetrofitPlanner
         self._expected_wagon_count = 0
         self.all_wagons: list[Wagon] = []
         self._retrofitted_accumulator: list[Wagon] = []
-        self._track_occupancy_m: dict[str, float] = {}
+
         self._workshop_round_robin_index: int = 0
         self._workshop_wagon_counts: dict[str, int] = {}
 
@@ -96,52 +95,39 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.scenario = scenario
         self.train_processed_event = self.infra.engine.create_event()
 
-        if scenario and hasattr(scenario, 'tracks') and scenario.tracks:
-            for track in scenario.tracks:
-                track_type = getattr(track, 'type', 'unknown')
-                if track_type not in self._tracks_by_type:
-                    self._tracks_by_type[track_type] = []
-                    self._round_robin_index[track_type] = 0
-                self._tracks_by_type[track_type].append(track)
-
         # Get railway infrastructure context for capacity management
-        # railway_context = getattr(self.infra, 'contexts', {}).get('railway')
         self.railway_context = self.infra.contexts['railway']
         self.railway_capacity_service = RailwayCapacityService(self.railway_context)  # type: ignore[arg-type]
 
         # Initialize hump yard service with railway capacity service
         self.hump_yard_service = HumpYardService(self.railway_capacity_service)  # type: ignore[arg-type]
 
+        # Initialize step-specific planners
+        self.collection_to_retrofit_planner = CollectionToRetrofitPlanner(self.railway_context)
+
         # Initialize yard configuration using railway infrastructure capacity
-        # Get collection track capacity from railway infrastructure
-        collection_capacity = 50  # Default
-        collection_tracks = self._tracks_by_type.get('collection', [])
-        if self.railway_context and collection_tracks:
-            collection_capacity = self.railway_context.get_track_capacity(collection_tracks[0].id)
-            if collection_capacity == 0:  # Track not found, use default
-                collection_capacity = 50
+        track_selection_service = self.railway_context.get_track_selection_service()
+        collection_tracks = track_selection_service.get_tracks_by_type('collection')
+        if not collection_tracks:
+            raise RuntimeError('CONFIGURATION ERROR: No collection tracks found in scenario')
+
+        collection_capacity = self.railway_context.get_track_capacity(collection_tracks[0].id)
+        if collection_capacity <= 0:
+            raise RuntimeError(f'CONFIGURATION ERROR: Collection track {collection_tracks[0].id} has no capacity')
 
         # Get all collection track IDs
-        collection_track_ids = [t.id for t in self._tracks_by_type.get('collection', [])]
+        collection_track_ids = track_selection_service.get_track_ids_by_type('collection')
 
         self.yard_config = YardConfiguration(
             yard_id='main_yard',
             yard_type=YardType.HUMP_YARD,
             has_hump=True,
-            classification_tracks=collection_track_ids if collection_track_ids else ['collection'],
+            classification_tracks=collection_track_ids,
             collection_track_capacity=collection_capacity,
             current_collection_count=0,
         )
 
-        # Initialize track wagon lists
-        for track_type in ['collection', 'retrofit', 'retrofitted']:
-            tracks = self._tracks_by_type.get(track_type, [])
-            if tracks:
-                for track in tracks:
-                    self._track_wagons[track.id] = []
-            else:
-                # Create default track for backward compatibility
-                self._track_wagons[track_type] = []
+        # Track occupancy managed by Railway Context - no local initialization needed
 
     def start_processes(self) -> None:
         """Start yard operation processes."""
@@ -161,65 +147,145 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         """Handle wagons ready for pickup event."""
         self.infra.engine.schedule_process(self._pickup_wagons_from_track(event.track_id))
 
+    def _get_wagons_on_track(self, track_id: str) -> list[Any]:
+        """Get wagons currently on track from railway context."""
+        occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
+        track_occupancy = occupancy_repo.get(track_id)
+        if not track_occupancy:
+            return []
+
+        # Extract wagon objects from occupants
+        wagons = []
+        for occupant in track_occupancy.get_occupants():
+            if occupant.type.value == 'wagon':
+                # Find wagon object by ID in all_wagons
+                for wagon in self.all_wagons:
+                    if wagon.id == occupant.id:
+                        wagons.append(wagon)
+                        break
+        return wagons
+
+    def _add_wagons_to_track(self, wagons: list[Any], track_id: str) -> tuple[list[Any], list[Any]]:
+        """Add wagons to track via railway context. Returns (accepted, rejected) wagons."""
+        occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
+        track = self.railway_context.get_track(track_id)  # type: ignore[attr-defined]
+        if not track:
+            return [], wagons
+
+        track_occupancy = occupancy_repo.get_or_create(track)
+        current_time = self.infra.engine.current_time()
+
+        accepted_wagons = []
+        rejected_wagons = []
+
+        for wagon in wagons:
+            wagon_length = getattr(wagon, 'length', 15.0)
+            optimal_position = track_occupancy.find_optimal_position(wagon_length)
+
+            if optimal_position is None:
+                # Track is full - reject this wagon
+                wagon.status = 'REJECTED'
+                wagon.rejection_reason = f'{track_id}_FULL'
+                wagon.detailed_rejection_reason = f'Track {track_id} has no space for wagon {wagon.id}'
+                rejected_wagons.append(wagon)
+                continue
+
+            occupant = TrackOccupant(
+                id=wagon.id,
+                type=OccupantType.WAGON,
+                length=wagon_length,
+                position_start=optimal_position,
+            )
+            track_occupancy.add_occupant(occupant, current_time)
+            accepted_wagons.append(wagon)
+
+        return accepted_wagons, rejected_wagons
+
+    def _remove_wagons_from_track(self, wagon_ids: list[str], track_id: str) -> None:
+        """Remove wagons from track via railway context."""
+        occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
+        track_occupancy = occupancy_repo.get(track_id)
+        if track_occupancy:
+            current_time = self.infra.engine.current_time()
+            for wagon_id in wagon_ids:
+                track_occupancy.remove_occupant(wagon_id, current_time)
+
     def _pickup_wagons_from_track(self, track_id: str) -> Generator[Any, Any]:
         """Process for picking up wagons from a specific collection track."""
         current_time = self.infra.engine.current_time()
-        wagons_to_pickup = self._track_wagons.get(track_id, [])
+        wagons_to_pickup = self._get_wagons_on_track(track_id)
 
         if not wagons_to_pickup:
             return
 
-        # Clear wagons from track and update Railway Context
-        self._track_wagons[track_id] = []
-        occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
-        for wagon in wagons_to_pickup:
-            track_occupancy = occupancy_repo.get(track_id)
-            if track_occupancy:
-                track_occupancy.remove_occupant(wagon.id, self.infra.engine.current_time())
+        # Remove wagons from track via Railway Context
+        wagon_ids = [w.id for w in wagons_to_pickup]
+        self._remove_wagons_from_track(wagon_ids, track_id)
 
         yield from self.infra.engine.delay(0.1)  # Small processing delay
 
         # Log pickup from collection track
         try:
             plog = get_process_logger()
-            wagon_ids = ', '.join([w.id for w in wagons_to_pickup])
-            plog.log(f'PICKUP: {len(wagons_to_pickup)} wagons from {track_id} [{wagon_ids}]', sim_time=current_time)
+            wagon_id_list = ', '.join([w.id for w in wagons_to_pickup])
+            plog.log(f'PICKUP: {len(wagons_to_pickup)} wagons from {track_id} [{wagon_id_list}]', sim_time=current_time)
 
         except RuntimeError:
             pass
 
-        # Use domain service to create pickup plan.
-        # TODO: Fix is needed. It is using the workshop capacity but should use retrofit track
+        # Use step-specific planner for capacity-aware rake formation
+        plan = self.collection_to_retrofit_planner.plan_transport(wagons_to_pickup, track_id)
 
-        # Utterly bullshit here!
-        workshop_capacities = self._get_workshop_capacities()
-        pickup_plan = self.wagon_pickup_service.create_pickup_plan(wagons_to_pickup, workshop_capacities)
-
-        # Validate pickup feasibility
-        available_locomotives = self._get_available_locomotive_count()
-        is_feasible, _issues = self.wagon_pickup_service.validate_pickup_feasibility(pickup_plan, available_locomotives)
-
-        if not is_feasible:
+        if not plan:
+            try:
+                plog = get_process_logger()
+                plog.log(
+                    f'NO CAPACITY: No retrofit track capacity available for {len(wagons_to_pickup)} wagons',
+                    sim_time=current_time,
+                )
+            except RuntimeError:
+                pass
             return
 
-        pickup_plan.wagons = wagons_to_pickup  # type: ignore[attr-defined]
-
-        # Execute pickup plan using application service
-        yield from self._execute_pickup_plan(pickup_plan, track_id)
+        # Execute transport plan
+        yield from self._execute_transport_plan(plan)
 
         # Log capacity status after pickup
         if self.railway_capacity_service:
             self.railway_capacity_service.get_capacity_info(track_id)
 
         # Log remaining wagons on this collection track
-        remaining_count = len(self._track_wagons.get(track_id, []))
-        if remaining_count > 0:
+        remaining_wagons = self._get_wagons_on_track(track_id)
+        if remaining_wagons:
             try:
                 plog = get_process_logger()
                 current_time = self.infra.engine.current_time()
-                plog.log(f'WAITING: {remaining_count} wagons still on {track_id}', sim_time=current_time)
+                plog.log(f'WAITING: {len(remaining_wagons)} wagons still on {track_id}', sim_time=current_time)
             except RuntimeError:
                 pass
+
+    def _execute_transport_plan(self, transport_plan: Any) -> Generator[Any, Any]:
+        """Execute transport plan using capacity-validated rake."""
+        # Form rake from transport plan
+        rake = self._rake_formation_service.form_transport_rake(
+            transport_plan.wagons, transport_plan.from_track, transport_plan.to_track
+        )
+        self.rake_registry.register_rake(rake)
+
+        # Publish rake formed event
+        rake_event = RakeFormedEvent(rake=rake)
+        self.infra.event_bus.publish(rake_event)
+
+        # Request transport
+        transport_event = RakeTransportRequestedEvent(
+            rake_id=rake.rake_id,
+            from_track=transport_plan.from_track,
+            to_track=transport_plan.to_track,
+            rake_type=rake.rake_type,
+        )
+        self.infra.event_bus.publish(transport_event)
+
+        yield from self.infra.engine.delay(0.1)  # Small delay for processing
 
     def _group_wagons_by_retrofit_track(self, wagons: list[Any]) -> dict[str, list[Any]]:
         """Group wagons by their assigned retrofit track."""
@@ -293,39 +359,13 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
         # 4. Add all train wagons to the selected collection track via Railway Context
         if classification_result.accepted_wagons:
-            occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
-            for wagon in classification_result.accepted_wagons:
-                # Add to track wagon list
-                if collection_track_id not in self._track_wagons:
-                    self._track_wagons[collection_track_id] = []
-                self._track_wagons[collection_track_id].append(wagon)
+            final_accepted, track_rejected = self._add_wagons_to_track(
+                classification_result.accepted_wagons, collection_track_id
+            )
 
-                # Update Railway Context occupancy using proper aggregate pattern
-                wagon_length = getattr(wagon, 'length', 15.0)
-                track = self.railway_context.get_track(collection_track_id)  # type: ignore[attr-defined]
-                if track:
-                    track_occupancy = occupancy_repo.get_or_create(track)
-
-                    # Check if track can accommodate the wagon
-                    optimal_position = track_occupancy.find_optimal_position(wagon_length)
-                    if optimal_position is None:
-                        # Track is full - reject this wagon with specific track name
-                        wagon.status = 'REJECTED'
-                        wagon.rejection_reason = f'{collection_track_id}_FULL'
-                        wagon.detailed_rejection_reason = (
-                            f'Collection track {collection_track_id} has no space for wagon {wagon.id}'
-                        )
-                        classification_result.rejected_wagons.append(wagon)
-                        classification_result.accepted_wagons.remove(wagon)
-                        continue
-
-                    occupant = TrackOccupant(
-                        id=wagon.id,
-                        type=OccupantType.WAGON,
-                        length=wagon_length,
-                        position_start=optimal_position,
-                    )
-                    track_occupancy.add_occupant(occupant, self.infra.engine.current_time())
+            # Update classification result with track capacity rejections
+            classification_result.accepted_wagons = final_accepted
+            classification_result.rejected_wagons.extend(track_rejected)
 
             # Publish event to trigger pickup process
             pickup_event = WagonsReadyForPickupEvent(
@@ -435,11 +475,13 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             self._form_and_transport_retrofitted_rake(wagons_to_transport, workshop_id)
 
             # Check if there are wagons waiting on collection tracks
-            for track_id, wagons in self._track_wagons.items():
-                if 'collection' in track_id and wagons:
+            collection_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('collection')
+            for track in collection_tracks:
+                wagons_on_track = self._get_wagons_on_track(track.id)
+                if wagons_on_track:
                     pickup_event = WagonsReadyForPickupEvent(
-                        track_id=track_id,
-                        wagon_count=len(wagons),
+                        track_id=track.id,
+                        wagon_count=len(wagons_on_track),
                         event_timestamp=self.infra.engine.current_time(),
                     )
                     self.infra.event_bus.publish(pickup_event)
@@ -840,10 +882,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                         parked_event.event_timestamp = current_time
                         self.infra.event_bus.publish(parked_event)
 
-                    # Update track occupancy
-                    self._track_occupancy_m[parking_track_id] = (
-                        self._track_occupancy_m.get(parking_track_id, 0.0) + total_length
-                    )
+                    # Add wagons to parking track via railway context
+                    self._add_wagons_to_track(wagons_to_park, parking_track_id)
 
                     yield from shunting_context.move_locomotive(self, loco2, parking_track_id, loco2.home_track)
                     yield from shunting_context.release_locomotive(self, loco2)
@@ -900,13 +940,13 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         track_util = {}
 
         # Calculate utilization for collection tracks using Railway Context
-        for track_id in self._track_wagons:
-            if 'collection' in track_id:
-                available_capacity = self.railway_context.get_available_capacity(track_id)  # type: ignore[attr-defined]
-                total_capacity = self.railway_context.get_total_capacity(track_id)  # type: ignore[attr-defined]
-                if total_capacity > 0:
-                    utilization = ((total_capacity - available_capacity) / total_capacity) * 100.0
-                    track_util[track_id] = utilization
+        collection_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('collection')
+        for track in collection_tracks:
+            available_capacity = self.railway_context.get_available_capacity(track.id)  # type: ignore[attr-defined]
+            total_capacity = self.railway_context.get_total_capacity(track.id)  # type: ignore[attr-defined]
+            if total_capacity > 0:
+                utilization = ((total_capacity - available_capacity) / total_capacity) * 100.0
+                track_util[track.id] = utilization
 
         return track_util
 
@@ -929,7 +969,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         # Check if destination is a retrofitted track (by type, not hardcoded name)
         is_retrofitted_destination = False
         if event.to_track:
-            for track in self._tracks_by_type.get('retrofitted', []):
+            retrofitted_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('retrofitted')
+            for track in retrofitted_tracks:
                 if track.id == event.to_track:
                     is_retrofitted_destination = True
                     break
@@ -1104,12 +1145,8 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             return len(shunting_context.locomotive_pool.available_locomotives)
         return 2  # Default assumption
 
-    def _select_track_by_type(self, track_type: str, strategy: str | None = None) -> Any | None:  # pylint: disable=too-many-locals, too-many-return-statements, too-many-branches
-        """Select track by type using configured strategy."""
-        tracks = self._tracks_by_type.get(track_type, [])
-        if not tracks:
-            return None
-
+    def _select_track_by_type(self, track_type: str, strategy: str | None = None) -> Any | None:
+        """Select track by type using railway context's track selection service."""
         # Use scenario strategy if not specified
         if strategy is None:
             if track_type == 'parking':
@@ -1119,60 +1156,62 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             if hasattr(strategy, 'value'):
                 strategy = strategy.value
 
-        if strategy == 'round_robin':
-            idx = self._round_robin_index[track_type] % len(tracks)
-            self._round_robin_index[track_type] += 1
-            return tracks[idx]
+        # For parking tracks with special occupancy tracking, use custom logic
+        if track_type == 'parking' and strategy == 'least_occupied':
+            return self._select_parking_track_with_fill_factor()
 
-        if strategy == 'least_occupied':
-            # For parking tracks, always use length-based occupancy tracking
-            if track_type == 'parking':
-                # Get fill factor from scenario (default 0.75)
-                fill_factor = 0.75
-                if self.scenario and hasattr(self.scenario, 'fill_factor'):
-                    fill_factor = self.scenario.fill_factor
+        # Map string strategy to enum
+        strategy_mapping = {
+            'round_robin': SelectionStrategy.ROUND_ROBIN,
+            'least_occupied': SelectionStrategy.LEAST_OCCUPIED,
+            'most_available': SelectionStrategy.MOST_AVAILABLE,
+        }
+        strategy_enum = strategy_mapping.get(strategy, SelectionStrategy.ROUND_ROBIN)
 
-                # Get track lengths from scenario
-                track_lengths: dict[str, float] = {}
-                if self.scenario and hasattr(self.scenario, 'tracks'):
-                    for t in self.scenario.tracks:
-                        track_lengths[t.id] = getattr(t, 'length', 200.0)
+        # Use railway context's track selection service
+        return self.railway_context.get_track_selection_service().select_track(track_type, strategy_enum)
 
-                # Calculate available capacity for each track (respecting fill factor)
-                track_info = []
-                for track in tracks:
-                    track_length = track_lengths.get(track.id, 200.0)
-                    max_usable = track_length * fill_factor  # Apply fill factor
-                    occupied = self._track_occupancy_m.get(track.id, 0.0)
-                    available_usable = max_usable - occupied  # Available within fill factor
-                    available_absolute = track_length - occupied  # Available absolute capacity
-                    track_info.append((track, available_usable, available_absolute, occupied, track_length))
+    def _select_parking_track_with_fill_factor(self) -> Any | None:
+        """Select parking track considering fill factor and local occupancy tracking."""
+        tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('parking')
+        if not tracks:
+            return None
 
-                # First try: Select track with most available capacity within fill factor
-                available_tracks = [
-                    (t, avail_usable) for t, avail_usable, avail_abs, occ, tlen in track_info if avail_usable > 0
-                ]
-                if available_tracks:
-                    return max(available_tracks, key=lambda x: x[1])[0]
+        # Get fill factor from scenario (default 0.75)
+        fill_factor = 0.75
+        if self.scenario and hasattr(self.scenario, 'fill_factor'):
+            fill_factor = self.scenario.fill_factor
 
-                # Second try: All tracks at/over fill factor - check if ANY absolute capacity remains
-                tracks_with_absolute_capacity = [
-                    (t, avail_abs) for t, avail_usable, avail_abs, occ, tlen in track_info if avail_abs > 0
-                ]
-                if tracks_with_absolute_capacity:
-                    # Use track with most absolute capacity remaining
-                    return max(tracks_with_absolute_capacity, key=lambda x: x[1])[0]
+        # Calculate available capacity for each track (respecting fill factor)
+        track_info = []
+        for track in tracks:
+            track_length = track.total_length
+            max_usable = track_length * fill_factor  # Apply fill factor
+            # Get occupied capacity from railway context
+            occupancy_repo = self.railway_context.get_occupancy_repository()
+            track_occupancy = occupancy_repo.get(track.id)
+            occupied = track_occupancy.get_current_occupancy_meters() if track_occupancy else 0.0
+            available_usable = max_usable - occupied  # Available within fill factor
+            available_absolute = track_length - occupied  # Available absolute capacity
+            track_info.append((track, available_usable, available_absolute, occupied, track_length))
 
-                # No capacity available - return None to signal capacity exceeded
-                return None
-            if self.railway_context:
-                # For non-parking tracks, use railway context capacity
-                available = [(t, self.railway_context.get_available_capacity(t.id)) for t in tracks]
-                return max(available, key=lambda x: x[1])[0] if available else tracks[0]
-            # Fallback to first track
-            return tracks[0]
+        # First try: Select track with most available capacity within fill factor
+        available_tracks = [
+            (t, avail_usable) for t, avail_usable, avail_abs, occ, tlen in track_info if avail_usable > 0
+        ]
+        if available_tracks:
+            return max(available_tracks, key=lambda x: x[1])[0]
 
-        return tracks[0]
+        # Second try: All tracks at/over fill factor - check if ANY absolute capacity remains
+        tracks_with_absolute_capacity = [
+            (t, avail_abs) for t, avail_usable, avail_abs, occ, tlen in track_info if avail_abs > 0
+        ]
+        if tracks_with_absolute_capacity:
+            # Use track with most absolute capacity remaining
+            return max(tracks_with_absolute_capacity, key=lambda x: x[1])[0]
+
+        # No capacity available - return None to signal capacity exceeded
+        return None
 
     def _execute_pickup_plan(self, pickup_plan: Any, from_track_id: str) -> Generator[Any, Any]:  # pylint: disable=too-many-locals
         """Execute pickup plan - form rakes limited by retrofit track capacity."""
@@ -1248,13 +1287,16 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
 
     def _get_retrofit_track_capacity(self) -> float:
         """Get retrofit track full capacity in meters (no fill_factor for retrofit staging)."""
-        # TODO: We should use the trackcapacity management of the railway infrastructure context (currently broke!)
-        retrofit_tracks = self._tracks_by_type.get('retrofit', [])
+        retrofit_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('retrofit')
 
         if not retrofit_tracks:
+            available_track_types = []
+            for track_type in ['collection', 'retrofit', 'retrofitted', 'parking']:
+                if self.railway_context.get_track_selection_service().get_tracks_by_type(track_type):
+                    available_track_types.append(track_type)
             raise RuntimeError(
                 f'CONFIGURATION ERROR: No retrofit tracks found in scenario. '
-                f'Available track types: {list(self._tracks_by_type.keys())}'
+                f'Available track types: {available_track_types}'
             )
         if not self.railway_context:
             raise RuntimeError('CONFIGURATION ERROR: Railway context not initialized.')
@@ -1264,16 +1306,19 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 f"CONFIGURATION ERROR: Retrofit track '{retrofit_tracks[0].id}' has no capacity. "
                 f'Check topology.json for track length definition.'
             )
-        return track_capacity
+        return float(track_capacity)
 
     def _get_retrofitted_track_capacity(self) -> float:
         """Get retrofitted track capacity in meters."""
-        # TODO: We should use the trackcapacity management of the railway infrastructure context (currently broke!)
-        retrofitted_tracks = self._tracks_by_type.get('retrofitted', [])
+        retrofitted_tracks = self.railway_context.get_track_selection_service().get_tracks_by_type('retrofitted')
         if not retrofitted_tracks:
+            available_track_types = []
+            for track_type in ['collection', 'retrofit', 'retrofitted', 'parking']:
+                if self.railway_context.get_track_selection_service().get_tracks_by_type(track_type):
+                    available_track_types.append(track_type)
             raise RuntimeError(
                 f'CONFIGURATION ERROR: No retrofitted tracks found in scenario. '
-                f'Available track types: {list(self._tracks_by_type.keys())}'
+                f'Available track types: {available_track_types}'
             )
         if not self.railway_context:
             raise RuntimeError('CONFIGURATION ERROR: Railway context not initialized.')
@@ -1283,7 +1328,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 f"CONFIGURATION ERROR: Retrofitted track '{retrofitted_tracks[0].id}' has no capacity. "
                 f'Check topology.json for track length definition.'
             )
-        return track_capacity
+        return float(track_capacity)
 
     def _execute_direct_rake_assignment(self, rakes: list[Any]) -> Generator[Any, Any]:
         """Fallback: direct rake assignment without shunting operations."""
@@ -1353,6 +1398,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 parked_event = WagonParkedEvent(wagon_id=wagon.id, parking_area_id=parking_track_id)
                 parked_event.event_timestamp = current_time
                 self.infra.event_bus.publish(parked_event)
+
+            # Add wagons to parking track via railway context
+            self._add_wagons_to_track(wagons_to_park, parking_track_id)
 
             yield from shunting_context.move_locomotive(self, loco, parking_track_id, loco.home_track)
         finally:
