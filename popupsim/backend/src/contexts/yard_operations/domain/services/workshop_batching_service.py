@@ -30,8 +30,8 @@ class WorkshopBatchingService:
         self._pending_batches: dict[str, list[Wagon]] = {}
         self._pending_transport_checks: dict[str, bool] = {}
 
-    def add_completed_wagon(self, wagon: Wagon, workshop_id: str) -> WagonBatch | None:
-        """Add completed wagon and return batch if ready for transport."""
+    def add_completed_wagon(self, wagon: Wagon, workshop_id: str) -> bool:
+        """Add completed wagon to pending batch. Returns True if this is the first wagon."""
         # Initialize workshop batch if needed
         if workshop_id not in self._pending_batches:
             self._pending_batches[workshop_id] = []
@@ -40,15 +40,15 @@ class WorkshopBatchingService:
         # Add wagon to batch
         self._pending_batches[workshop_id].append(wagon)
 
-        # Check if we should create a batch (avoid duplicate processing)
+        # Return True if this is the first wagon (caller should schedule batch creation)
         if not self._pending_transport_checks[workshop_id]:
             self._pending_transport_checks[workshop_id] = True
-            return self._create_batch_if_ready(workshop_id)
+            return True
 
-        return None
+        return False
 
-    def _create_batch_if_ready(self, workshop_id: str) -> WagonBatch | None:
-        """Create batch if wagons are ready for transport."""
+    def create_batch(self, workshop_id: str) -> WagonBatch | None:
+        """Create batch from pending wagons and clear."""
         if workshop_id not in self._pending_batches or not self._pending_batches[workshop_id]:
             return None
 
@@ -61,6 +61,10 @@ class WorkshopBatchingService:
             return WagonBatch(completed_wagons, workshop_id)
 
         return None
+
+    def _create_batch_if_ready(self, workshop_id: str) -> WagonBatch | None:
+        """Create batch if wagons are ready for transport (deprecated - use create_batch)."""
+        return self.create_batch(workshop_id)
 
     def has_pending_wagons(self, workshop_id: str) -> bool:
         """Check if workshop has pending wagons."""

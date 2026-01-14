@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import Any
 
 from contexts.configuration.domain.models.scenario import Scenario
+from contexts.railway_infrastructure.application.track_occupancy_event_handler import TrackOccupancyEventHandler
 from contexts.railway_infrastructure.domain.aggregates.railway_yard import RailwayYard
 from contexts.railway_infrastructure.domain.aggregates.track_group import TrackGroup
 from contexts.railway_infrastructure.domain.entities.track import Track
@@ -13,6 +14,7 @@ from contexts.railway_infrastructure.domain.repositories.track_occupancy_reposit
 from contexts.railway_infrastructure.domain.services.topology_service import TopologyService
 from contexts.railway_infrastructure.domain.services.track_group_service import TrackGroupService
 from contexts.railway_infrastructure.domain.services.track_selection_service import TrackSelectionService
+from shared.domain.events.wagon_movement_events import WagonMovedEvent
 
 
 class RailwayInfrastructureContext:
@@ -50,6 +52,8 @@ class RailwayInfrastructureContext:
         self._scenario = scenario
         self._metrics_port = metrics_port
         self._occupancy_repository = occupancy_repository or TrackOccupancyRepository()
+        self._infra: Any = None
+        self._occupancy_handler: TrackOccupancyEventHandler | None = None
 
     @cached_property
     def _topology_service(self) -> TopologyService:
@@ -161,14 +165,11 @@ class RailwayInfrastructureContext:
     def cleanup(self) -> None:
         """Cleanup context resources."""
 
-    def initialize(self, infrastructure: Any, scenario: Scenario) -> None:
-        """Initialize context."""
+    def initialize(self, infrastructure: Any, scenario: Any) -> None:  # pylint: disable=unused-argument
+        """Initialize with infrastructure and scenario."""
         self._infra = infrastructure
 
         # Set up track occupancy event handler
-        from contexts.railway_infrastructure.application.track_occupancy_event_handler import TrackOccupancyEventHandler
-        from shared.domain.events.wagon_movement_events import WagonMovedEvent
-
         self._occupancy_handler = TrackOccupancyEventHandler(self)
         if hasattr(infrastructure, 'event_bus'):
             infrastructure.event_bus.subscribe(WagonMovedEvent, self._occupancy_handler.handle_wagon_moved)
@@ -271,9 +272,11 @@ class RailwayInfrastructureContext:
             'parking_area': TrackType.PARKING,
             'rescource_parking': TrackType.LOCOPARKING,
             'loco_parking': TrackType.LOCOPARKING,
+            'locoparking': TrackType.LOCOPARKING,
             'collection': TrackType.COLLECTION,
             'mainline': TrackType.MAINLINE,
             'retrofit': TrackType.RETROFIT,
+            'retrofitted': TrackType.RETROFITTED,
             'workshop': TrackType.WORKSHOP,
             'workshop_area': TrackType.WORKSHOP,
         }

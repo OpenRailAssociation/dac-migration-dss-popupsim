@@ -2,12 +2,13 @@
 
 import logging
 from pathlib import Path
+import sys
 
 
 class ProcessLogger:
     """Logger for tracking detailed process operations."""
 
-    def __init__(self, output_dir: Path) -> None:
+    def __init__(self, output_dir: Path, console: bool = False) -> None:
         self.logger = logging.getLogger('process')
         self.logger.setLevel(logging.INFO)
         self.logger.propagate = False
@@ -20,6 +21,13 @@ class ProcessLogger:
         handler = logging.FileHandler(output_dir / 'process.log', mode='w', encoding='utf-8')
         handler.setFormatter(logging.Formatter('%(asctime)s | t=%(sim_time)6.1f | %(message)s', datefmt='%H:%M:%S'))
         self.logger.addHandler(handler)
+
+        # Console handler for debugging (optional)
+        if console:
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setFormatter(logging.Formatter('t=%(sim_time)6.1f | %(message)s'))
+            self.logger.addHandler(console_handler)
+
         self.current_time = 0.0
 
     def set_time(self, sim_time: float) -> None:
@@ -35,11 +43,16 @@ class ProcessLogger:
 _PROCESS_LOGGER: ProcessLogger | None = None
 
 
-def init_process_logger(output_dir: Path) -> ProcessLogger:
-    """Initialize global process logger."""
+def init_process_logger(output_dir: Path, console: bool = False) -> ProcessLogger:
+    """Initialize global process logger.
+
+    Args:
+        output_dir: Directory for log file
+        console: If True, also log to console (useful for tests/debugging)
+    """
     # pylint: disable=global-statement
     global _PROCESS_LOGGER
-    _PROCESS_LOGGER = ProcessLogger(output_dir)
+    _PROCESS_LOGGER = ProcessLogger(output_dir, console=console)
     return _PROCESS_LOGGER
 
 

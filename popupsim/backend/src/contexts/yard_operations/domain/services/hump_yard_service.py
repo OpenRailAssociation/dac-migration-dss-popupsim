@@ -150,18 +150,19 @@ class HumpYardService:
 
         for wagon in wagons:
             wagon_length = getattr(wagon, 'length', 20.0)  # Default wagon length
+            remaining_meters = available_meters - used_meters
 
-            if used_meters + wagon_length <= available_meters and self._should_accept_wagon(wagon):
+            if wagon_length <= remaining_meters and self._should_accept_wagon(wagon):
                 wagon.status = 'COLLECTION'
                 wagon.track = track_id
                 accepted_wagons.append(wagon)
                 used_meters += wagon_length
             else:
                 wagon.status = 'REJECTED'
-                if used_meters + wagon_length > available_meters:
+                if wagon_length > remaining_meters:
                     wagon.rejection_reason = 'COLLECTION_TRACK_FULL'
                     wagon.detailed_rejection_reason = (
-                        f'Collection track capacity exceeded ({available_meters:.1f} meters available, '
+                        f'Collection track capacity exceeded ({remaining_meters:.1f} meters available, '
                         f'{wagon_length:.1f} meters needed)'
                     )
                 else:
@@ -171,7 +172,7 @@ class HumpYardService:
 
         return accepted_wagons, rejected_wagons
 
-    def _get_available_capacity(self, yard_config: YardConfiguration | None) -> int:
+    def _get_available_capacity(self, yard_config: YardConfiguration | None) -> int:  # noqa: ARG002
         """Get available capacity on collection track (legacy method)."""
         raise RuntimeError('Legacy method - use _get_available_capacity_from_railway instead')
 

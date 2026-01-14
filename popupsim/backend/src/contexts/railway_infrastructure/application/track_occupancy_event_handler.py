@@ -1,5 +1,6 @@
 """Track occupancy event handler for wagon movement synchronization."""
 
+import contextlib
 from typing import Any
 
 from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
@@ -7,7 +8,7 @@ from contexts.railway_infrastructure.domain.value_objects.track_occupant import 
 from shared.domain.events.wagon_movement_events import WagonMovedEvent
 
 
-class TrackOccupancyEventHandler:
+class TrackOccupancyEventHandler:  # pylint: disable=too-few-public-methods
     """Handles wagon movement events to keep track occupancy synchronized."""
 
     def __init__(self, railway_context: Any) -> None:
@@ -23,9 +24,8 @@ class TrackOccupancyEventHandler:
             if source_occupancy:
                 try:
                     source_occupancy.remove_occupant(event.wagon_id, event.timestamp)
-                except (ValueError, KeyError):
-                    # Wagon not found in source track - ignore
-                    pass
+                except (ValueError, KeyError) as e:
+                    print(f'Warning: Could not remove wagon {event.wagon_id} from {event.from_track}: {e}')
 
         # Add to destination track
         dest_track = self.railway_context.get_track(event.to_track)
@@ -36,10 +36,8 @@ class TrackOccupancyEventHandler:
             wagon = self._find_wagon_by_id(event.wagon_id)
             if wagon:
                 # Remove wagon from destination track first (in case it's already there)
-                try:
+                with contextlib.suppress(ValueError, KeyError):
                     dest_occupancy.remove_occupant(event.wagon_id, event.timestamp)
-                except (ValueError, KeyError):
-                    pass
 
                 optimal_position = dest_occupancy.find_optimal_position(wagon.length)
                 if optimal_position is not None:
@@ -50,16 +48,18 @@ class TrackOccupancyEventHandler:
                         position_start=optimal_position,
                     )
                     dest_occupancy.add_occupant(occupant, event.timestamp)
+                else:
+                    print(f'Warning: No space on {event.to_track} for wagon {event.wagon_id}')
+            else:
+                print(f'Warning: Could not find wagon {event.wagon_id} for movement to {event.to_track}')
 
     def _find_wagon_by_id(self, wagon_id: str) -> Any:
         """Find wagon by ID from yard context."""
-        try:
-            if hasattr(self.railway_context, '_infra') and self.railway_context._infra:
-                yard_context = self.railway_context._infra.contexts.get('yard')
+        with contextlib.suppress(Exception):
+            if self.railway_context._infra:  # pylint: disable=protected-access
+                yard_context = self.railway_context._infra.contexts.get('yard')  # pylint: disable=protected-access
                 if yard_context and hasattr(yard_context, 'all_wagons'):
                     for wagon in yard_context.all_wagons:
                         if wagon.id == wagon_id:
                             return wagon
-        except Exception:
-            pass
         return None
