@@ -10,7 +10,7 @@ Todo
         - Execute rakes
         - Shedule remaining wagons (current implementation is still odd)
 """
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,too-many-locals,too-many-statements,too-many-branches,too-many-nested-blocks,protected-access
 # ruff: noqa: C901, PLR0912, PLR0915
 # TODO: Refactoring is needed here. This is just for the MVP to get it running
 
@@ -19,8 +19,6 @@ import time
 from typing import Any
 
 from contexts.railway_infrastructure.domain.services.track_selection_service import SelectionStrategy
-from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
-from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
 from contexts.yard_operations.domain.aggregates.yard import Yard
 from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
 from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
@@ -157,21 +155,9 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self.infra.engine.schedule_process(self._pickup_wagons_from_track(event.track_id))
 
     def _get_wagons_on_track(self, track_id: str) -> list[Any]:
-        """Get wagons currently on track from railway context."""
+        """Get wagons currently on track in sequence order from railway context."""
         occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
-        track_occupancy = occupancy_repo.get(track_id)
-        if not track_occupancy:
-            return []
-
-        # Extract wagon objects from occupants
-        wagons = []
-        for occupant in track_occupancy.get_occupants():
-            if occupant.type.value == 'wagon':
-                # Find wagon object by ID in all_wagons
-                for wagon in self.all_wagons:
-                    if wagon.id == occupant.id:
-                        wagons.append(wagon)
-                        break
+        wagons: list[Any] = occupancy_repo.get_wagons_on_track(track_id)
         return wagons
 
     def _add_wagons_to_track(self, wagons: list[Any], track_id: str) -> tuple[list[Any], list[Any]]:
@@ -181,43 +167,33 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         if not track:
             return [], wagons
 
-        track_occupancy = occupancy_repo.get_or_create(track)
+        enhanced_occupancy = occupancy_repo.get_or_create(track)
         current_time = self.infra.engine.current_time()
 
         accepted_wagons = []
         rejected_wagons = []
 
         for wagon in wagons:
-            wagon_length = wagon.length
-            optimal_position = track_occupancy.find_optimal_position(wagon_length)
-
-            if optimal_position is None:
+            try:
+                enhanced_occupancy.add_wagon(wagon, current_time)
+                accepted_wagons.append(wagon)
+            except ValueError:
                 # Track is full - reject this wagon
                 wagon.status = WagonStatus.REJECTED
                 wagon.rejection_reason = f'{track_id}_FULL'
                 wagon.detailed_rejection_reason = f'Track {track_id} has no space for wagon {wagon.id}'
                 rejected_wagons.append(wagon)
-                continue
-
-            occupant = TrackOccupant(
-                id=wagon.id,
-                type=OccupantType.WAGON,
-                length=wagon_length,
-                position_start=optimal_position,
-            )
-            track_occupancy.add_occupant(occupant, current_time)
-            accepted_wagons.append(wagon)
 
         return accepted_wagons, rejected_wagons
 
     def _remove_wagons_from_track(self, wagon_ids: list[str], track_id: str) -> None:
         """Remove wagons from track via railway context."""
         occupancy_repo = self.railway_context.get_occupancy_repository()  # type: ignore[attr-defined]
-        track_occupancy = occupancy_repo.get(track_id)
-        if track_occupancy:
+        enhanced_occupancy = occupancy_repo.get(track_id)
+        if enhanced_occupancy:
             current_time = self.infra.engine.current_time()
             for wagon_id in wagon_ids:
-                track_occupancy.remove_occupant(wagon_id, current_time)
+                enhanced_occupancy.remove_wagon(wagon_id, current_time)
 
     def _pickup_wagons_from_track(self, track_id: str) -> Generator[Any, Any]:
         """Process for picking up wagons from a specific collection track."""
@@ -580,12 +556,69 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     event_timestamp=self.infra.engine.current_time(),
                 )
                 self.infra.event_bus.publish(pickup_event)
-                break  # Only trigger one pickup at a time
+                return  # Only trigger one pickup at a time
+
+        # Check if there are wagons waiting on retrofit track for any workshop
+        for workshop_id, waiting_wagons in self._waiting_at_retrofit.items():
+            if waiting_wagons:
+                # Filter: Only wagons that are ACTUALLY on the retrofit track
+                valid_waiting_wagons = [w for w in waiting_wagons if w.track == 'retrofit']
+
+                # Sort by arrival time at retrofit track (FIFO order)
+                # Use wagon's retrofit_start_time as proxy for arrival order, or use a timestamp
+                valid_waiting_wagons.sort(key=lambda w: getattr(w, '_retrofit_arrival_time', 0))
+
+                # Log filtered wagons for debugging
+                if len(valid_waiting_wagons) < len(waiting_wagons):
+                    filtered_out = [w for w in waiting_wagons if w not in valid_waiting_wagons]
+                    try:
+                        plog = get_process_logger()
+                        current_time = self.infra.engine.current_time()
+                        for wagon in filtered_out:
+                            plog.log(
+                                f'FILTERED_OUT: Wagon {wagon.id} track={wagon.track} (not on retrofit track)',
+                                sim_time=current_time,
+                            )
+                    except RuntimeError:
+                        pass
+
+                # Update the waiting list to remove invalid wagons
+                self._waiting_at_retrofit[workshop_id] = valid_waiting_wagons
+
+                if not valid_waiting_wagons:
+                    continue
+
+                workshop_capacity = self._get_workshop_capacity_for_batching(workshop_id)
+                next_batch_size = min(workshop_capacity, len(valid_waiting_wagons))
+                next_batch = valid_waiting_wagons[:next_batch_size]
+                self._waiting_at_retrofit[workshop_id] = valid_waiting_wagons[next_batch_size:]
+
+                try:
+                    plog = get_process_logger()
+                    current_time = self.infra.engine.current_time()
+                    wagon_ids = [w.id for w in next_batch]
+                    plog.log(
+                        f'TRIGGER_RETROFIT_PICKUP: Found {len(next_batch)} wagons {wagon_ids} '
+                        f'waiting for {workshop_id}',
+                        sim_time=current_time,
+                    )
+                except RuntimeError:
+                    pass
+
+                self.infra.engine.schedule_process(self._bring_next_batch_from_retrofit(next_batch, workshop_id))
+                return  # Only trigger one pickup at a time
 
     def _bring_next_batch_from_retrofit(self, wagons: list[Any], workshop_id: str) -> Generator[Any, Any]:
         """Bring next batch of wagons from retrofit track to workshop."""
         if not wagons:
             return
+
+        # Immediately remove these wagons from waiting list to prevent duplicate transport
+        if workshop_id in self._waiting_at_retrofit:
+            for wagon in wagons:
+                self._waiting_at_retrofit[workshop_id] = [
+                    w for w in self._waiting_at_retrofit[workshop_id] if w.id != wagon.id
+                ]
 
         try:
             plog = get_process_logger()
@@ -734,30 +767,38 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 if workshops_idle:
                     workshop_id = rake.formation_track
                     if self._waiting_at_retrofit.get(workshop_id):
-                        workshop_capacity = self._get_workshop_capacity_for_batching(workshop_id)
-                        waiting_count = len(self._waiting_at_retrofit[workshop_id])
-                        next_batch_size = min(workshop_capacity, waiting_count)
-                        next_batch = self._waiting_at_retrofit[workshop_id][:next_batch_size]
-                        self._waiting_at_retrofit[workshop_id] = self._waiting_at_retrofit[workshop_id][
-                            next_batch_size:
+                        # Filter: Only wagons that are ACTUALLY on the retrofit track
+                        valid_waiting_wagons = [
+                            w for w in self._waiting_at_retrofit[workshop_id] if w.track == 'retrofit'
                         ]
+                        # Sort by arrival time (FIFO)
+                        valid_waiting_wagons.sort(key=lambda w: getattr(w, '_retrofit_arrival_time', 0))
+                        # Update the waiting list to remove invalid wagons
+                        self._waiting_at_retrofit[workshop_id] = valid_waiting_wagons
 
-                        try:
-                            plog = get_process_logger()
-                            current_time = self.infra.engine.current_time()
-                            wagon_ids = [w.id for w in next_batch]
-                            plog.log(
-                                f'TASK_SCHEDULED: bring_next_batch for {workshop_id} - '
-                                f'{len(next_batch)} wagons {wagon_ids} at {current_time:.1f}min',
-                                sim_time=current_time,
+                        if valid_waiting_wagons:
+                            workshop_capacity = self._get_workshop_capacity_for_batching(workshop_id)
+                            waiting_count = len(valid_waiting_wagons)
+                            next_batch_size = min(workshop_capacity, waiting_count)
+                            next_batch = valid_waiting_wagons[:next_batch_size]
+                            self._waiting_at_retrofit[workshop_id] = valid_waiting_wagons[next_batch_size:]
+
+                            try:
+                                plog = get_process_logger()
+                                current_time = self.infra.engine.current_time()
+                                wagon_ids = [w.id for w in next_batch]
+                                plog.log(
+                                    f'TASK_SCHEDULED: bring_next_batch for {workshop_id} - '
+                                    f'{len(next_batch)} wagons {wagon_ids} at {current_time:.1f}min',
+                                    sim_time=current_time,
+                                )
+                            except RuntimeError:
+                                pass
+
+                            # Schedule immediately - all workshops are idle, this has priority
+                            self.infra.engine.schedule_process(
+                                self._bring_next_batch_from_retrofit(next_batch, workshop_id)
                             )
-                        except RuntimeError:
-                            pass
-
-                        # Schedule immediately - all workshops are idle, this has priority
-                        self.infra.engine.schedule_process(
-                            self._bring_next_batch_from_retrofit(next_batch, workshop_id)
-                        )
             finally:
                 yield from shunting_context.release_locomotive(self, loco2)
         except GeneratorExit:  # pylint: disable=try-except-raise
@@ -896,6 +937,18 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
             # Step 1: Move ALL wagons from collection to retrofit staging track
             loco = yield from shunting_context.allocate_locomotive(self)
             try:
+                try:
+                    plog = get_process_logger()
+                    current_time = self.infra.engine.current_time()
+                    wagon_ids = [w.id for w in rake.wagons]
+                    plog.log(
+                        f'COLLECTION_TO_RETROFIT: Moving {len(rake.wagons)} wagons {wagon_ids} '
+                        f'from {rake.formation_track} to {rake.target_track}',
+                        sim_time=current_time,
+                    )
+                except RuntimeError:
+                    pass
+
                 yield from shunting_context.move_locomotive(self, loco, loco.current_track, rake.formation_track)
                 yield from shunting_context.couple_wagons(self, rake.wagon_count, 'SCREW', [])
                 yield from shunting_context.move_locomotive(self, loco, rake.formation_track, rake.target_track)
@@ -905,9 +958,22 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                 current_time = self.infra.engine.current_time()
 
                 for wagon in rake.wagons:
+                    old_track = wagon.track
+                    wagon.move_to_track(rake.target_track)  # Update wagon's track to retrofit
+                    wagon._retrofit_arrival_time = current_time  # Track arrival time for FIFO
+
+                    try:
+                        plog = get_process_logger()
+                        plog.log(
+                            f'WAGON_MOVED_TO_RETROFIT: {wagon.id} from {old_track} to {rake.target_track}',
+                            sim_time=current_time,
+                        )
+                    except RuntimeError:
+                        pass
+
                     moved_event = WagonMovedEvent(
                         wagon_id=wagon.id,
-                        from_track=rake.formation_track,
+                        from_track=old_track,
                         to_track=rake.target_track,
                         timestamp=current_time,
                         movement_type='shunting',
@@ -963,60 +1029,85 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
                     continue
 
                 batch_size = workshop_capacities[workshop_id]
-                first_batch = batch_wagons[:batch_size]
-                remaining = batch_wagons[batch_size:]
 
-                try:
-                    plog = get_process_logger()
-                    current_time = self.infra.engine.current_time()
-                    first_ids = [w.id for w in first_batch]
-                    plog.log(
-                        f'BATCH_SPLIT: {workshop_id} - first_batch={len(first_batch)} {first_ids}, '
-                        f'remaining={len(remaining)}',
-                        sim_time=current_time,
-                    )
-                except RuntimeError:
-                    pass
+                # Check if there are already wagons waiting for this workshop
+                existing_waiting = self._waiting_at_retrofit.get(workshop_id, [])
 
-                # Store remaining wagons for this workshop FIRST
-                if remaining:
+                if existing_waiting:
+                    # If wagons are already waiting, add ALL new wagons to waiting list (FIFO)
                     if workshop_id not in self._waiting_at_retrofit:
                         self._waiting_at_retrofit[workshop_id] = []
-                    self._waiting_at_retrofit[workshop_id].extend(remaining)
+
+                    existing_ids = {w.id for w in self._waiting_at_retrofit[workshop_id]}
+                    new_wagons = [w for w in batch_wagons if w.track == 'retrofit' and w.id not in existing_ids]
+
+                    if new_wagons:
+                        self._waiting_at_retrofit[workshop_id].extend(new_wagons)
+                        try:
+                            plog = get_process_logger()
+                            current_time = self.infra.engine.current_time()
+                            wagon_ids = [w.id for w in new_wagons]
+                            plog.log(
+                                f'STORE_ALL_WAITING: Added {len(new_wagons)} wagons {wagon_ids} '
+                                f'to waiting list for {workshop_id} '
+                                f'(total waiting: {len(self._waiting_at_retrofit[workshop_id])})',
+                                sim_time=current_time,
+                            )
+                        except RuntimeError:
+                            pass
+                else:
+                    # No wagons waiting, split into first batch and remaining
+                    first_batch = batch_wagons[:batch_size]
+                    remaining = batch_wagons[batch_size:]
 
                     try:
                         plog = get_process_logger()
                         current_time = self.infra.engine.current_time()
-                        wagon_ids = [w.id for w in remaining]
+                        first_ids = [w.id for w in first_batch]
                         plog.log(
-                            f'STORE_WAITING: Stored {len(remaining)} wagons {wagon_ids} for {workshop_id}',
+                            f'BATCH_SPLIT: {workshop_id} - first_batch={len(first_batch)} {first_ids}, '
+                            f'remaining={len(remaining)}',
                             sim_time=current_time,
                         )
                     except RuntimeError:
                         pass
 
-            # Transport first batch to each workshop
-            for workshop_id in scenario_workshop_ids:
-                batch_wagons = workshop_batches[workshop_id]
-                if not batch_wagons:
-                    continue
+                    # Store remaining wagons for this workshop
+                    if remaining:
+                        if workshop_id not in self._waiting_at_retrofit:
+                            self._waiting_at_retrofit[workshop_id] = []
 
-                batch_size = workshop_capacities[workshop_id]
-                first_batch = batch_wagons[:batch_size]
+                        existing_ids = {w.id for w in self._waiting_at_retrofit[workshop_id]}
+                        new_wagons = [w for w in remaining if w.track == 'retrofit' and w.id not in existing_ids]
 
-                try:
-                    plog = get_process_logger()
-                    current_time = self.infra.engine.current_time()
-                    wagon_ids = [w.id for w in first_batch]
-                    plog.log(
-                        f'TRANSPORT_FIRST_BATCH: {len(first_batch)} wagons {wagon_ids} to {workshop_id}',
-                        sim_time=current_time,
-                    )
-                except RuntimeError:
-                    pass
+                        if new_wagons:
+                            self._waiting_at_retrofit[workshop_id].extend(new_wagons)
 
-                # Transport first batch
-                yield from self._transport_wagon_batch_to_workshop(first_batch, workshop_id, shunting_context)
+                            try:
+                                plog = get_process_logger()
+                                current_time = self.infra.engine.current_time()
+                                wagon_ids = [w.id for w in new_wagons]
+                                plog.log(
+                                    f'STORE_WAITING: Stored {len(new_wagons)} wagons {wagon_ids} for {workshop_id} '
+                                    f'(total waiting: {len(self._waiting_at_retrofit[workshop_id])})',
+                                    sim_time=current_time,
+                                )
+                            except RuntimeError:
+                                pass
+
+                    # Transport first batch immediately
+                    try:
+                        plog = get_process_logger()
+                        current_time = self.infra.engine.current_time()
+                        wagon_ids = [w.id for w in first_batch]
+                        plog.log(
+                            f'TRANSPORT_FIRST_BATCH: {len(first_batch)} wagons {wagon_ids} to {workshop_id}',
+                            sim_time=current_time,
+                        )
+                    except RuntimeError:
+                        pass
+
+                    yield from self._transport_wagon_batch_to_workshop(first_batch, workshop_id, shunting_context)
         except GeneratorExit:  # pylint: disable=try-except-raise
             return
 
@@ -1024,23 +1115,47 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         self, wagons: list[Any], workshop_id: str, shunting_context: Any
     ) -> Generator[Any, Any]:
         """Transport a batch of wagons from retrofit to workshop using step planner."""
+        # Filter out wagons that don't need retrofit, are already at workshop, or are being processed
+        valid_wagons = [
+            w
+            for w in wagons
+            if w.needs_retrofit
+            and w.track == 'retrofit'  # MUST be on retrofit track
+            and w.status not in [WagonStatus.RETROFITTING, WagonStatus.MOVING_TO_STATION, WagonStatus.RETROFITTED]
+            and not hasattr(w, '_sent_to_workshop')  # Not already sent
+        ]
+
+        if not valid_wagons:
+            try:
+                plog = get_process_logger()
+                current_time = self.infra.engine.current_time()
+                plog.log(
+                    f'SKIP_TRANSPORT: No valid wagons to transport to {workshop_id}',
+                    sim_time=current_time,
+                )
+            except RuntimeError:
+                pass
+            return
+
         try:
             plog = get_process_logger()
             current_time = self.infra.engine.current_time()
-            wagon_ids = [w.id for w in wagons]
-            plog.log(f'TRANSPORT_TO_WORKSHOP: {len(wagons)} wagons {wagon_ids} to {workshop_id}', sim_time=current_time)
+            wagon_ids = [w.id for w in valid_wagons]
+            plog.log(
+                f'TRANSPORT_TO_WORKSHOP: {len(valid_wagons)} wagons {wagon_ids} to {workshop_id}', sim_time=current_time
+            )
         except RuntimeError:
             pass
 
         # Use step planner for capacity-aware transport planning
-        transport_plan = self.retrofit_to_workshop_planner.plan_transport(wagons, 'retrofit')
+        transport_plan = self.retrofit_to_workshop_planner.plan_transport(valid_wagons, 'retrofit')
 
         if not transport_plan:
             try:
                 plog = get_process_logger()
                 current_time = self.infra.engine.current_time()
                 plog.log(
-                    f'TRANSPORT_FAILED: No transport plan for {len(wagons)} wagons to {workshop_id}',
+                    f'TRANSPORT_FAILED: No transport plan for {len(valid_wagons)} wagons to {workshop_id}',
                     sim_time=current_time,
                 )
             except RuntimeError:
@@ -1050,40 +1165,39 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         loco = yield from shunting_context.allocate_locomotive(self)
         try:
             yield from shunting_context.move_locomotive(self, loco, loco.current_track, transport_plan.from_track)
-            wagon_ids = [w.id for w in wagons]
-            yield from shunting_context.couple_wagons(self, len(wagons), 'SCREW', wagon_ids)
+            wagon_ids = [w.id for w in valid_wagons]
+            yield from shunting_context.couple_wagons(self, len(valid_wagons), 'SCREW', wagon_ids)
             yield from shunting_context.move_locomotive(self, loco, transport_plan.from_track, workshop_id, wagon_ids)
-            yield from shunting_context.decouple_wagons(self, len(wagons), 'SCREW', wagon_ids)
+            yield from shunting_context.decouple_wagons(self, len(valid_wagons), 'SCREW', wagon_ids)
 
             # Publish wagon moved events and ready events
             current_time = self.infra.engine.current_time()
 
-            for wagon in wagons:
-                old_track = wagon.track
-                wagon.workshop_id = workshop_id
-                wagon.move_to_track(workshop_id)
-
+            for wagon in valid_wagons:
+                # Wagon stays on retrofit track - popup context will handle workshop assignment
                 try:
                     plog = get_process_logger()
                     plog.log(
-                        f'WAGON_STATE: {wagon.id} moved {old_track} → {workshop_id}, status={wagon.status.value}',
+                        f'WAGON_READY: {wagon.id} ready on retrofit track, status={wagon.status}',
                         sim_time=current_time,
                     )
                 except RuntimeError:
                     pass
 
-                # Publish wagon moved event for track occupancy sync
-                moved_event = WagonMovedEvent(
-                    wagon_id=wagon.id,
-                    from_track=old_track,
-                    to_track=workshop_id,
-                    timestamp=current_time,
-                    movement_type='shunting',
-                )
-                self.infra.event_bus.publish(moved_event)
-
-                event = WagonReadyForRetrofitEvent(wagon=wagon, workshop_id=workshop_id)
-                self.infra.event_bus.publish(event)
+                event = WagonReadyForRetrofitEvent(wagon=wagon, event_timestamp=current_time)
+                # Only publish if wagon hasn't been sent to workshop yet
+                if not hasattr(wagon, '_sent_to_workshop') or not wagon._sent_to_workshop:  # pylint: disable=protected-access
+                    wagon._sent_to_workshop = True  # pylint: disable=protected-access
+                    self.infra.event_bus.publish(event)
+                else:
+                    try:
+                        plog = get_process_logger()
+                        plog.log(
+                            f'SKIP_DUPLICATE: {wagon.id} already sent to {workshop_id}, skipping duplicate event',
+                            sim_time=current_time,
+                        )
+                    except RuntimeError:
+                        pass
 
             yield from shunting_context.move_locomotive(self, loco, workshop_id, loco.home_track)
         finally:
