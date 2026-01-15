@@ -188,7 +188,7 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
             start_event = RetrofitStartedEvent(
                 wagon_id=wagon.id,
                 workshop_id=workshop_id,
-                bay_id=f'{workshop_id}_bay_1',
+                bay_id=bay_id,
                 event_timestamp=acquire_time,
             )
             self._event_bus.publish(start_event)  # type: ignore[arg-type]
@@ -224,6 +224,9 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
                 )
             except RuntimeError:
                 pass
+
+            # Mark wagon as no longer needing retrofit
+            wagon.needs_retrofit = False
 
             # Publish completion event
             completion_event = WagonRetrofitCompletedEvent(
@@ -345,28 +348,54 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
         return {workshop_id: workshop.get_performance_summary() for workshop_id, workshop in self._workshops.items()}
 
     def _handle_wagon_ready(self, event: WagonReadyForRetrofitEvent) -> None:
-        """Handle wagon ready for retrofit event using DDD approach."""
-        self.infra.engine.current_time()  # type: ignore[union-attr]
+        """Handle wagon ready for retrofit event - select workshop and process.
 
-        # Use domain service to create processing plan
-        workshop_capacity = self._get_workshop_capacity(event.workshop_id)
-        processing_plan = self._processing_service.create_processing_plan(
-            [event.wagon],
-            event.workshop_id,
-            workshop_capacity,
-            ProcessingStrategy.INDIVIDUAL,
-        )
-
-        # Validate processing feasibility
-        is_feasible, _issues = self._processing_service.validate_processing_feasibility(
-            processing_plan, workshop_capacity
-        )
-
-        if not is_feasible:
+        Workshop selection follows DDD principles:
+        - Popup context owns workshop assignment (SRP)
+        - Uses round-robin strategy for load balancing
+        - Wagon stays on retrofit track until retrofit starts
+        """
+        # Select available workshop using round-robin
+        workshop_id = self._select_available_workshop()
+        if not workshop_id:
+            try:
+                plog = get_process_logger()
+                current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+                plog.log(
+                    f'NO_WORKSHOP: No workshop available for wagon {event.wagon.id}',
+                    sim_time=current_time,
+                )
+            except RuntimeError:
+                pass
             return
 
-        # Execute processing plan
-        self._execute_processing_plan(processing_plan)
+        # Assign workshop to wagon
+        event.wagon.workshop_id = workshop_id
+
+        # Process wagon immediately to ensure wagons arriving together start at same time
+        wagon_retrofit = self._process_wagon_retrofit(event.wagon, workshop_id)
+        self.infra.engine.schedule_process(wagon_retrofit)  # type: ignore[union-attr]
+
+    def _select_available_workshop(self) -> str | None:
+        """Select available workshop using round-robin strategy.
+
+        Returns
+        -------
+        str | None
+            Workshop ID or None if no workshops available
+        """
+        if not self._workshop_resources:
+            return None
+
+        # Simple round-robin: cycle through workshops
+        workshop_ids = list(self._workshop_resources.keys())
+        if not workshop_ids:
+            return None
+
+        # Use timestamp-based selection for deterministic round-robin
+        current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+        index = int(current_time) % len(workshop_ids)
+        return workshop_ids[index]
 
     def _handle_rake_transported(self, event: RakeTransportedEvent) -> None:
         """Handle rake transported event using DDD approach."""

@@ -20,6 +20,7 @@ from shared.domain.events.wagon_lifecycle_events import WagonReadyForParkingEven
 from shared.domain.events.wagon_lifecycle_events import WagonReadyForRetrofitEvent
 from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEvent
 from shared.domain.events.wagon_lifecycle_events import WagonRetrofittedEvent
+from shared.domain.events.wagon_movement_events import WagonMovedEvent
 
 
 def discover_shared_events() -> list[type[Any]]:
@@ -33,6 +34,7 @@ def discover_shared_events() -> list[type[Any]]:
         BatchRetrofittedEvent,
         WagonReadyForParkingEvent,
         LocomotiveMovementRequestEvent,
+        WagonMovedEvent,
     ]
 
 

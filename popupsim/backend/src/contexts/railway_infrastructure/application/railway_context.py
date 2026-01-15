@@ -165,7 +165,7 @@ class RailwayInfrastructureContext:
     def cleanup(self) -> None:
         """Cleanup context resources."""
 
-    def initialize(self, infrastructure: Any, scenario: Any) -> None:  # pylint: disable=unused-argument
+    def initialize(self, infrastructure: Any, _scenario: Any) -> None:  # pylint: disable=unused-argument
         """Initialize with infrastructure and scenario."""
         self._infra = infrastructure
 
@@ -220,10 +220,9 @@ class RailwayInfrastructureContext:
         track = self._tracks[track_id]
         total_capacity = track.total_length * track.fill_factor
         try:
-            occupancy = self._occupancy_repository.get(track_id)
-            if occupancy:
-                occupied_meters = occupancy.get_current_occupancy_meters()
-                return max(0.0, total_capacity - occupied_meters)
+            enhanced_occupancy = self._occupancy_repository.get(track_id)
+            if enhanced_occupancy:
+                return enhanced_occupancy.get_available_capacity()
         except (ValueError, TypeError):
             pass
         return total_capacity

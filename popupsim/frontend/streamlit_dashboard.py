@@ -784,7 +784,7 @@ def render_process_log_tab(data: dict[str, Any]) -> None:
     st.caption(f'Showing {min(show_lines, len(filtered_df))} of {len(filtered_df)} process entries')
 
 
-def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None:
+def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None:  # noqa: PLR0915
     """Render Gantt chart showing individual wagon journeys."""
     import matplotlib.pyplot as plt
 
@@ -810,13 +810,13 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
         'collection': '#e74c3c',  # Red
         'collection1': '#e74c3c',
         'collection2': '#c0392b',
-        'retrofit': '#f39c12',  # Orange
+        'retrofit': '#f39c12',  # Orange - STAGING TRACK
         'WS_01': '#27ae60',  # Green
         'WS_02': '#3498db',  # Blue
         'retrofitted': '#9b59b6',  # Purple
         'distribution': '#1abc9c',  # Turquoise
         'parking': '#34495e',  # Dark gray
-        'rejected': '#e67e22',  # Dark orange (out of system)
+        'rejected': '#d62728',  # Red - OUT OF SYSTEM
     }
 
     # Add colors for specific parking tracks (different shades of gray/blue)
@@ -836,48 +836,89 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
             next_row = wagon_data.iloc[i + 1]
 
             track = row['location']
+            status = row['status']
             start_time = row['timestamp']
             end_time = next_row['timestamp']
             duration = end_time - start_time
 
             color = track_colors.get(track, '#7f7f7f')
+
+            # Use hatching for RETROFITTING status to show active work
+            hatch = '///' if status == 'RETROFITTING' else None
+            alpha = 1.0 if status == 'RETROFITTING' else 0.8
+
             ax.barh(
-                y_pos, duration, left=start_time, height=0.8, color=color, alpha=0.8, edgecolor='black', linewidth=0.2
+                y_pos,
+                duration,
+                left=start_time,
+                height=0.8,
+                color=color,
+                alpha=alpha,
+                edgecolor='black',
+                linewidth=0.3,
+                hatch=hatch,
             )
 
         # Add final position
         last_row = wagon_data.iloc[-1]
         track = last_row['location']
+        status = last_row['status']
         max_time = journey_df['timestamp'].max()
         duration = max_time - last_row['timestamp']
         if duration > 0:
             color = track_colors.get(track, '#7f7f7f')
+            hatch = '///' if status == 'RETROFITTING' else None
+            alpha = 1.0 if status == 'RETROFITTING' else 0.8
+
             ax.barh(
                 y_pos,
                 duration,
                 left=last_row['timestamp'],
                 height=0.8,
                 color=color,
-                alpha=0.8,
+                alpha=alpha,
                 edgecolor='black',
-                linewidth=0.2,
+                linewidth=0.3,
+                hatch=hatch,
             )
 
     ax.set_yticks(range(len(wagon_ids)))
     ax.set_yticklabels(wagon_ids, fontsize=6)
     ax.set_xlabel('Simulation Time (minutes)', fontsize=11)
     ax.set_ylabel('Wagon ID', fontsize=11)
-    ax.set_title('Individual Wagon Journeys Over Time', fontsize=12, fontweight='bold')
+    ax.set_title('Individual Wagon Journeys Over Time (Track-based)', fontsize=12, fontweight='bold')
     ax.grid(axis='x', alpha=0.3, linestyle='--')
 
-    # Add legend
+    # Add legend - prioritize important tracks
     from matplotlib.patches import Patch
 
     unique_tracks = sorted(set(journey_df['location'].unique()))
+
+    # Prioritize key tracks in legend
+    priority_tracks = [
+        'collection',
+        'collection1',
+        'collection2',
+        'retrofit',
+        'WS_01',
+        'WS_02',
+        'retrofitted',
+        'parking',
+        'rejected',
+    ]
+    legend_tracks = [t for t in priority_tracks if t in unique_tracks]
+    # Add remaining tracks
+    legend_tracks.extend([t for t in unique_tracks if t not in legend_tracks][:5])
+
     legend_elements = [
         Patch(facecolor=track_colors.get(track, '#7f7f7f'), edgecolor='black', label=track, alpha=0.8)
-        for track in unique_tracks[:10]
-    ]  # Limit to first 10 for readability
+        for track in legend_tracks
+    ]
+    # Add hatched element to show retrofitting status
+    legend_elements.append(
+        Patch(facecolor='gray', edgecolor='black', hatch='///', label='RETROFITTING (active work)', alpha=1.0)
+    )
+
     ax.legend(handles=legend_elements, loc='upper right', fontsize=8, ncol=2)
 
     plt.tight_layout()
@@ -887,11 +928,17 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
 
     if not show_all:
         st.caption(
-            f'Showing {len(wagon_ids)} wagons with journeys (excludes wagons stuck on collection track). '
-            'Each color represents a different track/location.'
+            f'Showing {len(wagon_ids)} wagons with journeys '
+            '(excludes wagons stuck on collection track). '
+            'Each color = track/location. Hatched pattern (///) = '
+            'actively retrofitting in workshop.'
         )
     else:
-        st.caption(f'Showing all {len(wagon_ids)} wagons. Each color represents a different track/location.')
+        st.caption(
+            f'Showing all {len(wagon_ids)} wagons. '
+            'Each color = track/location. '
+            'Hatched pattern (///) = actively retrofitting in workshop.'
+        )
 
 
 def _render_track_gantt(journey_df: pd.DataFrame) -> None:
