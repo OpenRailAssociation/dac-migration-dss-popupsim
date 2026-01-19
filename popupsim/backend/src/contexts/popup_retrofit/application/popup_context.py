@@ -1,4 +1,5 @@
 """PopUp Retrofit Context implementation."""
+# pylint: disable=too-many-instance-attributes,too-many-locals,too-many-branches,too-many-statements,import-outside-toplevel,duplicate-code,cyclic-import
 
 from datetime import timedelta
 import time
@@ -16,6 +17,7 @@ from contexts.popup_retrofit.domain.value_objects.workshop_id import WorkshopId
 from infrastructure.event_bus.event_bus import EventBus
 from infrastructure.logging import get_process_logger
 from shared.domain.entities.rake import Rake
+from shared.domain.entities.wagon import Wagon
 from shared.domain.events.rake_events import RakeProcessingStartedEvent
 from shared.domain.events.rake_events import RakeTransportedEvent
 from shared.domain.events.rake_events import RakeTransportRequestedEvent
@@ -32,11 +34,10 @@ from shared.infrastructure.time_converters import to_ticks
 from .ports.popup_context_port import PopUpContextPort
 
 if TYPE_CHECKING:
-    from shared.domain.entities.wagon import Wagon
     from shared.infrastructure.simulation.coordination.simulation_infrastructure import SimulationInfrastructure
 
 
-class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instance-attributes
+class PopUpRetrofitContext(PopUpContextPort):
     """PopUp Retrofit Context for managing DAC installation operations."""
 
     def __init__(self, event_bus: EventBus, rake_registry: RakeRegistry | None = None) -> None:
@@ -55,6 +56,13 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
         self._bay_status_history: dict[str, list[tuple[float, bool]]] = {}
         # Track bay assignments per workshop
         self._bay_counters: dict[str, int] = {}
+        # Global FIFO queue for workshop assignment
+        self._global_waiting_queue: list[tuple[float, Wagon]] = []  # (arrival_time, wagon)
+        self._workshop_assignment_counter = 0  # For round-robin
+        self._assignment_scheduled = False  # Flag to prevent duplicate scheduling
+        # Batch collection for simultaneous arrivals
+        self._pending_batches: dict[tuple[str, float], list[Wagon]] = {}  # (workshop_id, arrival_time) -> wagons
+        self._batch_scheduled: dict[tuple[str, float], bool] = {}  # (workshop_id, arrival_time) -> is_scheduled
 
     def initialize(self, infra: Any, scenario: Any) -> None:
         """Initialize with infrastructure and scenario."""
@@ -241,6 +249,9 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
             self._track_batch_completion(wagon, workshop_id)
             self._track_rake_completion(wagon, workshop_id)
 
+            # Try to assign next wagon from queue after retrofit completes
+            self._try_assign_from_queue()
+
             # Resource will be released after wagon is picked up (in yard context)
 
         return retrofit_gen()
@@ -348,54 +359,324 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
         return {workshop_id: workshop.get_performance_summary() for workshop_id, workshop in self._workshops.items()}
 
     def _handle_wagon_ready(self, event: WagonReadyForRetrofitEvent) -> None:
-        """Handle wagon ready for retrofit event - select workshop and process.
+        """Handle wagon ready for retrofit event - add to FIFO queue.
 
-        Workshop selection follows DDD principles:
-        - Popup context owns workshop assignment (SRP)
-        - Uses round-robin strategy for load balancing
-        - Wagon stays on retrofit track until retrofit starts
+        Logic:
+        - Add wagon to FIFO queue
+        - DON'T immediately assign - wait for all wagons from rake to arrive
+        - Assignment happens via delay(0) to batch simultaneous arrivals
         """
-        # Select available workshop using round-robin
-        workshop_id = self._select_available_workshop()
-        if not workshop_id:
+        arrival_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+
+        # Add wagon to FIFO queue
+        self._global_waiting_queue.append((arrival_time, event.wagon))
+        self._global_waiting_queue.sort(key=lambda x: x[0])
+
+        try:
+            plog = get_process_logger()
+            plog.log(
+                f'WAGON_QUEUED: {event.wagon.id} added to FIFO queue at {arrival_time:.1f}min '
+                f'(queue size: {len(self._global_waiting_queue)})',
+                sim_time=arrival_time,
+            )
+        except RuntimeError:
+            pass
+
+        # Schedule batch assignment with delay(0) to collect all simultaneous arrivals
+        if not hasattr(self, '_assignment_scheduled') or not self._assignment_scheduled:
+            self._assignment_scheduled = True
+            self.infra.engine.schedule_process(self._delayed_batch_assignment())  # type: ignore[union-attr]
+
+    def _delayed_batch_assignment(self) -> Any:
+        """Delayed batch assignment to collect all wagons arriving at same time."""
+
+        def assign_gen() -> Any:
+            # Delay to collect all wagons arriving at same simulation time
+            yield from self.infra.engine.delay(0)  # type: ignore[union-attr]
+
+            # Reset flag
+            self._assignment_scheduled = False
+
+            # Now assign batches from queue
+            self._try_assign_from_queue()
+
+        return assign_gen()
+
+    def _process_batch(self, batch_key: tuple[str, float]) -> Any:
+        """Process batch of wagons that arrived at same time - all start together."""
+
+        def batch_gen() -> Any:
+            # Delay to collect all wagons arriving at same simulation time
+            yield from self.infra.engine.delay(0)  # type: ignore[union-attr]
+
+            workshop_id, arrival_time = batch_key
+
+            # Get all wagons in batch
+            wagons = self._pending_batches.get(batch_key, [])
+            if batch_key in self._pending_batches:
+                del self._pending_batches[batch_key]
+            if batch_key in self._batch_scheduled:
+                del self._batch_scheduled[batch_key]
+
+            if not wagons:
+                return
+
+            workshop_resource = self._workshop_resources.get(workshop_id)
+            if not workshop_resource:
+                return
+
+            # Check capacity - if not enough, queue wagons
+            available_capacity = workshop_resource.capacity - workshop_resource.count  # type: ignore[attr-defined]
+
+            if available_capacity <= 0:
+                # No capacity - queue all wagons
+                for wagon in wagons:
+                    self._global_waiting_queue.append((arrival_time, wagon))
+                self._global_waiting_queue.sort(key=lambda x: x[0])
+
+                try:
+                    plog = get_process_logger()
+                    current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+                    wagon_ids = [w.id for w in wagons]
+                    plog.log(
+                        f'BATCH_QUEUED: {len(wagons)} wagons {wagon_ids} queued (workshop {workshop_id} at capacity)',
+                        sim_time=current_time,
+                    )
+                except RuntimeError:
+                    pass
+                return
+
+            # Split into immediate batch and queued wagons
+            immediate_batch = wagons[:available_capacity]
+            queued_wagons = wagons[available_capacity:]
+
+            # Queue excess wagons
+            for wagon in queued_wagons:
+                self._global_waiting_queue.append((arrival_time, wagon))
+            if queued_wagons:
+                self._global_waiting_queue.sort(key=lambda x: x[0])
+
             try:
                 plog = get_process_logger()
                 current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+                immediate_ids = [w.id for w in immediate_batch]
+                queued_ids = [w.id for w in queued_wagons]
                 plog.log(
-                    f'NO_WORKSHOP: No workshop available for wagon {event.wagon.id}',
+                    f'BATCH_PROCESS: {len(immediate_batch)} wagons {immediate_ids} starting together at {workshop_id}, '
+                    f'{len(queued_wagons)} queued {queued_ids}',
                     sim_time=current_time,
                 )
             except RuntimeError:
                 pass
+
+            # Request ALL workshop resources for the batch BEFORE starting any retrofits
+            requests = []
+            for _ in immediate_batch:
+                req = workshop_resource.request()  # type: ignore[attr-defined]
+                requests.append(req)
+                yield req  # Wait for this resource
+
+            # All resources acquired - now start all retrofits at the SAME time
+            start_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+
+            for i, wagon in enumerate(immediate_batch):
+                wagon.retrofit_start_time = start_time
+                wagon.status = 'RETROFITTING'
+
+                # Assign to bay
+                bay_num = i % workshop_resource.capacity  # type: ignore[attr-defined]
+                bay_id = f'{workshop_id}_bay_{bay_num}'
+                if bay_id not in self._bay_status_history:
+                    self._bay_status_history[bay_id] = []
+                self._bay_status_history[bay_id].append((start_time, True))
+
+                # Store for later release
+                wagon._assigned_bay_id = bay_id  # pylint: disable=protected-access
+                wagon._workshop_request = requests[i]  # pylint: disable=protected-access
+                wagon._workshop_resource = workshop_resource  # pylint: disable=protected-access
+
+                # Publish retrofit started event
+                start_event = RetrofitStartedEvent(
+                    wagon_id=wagon.id,
+                    workshop_id=workshop_id,
+                    bay_id=bay_id,
+                    event_timestamp=start_time,
+                )
+                self._event_bus.publish(start_event)  # type: ignore[arg-type]
+
+            # Wait for retrofit completion (same duration for all)
+            retrofit_time = to_ticks(timedelta(minutes=10))  # Default
+            if self.scenario and hasattr(self.scenario, 'process_times'):
+                process_time = getattr(
+                    self.scenario.process_times,
+                    'wagon_retrofit_time',
+                    timedelta(minutes=10),
+                )
+                retrofit_time = to_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+
+            yield from self.infra.engine.delay(retrofit_time)  # type: ignore[union-attr]
+
+            # All wagons complete at same time
+            complete_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+
+            for wagon in immediate_batch:
+                wagon.status = 'RETROFITTED'
+                wagon.retrofit_end_time = complete_time
+                wagon.needs_retrofit = False
+
+                # Track bay idle
+                bay_id = getattr(wagon, '_assigned_bay_id', f'{workshop_id}_bay_0')
+                self._bay_status_history[bay_id].append((complete_time, False))
+
+                # Publish completion event
+                completion_event = WagonRetrofitCompletedEvent(
+                    wagon_id=wagon.id,
+                    completion_time=complete_time,
+                    workshop_id=workshop_id,
+                    event_timestamp=complete_time,
+                )
+                self._event_bus.publish(completion_event)
+
+                # Track batch and rake completion
+                self._track_batch_completion(wagon, workshop_id)
+                self._track_rake_completion(wagon, workshop_id)
+
+            # Try to assign next wagons from queue
+            self._try_assign_from_queue()
+
+        return batch_gen()
+
+    def _try_assign_from_queue(self) -> None:
+        """Try to assign wagons from FIFO queue to available workshops.
+
+        When workshop becomes free:
+        1. Take up to workshop_capacity wagons from FIFO queue
+        2. Form batch for that workshop
+        3. Trigger batch transport and processing
+
+        PRIORITY: Only assign if no workshops have completed wagons waiting for pickup.
+        """
+        if not self._global_waiting_queue:
             return
 
-        # Assign workshop to wagon
-        event.wagon.workshop_id = workshop_id
+        # Check if any workshop has completed wagons - if so, defer assignment
+        # This ensures completed wagons are picked up before new wagons are assigned
+        from contexts.yard_operations.application.yard_context import YardOperationsContext
 
-        # Process wagon immediately to ensure wagons arriving together start at same time
-        wagon_retrofit = self._process_wagon_retrofit(event.wagon, workshop_id)
-        self.infra.engine.schedule_process(wagon_retrofit)  # type: ignore[union-attr]
+        yard_context: YardOperationsContext = self.infra.contexts['yard']  # type: ignore[assignment]
 
-    def _select_available_workshop(self) -> str | None:
-        """Select available workshop using round-robin strategy.
+        # Check if any workshop has completed wagons OR pending batches
+        workshop_ids = list(self._workshop_resources.keys())
+        for workshop_id in workshop_ids:
+            # Check if workshop has completed wagons
+            completed_at_workshop = [
+                w for w in yard_context.all_wagons if w.status == 'RETROFITTED' and w.track == workshop_id
+            ]
+            if completed_at_workshop:
+                try:
+                    plog = get_process_logger()
+                    current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+                    plog.log(
+                        f'DEFER_ASSIGNMENT: {workshop_id} has {len(completed_at_workshop)} completed wagons, '
+                        f'deferring FIFO assignment',
+                        sim_time=current_time,
+                    )
+                except RuntimeError:
+                    pass
+                return  # Defer assignment until completed wagons are picked up
+
+            # Check if workshop has pending batch
+            if yard_context.workshop_batching_service.has_pending_wagons(workshop_id):
+                try:
+                    plog = get_process_logger()
+                    current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+                    plog.log(
+                        f'DEFER_ASSIGNMENT: {workshop_id} has pending batch, deferring FIFO assignment',
+                        sim_time=current_time,
+                    )
+                except RuntimeError:
+                    pass
+                return  # Defer assignment until pending batch is processed
+
+        # Check each workshop for availability
+        if not workshop_ids:
+            return
+
+        for workshop_id in workshop_ids:
+            workshop_resource = self._workshop_resources[workshop_id]
+            available_capacity = workshop_resource.capacity - workshop_resource.count  # type: ignore[attr-defined]
+
+            if available_capacity <= 0:
+                continue  # Workshop full, check next
+
+            if not self._global_waiting_queue:
+                break  # No more wagons to assign
+
+            # Take up to available_capacity wagons from FIFO queue
+            batch_size = min(available_capacity, len(self._global_waiting_queue))
+            batch = []
+            for _ in range(batch_size):
+                if self._global_waiting_queue:
+                    _arrival_time, wagon = self._global_waiting_queue.pop(0)
+                    wagon.workshop_id = workshop_id
+                    batch.append(wagon)
+
+            if not batch:
+                continue
+
+            try:
+                plog = get_process_logger()
+                current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+                wagon_ids = [w.id for w in batch]
+                plog.log(
+                    f'BATCH_ASSIGNED: {len(batch)} wagons {wagon_ids} → {workshop_id} '
+                    f'(capacity: {available_capacity}, queue: {len(self._global_waiting_queue)})',
+                    sim_time=current_time,
+                )
+            except RuntimeError:
+                pass
+
+            # Publish batch assignment event
+            from shared.domain.events.wagon_lifecycle_events import WagonBatchAssignedToWorkshopEvent
+
+            assignment_event = WagonBatchAssignedToWorkshopEvent(
+                wagons=batch,
+                workshop_id=workshop_id,
+                event_timestamp=self.infra.engine.current_time(),  # type: ignore[union-attr]
+            )
+            self._event_bus.publish(assignment_event)
+
+    def _find_available_workshop(self) -> str | None:
+        """Find available workshop using round-robin.
+
+        Workshop is available if it has free capacity (count < capacity).
 
         Returns
         -------
         str | None
-            Workshop ID or None if no workshops available
+            Workshop ID that has available capacity or None if all busy
         """
         if not self._workshop_resources:
             return None
 
-        # Simple round-robin: cycle through workshops
         workshop_ids = list(self._workshop_resources.keys())
         if not workshop_ids:
             return None
 
-        # Use timestamp-based selection for deterministic round-robin
-        current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
-        index = int(current_time) % len(workshop_ids)
-        return workshop_ids[index]
+        # Try all workshops starting from current counter position
+        for i in range(len(workshop_ids)):
+            index = (self._workshop_assignment_counter + i) % len(workshop_ids)
+            workshop_id = workshop_ids[index]
+            workshop_resource = self._workshop_resources[workshop_id]
+
+            # Workshop is available if it has free capacity
+            if workshop_resource.count < workshop_resource.capacity:  # type: ignore[attr-defined]
+                # Found available workshop, increment counter for next call
+                self._workshop_assignment_counter = index + 1
+                return workshop_id
+
+        # All workshops are at full capacity
+        return None
 
     def _handle_rake_transported(self, event: RakeTransportedEvent) -> None:
         """Handle rake transported event using DDD approach."""

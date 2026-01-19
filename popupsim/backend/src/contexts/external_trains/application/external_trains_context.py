@@ -69,8 +69,8 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
         if arrival_delay > 0:
             yield from self.infra.engine.delay(arrival_delay)  # type: ignore[union-attr]
 
-        # Get arrival track from first wagon
-        arrival_track = train.wagons[0].track if train.wagons else 'collection'
+        # Get arrival track from train configuration
+        arrival_track = train.arrival_track or 'collection'
 
         current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
 
