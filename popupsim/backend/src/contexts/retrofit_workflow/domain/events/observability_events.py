@@ -61,6 +61,20 @@ class ResourceStateChangeEvent:  # pylint: disable=too-many-instance-attributes
     triggered_by: str | None = None
 
 
+@dataclass
+class LocomotiveAssemblyEvent:  # pylint: disable=too-many-instance-attributes
+    """Tracks locomotive assembly operations."""
+
+    timestamp: float
+    locomotive_id: str
+    event_type: str  # RAKE_COUPLED, RAKE_DECOUPLED, BRAKE_TEST_STARTED, BRAKE_TEST_COMPLETED, ASSEMBLY_COMPLETED
+    rake_id: str | None = None
+    coupler_type: str | None = None
+    total_rakes: int | None = None
+    duration: float | None = None
+    location: str | None = None
+
+
 class RejectionReason:  # pylint: disable=too-few-public-methods
     """Standard rejection reasons with human-readable descriptions."""
 
