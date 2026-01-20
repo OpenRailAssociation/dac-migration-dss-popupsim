@@ -72,6 +72,17 @@ class WagonAssignedToWorkshopEvent(DomainEvent):
     """
 
     wagon: Any = None
+    event_timestamp: float = 0.0
+
+
+@dataclass(frozen=True)
+class WagonBatchAssignedToWorkshopEvent(DomainEvent):
+    """Batch of wagons assigned to same workshop from FIFO queue.
+
+    Triggers batch transport from retrofit track to workshop.
+    """
+
+    wagons: list[Any] = field(default_factory=list)
     workshop_id: str = ''
     event_timestamp: float = 0.0
 
