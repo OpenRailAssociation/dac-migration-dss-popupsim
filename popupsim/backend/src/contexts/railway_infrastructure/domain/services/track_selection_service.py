@@ -77,9 +77,9 @@ class TrackSelectionService:
 
         for track in tracks:
             occupancy_repo = self._railway_context.get_occupancy_repository()
-            track_occupancy = occupancy_repo.get(track.id)
+            enhanced_occupancy = occupancy_repo.get(track.id)
 
-            current_occupancy = track_occupancy.get_current_occupancy_meters() if track_occupancy else 0.0
+            current_occupancy = enhanced_occupancy.get_current_occupancy_meters() if enhanced_occupancy else 0.0
 
             if current_occupancy < min_occupancy:
                 min_occupancy = current_occupancy

@@ -1,5 +1,6 @@
 """Repository for managing track occupancy aggregates."""
 
+from typing import Any
 from uuid import UUID
 
 from contexts.railway_infrastructure.domain.aggregates.track_occupancy import TrackOccupancy
@@ -8,7 +9,7 @@ from contexts.railway_infrastructure.domain.value_objects.occupancy_snapshot imp
 
 
 class TrackOccupancyRepository:
-    """Repository managing all track occupancy aggregates."""
+    """Repository managing track occupancy with wagon queues."""
 
     def __init__(self) -> None:
         """Initialize empty repository."""
@@ -17,12 +18,17 @@ class TrackOccupancyRepository:
     def get_or_create(self, track: Track) -> TrackOccupancy:
         """Get existing occupancy or create new one for track."""
         if track.id not in self._occupancies:
-            self._occupancies[track.id] = TrackOccupancy(track_id=track.id, track_specification=track)
+            self._occupancies[track.id] = TrackOccupancy(track.id, track)
         return self._occupancies[track.id]
 
     def get(self, track_id: UUID | str) -> TrackOccupancy | None:
         """Get occupancy by track ID."""
         return self._occupancies.get(track_id)
+
+    def get_wagons_on_track(self, track_id: UUID | str) -> list[Any]:
+        """Get wagons on track in sequence order."""
+        occupancy = self._occupancies.get(track_id)
+        return occupancy.get_wagons_in_sequence() if occupancy else []
 
     def get_occupancy_history(self, track_id: UUID | str, from_time: float, to_time: float) -> list[OccupancySnapshot]:
         """Get occupancy history for time range."""

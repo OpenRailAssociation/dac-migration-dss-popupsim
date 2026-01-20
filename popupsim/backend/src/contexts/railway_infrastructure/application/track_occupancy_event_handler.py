@@ -3,8 +3,6 @@
 import contextlib
 from typing import Any
 
-from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
-from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
 from shared.domain.events.wagon_movement_events import WagonMovedEvent
 
 
@@ -23,7 +21,7 @@ class TrackOccupancyEventHandler:  # pylint: disable=too-few-public-methods
             source_occupancy = occupancy_repo.get(event.from_track)
             if source_occupancy:
                 try:
-                    source_occupancy.remove_occupant(event.wagon_id, event.timestamp)
+                    source_occupancy.remove_wagon(event.wagon_id, event.timestamp)
                 except (ValueError, KeyError) as e:
                     print(f'Warning: Could not remove wagon {event.wagon_id} from {event.from_track}: {e}')
 
@@ -37,18 +35,12 @@ class TrackOccupancyEventHandler:  # pylint: disable=too-few-public-methods
             if wagon:
                 # Remove wagon from destination track first (in case it's already there)
                 with contextlib.suppress(ValueError, KeyError):
-                    dest_occupancy.remove_occupant(event.wagon_id, event.timestamp)
+                    dest_occupancy.remove_wagon(event.wagon_id, event.timestamp)
 
-                optimal_position = dest_occupancy.find_optimal_position(wagon.length)
-                if optimal_position is not None:
-                    occupant = TrackOccupant(
-                        id=event.wagon_id,
-                        type=OccupantType.WAGON,
-                        length=wagon.length,
-                        position_start=optimal_position,
-                    )
-                    dest_occupancy.add_occupant(occupant, event.timestamp)
-                else:
+                # Add wagon using enhanced occupancy
+                try:
+                    dest_occupancy.add_wagon(wagon, event.timestamp)
+                except ValueError:
                     print(f'Warning: No space on {event.to_track} for wagon {event.wagon_id}')
             else:
                 print(f'Warning: Could not find wagon {event.wagon_id} for movement to {event.to_track}')

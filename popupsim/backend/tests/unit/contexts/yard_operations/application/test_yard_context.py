@@ -84,15 +84,11 @@ class TestYardOperationsContext:
         wagon.id = 'wagon_1'
         initialized_yard_context.all_wagons = [wagon]
 
-        occupant = Mock()
-        occupant.type.value = 'wagon'
-        occupant.id = 'wagon_1'
-
         track_occupancy = Mock()
-        track_occupancy.get_occupants.return_value = [occupant]
+        track_occupancy.get_wagons_in_sequence.return_value = [wagon]
 
         occupancy_repo = Mock()
-        occupancy_repo.get.return_value = track_occupancy
+        occupancy_repo.get_wagons_on_track.return_value = [wagon]
         initialized_yard_context.railway_context.get_occupancy_repository.return_value = occupancy_repo
 
         wagons = initialized_yard_context._get_wagons_on_track('test_track')
@@ -102,7 +98,7 @@ class TestYardOperationsContext:
     def test_get_wagons_on_track_empty(self, initialized_yard_context: YardOperationsContext) -> None:
         """Test getting wagons on empty track."""
         occupancy_repo = Mock()
-        occupancy_repo.get.return_value = None
+        occupancy_repo.get_wagons_on_track.return_value = []
         initialized_yard_context.railway_context.get_occupancy_repository.return_value = occupancy_repo
 
         wagons = initialized_yard_context._get_wagons_on_track('test_track')
@@ -116,7 +112,7 @@ class TestYardOperationsContext:
 
         track = Mock()
         track_occupancy = Mock()
-        track_occupancy.find_optimal_position.return_value = 0.0
+        track_occupancy.add_wagon = Mock()  # Mock the add_wagon method
 
         occupancy_repo = Mock()
         occupancy_repo.get_or_create.return_value = track_occupancy
@@ -128,7 +124,7 @@ class TestYardOperationsContext:
 
         assert len(accepted) == 1
         assert len(rejected) == 0
-        track_occupancy.add_occupant.assert_called_once()
+        track_occupancy.add_wagon.assert_called_once()
 
     def test_add_wagons_to_track_no_capacity(self, initialized_yard_context: YardOperationsContext) -> None:
         """Test adding wagons when track has no capacity."""
@@ -138,7 +134,7 @@ class TestYardOperationsContext:
 
         track = Mock()
         track_occupancy = Mock()
-        track_occupancy.find_optimal_position.return_value = None  # No space
+        track_occupancy.add_wagon.side_effect = ValueError('No space')  # Simulate no space
 
         occupancy_repo = Mock()
         occupancy_repo.get_or_create.return_value = track_occupancy
@@ -204,13 +200,8 @@ class TestYardOperationsContext:
         initialized_yard_context.all_wagons = [wagon]
 
         # Mock track occupancy
-        occupant = Mock()
-        occupant.type.value = 'wagon'
-        occupant.id = 'wagon_1'
-        track_occupancy = Mock()
-        track_occupancy.get_occupants.return_value = [occupant]
         occupancy_repo = Mock()
-        occupancy_repo.get.return_value = track_occupancy
+        occupancy_repo.get_wagons_on_track.return_value = [wagon]
         initialized_yard_context.railway_context.get_occupancy_repository.return_value = occupancy_repo
 
         # Mock transport plan

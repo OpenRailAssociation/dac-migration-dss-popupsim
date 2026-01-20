@@ -471,15 +471,16 @@ class DashboardExporter:
         self._export_wagon_locations(analytics_context, output_path)
 
     def _export_wagon_journey(self, analytics_context: Any, output_path: Path) -> None:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
-        """Export complete wagon journey history to CSV."""
+        """Export complete wagon journey history to CSV - simplified to key transitions only."""
         wagon_journey = []
+        wagon_states: dict[str, dict[str, Any]] = {}  # Track last state per wagon
 
         events = analytics_context.event_stream.collector.get_events()
 
         for timestamp, event in events:
             event_type = type(event).__name__
 
-            # Track all wagon-related events
+            # Track only key wagon state transitions
             if 'TrainArrived' in event_type:
                 train_id = getattr(event, 'train_id', None)
                 wagons = getattr(event, 'wagons', [])
@@ -498,26 +499,55 @@ class DashboardExporter:
                                 'status': 'ARRIVED',
                             }
                         )
+                        wagon_states[wagon_id] = {'location': arrival_track, 'event': 'ARRIVED'}
 
-            elif 'WagonReadyForRetrofit' in event_type:
+            elif 'WagonMoved' in event_type:
                 wagon_id = getattr(event, 'wagon_id', None)
-                track = getattr(event, 'track', None)
-                if wagon_id:
-                    wagon_journey.append(
-                        {
-                            'timestamp': timestamp,
-                            'wagon_id': wagon_id,
-                            'train_id': '',
-                            'event': 'READY_FOR_RETROFIT',
-                            'location': track or 'retrofit',
-                            'status': 'WAITING_RETROFIT',
-                        }
-                    )
+                to_track = getattr(event, 'to_track', None)
+                if wagon_id and to_track:
+                    last_state = wagon_states.get(wagon_id, {})
+                    last_location = last_state.get('location')
+
+                    # Only track movements to key locations and avoid duplicates
+                    if (
+                        'retrofit' in to_track.lower()
+                        and 'retrofitted' not in to_track.lower()
+                        and last_location != to_track
+                    ):
+                        wagon_journey.append(
+                            {
+                                'timestamp': timestamp,
+                                'wagon_id': wagon_id,
+                                'train_id': '',
+                                'event': 'ON_RETROFIT_TRACK',
+                                'location': to_track,
+                                'status': 'WAITING',
+                            }
+                        )
+                        wagon_states[wagon_id] = {'location': to_track, 'event': 'ON_RETROFIT_TRACK'}
+                    # NOTE: Do NOT create AT_WORKSHOP entry from WagonMoved event
+                    # Wagons should only show at workshop when retrofit actually starts
 
             elif 'RetrofitStarted' in event_type:
                 wagon_id = getattr(event, 'wagon_id', None)
                 workshop_id = getattr(event, 'workshop_id', None)
                 if wagon_id:
+                    last_state = wagon_states.get(wagon_id, {})
+                    last_location = last_state.get('location')
+
+                    # Add AT_WORKSHOP entry if wagon is moving from retrofit track to workshop
+                    if last_location != workshop_id:
+                        wagon_journey.append(
+                            {
+                                'timestamp': timestamp,
+                                'wagon_id': wagon_id,
+                                'train_id': '',
+                                'event': 'AT_WORKSHOP',
+                                'location': workshop_id or 'workshop',
+                                'status': 'READY',
+                            }
+                        )
+
                     wagon_journey.append(
                         {
                             'timestamp': timestamp,
@@ -528,6 +558,7 @@ class DashboardExporter:
                             'status': 'RETROFITTING',
                         }
                     )
+                    wagon_states[wagon_id] = {'location': workshop_id, 'event': 'RETROFIT_STARTED'}
 
             elif 'RetrofitCompleted' in event_type or 'WagonRetrofitCompleted' in event_type:
                 wagon_id = getattr(event, 'wagon_id', None)
@@ -543,38 +574,11 @@ class DashboardExporter:
                             'status': 'COMPLETED',
                         }
                     )
-
-            elif 'WagonRetrofitted' in event_type:
-                wagon_id = getattr(event, 'wagon', None)
-                if wagon_id and hasattr(wagon_id, 'id'):
-                    wagon_id = wagon_id.id
-                    wagon_journey.append(
-                        {
-                            'timestamp': timestamp,
-                            'wagon_id': wagon_id,
-                            'train_id': '',
-                            'event': 'RETROFITTED',
-                            'location': 'retrofitted',
-                            'status': 'RETROFITTED',
-                        }
-                    )
-
-            elif 'WagonDistributed' in event_type:
-                wagon_id = getattr(event, 'wagon_id', None)
-                if wagon_id:
-                    wagon_journey.append(
-                        {
-                            'timestamp': timestamp,
-                            'wagon_id': wagon_id,
-                            'train_id': '',
-                            'event': 'DISTRIBUTED',
-                            'location': event.track_id,
-                            'status': 'DISTRIBUTED',
-                        }
-                    )
+                    wagon_states[wagon_id] = {'location': workshop_id, 'event': 'RETROFIT_COMPLETED'}
 
             elif 'WagonParked' in event_type:
                 wagon_id = getattr(event, 'wagon_id', None)
+                parking_area = getattr(event, 'parking_area_id', 'parking')
                 if wagon_id:
                     wagon_journey.append(
                         {
@@ -582,10 +586,11 @@ class DashboardExporter:
                             'wagon_id': wagon_id,
                             'train_id': '',
                             'event': 'PARKED',
-                            'location': 'parking',
+                            'location': parking_area,
                             'status': 'PARKED',
                         }
                     )
+                    wagon_states[wagon_id] = {'location': parking_area, 'event': 'PARKED'}
 
             elif 'WagonRejected' in event_type:
                 wagon_id = getattr(event, 'wagon_id', None)
@@ -600,9 +605,9 @@ class DashboardExporter:
                             'status': 'REJECTED',
                         }
                     )
+                    wagon_states[wagon_id] = {'location': 'rejected', 'event': 'REJECTED'}
 
         # Post-process: Move rejected wagons to "rejected" track
-        # Get rejected wagon IDs from rejected_wagons if available
         rejected_wagon_ids = set()
         rejected_file = output_path.parent / 'rejected_wagons.csv'
         if rejected_file.exists():
@@ -613,7 +618,7 @@ class DashboardExporter:
 
         # Update location for rejected wagons
         for entry in wagon_journey:
-            if entry['wagon_id'] in rejected_wagon_ids:
+            if entry['wagon_id'] in rejected_wagon_ids and entry['event'] == 'ARRIVED':
                 entry['location'] = 'rejected'
                 entry['status'] = 'REJECTED'
 

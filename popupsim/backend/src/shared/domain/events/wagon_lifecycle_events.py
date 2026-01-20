@@ -55,10 +55,12 @@ class TrainDepartedEvent(DomainEvent):
 
 @dataclass(frozen=True)
 class WagonReadyForRetrofitEvent(DomainEvent):
-    """Wagon is ready for retrofit processing."""
+    """Wagon is ready for retrofit processing on retrofit track.
+
+    Workshop assignment is handled by the popup context.
+    """
 
     wagon: Any = None
-    workshop_id: str = ''
     event_timestamp: float = 0.0
 
 

@@ -39,6 +39,13 @@ class LocoDeliveryStrategy(str, Enum):
     DIRECT_DELIVERY = 'direct_delivery'
 
 
+class LocoPriorityStrategy(str, Enum):
+    """Strategy for locomotive task prioritization."""
+
+    WORKSHOP_PRIORITY = 'workshop_priority'  # Park wagons immediately when loco available
+    BATCH_COMPLETION = 'batch_completion'  # Complete workshop pickups before parking
+
+
 class Scenario(BaseModel):
     """Scenario configuration for simulation."""
 
@@ -50,6 +57,7 @@ class Scenario(BaseModel):
     workshop_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.ROUND_ROBIN
     parking_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     loco_delivery_strategy: LocoDeliveryStrategy = LocoDeliveryStrategy.RETURN_TO_PARKING
+    loco_priority_strategy: LocoPriorityStrategy = LocoPriorityStrategy.WORKSHOP_PRIORITY
     locomotives: list[LocomotiveInputDTO] | None = None
     process_times: ProcessTimes | None = None
     routes: list[RouteInputDTO] | None = None

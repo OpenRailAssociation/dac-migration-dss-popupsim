@@ -1,27 +1,60 @@
-"""Track occupancy aggregate root for position-aware occupancy management."""
+"""Track occupancy aggregate root with wagon queue management."""
 
 from dataclasses import dataclass
 from dataclasses import field
+from typing import Any
 from uuid import UUID
 
 from contexts.railway_infrastructure.domain.entities.track import Track
 from contexts.railway_infrastructure.domain.entities.track import TrackAccess
 from contexts.railway_infrastructure.domain.value_objects.occupancy_snapshot import OccupancySnapshot
+from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
 from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
+from contexts.railway_infrastructure.domain.value_objects.track_wagon_queue import TrackWagonQueue
 
 
 @dataclass
 class TrackOccupancy:
-    """Aggregate root managing all occupancy state for a single track.
+    """Aggregate root managing occupancy state and wagon queue for a single track.
 
-    Provides position-aware occupancy management with collision detection
-    and optimal space allocation.
+    Combines position-aware occupancy management with wagon sequence tracking.
     """
 
     track_id: UUID | str
     track_specification: Track
     _occupants: list[TrackOccupant] = field(default_factory=list)
     _occupancy_history: list[OccupancySnapshot] = field(default_factory=list)
+    _wagon_queue: TrackWagonQueue = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Initialize wagon queue after dataclass initialization."""
+        self._wagon_queue = TrackWagonQueue(str(self.track_id))
+
+    def add_wagon(self, wagon: Any, timestamp: float) -> None:
+        """Add wagon to both occupancy and queue."""
+        # Find optimal position for occupancy tracking
+        position = self.find_optimal_position(wagon.length)
+        if position is None:
+            raise ValueError(f'No space for wagon {wagon.id}')
+
+        # Add to occupancy tracking
+        occupant = TrackOccupant(id=wagon.id, type=OccupantType.WAGON, length=wagon.length, position_start=position)
+        self.add_occupant(occupant, timestamp)
+
+        # Add to sequence queue
+        self._wagon_queue.add_wagon(wagon)
+
+    def remove_wagon(self, wagon_id: str, timestamp: float) -> Any | None:
+        """Remove wagon from both occupancy and queue."""
+        # Remove from occupancy
+        self.remove_occupant(wagon_id, timestamp)
+
+        # Remove from queue
+        return self._wagon_queue.remove_wagon(wagon_id)
+
+    def get_wagons_in_sequence(self) -> list[Any]:
+        """Get wagons in arrival sequence."""
+        return self._wagon_queue.get_wagons()
 
     def add_occupant(self, occupant: TrackOccupant, timestamp: float) -> None:
         """Add occupant to track with collision detection."""
@@ -113,7 +146,7 @@ class TrackOccupancy:
         return self.get_current_occupancy_percentage()
 
     def is_empty(self) -> bool:
-        """Check if track has no occupants."""
+        """Check if track has no wagons."""
         return len(self._occupants) == 0
 
     def is_full(self, min_length: float = 15.0) -> bool:
