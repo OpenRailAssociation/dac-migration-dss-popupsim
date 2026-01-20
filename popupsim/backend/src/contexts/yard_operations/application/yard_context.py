@@ -224,8 +224,7 @@ class YardOperationsContext:  # pylint: disable=too-many-instance-attributes
         current_time = self.infra.engine.current_time()
         wagons_to_pickup = self._get_wagons_on_track(track_id)
 
-        if not wagons_to_pickup:
-            return
+        yield from self.infra.engine.delay(0.1)  # Small processing delay
 
         # Log pickup from collection track
         try:
