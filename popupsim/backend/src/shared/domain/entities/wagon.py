@@ -42,6 +42,8 @@ class Wagon(BaseModel):
     it cares about, but all contexts reference the same wagon instance.
     """
 
+    model_config = {'frozen': False}  # Allow mutations
+
     id: str = Field(description='Unique identifier for the wagon')
     length: float = Field(gt=0, description='Length of the wagon in meters')
     is_loaded: bool = Field(description='Whether the wagon is loaded')
@@ -56,6 +58,11 @@ class Wagon(BaseModel):
     coupler_type: CouplerType = Field(default=CouplerType.SCREW, description='Type of coupler on the wagon')
     workshop_id: str | None = Field(default=None, description='ID of the workshop the wagon is assigned to')
     rake_id: str | None = Field(default=None, description='ID of the rake the wagon is assigned to')
+    train_id: str | None = Field(default=None, description='ID of the train the wagon arrived with')
+    rejection_reason: str | None = Field(default=None, description='Reason for rejection during classification')
+    detailed_rejection_reason: str | None = Field(default=None, description='Detailed reason for rejection')
+    rejection_time: float | None = Field(default=None, description='Time when wagon was rejected')
+    collection_track_id: str | None = Field(default=None, description='Collection track ID for rejected wagons')
 
     @property
     def waiting_time(self) -> float | None:
@@ -71,3 +78,53 @@ class Wagon(BaseModel):
             arrival_timestamp: float = self.arrival_time.timestamp()
             return self.retrofit_start_time - arrival_timestamp
         return None
+
+    # Domain behavior methods
+
+    def assign_to_workshop(self, workshop_id: str) -> None:
+        """Assign wagon to workshop for retrofit."""
+        if self.status not in [WagonStatus.ON_RETROFIT_TRACK, WagonStatus.TO_BE_RETROFFITED]:
+            raise ValueError(f'Wagon {self.id} not ready for workshop assignment (status: {self.status})')
+
+        self.workshop_id = workshop_id
+        self.status = WagonStatus.MOVING_TO_STATION
+
+    def start_retrofit(self, start_time: float) -> None:
+        """Start retrofit process."""
+        if self.status != WagonStatus.MOVING_TO_STATION:
+            raise ValueError(f'Wagon {self.id} not at workshop (status: {self.status})')
+
+        self.retrofit_start_time = start_time
+        self.status = WagonStatus.RETROFITTING
+
+    def complete_retrofit(self, end_time: float) -> None:
+        """Complete retrofit process."""
+        if self.status != WagonStatus.RETROFITTING:
+            raise ValueError(f'Wagon {self.id} not in retrofit (status: {self.status})')
+
+        self.retrofit_end_time = end_time
+        self.coupler_type = CouplerType.DAC
+        self.status = WagonStatus.RETROFITTED
+
+    def mark_classified(self) -> None:
+        """Mark wagon as classified and ready for retrofit."""
+        self.status = WagonStatus.TO_BE_RETROFFITED
+
+    def mark_rejected(self, reason: str) -> None:
+        """Mark wagon as rejected during classification."""
+        self.status = WagonStatus.REJECTED
+        self.rejection_reason = reason
+
+    def can_be_transported(self) -> bool:
+        """Check if wagon can be transported."""
+        return self.status in [
+            WagonStatus.TO_BE_RETROFFITED,
+            WagonStatus.ON_RETROFIT_TRACK,
+            WagonStatus.RETROFITTED,
+            WagonStatus.MOVING_TO_STATION,
+        ]
+
+    def move_to_track(self, track_id: str) -> None:
+        """Move wagon to specified track."""
+        self.track = track_id
+        self.status = WagonStatus.MOVING

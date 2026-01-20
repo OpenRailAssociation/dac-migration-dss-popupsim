@@ -103,10 +103,11 @@ class TrackSelectionService:
     def _map_track_type(self, track_type: str) -> TrackType:
         """Map string to TrackType enum."""
         type_mapping = {
+            'locoparking': TrackType.LOCOPARKING,
             'parking': TrackType.PARKING,
             'collection': TrackType.COLLECTION,
             'retrofit': TrackType.RETROFIT,
             'workshop': TrackType.WORKSHOP,
-            'retrofitted': TrackType.PARKING,  # Retrofitted wagons go to parking
+            'retrofitted': TrackType.RETROFITTED,
         }
         return type_mapping.get(track_type.lower(), TrackType.COLLECTION)

@@ -47,11 +47,11 @@ class RailwayCapacityService:
             current_usage=current,
         )
 
-    def can_accept_wagons(self, track_id: str, wagon_count: int) -> bool:
-        """Check if track can accept specified number of wagons."""
+    def can_accept_wagons(self, track_id: str, wagon_length: float) -> bool:
+        """Check if track can accept wagon with specified length."""
         available = self._railway_port.get_available_capacity(track_id)
-        return available >= wagon_count
+        return available >= wagon_length
 
-    def get_maximum_acceptable_count(self, track_id: str) -> int:
-        """Get maximum number of wagons that can be accepted on track."""
+    def get_available_capacity_meters(self, track_id: str) -> float:
+        """Get available capacity in meters."""
         return self._railway_port.get_available_capacity(track_id)

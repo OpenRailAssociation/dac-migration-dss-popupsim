@@ -31,6 +31,7 @@ def create_minimal_scenario(
 
     # Create topology with edges
     edges = {
+        'locoparking': {'nodes': [1, 2], 'length': 300.0},
         'parking': {'nodes': [1, 2], 'length': 300.0},
         'collection': {'nodes': [1, 2], 'length': 300.0},
         'retrofit': {'nodes': [1, 2], 'length': 300.0},
@@ -43,6 +44,7 @@ def create_minimal_scenario(
 
     # Create tracks with type field and length
     tracks = [
+        TrackInputDTO(id='locoparking', edges=['locoparking'], type='locoparking', length=300.0),
         TrackInputDTO(id='parking', edges=['parking'], type='parking', length=300.0),
         TrackInputDTO(id='collection', edges=['collection'], type='collection', length=300.0),
         TrackInputDTO(id='retrofit', edges=['retrofit'], type='retrofit', length=300.0),
@@ -53,11 +55,12 @@ def create_minimal_scenario(
 
     # Create routes with path arrays and durations
     routes = [
-        RouteInputDTO(id='parking_collection', path=['parking', 'collection'], duration=1.0),
+        RouteInputDTO(id='locoparking_collection', path=['locoparking', 'collection'], duration=1.0),
         RouteInputDTO(id='collection_retrofit', path=['collection', 'retrofit'], duration=1.0),
-        RouteInputDTO(id='retrofit_parking', path=['retrofit', 'parking'], duration=1.0),
-        RouteInputDTO(id='parking_retrofit', path=['parking', 'retrofit'], duration=1.0),
-        RouteInputDTO(id='parking_retrofitted', path=['parking', 'retrofitted'], duration=1.0),
+        RouteInputDTO(id='retrofit_locoparking', path=['retrofit', 'locoparking'], duration=1.0),
+        RouteInputDTO(id='locoparking_retrofit', path=['locoparking', 'retrofit'], duration=1.0),
+        RouteInputDTO(id='locoparking_retrofitted', path=['locoparking', 'retrofitted'], duration=1.0),
+        RouteInputDTO(id='retrofitted_locoparking', path=['retrofitted', 'locoparking'], duration=1.0),
         RouteInputDTO(id='retrofitted_parking', path=['retrofitted', 'parking'], duration=1.0),
     ]
 
@@ -66,13 +69,13 @@ def create_minimal_scenario(
         routes.extend(
             [
                 RouteInputDTO(id=f'retrofit_{ws_id}', path=['retrofit', ws_id], duration=1.0),
-                RouteInputDTO(id=f'{ws_id}_parking', path=[ws_id, 'parking'], duration=1.0),
+                RouteInputDTO(id=f'{ws_id}_locoparking', path=[ws_id, 'locoparking'], duration=1.0),
                 RouteInputDTO(id=f'{ws_id}_retrofitted', path=[ws_id, 'retrofitted'], duration=1.0),
-                RouteInputDTO(id=f'parking_{ws_id}', path=['parking', ws_id], duration=1.0),
+                RouteInputDTO(id=f'locoparking_{ws_id}', path=['locoparking', ws_id], duration=1.0),
             ]
         )
 
-    locomotives = [LocomotiveInputDTO(id='L1', track='parking')]
+    locomotives = [LocomotiveInputDTO(id='L1', track='locoparking')]
     process_times = ProcessTimes(
         wagon_retrofit_time=retrofit_time,
         train_to_hump_delay=0.0,

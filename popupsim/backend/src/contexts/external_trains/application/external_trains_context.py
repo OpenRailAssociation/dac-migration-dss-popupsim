@@ -17,6 +17,8 @@ from contexts.external_trains.domain.value_objects.train_id import TrainId
 from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from infrastructure.event_bus.event_bus import EventBus
 from infrastructure.logging import get_process_logger
+from shared.domain.entities.wagon import Wagon
+from shared.domain.entities.wagon import WagonStatus
 from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
 from shared.domain.events.wagon_lifecycle_events import WagonRetrofitCompletedEvent
 from shared.infrastructure.time_converters import datetime_to_ticks
@@ -83,22 +85,16 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
             pass
 
         # Create actual wagon entities and store as single source of truth
-        train_wagons: list[Any] = []
+        train_wagons: list[Wagon] = []
         for wagon_dto in train.wagons:
-            wagon = type(
-                'Wagon',
-                (),
-                {
-                    'id': wagon_dto.id,
-                    'length': wagon_dto.length,
-                    'status': 'ARRIVING',
-                    'retrofit_start_time': None,
-                    'retrofit_end_time': None,
-                    'track': arrival_track,
-                    'needs_retrofit': wagon_dto.needs_retrofit,
-                    'is_loaded': wagon_dto.is_loaded,
-                },
-            )()
+            wagon = Wagon(
+                id=wagon_dto.id,
+                length=wagon_dto.length,
+                is_loaded=wagon_dto.is_loaded,
+                track=arrival_track,
+                needs_retrofit=wagon_dto.needs_retrofit,
+                status=WagonStatus.UNKNOWN,
+            )
             train_wagons.append(wagon)
             self._wagons[wagon.id] = wagon  # Store as single source of truth
 
@@ -146,18 +142,18 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
         """Handle wagon retrofit completion - update wagon state."""
         wagon = self._wagons.get(event.wagon_id)
         if wagon:
-            wagon.status = 'RETROFITTED'
+            wagon.status = WagonStatus.RETROFITTED
             wagon.retrofit_end_time = event.completion_time
 
     def _handle_wagon_parked(self, event: WagonParkedEvent) -> None:
         """Handle wagon parked - update wagon state."""
         wagon = self._wagons.get(event.wagon_id)
         if wagon:
-            wagon.status = 'PARKED'
+            wagon.status = WagonStatus.PARKING
 
-    def get_completed_wagons(self) -> list[Any]:
+    def get_completed_wagons(self) -> list[Wagon]:
         """Get all completed wagons for test validation."""
-        return [w for w in self._wagons.values() if w.status == 'PARKED']
+        return [w for w in self._wagons.values() if w.status == WagonStatus.PARKING]
 
     def get_metrics(self) -> dict[str, Any]:
         """Get metrics."""

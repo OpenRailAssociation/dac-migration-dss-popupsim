@@ -2,12 +2,8 @@
 
 import json
 from pathlib import Path
-import sys
 
 from scenario_builder import create_minimal_scenario  # type: ignore[import-not-found]
-
-src_path = Path(__file__).parent.parent.parent.parent / 'src'
-sys.path.insert(0, str(src_path))
 
 
 def export_scenario_to_json(scenario, output_dir: Path) -> None:

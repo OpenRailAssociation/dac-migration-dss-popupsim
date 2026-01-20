@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import Any
 
 from contexts.configuration.domain.models.scenario import Scenario
+from contexts.railway_infrastructure.application.track_occupancy_event_handler import TrackOccupancyEventHandler
 from contexts.railway_infrastructure.domain.aggregates.railway_yard import RailwayYard
 from contexts.railway_infrastructure.domain.aggregates.track_group import TrackGroup
 from contexts.railway_infrastructure.domain.entities.track import Track
@@ -13,6 +14,7 @@ from contexts.railway_infrastructure.domain.repositories.track_occupancy_reposit
 from contexts.railway_infrastructure.domain.services.topology_service import TopologyService
 from contexts.railway_infrastructure.domain.services.track_group_service import TrackGroupService
 from contexts.railway_infrastructure.domain.services.track_selection_service import TrackSelectionService
+from shared.domain.events.wagon_movement_events import WagonMovedEvent
 
 
 class RailwayInfrastructureContext:
@@ -50,6 +52,8 @@ class RailwayInfrastructureContext:
         self._scenario = scenario
         self._metrics_port = metrics_port
         self._occupancy_repository = occupancy_repository or TrackOccupancyRepository()
+        self._infra: Any = None
+        self._occupancy_handler: TrackOccupancyEventHandler | None = None
 
     @cached_property
     def _topology_service(self) -> TopologyService:
@@ -161,8 +165,14 @@ class RailwayInfrastructureContext:
     def cleanup(self) -> None:
         """Cleanup context resources."""
 
-    def initialize(self, infrastructure: Any, scenario: Scenario) -> None:
-        """Initialize context."""
+    def initialize(self, infrastructure: Any, scenario: Any) -> None:  # pylint: disable=unused-argument
+        """Initialize with infrastructure and scenario."""
+        self._infra = infrastructure
+
+        # Set up track occupancy event handler
+        self._occupancy_handler = TrackOccupancyEventHandler(self)
+        if hasattr(infrastructure, 'event_bus'):
+            infrastructure.event_bus.subscribe(WagonMovedEvent, self._occupancy_handler.handle_wagon_moved)
 
     def start_processes(self) -> None:
         """Start context processes."""
@@ -262,16 +272,18 @@ class RailwayInfrastructureContext:
             'parking_area': TrackType.PARKING,
             'rescource_parking': TrackType.LOCOPARKING,
             'loco_parking': TrackType.LOCOPARKING,
+            'locoparking': TrackType.LOCOPARKING,
             'collection': TrackType.COLLECTION,
             'mainline': TrackType.MAINLINE,
             'retrofit': TrackType.RETROFIT,
+            'retrofitted': TrackType.RETROFITTED,
             'workshop': TrackType.WORKSHOP,
             'workshop_area': TrackType.WORKSHOP,
         }
         return type_mapping.get(track_type_str.lower(), TrackType.COLLECTION)
 
     def _build_tracks(self) -> dict[str, Track]:
-        """Build tracks from scenario.
+        """Build tracks from scenario using topology data for lengths.
 
         Returns
         -------
@@ -279,6 +291,21 @@ class RailwayInfrastructureContext:
             Dictionary of tracks by name
         """
         tracks = {}
+
+        # Get topology data for track lengths
+        topology_data = self._build_topology_data()
+        edge_lengths = {}
+        if 'tracks' in topology_data:
+            for track_data in topology_data['tracks']:
+                track_id = track_data['id']
+                # Get length from topology edges if available
+                if hasattr(self._scenario, 'topology') and self._scenario.topology:
+                    topology = self._scenario.topology
+                    if hasattr(topology, 'edges') and track_id in topology.edges:
+                        edge_lengths[track_id] = topology.edges[track_id]['length']
+                    elif isinstance(topology, dict) and 'edges' in topology and track_id in topology['edges']:
+                        edge_lengths[track_id] = topology['edges'][track_id]['length']
+
         for track_config in self._scenario.tracks or []:
             track_type = track_config.type
             if track_type is not None and hasattr(track_type, 'value'):
@@ -290,11 +317,14 @@ class RailwayInfrastructureContext:
 
             track_id = track_config.id
 
+            # Use topology length if available, otherwise use config length
+            track_length = edge_lengths.get(track_id, track_config.length)
+
             track = Track(
                 id=track_id,
                 name=track_config.id,  # Use ID as name
                 type=self._map_track_type(type_str),
-                total_length=track_config.length,
+                total_length=track_length,
                 fill_factor=track_config.fillfactor,
                 max_wagons=getattr(track_config, 'max_wagons', None),
             )

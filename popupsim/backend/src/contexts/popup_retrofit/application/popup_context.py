@@ -285,9 +285,19 @@ class PopUpRetrofitContext(PopUpContextPort):  # pylint: disable=too-many-instan
     def _track_rake_completion(self, wagon: Any, workshop_id: str) -> None:
         """Track rake completion and publish coordination events."""
         rake_id = getattr(wagon, 'rake_id', None)
-        if not rake_id or rake_id not in self._rake_tracking:
-            # Handle individual wagons - check if workshop is ready for pickup
-            self._check_workshop_pickup_readiness(workshop_id)
+        if not rake_id:
+            # Handle individual wagons - immediately publish completion event
+            current_time = self.infra.engine.current_time()  # type: ignore[union-attr]
+            single_wagon_event = RakeRetrofitCompletedEvent(
+                rake_id=f'single_{wagon.id}',
+                workshop_id=workshop_id,
+                completed_wagons=[wagon],
+                completion_time=current_time,
+            )
+            self._event_bus.publish(single_wagon_event)
+            return
+
+        if rake_id not in self._rake_tracking:
             return
 
         rake_info = self._rake_tracking[rake_id]
