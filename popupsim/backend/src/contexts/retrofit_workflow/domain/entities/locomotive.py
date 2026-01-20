@@ -36,7 +36,8 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
     # Private state
     _current_track: str = field(default='', init=False)
     _status: LocomotiveStatus = field(default=LocomotiveStatus.PARKING, init=False)
-    _coupled_rake_id: str | None = field(default=None, init=False)  # References Rake!
+    _coupled_rakes: list[str] = field(default_factory=list, init=False)  # Multiple rakes
+    _assembly_complete: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
         """Initialize current track to home track."""
@@ -54,51 +55,58 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
         return self._status
 
     @property
-    def coupled_rake_id(self) -> str | None:
-        """Get coupled rake ID."""
-        return self._coupled_rake_id
+    def coupled_rakes(self) -> list[str]:
+        """Get list of coupled rake IDs."""
+        return self._coupled_rakes.copy()
 
     @property
     def is_coupled(self) -> bool:
-        """Check if locomotive has coupled rake."""
-        return self._coupled_rake_id is not None
+        """Check if locomotive has any coupled rakes."""
+        return len(self._coupled_rakes) > 0
 
-    def couple_rake(self, rake_id: str) -> None:
-        """Couple rake to locomotive.
+    @property
+    def assembly_complete(self) -> bool:
+        """Check if train assembly is complete."""
+        return self._assembly_complete
 
-        A rake is already coupled (wagons coupled to each other).
-        Locomotive couples to the rake as a unit.
+    def assemble_rake(self, rake_id: str) -> None:
+        """Assemble rake to locomotive.
 
         Args:
-            rake_id: Rake to couple
+            rake_id: Rake to assemble
 
         Raises
         ------
-            ValueError: If already coupled
+            ValueError: If rake already assembled
         """
-        if self._coupled_rake_id:
-            raise ValueError(f'Locomotive {self.id} already has coupled rake {self._coupled_rake_id}. Decouple first.')
+        if rake_id in self._coupled_rakes:
+            raise ValueError(f'Rake {rake_id} already assembled to locomotive {self.id}')
 
-        self._coupled_rake_id = rake_id
+        self._coupled_rakes.append(rake_id)
 
-    def decouple_rake(self) -> str:
-        """Decouple rake from locomotive.
+    def disassemble_rake(self, rake_id: str) -> None:
+        """Disassemble rake from locomotive.
 
-        Returns
-        -------
-            Rake ID that was decoupled
+        Args:
+            rake_id: Rake to disassemble
 
         Raises
         ------
-            ValueError: If no rake coupled
+            ValueError: If rake not assembled
         """
-        if not self._coupled_rake_id:
-            raise ValueError(f'Locomotive {self.id} has no coupled rake')
+        if rake_id not in self._coupled_rakes:
+            raise ValueError(f'Rake {rake_id} not assembled to locomotive {self.id}')
 
-        rake_id = self._coupled_rake_id
-        self._coupled_rake_id = None
+        self._coupled_rakes.remove(rake_id)
+        if not self._coupled_rakes:
+            self._assembly_complete = False
 
-        return rake_id
+    def complete_assembly(self) -> None:
+        """Mark train assembly as complete after brake test."""
+        if not self._coupled_rakes:
+            raise ValueError(f'Cannot complete assembly - no rakes coupled to locomotive {self.id}')
+
+        self._assembly_complete = True
 
     def start_movement(self, _to_track: str) -> None:
         """Start movement to track.

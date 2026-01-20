@@ -5,6 +5,7 @@ wagon sequences) in the DAC migration simulation system. It handles rake
 validation, formation, and dissolution operations.
 """
 
+from contexts.configuration.domain.models.process_times import ProcessTimes
 from contexts.retrofit_workflow.domain.aggregates.rake_aggregate import Rake
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.services.coupling_validation_service import CouplingValidationService
@@ -43,6 +44,53 @@ class RakeFormationService:
         validating wagon compatibility during rake formation.
         """
         self.coupling_validator = CouplingValidationService()
+
+    def calculate_coupling_operation_time(
+        self, wagons: list[Wagon], process_times: ProcessTimes, is_coupling: bool = True
+    ) -> float:
+        """Calculate time for coupling or decoupling wagons in rake.
+
+        Parameters
+        ----------
+        wagons : list[Wagon]
+            Wagons involved in the operation
+        process_times : ProcessTimes
+            Process timing configuration
+        is_coupling : bool, default=True
+            True for coupling operation, False for decoupling
+
+        Returns
+        -------
+        float
+            Total operation time in simulation ticks
+        """
+        if len(wagons) <= 1:
+            return 0.0
+
+        total_time = 0.0
+
+        # Calculate time for each adjacent pair
+        for i in range(len(wagons) - 1):
+            wagon1 = wagons[i]
+            # Use wagon1's rear coupler type (connects to wagon2's front)
+            coupler_type = wagon1.coupler_b.type.value
+
+            if is_coupling:
+                operation_time = process_times.get_coupling_ticks(coupler_type)
+            else:
+                operation_time = process_times.get_decoupling_ticks(coupler_type)
+
+            total_time += operation_time
+
+        return total_time
+
+    def calculate_rake_formation_time(self, wagons: list[Wagon], process_times: ProcessTimes) -> float:
+        """Calculate time to form rake by coupling wagons together."""
+        return self.calculate_coupling_operation_time(wagons, process_times, is_coupling=True)
+
+    def calculate_rake_dissolution_time(self, wagons: list[Wagon], process_times: ProcessTimes) -> float:
+        """Calculate time to dissolve rake by decoupling wagons."""
+        return self.calculate_coupling_operation_time(wagons, process_times, is_coupling=False)
 
     def can_form_rake(self, wagons: list[Wagon]) -> tuple[bool, str | None]:
         """Validate if wagons can form a valid rake.
@@ -160,13 +208,6 @@ class RakeFormationService:
         This method only removes the rake association from wagons.
         The rake object itself should be handled by the calling context
         for proper lifecycle management.
-
-        Examples
-        --------
-        >>> service = RakeFormationService()
-        >>> service.dissolve_rake(rake, wagons)
-        >>> # All wagons now have rake_id = None
-        >>> assert all(w.rake_id is None for w in wagons)
         """
         for wagon in wagons:
             if wagon.id in rake.wagon_ids:

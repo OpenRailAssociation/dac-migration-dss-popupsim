@@ -5,6 +5,7 @@ from dataclasses import field
 from enum import Enum
 
 from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
+from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
 
 
 class WagonStatus(Enum):
@@ -129,6 +130,8 @@ class Wagon:  # pylint: disable=too-many-instance-attributes
     def complete_retrofit(self, end_time: float) -> None:
         """Complete retrofit operation.
 
+        Changes coupler types from SCREW to DAC and updates status.
+
         Args:
             end_time: Simulation time when retrofit completes
 
@@ -138,6 +141,11 @@ class Wagon:  # pylint: disable=too-many-instance-attributes
         """
         if self._status != WagonStatus.RETROFITTING:
             raise ValueError(f'Cannot complete retrofit for wagon {self.id} in status {self._status}')
+
+        # Change couplers from SCREW to DAC
+        self.coupler_a = Coupler(CouplerType.DAC, self.coupler_a.side)
+        self.coupler_b = Coupler(CouplerType.DAC, self.coupler_b.side)
+
         self._status = WagonStatus.RETROFITTED
         self.retrofit_end_time = end_time
 

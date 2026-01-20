@@ -1,8 +1,14 @@
 """Rake Aggregate - references wagons, doesn't own them."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 
 
 class RakeType(Enum):
@@ -83,6 +89,37 @@ class Rake:
         """
         if wagon_id in self.wagon_ids:
             self.wagon_ids.remove(wagon_id)
+
+    def get_coupling_coupler_type(self, wagon_repository) -> str:
+        """Get coupler type for locomotive coupling.
+
+        Args:
+            wagon_repository: Repository to resolve wagon entities
+
+        Returns
+        -------
+            Coupler type of first wagon for locomotive coupling
+        """
+        if not self.wagon_ids:
+            raise ValueError(f'Rake {self.id} has no wagons')
+
+        first_wagon = wagon_repository.get_by_id(self.wagon_ids[0])
+        return first_wagon.coupler_a.type.value
+
+    def get_first_wagon(self, wagon_repository) -> Wagon:
+        """Get first wagon entity for coupling validation.
+
+        Args:
+            wagon_repository: Repository to resolve wagon entities
+
+        Returns
+        -------
+            First wagon entity in the rake
+        """
+        if not self.wagon_ids:
+            raise ValueError(f'Rake {self.id} has no wagons')
+
+        return wagon_repository.get_by_id(self.wagon_ids[0])
 
     def __repr__(self) -> str:
         """Return string representation."""

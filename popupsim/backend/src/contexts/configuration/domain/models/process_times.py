@@ -59,6 +59,18 @@ class ProcessTimes(BaseModel):
         default=timedelta(minutes=0.0),
         description='Time locomotive waits at parking before next trip',
     )
+    brake_continuity_check_time: timedelta = Field(
+        default=timedelta(seconds=30.0),
+        description='Time for brake continuity check after coupling rake',
+    )
+    full_brake_test_time: timedelta = Field(
+        default=timedelta(minutes=4.0),
+        description='Time for full brake test on completed train',
+    )
+    technical_inspection_time: timedelta = Field(
+        default=timedelta(minutes=2.0),
+        description='Time for technical inspection of assembled train',
+    )
 
     @field_validator('*', mode='before')
     @classmethod
