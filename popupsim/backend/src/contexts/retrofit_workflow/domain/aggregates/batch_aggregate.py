@@ -25,11 +25,16 @@ class DomainError(Exception):
 
 @dataclass
 class BatchAggregate:
-    """Aggregate root for batch operations ensuring consistency."""
+    """Aggregate root for batch operations ensuring consistency.
+
+    Contains rake_id reference to ensure every batch has a transportable rake.
+    Rake creation is handled by BatchFormationService following DDD principles.
+    """
 
     id: str
     wagons: list[Wagon]
     destination: str
+    rake_id: str  # Reference to associated rake
     _status: BatchStatus = field(default=BatchStatus.FORMED, init=False)
     _locomotive: Locomotive | None = field(default=None, init=False)
     _events: list[Any] = field(default_factory=list, init=False)
@@ -120,7 +125,11 @@ class BatchAggregate:
 
     def can_start_transport(self) -> bool:
         """Check if batch can start transport."""
-        return self._status == BatchStatus.FORMED and all(wagon.needs_retrofit for wagon in self.wagons)
+        return (
+            self._status == BatchStatus.FORMED
+            and all(wagon.needs_retrofit for wagon in self.wagons)
+            and self.rake_id is not None  # Rake must exist for transport
+        )
 
     def __post_init__(self) -> None:
         """Validate batch after creation."""
@@ -129,3 +138,6 @@ class BatchAggregate:
 
         if not self.destination:
             raise DomainError('Batch must have destination')
+
+        if not self.rake_id:
+            raise DomainError('Batch must have associated rake for transport')
