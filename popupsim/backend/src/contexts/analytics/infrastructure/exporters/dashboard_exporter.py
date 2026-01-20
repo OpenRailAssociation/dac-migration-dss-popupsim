@@ -662,12 +662,18 @@ class DashboardExporter:
                 collection_track_id = getattr(wagon, 'collection_track_id', '')
 
                 # Determine rejection type from detailed reason
+                rejection_reason = getattr(wagon, 'rejection_reason', 'UNKNOWN')
                 if 'loaded' in detailed_reason.lower():
                     rejection_type = 'Loaded'
                 elif "doesn't need retrofit" in detailed_reason.lower() or 'no retrofit' in detailed_reason.lower():
                     rejection_type = 'No Retrofit Needed'
-                elif 'capacity exceeded' in detailed_reason.lower() or 'track full' in detailed_reason.lower():
-                    rejection_type = 'Collection Track Full'
+                elif '_FULL' in rejection_reason or 'track full' in detailed_reason.lower():
+                    # Extract track name from rejection reason (e.g., 'collection1_FULL' -> 'collection1 Full')
+                    if '_FULL' in rejection_reason:
+                        track_name = rejection_reason.replace('_FULL', '')
+                        rejection_type = f'{track_name} Full'
+                    else:
+                        rejection_type = 'Collection Track Full'
                 else:
                     rejection_type = 'Other'
 

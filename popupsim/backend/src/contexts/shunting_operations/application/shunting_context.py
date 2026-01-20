@@ -277,7 +277,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log coupling completion
             try:
                 plog = get_process_logger()
-                wagon_str = ', '.join(wagon_ids)  # type: ignore[arg-type]
+                wagon_str = ', '.join(wagon_ids) if wagon_ids else 'unknown wagons'
                 plog.log(
                     (
                         f'COUPLING: [{wagon_str}] with {coupler_type} couplers '
@@ -324,7 +324,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             # Log decoupling completion
             try:
                 plog = get_process_logger()
-                wagon_str = ', '.join(wagon_ids)  # type: ignore[arg-type]
+                wagon_str = ', '.join(wagon_ids) if wagon_ids else 'unknown wagons'
                 plog.log(
                     (
                         f'DECOUPLING: [{wagon_str}] with {coupler_type or "SCREW"} couplers'
