@@ -224,6 +224,7 @@ module = [
     "contexts.external_trains.*",
     "contexts.yard_operations.*",
     "contexts.shunting_operations.*",
+    "contexts.retrofit_workflow.*",
     "debug_tracks",
     "popupsim.analytics_application_service",
     "popupsim.frontend.streamlit_dashboard"

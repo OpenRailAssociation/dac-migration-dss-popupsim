@@ -5,8 +5,6 @@ from contexts.configuration.application.dtos.route_input_dto import RouteInputDT
 from contexts.configuration.application.dtos.track_input_dto import TrackInputDTO
 import pytest
 
-from application.simulation_service import SimulationApplicationService
-
 from .scenario_builder import create_minimal_scenario
 from .timeline_validator import validate_timeline_from_docstring
 
