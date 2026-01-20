@@ -72,6 +72,7 @@ class WagonAssignedToWorkshopEvent(DomainEvent):
     """
 
     wagon: Any = None
+    workshop_id: str = ''
     event_timestamp: float = 0.0
 
 
