@@ -1,4 +1,4 @@
-"""Unified track occupancy domain service."""
+"""track occupancy domain service."""
 
 from uuid import UUID
 

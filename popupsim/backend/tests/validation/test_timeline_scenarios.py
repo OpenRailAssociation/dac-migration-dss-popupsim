@@ -9,7 +9,7 @@ from .scenario_builder import create_minimal_scenario
 from .timeline_validator import validate_timeline_from_docstring
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_single_wagon_single_station() -> None:
     """Test 1 wagon, 1 station - validates state at each timestep.
 
@@ -39,7 +39,7 @@ def test_single_wagon_single_station() -> None:
     assert result.success
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_two_wagons_one_station() -> None:
     """Test 2 wagons, 1 station - sequential processing.
 
@@ -81,7 +81,7 @@ def test_two_wagons_one_station() -> None:
     assert result.success
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_two_wagons_two_stations() -> None:
     """Test 2 wagons, 2 stations - parallel processing.
 
@@ -115,7 +115,7 @@ def test_two_wagons_two_stations() -> None:
     assert result.success
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_four_wagons_two_stations() -> None:
     """Test 4 wagons, 2 stations.
 
@@ -166,7 +166,7 @@ def test_four_wagons_two_stations() -> None:
     assert result.success
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_six_wagons_two_workshops() -> None:
     """Test 6 wagons, 2 workshops - load balancing.
 
@@ -234,7 +234,7 @@ def test_six_wagons_two_workshops() -> None:
     assert result.success
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_seven_wagons_two_workshops() -> None:
     """Test 7 wagons, 2 workshops - partial batch handling.
 
@@ -315,7 +315,7 @@ def test_seven_wagons_two_workshops() -> None:
     assert result.success
 
 
-@pytest.mark.xfail(reason='Old architecture tests - need update for unified operations')
+@pytest.mark.xfail(reason='Old architecture tests - need update for retrofit workflow')
 def test_four_wagons_four_stations_two_collection_tracks() -> None:
     """Test 1 train (4 wagons) with 2 collection tracks - verify all 4 picked up together.
 

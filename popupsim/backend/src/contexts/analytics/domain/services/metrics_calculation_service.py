@@ -1,4 +1,4 @@
-"""Unified metrics calculation service."""
+"""Mtrics calculation service."""
 
 from collections import defaultdict
 from typing import Any
