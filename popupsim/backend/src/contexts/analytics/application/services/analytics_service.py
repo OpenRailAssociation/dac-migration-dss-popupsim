@@ -1,4 +1,4 @@
-"""Unified analytics service for cross-context analysis and monitoring."""
+"""Analytics service for cross-context analysis and monitoring."""
 
 from collections import deque
 from dataclasses import dataclass
@@ -30,7 +30,7 @@ class Alert:
 
 
 class AnalyticsService:
-    """Unified service for cross-context analysis and real-time monitoring."""
+    """Service for cross-context analysis and real-time monitoring."""
 
     def __init__(
         self,

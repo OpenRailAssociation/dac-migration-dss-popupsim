@@ -1,4 +1,4 @@
-"""Unified event collection service."""
+"""Event collection service."""
 
 # pylint: disable=duplicate-code
 from collections import defaultdict

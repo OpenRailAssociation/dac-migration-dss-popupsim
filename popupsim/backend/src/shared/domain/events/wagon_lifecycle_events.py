@@ -65,6 +65,29 @@ class WagonReadyForRetrofitEvent(DomainEvent):
 
 
 @dataclass(frozen=True)
+class WagonAssignedToWorkshopEvent(DomainEvent):
+    """Wagon has been assigned to a workshop from FIFO queue.
+
+    Triggers transport from retrofit track to workshop.
+    """
+
+    wagon: Any = None
+    event_timestamp: float = 0.0
+
+
+@dataclass(frozen=True)
+class WagonBatchAssignedToWorkshopEvent(DomainEvent):
+    """Batch of wagons assigned to same workshop from FIFO queue.
+
+    Triggers batch transport from retrofit track to workshop.
+    """
+
+    wagons: list[Any] = field(default_factory=list)
+    workshop_id: str = ''
+    event_timestamp: float = 0.0
+
+
+@dataclass(frozen=True)
 class WagonRetrofittedEvent(DomainEvent):
     """Wagon has completed retrofit."""
 
