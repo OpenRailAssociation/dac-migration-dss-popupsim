@@ -54,7 +54,7 @@ class TestBatchRakeIntegration:
         ]
 
         # Act & Assert
-        with pytest.raises(DomainError, match="Cannot form batch.*rake formation failed"):
+        with pytest.raises(DomainError, match='Cannot form batch - insufficient wagons'):
             service.create_batch_aggregate(wagons, 'WORKSHOP_B')
 
     def test_batch_formation_fails_with_empty_wagons(self) -> None:

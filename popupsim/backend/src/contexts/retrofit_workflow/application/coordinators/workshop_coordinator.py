@@ -65,13 +65,17 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 else:
                     break
 
+            # Form batch based on workshop capacity
+            batch_wagons = self.batch_service.form_batch_for_workshop(wagons, workshop)
+
+            # Use old batch processing temporarily
             # Free retrofit track capacity
             if self.track_manager:
                 retrofit_track = self.track_manager.get_track('retrofit')
                 if retrofit_track:
-                    yield from retrofit_track.remove_wagons(wagons)
+                    yield from retrofit_track.remove_wagons(batch_wagons)
 
-            self.env.process(self._process_and_release(available_workshop, wagons))
+            self.env.process(self._process_and_release(available_workshop, batch_wagons))
 
     def _find_available_workshop(self) -> str | None:
         """Find first available workshop (not busy)."""
@@ -92,7 +96,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
 
     def _process_workshop_batch(self, workshop_id: str, wagons: list[Wagon]) -> Generator[Any, Any]:
         """Process a batch of wagons in workshop."""
-        loco = yield from self.locomotive_manager.allocate(purpose='workshop_pickup')
+        loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
         yield from self._transport_to_workshop(loco, workshop_id)
 
         retrofit_start_time = self.env.now
@@ -128,7 +132,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 'COMPLETED',
             )
 
-        pickup_loco = yield from self.locomotive_manager.allocate(purpose='workshop_pickup')
+        pickup_loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
         try:
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
         finally:

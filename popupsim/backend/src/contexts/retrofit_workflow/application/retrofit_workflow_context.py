@@ -231,6 +231,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             track_selector=self.track_selector,
             batch_service=self.batch_formation_service,
             route_service=self.route_service,
+            scenario=self.scenario,
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
             batch_event_publisher=self.event_collector.add_batch_event,

@@ -7,6 +7,7 @@ from typing import Any
 
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 
 class BatchStatus(Enum):
@@ -130,6 +131,35 @@ class BatchAggregate:
             and all(wagon.needs_retrofit for wagon in self.wagons)
             and self.rake_id is not None  # Rake must exist for transport
         )
+
+    def get_transport_time(self, base_transport_time: float, process_times: Any) -> float:
+        """Calculate total transport time including coupling.
+
+        Args:
+            base_transport_time: Base route transport time
+            process_times: Process times configuration
+
+        Returns
+        -------
+            Total transport time including coupling
+
+        """
+        if not process_times:
+            return base_transport_time
+
+        # Get coupling time based on wagon coupler types
+        coupling_time = 0.0
+        if self.wagons:
+            # Use first wagon's coupler type to determine coupling time
+            first_wagon = self.wagons[0]
+            if hasattr(first_wagon, 'coupler_a') and hasattr(first_wagon.coupler_a, 'type'):
+                coupler_type = first_wagon.coupler_a.type.value
+                if coupler_type == 'SCREW':
+                    coupling_time = timedelta_to_sim_ticks(process_times.screw_coupling_time)
+                elif coupler_type == 'DAC':
+                    coupling_time = timedelta_to_sim_ticks(process_times.dac_coupling_time)
+
+        return base_transport_time + coupling_time
 
     def __post_init__(self) -> None:
         """Validate batch after creation."""

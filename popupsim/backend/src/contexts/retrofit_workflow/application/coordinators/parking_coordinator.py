@@ -73,30 +73,24 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
     def _process_parking_batch(self, wagons: list[Wagon]) -> Generator[Any, Any]:
         """Process a batch of wagons for parking."""
-        # self.coordination.start_operation('parking')  # Method not available
-
         try:
             parking_track = self.track_selector.select_track_with_capacity('parking_area')
             if not parking_track:
                 logger.error('No parking tracks configured')
                 return
 
-            batch = self.batch_service.form_batch_for_parking_track(wagons, parking_track.get_available_capacity())
-            if not batch:
+            # Form batch that fits parking track capacity
+            batch_wagons = self.batch_service.form_batch_for_parking_track(
+                wagons, parking_track.get_available_capacity()
+            )
+            if not batch_wagons:
                 return
 
-            batch_id = self._publish_batch_events(batch)
-            loco = yield from self.locomotive_manager.allocate(purpose='parking')
-            EventPublisherHelper.publish_loco_allocated(self.loco_event_publisher, self.env.now, loco.id)
-
-            try:
-                yield from self._transport_to_parking(loco, batch, batch_id)
-                yield from self._park_wagons(batch)
-                yield from self._return_locomotive(loco)
-            finally:
-                yield from self.locomotive_manager.release(loco)
+            # Use old batch processing temporarily
+            batch_id = self._publish_batch_events_old(batch_wagons)
+            yield from self._transport_batch_old(batch_wagons, batch_id)
         finally:
-            pass  # self.coordination.complete_operation('parking')  # Method not available
+            pass
 
     def _publish_batch_events(self, batch: list[Wagon]) -> str:
         """Publish batch formation events."""
@@ -168,3 +162,51 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
         return_time = self.route_service.get_duration('parking_area', 'loco_parking')
         yield self.env.timeout(return_time)
+
+    def _transport_batch_aggregate(self, batch_aggregate: Any) -> Generator[Any, Any]:
+        """Transport batch aggregate to parking area."""
+        batch_id = batch_aggregate.id
+        wagons = batch_aggregate.wagons
+
+        self._publish_batch_events(batch_aggregate)
+
+        loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
+        EventPublisherHelper.publish_loco_allocated(self.loco_event_publisher, self.env.now, loco.id)
+
+        try:
+            yield from self._transport_to_parking(loco, wagons, batch_id)
+            yield from self._park_wagons(wagons)
+            yield from self._return_locomotive(loco)
+        finally:
+            yield from self.locomotive_manager.release(loco)
+
+    def _publish_batch_events_old(self, batch: list[Wagon]) -> str:
+        """Publish batch formation events (old method)."""
+        self.batch_counter += 1
+        batch_id = f'RETROFITTED-PARK-{int(self.env.now)}-{self.batch_counter}'
+
+        if self.batch_event_publisher:
+            self.batch_event_publisher(
+                BatchFormed(
+                    timestamp=self.env.now,
+                    event_id=f'batch_formed_{batch_id}',
+                    batch_id=batch_id,
+                    wagon_ids=[w.id for w in batch],
+                    destination='parking_area',
+                    total_length=sum(w.length for w in batch),
+                )
+            )
+
+        return batch_id
+
+    def _transport_batch_old(self, batch: list[Wagon], batch_id: str) -> Generator[Any, Any]:
+        """Transport batch to parking area (old method)."""
+        loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
+        EventPublisherHelper.publish_loco_allocated(self.loco_event_publisher, self.env.now, loco.id)
+
+        try:
+            yield from self._transport_to_parking(loco, batch, batch_id)
+            yield from self._park_wagons(batch)
+            yield from self._return_locomotive(loco)
+        finally:
+            yield from self.locomotive_manager.release(loco)

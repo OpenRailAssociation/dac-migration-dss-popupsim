@@ -86,6 +86,7 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     track_selector: TrackSelectionService
     batch_service: BatchFormationService
     route_service: RouteService
+    scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
