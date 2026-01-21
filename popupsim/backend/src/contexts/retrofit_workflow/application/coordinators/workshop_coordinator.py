@@ -165,7 +165,10 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             yield from self.locomotive_manager.release(pickup_loco)
 
     def _transport_to_workshop_with_batch(
-        self, loco: Any, workshop_id: str, batch_aggregate: Any
+        self,
+        loco: Any,
+        workshop_id: str,
+        batch_aggregate: Any,  # noqa: ARG002
     ) -> Generator[Any, Any]:
         """Transport batch aggregate to workshop (no coupling time - handled manually at workshop)."""
         EventPublisherHelper.publish_loco_moving(
@@ -186,7 +189,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
     def _transport_from_workshop_with_batch(
         self, loco: Any, workshop_id: str, batch_aggregate: Any
     ) -> Generator[Any, Any]:
-        """Transport batch aggregate from workshop to retrofitted track (no coupling time - handled manually at workshop)."""
+        """Transport batch from workshop to retrofitted track (no coupling - handled at workshop)."""
         wagons = batch_aggregate.wagons
 
         EventPublisherHelper.publish_loco_moving(
