@@ -56,8 +56,8 @@ def mock_batch(mock_wagons: list[Wagon]) -> BatchAggregate:
 def process_times() -> ProcessTimes:
     """Create process times configuration."""
     return ProcessTimes(
-        loco_coupling_time=timedelta(minutes=3),
-        loco_decoupling_time=timedelta(minutes=2),
+        screw_coupling_time=timedelta(minutes=1),
+        dac_coupling_time=timedelta(minutes=0.5),
         full_brake_test_time=timedelta(minutes=5),
         technical_inspection_time=timedelta(minutes=2),
         shunting_preparation_time=timedelta(minutes=1),
@@ -160,8 +160,8 @@ def test_shunting_preparation_time(
     )
 
     prep_time = train.get_preparation_time(process_times)
-    # Should be 4 minutes (3 loco coupling + 1 preparation)
-    assert prep_time == 4.0
+    # Should be 2 minutes (1 SCREW coupling + 1 preparation)
+    assert prep_time == 2.0
 
 
 def test_mainline_preparation_time(
@@ -178,8 +178,8 @@ def test_mainline_preparation_time(
     )
 
     prep_time = train.get_preparation_time(process_times)
-    # Should be 3 + 5 + 2 = 10 minutes
-    assert prep_time == 10.0
+    # Should be 1 + 5 + 2 = 8 minutes (SCREW coupling + brake test + inspection)
+    assert prep_time == 8.0
 
 
 def test_train_lifecycle(mock_locomotive: Locomotive, mock_batch: BatchAggregate) -> None:
@@ -232,7 +232,7 @@ def test_train_formation_service_shunting(
 
     # Prepare train
     prep_time = service.prepare_train(train, process_times, 0.0)
-    assert prep_time == 4.0  # Loco coupling + preparation
+    assert prep_time == 2.0  # SCREW coupling + preparation
     assert train.status == TrainMovementStatus.READY
 
 
@@ -256,5 +256,5 @@ def test_train_formation_service_mainline(
 
     # Prepare train
     prep_time = service.prepare_train(train, process_times, 0.0)
-    assert prep_time == 10.0  # Loco coupling + brake test + inspection
+    assert prep_time == 8.0  # SCREW coupling + brake test + inspection
     assert train.status == TrainMovementStatus.READY

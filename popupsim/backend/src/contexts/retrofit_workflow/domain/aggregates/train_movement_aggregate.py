@@ -210,17 +210,44 @@ class TrainMovement:  # pylint: disable=too-many-instance-attributes
         -------
             Total preparation time in simulation ticks
         """
+        # Get loco coupling time based on wagon coupler types
+        loco_coupling = self._get_loco_coupling_time(process_times)
+
         if self.is_mainline:
             # Mainline: loco coupling + brake test + inspection
-            loco_coupling = timedelta_to_sim_ticks(process_times.loco_coupling_time)
             brake_test = timedelta_to_sim_ticks(process_times.full_brake_test_time)
             inspection = timedelta_to_sim_ticks(process_times.technical_inspection_time)
             return loco_coupling + brake_test + inspection
 
         # Shunting: loco coupling + preparation (safety checks, communication)
-        loco_coupling = timedelta_to_sim_ticks(process_times.loco_coupling_time)
         preparation = timedelta_to_sim_ticks(process_times.shunting_preparation_time)
         return loco_coupling + preparation
+
+    def _get_loco_coupling_time(self, process_times: Any) -> float:
+        """Get locomotive coupling time based on wagon coupler types.
+
+        Uses the coupler type of the first wagon in the batch to determine
+        the coupling time (SCREW or DAC).
+
+        Args:
+            process_times: Process times configuration
+
+        Returns
+        -------
+            Coupling time in simulation ticks
+        """
+        if not self.batch.wagons:
+            # Fallback to screw coupling if no wagons
+            return timedelta_to_sim_ticks(process_times.screw_coupling_time)
+
+        # Use first wagon's coupler type
+        first_wagon = self.batch.wagons[0]
+        if hasattr(first_wagon, 'coupler_a') and hasattr(first_wagon.coupler_a, 'type'):
+            coupler_type = first_wagon.coupler_a.type.value
+            return timedelta_to_sim_ticks(process_times.get_coupling_time(coupler_type))
+
+        # Fallback to screw coupling
+        return timedelta_to_sim_ticks(process_times.screw_coupling_time)
 
     def __post_init__(self) -> None:
         """Validate train movement after creation."""

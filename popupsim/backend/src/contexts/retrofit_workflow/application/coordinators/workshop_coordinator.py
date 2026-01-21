@@ -7,6 +7,7 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Wor
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 
@@ -29,6 +30,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         self.locomotive_manager = config.locomotive_manager
         self.route_service = config.route_service
         self.batch_service = config.batch_service
+        self.train_service: TrainFormationService = config.train_service
         self.scenario = config.scenario
         self.wagon_event_publisher = config.wagon_event_publisher
         self.loco_event_publisher = config.loco_event_publisher
@@ -167,7 +169,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             yield from self.locomotive_manager.release(pickup_loco)
 
     def _transport_to_workshop(self, loco: Any, workshop_id: str) -> Generator[Any, Any]:
-        """Transport locomotive to workshop."""
+        """Transport locomotive to workshop with train formation."""
+        # Transport: loco_parking -> retrofit (no prep, loco is already there)
         EventPublisherHelper.publish_loco_moving(
             self.loco_event_publisher, self.env.now, loco.id, 'loco_parking', 'retrofit'
         )
@@ -175,6 +178,16 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         transport_time = self.route_service.get_duration('loco_parking', 'retrofit')
         yield self.env.timeout(transport_time)
 
+        # Prepare train at retrofit (loco coupling + prep time)
+        # Note: Loco coupling time is now dynamic based on wagon coupler types
+        # For workshop transport, wagons have SCREW couplers (before retrofit)
+        loco_coupling_time = timedelta_to_sim_ticks(self.scenario.process_times.screw_coupling_time)
+        prep_time_ticks = loco_coupling_time + timedelta_to_sim_ticks(
+            self.scenario.process_times.shunting_preparation_time
+        )
+        yield self.env.timeout(prep_time_ticks)
+
+        # Transport: retrofit -> workshop
         EventPublisherHelper.publish_loco_moving(
             self.loco_event_publisher, self.env.now, loco.id, 'retrofit', workshop_id
         )
@@ -212,10 +225,26 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         yield from self.locomotive_manager.release(loco)
 
     def _transport_from_workshop(self, loco: Any, workshop_id: str, wagons: list[Wagon]) -> Generator[Any, Any]:
-        """Transport wagons from workshop to retrofitted track."""
+        """Transport wagons from workshop to retrofitted track with train formation."""
+        # Get route type
+        route_type = self.route_service.get_route_type(workshop_id, 'retrofitted')
+
+        # Create batch for train formation
+        batch = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
+
+        # Form train
+        train = self.train_service.form_train(
+            locomotive=loco, batch=batch, origin='loco_parking', destination='retrofitted', route_type=route_type
+        )
+
+        # Prepare train (adds loco coupling + prep time)
+        prep_time = self.train_service.prepare_train(train, self.scenario.process_times, self.env.now)
+        yield self.env.timeout(prep_time)
+
         EventPublisherHelper.publish_loco_moving(
             self.loco_event_publisher, self.env.now, loco.id, 'loco_parking', workshop_id
         )
+        train.depart(self.env.now)
 
         # Move to workshop
         transport_time = self.route_service.get_duration('loco_parking', workshop_id)
@@ -228,6 +257,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         # Transport to retrofitted
         transport_time = self.route_service.get_duration(workshop_id, 'retrofitted')
         yield self.env.timeout(transport_time)
+        train.arrive(self.env.now)
 
         # Put wagons on retrofitted queue
         for wagon in wagons:
@@ -241,6 +271,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         # Return locomotive
         return_time = self.route_service.get_duration('retrofitted', 'loco_parking')
         yield self.env.timeout(return_time)
+
+        train.dissolve()
 
     def _get_decoupling_time(self, wagons: list[Wagon]) -> float:
         """Calculate decoupling time: (n-1) couplings x time_per_coupling."""

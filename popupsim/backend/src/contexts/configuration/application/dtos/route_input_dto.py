@@ -7,10 +7,10 @@ from pydantic import model_validator
 
 
 class RouteType(Enum):
-    """Route type enumeration for transport operations."""
+    """Route type enumeration for operational modes."""
 
-    MAINLINE = 'MAINLINE'
-    SHUNTING = 'SHUNTING'
+    MAINLINE = 'MAINLINE'  # Full brake test + inspection required
+    SHUNTING = 'SHUNTING'  # Yard shunting - coupling + preparation only
 
 
 class RouteInputDTO(BaseModel):
@@ -21,6 +21,7 @@ class RouteInputDTO(BaseModel):
     duration: float
     track_sequence: list[str] = []
     path: list[str] = []
+    route_type: str = 'SHUNTING'  # Default to shunting for backward compatibility
 
     @model_validator(mode='after')
     def sync_path_to_track_sequence(self) -> 'RouteInputDTO':

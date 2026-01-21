@@ -177,8 +177,26 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
     def _transport_to_retrofit_with_batch(
         self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str
     ) -> Generator[Any, Any]:
-        """Transport batch aggregate to retrofit track with coupling time."""
+        """Transport batch aggregate to retrofit track with train formation."""
         wagons = batch_aggregate.wagons
+
+        # Get route type for train formation
+        route_type = self.config.route_service.get_route_type('collection', 'retrofit')
+
+        # Form train (locomotive + rake)
+        train = self.config.train_service.form_train(
+            locomotive=loco,
+            batch=batch_aggregate,
+            origin='collection',
+            destination='retrofit',
+            route_type=route_type,
+        )
+
+        # Prepare train (loco coupling + brake test + inspection for MAINLINE)
+        prep_time = self.config.train_service.prepare_train(
+            train, self.config.scenario.process_times, self.config.env.now
+        )
+        yield self.config.env.timeout(prep_time)
 
         EventPublisherHelper.publish_batch_transport_started(
             self.config.batch_event_publisher,
@@ -189,20 +207,20 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             len(wagons),
         )
 
+        # Depart
+        train.depart(self.config.env.now)
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'collection', 'retrofit'
         )
 
         yield from retrofit_track.add_wagons(wagons)
 
-        # Use batch aggregate to calculate transport time including coupling
+        # Transport
         base_transport_time = self.config.route_service.get_duration('collection', 'retrofit')
-        process_times = (
-            getattr(self.config.scenario, 'process_times', None) if hasattr(self.config, 'scenario') else None
-        )
-        total_transport_time = batch_aggregate.get_transport_time(base_transport_time, process_times)
+        yield self.config.env.timeout(base_transport_time)
 
-        yield self.config.env.timeout(total_transport_time)
+        # Arrive
+        train.arrive(self.config.env.now)
 
         EventPublisherHelper.publish_batch_arrived(
             self.config.batch_event_publisher,
@@ -211,6 +229,9 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             'retrofit',
             len(wagons),
         )
+
+        # Dissolve train (separate loco from rake)
+        _, _ = train.dissolve()
 
     def _publish_batch_events_old(self, batch: list[Wagon]) -> str:
         """Publish batch formation events (old method)."""
