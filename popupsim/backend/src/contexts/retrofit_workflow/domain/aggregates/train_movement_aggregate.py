@@ -86,11 +86,8 @@ class TrainMovement:  # pylint: disable=too-many-instance-attributes
         """Check if this is a shunting movement."""
         return self.train_type == TrainType.SHUNTING
 
-    def complete_brake_test(self, current_time: float) -> None:  # noqa: ARG002
+    def complete_brake_test(self) -> None:
         """Complete brake test (mainline only).
-
-        Args:
-            current_time: Current simulation time
 
         Raises
         ------
@@ -104,11 +101,8 @@ class TrainMovement:  # pylint: disable=too-many-instance-attributes
 
         self._brake_test_completed = True
 
-    def complete_inspection(self, current_time: float) -> None:  # noqa: ARG002
+    def complete_inspection(self) -> None:
         """Complete inspection (mainline only).
-
-        Args:
-            current_time: Current simulation time
 
         Raises
         ------

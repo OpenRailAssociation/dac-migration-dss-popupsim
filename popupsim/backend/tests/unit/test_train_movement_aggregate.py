@@ -134,11 +134,11 @@ def test_mainline_train_requires_brake_test_and_inspection(
     assert not train.is_ready_for_departure()
 
     # Complete brake test
-    train.complete_brake_test(0.0)
+    train.complete_brake_test()
     assert not train.is_ready_for_departure()  # Still need inspection
 
     # Complete inspection
-    train.complete_inspection(0.0)
+    train.complete_inspection()
     assert train.is_ready_for_departure()
 
     # Mark ready

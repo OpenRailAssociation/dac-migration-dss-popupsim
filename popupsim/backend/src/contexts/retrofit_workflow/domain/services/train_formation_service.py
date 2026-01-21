@@ -72,8 +72,8 @@ class TrainFormationService:
         """
         if train.is_mainline:
             # Mainline: complete brake test and inspection
-            train.complete_brake_test(current_time)
-            train.complete_inspection(current_time)
+            train.complete_brake_test()
+            train.complete_inspection()
 
         # Mark ready (will validate requirements)
         train.mark_ready_for_departure(current_time)
