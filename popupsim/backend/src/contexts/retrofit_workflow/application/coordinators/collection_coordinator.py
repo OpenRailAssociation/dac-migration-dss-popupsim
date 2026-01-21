@@ -8,9 +8,6 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Col
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
-from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAtDestination
-from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
-from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 
 logger = logging.getLogger(__name__)
 
@@ -114,36 +111,25 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
 
     def _publish_batch_events(self, batch_aggregate: Any) -> None:
         """Publish batch formation events."""
-        batch_id = batch_aggregate.id
-        wagons = batch_aggregate.wagons
-
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchFormed(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_formed_{batch_id}',
-                    batch_id=batch_id,
-                    wagon_ids=[w.id for w in wagons],
-                    destination='retrofit',
-                    total_length=sum(w.length for w in wagons),
-                )
-            )
+        EventPublisherHelper.publish_batch_events_for_aggregate(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_aggregate,
+            'retrofit',
+        )
 
     def _transport_to_retrofit(
         self, loco: Any, wagons: list[Wagon], retrofit_track: Any, batch_id: str
     ) -> Generator[Any, Any]:
         """Transport batch to retrofit track."""
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchTransportStarted(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_transport_{batch_id}',
-                    batch_id=batch_id,
-                    locomotive_id=loco.id,
-                    destination='retrofit',
-                    wagon_count=len(wagons),
-                )
-            )
+        EventPublisherHelper.publish_batch_transport_started(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            loco.id,
+            'retrofit',
+            len(wagons),
+        )
 
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'collection', 'retrofit'
@@ -153,16 +139,13 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         transport_time = self.config.route_service.get_duration('collection', 'retrofit')
         yield self.config.env.timeout(transport_time)
 
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchArrivedAtDestination(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_arrived_{batch_id}',
-                    batch_id=batch_id,
-                    destination='retrofit',
-                    wagon_count=len(wagons),
-                )
-            )
+        EventPublisherHelper.publish_batch_arrived(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            'retrofit',
+            len(wagons),
+        )
 
     def _deliver_wagons(self, wagons: list[Wagon], retrofit_track: Any) -> Generator[Any, Any]:
         """Deliver wagons to retrofit queue."""
@@ -197,17 +180,14 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         """Transport batch aggregate to retrofit track with coupling time."""
         wagons = batch_aggregate.wagons
 
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchTransportStarted(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_transport_{batch_id}',
-                    batch_id=batch_id,
-                    locomotive_id=loco.id,
-                    destination='retrofit',
-                    wagon_count=len(wagons),
-                )
-            )
+        EventPublisherHelper.publish_batch_transport_started(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            loco.id,
+            'retrofit',
+            len(wagons),
+        )
 
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'collection', 'retrofit'
@@ -224,33 +204,27 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
 
         yield self.config.env.timeout(total_transport_time)
 
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchArrivedAtDestination(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_arrived_{batch_id}',
-                    batch_id=batch_id,
-                    destination='retrofit',
-                    wagon_count=len(wagons),
-                )
-            )
+        EventPublisherHelper.publish_batch_arrived(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            'retrofit',
+            len(wagons),
+        )
 
     def _publish_batch_events_old(self, batch: list[Wagon]) -> str:
         """Publish batch formation events (old method)."""
         self.batch_counter += 1
         batch_id = f'COL-RET-{int(self.config.env.now)}-{self.batch_counter}'
 
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchFormed(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_formed_{batch_id}',
-                    batch_id=batch_id,
-                    wagon_ids=[w.id for w in batch],
-                    destination='retrofit',
-                    total_length=sum(w.length for w in batch),
-                )
-            )
+        EventPublisherHelper.publish_batch_formed(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            [w.id for w in batch],
+            'retrofit',
+            sum(w.length for w in batch),
+        )
 
         return batch_id
 

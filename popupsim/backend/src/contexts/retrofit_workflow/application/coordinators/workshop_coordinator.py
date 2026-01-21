@@ -7,6 +7,7 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Wor
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 
 class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-few-public-methods
@@ -99,13 +100,17 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
         yield from self._transport_to_workshop(loco, workshop_id)
 
+        # Decouple rake at workshop arrival
+        decoupling_time = self._get_decoupling_time(wagons)
+        yield self.env.timeout(decoupling_time)
+
         retrofit_start_time = self.env.now
         yield from self._start_retrofit(workshop_id, wagons)
         yield from self._return_locomotive(loco, workshop_id)
 
         elapsed_time = self.env.now - retrofit_start_time
-        retrofit_time_minutes = self.scenario.process_times.wagon_retrofit_time.total_seconds() / 60.0
-        remaining_time = max(0, retrofit_time_minutes - elapsed_time)
+        retrofit_time_ticks = timedelta_to_sim_ticks(self.scenario.process_times.wagon_retrofit_time)
+        remaining_time = max(0, retrofit_time_ticks - elapsed_time)
 
         if remaining_time > 0:
             yield self.env.timeout(remaining_time)
@@ -131,6 +136,10 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 workshop_id,
                 'COMPLETED',
             )
+
+        # Couple rake at workshop departure
+        coupling_time = self._get_coupling_time(wagons)
+        yield self.env.timeout(coupling_time)
 
         pickup_loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
         try:
@@ -213,3 +222,32 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         # Return locomotive
         return_time = self.route_service.get_duration('retrofitted', 'loco_parking')
         yield self.env.timeout(return_time)
+
+    def _get_decoupling_time(self, wagons: list[Wagon]) -> float:
+        """Calculate decoupling time: (n-1) couplings x time_per_coupling."""
+        if len(wagons) <= 1:
+            return 0.0
+
+        # Use first wagon's coupler type
+        coupler_type = wagons[0].coupler_a.type.value if hasattr(wagons[0], 'coupler_a') else 'SCREW'
+
+        if coupler_type == 'SCREW':
+            time_per_coupling = timedelta_to_sim_ticks(self.scenario.process_times.screw_decoupling_time)
+        else:  # DAC
+            time_per_coupling = timedelta_to_sim_ticks(self.scenario.process_times.dac_decoupling_time)
+
+        return (len(wagons) - 1) * time_per_coupling
+
+    def _get_coupling_time(self, wagons: list[Wagon]) -> float:
+        """Calculate coupling time: (n-1) couplings x time_per_coupling."""
+        if len(wagons) <= 1:
+            return 0.0
+
+        coupler_type = wagons[0].coupler_a.type.value if hasattr(wagons[0], 'coupler_a') else 'SCREW'
+
+        if coupler_type == 'SCREW':
+            time_per_coupling = timedelta_to_sim_ticks(self.scenario.process_times.screw_coupling_time)
+        else:  # DAC
+            time_per_coupling = timedelta_to_sim_ticks(self.scenario.process_times.dac_coupling_time)
+
+        return (len(wagons) - 1) * time_per_coupling

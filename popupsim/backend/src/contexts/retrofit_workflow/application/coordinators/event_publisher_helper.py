@@ -1,9 +1,13 @@
 """Helper for publishing coordinator events - eliminates duplicate code."""
 
 from collections.abc import Callable
+from typing import Any
 
 from contexts.retrofit_workflow.domain.events import LocomotiveMovementEvent
 from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
+from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAtDestination
+from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
+from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 
 
 class EventPublisherHelper:
@@ -67,5 +71,91 @@ class EventPublisherHelper:
                     event_type=event_type,
                     location=location,
                     status=status,
+                )
+            )
+
+    @staticmethod
+    def publish_batch_formed(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None,
+        timestamp: float,
+        batch_id: str,
+        wagon_ids: list[str],
+        destination: str,
+        total_length: float,
+    ) -> None:
+        """Publish batch formed event."""
+        if publisher:
+            publisher(
+                BatchFormed(
+                    timestamp=timestamp,
+                    event_id=f'batch_formed_{batch_id}',
+                    batch_id=batch_id,
+                    wagon_ids=wagon_ids,
+                    destination=destination,
+                    total_length=total_length,
+                )
+            )
+
+    @staticmethod
+    def publish_batch_transport_started(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None,
+        timestamp: float,
+        batch_id: str,
+        locomotive_id: str,
+        destination: str,
+        wagon_count: int,
+    ) -> None:
+        """Publish batch transport started event."""
+        if publisher:
+            publisher(
+                BatchTransportStarted(
+                    timestamp=timestamp,
+                    event_id=f'batch_transport_{batch_id}',
+                    batch_id=batch_id,
+                    locomotive_id=locomotive_id,
+                    destination=destination,
+                    wagon_count=wagon_count,
+                )
+            )
+
+    @staticmethod
+    def publish_batch_arrived(
+        publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None,
+        timestamp: float,
+        batch_id: str,
+        destination: str,
+        wagon_count: int,
+    ) -> None:
+        """Publish batch arrived at destination event."""
+        if publisher:
+            publisher(
+                BatchArrivedAtDestination(
+                    timestamp=timestamp,
+                    event_id=f'batch_arrived_{batch_id}',
+                    batch_id=batch_id,
+                    destination=destination,
+                    wagon_count=wagon_count,
+                )
+            )
+
+    @staticmethod
+    def publish_batch_events_for_aggregate(
+        publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None,
+        timestamp: float,
+        batch_aggregate: Any,
+        destination: str,
+    ) -> None:
+        """Publish batch formed event from batch aggregate."""
+        if publisher:
+            batch_id = batch_aggregate.id
+            wagons = batch_aggregate.wagons
+            publisher(
+                BatchFormed(
+                    timestamp=timestamp,
+                    event_id=f'batch_formed_{batch_id}',
+                    batch_id=batch_id,
+                    wagon_ids=[w.id for w in wagons],
+                    destination=destination,
+                    total_length=sum(w.length for w in wagons),
                 )
             )

@@ -174,6 +174,11 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
 
     def _build_remaining_components(self) -> None:
         """Build remaining components (simplified for now)."""
+        self._build_track_and_route_services()
+        self._build_coordinators()
+
+    def _build_track_and_route_services(self) -> None:
+        """Build track manager, route service, and track selector."""
         # Create track manager with all tracks
         track_capacities = {}
         for track_config in self.scenario.tracks:
@@ -186,9 +191,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         )
 
         # Create route service
-        routes = []
-        routes = self.scenario.routes
-        self.route_service = RouteService(routes)
+        self.route_service = RouteService(self.scenario.routes)
 
         # Create track selector using SAME track instances from track_manager
         tracks_by_type: dict[str, list[Any]] = {}
@@ -202,14 +205,19 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
                     tracks_by_type[track_type].append(track)
 
         self.track_selector = TrackSelectionService(tracks_by_type)
-
-        # Create workshop assignment service
         self.workshop_assignment_service = WorkshopAssignmentService(dict(self.workshops))
 
-        # Create coordinators with proper dependencies using ports
+    def _build_coordinators(self) -> None:
+        """Build all coordinators."""
         coordination_service = CoordinationService()
 
-        # Arrival coordinator: handles train arrivals and wagon creation
+        self._build_arrival_coordinator()
+        self._build_collection_coordinator(coordination_service)
+        self._build_workshop_coordinator(coordination_service)
+        self._build_parking_coordinator(coordination_service)
+
+    def _build_arrival_coordinator(self) -> None:
+        """Build arrival coordinator."""
         arrival_config = ArrivalCoordinatorConfig(
             env=self.env,
             collection_queue=self.collection_queue,
@@ -217,7 +225,8 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         )
         self.arrival_coordinator = ArrivalCoordinator(arrival_config)
 
-        # Collection coordinator: moves wagons from collection to retrofit
+    def _build_collection_coordinator(self, coordination_service: CoordinationService) -> None:
+        """Build collection coordinator."""
         if not self.locomotive_manager:
             raise RuntimeError('Locomotive manager not initialized')
         if not self.event_collector:
@@ -238,7 +247,11 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         )
         self.collection_coordinator = CollectionCoordinator(collection_config, coordination_service)
 
-        # Workshop coordinator: processes wagons in workshops
+    def _build_workshop_coordinator(self, coordination_service: CoordinationService) -> None:
+        """Build workshop coordinator."""
+        if not self.locomotive_manager or not self.event_collector:
+            raise RuntimeError('Required managers not initialized')
+
         workshop_config = WorkshopCoordinatorConfig(
             env=self.env,
             workshops=self.workshops,
@@ -254,7 +267,19 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         self.workshop_coordinator = WorkshopCoordinator(workshop_config, coordination_service)
         self.workshop_coordinator.track_manager = self.track_manager
 
-        # Parking coordinator: moves wagons to final parking
+    def _build_parking_coordinator(self, coordination_service: CoordinationService) -> None:
+        """Build parking coordinator."""
+        if not self.locomotive_manager or not self.event_collector:
+            raise RuntimeError('Required managers not initialized')
+
+        # Get retrofitted track capacity
+        retrofitted_track_capacity = 200.0  # Default
+        for track_config in self.scenario.tracks:
+            if track_config.type == 'retrofitted':
+                retrofitted_track_capacity = track_config.length * track_config.fillfactor
+                break
+
+        # Get parking strategy configuration from scenario (with defaults)
         parking_config = ParkingCoordinatorConfig(
             env=self.env,
             retrofitted_queue=self.retrofitted_queue,
@@ -262,8 +287,14 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             track_selector=self.track_selector,
             batch_service=self.batch_formation_service,
             route_service=self.route_service,
+            scenario=self.scenario,
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
             batch_event_publisher=self.event_collector.add_batch_event,
+            strategy=getattr(self.scenario, 'parking_strategy', 'opportunistic'),
+            normal_threshold=getattr(self.scenario, 'parking_normal_threshold', 0.3),
+            critical_threshold=getattr(self.scenario, 'parking_critical_threshold', 0.8),
+            idle_check_interval=getattr(self.scenario, 'parking_idle_check_interval', 1.0),
+            retrofitted_track_capacity=retrofitted_track_capacity,
         )
         self.parking_coordinator = ParkingCoordinator(parking_config, coordination_service)
