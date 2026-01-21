@@ -30,11 +30,12 @@ class TestBatchAggregate:
             wagon.prepare_for_retrofit()
 
         # Create batch aggregate
-        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1')
+        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1', rake_id='BATCH_001_RAKE')
 
         # Verify properties
         assert batch.id == 'BATCH_001'
         assert batch.destination == 'WS1'
+        assert batch.rake_id == 'BATCH_001_RAKE'
         assert batch.status == BatchStatus.FORMED
         assert batch.wagon_count == 2
         assert batch.total_length == 35.0
@@ -50,7 +51,7 @@ class TestBatchAggregate:
         wagons[0].classify()
         wagons[0].prepare_for_retrofit()
 
-        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1')
+        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1', rake_id='BATCH_001_RAKE')
 
         # Create locomotive with required couplers
         coupler_front = Coupler(CouplerType.SCREW, 'FRONT')
@@ -88,7 +89,7 @@ class TestBatchAggregate:
         wagons[0].classify()
         wagons[0].prepare_for_retrofit()
 
-        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1')
+        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1', rake_id='BATCH_001_RAKE')
 
         # Create locomotive with required couplers
         coupler_front = Coupler(CouplerType.SCREW, 'FRONT')
@@ -109,7 +110,7 @@ class TestBatchAggregate:
     def test_empty_batch_raises_error(self) -> None:
         """Test empty batch raises domain error."""
         with pytest.raises(DomainError, match='cannot be empty'):
-            BatchAggregate(id='BATCH_001', wagons=[], destination='WS1')
+            BatchAggregate(id='BATCH_001', wagons=[], destination='WS1', rake_id='BATCH_001_RAKE')
 
     def test_batch_without_destination_raises_error(self) -> None:
         """Test batch without destination raises error."""
@@ -119,7 +120,7 @@ class TestBatchAggregate:
         wagons = [Wagon(id='W1', length=10.0, coupler_a=coupler_a, coupler_b=coupler_b)]
 
         with pytest.raises(DomainError, match='must have destination'):
-            BatchAggregate(id='BATCH_001', wagons=wagons, destination='')
+            BatchAggregate(id='BATCH_001', wagons=wagons, destination='', rake_id='BATCH_001_RAKE')
 
     def test_event_management(self) -> None:
         """Test domain event management."""
@@ -130,7 +131,7 @@ class TestBatchAggregate:
         wagons[0].classify()
         wagons[0].prepare_for_retrofit()
 
-        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1')
+        batch = BatchAggregate(id='BATCH_001', wagons=wagons, destination='WS1', rake_id='BATCH_001_RAKE')
 
         # Create locomotive with required couplers
         coupler_front = Coupler(CouplerType.SCREW, 'FRONT')

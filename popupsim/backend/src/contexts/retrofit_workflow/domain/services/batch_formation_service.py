@@ -6,16 +6,20 @@ Batch formation follows specific business rules for different operational phases
 """
 
 from contexts.retrofit_workflow.domain.aggregates.batch_aggregate import BatchAggregate
+from contexts.retrofit_workflow.domain.aggregates.batch_aggregate import DomainError
+from contexts.retrofit_workflow.domain.aggregates.rake_aggregate import RakeType
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.entities.workshop import Workshop
+from contexts.retrofit_workflow.domain.services.rake_formation_service import RakeFormationService
+from contexts.retrofit_workflow.domain.value_objects.rake_formation_request import RakeFormationRequest
 
 
 class BatchFormationService:
-    """Domain service for forming wagon batches based on capacity constraints.
+    """Domain service for forming wagon batches with integrated rake creation.
 
     This service implements business rules for batch formation across different
-    operational phases of the DAC migration process. Each phase has specific
-    capacity constraints and batch sizing requirements.
+    operational phases of the DAC migration process. It coordinates batch and
+    rake creation to ensure every batch is transportable.
 
     Business Rules
     --------------
@@ -23,11 +27,11 @@ class BatchFormationService:
     2. Retrofit → Workshop: Batch size equals available workshop bays
     3. Workshop → Retrofitted: Batch size matches workshop processing batch
     4. Retrofitted → Parking: Batch size limited by parking track capacity
+    5. Every batch must have a valid rake for transport (coupling validation)
 
     Notes
     -----
-    This is a stateless domain service with no external dependencies.
-    All batch formation logic is based on pure business rules.
+    This is a stateless domain service that coordinates batch and rake creation.
 
     Examples
     --------
@@ -35,6 +39,16 @@ class BatchFormationService:
     >>> batch = service.form_batch_for_workshop(wagons, workshop)
     >>> aggregate = service.create_batch_aggregate(batch, 'WORKSHOP_01')
     """
+
+    def __init__(self, rake_formation_service: RakeFormationService | None = None) -> None:
+        """Initialize batch formation service with dependencies.
+
+        Parameters
+        ----------
+        rake_formation_service : RakeFormationService | None
+            Service for rake formation operations. If None, creates default instance.
+        """
+        self._rake_formation_service = rake_formation_service or RakeFormationService()
 
     def form_batch_for_retrofit_track(
         self,
@@ -208,11 +222,11 @@ class BatchFormationService:
         self,
         wagons: list[Wagon],
         destination: str,
-    ) -> BatchAggregate | None:
-        """Create batch aggregate from validated wagon collection.
+    ) -> BatchAggregate:
+        """Create batch aggregate with integrated rake formation.
 
-        Constructs a BatchAggregate domain object from a collection of wagons
-        if the batch meets formation requirements.
+        Constructs a BatchAggregate with associated rake. Validates coupling
+        compatibility and ensures transportability.
 
         Parameters
         ----------
@@ -223,26 +237,47 @@ class BatchFormationService:
 
         Returns
         -------
-        BatchAggregate | None
-            BatchAggregate if formation is valid, None otherwise
+        BatchAggregate
+            BatchAggregate with associated rake for transport
+
+        Raises
+        ------
+        DomainError
+            If batch formation fails or rake creation fails due to coupling issues
 
         Notes
         -----
-        The batch ID is generated using destination and wagon information
-        to ensure uniqueness across the system.
+        This method coordinates both batch and rake creation atomically.
+        If rake formation fails, no batch is created, maintaining consistency.
 
         Examples
         --------
         >>> service = BatchFormationService()
         >>> aggregate = service.create_batch_aggregate(wagons, 'WORKSHOP_01')
-        >>> if aggregate:
-        ...     print(f'Created batch: {aggregate.id}')
+        >>> print(f'Created batch: {aggregate.id} with rake: {aggregate.rake_id}')
         """
         if not self.can_form_batch(wagons):
-            return None
+            raise DomainError('Cannot form batch - insufficient wagons')
 
         batch_id = f'BATCH_{destination}_{len(wagons)}_{id(wagons[0])}'
-        return BatchAggregate(id=batch_id, wagons=wagons, destination=destination)
+        rake_id = f'{batch_id}_RAKE'
+
+        # Create rake first to validate coupling compatibility
+        rake_request = RakeFormationRequest(
+            rake_id=rake_id,
+            wagons=wagons,
+            rake_type=RakeType.WORKSHOP_RAKE,
+            formation_track='BATCH_FORMATION',
+            target_track=destination,
+            formation_time=0.0,
+        )
+
+        rake, error = self._rake_formation_service.form_rake(rake_request)
+        if not rake:
+            raise DomainError(f'Cannot form batch {batch_id} - rake formation failed: {error}')
+
+        # Create batch with rake reference
+        return BatchAggregate(id=batch_id, wagons=wagons, destination=destination, rake_id=rake_id)
 
     def can_form_batch(
         self,
@@ -252,7 +287,7 @@ class BatchFormationService:
         """Validate if a batch can be formed from the given wagons.
 
         Checks if the wagon collection meets minimum requirements for
-        batch formation.
+        batch formation and coupling compatibility.
 
         Parameters
         ----------
@@ -268,14 +303,19 @@ class BatchFormationService:
 
         Notes
         -----
-        Currently only validates minimum size, but can be extended
-        to include additional business rules as needed.
+        Validates both minimum size and coupling compatibility to ensure
+        the batch can be transported as a rake.
 
         Examples
         --------
         >>> service = BatchFormationService()
         >>> can_form = service.can_form_batch(wagons, min_size=2)
         >>> if not can_form:
-        ...     print('Insufficient wagons for batch formation')
+        ...     print('Insufficient wagons or coupling incompatibility')
         """
-        return len(wagons) >= min_size
+        if len(wagons) < min_size:
+            return False
+
+        # Check coupling compatibility
+        can_couple, _ = self._rake_formation_service.can_form_rake(wagons)
+        return can_couple

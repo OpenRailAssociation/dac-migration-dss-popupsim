@@ -163,6 +163,7 @@ source-roots = ["popupsim/backend/src"] # Default to src folder only
 disable = [
     "W0511",  # Disable fixme warnings (TODO/FIXME comments)
     "R1708",  # stop-iteration-return: Using return in generator is valid Python 3.3+ for SimPy patterns
+    "R0801",  # duplicate-code: Coordinators have similar structural patterns by design
 ]
 
 [tool.mypy]

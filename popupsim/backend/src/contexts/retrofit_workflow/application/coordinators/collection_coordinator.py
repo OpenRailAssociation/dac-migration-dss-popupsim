@@ -8,9 +8,6 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Col
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
-from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAtDestination
-from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
-from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 
 logger = logging.getLogger(__name__)
 
@@ -62,11 +59,21 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         if not wagons:
             return
 
-        batch = self.config.batch_service.form_batch_for_retrofit_track(wagons, retrofit_track.get_available_capacity())
-        if not batch:
+        # Form batch that fits retrofit track capacity
+        batch_wagons = self.config.batch_service.form_batch_for_retrofit_track(
+            wagons, retrofit_track.get_available_capacity()
+        )
+        if not batch_wagons:
             return
 
-        yield from self._transport_batch(batch, retrofit_track)
+        # Create batch aggregate with rake integration
+        try:
+            batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, 'retrofit')
+            yield from self._transport_batch_aggregate(batch_aggregate, retrofit_track)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.warning('Batch aggregate creation failed: %s, falling back to old method', e)
+            batch_id = self._publish_batch_events_old(batch_wagons)
+            yield from self._transport_batch_old(batch_wagons, retrofit_track, batch_id)
 
     def _collect_wagons(self, first_wagon: Wagon, retrofit_track: Any) -> Generator[Any, Any, list[Wagon]]:
         """Collect wagons that fit in available capacity."""
@@ -85,77 +92,64 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
 
         return wagons
 
-    def _transport_batch(self, batch: list[Wagon], retrofit_track: Any) -> Generator[Any, Any]:
-        """Transport batch to retrofit track."""
-        batch_id = self._publish_batch_events(batch)
+    def _transport_batch_aggregate(self, batch_aggregate: Any, retrofit_track: Any) -> Generator[Any, Any]:
+        """Transport batch aggregate to retrofit track."""
+        batch_id = batch_aggregate.id
+        wagons = batch_aggregate.wagons
 
-        loco = yield from self.config.locomotive_manager.allocate(purpose='collection_to_retrofit')
+        self._publish_batch_events(batch_aggregate)
+
+        loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
         EventPublisherHelper.publish_loco_allocated(self.config.loco_event_publisher, self.config.env.now, loco.id)
 
         try:
-            yield from self._transport_to_retrofit(loco, batch, retrofit_track, batch_id)
-            yield from self._deliver_wagons(batch, retrofit_track)
+            yield from self._transport_to_retrofit_with_batch(loco, batch_aggregate, retrofit_track, batch_id)
+            yield from self._deliver_wagons(wagons, retrofit_track)
             yield from self._return_locomotive(loco)
         finally:
             yield from self.config.locomotive_manager.release(loco)
 
-    def _publish_batch_events(self, batch: list[Wagon]) -> str:
+    def _publish_batch_events(self, batch_aggregate: Any) -> None:
         """Publish batch formation events."""
-        self.batch_counter += 1
-        batch_id = f'COL-RET-{int(self.config.env.now)}-{self.batch_counter}'
-
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchFormed(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_formed_{batch_id}',
-                    batch_id=batch_id,
-                    wagon_ids=[w.id for w in batch],
-                    destination='retrofit',
-                    total_length=sum(w.length for w in batch),
-                )
-            )
-
-        return batch_id
+        EventPublisherHelper.publish_batch_events_for_aggregate(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_aggregate,
+            'retrofit',
+        )
 
     def _transport_to_retrofit(
-        self, loco: Any, batch: list[Wagon], retrofit_track: Any, batch_id: str
+        self, loco: Any, wagons: list[Wagon], retrofit_track: Any, batch_id: str
     ) -> Generator[Any, Any]:
         """Transport batch to retrofit track."""
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchTransportStarted(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_transport_{batch_id}',
-                    batch_id=batch_id,
-                    locomotive_id=loco.id,
-                    destination='retrofit',
-                    wagon_count=len(batch),
-                )
-            )
+        EventPublisherHelper.publish_batch_transport_started(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            loco.id,
+            'retrofit',
+            len(wagons),
+        )
 
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'collection', 'retrofit'
         )
 
-        yield from retrofit_track.add_wagons(batch)
+        yield from retrofit_track.add_wagons(wagons)
         transport_time = self.config.route_service.get_duration('collection', 'retrofit')
         yield self.config.env.timeout(transport_time)
 
-        if self.config.batch_event_publisher:
-            self.config.batch_event_publisher(
-                BatchArrivedAtDestination(
-                    timestamp=self.config.env.now,
-                    event_id=f'batch_arrived_{batch_id}',
-                    batch_id=batch_id,
-                    destination='retrofit',
-                    wagon_count=len(batch),
-                )
-            )
+        EventPublisherHelper.publish_batch_arrived(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            'retrofit',
+            len(wagons),
+        )
 
-    def _deliver_wagons(self, batch: list[Wagon], retrofit_track: Any) -> Generator[Any, Any]:
+    def _deliver_wagons(self, wagons: list[Wagon], retrofit_track: Any) -> Generator[Any, Any]:
         """Deliver wagons to retrofit queue."""
-        for wagon in batch:
+        for wagon in wagons:
             wagon.prepare_for_retrofit()
             self.config.retrofit_queue.put(wagon)
 
@@ -179,3 +173,69 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
 
         return_time = self.config.route_service.get_duration('retrofit', 'loco_parking')
         yield self.config.env.timeout(return_time)
+
+    def _transport_to_retrofit_with_batch(
+        self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str
+    ) -> Generator[Any, Any]:
+        """Transport batch aggregate to retrofit track with coupling time."""
+        wagons = batch_aggregate.wagons
+
+        EventPublisherHelper.publish_batch_transport_started(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            loco.id,
+            'retrofit',
+            len(wagons),
+        )
+
+        EventPublisherHelper.publish_loco_moving(
+            self.config.loco_event_publisher, self.config.env.now, loco.id, 'collection', 'retrofit'
+        )
+
+        yield from retrofit_track.add_wagons(wagons)
+
+        # Use batch aggregate to calculate transport time including coupling
+        base_transport_time = self.config.route_service.get_duration('collection', 'retrofit')
+        process_times = (
+            getattr(self.config.scenario, 'process_times', None) if hasattr(self.config, 'scenario') else None
+        )
+        total_transport_time = batch_aggregate.get_transport_time(base_transport_time, process_times)
+
+        yield self.config.env.timeout(total_transport_time)
+
+        EventPublisherHelper.publish_batch_arrived(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            'retrofit',
+            len(wagons),
+        )
+
+    def _publish_batch_events_old(self, batch: list[Wagon]) -> str:
+        """Publish batch formation events (old method)."""
+        self.batch_counter += 1
+        batch_id = f'COL-RET-{int(self.config.env.now)}-{self.batch_counter}'
+
+        EventPublisherHelper.publish_batch_formed(
+            self.config.batch_event_publisher,
+            self.config.env.now,
+            batch_id,
+            [w.id for w in batch],
+            'retrofit',
+            sum(w.length for w in batch),
+        )
+
+        return batch_id
+
+    def _transport_batch_old(self, batch: list[Wagon], retrofit_track: Any, batch_id: str) -> Generator[Any, Any]:
+        """Transport batch to retrofit track (old method)."""
+        loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
+        EventPublisherHelper.publish_loco_allocated(self.config.loco_event_publisher, self.config.env.now, loco.id)
+
+        try:
+            yield from self._transport_to_retrofit(loco, batch, retrofit_track, batch_id)
+            yield from self._deliver_wagons(batch, retrofit_track)
+            yield from self._return_locomotive(loco)
+        finally:
+            yield from self.config.locomotive_manager.release(loco)

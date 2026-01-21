@@ -86,6 +86,7 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     track_selector: TrackSelectionService
     batch_service: BatchFormationService
     route_service: RouteService
+    scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
@@ -119,8 +120,15 @@ class ParkingCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     track_selector: TrackSelectionService
     batch_service: BatchFormationService
     route_service: RouteService
+    scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
         None
     )
+    # Strategy configuration
+    strategy: str = 'opportunistic'  # 'opportunistic' or 'smart_accumulation'
+    normal_threshold: float = 0.3  # 30% of retrofitted track capacity for smart_accumulation
+    critical_threshold: float = 0.8  # 80% of retrofitted track capacity
+    idle_check_interval: float = 1.0  # minutes
+    retrofitted_track_capacity: float = 200.0  # meters
