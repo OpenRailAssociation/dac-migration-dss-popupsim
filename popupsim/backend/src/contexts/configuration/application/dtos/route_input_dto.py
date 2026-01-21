@@ -1,7 +1,16 @@
 """Route input DTO for configuration context."""
 
+from enum import Enum
+
 from pydantic import BaseModel
 from pydantic import model_validator
+
+
+class RouteType(Enum):
+    """Route type enumeration for transport operations."""
+
+    MAINLINE = 'MAINLINE'
+    SHUNTING = 'SHUNTING'
 
 
 class RouteInputDTO(BaseModel):

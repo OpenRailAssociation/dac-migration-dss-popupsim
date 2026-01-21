@@ -102,10 +102,12 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         coupling_time = self._get_coupling_time(wagons)
         yield self.env.timeout(coupling_time)
 
-        # Create inbound batch aggregate (SCREW couplers)
+        # Create inbound batch aggregate (SCREW couplers) for rake validation
         try:
+            _ = self.batch_service.create_batch_aggregate(wagons, workshop_id)
+            # Batch aggregate created successfully - rake is valid
             loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
-            yield from self._transport_to_workshop_with_batch(loco, workshop_id)
+            yield from self._transport_to_workshop(loco, workshop_id)
         except Exception:  # pylint: disable=broad-exception-caught
             # Fallback to old method
             loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
@@ -152,72 +154,17 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         coupling_time = self._get_coupling_time(wagons)
         yield self.env.timeout(coupling_time)
 
-        # Create outbound batch aggregate (DAC couplers after retrofit)
+        # Create outbound batch aggregate (DAC couplers after retrofit) for rake validation
         pickup_loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
         try:
-            batch_aggregate_out = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
-            yield from self._transport_from_workshop_with_batch(pickup_loco, workshop_id, batch_aggregate_out)
+            _ = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
+            # Batch aggregate created successfully - rake is valid
+            yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
         except Exception:  # pylint: disable=broad-exception-caught
             # Fallback to old method
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
         finally:
             yield from self.locomotive_manager.release(pickup_loco)
-
-    def _transport_to_workshop_with_batch(
-        self,
-        loco: Any,
-        workshop_id: str,
-    ) -> Generator[Any, Any]:
-        """Transport batch aggregate to workshop (no coupling time - handled manually at workshop)."""
-        EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'loco_parking', 'retrofit'
-        )
-
-        transport_time = self.route_service.get_duration('loco_parking', 'retrofit')
-        yield self.env.timeout(transport_time)
-
-        EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'retrofit', workshop_id
-        )
-
-        # Use base transport time only (coupling/decoupling handled manually at workshop)
-        transport_time = self.route_service.get_duration('retrofit', workshop_id)
-        yield self.env.timeout(transport_time)
-
-    def _transport_from_workshop_with_batch(
-        self, loco: Any, workshop_id: str, batch_aggregate: Any
-    ) -> Generator[Any, Any]:
-        """Transport batch from workshop to retrofitted track (no coupling - handled at workshop)."""
-        wagons = batch_aggregate.wagons
-
-        EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'loco_parking', workshop_id
-        )
-
-        # Move to workshop
-        transport_time = self.route_service.get_duration('loco_parking', workshop_id)
-        yield self.env.timeout(transport_time)
-
-        EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, workshop_id, 'retrofitted'
-        )
-
-        # Use base transport time only (coupling/decoupling handled manually at workshop)
-        transport_time = self.route_service.get_duration(workshop_id, 'retrofitted')
-        yield self.env.timeout(transport_time)
-
-        # Put wagons on retrofitted queue
-        for wagon in wagons:
-            wagon.move_to('retrofitted')
-            self.retrofitted_queue.put(wagon)
-
-        EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'retrofitted', 'loco_parking'
-        )
-
-        # Return locomotive
-        return_time = self.route_service.get_duration('retrofitted', 'loco_parking')
-        yield self.env.timeout(return_time)
 
     def _transport_to_workshop(self, loco: Any, workshop_id: str) -> Generator[Any, Any]:
         """Transport locomotive to workshop."""

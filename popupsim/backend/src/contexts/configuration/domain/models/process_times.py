@@ -71,6 +71,18 @@ class ProcessTimes(BaseModel):
         default=timedelta(minutes=2.0),
         description='Time for technical inspection of assembled train',
     )
+    loco_coupling_time: timedelta = Field(
+        default=timedelta(minutes=3.0),
+        description='Time to couple locomotive to rake',
+    )
+    loco_decoupling_time: timedelta = Field(
+        default=timedelta(minutes=2.0),
+        description='Time to decouple locomotive from rake',
+    )
+    shunting_preparation_time: timedelta = Field(
+        default=timedelta(minutes=1.0),
+        description='Time for shunting preparation (safety checks, communication)',
+    )
 
     @field_validator('*', mode='before')
     @classmethod
