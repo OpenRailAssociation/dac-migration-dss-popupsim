@@ -5,6 +5,7 @@ between different locations in the DAC migration simulation system. It manages
 route configurations and provides standardized access to timing information.
 """
 
+from contexts.configuration.application.dtos.route_input_dto import RouteType
 from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 
@@ -59,6 +60,7 @@ class RouteService:
         2. Converts duration values to simulation time units
         3. Builds lookup dictionary for O(1) duration queries
         4. Handles both timedelta and numeric duration formats
+        5. Stores route type (MAINLINE or SHUNTING) for each route
 
         Examples
         --------
@@ -68,6 +70,8 @@ class RouteService:
         """
         # Build lookup dict: (from, to) -> duration
         self.route_durations: dict[tuple[str, str], float] = {}
+        # Build lookup dict: (from, to) -> route_type
+        self.route_types: dict[tuple[str, str], RouteType] = {}
 
         for route in routes:
             if len(route.path) >= 2:
@@ -78,6 +82,14 @@ class RouteService:
                 if hasattr(duration, 'total_seconds'):
                     duration = timedelta_to_sim_ticks(duration)
                 self.route_durations[(from_location, to_location)] = float(duration)
+
+                # Store route type (default to SHUNTING for backward compatibility)
+                route_type_str = getattr(route, 'route_type', 'SHUNTING')
+                try:
+                    route_type = RouteType[route_type_str.upper()]
+                except (KeyError, AttributeError):
+                    route_type = RouteType.SHUNTING
+                self.route_types[(from_location, to_location)] = route_type
 
     def get_duration(self, from_location: str, to_location: str) -> float:
         """Get transport duration between two specified locations.
@@ -218,3 +230,27 @@ class RouteService:
         >>> print(f'Final parking transport: {parking_time} minutes')
         """
         return self.get_duration('retrofitted', 'parking')
+
+    def get_route_type(self, from_location: str, to_location: str) -> RouteType:
+        """Get route type (MAINLINE or SHUNTING) for a route.
+
+        Parameters
+        ----------
+        from_location : str
+            Starting location identifier
+        to_location : str
+            Destination location identifier
+
+        Returns
+        -------
+        RouteType
+            Route type (MAINLINE or SHUNTING), defaults to SHUNTING if not found
+
+        Examples
+        --------
+        >>> service = RouteService(routes)
+        >>> route_type = service.get_route_type('collection', 'retrofit')
+        >>> if route_type == RouteType.MAINLINE:
+        ...     print('Full brake test required')
+        """
+        return self.route_types.get((from_location, to_location), RouteType.SHUNTING)
