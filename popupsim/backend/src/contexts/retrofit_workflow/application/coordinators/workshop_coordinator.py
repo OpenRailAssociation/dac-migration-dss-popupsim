@@ -104,9 +104,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
 
         # Create inbound batch aggregate (SCREW couplers)
         try:
-            batch_aggregate_in = self.batch_service.create_batch_aggregate(wagons, workshop_id)
             loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
-            yield from self._transport_to_workshop_with_batch(loco, workshop_id, batch_aggregate_in)
+            yield from self._transport_to_workshop_with_batch(loco, workshop_id)
         except Exception:  # pylint: disable=broad-exception-caught
             # Fallback to old method
             loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
@@ -168,7 +167,6 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         self,
         loco: Any,
         workshop_id: str,
-        batch_aggregate: Any,  # noqa: ARG002
     ) -> Generator[Any, Any]:
         """Transport batch aggregate to workshop (no coupling time - handled manually at workshop)."""
         EventPublisherHelper.publish_loco_moving(
