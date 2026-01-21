@@ -23,6 +23,7 @@ from contexts.retrofit_workflow.domain.services.coupling_validation_service impo
 from contexts.retrofit_workflow.domain.services.rake_formation_service import RakeFormationService
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
 from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
+from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.domain.services.workshop_assignment_service import WorkshopAssignmentService
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 from contexts.retrofit_workflow.infrastructure.resources.track_capacity_manager import TrackResourceManager
@@ -75,6 +76,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         self.coupling_validator = CouplingValidationService()
         self.rake_formation_service = RakeFormationService()
         self.batch_formation_service = BatchFormationService()
+        self.train_formation_service = TrainFormationService()
         self.route_service: RouteService | None = None
         self.track_selector: TrackSelectionService | None = None
         self.workshop_assignment_service: WorkshopAssignmentService | None = None
@@ -240,6 +242,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             track_selector=self.track_selector,
             batch_service=self.batch_formation_service,
             route_service=self.route_service,
+            train_service=self.train_formation_service,
             scenario=self.scenario,
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
@@ -260,6 +263,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             locomotive_manager=self.locomotive_manager,
             route_service=self.route_service,
             batch_service=self.batch_formation_service,
+            train_service=self.train_formation_service,
             scenario=self.scenario,
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
@@ -287,6 +291,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             track_selector=self.track_selector,
             batch_service=self.batch_formation_service,
             route_service=self.route_service,
+            train_service=self.train_formation_service,
             scenario=self.scenario,
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,

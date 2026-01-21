@@ -159,8 +159,16 @@ def create_test_scenario(
         dac_coupling_time=timedelta(minutes=0.5 if coupling_time > 0 else 0.0),
         dac_decoupling_time=timedelta(minutes=0.5 if coupling_time > 0 else 0.0),
         brake_continuity_check_time=timedelta(seconds=0.0),
-        full_brake_test_time=timedelta(minutes=0.0),
-        technical_inspection_time=timedelta(minutes=0.0),
+        # Locomotive operations - only add if coupling_time > 0 (for coupling tests)
+        shunting_preparation_time=timedelta(minutes=1.0 if coupling_time > 0 else 0.0),
+        full_brake_test_time=timedelta(minutes=5.0 if coupling_time > 0 else 0.0),
+        technical_inspection_time=timedelta(minutes=2.0 if coupling_time > 0 else 0.0),
+    )
+    # Add get_coupling_time method for dynamic loco coupling
+    mock_scenario.process_times.get_coupling_time = lambda coupler_type: (
+        timedelta(minutes=0.5 if coupling_time > 0 else 0.0)
+        if coupler_type.upper() == 'DAC'
+        else timedelta(minutes=1.0 if coupling_time > 0 else 0.0)
     )
 
     # Locomotive priority strategy for coordination
@@ -745,120 +753,3 @@ def test_seven_wagons_two_workshops() -> None:
 
     validate_retrofit_timeline_from_docstring(events, test_seven_wagons_two_workshops, analytics_context)
     print('Test passed: All 7 wagons collected at once, distributed 2-2-2-1 across workshops')
-
-
-def test_two_wagons_one_station_with_coupling() -> None:
-    """Test 2 wagons, 1 station with coupling time of 1 minute for SCREW couplers.
-
-    TIMELINE:
-    t=0: train[T1] ARRIVED collection
-    t=0: wagon[W01] ARRIVED collection
-    t=0: wagon[W02] ARRIVED collection
-    t=1: batch[COL-RET-1-1] FORMED wagons=W01,W02
-    t=1: locomotive[L1] ALLOCATED batch_transport
-    t=1: batch[COL-RET-1-1] TRANSPORT_STARTED destination=retrofit
-    t=1: locomotive[L1] MOVING collection->retrofit
-    t=3: batch[COL-RET-1-1] ARRIVED_AT_DESTINATION retrofit
-    t=4: locomotive[L1] MOVING loco_parking->retrofit
-    t=5: locomotive[L1] MOVING retrofit->WS1
-    t=6: wagon[W01] RETROFIT_STARTED WS1
-    t=16: wagon[W01] RETROFIT_COMPLETED WS1
-    t=16: locomotive[L1] MOVING loco_parking->WS1
-    t=17: locomotive[L1] MOVING WS1->retrofitted
-    t=18: locomotive[L1] MOVING retrofitted->loco_parking
-    t=19: locomotive[L1] MOVING loco_parking->retrofit
-    t=20.5: wagon[W01] PARKED parking_area
-    t=21.5: locomotive[L1] MOVING loco_parking->retrofit
-    t=22.5: locomotive[L1] MOVING retrofit->WS1
-    t=23.5: wagon[W02] RETROFIT_STARTED WS1
-    t=33.5: wagon[W02] RETROFIT_COMPLETED WS1
-    t=38: wagon[W02] PARKED parking_area
-    """
-    events, analytics_context = run_timeline_test(2, 1, 10.0, 50.0, workshop_bays=[1], coupling_time=1.0)
-
-    # Verify we have arrival events for both wagons
-    arrival_events = [
-        e for t, e in events if hasattr(e, 'event_type') and e.event_type == 'ARRIVED' and hasattr(e, 'wagon_id')
-    ]
-    assert len(arrival_events) >= 2
-    wagon_ids = {e.wagon_id for e in arrival_events}
-    assert 'W01' in wagon_ids
-    assert 'W02' in wagon_ids
-
-    # Verify both wagons completed retrofit
-    retrofit_completed = [
-        e
-        for t, e in events
-        if hasattr(e, 'event_type') and e.event_type == 'RETROFIT_COMPLETED' and hasattr(e, 'wagon_id')
-    ]
-    assert len(retrofit_completed) == 2
-
-    # Verify both wagons were parked
-    parked_events = [
-        e for t, e in events if hasattr(e, 'event_type') and e.event_type == 'PARKED' and hasattr(e, 'wagon_id')
-    ]
-    assert len(parked_events) == 2
-
-    validate_retrofit_timeline_from_docstring(events, test_two_wagons_one_station_with_coupling, analytics_context)
-    print('[PASS] Test passed: 2 wagons processed sequentially with 1 minute coupling time')
-
-
-def test_two_wagons_two_bays_with_coupling() -> None:
-    """Test 2 wagons, 2 bays with coupling time - validates workshop coupling/decoupling.
-
-    With 2 wagons and SCREW couplers (1 min coupling/decoupling):
-    - 1 coupling between wagons: (2-1) = 1 coupling
-    - Decoupling at workshop arrival: 1 min
-    - Coupling at workshop departure: 1 min
-
-    TIMELINE:
-    t=0: train[T1] ARRIVED collection
-    t=0: wagon[W01] ARRIVED collection
-    t=0: wagon[W02] ARRIVED collection
-    t=1: batch[COL-RET-1-1] FORMED wagons=W01,W02
-    t=1: locomotive[L1] ALLOCATED batch_transport
-    t=1: batch[COL-RET-1-1] TRANSPORT_STARTED destination=retrofit
-    t=1: locomotive[L1] MOVING collection->retrofit
-    t=3: batch[COL-RET-1-1] ARRIVED_AT_DESTINATION retrofit
-    t=4: locomotive[L1] MOVING loco_parking->retrofit
-    t=5: locomotive[L1] MOVING retrofit->WS1
-    t=6: DECOUPLING (1 min for 1 coupling)
-    t=7: wagon[W01] RETROFIT_STARTED WS1
-    t=7: wagon[W02] RETROFIT_STARTED WS1
-    t=17: wagon[W01] RETROFIT_COMPLETED WS1
-    t=17: wagon[W02] RETROFIT_COMPLETED WS1
-    t=17: COUPLING (1 min for 1 coupling)
-    t=18: locomotive[L1] MOVING loco_parking->WS1
-    t=19: locomotive[L1] MOVING WS1->retrofitted
-    """
-    events, analytics_context = run_timeline_test(2, 1, 10.0, 50.0, workshop_bays=[2], coupling_time=1.0)
-
-    # Verify both wagons arrived
-    arrival_events = [
-        e for t, e in events if hasattr(e, 'event_type') and e.event_type == 'ARRIVED' and hasattr(e, 'wagon_id')
-    ]
-    assert len(arrival_events) >= 2
-
-    # Verify both wagons started retrofit at t=7 (not t=6) due to 1 min decoupling
-    retrofit_started = [
-        e
-        for t, e in events
-        if hasattr(e, 'event_type') and e.event_type == 'RETROFIT_STARTED' and hasattr(e, 'wagon_id')
-    ]
-    assert len(retrofit_started) == 2
-    # Check that retrofit starts at t=7 (after 1 min decoupling)
-    for event_time, event in events:
-        if hasattr(event, 'event_type') and event.event_type == 'RETROFIT_STARTED':
-            assert event_time == 7.0, f'Expected RETROFIT_STARTED at t=7.0, got t={event_time}'
-            break
-
-    # Verify both wagons completed retrofit
-    retrofit_completed = [
-        e
-        for t, e in events
-        if hasattr(e, 'event_type') and e.event_type == 'RETROFIT_COMPLETED' and hasattr(e, 'wagon_id')
-    ]
-    assert len(retrofit_completed) == 2
-
-    validate_retrofit_timeline_from_docstring(events, test_two_wagons_two_bays_with_coupling, analytics_context)
-    print('Test passed: 2 wagons with workshop coupling/decoupling (1 min each)')

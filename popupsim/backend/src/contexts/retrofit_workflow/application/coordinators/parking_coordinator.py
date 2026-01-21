@@ -8,6 +8,7 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Par
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 logger = logging.getLogger(__name__)
 
@@ -238,6 +239,16 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
     def _return_locomotive(self, loco: Any) -> Generator[Any, Any]:
         """Return locomotive to home track."""
+        # Add locomotive decoupling time based on wagon coupler types
+        process_times = (
+            getattr(self.config.scenario, 'process_times', None) if hasattr(self.config, 'scenario') else None
+        )
+        if process_times:
+            # Use first wagon's coupler type from last batch (stored in locomotive context if needed)
+            # For now, use screw coupling as default
+            decouple_time = timedelta_to_sim_ticks(process_times.screw_decoupling_time)
+            yield self.config.env.timeout(decouple_time)
+
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'parking_area', loco.home_track
         )
@@ -275,15 +286,21 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             len(wagons),
         )
 
+        # Add locomotive preparation time (loco coupling + shunting prep)
+        route_type = self.config.route_service.get_route_type('retrofitted', 'parking_area')
+        train = self.config.train_service.form_train(loco, batch_aggregate, 'retrofitted', 'parking_area', route_type)
+        process_times = (
+            getattr(self.config.scenario, 'process_times', None) if hasattr(self.config, 'scenario') else None
+        )
+        prep_time = self.config.train_service.prepare_train(train, process_times, self.config.env.now)
+        yield self.config.env.timeout(prep_time)
+
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'retrofitted', 'parking_area'
         )
 
         # Use batch aggregate to calculate transport time including coupling
         base_transport_time = self.config.route_service.get_duration('retrofitted', 'parking_area')
-        process_times = (
-            getattr(self.config.scenario, 'process_times', None) if hasattr(self.config, 'scenario') else None
-        )
         total_transport_time = batch_aggregate.get_transport_time(base_transport_time, process_times)
 
         yield self.config.env.timeout(total_transport_time)

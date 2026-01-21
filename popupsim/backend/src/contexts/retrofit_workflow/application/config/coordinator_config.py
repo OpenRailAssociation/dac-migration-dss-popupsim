@@ -17,6 +17,7 @@ from contexts.retrofit_workflow.domain.events.batch_events import BatchTransport
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
 from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
+from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 import simpy
 
@@ -86,6 +87,7 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     track_selector: TrackSelectionService
     batch_service: BatchFormationService
     route_service: RouteService
+    train_service: TrainFormationService
     scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
@@ -105,6 +107,7 @@ class WorkshopCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     locomotive_manager: LocomotiveResourceManager
     route_service: RouteService
     batch_service: BatchFormationService
+    train_service: TrainFormationService
     scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
@@ -120,6 +123,7 @@ class ParkingCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     track_selector: TrackSelectionService
     batch_service: BatchFormationService
     route_service: RouteService
+    train_service: TrainFormationService
     scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
