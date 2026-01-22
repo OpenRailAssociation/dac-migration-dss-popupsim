@@ -38,7 +38,7 @@ If you have a git client installed:
 
 ```bash
 # Clone repository
-git clone https://github.com/open-rail-association/dac-migration-dss-popupsim.git
+git clone https://github.com/OpenRailAssociation/dac-migration-dss-popupsim.git
 cd dac-migration-dss-popupsim
 
 # Install dependencies
@@ -53,18 +53,18 @@ uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --outp
 If you don't have git installed:
 
 1. Download the latest release as ZIP:
-   - Visit: https://github.com/open-rail-association/dac-migration-dss-popupsim/archive/refs/heads/main.zip
-   - Or go to the [GitHub repository](https://github.com/open-rail-association/dac-migration-dss-popupsim) and click "Code" → "Download ZIP"
+   - Visit: https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/archive/refs/heads/main.zip
+   - Or go to the [GitHub repository](https://github.com/OpenRailAssociation/dac-migration-dss-popupsim) and click "Code" → "Download ZIP"
 
 2. Extract the archive to your desired location
 
 3. Open a terminal/command prompt and navigate to the extracted folder:
    ```bash
    cd dac-migration-dss-popupsim-main
-   
+
    # Install dependencies
    uv sync
-   
+
    # Run example simulation
    uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
    ```
