@@ -367,7 +367,7 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915, C901,
             on_retrofit_track = len(
                 locations_df[(locations_df['current_track'] == 'retrofit') & (locations_df['status'] != 'RETROFITTING')]
             )
-            on_collection = len(locations_df[locations_df['current_track'].str.startswith('collection', na=False)])
+            on_collection = len(locations_df[locations_df['current_track'].str.contains('collection', case=False, na=False)])
             on_workshops = len(
                 locations_df[
                     locations_df['current_track'].str.startswith('WS', na=False)
@@ -806,23 +806,29 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
     wagon_positions = {wagon_id: i for i, wagon_id in enumerate(wagon_ids)}
 
     # Color map for tracks - distinct colors
+    # Get unique tracks from data to dynamically assign colors
+    unique_tracks = journey_df['location'].unique()
+
     track_colors = {
-        'collection': '#e74c3c',  # Red
-        'collection1': '#e74c3c',
-        'collection2': '#c0392b',
         'retrofit': '#f39c12',  # Orange - STAGING TRACK
         'WS_01': '#27ae60',  # Green
         'WS_02': '#3498db',  # Blue
         'retrofitted': '#9b59b6',  # Purple
         'distribution': '#1abc9c',  # Turquoise
-        'parking': '#34495e',  # Dark gray
         'rejected': '#d62728',  # Red - OUT OF SYSTEM
     }
 
-    # Add colors for specific parking tracks (different shades of gray/blue)
+    # Dynamically assign colors to collection tracks (all red shades)
+    collection_colors = ['#e74c3c', '#c0392b', '#e67e22', '#d35400']
+    collection_tracks = [t for t in unique_tracks if 'collection' in str(t).lower()]
+    for i, track in enumerate(sorted(collection_tracks)):
+        track_colors[track] = collection_colors[i % len(collection_colors)]
+
+    # Dynamically assign colors to parking tracks (different shades of gray/blue)
     parking_colors = ['#34495e', '#2c3e50', '#7f8c8d', '#95a5a6', '#bdc3c7']
-    for i in range(1, 20):
-        track_colors[f'parking{i}'] = parking_colors[i % len(parking_colors)]
+    parking_tracks = [t for t in unique_tracks if 'parking' in str(t).lower()]
+    for i, track in enumerate(sorted(parking_tracks)):
+        track_colors[track] = parking_colors[i % len(parking_colors)]
 
     fig, ax = plt.subplots(figsize=(14, max(10, len(wagon_ids) * 0.15)))
 
@@ -894,18 +900,19 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
 
     unique_tracks = sorted(set(journey_df['location'].unique()))
 
-    # Prioritize key tracks in legend
-    priority_tracks = [
-        'collection',
-        'collection1',
-        'collection2',
+    # Prioritize key tracks in legend - dynamically detect collection tracks
+    collection_tracks_in_data = [t for t in unique_tracks if 'collection' in str(t).lower()]
+    priority_tracks = collection_tracks_in_data + [
         'retrofit',
         'WS_01',
         'WS_02',
         'retrofitted',
-        'parking',
         'rejected',
     ]
+    # Add parking as generic if any parking tracks exist
+    if any('parking' in str(t).lower() for t in unique_tracks):
+        priority_tracks.append('parking')
+
     legend_tracks = [t for t in priority_tracks if t in unique_tracks]
     # Add remaining tracks
     legend_tracks.extend([t for t in unique_tracks if t not in legend_tracks][:5])
