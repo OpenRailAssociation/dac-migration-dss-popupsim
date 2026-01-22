@@ -1,0 +1,2 @@
+locomotive_id,parking_time,moving_time,coupling_time,decoupling_time,parking_percent,moving_percent,coupling_percent,decoupling_percent
+LOCO_01,1554.0,534.0,150.0,173.0,64.45458316051432,22.148486105350475,6.221484861053505,7.17544587308171

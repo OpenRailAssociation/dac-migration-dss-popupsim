@@ -1,0 +1,17 @@
+{
+  "total_wagons_arrived": 209,
+  "total_wagons_parked": 125,
+  "total_wagons_rejected": 15,
+  "rejection_breakdown": {
+    "No Retrofit Needed": 4,
+    "Loaded": 11
+  },
+  "completion_rate": 0.5980861244019139,
+  "throughput_per_hour": 2.368919772583702,
+  "simulation_duration_minutes": 3166.0,
+  "total_events": {
+    "wagon_events": 724,
+    "locomotive_events": 609,
+    "resource_events": 484
+  }
+}

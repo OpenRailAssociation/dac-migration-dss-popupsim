@@ -1,0 +1,16 @@
+wagon_id,train_id,rejection_reason,rejection_description,timestamp
+W0062,T3,No Retrofit Needed,Wagon doesn't need retrofit,936.0
+W0076,T4,Loaded,Wagon is loaded,1224.0
+W0080,T4,No Retrofit Needed,Wagon doesn't need retrofit,1224.0
+W0093,T4,Loaded,Wagon is loaded,1224.0
+W0096,T5,Loaded,Wagon is loaded,1512.0
+W0098,T5,Loaded,Wagon is loaded,1512.0
+W0113,T6,Loaded,Wagon is loaded,1800.0
+W0119,T6,No Retrofit Needed,Wagon doesn't need retrofit,1800.0
+W0128,T7,Loaded,Wagon is loaded,2088.0
+W0144,T7,Loaded,Wagon is loaded,2088.0
+W0205,T9,Loaded,Wagon is loaded,2664.0
+W0206,T9,Loaded,Wagon is loaded,2664.0
+W0211,T9,No Retrofit Needed,Wagon doesn't need retrofit,2664.0
+W0222,T10,Loaded,Wagon is loaded,2952.0
+W0223,T10,Loaded,Wagon is loaded,2952.0

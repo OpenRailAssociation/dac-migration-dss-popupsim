@@ -93,7 +93,11 @@ class ArrivalCoordinator:  # pylint: disable=too-few-public-methods
         Wagon configurations should contain:
         - 'id': Unique wagon identifier
         - 'length': Wagon length in meters (defaults to 15.0)
-        - Additional properties as needed for specific wagon types
+        - 'is_loaded': Whether wagon is loaded (optional, defaults to False)
+        - 'needs_retrofit': Whether wagon needs retrofit (optional, defaults to True)
+
+        Wagons are filtered: only unloaded wagons that need retrofit are processed.
+        Loaded wagons or wagons that don't need retrofit are rejected.
 
         The method creates a SimPy process that will execute the arrival
         at the specified time, handling all necessary coordination.
@@ -101,13 +105,52 @@ class ArrivalCoordinator:  # pylint: disable=too-few-public-methods
         Examples
         --------
         >>> wagon_configs = [
-        ...     {'id': 'W001', 'length': 18.5},
-        ...     {'id': 'W002', 'length': 16.0},
-        ...     {'id': 'W003', 'length': 20.0},
+        ...     {'id': 'W001', 'length': 18.5, 'is_loaded': False, 'needs_retrofit': True},
+        ...     {'id': 'W002', 'length': 16.0, 'is_loaded': True, 'needs_retrofit': True},  # Rejected
+        ...     {'id': 'W003', 'length': 20.0, 'is_loaded': False, 'needs_retrofit': False},  # Rejected
         ... ]
         >>> coordinator.schedule_train('TRAIN_001', 120.0, wagon_configs)
         """
-        # Create wagons
+        # Filter wagons and log rejections
+        eligible_configs = []
+        for cfg in wagon_configs:
+            is_loaded = cfg.get('is_loaded', False)
+            needs_retrofit = cfg.get('needs_retrofit', True)
+
+            if is_loaded:
+                # Reject loaded wagons - log rejection event
+                if self.event_publisher:
+                    self.event_publisher(
+                        WagonJourneyEvent(
+                            timestamp=arrival_time,
+                            wagon_id=cfg['id'],
+                            event_type='REJECTED',
+                            location='collection',
+                            status='REJECTED_LOADED',
+                            train_id=train_id,
+                            rejection_reason='Loaded',
+                            rejection_description='Wagon is loaded',
+                        )
+                    )
+            elif not needs_retrofit:
+                # Reject wagons that don't need retrofit - log rejection event
+                if self.event_publisher:
+                    self.event_publisher(
+                        WagonJourneyEvent(
+                            timestamp=arrival_time,
+                            wagon_id=cfg['id'],
+                            event_type='REJECTED',
+                            location='collection',
+                            status='REJECTED_NO_RETROFIT_NEEDED',
+                            train_id=train_id,
+                            rejection_reason='No Retrofit Needed',
+                            rejection_description="Wagon doesn't need retrofit",
+                        )
+                    )
+            else:
+                eligible_configs.append(cfg)
+
+        # Create wagons only for eligible ones
         wagons = [
             Wagon(
                 id=cfg['id'],
@@ -115,7 +158,7 @@ class ArrivalCoordinator:  # pylint: disable=too-few-public-methods
                 coupler_a=Coupler(CouplerType.SCREW, 'A'),
                 coupler_b=Coupler(CouplerType.SCREW, 'B'),
             )
-            for cfg in wagon_configs
+            for cfg in eligible_configs
         ]
 
         # Create train aggregate (owns wagons during arrival)

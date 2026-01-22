@@ -15,6 +15,7 @@ from contexts.configuration.domain.models.process_times import ProcessTimes
 from contexts.configuration.domain.models.scenario import LocoDeliveryStrategy
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.configuration.domain.models.scenario import TrackSelectionStrategy
+from contexts.configuration.domain.models.scenario import WorkflowMode
 from contexts.configuration.domain.models.topology import Topology
 import pandas as pd
 
@@ -37,6 +38,7 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             id=data.get('id') or data.get('scenario_id'),
             start_date=data['start_date'],
             end_date=data['end_date'],
+            workflow_mode=data.get('workflow_mode') or WorkflowMode.LEGACY,
             track_selection_strategy=data.get('track_selection_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
             retrofit_selection_strategy=data.get('retrofit_selection_strategy')
             or TrackSelectionStrategy.LEAST_OCCUPIED,
@@ -179,8 +181,8 @@ class FileLoader:  # pylint: disable=too-few-public-methods
                     WagonInputDTO(
                         id=str(row.get('wagon_id', f'{train_id}_wagon_{i + 1}')),
                         length=float(row.get('length', 10.0)),
-                        is_loaded=bool(row.get('is_loaded', False)),
-                        needs_retrofit=bool(row.get('needs_retrofit', True)),
+                        is_loaded=str(row.get('is_loaded', 'False')).lower() == 'true',
+                        needs_retrofit=str(row.get('needs_retrofit', 'True')).lower() == 'true',
                         track=str(row.get('Track')) if pd.notna(row.get('Track')) else None,
                     )
                     for i, (_, row) in enumerate(group.iterrows())
