@@ -30,7 +30,13 @@ PopUpSim helps railway operators:
 - Python 3.13 or higher
 - [uv](https://docs.astral.sh/uv/) package manager
 
+The necessary Python version will be automatically installed when using uv. For different
+ways of installing uv can be found in **Step 1** of the [installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorail/00-installation.md).
+
 ### Installation
+
+A more detailed description of the installation process can be found in the
+[installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorail/00-installation.md)
 
 #### Option 1: Using Git (Recommended)
 
@@ -117,8 +123,8 @@ The dashboard will open in your browser at http://localhost:8501
 
 Two ready-to-use scenarios are included:
 
-- **[Demo Scenario](Data/examples/demo/README.md)** - Quick demonstration scenario for testing
-- **[Ten Trains Two Days](Data/examples/ten_trains_two_days/README.md)** - 10 trains, 224 wagons over 2 days (used in tutorial)
+- **[Demo Scenario](Data/examples/demo)** - Quick demonstration scenario for testing
+- **[Ten Trains Two Days](Data/examples/ten_trains_two_days)** - 10 trains, 224 wagons over 2 days (used in tutorial)
 
 ## Architecture
 

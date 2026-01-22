@@ -134,7 +134,7 @@ cd dac-migration-dss-popupsim
 
 ### Option B: Download ZIP (No Git Required)
 
-1. Visit: https://github.com/open-rail-association/dac-migration-dss-popupsim/archive/refs/heads/main.zip
+1. Visit: https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/archive/refs/heads/main.zipp
 2. Extract the ZIP file to your desired location
 3. Open terminal and navigate to the extracted folder:
 
