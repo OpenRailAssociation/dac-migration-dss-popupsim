@@ -1,4 +1,0 @@
-route_id,from_track,to_track,duration,path
-R001,T_COL1,T_WS1,5.0,T_COL1,T_WS1
-R002,T_WS1,T_RET1,3.0,T_WS1,T_RET1
-R003,T_RET1,T_PARK1,4.0,T_RET1,T_PARK1

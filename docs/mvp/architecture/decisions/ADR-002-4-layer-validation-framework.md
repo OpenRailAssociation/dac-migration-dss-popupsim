@@ -174,7 +174,6 @@ This decision supports the following quality goals:
 
 ## References
 
-- [Validation Framework README](../../../popupsim/backend/src/shared/validation/README.md)
 - [Building Blocks Documentation](../05-building-blocks.md#level-3-4-layer-validation-pipeline)
 - [Cross-Cutting Concepts](../08-concepts.md#88-4-layer-validation-framework)
 

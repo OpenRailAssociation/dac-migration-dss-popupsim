@@ -1,3 +1,0 @@
-locomotive_id,name,track_id,start_date,end_date
-L001,Loco 1,T_PARK1,2025-01-15T00:00:00,2025-01-16T23:59:59
-L002,Loco 2,T_PARK1,2025-01-15T00:00:00,2025-01-16T23:59:59

@@ -220,9 +220,8 @@ yards = {
 4. Performance tuning for large yard operations
 
 ## Related ADRs
-- [ADR-001: External Train Context](ADR-001-external-train-context.md) - Delivers trains to yards
-- [ADR-003: Railway Infrastructure Context](ADR-003-railway-infrastructure-context.md) - Provides yard topology
-- [ADR-007: Shunting Operations Context](ADR-007-shunting-operations-context.md) - Handles yard movements
+- ADR-001: External Train Context - Delivers trains to yards
+- ADR-007: Shunting Operations Context - Handles yard movements
 
 ## Migration Strategy
 - **Current Workshop Operations** → Becomes `RetrofittingArea` within yards
