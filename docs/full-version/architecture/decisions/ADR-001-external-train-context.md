@@ -142,7 +142,4 @@ class WagonsDeliveredEvent(DomainEvent):
 
 ## References
 
-- [ADR-001: Hexagonal Pipeline Architecture](ADR-001-hexagonal-pipeline-architecture.md)
-- [ADR-004: 3 Bounded Context Architecture](ADR-004-3-bounded-context-architecture.md)
-- [Building Block View - Level 2](../05-building-blocks.md#52-level-2-configuration-context)
 - Railway Industry EDI Standards

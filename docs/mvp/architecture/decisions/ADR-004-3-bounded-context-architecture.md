@@ -186,7 +186,6 @@ This decision supports:
 
 - [Building Blocks Documentation](../05-building-blocks.md)
 - [Solution Strategy](../04-solution-strategy.md)
-- [Architecture Update 2025](../ARCHITECTURE_UPDATE_2025.md)
 
 ---
 

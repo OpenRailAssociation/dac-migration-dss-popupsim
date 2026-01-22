@@ -50,8 +50,8 @@ If you're new to PopUpSim:
 
 If you're experienced:
 - Jump to specific chapters for reference
-- Use the [Parameter Reference](parameter-reference.md) for quick lookups (if available)
-- Check [Common Patterns](common-patterns.md) for best practices (if available)
+- Experiment with different parameter values
+- Check configuration examples in each chapter
 
 ## Next Steps
 

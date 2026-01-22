@@ -356,7 +356,7 @@ uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --outp
 
 After successful installation:
 
-1. **Run example scenarios** - See [README.md](../../README.md) for commands
+1. **Run example scenarios** - See [Getting Started](../README.md) for commands
 2. **Follow the tutorial** - Start with [Tutorial Overview](README.md)
 3. **Create your own scenarios** - Modify example configurations
 
