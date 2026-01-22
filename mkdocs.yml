@@ -51,6 +51,18 @@ nav:
       - Glossary: mvp/architecture/12-glossary.md
       - Bibliography: mvp/architecture/13-bibliography.md
   - CI/CD: ci-cd.md
+  - Tutorials:
+      - Installation: tutorial/00-installation.md
+      - Overview: tutorial/01-overview.md
+      - Scenario configuration: tutorial/02-scenario-configuration.md
+      - Topology configuration: tutorial/03-topology-configuration.md
+      - Track configuration: tutorial/04-track-configuration.md
+      - Workshop configuration: tutorial/05-workshop-configuration.md
+      - Process times configuration: tutorial/06-process-times-configuration.md
+      - Locomotive configuration: tutorial/07-locomotive-configuration.md
+      - Routes configuration: tutorial/08-routes-configuration.md
+      - Train schedule configuration: tutorial/09-train-schedule-configuration.md
+      - Running the simulation: tutorial/10-running-simulation.md
 
 plugins:
   - search

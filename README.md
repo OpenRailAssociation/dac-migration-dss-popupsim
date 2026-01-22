@@ -30,7 +30,13 @@ PopUpSim helps railway operators:
 - Python 3.13 or higher
 - [uv](https://docs.astral.sh/uv/) package manager
 
+The necessary Python version will be automatically installed when using uv. For different
+ways of installing uv can be found in **Step 1** of the [installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorail/00-installation.md).
+
 ### Installation
+
+A more detailed description of the installation process can be found in the
+[installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorail/00-installation.md)
 
 #### Option 1: Using Git (Recommended)
 
@@ -38,7 +44,7 @@ If you have a git client installed:
 
 ```bash
 # Clone repository
-git clone https://github.com/open-rail-association/dac-migration-dss-popupsim.git
+git clone https://github.com/OpenRailAssociation/dac-migration-dss-popupsim.git
 cd dac-migration-dss-popupsim
 
 # Install dependencies
@@ -53,18 +59,18 @@ uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --outp
 If you don't have git installed:
 
 1. Download the latest release as ZIP:
-   - Visit: https://github.com/open-rail-association/dac-migration-dss-popupsim/archive/refs/heads/main.zip
-   - Or go to the [GitHub repository](https://github.com/open-rail-association/dac-migration-dss-popupsim) and click "Code" → "Download ZIP"
+   - Visit: https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/archive/refs/heads/main.zip
+   - Or go to the [GitHub repository](https://github.com/OpenRailAssociation/dac-migration-dss-popupsim) and click "Code" → "Download ZIP"
 
 2. Extract the archive to your desired location
 
 3. Open a terminal/command prompt and navigate to the extracted folder:
    ```bash
    cd dac-migration-dss-popupsim-main
-   
+
    # Install dependencies
    uv sync
-   
+
    # Run example simulation
    uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
    ```
@@ -117,8 +123,8 @@ The dashboard will open in your browser at http://localhost:8501
 
 Two ready-to-use scenarios are included:
 
-- **[Demo Scenario](Data/examples/demo/README.md)** - Quick demonstration scenario for testing
-- **[Ten Trains Two Days](Data/examples/ten_trains_two_days/README.md)** - 10 trains, 224 wagons over 2 days (used in tutorial)
+- **[Demo Scenario](Data/examples/demo)** - Quick demonstration scenario for testing
+- **[Ten Trains Two Days](Data/examples/ten_trains_two_days)** - 10 trains, 224 wagons over 2 days (used in tutorial)
 
 ## Architecture
 
@@ -185,23 +191,8 @@ uv run pylint popupsim/backend/src/    # Code quality analysis
 
 ## Project Status
 
-**Current Phase:** MVP Implementation Complete
+**Current Phase:** MVP Implementation and code stabilization
 
-**Implemented:**
-- ✅ Configuration Context (Builder pattern, Pydantic validation, multi-file loading)
-- ✅ Workshop Operations Context (5 process coordinators, SimPy integration, resource management)
-- ✅ Analysis & Reporting Context (KPI calculation, CSV export, Matplotlib visualization)
-- ✅ Resource Management (ResourcePool, TrackCapacityManager, WorkshopCapacityManager)
-- ✅ Metrics Collection (Real-time collectors for wagons, locomotives, workshops)
-- ✅ Domain Services (State managers, selectors, distributors - no SimPy dependencies)
-- ✅ Example scenarios (demo, ten_trains_two_days)
-- ✅ Architecture documentation (arc42 with Level 3 details)
-- ✅ CLI interface (Typer-based)
-
-**In Progress:**
-- 🚧 Unit and integration tests
-- 🚧 Performance optimization
-- 🚧 Additional example scenarios
 
 ## Contributing
 
