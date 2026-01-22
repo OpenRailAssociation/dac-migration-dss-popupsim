@@ -26,17 +26,32 @@ class Contexts:
 
     analytics: AnalyticsContext
     external_trains: ExternalTrainsContext
-    yard: YardOperationsContext
-    popup_workshop: PopUpRetrofitContext
-    shunting: ShuntingOperationsContext
+    yard: YardOperationsContext | None
+    popup_workshop: PopUpRetrofitContext | None
+    shunting: ShuntingOperationsContext | None
 
 
-def print_wagon_metrics(external_trains: ExternalTrainsContext) -> None:
+def print_wagon_metrics(
+    external_trains: ExternalTrainsContext, is_legacy: bool, output_path: Path | None = None
+) -> None:
     """Print metrics of wagons."""
     ext_metrics = external_trains.get_metrics()
     typer.echo('\nWAGON METRICS:')
     typer.echo(f'  Total wagons arrived:     {ext_metrics.get("total_wagons", 0)}')
-    typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
+
+    # For retrofit workflow, read completed count from summary_metrics.json
+    if not is_legacy and output_path:
+        import json  # pylint: disable=import-outside-toplevel
+
+        summary_file = output_path / 'summary_metrics.json'
+        if summary_file.exists():
+            with open(summary_file, encoding='utf-8') as f:
+                metrics = json.load(f)
+            typer.echo(f'  Wagons completed:         {metrics.get("total_wagons_parked", 0)}')
+        else:
+            typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
+    else:
+        typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
 
 
 def print_popup_workshop_metrics(popup: PopUpRetrofitContext) -> None:
@@ -108,34 +123,47 @@ def configure_console_logging() -> StreamHandler:
     return console_handler
 
 
-def output_visualization(contexts: Contexts, output_path: Path) -> None:
+def output_visualization(contexts: Contexts, output_path: Path, is_legacy: bool, service: Any = None) -> None:
     """Write files for visualization onto the disk."""
-    dashboard_files = contexts.analytics.export_dashboard_data(
-        output_dir=output_path,
-        yard_context=contexts.yard,
-        popup_context=contexts.popup_workshop,
-        shunting_context=contexts.shunting,
-    )
+    if is_legacy:
+        dashboard_files = contexts.analytics.export_dashboard_data(
+            output_dir=output_path,
+            yard_context=contexts.yard,
+            popup_context=contexts.popup_workshop,
+            shunting_context=contexts.shunting,
+        )
 
-    typer.echo('\nDashboard data exported:')
-    for file_type, file_path in dashboard_files.items():
-        typer.echo(f'  - {file_type}: {file_path.name}')
+        typer.echo('\nDashboard data exported:')
+        for file_type, file_path in dashboard_files.items():
+            typer.echo(f'  - {file_type}: {file_path.name}')
 
-    # Generate visualizations
-    context_metrics = {
-        'external_trains': contexts.external_trains.get_metrics(),
-        'popup': contexts.popup_workshop.get_metrics(),
-        'yard': contexts.yard.get_metrics(),
-        'shunting': contexts.shunting.get_metrics(),
-    }
-    charts = contexts.analytics.visualizer.generate_all_charts(contexts.analytics, output_path, context_metrics)
-    typer.echo('\nVisualizations generated:')
-    for chart in charts:
-        typer.echo(f'  - {chart.name}')
+        # Generate visualizations
+        context_metrics = {
+            'external_trains': contexts.external_trains.get_metrics(),
+            'popup': (contexts.popup_workshop.get_metrics() if contexts.popup_workshop else {}),  # type: ignore[union-attr]  # pylint: disable=line-too-long
+            'yard': contexts.yard.get_metrics() if contexts.yard else {},  # type: ignore[union-attr]
+            'shunting': (contexts.shunting.get_metrics() if contexts.shunting else {}),  # type: ignore[union-attr]
+        }
+        charts = contexts.analytics.visualizer.generate_all_charts(contexts.analytics, output_path, context_metrics)
+        typer.echo('\nVisualizations generated:')
+        for chart in charts:
+            typer.echo(f'  - {chart.name}')
+    else:
+        # Export retrofit workflow events
+        retrofit_context = service.contexts.get('retrofit_workflow')
+        if retrofit_context and hasattr(retrofit_context, 'export_events'):
+            retrofit_context.export_events(str(output_path))
+            typer.echo('\nRetrofit workflow data exported:')
+            typer.echo('  - wagon_journey.csv')
+            typer.echo('  - rejected_wagons.csv')
+            typer.echo('  - locomotive_movements.csv')
+            typer.echo('  - summary_metrics.json')
+        else:
+            typer.echo('\nRetrofit workflow output generation not available')
 
 
-@app.command()
-def run(
+@app.command()  # pylint: disable=too-many-locals,too-many-statements
+def run(  # noqa: PLR0915
     scenario_path: Annotated[Path, typer.Option('--scenario', help='Path to scenario file')],
     output_path: Annotated[Path, typer.Option('--output', help='Output directory')] = Path('./output'),
     verbose: Annotated[bool, typer.Option('--verbose', help='Verbose output')] = False,
@@ -188,15 +216,42 @@ def run(
 
         # Generate outputs
         typer.echo('\nGenerating outputs...')
-        output_visualization(contexts, output_path)
+        is_legacy = contexts.yard is not None
+        output_visualization(contexts, output_path, is_legacy, service)
 
         typer.echo('\n' + '=' * 60)
         typer.echo('SIMULATION STATISTICS')
         typer.echo('=' * 60)
-        print_wagon_metrics(contexts.external_trains)
-        print_popup_workshop_metrics(contexts.popup_workshop)
-        print_yard_metrics(contexts.yard)
-        print_shunting_metrics(contexts.shunting)
+        print_wagon_metrics(contexts.external_trains, is_legacy, output_path)
+        if is_legacy:
+            print_popup_workshop_metrics(contexts.popup_workshop)  # type: ignore[arg-type]
+            print_yard_metrics(contexts.yard)  # type: ignore[arg-type]
+            print_shunting_metrics(contexts.shunting)  # type: ignore[arg-type]
+        else:
+            # Print retrofit workflow metrics from summary_metrics.json
+            import json  # pylint: disable=import-outside-toplevel
+
+            summary_file = output_path / 'summary_metrics.json'
+            if summary_file.exists():
+                with open(summary_file, encoding='utf-8') as f:
+                    metrics = json.load(f)
+                typer.echo('\nRETROFIT WORKFLOW METRICS:')
+                typer.echo(f'  Wagons parked (completed): {metrics.get("total_wagons_parked", 0)}')
+                typer.echo(f'  Wagons rejected:           {metrics.get("total_wagons_rejected", 0)}')
+                wagons_in_process = (
+                    metrics.get('total_wagons_arrived', 0)
+                    - metrics.get('total_wagons_parked', 0)
+                    - metrics.get('total_wagons_rejected', 0)
+                )
+                if wagons_in_process > 0:
+                    typer.echo(f'  Wagons in process:         {wagons_in_process}')
+                typer.echo(f'  Completion rate:           {metrics.get("completion_rate", 0) * 100:.1f}%')
+                typer.echo(f'  Throughput (wagons/hour):  {metrics.get("throughput_per_hour", 0):.2f}')
+                rejection_breakdown = metrics.get('rejection_breakdown', {})
+                if rejection_breakdown:
+                    typer.echo('  Rejection breakdown:')
+                    for reason, count in rejection_breakdown.items():
+                        typer.echo(f'    {reason}: {count}')
         typer.echo(f'\nSIMULATION TIME:            {result.duration:.1f} minutes')
         typer.echo('=' * 60)
     else:

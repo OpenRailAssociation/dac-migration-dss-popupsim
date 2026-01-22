@@ -28,6 +28,8 @@ from contexts.retrofit_workflow.domain.services.workshop_assignment_service impo
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 from contexts.retrofit_workflow.infrastructure.resources.track_capacity_manager import TrackResourceManager
 from contexts.retrofit_workflow.infrastructure.resources.workshop_resource_manager import WorkshopResourceManager
+from infrastructure.logging import get_process_logger
+from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
 import simpy
 
 
@@ -96,10 +98,17 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
 
     def initialize(self) -> None:
         """Initialize context from scenario using builder pattern."""
+        # Get process logger if available
+        process_logger = None
+        from contextlib import suppress  # pylint: disable=import-outside-toplevel
+
+        with suppress(RuntimeError):
+            process_logger = get_process_logger()
+
         builder = RetrofitWorkshopContexttBuilder(self.env, self.scenario)
 
         # Build components step by step
-        builder.build_event_collector()
+        builder.build_event_collector(process_logger=process_logger)
         builder.build_entities()
         builder.build_resource_managers()
 
@@ -112,6 +121,30 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
 
         # Build remaining components (simplified)
         self._build_remaining_components()
+
+    def subscribe_to_train_arrivals(self, event_bus: Any) -> None:
+        """Subscribe to train arrival events.
+
+        Args:
+            event_bus: Event bus to subscribe to
+        """
+        event_bus.subscribe(TrainArrivedEvent, self._handle_train_arrived)
+
+    def _handle_train_arrived(self, event: Any) -> None:
+        """Handle train arrival by injecting wagons into collection queue.
+
+        Args:
+            event: TrainArrivedEvent with wagons
+        """
+        if self.arrival_coordinator:
+            # Convert wagons to config format expected by coordinator
+            wagon_configs = [
+                {'id': w.id, 'length': w.length, 'is_loaded': w.is_loaded, 'needs_retrofit': w.needs_retrofit}
+                for w in event.wagons
+            ]
+            self.arrival_coordinator.schedule_train(
+                train_id=event.train_id, arrival_time=event.event_timestamp, wagon_configs=wagon_configs
+            )
 
     def start_processes(self) -> None:
         """Start all coordinator processes."""

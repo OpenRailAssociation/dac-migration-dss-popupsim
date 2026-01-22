@@ -50,7 +50,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         """Opportunistic strategy: grab and go immediately."""
         while True:
             first_wagon = yield self.config.retrofitted_queue.get()
-            parking_track = self.config.track_selector.select_track_with_capacity('parking_area')
+            parking_track = self.config.track_selector.select_track_with_capacity('parking')
 
             if not parking_track:
                 logger.error('No parking tracks configured')
@@ -123,9 +123,9 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
         # Get all parking tracks with sufficient capacity
         suitable_tracks = []
-        for track_id in ['parking_area']:  # Extend if multiple parking areas
-            track = self.config.track_selector.select_track_with_capacity(track_id)
-            if track and track.get_available_capacity() >= batch_length:
+        all_parking_tracks = self.config.track_selector.get_tracks_of_type('parking')
+        for track in all_parking_tracks:
+            if track.get_available_capacity() >= batch_length:
                 suitable_tracks.append(track)
 
         if not suitable_tracks:
@@ -136,6 +136,8 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
     def _process_wagon_batch_with_wagons(self, wagons: list[Wagon], parking_track: Any) -> Generator[Any, Any]:
         """Process a batch of wagons (for smart_accumulation strategy)."""
+        parking_track_id = parking_track.track_id
+
         # Form batch that fits parking track capacity
         batch_wagons = self.config.batch_service.form_batch_for_parking_track(
             wagons, parking_track.get_available_capacity()
@@ -145,15 +147,17 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
         # Create batch aggregate with rake integration
         try:
-            batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, 'parking_area')
-            yield from self._transport_batch_aggregate(batch_aggregate)
+            batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, parking_track_id)
+            yield from self._transport_batch_aggregate(batch_aggregate, parking_track_id)
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning('Batch aggregate creation failed: %s, falling back to old method', e)
-            batch_id = self._publish_batch_events_old(batch_wagons)
-            yield from self._transport_batch_old(batch_wagons, batch_id)
+            batch_id = self._publish_batch_events_old(batch_wagons, parking_track_id)
+            yield from self._transport_batch_old(batch_wagons, batch_id, parking_track_id)
 
     def _process_wagon_batch(self, first_wagon: Wagon, parking_track: Any) -> Generator[Any, Any]:
         """Process a batch of wagons."""
+        parking_track_id = parking_track.track_id
+
         # Immediately collect available wagons (no accumulation window)
         wagons = yield from self._collect_wagons(first_wagon, parking_track)
         if not wagons:
@@ -168,12 +172,12 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
         # Create batch aggregate with rake integration
         try:
-            batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, 'parking_area')
-            yield from self._transport_batch_aggregate(batch_aggregate)
+            batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, parking_track_id)
+            yield from self._transport_batch_aggregate(batch_aggregate, parking_track_id)
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning('Batch aggregate creation failed: %s, falling back to old method', e)
-            batch_id = self._publish_batch_events_old(batch_wagons)
-            yield from self._transport_batch_old(batch_wagons, batch_id)
+            batch_id = self._publish_batch_events_old(batch_wagons, parking_track_id)
+            yield from self._transport_batch_old(batch_wagons, batch_id, parking_track_id)
 
     def _collect_wagons(self, first_wagon: Wagon, parking_track: Any) -> Generator[Any, Any, list[Wagon]]:
         """Collect wagons that fit in available parking capacity."""
@@ -192,52 +196,54 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
         return wagons
 
-    def _publish_batch_events(self, batch_aggregate: Any) -> None:
+    def _publish_batch_events(self, batch_aggregate: Any, parking_track_id: str) -> None:
         """Publish batch formation events."""
         EventPublisherHelper.publish_batch_events_for_aggregate(
             self.config.batch_event_publisher,
             self.config.env.now,
             batch_aggregate,
-            'parking_area',
+            parking_track_id,
         )
 
-    def _transport_to_parking(self, loco: Any, wagons: list[Wagon], batch_id: str) -> Generator[Any, Any]:
+    def _transport_to_parking(
+        self, loco: Any, wagons: list[Wagon], batch_id: str, parking_track_id: str
+    ) -> Generator[Any, Any]:
         """Transport batch to parking area."""
         EventPublisherHelper.publish_batch_transport_started(
             self.config.batch_event_publisher,
             self.config.env.now,
             batch_id,
             loco.id,
-            'parking_area',
+            parking_track_id,
             len(wagons),
         )
 
         EventPublisherHelper.publish_loco_moving(
-            self.config.loco_event_publisher, self.config.env.now, loco.id, 'retrofitted', 'parking_area'
+            self.config.loco_event_publisher, self.config.env.now, loco.id, 'retrofitted', parking_track_id
         )
 
-        transport_time = self.config.route_service.get_duration('retrofitted', 'parking_area')
+        transport_time = self.config.route_service.get_duration('retrofitted', parking_track_id)
         yield self.config.env.timeout(transport_time)
 
         EventPublisherHelper.publish_batch_arrived(
             self.config.batch_event_publisher,
             self.config.env.now,
             batch_id,
-            'parking_area',
+            parking_track_id,
             len(wagons),
         )
 
-    def _park_wagons(self, wagons: list[Wagon]) -> Generator[Any, Any]:
+    def _park_wagons(self, wagons: list[Wagon], parking_track_id: str) -> Generator[Any, Any]:
         """Park wagons in parking area."""
         for wagon in wagons:
-            wagon.park('parking_area')
+            wagon.park(parking_track_id)
             EventPublisherHelper.publish_wagon_event(
-                self.config.wagon_event_publisher, self.config.env.now, wagon.id, 'PARKED', 'parking_area', 'PARKED'
+                self.config.wagon_event_publisher, self.config.env.now, wagon.id, 'PARKED', parking_track_id, 'PARKED'
             )
 
         yield self.config.env.timeout(0)
 
-    def _return_locomotive(self, loco: Any) -> Generator[Any, Any]:
+    def _return_locomotive(self, loco: Any, parking_track_id: str) -> Generator[Any, Any]:
         """Return locomotive to home track."""
         # Add locomotive decoupling time based on wagon coupler types
         process_times = (
@@ -250,30 +256,32 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             yield self.config.env.timeout(decouple_time)
 
         EventPublisherHelper.publish_loco_moving(
-            self.config.loco_event_publisher, self.config.env.now, loco.id, 'parking_area', loco.home_track
+            self.config.loco_event_publisher, self.config.env.now, loco.id, parking_track_id, loco.home_track
         )
 
-        return_time = self.config.route_service.get_duration('parking_area', 'loco_parking')
+        return_time = self.config.route_service.get_duration(parking_track_id, 'loco_parking')
         yield self.config.env.timeout(return_time)
 
-    def _transport_batch_aggregate(self, batch_aggregate: Any) -> Generator[Any, Any]:
+    def _transport_batch_aggregate(self, batch_aggregate: Any, parking_track_id: str) -> Generator[Any, Any]:
         """Transport batch aggregate to parking area."""
         batch_id = batch_aggregate.id
         wagons = batch_aggregate.wagons
 
-        self._publish_batch_events(batch_aggregate)
+        self._publish_batch_events(batch_aggregate, parking_track_id)
 
         loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
         EventPublisherHelper.publish_loco_allocated(self.config.loco_event_publisher, self.config.env.now, loco.id)
 
         try:
-            yield from self._transport_to_parking_with_batch(loco, batch_aggregate, batch_id)
-            yield from self._park_wagons(wagons)
-            yield from self._return_locomotive(loco)
+            yield from self._transport_to_parking_with_batch(loco, batch_aggregate, batch_id, parking_track_id)
+            yield from self._park_wagons(wagons, parking_track_id)
+            yield from self._return_locomotive(loco, parking_track_id)
         finally:
             yield from self.config.locomotive_manager.release(loco)
 
-    def _transport_to_parking_with_batch(self, loco: Any, batch_aggregate: Any, batch_id: str) -> Generator[Any, Any]:
+    def _transport_to_parking_with_batch(
+        self, loco: Any, batch_aggregate: Any, batch_id: str, parking_track_id: str
+    ) -> Generator[Any, Any]:
         """Transport batch aggregate to parking area with coupling time."""
         wagons = batch_aggregate.wagons
 
@@ -282,13 +290,13 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             self.config.env.now,
             batch_id,
             loco.id,
-            'parking_area',
+            parking_track_id,
             len(wagons),
         )
 
         # Add locomotive preparation time (loco coupling + shunting prep)
-        route_type = self.config.route_service.get_route_type('retrofitted', 'parking_area')
-        train = self.config.train_service.form_train(loco, batch_aggregate, 'retrofitted', 'parking_area', route_type)
+        route_type = self.config.route_service.get_route_type('retrofitted', parking_track_id)
+        train = self.config.train_service.form_train(loco, batch_aggregate, 'retrofitted', parking_track_id, route_type)
         process_times = (
             getattr(self.config.scenario, 'process_times', None) if hasattr(self.config, 'scenario') else None
         )
@@ -296,11 +304,11 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         yield self.config.env.timeout(prep_time)
 
         EventPublisherHelper.publish_loco_moving(
-            self.config.loco_event_publisher, self.config.env.now, loco.id, 'retrofitted', 'parking_area'
+            self.config.loco_event_publisher, self.config.env.now, loco.id, 'retrofitted', parking_track_id
         )
 
         # Use batch aggregate to calculate transport time including coupling
-        base_transport_time = self.config.route_service.get_duration('retrofitted', 'parking_area')
+        base_transport_time = self.config.route_service.get_duration('retrofitted', parking_track_id)
         total_transport_time = batch_aggregate.get_transport_time(base_transport_time, process_times)
 
         yield self.config.env.timeout(total_transport_time)
@@ -309,11 +317,11 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             self.config.batch_event_publisher,
             self.config.env.now,
             batch_id,
-            'parking_area',
+            parking_track_id,
             len(wagons),
         )
 
-    def _publish_batch_events_old(self, batch: list[Wagon]) -> str:
+    def _publish_batch_events_old(self, batch: list[Wagon], parking_track_id: str) -> str:
         self.batch_counter += 1
         batch_id = f'RETROFITTED-PARK-{int(self.config.env.now)}-{self.batch_counter}'
 
@@ -322,20 +330,20 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             self.config.env.now,
             batch_id,
             [w.id for w in batch],
-            'parking_area',
+            parking_track_id,
             sum(w.length for w in batch),
         )
 
         return batch_id
 
-    def _transport_batch_old(self, batch: list[Wagon], batch_id: str) -> Generator[Any, Any]:
+    def _transport_batch_old(self, batch: list[Wagon], batch_id: str, parking_track_id: str) -> Generator[Any, Any]:
         """Transport batch to parking area (old method)."""
         loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
         EventPublisherHelper.publish_loco_allocated(self.config.loco_event_publisher, self.config.env.now, loco.id)
 
         try:
-            yield from self._transport_to_parking(loco, batch, batch_id)
-            yield from self._park_wagons(batch)
-            yield from self._return_locomotive(loco)
+            yield from self._transport_to_parking(loco, batch, batch_id, parking_track_id)
+            yield from self._park_wagons(batch, parking_track_id)
+            yield from self._return_locomotive(loco, parking_track_id)
         finally:
             yield from self.config.locomotive_manager.release(loco)

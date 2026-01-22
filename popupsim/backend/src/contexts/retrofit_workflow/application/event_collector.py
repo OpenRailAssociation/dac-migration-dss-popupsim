@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from contexts.retrofit_workflow.domain.events import LocomotiveMovementEvent
 from contexts.retrofit_workflow.domain.events import ResourceStateChangeEvent
@@ -11,31 +12,61 @@ from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
 from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 import pandas as pd
 
+if TYPE_CHECKING:
+    from infrastructure.logging import ProcessLogger
+
 
 class EventCollector:
     """Collects all simulation events and exports to CSV/JSON."""
 
-    def __init__(self) -> None:
+    def __init__(self, process_logger: 'ProcessLogger | None' = None) -> None:
+        self.process_logger = process_logger
         self.wagon_events: list[WagonJourneyEvent] = []
         self.locomotive_events: list[LocomotiveMovementEvent] = []
         self.resource_events: list[ResourceStateChangeEvent] = []
         self.batch_events: list[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination] = []
 
     def add_wagon_event(self, event: WagonJourneyEvent) -> None:
-        """Add wagon journey event."""
+        """Add wagon journey event and log to process log."""
         self.wagon_events.append(event)
 
+        if self.process_logger:
+            self.process_logger.set_time(event.timestamp)
+            self.process_logger.log(f'Wagon {event.wagon_id}: {event.event_type} at {event.location}')
+
     def add_locomotive_event(self, event: LocomotiveMovementEvent) -> None:
-        """Add locomotive movement event."""
+        """Add locomotive movement event and log to process log."""
         self.locomotive_events.append(event)
+
+        if self.process_logger:
+            self.process_logger.set_time(event.timestamp)
+            from_loc = event.from_location or ''
+            to_loc = event.to_location or ''
+            movement = f'{from_loc} → {to_loc}' if from_loc or to_loc else event.purpose or ''
+            self.process_logger.log(f'Loco {event.locomotive_id}: {event.event_type} {movement}')
 
     def add_resource_event(self, event: ResourceStateChangeEvent) -> None:
         """Add resource state change event."""
         self.resource_events.append(event)
 
     def add_batch_event(self, event: BatchFormed | BatchTransportStarted | BatchArrivedAtDestination) -> None:
-        """Add batch event."""
+        """Add batch event and log to process log."""
         self.batch_events.append(event)
+
+        if self.process_logger:
+            self.process_logger.set_time(event.timestamp)
+            if isinstance(event, BatchFormed):
+                self.process_logger.log(
+                    f'Batch {event.batch_id}: FORMED with {len(event.wagon_ids)} wagons → {event.destination}'
+                )
+            elif isinstance(event, BatchTransportStarted):
+                self.process_logger.log(
+                    f'Batch {event.batch_id}: TRANSPORT_STARTED by {event.locomotive_id} → {event.destination}'
+                )
+            elif isinstance(event, BatchArrivedAtDestination):
+                self.process_logger.log(
+                    f'Batch {event.batch_id}: ARRIVED at {event.destination} ({event.wagon_count} wagons)'
+                )
 
     def export_all(self, output_dir: str) -> None:
         """Export all data to output directory."""

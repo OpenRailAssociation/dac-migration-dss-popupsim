@@ -1,0 +1,7 @@
+timestamp,metric,value
+360.0,train_arrivals,"{'count': 10, 'wagons': 224}"
+360.0,wagons_arrived,224
+360.0,retrofits_completed,86
+360.0,locomotive_utilization,"{'moving': 137, 'parking': 137}"
+360.0,workshop_utilization,"{'working': 86, 'completed': 0}"
+360.0,track_occupancy,{'retrofitted': 84}

@@ -46,13 +46,49 @@ class LocoPriorityStrategy(str, Enum):
     BATCH_COMPLETION = 'batch_completion'  # Complete workshop pickups before parking
 
 
+class WorkflowMode(str, Enum):
+    """Workflow execution mode."""
+
+    LEGACY = 'legacy'
+    RETROFIT_WORKFLOW = 'retrofit_workflow'
+
+    @classmethod
+    def _missing_(cls, value: object) -> 'WorkflowMode':
+        """Handle missing values by returning default."""
+        if isinstance(value, str):
+            # Try case-insensitive match
+            for member in cls:
+                if member.value.lower() == value.lower():
+                    return member
+        return cls.LEGACY
+
+
 class Scenario(BaseModel):
     """Scenario configuration for simulation."""
 
     id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
     start_date: datetime
     end_date: datetime
+    workflow_mode: WorkflowMode = WorkflowMode.LEGACY
     track_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
+
+    @field_validator('workflow_mode', mode='before')
+    @classmethod
+    def validate_workflow_mode(cls, v: str | WorkflowMode) -> WorkflowMode:
+        """Validate and convert workflow_mode."""
+        if isinstance(v, WorkflowMode):
+            return v
+        if isinstance(v, str):
+            # Try exact match first
+            for mode in WorkflowMode:
+                if mode.value == v:
+                    return mode
+            # Try case-insensitive
+            for mode in WorkflowMode:
+                if mode.value.lower() == v.lower():
+                    return mode
+        return WorkflowMode.LEGACY
+
     retrofit_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     workshop_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.ROUND_ROBIN
     parking_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED

@@ -51,7 +51,7 @@ def create_layered_scenario(
         Mock(id='collection', type='collection', length=100.0, fillfactor=0.8),
         Mock(id='retrofit', type='retrofit', length=80.0, fillfactor=0.9),
         Mock(id='retrofitted', type='retrofitted', length=120.0, fillfactor=0.8),
-        Mock(id='parking_area', type='parking_area', length=200.0, fillfactor=0.7),
+        Mock(id='parking_area', type='parking', length=200.0, fillfactor=0.7),
         Mock(id='loco_parking', type='loco_parking', length=50.0, fillfactor=0.5),
     ]
     for i in range(num_workshops):
