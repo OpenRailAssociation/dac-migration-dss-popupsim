@@ -1,0 +1,2333 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+        <link rel="prev" href="../use-cases/">
+      
+      
+        <link rel="next" href="../../mvp/architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Konzept - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#konzept-popupsim" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Konzept
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../mvp/architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorial/00-installation/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anderungshistorie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Änderungshistorie
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inhaltsverzeichnis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inhaltsverzeichnis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abbildungsverzeichnis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abbildungsverzeichnis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-zusammenfassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1 Zusammenfassung
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-abkurzungen-glossar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 Abkürzungen / Glossar
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-einordnung-und-zusammenhange" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Einordnung und Zusammenhänge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Einordnung und Zusammenhänge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-dak-migration-ca-500-tsd-wagen-sind-umzubauen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 DAK Migration: ca. 500 Tsd. Wagen sind umzubauen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-dak-migration-dss-unterstutzung-von-planung-durchfuhrung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 DAK Migration DSS: Unterstützung von Planung &amp; Durchführung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-popup-sim-erste-demo-fur-big-bang-simulation-vorhanden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 PopUp Sim: Erste Demo für Big-Bang-Simulation vorhanden
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-popupsim-die-zielvision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 PopUpSim: Die Zielvision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4 PopUpSim: Die Zielvision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-user-stories-aus-verschiedenen-phasen-der-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 User-Stories aus verschiedenen Phasen der Migration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 User-Stories aus verschiedenen Phasen der Migration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#strategische-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategische Phase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailplanungsphase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailplanungsphase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#umsetzungsphase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Umsetzungsphase
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-ablauf-der-anwendung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Ablauf der Anwendung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 Ablauf der Anwendung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#421-datenvorbereitung-szenarioaufbau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.1 Datenvorbereitung &amp; Szenarioaufbau
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#422-simulation-vom-betrieb-in-die-werkstatt-und-zuruck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.2 Simulation: Vom Betrieb in die Werkstatt und zurück
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#423-ergebnisvisualisierung-film-und-statistik" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.3 Ergebnisvisualisierung: „Film" und „Statistik"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-mvp-geschaftslogik-zuerst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5 MVP: Geschäftslogik zuerst
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5 MVP: Geschäftslogik zuerst">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nicht-funktionale-anforderungen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nicht-funktionale Anforderungen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datenaufbereitung-szenarioaufbau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datenaufbereitung &amp; Szenarioaufbau
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualisierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visualisierung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstoen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6 Ausblick: Mit fachlich relevanten Ergebnissen nächste Schritte anstoßen
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction & Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risks & Technical Debt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/00-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/01-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/02-scenario-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/03-topology-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/04-track-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/05-workshop-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/06-process-times-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/07-locomotive-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/08-routes-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/09-train-schedule-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/10-running-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anderungshistorie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Änderungshistorie
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inhaltsverzeichnis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inhaltsverzeichnis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abbildungsverzeichnis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abbildungsverzeichnis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-zusammenfassung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1 Zusammenfassung
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-abkurzungen-glossar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 Abkürzungen / Glossar
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-einordnung-und-zusammenhange" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Einordnung und Zusammenhänge
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Einordnung und Zusammenhänge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-dak-migration-ca-500-tsd-wagen-sind-umzubauen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 DAK Migration: ca. 500 Tsd. Wagen sind umzubauen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-dak-migration-dss-unterstutzung-von-planung-durchfuhrung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 DAK Migration DSS: Unterstützung von Planung &amp; Durchführung
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-popup-sim-erste-demo-fur-big-bang-simulation-vorhanden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 PopUp Sim: Erste Demo für Big-Bang-Simulation vorhanden
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-popupsim-die-zielvision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 PopUpSim: Die Zielvision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4 PopUpSim: Die Zielvision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-user-stories-aus-verschiedenen-phasen-der-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 User-Stories aus verschiedenen Phasen der Migration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 User-Stories aus verschiedenen Phasen der Migration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#strategische-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategische Phase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailplanungsphase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailplanungsphase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#umsetzungsphase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Umsetzungsphase
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-ablauf-der-anwendung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Ablauf der Anwendung
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 Ablauf der Anwendung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#421-datenvorbereitung-szenarioaufbau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.1 Datenvorbereitung &amp; Szenarioaufbau
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#422-simulation-vom-betrieb-in-die-werkstatt-und-zuruck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.2 Simulation: Vom Betrieb in die Werkstatt und zurück
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#423-ergebnisvisualisierung-film-und-statistik" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.3 Ergebnisvisualisierung: „Film" und „Statistik"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-mvp-geschaftslogik-zuerst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5 MVP: Geschäftslogik zuerst
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5 MVP: Geschäftslogik zuerst">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nicht-funktionale-anforderungen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Nicht-funktionale Anforderungen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datenaufbereitung-szenarioaufbau" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Datenaufbereitung &amp; Szenarioaufbau
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualisierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visualisierung
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstoen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6 Ausblick: Mit fachlich relevanten Ergebnissen nächste Schritte anstoßen
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="konzept-popupsim">Konzept PopUpSim<a class="headerlink" href="#konzept-popupsim" title="Permanent link">&para;</a></h1>
+<p>zur Simulation der schlagartigen Umrüstung auf DAK</p>
+<p><strong>April 2025</strong></p>
+<p>Frederik Schäfer
+DB Cargo AG</p>
+<hr />
+<h2 id="anderungshistorie">Änderungshistorie<a class="headerlink" href="#anderungshistorie" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Datum</th>
+<th>Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>28.03.2025</td>
+<td>Erster Entwurf</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="inhaltsverzeichnis">Inhaltsverzeichnis<a class="headerlink" href="#inhaltsverzeichnis" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-zusammenfassung">Zusammenfassung</a></li>
+<li><a href="#2-abkurzungen-glossar">Abkürzungen / Glossar</a></li>
+<li><a href="#3-einordnung-und-zusammenhange">Einordnung und Zusammenhänge</a></li>
+<li>3.1 <a href="#31-dak-migration-ca-500-tsd-wagen-sind-umzubauen">DAK Migration: ca. 500 Tsd. Wagen sind umzubauen</a></li>
+<li>3.2 <a href="#32-dak-migration-dss-unterstutzung-von-planung-durchfuhrung">DAK Migration DSS: Unterstützung von Planung &amp; Durchführung</a></li>
+<li>3.3 <a href="#33-popup-sim-erste-demo-fur-big-bang-simulation-vorhanden">PopUp Sim: Erste Demo für Big-Bang-Simulation vorhanden</a></li>
+<li><a href="#4-popupsim-die-zielvision">PopUpSim: Die Zielvision</a></li>
+<li>4.1 <a href="#41-user-stories-aus-verschiedenen-phasen-der-migration">User-Stories aus verschiedenen Phasen der Migration</a></li>
+<li>4.2 <a href="#42-ablauf-der-anwendung">Ablauf der Anwendung</a></li>
+<li><a href="#5-mvp-geschaftslogik-zuerst">MVP: Geschäftslogik zuerst</a></li>
+<li><a href="#6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstossen">Ausblick: Mit fachlich relevanten Ergebnissen nächste Schritte anstoßen</a></li>
+</ol>
+<h2 id="abbildungsverzeichnis">Abbildungsverzeichnis<a class="headerlink" href="#abbildungsverzeichnis" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Abb. 1: Ablauf der Anwendung</li>
+<li>Abb. 2: Konfiguration im Prototyp von PopUpSim</li>
+<li>Abb. 3: Visualisierung des Simulationsablaufs in PopUpSim Prototyp</li>
+<li>Abb. 4: Mock-Up Visualisierung Simulationsablauf in PopUpSim</li>
+<li>Abb. 5: Mock-Up Ansicht Statistik</li>
+</ul>
+<hr />
+<h2 id="1-zusammenfassung">1 Zusammenfassung<a class="headerlink" href="#1-zusammenfassung" title="Permanent link">&para;</a></h2>
+<p>Der kurze Zeitraum der europaweiten, schlagartigen Umrüstung einer Teilflotte von Güterwagen, genannt „Big Bang", im Rahmen der DAK Migration ist ein kritischer Moment, der durch eine Simulation sowohl strategisch als auch im Detail zu planen und validieren ist.</p>
+<p>Dafür wurde bereits ein Prototyp „PopUpSim" erstellt, der zu einem Minimal Viable Product (MVP) ausgebaut werden soll. Da der Big-Bang methodisch weitgehend getrennt von der übrigen DAK Migration betrachtet werden kann, eignet er sich für ein separates Modul im Rahmen eines größeren „DAC Migration DSS".</p>
+<p>Im Rahmen der MVP Entwicklung steht die Simulation (=Geschäftslogik, Abbildung der Abläufe) im Vordergrund. Eine angemessene Visualisierung der Ergebnisse („Film" Simulationsablauf, Statistiken) soll ebenfalls umgesetzt werden. Die Benutzer:innen Schnittstelle, insbesondere für den Aufbau der Szenarien (Komfort Dateneingabe, Anlage von Gleistopologie usw.) kann auf sehr niedrigen Niveau gehalten werden, um Aufwände gering zu halten. Ebenso können auf Ebene MVP die nicht-funktionalen Anforderungen auf ein sehr geringes Maß reduziert werden.</p>
+<hr />
+<h2 id="2-abkurzungen-glossar">2 Abkürzungen / Glossar<a class="headerlink" href="#2-abkurzungen-glossar" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Abkürzung</th>
+<th>Erklärung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Big-Bang</strong></td>
+<td>Zeitraum von wenigen Wochen in denen eine Vielzahl von vorgerüsteten Wagen von Schraubkupplung auf Digitale Automatische Kupplung umgerüstet werden.</td>
+</tr>
+<tr>
+<td><strong>DAK / DAC</strong></td>
+<td>Digital Automatische Kupplung</td>
+</tr>
+<tr>
+<td><strong>DAC-Ready</strong></td>
+<td>Migrationsmethode bei der der Umbau zweischrittig erfolgt. Zuerst werden die Wagen für die DAK vorgerüstet, behalten aber äußerlich die Schraubkupplungen. In einem zweiten, vom Arbeitsaufwand her auf ein Minimum reduziertem Schritt (→Big Bang) werden Schraubkupplungen entfernt und DAK-Kupplungsköpfe aufgesetzt.</td>
+</tr>
+<tr>
+<td><strong>DSS</strong></td>
+<td>Decision Support System, Entscheidungsunterstützungssystem</td>
+</tr>
+<tr>
+<td><strong>MVP</strong></td>
+<td>Minimal Viable Product (minimales gebrauchstaugliches Produkt)</td>
+</tr>
+<tr>
+<td><strong>Pop-Up-Werkstatt</strong></td>
+<td>Werkstatt, in der vorgerüstete Wagen in großer Anzahl von Schraubkupplung auf Digitale Automatische Kupplung umgerüstet werden. Häufig sind diese Werkstätten nur vorübergehend für diesen Zweck eingerichtet.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-einordnung-und-zusammenhange">3 Einordnung und Zusammenhänge<a class="headerlink" href="#3-einordnung-und-zusammenhange" title="Permanent link">&para;</a></h2>
+<h3 id="31-dak-migration-ca-500-tsd-wagen-sind-umzubauen">3.1 DAK Migration: ca. 500 Tsd. Wagen sind umzubauen<a class="headerlink" href="#31-dak-migration-ca-500-tsd-wagen-sind-umzubauen" title="Permanent link">&para;</a></h3>
+<p>Im Rahmen der DAK Migration werden europaweit rund 500 Tsd. Güterwagen, Lokomotiven und Arbeitsfahrzeuge von der Schraubkupplung auf die Digitale Automatische Kupplung (DAK) umgerüstet. Stand heute findet die flächendeckende Migration in den Jahren 2029-2034 statt.</p>
+<p>Für die Durchführung der DAK-Migration wurden verschiedene Methoden entwickelt. Eine aussichtsreiche, aber auch sehr anspruchsvolle Methode, ist DAC Ready. Diese sieht vor, dass aufwändige Umbauarbeiten über einen längeren Zeitraum (z.B. 4 Jahre) verteilt in den üblichen Werkstätten durchgeführt werden. Die Wagen verlassen die Werkstatt wieder mit Schraubkupplungen. In einem kurzen Zeitraum (z.B. 3 Wochen), dem sogenannten Big-Bang, wird die Schraubkupplung entfernt und mit nur noch vergleichsweise geringem Aufwand der DAK-Kupplungskopf eingesetzt. So werden längere Betriebsunterbrechungen oder -erschwernisse durch inkompatible Kupplungen an Wagen vermieden. Die Abläufe im Big-Bang allerdings sind zeitkritisch und erfordern die Behandlung vieler Wagen.</p>
+<h3 id="32-dak-migration-dss-unterstutzung-von-planung-durchfuhrung">3.2 DAK Migration DSS: Unterstützung von Planung &amp; Durchführung<a class="headerlink" href="#32-dak-migration-dss-unterstutzung-von-planung-durchfuhrung" title="Permanent link">&para;</a></h3>
+<p>Die Planung der DAK-Migration bedarf aufgrund der Größe des Vorhabens, der Vielzahl der Beteiligten, der hohen verkehrlichen Verflechtungen im Güterverkehr sowie der hohen Bedeutung einer reibungslosen Migration eines besonderen Entscheidungsunterstützungssysteme („DAC Migration DSS").</p>
+<p>Das konzipierte DAC Migration DSS soll mehrere Module umfassen, die auf die verschiedenen Phasen (Strategische Planung, Detailplanung, Umsetzungsmonitoring) der Migration ausgelegt sind.</p>
+<p>Die Kernfunktionalität des DAC Migration DSS besteht in einem mathematischen Modell, dass die Zusammenhänge zwischen den Kapazitäten der Kupplungshersteller und Werkstätten, den Umbaubedarfen unter Berücksichtigung der Anzahl der Wagen und ihrer verkehrlichen Verwendung sowie den strategischen Zielen der Migration auf makroskopische Ebene abbildet und optimiert.</p>
+<p>Eine andere wichtige Funktionalität ist die Simulation der Vorgänge im Big-Bang, an dieser Stelle setzt PopUpSim an. Dieser Funktionalität kommt in allen Phasen eine hohe Bedeutung zu. Da hier methodisch ein anderer Ansatz zum Einsatz kommt (mikroskopisch, Simulation) und die vorhandenen Bezüge zur Kernfunktionalität sich reduzieren lassen, eignet sich die Simulation sehr gut für eine gesonderte Entwicklung.</p>
+<p>Das DAC Migration DSS ist als Open-Source-Software (Apache 2.0 Lizenz) konzipiert. Es soll allen Interessierten möglich sein, die Arbeitsweise des Systems zu verstehen und eigene Untersuchungen mit eigenen Daten und Parametern durchzuführen. In der Detailplanungsphase soll es allen Betroffenen für unternehmensinterne Planungen sowie für die übergeordnete Planung auf europäischer Ebene zur Verfügung stehen und für besondere unternehmensspezifische Sachverhalte anpassbar sein. Selbes gilt für die Umsetzungsphase, wobei hier Erweiterungen für Echtzeitdaten erforderlich sind.</p>
+<p>Das DAC Migration DSS ist ein von der Open-Rail-Association angenommenes Projekt, ein Repository auf Git-Hub wurde bereits eingerichtet.</p>
+<p><strong>🔗 Repository:</strong> https://github.com/OpenRailAssociation/dac-migration-dss</p>
+<h3 id="33-popup-sim-erste-demo-fur-big-bang-simulation-vorhanden">3.3 PopUp Sim: Erste Demo für Big-Bang-Simulation vorhanden<a class="headerlink" href="#33-popup-sim-erste-demo-fur-big-bang-simulation-vorhanden" title="Permanent link">&para;</a></h3>
+<p>Im Rahmen des gemeinsamen Hackatons von DB, SBB und ÖBB „3-Länderhack" wurde 2024 unter dem Namen „PopUpSim" ein funktionsfähiger aber vom Umfang her sehr stark reduzierter Prototyp für eine Big-Bang-Simulation entwickelt.</p>
+<p><strong>🔗 Demo:</strong> https://openrail-playground.github.io/PopupSim/ („Statische Daten Laden" klicken)</p>
+<hr />
+<h2 id="4-popupsim-die-zielvision">4 PopUpSim: Die Zielvision<a class="headerlink" href="#4-popupsim-die-zielvision" title="Permanent link">&para;</a></h2>
+<h3 id="41-user-stories-aus-verschiedenen-phasen-der-migration">4.1 User-Stories aus verschiedenen Phasen der Migration<a class="headerlink" href="#41-user-stories-aus-verschiedenen-phasen-der-migration" title="Permanent link">&para;</a></h3>
+<p>Die Funktionalität von PopUpSim wird in allen Phasen der Migration benötigt. Hier eine Auswahl von typischen User-Stories von PopUpSim:</p>
+<h4 id="strategische-phase">Strategische Phase<a class="headerlink" href="#strategische-phase" title="Permanent link">&para;</a></h4>
+<p>• Als strategische:r Migrationsplaner:in möchte ich standardisierte Entwürfe für Pop-Up Werkstätten entwickeln, um diese dem Projekt zur Verfügung zu stellen.</p>
+<p>• Als strategische:r Migrationsplaner:in möchte ich abschätzen, welcher Durchsatz von Wagen in einer Pop-Up-Werkstatt mit bestimmten Layout möglich ist, um zu sehen, wie viele Werkstätten benötigt werden.</p>
+<h4 id="detailplanungsphase">Detailplanungsphase<a class="headerlink" href="#detailplanungsphase" title="Permanent link">&para;</a></h4>
+<p>• Als Planer:in in einem Unternehmen möchte ich einfach Infrastrukturdaten importieren und den Gleisen komfortabel Funktionen zuweisen, um schnell weiter arbeiten zu können.</p>
+<p>• Als Planer:in im Unternehmen möchte ich eine Abschätzung, wie viele Wagen die von mir geplante Werkstatt umrüsten kann, um zu sehen, ob die Kapazität ausreichend ist oder weiter erhöht werden muss.</p>
+<p>• Als Planer:in im Unternehmen möchte ich den Output grafisch und tabellarisch übersichtlich dargestellt bekommen, damit ich die Ergebnisse schnell verstehe.</p>
+<p>• Als Deployment Manger:in möchte ich sehen, ob die Planungen der einzelnen Unternehmen zusammenpassen, um zu erkennen, ob auf europäischer Ebene das strategische Ziel erreichbar ist.</p>
+<h4 id="umsetzungsphase">Umsetzungsphase<a class="headerlink" href="#umsetzungsphase" title="Permanent link">&para;</a></h4>
+<p>• Als Disponent:in möchte ich wissen, welche Wagen als nächstes der Werkstatt zugeführt werden sollen, damit ich Dispositionsentscheidungen treffen kann.</p>
+<p>• Als Deployment Manger:in möchte ich den Fortschritt überwachen um ggf. Gegenmaßnahmen einleiten zu können.</p>
+<h3 id="42-ablauf-der-anwendung">4.2 Ablauf der Anwendung<a class="headerlink" href="#42-ablauf-der-anwendung" title="Permanent link">&para;</a></h3>
+<p><img alt="Abb. 1: Ablauf der Anwendung" src="../img/ablauf_anwendung.png" />
+<em>Infrastrukturdaten → Datenvorbereitung → Simulation (=Geschäftslogik) → Ergebnisvisualisierung</em></p>
+<h4 id="421-datenvorbereitung-szenarioaufbau">4.2.1 Datenvorbereitung &amp; Szenarioaufbau<a class="headerlink" href="#421-datenvorbereitung-szenarioaufbau" title="Permanent link">&para;</a></h4>
+<p>Am Anfang einer Anwendung von PopUpSim steht der Aufbau der für die Simulation zur Verfügung stehenden Gleisinfrastruktur und die Festlegung von Ressource und Parametern. Das beinhaltet:</p>
+<p>• Aufbau der Gleistopologie (ggf. Import aus bestehender Quelle, z.B. DaVit)</p>
+<p>• Die Zuweisung von spezifischen Funktionalitäten im Rahmen der DAK-Migration (z.B. Gl. 12 in Musterstadt ist auf 455 m Länge Sammelgleis)</p>
+<p>• Anlegen von Ressourcen wie Werkstätte, Loks und Wagenmeister:innen</p>
+<p>• Konfiguration weiterer Parameter wie z.B. Zeitverbräuche (Die Werkstatt braucht x min zur Umrüstung eines Wagens, die Fahrt von Beispielstadt nach Musterort dauert 85 min.)</p>
+<p>• Missionen für Betriebsmittel festlegen (z.B. Lok 1 holt Wagen ab, sobald Gleis 12 in Musterstadt zu 80% voll ist und fährt zu Werkstattbahnhof Beispielort)</p>
+<p><img alt="Abb. 2: Konfiguration im Prototyp von PopUpSim" src="../img/konfiguration_prototyp.jpeg" /></p>
+<h4 id="422-simulation-vom-betrieb-in-die-werkstatt-und-zuruck">4.2.2 Simulation: Vom Betrieb in die Werkstatt und zurück<a class="headerlink" href="#422-simulation-vom-betrieb-in-die-werkstatt-und-zuruck" title="Permanent link">&para;</a></h4>
+<p>Die Simulation besteht auf folgenden wesentlichen Teilen:</p>
+<p>• <strong>Selektionsmechanismus:</strong> Die Auswahl von Wagen für die Zuführung zur Umrüstung an bestimmten Punkten.</p>
+<p>• <strong>Das Bewegen von Wagen</strong> zwischen einzelnen Standorten im Rahmen des Umbauvorgangs (Sammelgleis, Zuführungsgleis, Werkstatt, Sammelgleis für Parkplatz, Parkplatz) unter Verwendung von Ressourcen wie Gleiskapazität, Rangierlokomotiven, Werkstattkapazität, Personalen für Zugvorbereitung sowie Zeitverbräuchen.</p>
+<p>• <strong>Rückführen der Wagen</strong> in den Betrieb.</p>
+<p><strong>Nicht abgebildet werden:</strong>
+- Die einzelnen Umrüstungshandlungen am Wagen sofern der Wagen nicht bewegt wird (Abgrenzung zu einer allgemeinen Werkstattsimulation)
+- Fahrzeiten zwischen verschiedenen Gleisen nur pauschalisiert angenommen und keine tiefergehende Berechnung z.B. aufgrund von Streckenbelegung durch andere Züge oder Fahrdynamik (Abgrenzung zu eisenbahnbetriebswissenschaftlicher Simulation)</p>
+<h4 id="423-ergebnisvisualisierung-film-und-statistik">4.2.3 Ergebnisvisualisierung: „Film" und „Statistik"<a class="headerlink" href="#423-ergebnisvisualisierung-film-und-statistik" title="Permanent link">&para;</a></h4>
+<p>Sowohl der Ablauf der Simulation kann als „Film Simulationsablauf" verfolgt werden und es steht eine Ansicht mit Kennzahlen, Graphen und Diagrammen zur Verfügung.</p>
+<p><img alt="Abb. 3: Visualisierung des Simulationsablaufs in PopUpSim Prototyp" src="../img/visualisierung_prototyp.jpeg" /></p>
+<p><img alt="Abb. 4: Mock-Up Visualisierung Simulationsablauf in PopUpSim" src="../img/mockup_visualisierung.jpeg" /></p>
+<hr />
+<h2 id="5-mvp-geschaftslogik-zuerst">5 MVP: Geschäftslogik zuerst<a class="headerlink" href="#5-mvp-geschaftslogik-zuerst" title="Permanent link">&para;</a></h2>
+<p>Mit dem im Rahmen des 3-LH erstellten Prototypen von PopUpSim ist es gelungen, die Aufgaben der Simulation des „Big-Bangs" zu verdeutlichen und auch zu zeigen, dass alle benötigten Bestandteile auf einem noch unterhalb der Gebrauchstauglichkeit liegendem Niveau in kurzer Zeit implementierbar sind.</p>
+<p>Der nächste Schritt der Entwicklung ist ein „Minimal Viable Produkt", das eine Gebrauchstauglichkeit aufweisen muss, d.h. es muss in der Lage sein, reale Probleme zu lösen und die Ergebnisse angemessen darzustellen.</p>
+<p>Dementsprechend liegt der Schwerpunkt auf der Implementierung der Geschäftslogik (=Simulation). Bei Nutzerschnittstelle und -erfahrung sind, insbesondere bei der Dateneingabe, deutliche Abstriche möglich. Die Visualisierung sollte hingegen einen gewissen Reifegrad erreichen, da dies ein zentraler Hebel für die Akzeptanz durch Praktiker:innen und damit weiterer Entwicklungsschritte ist.</p>
+<h3 id="nicht-funktionale-anforderungen">Nicht-funktionale Anforderungen<a class="headerlink" href="#nicht-funktionale-anforderungen" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspekt</th>
+<th>Anforderung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ziel der Anwendung</strong></td>
+<td>Erstellen und Bewerten von Beispielplänen für Pop-Up-Workshops im begrenzten Umfang</td>
+</tr>
+<tr>
+<td><strong>Art der Anwendung</strong></td>
+<td>Einfach, z.B. auf lokalen Rechner der Anwender:innen</td>
+</tr>
+<tr>
+<td><strong>Schutzklasse</strong></td>
+<td>Niedrig, Output dient der unternehmensübergreifenden Diskussion. Späteres Anheben der Schutzklasse soll ohne übermäßigen Aufwand möglich sein.</td>
+</tr>
+<tr>
+<td><strong>Vertraulichkeitsklasse</strong></td>
+<td>Vergleichbar DB offen, relevante Ergebnisse werden veröffentlicht. Späteres Anheben der Vertraulichkeitsklasse soll ohne übermäßigen Aufwand möglich sein.</td>
+</tr>
+<tr>
+<td><strong>Anwender:innen</strong></td>
+<td>Stark begrenzte Anzahl versierter Anwender:innen</td>
+</tr>
+<tr>
+<td><strong>Sprache Schnittstelle</strong></td>
+<td>Deutsch, Englisch zulässig (z.B. bei Weitergabe von Fehlermeldungen aus Datenbanken, Paketen u.Ä.). Spätere Mehrsprachigkeit soll herstellbar sein.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="datenaufbereitung-szenarioaufbau">Datenaufbereitung &amp; Szenarioaufbau<a class="headerlink" href="#datenaufbereitung-szenarioaufbau" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Funktion</th>
+<th>Anforderung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Gleistopologie aufbauen</strong></td>
+<td>Manuell über z.B. csv, json, …. Rendern (optional: in Echtzeit) des Gleisplans möglich. Optional: Eingabemaske, rudimentäre Plausibilitätskontrolle</td>
+</tr>
+<tr>
+<td><strong>Funktionszuweisung der Gleise</strong></td>
+<td>Manuell über z.B. csv, json, …. Optional: Eingabemaske</td>
+</tr>
+<tr>
+<td><strong>Anlage Ressourcen</strong></td>
+<td>Manuell über. z.B. csv, json, …. Optional: Eingabemaske</td>
+</tr>
+<tr>
+<td><strong>Konfiguration &amp; Zeitverbräuche</strong></td>
+<td>Manuell über z.B. csv, json, …. Optional: Eingabemaske, Berechnungshilfe</td>
+</tr>
+<tr>
+<td><strong>Definition von Missionen / Entscheidungsregeln</strong></td>
+<td>Manuell über z.B. csv, json, Begrenzte Anzahl an Entscheidungsmöglichkeiten. Optional: rudimentäre Plausibilitätskontrolle, Eingabemaske</td>
+</tr>
+</tbody>
+</table>
+<h3 id="simulation">Simulation<a class="headerlink" href="#simulation" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspekt</th>
+<th>Anforderung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anzahl der Elemente (Wagen usw.)</strong></td>
+<td>Ca. 10.000 (wenn möglich von vornherein Simulation effizient anlegen um spätere Erweiterung zu vereinfachen)</td>
+</tr>
+<tr>
+<td><strong>Vollständigkeit</strong></td>
+<td>Vollständige Abbildung der Geschäftslogik aufgrund von vorgegebenen Zeitverbräuchen, Entscheidungsregeln usw.</td>
+</tr>
+<tr>
+<td><strong>Verhalten an Grenzen des simulierten Bereichs</strong></td>
+<td>Keine eisenbahnbetriebliche Simulation. Keine Simulation von Eisenbahnverkehr außerhalb des definierten Simulationsmodells. Einfach Regeln</td>
+</tr>
+</tbody>
+</table>
+<h3 id="visualisierung">Visualisierung<a class="headerlink" href="#visualisierung" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Funktion</th>
+<th>Anforderung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ablaufdarstellung</strong></td>
+<td>Ja, Darstellung vorgegebener Gleisplan, Ressourcen und zentraler Kennzahlen. Hervorhebung bestimmter Elemente (z.B. ausgewählter Wagen). Optional: Durch Klicken auf z.B. Wagen weitere Informationen</td>
+</tr>
+<tr>
+<td><strong>Statistiken</strong></td>
+<td>Statistiken inkl. Visualisierung zu wichtigen Kenngrößen</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstoen">6 Ausblick: Mit fachlich relevanten Ergebnissen nächste Schritte anstoßen<a class="headerlink" href="#6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstoen" title="Permanent link">&para;</a></h2>
+<p>Mit dem oben definierten MVP kann ein begrenzter Anwender:innenkreis relevante fachliche Ergebnisse erzeugen, die bei ansprechender Visualisierung auf großes Interesse stoßen werden.</p>
+<p>Für die flächendeckende Planung der Migration, ist eine Simulation für jede einzelne Werkstatt anzulegen. Hierfür eignet sich das skizzierte MVP noch nicht, weitere Entwicklungsschritte sind notwendig, die beauftragt oder durch die Community geleistet werden müssen.</p>
+<p>Das skizzierte MVP ist dazu geeignet, Impulse für die Entwickler:innen-Community als auch die Anwender:innen-Community zu setzen.</p>
+<hr />
+<p><em>Konzept PopUpSim | Frederik Schäfer DB Cargo | April 2025</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

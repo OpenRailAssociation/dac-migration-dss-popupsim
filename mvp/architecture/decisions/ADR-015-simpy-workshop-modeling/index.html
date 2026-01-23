@@ -1,0 +1,2031 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>ADR-015: SimPy Workshop Modeling and Queue Coordination - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adr-015-simpy-workshop-modeling-and-queue-coordination" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADR-015: SimPy Workshop Modeling and Queue Coordination
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../tutorial/00-installation/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction & Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risks & Technical Debt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/00-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/01-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/02-scenario-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/03-topology-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/04-track-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/05-workshop-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/06-process-times-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/07-locomotive-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/08-routes-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/09-train-schedule-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/10-running-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-simpy-usage-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current SimPy Usage Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-cause" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Root Cause
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implementation-in-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation in MVP
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-options-evaluated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision Options (Evaluated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision Options (Evaluated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-minimal-simpy-store-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Minimal SimPy Store Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-complete-simpy-workflow-stores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Complete SimPy Workflow Stores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-simpy-workshop-entity-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: SimPy Workshop Entity Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-4-hybrid-simpy-manual-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 4: Hybrid SimPy + Manual Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-simpy-infrastructure-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current SimPy Infrastructure Assessment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-existing-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with Existing Events
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#strategy-a-incremental-simpy-enhancement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy A: Incremental SimPy Enhancement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strategy-b-complete-simpy-refactor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy B: Complete SimPy Refactor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strategy-c-hybrid-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategy C: Hybrid Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-immediate-w07-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Immediate W07 Fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-long-term-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Long-term Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-advanced-modeling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Advanced Modeling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#achieved-in-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Achieved in MVP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-implementing-this-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Implementing This Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adr-015-simpy-workshop-modeling-and-queue-coordination">ADR-015: SimPy Workshop Modeling and Queue Coordination<a class="headerlink" href="#adr-015-simpy-workshop-modeling-and-queue-coordination" title="Permanent link">&para;</a></h1>
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h2>
+<p><strong>IMPLEMENTED</strong> - Resolved in MVP</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>PopUpSim had a hybrid approach to SimPy usage - some components used SimPy resources and stores effectively, while others relied on manual queue management and polling. This inconsistency led to the W07 wagon tracking issue and required better SimPy integration.</p>
+<h3 id="current-simpy-usage-analysis">Current SimPy Usage Analysis<a class="headerlink" href="#current-simpy-usage-analysis" title="Permanent link">&para;</a></h3>
+<p><strong>✅ Already Using SimPy Well:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Workshop stations as SimPy Resources</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">[</span><span class="n">track_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_resource</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="n">workshop</span><span class="o">.</span><span class="n">retrofit_stations</span><span class="p">)</span>
+
+<span class="c1"># Workflow coordination with SimPy Stores</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">wagons_ready_for_stations</span><span class="p">[</span><span class="n">track_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">wagons_completed</span><span class="p">[</span><span class="n">track_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># Proper resource blocking in process_single_wagon</span>
+<span class="k">with</span> <span class="n">workshop_resource</span><span class="o">.</span><span class="n">request</span><span class="p">()</span> <span class="k">as</span> <span class="n">station_req</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">station_req</span>  <span class="c1"># Blocks until station available</span>
+</code></pre></div></p>
+<p><strong>❌ Missing SimPy Opportunities:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># W07 problem: No SimPy Store for retrofitted wagons</span>
+<span class="c1"># move_to_parking searches wagons_queue instead of using SimPy coordination</span>
+<span class="n">wagons_on_retrofitted</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">wagons_queue</span>  <span class="c1"># Manual search + polling</span>
+    <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">track</span> <span class="o">==</span> <span class="n">retrofitted_track</span><span class="o">.</span><span class="n">id</span> <span class="ow">and</span> <span class="n">w</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">WagonStatus</span><span class="o">.</span><span class="n">RETROFITTED</span>
+<span class="p">]</span>
+
+<span class="c1"># Polling-based approach instead of event-driven</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">wagons_on_retrofitted</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># Inefficient polling</span>
+    <span class="k">continue</span>
+</code></pre></div></p>
+<h3 id="root-cause">Root Cause<a class="headerlink" href="#root-cause" title="Permanent link">&para;</a></h3>
+<p>The fundamental issue is <strong>incomplete SimPy workflow coordination</strong>. We have SimPy stores for some workflow stages but not others, creating gaps where manual queue management and polling are required.</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p><strong>IMPLEMENTED: Option 1 (Minimal SimPy Store Fix)</strong> - Added missing SimPy store to complete the workflow chain.</p>
+<p>The MVP implements complete SimPy workflow coordination:</p>
+<h3 id="implementation-in-mvp">Implementation in MVP<a class="headerlink" href="#implementation-in-mvp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">WorkshopOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">scenario</span><span class="p">):</span>
+        <span class="c1"># Complete SimPy store workflow (no polling)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retrofitted_wagons_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">()</span>  <span class="c1"># ✅ Added missing store</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wagons_ready_for_stations</span> <span class="o">=</span> <span class="p">{</span><span class="n">track_id</span><span class="p">:</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">()</span> <span class="k">for</span> <span class="n">track_id</span> <span class="ow">in</span> <span class="n">workshops</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wagons_completed</span> <span class="o">=</span> <span class="p">{</span><span class="n">track_id</span><span class="p">:</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">()</span> <span class="k">for</span> <span class="n">track_id</span> <span class="ow">in</span> <span class="n">workshops</span><span class="p">}</span>
+
+        <span class="c1"># SimPy Resources for workshop stations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workshop_capacity</span> <span class="o">=</span> <span class="n">WorkshopCapacityManager</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">workshops</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">move_to_parking</span><span class="p">(</span><span class="n">popupsim</span><span class="p">):</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># ✅ Event-driven coordination (no polling)</span>
+        <span class="n">wagon</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">get_wagon_from_retrofitted</span><span class="p">()</span>
+        <span class="c1"># Process wagon...</span>
+</code></pre></div>
+<p><strong>Result</strong>: Complete event-driven workflow with no polling delays.</p>
+<h2 id="decision-options-evaluated">Decision Options (Evaluated)<a class="headerlink" href="#decision-options-evaluated" title="Permanent link">&para;</a></h2>
+<h3 id="option-1-minimal-simpy-store-fix">Option 1: Minimal SimPy Store Fix<a class="headerlink" href="#option-1-minimal-simpy-store-fix" title="Permanent link">&para;</a></h3>
+<p><strong>Principle</strong>: Add missing SimPy store to complete the workflow chain</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">WorkshopOrchestrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">scenario</span><span class="p">):</span>
+        <span class="c1"># Add missing store for retrofitted wagons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retrofitted_wagons_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># In _pickup_track_batches - after moving to retrofitted track:</span>
+<span class="k">for</span> <span class="n">wagon</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+    <span class="n">popupsim</span><span class="o">.</span><span class="n">track_capacity</span><span class="o">.</span><span class="n">add_wagon</span><span class="p">(</span><span class="n">retrofitted_track</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">wagon</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+    <span class="n">popupsim</span><span class="o">.</span><span class="n">wagon_state</span><span class="o">.</span><span class="n">complete_arrival</span><span class="p">(</span><span class="n">wagon</span><span class="p">,</span> <span class="n">retrofitted_track</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">WagonStatus</span><span class="o">.</span><span class="n">RETROFITTED</span><span class="p">)</span>
+    <span class="c1"># ✅ Add to SimPy store for move_to_parking</span>
+    <span class="k">yield</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">retrofitted_wagons_ready</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">wagon</span><span class="p">)</span>
+
+<span class="c1"># In move_to_parking - use SimPy store instead of searching wagons_queue:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">move_to_parking</span><span class="p">(</span><span class="n">popupsim</span><span class="p">:</span> <span class="n">WorkshopOrchestrator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># ✅ Block until wagons available (no polling!)</span>
+        <span class="n">wagon</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">retrofitted_wagons_ready</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="c1"># Process wagon for parking...</span>
+</code></pre></div>
+<p><strong>Pros:</strong>
+- Solves W07 problem immediately (5 lines of code)
+- No polling - event-driven coordination
+- Consistent with existing SimPy usage
+- Minimal risk - small, focused change</p>
+<p><strong>Cons:</strong>
+- Doesn't address broader architectural issues
+- Still maintains dual-purpose wagons_queue
+- Partial solution to larger problem</p>
+<h3 id="option-2-complete-simpy-workflow-stores">Option 2: Complete SimPy Workflow Stores<a class="headerlink" href="#option-2-complete-simpy-workflow-stores" title="Permanent link">&para;</a></h3>
+<p><strong>Principle</strong>: Replace wagons_queue with stage-specific SimPy stores throughout</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimPyWorkshopFlow</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">):</span>
+        <span class="c1"># Stage-specific stores (replaces dual-purpose wagons_queue)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collection_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retrofit_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workshop_input</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workshop_output</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retrofitted_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># Solves W07</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parking_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Natural workflow chain:</span>
+<span class="c1"># Train → collection_ready → retrofit_ready → workshop_input → </span>
+<span class="c1"># workshop_output → retrofitted_ready → parking_ready</span>
+</code></pre></div>
+<p><strong>Pros:</strong>
+- Complete SimPy integration - no manual queue management
+- Event-driven throughout - no polling anywhere
+- Natural workflow modeling
+- Automatic capacity management
+- Solves W07 and prevents similar issues</p>
+<p><strong>Cons:</strong>
+- Larger refactor - affects multiple components
+- Need to migrate existing wagons_queue usage
+- More complex migration path</p>
+<h3 id="option-3-simpy-workshop-entity-model">Option 3: SimPy Workshop Entity Model<a class="headerlink" href="#option-3-simpy-workshop-entity-model" title="Permanent link">&para;</a></h3>
+<p><strong>Principle</strong>: Model workshop as complete SimPy entity with input/output queues</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimPyWorkshop</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Model entire workshop workflow with SimPy primitives&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">,</span> <span class="n">workshop_config</span><span class="p">):</span>
+        <span class="c1"># Input queue (wagons waiting for retrofit)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_queue</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="n">workshop_config</span><span class="o">.</span><span class="n">max_input</span><span class="p">)</span>
+
+        <span class="c1"># Processing stations (SimPy Resources)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stations</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_resource</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="n">workshop_config</span><span class="o">.</span><span class="n">retrofit_stations</span><span class="p">)</span>
+
+        <span class="c1"># Output queue (retrofitted wagons ready for pickup)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_queue</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="n">workshop_config</span><span class="o">.</span><span class="n">max_output</span><span class="p">)</span>
+
+        <span class="c1"># Start continuous workshop process</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_workshop_process</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_workshop_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Continuous workshop processing&quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Get wagon from input</span>
+            <span class="n">wagon</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+            <span class="c1"># Request station</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">stations</span><span class="o">.</span><span class="n">request</span><span class="p">()</span> <span class="k">as</span> <span class="n">station</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">station</span>
+                <span class="c1"># Process wagon</span>
+                <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retrofit_time</span><span class="p">)</span>
+                <span class="n">wagon</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">WagonStatus</span><span class="o">.</span><span class="n">RETROFITTED</span>
+
+            <span class="c1"># Send to output</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">wagon</span><span class="p">)</span>
+
+<span class="c1"># Usage:</span>
+<span class="n">workshop</span> <span class="o">=</span> <span class="n">SimPyWorkshop</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">workshop_config</span><span class="p">)</span>
+<span class="k">yield</span> <span class="n">workshop</span><span class="o">.</span><span class="n">input_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">wagon</span><span class="p">)</span>  <span class="c1"># Send wagon to workshop</span>
+<span class="n">retrofitted_wagon</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">workshop</span><span class="o">.</span><span class="n">output_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># Get completed wagon</span>
+</code></pre></div>
+<p><strong>Pros:</strong>
+- Most natural SimPy modeling approach
+- Encapsulates workshop behavior completely
+- Automatic internal workflow management
+- Easy to test and reason about
+- Scales to complex workshop configurations</p>
+<p><strong>Cons:</strong>
+- Significant architectural change
+- Need to redesign workshop interactions
+- Higher complexity for simple scenarios</p>
+<h3 id="option-4-hybrid-simpy-manual-approach">Option 4: Hybrid SimPy + Manual Approach<a class="headerlink" href="#option-4-hybrid-simpy-manual-approach" title="Permanent link">&para;</a></h3>
+<p><strong>Principle</strong>: Use SimPy where it adds value, manual management where simpler</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># SimPy for resource contention and blocking</span>
+<span class="n">workshop_resource</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_resource</span><span class="p">(</span><span class="n">capacity</span><span class="o">=</span><span class="n">stations</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">workshop_resource</span><span class="o">.</span><span class="n">request</span><span class="p">()</span> <span class="k">as</span> <span class="n">req</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">req</span>
+
+<span class="c1"># SimPy for workflow coordination</span>
+<span class="n">retrofitted_ready</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">create_store</span><span class="p">()</span>
+<span class="k">yield</span> <span class="n">retrofitted_ready</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">wagon</span><span class="p">)</span>
+
+<span class="c1"># Manual for simple state tracking</span>
+<span class="n">wagon_registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Wagon</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Simple lookup</span>
+</code></pre></div>
+<p><strong>Pros:</strong>
+- Pragmatic approach - best tool for each job
+- Leverages SimPy strengths without over-engineering
+- Easier migration path
+- Maintains flexibility</p>
+<p><strong>Cons:</strong>
+- Mixed paradigms - less consistent
+- Need to decide SimPy vs manual for each case
+- Potential for inconsistencies</p>
+<h2 id="current-simpy-infrastructure-assessment">Current SimPy Infrastructure Assessment<a class="headerlink" href="#current-simpy-infrastructure-assessment" title="Permanent link">&para;</a></h2>
+<p><strong>Existing SimPy Components:</strong>
+- ✅ <code>SimulationAdapter</code> - Good abstraction over SimPy
+- ✅ <code>ResourcePool</code> - Uses SimPy Store for locomotive management
+- ✅ <code>WorkshopCapacityManager</code> - Uses SimPy Resources for stations
+- ✅ Workflow stores - <code>wagons_ready_for_stations</code>, <code>wagons_completed</code></p>
+<p><strong>Missing SimPy Components:</strong>
+- ❌ Store for retrofitted wagons (causes W07 problem)
+- ❌ Consistent store-based workflow throughout
+- ❌ SimPy-based track capacity coordination</p>
+<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
+<p><strong>SimPy Store Benefits:</strong>
+- O(1) put/get operations
+- Automatic blocking/unblocking
+- Built-in capacity management
+- No polling overhead</p>
+<p><strong>Manual Queue Drawbacks:</strong>
+- O(n) search operations (<code>wagons_queue</code> filtering)
+- Polling delays (1.0 second intervals)
+- Manual capacity tracking
+- Race condition potential</p>
+<h2 id="integration-with-existing-events">Integration with Existing Events<a class="headerlink" href="#integration-with-existing-events" title="Permanent link">&para;</a></h2>
+<p>All options must maintain compatibility with existing event system:
+<div class="highlight"><pre><span></span><code><span class="c1"># Events still fired regardless of queue mechanism</span>
+<span class="n">event</span> <span class="o">=</span> <span class="n">WagonRetrofittedEvent</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">wagon_id</span><span class="o">=</span><span class="n">wagon</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">popupsim</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">record_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</code></pre></div></p>
+<h2 id="migration-strategies">Migration Strategies<a class="headerlink" href="#migration-strategies" title="Permanent link">&para;</a></h2>
+<h3 id="strategy-a-incremental-simpy-enhancement">Strategy A: Incremental SimPy Enhancement<a class="headerlink" href="#strategy-a-incremental-simpy-enhancement" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Phase 1</strong>: Add <code>retrofitted_wagons_ready</code> store (solve W07)</li>
+<li><strong>Phase 2</strong>: Replace remaining manual queues with SimPy stores</li>
+<li><strong>Phase 3</strong>: Evaluate full SimPy workshop modeling</li>
+</ol>
+<h3 id="strategy-b-complete-simpy-refactor">Strategy B: Complete SimPy Refactor<a class="headerlink" href="#strategy-b-complete-simpy-refactor" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Phase 1</strong>: Design complete SimPy workflow architecture</li>
+<li><strong>Phase 2</strong>: Implement new SimPy-based components</li>
+<li><strong>Phase 3</strong>: Migrate existing code to new architecture</li>
+</ol>
+<h3 id="strategy-c-hybrid-approach">Strategy C: Hybrid Approach<a class="headerlink" href="#strategy-c-hybrid-approach" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Phase 1</strong>: Add SimPy stores where they solve specific problems</li>
+<li><strong>Phase 2</strong>: Keep manual management where it's simpler</li>
+<li><strong>Phase 3</strong>: Optimize based on performance and maintainability</li>
+</ol>
+<h2 id="open-questions">Open Questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Scope</strong>: Should we fix just W07 or redesign the entire workflow coordination?</li>
+<li><strong>Performance</strong>: How important is eliminating polling vs. code simplicity?</li>
+<li><strong>SimPy Modeling</strong>: Should workshops be modeled as complete SimPy entities?</li>
+<li><strong>Migration Risk</strong>: What's the acceptable risk level for workflow changes?</li>
+<li><strong>Testing</strong>: How do we ensure no regressions during SimPy migration?</li>
+<li><strong>Capacity Management</strong>: Should track capacity also use SimPy resources?</li>
+</ol>
+<h2 id="recommendations">Recommendations<a class="headerlink" href="#recommendations" title="Permanent link">&para;</a></h2>
+<h3 id="for-immediate-w07-fix">For Immediate W07 Fix<a class="headerlink" href="#for-immediate-w07-fix" title="Permanent link">&para;</a></h3>
+<p><strong>Option 1</strong> (Minimal SimPy Store Fix) - Low risk, immediate solution</p>
+<h3 id="for-long-term-architecture">For Long-term Architecture<a class="headerlink" href="#for-long-term-architecture" title="Permanent link">&para;</a></h3>
+<p><strong>Option 2</strong> (Complete SimPy Workflow Stores) - Better architectural consistency</p>
+<h3 id="for-advanced-modeling">For Advanced Modeling<a class="headerlink" href="#for-advanced-modeling" title="Permanent link">&para;</a></h3>
+<p><strong>Option 3</strong> (SimPy Workshop Entity Model) - Most natural SimPy approach</p>
+<h2 id="implementation-results">Implementation Results<a class="headerlink" href="#implementation-results" title="Permanent link">&para;</a></h2>
+<h3 id="achieved-in-mvp">Achieved in MVP<a class="headerlink" href="#achieved-in-mvp" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ <strong>Complete SimPy Integration</strong>: All workflow stages use SimPy stores</li>
+<li>✅ <strong>No Polling</strong>: Event-driven coordination throughout the system</li>
+<li>✅ <strong>W07 Problem Solved</strong>: <code>retrofitted_wagons_ready</code> store added for complete workflow</li>
+<li>✅ <strong>Resource Management</strong>: SimPy Resources for workshop stations with proper blocking</li>
+<li>✅ <strong>Performance</strong>: Eliminated 1-second polling delays, immediate event response</li>
+</ul>
+<h3 id="files-implementing-this-decision">Files Implementing This Decision<a class="headerlink" href="#files-implementing-this-decision" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>workshop_operations/application/orchestrator.py</code> - Complete SimPy store workflow</li>
+<li><code>workshop_operations/infrastructure/resources/workshop_capacity_manager.py</code> - SimPy Resources</li>
+<li><code>workshop_operations/infrastructure/simulation/simpy_adapter.py</code> - SimPy abstraction layer</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Current W07 issue: Wagon stuck on retrofit track due to missing SimPy store</li>
+<li>Existing SimPy usage: <code>WorkshopCapacityManager</code>, <code>ResourcePool</code>, workflow stores</li>
+<li>SimPy documentation: Resources, Stores, and Process coordination</li>
+<li>Related: ADR-001 (Wagon Tracking and Queue Management Architecture)</li>
+</ul>
+<hr />
+<p><strong>Authors</strong>: Development Team<br />
+<strong>Date</strong>: 2024-12-19<br />
+<strong>Review Date</strong>: TBD</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

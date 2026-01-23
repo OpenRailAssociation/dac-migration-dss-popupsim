@@ -1,0 +1,3336 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+        <link rel="prev" href="../09-train-schedule-configuration/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Running the simulation - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-10-running-your-simulation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Running the simulation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../mvp/architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../00-installation/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction & Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risks & Technical Debt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../00-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-scenario-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-topology-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-track-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-workshop-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-process-times-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-locomotive-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-routes-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-train-schedule-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-popupsim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running PopUpSim
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-ten_trains_two_days" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running ten_trains_two_days
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Viewing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Output Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Process
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configuration-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Configuration Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-simulation-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Simulation Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-simulation-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Simulation Execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-results-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Results Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wagon-metrics-wagon_metricscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wagon Metrics (wagon_metrics.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workshop-metrics-workshop_metricscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Metrics (workshop_metrics.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#locomotive-metrics-locomotive_metricscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locomotive Metrics (locomotive_metrics.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-statistics-summaryjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary Statistics (summary.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analyzing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-performance-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Performance Indicators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Performance Indicators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Throughput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workshop-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Utilization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#average-wagon-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Average Wagon Time
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#locomotive-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locomotive Utilization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bottleneck-identification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bottleneck Identification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bottleneck Identification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workshop-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#locomotive-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locomotive Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#track-capacity-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Track Capacity Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optimization-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimization Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-baseline-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Baseline Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-targeted-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Targeted Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-comparison-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Comparison Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-iteration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Iteration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-increase-throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: Increase Throughput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-reduce-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: Reduce Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-handle-peak-loads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Handle Peak Loads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simulation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulation Errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simulation Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-route-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "No route found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#track-capacity-exceeded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Track capacity exceeded"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-arrival-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Invalid arrival time"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slow-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slow Simulation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Memory Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#experimentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experimentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reporting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#further-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further Learning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-your-own-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating Your Own Scenarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-popupsim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running PopUpSim
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Execution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-ten_trains_two_days" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running ten_trains_two_days
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Viewing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Output Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Process
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-configuration-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Configuration Loading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-simulation-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Simulation Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-simulation-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Simulation Execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-results-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Results Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wagon-metrics-wagon_metricscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wagon Metrics (wagon_metrics.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workshop-metrics-workshop_metricscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Metrics (workshop_metrics.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#locomotive-metrics-locomotive_metricscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locomotive Metrics (locomotive_metrics.csv)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary-statistics-summaryjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary Statistics (summary.json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analyzing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-performance-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Performance Indicators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Performance Indicators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Throughput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workshop-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Utilization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#average-wagon-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Average Wagon Time
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#locomotive-utilization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locomotive Utilization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bottleneck-identification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bottleneck Identification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bottleneck Identification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workshop-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workshop Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#locomotive-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Locomotive Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#track-capacity-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Track Capacity Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optimization-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optimization Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-baseline-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Baseline Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-targeted-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Targeted Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-comparison-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Comparison Run
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-iteration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Iteration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-increase-throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: Increase Throughput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-reduce-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: Reduce Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-handle-peak-loads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Handle Peak Loads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simulation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulation Errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simulation Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-route-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "No route found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#track-capacity-exceeded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Track capacity exceeded"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invalid-arrival-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Invalid arrival time"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slow-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slow Simulation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Memory Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#experimentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experimentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reporting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#further-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further Learning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-your-own-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating Your Own Scenarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="chapter-10-running-your-simulation">Chapter 10: Running Your Simulation<a class="headerlink" href="#chapter-10-running-your-simulation" title="Permanent link">&para;</a></h1>
+<h2 id="running-popupsim">Running PopUpSim<a class="headerlink" href="#running-popupsim" title="Permanent link">&para;</a></h2>
+<p>Now that you understand all configuration files, let's run the simulation and analyze results.</p>
+<h2 id="basic-execution">Basic Execution<a class="headerlink" href="#basic-execution" title="Permanent link">&para;</a></h2>
+<h3 id="command-syntax">Command Syntax<a class="headerlink" href="#command-syntax" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--scenario<span class="w"> </span>&lt;scenario_path&gt;<span class="w"> </span>--output<span class="w"> </span>&lt;output_path&gt;
+</code></pre></div>
+<h3 id="running-ten_trains_two_days">Running ten_trains_two_days<a class="headerlink" href="#running-ten_trains_two_days" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>dac-migration-dss-popupsim
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--scenario<span class="w"> </span>Data/examples/ten_trains_two_days/<span class="w"> </span>--output<span class="w"> </span>output/tutorial/
+</code></pre></div>
+<p><strong>Parameters:</strong>
+- <code>--scenario</code>: Path to scenario directory containing configuration files
+- <code>--output</code>: Path where results will be saved</p>
+<h2 id="viewing-results">Viewing Results<a class="headerlink" href="#viewing-results" title="Permanent link">&para;</a></h2>
+<h3 id="using-the-dashboard">Using the Dashboard<a class="headerlink" href="#using-the-dashboard" title="Permanent link">&para;</a></h3>
+<p>PopUpSim includes a web-based dashboard for interactive result visualization.</p>
+<p><strong>Start the dashboard (in a separate terminal):</strong></p>
+<p><strong>Windows:</strong>
+<div class="highlight"><pre><span></span><code>run_dashboard.bat
+</code></pre></div></p>
+<p><strong>Linux/macOS:</strong>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>streamlit<span class="w"> </span>run<span class="w"> </span>popupsim/frontend/streamlit_dashboard.py
+</code></pre></div></p>
+<p>The dashboard opens at http://localhost:8501</p>
+<p><strong>Dashboard Tabs:</strong></p>
+<ol>
+<li><strong>📊 Overview</strong> - High-level KPIs and operational dashboard</li>
+<li>Total wagons, retrofitted count, completion rate</li>
+<li>Wagon flow visualization</li>
+<li>Locomotive activity breakdown</li>
+<li>
+<p>Workshop bay utilization</p>
+</li>
+<li>
+<p><strong>🚃 Wagon Flow</strong> - Detailed wagon journey analysis</p>
+</li>
+<li>Gantt charts showing wagon movements over time</li>
+<li>Status distribution (retrofitted, parked, rejected)</li>
+<li>Track occupancy visualization</li>
+<li>
+<p>Individual wagon journey timelines</p>
+</li>
+<li>
+<p><strong>🏭 Workshop Performance</strong> - Workshop efficiency metrics</p>
+</li>
+<li>Utilization percentages per workshop</li>
+<li>Throughput (wagons/hour)</li>
+<li>
+<p>Workshop comparison table</p>
+</li>
+<li>
+<p><strong>🚂 Locomotive Operations</strong> - Shunting resource analysis</p>
+</li>
+<li>Activity breakdown (moving, parking, coupling, decoupling)</li>
+<li>Utilization percentages</li>
+<li>
+<p>Time distribution charts</p>
+</li>
+<li>
+<p><strong>🛤️ Track Capacity</strong> - Track usage analysis</p>
+</li>
+<li>Utilization per track (color-coded: green &lt; 70%, yellow 70-85%, red &gt; 85%)</li>
+<li>
+<p>Capacity charts</p>
+</li>
+<li>
+<p><strong>❌ Rejected Wagons</strong> - Analysis of wagons that couldn't be processed</p>
+</li>
+<li>Rejection reasons (loaded, no retrofit needed, track full)</li>
+<li>
+<p>Detailed rejection list</p>
+</li>
+<li>
+<p><strong>🔍 Event Log</strong> - Searchable simulation event viewer</p>
+</li>
+<li>Filter by event type</li>
+<li>
+<p>Search functionality</p>
+</li>
+<li>
+<p><strong>📋 Process Log</strong> - Detailed process execution log</p>
+</li>
+<li>Filter by process type</li>
+<li>Search functionality</li>
+</ol>
+<p><strong>Important:</strong> Run the dashboard in a separate terminal window so you can continue running simulations while viewing results.</p>
+<h3 id="using-output-files">Using Output Files<a class="headerlink" href="#using-output-files" title="Permanent link">&para;</a></h3>
+<p>Alternatively, analyze results directly from the output files.</p>
+<h2 id="execution-process">Execution Process<a class="headerlink" href="#execution-process" title="Permanent link">&para;</a></h2>
+<h3 id="1-configuration-loading">1. Configuration Loading<a class="headerlink" href="#1-configuration-loading" title="Permanent link">&para;</a></h3>
+<p>PopUpSim loads and validates all configuration files:</p>
+<div class="highlight"><pre><span></span><code>Loading scenario: Data/examples/ten_trains_two_days/
+├─ Reading scenario.json
+├─ Loading topology.json
+├─ Loading tracks.json
+├─ Loading workshops.json
+├─ Loading process_times.json
+├─ Loading locomotive.json
+├─ Loading routes.json
+└─ Loading train_schedule.csv
+</code></pre></div>
+<p><strong>Validation checks:</strong>
+- File existence
+- JSON/CSV syntax
+- Required fields
+- Data types
+- Cross-references between files</p>
+<h3 id="2-simulation-initialization">2. Simulation Initialization<a class="headerlink" href="#2-simulation-initialization" title="Permanent link">&para;</a></h3>
+<p>Creates simulation environment:</p>
+<div class="highlight"><pre><span></span><code>Initializing simulation...
+├─ Creating 224 wagons
+├─ Setting up 2 workshops (4 retrofit stations)
+├─ Configuring 15 parking tracks
+├─ Initializing 1 locomotive
+└─ Building route network (33 routes)
+</code></pre></div>
+<h3 id="3-simulation-execution">3. Simulation Execution<a class="headerlink" href="#3-simulation-execution" title="Permanent link">&para;</a></h3>
+<p>Runs discrete event simulation:</p>
+<div class="highlight"><pre><span></span><code>Running simulation...
+Simulation time: 2025-12-01 00:00:00 to 2025-12-20 00:00:00
+├─ Processing train arrivals
+├─ Managing wagon movements
+├─ Executing retrofit operations
+├─ Tracking resource utilization
+└─ Collecting metrics
+</code></pre></div>
+<p><strong>Progress indicators:</strong>
+- Current simulation time
+- Events processed
+- Wagons completed</p>
+<h3 id="4-results-generation">4. Results Generation<a class="headerlink" href="#4-results-generation" title="Permanent link">&para;</a></h3>
+<p>Creates output files and visualizations:</p>
+<div class="highlight"><pre><span></span><code>Generating results...
+├─ Writing CSV reports
+├─ Creating visualizations
+└─ Saving summary statistics
+</code></pre></div>
+<h2 id="output-files">Output Files<a class="headerlink" href="#output-files" title="Permanent link">&para;</a></h2>
+<h3 id="directory-structure">Directory Structure<a class="headerlink" href="#directory-structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>output/tutorial/
+├── metrics/
+│   ├── wagon_metrics.csv
+│   ├── workshop_metrics.csv
+│   └── locomotive_metrics.csv
+├── visualizations/
+│   ├── throughput_over_time.png
+│   ├── workshop_utilization.png
+│   └── wagon_flow.png
+└── summary.json
+</code></pre></div>
+<h3 id="wagon-metrics-wagon_metricscsv">Wagon Metrics (wagon_metrics.csv)<a class="headerlink" href="#wagon-metrics-wagon_metricscsv" title="Permanent link">&para;</a></h3>
+<p>Detailed information for each wagon:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>wagon_id</td>
+<td>Unique wagon identifier</td>
+</tr>
+<tr>
+<td>arrival_time</td>
+<td>When wagon arrived</td>
+</tr>
+<tr>
+<td>retrofit_start</td>
+<td>When retrofit began</td>
+</tr>
+<tr>
+<td>retrofit_end</td>
+<td>When retrofit completed</td>
+</tr>
+<tr>
+<td>departure_time</td>
+<td>When wagon left system</td>
+</tr>
+<tr>
+<td>total_time</td>
+<td>Total time in system</td>
+</tr>
+<tr>
+<td>waiting_time</td>
+<td>Time spent waiting</td>
+</tr>
+<tr>
+<td>retrofit_time</td>
+<td>Time spent in retrofit</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong>
+- Individual wagon analysis
+- Identifying delays
+- Calculating statistics</p>
+<h3 id="workshop-metrics-workshop_metricscsv">Workshop Metrics (workshop_metrics.csv)<a class="headerlink" href="#workshop-metrics-workshop_metricscsv" title="Permanent link">&para;</a></h3>
+<p>Workshop performance data:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>workshop_id</td>
+<td>Workshop identifier</td>
+</tr>
+<tr>
+<td>total_wagons</td>
+<td>Wagons processed</td>
+</tr>
+<tr>
+<td>utilization</td>
+<td>Percentage of time busy</td>
+</tr>
+<tr>
+<td>avg_queue_length</td>
+<td>Average wagons waiting</td>
+</tr>
+<tr>
+<td>max_queue_length</td>
+<td>Maximum wagons waiting</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong>
+- Capacity analysis
+- Bottleneck identification
+- Utilization optimization</p>
+<h3 id="locomotive-metrics-locomotive_metricscsv">Locomotive Metrics (locomotive_metrics.csv)<a class="headerlink" href="#locomotive-metrics-locomotive_metricscsv" title="Permanent link">&para;</a></h3>
+<p>Locomotive performance data:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>locomotive_id</td>
+<td>Locomotive identifier</td>
+</tr>
+<tr>
+<td>total_movements</td>
+<td>Number of wagon movements</td>
+</tr>
+<tr>
+<td>utilization</td>
+<td>Percentage of time busy</td>
+</tr>
+<tr>
+<td>total_distance</td>
+<td>Total distance traveled</td>
+</tr>
+<tr>
+<td>idle_time</td>
+<td>Time spent idle</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong>
+- Resource planning
+- Utilization analysis
+- Capacity requirements</p>
+<h3 id="summary-statistics-summaryjson">Summary Statistics (summary.json)<a class="headerlink" href="#summary-statistics-summaryjson" title="Permanent link">&para;</a></h3>
+<p>High-level simulation results:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;scenario_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test_scenario_01&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;simulation_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;19 days&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;total_wagons&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">224</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;wagons_retrofitted&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">220</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;avg_throughput&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">11.6</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;avg_wagon_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1234.5</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;workshop_utilization&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.78</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;locomotive_utilization&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.65</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="analyzing-results">Analyzing Results<a class="headerlink" href="#analyzing-results" title="Permanent link">&para;</a></h2>
+<h3 id="key-performance-indicators">Key Performance Indicators<a class="headerlink" href="#key-performance-indicators" title="Permanent link">&para;</a></h3>
+<h4 id="throughput">Throughput<a class="headerlink" href="#throughput" title="Permanent link">&para;</a></h4>
+<p><strong>Wagons per day:</strong>
+<div class="highlight"><pre><span></span><code>throughput = wagons_retrofitted / simulation_days
+</code></pre></div></p>
+<p><strong>Target:</strong> Depends on scenario requirements</p>
+<p><strong>ten_trains_two_days expected:</strong> ~110 wagons/day (220 wagons / 2 days)</p>
+<h4 id="workshop-utilization">Workshop Utilization<a class="headerlink" href="#workshop-utilization" title="Permanent link">&para;</a></h4>
+<p><strong>Percentage of time workshops are busy:</strong>
+<div class="highlight"><pre><span></span><code>utilization = busy_time / total_time
+</code></pre></div></p>
+<p><strong>Interpretation:</strong>
+- &lt; 60%: Under-utilized (excess capacity)
+- 60-80%: Well-balanced
+- 80-95%: High utilization (efficient)
+- &gt; 95%: Bottleneck (consider expansion)</p>
+<h4 id="average-wagon-time">Average Wagon Time<a class="headerlink" href="#average-wagon-time" title="Permanent link">&para;</a></h4>
+<p><strong>Total time wagon spends in system:</strong>
+<div class="highlight"><pre><span></span><code>avg_time = sum(departure_time - arrival_time) / wagon_count
+</code></pre></div></p>
+<p><strong>Components:</strong>
+- Waiting time (queuing)
+- Movement time (shunting)
+- Retrofit time (workshop)</p>
+<p><strong>Target:</strong> Minimize while maintaining throughput</p>
+<h4 id="locomotive-utilization">Locomotive Utilization<a class="headerlink" href="#locomotive-utilization" title="Permanent link">&para;</a></h4>
+<p><strong>Percentage of time locomotives are busy:</strong>
+<div class="highlight"><pre><span></span><code>utilization = (movement_time + coupling_time) / total_time
+</code></pre></div></p>
+<p><strong>Interpretation:</strong>
+- &lt; 50%: Over-capacity
+- 50-70%: Well-balanced
+- 70-90%: High utilization
+- &gt; 90%: Bottleneck (add locomotives)</p>
+<h3 id="bottleneck-identification">Bottleneck Identification<a class="headerlink" href="#bottleneck-identification" title="Permanent link">&para;</a></h3>
+<h4 id="workshop-bottleneck">Workshop Bottleneck<a class="headerlink" href="#workshop-bottleneck" title="Permanent link">&para;</a></h4>
+<p><strong>Symptoms:</strong>
+- Workshop utilization &gt; 90%
+- Long wagon waiting times
+- Growing retrofit queue
+- Idle parking capacity</p>
+<p><strong>Solutions:</strong>
+1. Add retrofit stations (workshops.json)
+2. Add more workshops
+3. Optimize workshop selection strategy</p>
+<h4 id="locomotive-bottleneck">Locomotive Bottleneck<a class="headerlink" href="#locomotive-bottleneck" title="Permanent link">&para;</a></h4>
+<p><strong>Symptoms:</strong>
+- Locomotive utilization &gt; 85%
+- Long movement queues
+- Idle workshops waiting for wagons
+- Delayed wagon distributions</p>
+<p><strong>Solutions:</strong>
+1. Optimize route durations (routes.json)
+2. Reduce coupling/decoupling times (process_times.json)
+3. Improve locomotive placement
+4. <strong>⚠️ Add more locomotives (locomotive.json) - EXPERIMENTAL, not fully tested</strong></p>
+<h4 id="track-capacity-bottleneck">Track Capacity Bottleneck<a class="headerlink" href="#track-capacity-bottleneck" title="Permanent link">&para;</a></h4>
+<p><strong>Symptoms:</strong>
+- Parking tracks at capacity
+- Collection tracks blocking
+- Wagons waiting for track space</p>
+<p><strong>Solutions:</strong>
+1. Add more parking tracks (topology.json, tracks.json)
+2. Increase track lengths (topology.json)
+3. Optimize track selection strategy
+4. Improve wagon distribution</p>
+<h2 id="optimization-workflow">Optimization Workflow<a class="headerlink" href="#optimization-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="1-baseline-run">1. Baseline Run<a class="headerlink" href="#1-baseline-run" title="Permanent link">&para;</a></h3>
+<p>Run with default configuration:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--scenario<span class="w"> </span>Data/examples/ten_trains_two_days/<span class="w"> </span>--output<span class="w"> </span>output/baseline/
+</code></pre></div>
+<p><strong>Analyze:</strong>
+- Identify bottlenecks
+- Note utilization rates
+- Record throughput</p>
+<h3 id="2-targeted-improvements">2. Targeted Improvements<a class="headerlink" href="#2-targeted-improvements" title="Permanent link">&para;</a></h3>
+<p>Modify configuration based on bottlenecks:</p>
+<p><strong>If workshop bottleneck:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// workshops.json</span>
+<span class="nt">&quot;retrofit_stations&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="c1">// Was 2</span>
+</code></pre></div></p>
+<p><strong>If locomotive bottleneck:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// routes.json - optimize travel times</span>
+<span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;track_19_collection1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;track_19&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;collection1&quot;</span><span class="p">]}</span>
+</code></pre></div></p>
+<p><strong>Note:</strong> Adding locomotives is not recommended (experimental feature, not fully tested)</p>
+<h3 id="3-comparison-run">3. Comparison Run<a class="headerlink" href="#3-comparison-run" title="Permanent link">&para;</a></h3>
+<p>Run with modifications:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--scenario<span class="w"> </span>Data/examples/ten_trains_two_days/<span class="w"> </span>--output<span class="w"> </span>output/improved/
+</code></pre></div>
+<p><strong>Compare:</strong>
+- Throughput change
+- Utilization improvements
+- Cost vs. benefit</p>
+<h3 id="4-iteration">4. Iteration<a class="headerlink" href="#4-iteration" title="Permanent link">&para;</a></h3>
+<p>Repeat until targets met:
+- Adjust parameters
+- Run simulation
+- Analyze results
+- Refine configuration</p>
+<h2 id="common-scenarios">Common Scenarios<a class="headerlink" href="#common-scenarios" title="Permanent link">&para;</a></h2>
+<h3 id="scenario-1-increase-throughput">Scenario 1: Increase Throughput<a class="headerlink" href="#scenario-1-increase-throughput" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Process 300 wagons in 2 days (150/day)</p>
+<p><strong>Approach:</strong>
+1. Calculate required capacity: 300 wagons × 60 min / 2880 min = 6.25 stations
+2. Add workshop capacity (workshops.json): 3 workshops × 2 stations = 6 stations
+3. Add parking tracks for increased volume
+4. Optimize route durations if locomotive utilization is high
+5. Run and verify throughput</p>
+<h3 id="scenario-2-reduce-costs">Scenario 2: Reduce Costs<a class="headerlink" href="#scenario-2-reduce-costs" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Minimize resources while maintaining throughput</p>
+<p><strong>Approach:</strong>
+1. Run baseline with current configuration
+2. Identify over-utilized resources (utilization &lt; 60%)
+3. Reduce excess capacity
+4. Verify throughput maintained
+5. Calculate cost savings</p>
+<h3 id="scenario-3-handle-peak-loads">Scenario 3: Handle Peak Loads<a class="headerlink" href="#scenario-3-handle-peak-loads" title="Permanent link">&para;</a></h3>
+<p><strong>Goal:</strong> Process burst of 100 wagons arriving simultaneously</p>
+<p><strong>Approach:</strong>
+1. Modify train_schedule.csv with simultaneous arrivals
+2. Increase collection track capacity
+3. Add temporary parking capacity
+4. Run simulation
+5. Verify no blocking or excessive delays</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="simulation-errors">Simulation Errors<a class="headerlink" href="#simulation-errors" title="Permanent link">&para;</a></h3>
+<h4 id="no-route-found">"No route found"<a class="headerlink" href="#no-route-found" title="Permanent link">&para;</a></h4>
+<p><strong>Error:</strong> Cannot find route from track A to track B</p>
+<p><strong>Solution:</strong> Add missing route in routes.json:
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A_to_B&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Mainline&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="p">]}</span>
+</code></pre></div></p>
+<h4 id="track-capacity-exceeded">"Track capacity exceeded"<a class="headerlink" href="#track-capacity-exceeded" title="Permanent link">&para;</a></h4>
+<p><strong>Error:</strong> Too many wagons for track length</p>
+<p><strong>Solution:</strong> 
+- Increase track length in topology.json
+- Add more tracks
+- Improve wagon distribution</p>
+<h4 id="invalid-arrival-time">"Invalid arrival time"<a class="headerlink" href="#invalid-arrival-time" title="Permanent link">&para;</a></h4>
+<p><strong>Error:</strong> Train arrival outside scenario timeframe</p>
+<p><strong>Solution:</strong> Adjust arrival_time in train_schedule.csv or extend scenario dates</p>
+<h3 id="performance-issues">Performance Issues<a class="headerlink" href="#performance-issues" title="Permanent link">&para;</a></h3>
+<h4 id="slow-simulation">Slow Simulation<a class="headerlink" href="#slow-simulation" title="Permanent link">&para;</a></h4>
+<p><strong>Causes:</strong>
+- Very large scenarios (&gt; 1000 wagons)
+- Complex route networks
+- Long simulation duration</p>
+<p><strong>Solutions:</strong>
+- Reduce simulation timeframe
+- Simplify route network
+- Use faster hardware</p>
+<h4 id="high-memory-usage">High Memory Usage<a class="headerlink" href="#high-memory-usage" title="Permanent link">&para;</a></h4>
+<p><strong>Causes:</strong>
+- Many wagons
+- Detailed metrics collection</p>
+<p><strong>Solutions:</strong>
+- Process in batches
+- Reduce metric granularity
+- Increase available RAM</p>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="configuration-management">Configuration Management<a class="headerlink" href="#configuration-management" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Version control:</strong> Use git for configuration files</li>
+<li><strong>Naming conventions:</strong> Clear, consistent file and ID naming</li>
+<li><strong>Documentation:</strong> Comment complex configurations</li>
+<li><strong>Backups:</strong> Keep baseline configurations</li>
+</ol>
+<h3 id="experimentation">Experimentation<a class="headerlink" href="#experimentation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>One change at a time:</strong> Isolate variable effects</li>
+<li><strong>Document changes:</strong> Track what was modified</li>
+<li><strong>Compare results:</strong> Use consistent output directories</li>
+<li><strong>Validate results:</strong> Sanity-check metrics</li>
+</ol>
+<h3 id="reporting">Reporting<a class="headerlink" href="#reporting" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Save all outputs:</strong> Keep complete result sets</li>
+<li><strong>Screenshot visualizations:</strong> Document key findings</li>
+<li><strong>Export metrics:</strong> Use CSV for further analysis</li>
+<li><strong>Summarize findings:</strong> Create executive summaries</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<h3 id="further-learning">Further Learning<a class="headerlink" href="#further-learning" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Explore other example scenarios (demo, ten_trains_two_days)</li>
+<li>Read <a href="../../mvp/architecture/">Architecture Documentation</a></li>
+<li>Review <a href="../../mvp/development/">Development Guide</a></li>
+</ul>
+<h3 id="creating-your-own-scenarios">Creating Your Own Scenarios<a class="headerlink" href="#creating-your-own-scenarios" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Copy an existing scenario as template</li>
+<li>Modify configuration files for your use case</li>
+<li>Start with small scale for testing</li>
+<li>Gradually increase complexity</li>
+<li>Validate results against expectations</li>
+</ol>
+<h3 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Share your scenarios with the community</li>
+<li>Report issues on GitHub</li>
+<li>Suggest improvements</li>
+<li>Contribute code enhancements</li>
+</ul>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>You now understand how to:
+- Configure all PopUpSim input files
+- Run simulations with different parameters
+- Analyze results and identify bottlenecks
+- Optimize configurations for better performance</p>
+<p><strong>Happy simulating!</strong></p>
+<hr />
+<p><strong>Tutorial Complete</strong></p>
+<p>Return to <a href="../">Tutorial Home</a> for overview and navigation.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
