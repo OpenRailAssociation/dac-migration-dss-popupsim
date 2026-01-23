@@ -525,6 +525,18 @@ class DashboardExporter:
                             }
                         )
                         wagon_states[wagon_id] = {'location': to_track, 'event': 'ON_RETROFIT_TRACK'}
+
+                    if 'retrofitted' == to_track.lower():
+                        wagon_journey.append(
+                            {
+                                'timestamp': timestamp,
+                                'wagon_id': wagon_id,
+                                'train_id': '',
+                                'event': 'ON_RETROFITTING_TRACK',
+                                'location': to_track,
+                                'status': 'WAITING',
+                            }
+                        )
                     # NOTE: Do NOT create AT_WORKSHOP entry from WagonMoved event
                     # Wagons should only show at workshop when retrofit actually starts
 

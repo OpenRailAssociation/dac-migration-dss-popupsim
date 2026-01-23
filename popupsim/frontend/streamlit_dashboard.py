@@ -76,7 +76,7 @@ def render_header(data: dict[str, Any]) -> None:
 
         with col1:
             total_wagons = metrics.get('wagons_arrived', 0)
-            st.metric('Total Wagons', total_wagons)
+            st.metric('Wagons in train schedule', total_wagons)
 
         with col2:
             completed = metrics.get('retrofits_completed', 0)
@@ -88,7 +88,7 @@ def render_header(data: dict[str, Any]) -> None:
 
         with col4:
             duration = metrics.get('simulation_duration_minutes', 0)
-            st.metric('Duration', f'{duration:.1f} min')
+            st.metric('Workshops open for', f'{duration:.1f} min')
 
     st.markdown('---')
 
@@ -109,7 +109,7 @@ def render_overview_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915
     with col1:
         trains = metrics.get('trains_arrived', 0)
         wagons = metrics.get('wagons_arrived', 0)
-        st.metric('Trains / Wagons', f'{trains} / {wagons}')
+        st.metric('Arrived trains / Overall wagons', f'{trains} / {wagons}')
 
     with col2:
         retrofitted = metrics.get('retrofits_completed', 0)
@@ -130,7 +130,7 @@ def render_overview_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915
 
     with col5:
         duration = metrics.get('simulation_duration_minutes', 0)
-        st.metric('Duration', f'{duration:.0f} min')
+        st.metric('Workshops open for', f'{duration:.0f} min')
 
     st.markdown('---')
     st.subheader('Operational Dashboard')
@@ -251,15 +251,12 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915, C901,
         col1, col2 = st.columns([3, 1])
         with col1:
             view_type = st.radio(
-                'View by:', ['By Track (see track utilization)', 'By Wagon (see individual journeys)'], horizontal=True
+                'View by:', ['By Wagon (see individual journeys)', 'By Track (see track utilization)'], horizontal=True
             )
-        with col2:
-            show_all = st.checkbox('Show all wagons', value=False) if 'Wagon' in view_type else True
-
         if 'Track' in view_type:
             _render_track_gantt(data['wagon_journey'])
         else:
-            _render_wagon_gantt(data['wagon_journey'], show_all)
+            _render_wagon_gantt(data['wagon_journey'])
     else:
         st.info('No wagon journey data available')
 
@@ -367,7 +364,9 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:  # noqa: PLR0915, C901,
             on_retrofit_track = len(
                 locations_df[(locations_df['current_track'] == 'retrofit') & (locations_df['status'] != 'RETROFITTING')]
             )
-            on_collection = len(locations_df[locations_df['current_track'].str.contains('collection', case=False, na=False)])
+            on_collection = len(
+                locations_df[locations_df['current_track'].str.contains('collection', case=False, na=False)]
+            )
             on_workshops = len(
                 locations_df[
                     locations_df['current_track'].str.startswith('WS', na=False)
@@ -689,23 +688,58 @@ def render_rejected_wagons_tab(data: dict[str, Any]) -> None:
 
     rejected_df = data['rejected_wagons']
 
-    # Rejection type breakdown with all types
-    st.subheader('Rejection Type Breakdown')
-    rejection_counts = {'Loaded': 0, 'No Retrofit Needed': 0, 'Collection Track Full': 0}
-    actual_counts = rejected_df['rejection_type'].value_counts()
-    for rtype, count in actual_counts.items():
-        if rtype in rejection_counts:
-            rejection_counts[rtype] = int(count)
+    # st.subheader('Rejection Type Breakdown')
+    rejected_df['rejection_type_norm'] = (
+        rejected_df['rejection_type']
+        .fillna('')
+        .astype(str)
+        .str.normalize('NFKC')
+        .str.replace('_', ' ', regex=False)  # "COLLECTION_TRACK" -> "COLLECTION TRACK"
+        .str.replace(r'\s+', ' ', regex=True)
+        .str.strip()
+        .str.casefold()
+    )
+
+    rejected_df['collection_track_id'] = rejected_df['collection_track_id'].astype(str).str.strip()
+
+    canonical_types = {
+        'loaded': 'Loaded',
+        'no retrofit needed': 'No Retrofit Needed',
+        'collection track full': 'Collection Track Full',
+    }
+
+    rejection_counts = {v: 0 for v in canonical_types.values()}
+    actual_counts_norm = rejected_df['rejection_type_norm'].value_counts()
+    for norm_type, count in actual_counts_norm.items():
+        if norm_type in canonical_types:
+            readable = canonical_types[norm_type]
+            rejection_counts[readable] = int(count)
 
     counts_df = pd.DataFrame(list(rejection_counts.items()), columns=['Type', 'Count'])
 
+    mask_full = rejected_df['rejection_type_norm'].eq('collection track full')
+
+    counts_by_track = (
+        rejected_df.loc[mask_full, 'collection_track_id'].value_counts(dropna=False).sort_values(ascending=False)
+    )
+
+    counts_by_track_df = counts_by_track.rename('Count').reset_index()
+    counts_by_track_df = counts_by_track_df.rename(columns={'index': 'collection_track_id'})
+
     col1, col2 = st.columns([2, 1])
+
     with col1:
+        st.subheader('Breakdown of rejection per type')
         st.bar_chart(counts_df.set_index('Type'))
     with col2:
+        st.subheader('Counts per type')
         st.dataframe(counts_df, use_container_width=True)
 
-    # Detailed table
+    st.subheader('Breakdown of rejection per collection track')
+    st.bar_chart(counts_by_track)  # Direkt als Series mit Track-ID im Index
+    st.dataframe(counts_by_track_df, use_container_width=True)
+    st.caption(f'Overall wagons still on collection tracks: {int(mask_full.sum())}')
+
     st.subheader('Rejected Wagons Details')
     st.dataframe(rejected_df, use_container_width=True)
     st.caption(f'Total rejected: {len(rejected_df)} wagons')
@@ -784,25 +818,20 @@ def render_process_log_tab(data: dict[str, Any]) -> None:
     st.caption(f'Showing {min(show_lines, len(filtered_df))} of {len(filtered_df)} process entries')
 
 
-def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None:  # noqa: PLR0915
+def _render_wagon_gantt(journey_df) -> None:  # noqa: PLR0915
     """Render Gantt chart showing individual wagon journeys."""
     import matplotlib.pyplot as plt
 
     # Filter wagons if needed
-    if not show_all:
-        # Show wagons that either:
-        # 1. Moved beyond collection track, OR
-        # 2. Were rejected (moved to rejected track)
-        def wagon_has_journey(locations) -> bool:
-            unique_locs = locations.unique()
-            # Has journey if: more than 1 location OR has rejected track
-            return len(unique_locs) > 1 or 'rejected' in unique_locs.tolist()
+    def wagon_has_journey(locations) -> bool:
+        unique_locs = locations.unique()
+        # Has journey if: more than 1 location OR has rejected track
+        return len(unique_locs) > 1 or 'rejected' in unique_locs.tolist()
 
-        wagons_with_journey = journey_df.groupby('wagon_id')['location'].apply(wagon_has_journey)
-        wagon_ids = sorted(wagons_with_journey[wagons_with_journey].index)
-        journey_df = journey_df[journey_df['wagon_id'].isin(wagon_ids)]
-    else:
-        wagon_ids = sorted(journey_df['wagon_id'].unique())
+    wagons_with_journey = journey_df.groupby('wagon_id')['location'].apply(wagon_has_journey)
+    wagon_ids = sorted(wagons_with_journey[wagons_with_journey].index)
+    journey_df = journey_df[journey_df['wagon_id'].isin(wagon_ids)]
+
     wagon_positions = {wagon_id: i for i, wagon_id in enumerate(wagon_ids)}
 
     # Color map for tracks - distinct colors
@@ -819,7 +848,7 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
     }
 
     # Dynamically assign colors to collection tracks (all red shades)
-    collection_colors = ['#e74c3c', '#c0392b', '#e67e22', '#d35400']
+    collection_colors = ['#5fca3f', '#158d39', '#129733', '#12b483']
     collection_tracks = [t for t in unique_tracks if 'collection' in str(t).lower()]
     for i, track in enumerate(sorted(collection_tracks)):
         track_colors[track] = collection_colors[i % len(collection_colors)]
@@ -893,6 +922,7 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
     ax.set_xlabel('Simulation Time (minutes)', fontsize=11)
     ax.set_ylabel('Wagon ID', fontsize=11)
     ax.set_title('Individual Wagon Journeys Over Time (Track-based)', fontsize=12, fontweight='bold')
+    ax.yaxis.set_inverted(True)
     ax.grid(axis='x', alpha=0.3, linestyle='--')
 
     # Add legend - prioritize important tracks
@@ -933,19 +963,12 @@ def _render_wagon_gantt(journey_df: pd.DataFrame, show_all: bool = True) -> None
     st.pyplot(fig)
     plt.close()
 
-    if not show_all:
-        st.caption(
-            f'Showing {len(wagon_ids)} wagons with journeys '
-            '(excludes wagons stuck on collection track). '
-            'Each color = track/location. Hatched pattern (///) = '
-            'actively retrofitting in workshop.'
-        )
-    else:
-        st.caption(
-            f'Showing all {len(wagon_ids)} wagons. '
-            'Each color = track/location. '
-            'Hatched pattern (///) = actively retrofitting in workshop.'
-        )
+    st.caption(
+        f'Showing {len(wagon_ids)} wagons with journeys '
+        '(excludes wagons stuck on collection track). '
+        'Each color = track/location. Hatched pattern (///) = '
+        'actively retrofitting in workshop.'
+    )
 
 
 def _render_track_gantt(journey_df: pd.DataFrame) -> None:
@@ -1191,7 +1214,9 @@ def main() -> None:
         data = load_dashboard_data(output_path)
 
     if not data:
-        st.error('❌ No data files found in output directory')
+        st.error(
+            '❌ No data files found in output directory. Maybe you need to set a scenario folder from the dropdown first.'
+        )
         st.stop()
 
     # Render header
