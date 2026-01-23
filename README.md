@@ -30,13 +30,14 @@ PopUpSim helps railway operators:
 - Python 3.13 or higher
 - [uv](https://docs.astral.sh/uv/) package manager
 
-The necessary Python version will be automatically installed when using uv. For different
-ways of installing uv can be found in **Step 1** of the [installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorail/00-installation.md).
+If uv is used, the necessary Python version will be automatically installed during installation
+of PopUpSim.
+For different ways of installing uv can be found in **Step 1** of the [installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorial/00-installation/).
 
 ### Installation
 
 A more detailed description of the installation process can be found in the
-[installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorail/00-installation.md)
+[installation guide](https://openrailassociation.github.io/dac-migration-dss-popupsim/tutorial/00-installation/)
 
 #### Option 1: Using Git (Recommended)
 

@@ -22,22 +22,18 @@ uv is a fast Python package manager that can:
 uv is a fast Python package manager. Choose the installation method that works for your system.
 
 ### Option 1: PowerShell (Windows - Recommended)
+If donwload of uv fails it selbst to deactivate your VPN connection (if you use one).
 
-**With Administrative Rights:**
-
+Open the commandline or a powershel:
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
-
-**Without Administrative Rights:**
-
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-This installs uv in your user directory (`%USERPROFILE%\.cargo\bin\`).
+to install uv. If you run in administrative mode the installation of uv is done
+system-wide. Otherwise uv will be installed in your user directory (`%USERPROFILE%\.cargo\bin\`).
 
 **Add to PATH (if needed):**
+
+In most cases this is not necessary since uv will automatically adjust the PATH variable.
 
 If `uv` command is not found after installation:
 
@@ -182,7 +178,10 @@ run_dashboard.bat
 uv run streamlit run popupsim/frontend/streamlit_dashboard.py
 ```
 
-Dashboard opens at http://localhost:8501
+On the first run it will ask you to enter your E-Mail. Leave empty and just press return/enter.
+
+A browser window (of your default browser) will open and pointing at the adress:
+ http://localhost:8501
 
 ## Troubleshooting
 
