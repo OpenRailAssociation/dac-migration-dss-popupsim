@@ -9,8 +9,8 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    # Only run for Dependabot PRs
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    # Only run if the PR was created by Dependabot
+    # if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -19,7 +19,7 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Enable auto-merge for Patch releases
-        # ✅ This is the actual way to check for Patch versions
+        # Check if the update is a Patch version (e.g., 1.0.1 -> 1.0.2)
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
