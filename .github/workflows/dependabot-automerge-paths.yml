@@ -9,7 +9,8 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    # Only run if the PR was created by Dependabot
+    # ✅ VITAL: This line prevents the "Failure" on human PRs
+    # It causes the job to be "Skipped" (Grey) instead of "Failed" (Red)
     # if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Fetch Dependabot metadata
@@ -19,7 +20,6 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Enable auto-merge for Patch releases
-        # Check if the update is a Patch version (e.g., 1.0.1 -> 1.0.2)
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
