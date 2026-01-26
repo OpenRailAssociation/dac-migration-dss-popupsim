@@ -1,6 +1,10 @@
 name: "Dependabot Auto-merge"
 
-on: pull_request
+on: 
+  pull_request:
+    types: [opened, reopened, synchronize]
+  # Allows you to manually trigger this from the "Actions" tab if needed
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -9,9 +13,10 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    # ✅ VITAL: This line prevents the "Failure" on human PRs
-    # It causes the job to be "Skipped" (Grey) instead of "Failed" (Red)
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    # ✅ FIX: Check if the PR *Owner* is Dependabot, not the person running the workflow.
+    # This allows YOU to click "Re-run" on a Dependabot PR and have it succeed.
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -20,6 +25,7 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Enable auto-merge for Patch releases
+        # Only merge if it is a Patch release
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
