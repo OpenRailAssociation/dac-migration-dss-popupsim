@@ -1,26 +1,25 @@
-name: "Automerge Dependabot PRs"
+name: "Dependabot Auto-merge"
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+on: pull_request
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  automerge:
+  dependabot:
     runs-on: ubuntu-latest
+    # Only run for Dependabot PRs
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v1
+        uses: dependabot/fetch-metadata@v2
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Enable auto-merge for Dependabot PRs
-        # Only merge if it is a PATCH update
+      - name: Enable auto-merge for Patch releases
+        # ✅ This is the actual way to check for Patch versions
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
