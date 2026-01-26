@@ -1,0 +1,1625 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../09-architecture-decisions/" rel="prev"/>
+<link href="../11-risks-technical-debt/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Quality Requirements - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#10-quality-requirements-mvp">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Quality Requirements
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#101-mvp-quality-goals">
+<span class="md-ellipsis">
+      
+        10.1 MVP Quality Goals
+      
+    </span>
+</a>
+<nav aria-label="10.1 MVP Quality Goals" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-quality-priorities">
+<span class="md-ellipsis">
+      
+        MVP Quality Priorities
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#102-mvp-performance-requirements">
+<span class="md-ellipsis">
+      
+        10.2 MVP Performance Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.2 MVP Performance Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-performance-goals">
+<span class="md-ellipsis">
+      
+        MVP Performance Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-performance-measurements">
+<span class="md-ellipsis">
+      
+        MVP Performance Measurements
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#103-mvp-usability-requirements">
+<span class="md-ellipsis">
+      
+        10.3 MVP Usability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.3 MVP Usability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-usability-goals">
+<span class="md-ellipsis">
+      
+        MVP Usability Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-usability-criteria">
+<span class="md-ellipsis">
+      
+        MVP Usability Criteria
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#104-mvp-reliability-requirements">
+<span class="md-ellipsis">
+      
+        10.4 MVP Reliability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.4 MVP Reliability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-reliability-goals">
+<span class="md-ellipsis">
+      
+        MVP Reliability Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-reliability-metrics">
+<span class="md-ellipsis">
+      
+        MVP Reliability Metrics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#105-mvp-maintainability-requirements">
+<span class="md-ellipsis">
+      
+        10.5 MVP Maintainability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.5 MVP Maintainability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-code-quality-standards">
+<span class="md-ellipsis">
+      
+        MVP Code Quality Standards
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-maintainability-metrics">
+<span class="md-ellipsis">
+      
+        MVP Maintainability Metrics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#106-mvp-portability-requirements">
+<span class="md-ellipsis">
+      
+        10.6 MVP Portability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.6 MVP Portability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-platform-support">
+<span class="md-ellipsis">
+      
+        MVP Platform Support
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-portability-tests">
+<span class="md-ellipsis">
+      
+        MVP Portability Tests
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#107-mvp-security-requirements">
+<span class="md-ellipsis">
+      
+        10.7 MVP Security Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.7 MVP Security Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-security-goals">
+<span class="md-ellipsis">
+      
+        MVP Security Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-security-measures">
+<span class="md-ellipsis">
+      
+        MVP Security Measures
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#108-mvp-testability-requirements">
+<span class="md-ellipsis">
+      
+        10.8 MVP Testability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.8 MVP Testability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-strategy">
+<span class="md-ellipsis">
+      
+        MVP Test Strategy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-metrics">
+<span class="md-ellipsis">
+      
+        MVP Test Metrics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#101-mvp-quality-goals">
+<span class="md-ellipsis">
+      
+        10.1 MVP Quality Goals
+      
+    </span>
+</a>
+<nav aria-label="10.1 MVP Quality Goals" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-quality-priorities">
+<span class="md-ellipsis">
+      
+        MVP Quality Priorities
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#102-mvp-performance-requirements">
+<span class="md-ellipsis">
+      
+        10.2 MVP Performance Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.2 MVP Performance Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-performance-goals">
+<span class="md-ellipsis">
+      
+        MVP Performance Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-performance-measurements">
+<span class="md-ellipsis">
+      
+        MVP Performance Measurements
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#103-mvp-usability-requirements">
+<span class="md-ellipsis">
+      
+        10.3 MVP Usability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.3 MVP Usability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-usability-goals">
+<span class="md-ellipsis">
+      
+        MVP Usability Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-usability-criteria">
+<span class="md-ellipsis">
+      
+        MVP Usability Criteria
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#104-mvp-reliability-requirements">
+<span class="md-ellipsis">
+      
+        10.4 MVP Reliability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.4 MVP Reliability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-reliability-goals">
+<span class="md-ellipsis">
+      
+        MVP Reliability Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-reliability-metrics">
+<span class="md-ellipsis">
+      
+        MVP Reliability Metrics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#105-mvp-maintainability-requirements">
+<span class="md-ellipsis">
+      
+        10.5 MVP Maintainability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.5 MVP Maintainability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-code-quality-standards">
+<span class="md-ellipsis">
+      
+        MVP Code Quality Standards
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-maintainability-metrics">
+<span class="md-ellipsis">
+      
+        MVP Maintainability Metrics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#106-mvp-portability-requirements">
+<span class="md-ellipsis">
+      
+        10.6 MVP Portability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.6 MVP Portability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-platform-support">
+<span class="md-ellipsis">
+      
+        MVP Platform Support
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-portability-tests">
+<span class="md-ellipsis">
+      
+        MVP Portability Tests
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#107-mvp-security-requirements">
+<span class="md-ellipsis">
+      
+        10.7 MVP Security Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.7 MVP Security Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-security-goals">
+<span class="md-ellipsis">
+      
+        MVP Security Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-security-measures">
+<span class="md-ellipsis">
+      
+        MVP Security Measures
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#108-mvp-testability-requirements">
+<span class="md-ellipsis">
+      
+        10.8 MVP Testability Requirements
+      
+    </span>
+</a>
+<nav aria-label="10.8 MVP Testability Requirements" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-strategy">
+<span class="md-ellipsis">
+      
+        MVP Test Strategy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-metrics">
+<span class="md-ellipsis">
+      
+        MVP Test Metrics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="10-quality-requirements-mvp">10. Quality Requirements (MVP)<a class="headerlink" href="#10-quality-requirements-mvp" title="Permanent link">¶</a></h1>
+<h2 id="101-mvp-quality-goals">10.1 MVP Quality Goals<a class="headerlink" href="#101-mvp-quality-goals" title="Permanent link">¶</a></h2>
+<p>Quality goals are defined in <a href="../01-introduction-goals/#12-quality-goals">Section 1.2</a>. This section details how they are measured and implemented.</p>
+<h3 id="mvp-quality-priorities">MVP Quality Priorities<a class="headerlink" href="#mvp-quality-priorities" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Quality Goal</th>
+<th>MVP Scenario</th>
+<th>Measurability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>Rapid Development</strong></td>
+<td>MVP deliverable in 5 weeks</td>
+<td>Functional prototype</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>Simulation Accuracy &amp; Reliability</strong></td>
+<td>Same inputs → identical results</td>
+<td>Reproducible simulation runs</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>Usability &amp; Accessibility</strong></td>
+<td>No complex installation</td>
+<td>File-based configuration</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>Simple Installation</strong></td>
+<td>One-command setup</td>
+<td><code>uv sync</code></td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>Testability</strong></td>
+<td>Business logic isolated</td>
+<td>Unit tests possible</td>
+</tr>
+</tbody>
+</table>
+<h2 id="102-mvp-performance-requirements">10.2 MVP Performance Requirements<a class="headerlink" href="#102-mvp-performance-requirements" title="Permanent link">¶</a></h2>
+<blockquote>
+<p><strong>Note:</strong> Performance targets will be measured during MVP implementation. See <a href="../07-deployment/#78-performance-monitoring">Section 7.8</a> for monitoring approach.</p>
+</blockquote>
+<h3 id="mvp-performance-goals">MVP Performance Goals<a class="headerlink" href="#mvp-performance-goals" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Performance Goals"
+        subgraph "Execution Time"
+            Config[Load configuration&lt;br/&gt;To be measured]
+            Setup[Configure workshop&lt;br/&gt;To be measured]
+            Sim[Simulation execution&lt;br/&gt;To be measured]
+            Output[Generate output&lt;br/&gt;To be measured]
+        end
+
+        subgraph "Resource Usage"
+            Memory[Memory usage&lt;br/&gt;To be measured]
+            CPU[CPU utilization&lt;br/&gt;Single-threaded]
+            Disk[Disk space&lt;br/&gt;Estimated: ~100 MB + results]
+        end
+
+        subgraph "Scalability"
+            Small[100 wagons&lt;br/&gt;To be measured]
+            Medium[1000 wagons&lt;br/&gt;To be measured]
+            Large[5000 wagons&lt;br/&gt;To be measured]
+        end
+    end
+
+    classDef time fill:#e3f2fd
+    classDef resource fill:#e8f5e8
+    classDef scale fill:#fff3e0
+
+    class Config,Setup,Sim,Output time
+    class Memory,CPU,Disk resource
+    class Small,Medium,Large scale</code></pre>
+<h3 id="mvp-performance-measurements">MVP Performance Measurements<a class="headerlink" href="#mvp-performance-measurements" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Measurement Method</th>
+<th>Acceptance Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Startup time</strong></td>
+<td><code>time python main.py --help</code></td>
+<td>To be measured on standard laptop</td>
+</tr>
+<tr>
+<td><strong>Configuration loading</strong></td>
+<td>Logging timestamps</td>
+<td>JSON/CSV parsing</td>
+</tr>
+<tr>
+<td><strong>Simulation speed</strong></td>
+<td>SimPy profiling</td>
+<td>Discrete event processing</td>
+</tr>
+<tr>
+<td><strong>Memory usage</strong></td>
+<td><code>psutil</code> monitoring</td>
+<td>To be measured</td>
+</tr>
+<tr>
+<td><strong>Output generation</strong></td>
+<td>File creation time</td>
+<td>CSV + PNG generation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="103-mvp-usability-requirements">10.3 MVP Usability Requirements<a class="headerlink" href="#103-mvp-usability-requirements" title="Permanent link">¶</a></h2>
+<h3 id="mvp-usability-goals">MVP Usability Goals<a class="headerlink" href="#mvp-usability-goals" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Usability Goals"
+        subgraph "Ease of Use"
+            Install[Simple installation&lt;br/&gt;uv sync]
+            Config[Simple configuration&lt;br/&gt;JSON/CSV files]
+            Run[Simple execution&lt;br/&gt;uv run python main.py]
+        end
+
+        subgraph "Error Handling"
+            Clear[Clear error messages&lt;br/&gt;Actionable feedback]
+            Recovery[Graceful degradation&lt;br/&gt;Partial results on error]
+            Help[Built-in help&lt;br/&gt;--help parameter]
+        end
+
+        subgraph "Output Quality"
+            Readable[Readable output&lt;br/&gt;CSV format]
+            Visual[Visualization&lt;br/&gt;Matplotlib PNG]
+            Logs[Detailed logs&lt;br/&gt;Debugging information]
+        end
+    end
+
+    classDef ease fill:#4caf50,stroke:#2e7d32
+    classDef error fill:#ff9800,stroke:#e65100
+    classDef output fill:#2196f3,stroke:#1565c0
+
+    class Install,Config,Run ease
+    class Clear,Recovery,Help error
+    class Readable,Visual,Logs output</code></pre>
+<h3 id="mvp-usability-criteria">MVP Usability Criteria<a class="headerlink" href="#mvp-usability-criteria" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>MVP Requirement</th>
+<th>Measurement Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Installation</strong></td>
+<td>Simple setup</td>
+<td>Documented steps</td>
+</tr>
+<tr>
+<td><strong>Configuration</strong></td>
+<td>Example files available</td>
+<td>Template files in <code>Data/examples/</code></td>
+</tr>
+<tr>
+<td><strong>Execution</strong></td>
+<td>One command starts simulation</td>
+<td><code>uv run python main.py</code></td>
+</tr>
+<tr>
+<td><strong>Error messages</strong></td>
+<td>Understandable descriptions</td>
+<td>Pydantic comprehensive error summary</td>
+</tr>
+<tr>
+<td><strong>Help</strong></td>
+<td>Integrated documentation</td>
+<td><code>--help</code> parameter</td>
+</tr>
+</tbody>
+</table>
+<h2 id="104-mvp-reliability-requirements">10.4 MVP Reliability Requirements<a class="headerlink" href="#104-mvp-reliability-requirements" title="Permanent link">¶</a></h2>
+<h3 id="mvp-reliability-goals">MVP Reliability Goals<a class="headerlink" href="#mvp-reliability-goals" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Reliability"
+        subgraph "Error Tolerance"
+            InputErrors[Input validation&lt;br/&gt;Catch invalid data]
+            RuntimeErrors[Runtime stability&lt;br/&gt;No crashes during simulation]
+            OutputErrors[Output robustness&lt;br/&gt;Partial results on error]
+        end
+
+        subgraph "Determinism"
+            Reproducible[Reproducible results&lt;br/&gt;Same input → same output]
+            Seeded[Seeded random&lt;br/&gt;Controlled randomness]
+            Consistent[Consistent behavior&lt;br/&gt;Cross-platform]
+        end
+
+        subgraph "Recovery"
+            Logging[Comprehensive logging&lt;br/&gt;Debug information]
+            Cleanup[Resource cleanup&lt;br/&gt;No memory leaks]
+            Restart[Easy restart&lt;br/&gt;No persistent state issues]
+        end
+    end
+
+    classDef tolerance fill:#e3f2fd
+    classDef determinism fill:#e8f5e8
+    classDef recovery fill:#fff3e0
+
+    class InputErrors,RuntimeErrors,OutputErrors tolerance
+    class Reproducible,Seeded,Consistent determinism
+    class Logging,Cleanup,Restart recovery</code></pre>
+<h3 id="mvp-reliability-metrics">MVP Reliability Metrics<a class="headerlink" href="#mvp-reliability-metrics" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>MVP Goal</th>
+<th>Measurement Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Crash rate</strong></td>
+<td>&lt; 1% with valid inputs</td>
+<td>Automated tests</td>
+</tr>
+<tr>
+<td><strong>Determinism</strong></td>
+<td>100% identical results</td>
+<td>Repeated execution with same inputs</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>Graceful handling of all input errors</td>
+<td>Negative tests</td>
+</tr>
+<tr>
+<td><strong>Memory leaks</strong></td>
+<td>No memory leaks</td>
+<td>Memory profiling</td>
+</tr>
+</tbody>
+</table>
+<h2 id="105-mvp-maintainability-requirements">10.5 MVP Maintainability Requirements<a class="headerlink" href="#105-mvp-maintainability-requirements" title="Permanent link">¶</a></h2>
+<h3 id="mvp-code-quality-standards">MVP Code Quality Standards<a class="headerlink" href="#mvp-code-quality-standards" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># MVP Code Quality Standards</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CodeQualityMetrics</span><span class="p">:</span>
+    <span class="n">MAX_FUNCTION_LENGTH</span> <span class="o">=</span> <span class="mi">50</span>      <span class="c1"># Lines per function</span>
+    <span class="n">MAX_CLASS_LENGTH</span> <span class="o">=</span> <span class="mi">200</span>        <span class="c1"># Lines per class</span>
+    <span class="n">MAX_COMPLEXITY</span> <span class="o">=</span> <span class="mi">10</span>           <span class="c1"># Cyclomatic complexity</span>
+    <span class="n">MIN_TEST_COVERAGE</span> <span class="o">=</span> <span class="mi">90</span>        <span class="c1"># Percent</span>
+    <span class="n">MAX_DEPENDENCIES</span> <span class="o">=</span> <span class="mi">5</span>          <span class="c1"># Per module</span>
+</code></pre></div>
+<h3 id="mvp-maintainability-metrics">MVP Maintainability Metrics<a class="headerlink" href="#mvp-maintainability-metrics" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>MVP Goal</th>
+<th>Measurement Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Code coverage</strong></td>
+<td>&gt; 90% for business logic</td>
+<td>pytest-cov</td>
+</tr>
+<tr>
+<td><strong>Documentation</strong></td>
+<td>All public APIs documented</td>
+<td>Docstring coverage</td>
+</tr>
+<tr>
+<td><strong>Complexity</strong></td>
+<td>Cyclomatic complexity &lt; 10</td>
+<td>radon</td>
+</tr>
+<tr>
+<td><strong>Dependencies</strong></td>
+<td>&lt; 10 external packages</td>
+<td>pyproject.toml</td>
+</tr>
+<tr>
+<td><strong>Refactoring</strong></td>
+<td>Easy extension possible</td>
+<td>Architecture review</td>
+</tr>
+</tbody>
+</table>
+<h2 id="106-mvp-portability-requirements">10.6 MVP Portability Requirements<a class="headerlink" href="#106-mvp-portability-requirements" title="Permanent link">¶</a></h2>
+<h3 id="mvp-platform-support">MVP Platform Support<a class="headerlink" href="#mvp-platform-support" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Platform Support"
+        subgraph "Operating Systems"
+            Windows[Windows 10+&lt;br/&gt;Primary target]
+            MacOS[macOS 10.15+&lt;br/&gt;Primary target]
+            Linux[Ubuntu 20.04+&lt;br/&gt;Primary target]
+        end
+
+        subgraph "Python Versions"
+            Python313[Python 3.13+&lt;br/&gt;Required]
+        end
+
+        subgraph "Hardware"
+            Laptop[Standard laptop&lt;br/&gt;Estimated: 4GB RAM minimum]
+            Desktop[Desktop PC&lt;br/&gt;Estimated: 4GB RAM minimum]
+        end
+    end
+
+    classDef primary fill:#4caf50,stroke:#2e7d32
+    classDef secondary fill:#ff9800,stroke:#e65100
+    classDef hardware fill:#2196f3,stroke:#1565c0
+
+    class Windows,MacOS,Linux,Python313 primary
+    class Laptop,Desktop hardware</code></pre>
+<h3 id="mvp-portability-tests">MVP Portability Tests<a class="headerlink" href="#mvp-portability-tests" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Test Status</th>
+<th>Critical Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Windows 10+</strong></td>
+<td>✅ Primary</td>
+<td>File paths, CSV encoding</td>
+</tr>
+<tr>
+<td><strong>macOS 10.15+</strong></td>
+<td>✅ Primary</td>
+<td>Path separators, matplotlib</td>
+</tr>
+<tr>
+<td><strong>Ubuntu 20.04+</strong></td>
+<td>✅ Primary</td>
+<td>Dependencies, file permissions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="107-mvp-security-requirements">10.7 MVP Security Requirements<a class="headerlink" href="#107-mvp-security-requirements" title="Permanent link">¶</a></h2>
+<h3 id="mvp-security-goals">MVP Security Goals<a class="headerlink" href="#mvp-security-goals" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Security"
+        subgraph "Input Security"
+            Validation[Input validation&lt;br/&gt;Pydantic models]
+            Sanitization[Path sanitization&lt;br/&gt;No directory traversal]
+            Limits[Resource limits&lt;br/&gt;File size, memory]
+        end
+
+        subgraph "Data Security"
+            NoCredentials[No credentials&lt;br/&gt;No sensitive data stored]
+            LocalOnly[Local processing&lt;br/&gt;No network communication]
+            TempFiles[Safe temp files&lt;br/&gt;Proper cleanup]
+        end
+
+        subgraph "Error Security"
+            NoLeakage[No information leakage&lt;br/&gt;Safe error messages]
+            Logging[Safe logging&lt;br/&gt;No sensitive data in logs]
+        end
+    end
+
+    classDef input fill:#e3f2fd
+    classDef data fill:#e8f5e8
+    classDef error fill:#fff3e0
+
+    class Validation,Sanitization,Limits input
+    class NoCredentials,LocalOnly,TempFiles data
+    class NoLeakage,Logging error</code></pre>
+<h3 id="mvp-security-measures">MVP Security Measures<a class="headerlink" href="#mvp-security-measures" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>MVP Measure</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Input validation</strong></td>
+<td>Pydantic models</td>
+<td>Automatic type validation</td>
+</tr>
+<tr>
+<td><strong>File access</strong></td>
+<td>Relative paths only</td>
+<td>Path sanitization</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>Safe error messages</td>
+<td>No system paths in errors</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>No sensitive data</td>
+<td>Filtered logging</td>
+</tr>
+<tr>
+<td><strong>Dependencies</strong></td>
+<td>Known packages only</td>
+<td>pyproject.toml with versions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="108-mvp-testability-requirements">10.8 MVP Testability Requirements<a class="headerlink" href="#108-mvp-testability-requirements" title="Permanent link">¶</a></h2>
+<h3 id="mvp-test-strategy">MVP Test Strategy<a class="headerlink" href="#mvp-test-strategy" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Testing Strategy"
+        subgraph "Unit Tests"
+            Models[Domain Models&lt;br/&gt;Business Logic]
+            Services[Service classes&lt;br/&gt;Isolated testing]
+            Utils[Utility functions&lt;br/&gt;Pure functions]
+        end
+
+        subgraph "Integration Tests"
+            FileIO[File I/O&lt;br/&gt;JSON/CSV processing]
+            SimPy[SimPy integration&lt;br/&gt;Simulation engine]
+            EndToEnd[End-to-end&lt;br/&gt;Complete scenarios]
+        end
+
+        subgraph "Manual Tests"
+            Scenarios[Test scenarios&lt;br/&gt;Real configurations]
+            Performance[Performance tests&lt;br/&gt;Large datasets]
+            Platforms[Platform tests&lt;br/&gt;Cross-platform]
+        end
+    end
+
+    classDef unit fill:#4caf50,stroke:#2e7d32
+    classDef integration fill:#ff9800,stroke:#e65100
+    classDef manual fill:#9e9e9e,stroke:#616161
+
+    class Models,Services,Utils unit
+    class FileIO,SimPy,EndToEnd integration
+    class Scenarios,Performance,Platforms manual</code></pre>
+<h3 id="mvp-test-metrics">MVP Test Metrics<a class="headerlink" href="#mvp-test-metrics" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>MVP Goal</th>
+<th>Automation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unit tests</strong></td>
+<td>&gt; 80% coverage</td>
+<td>✅ pytest</td>
+</tr>
+<tr>
+<td><strong>Integration tests</strong></td>
+<td>All main paths</td>
+<td>✅ pytest</td>
+</tr>
+<tr>
+<td><strong>Performance tests</strong></td>
+<td>Benchmark scenarios</td>
+<td>⚠️ Manual</td>
+</tr>
+<tr>
+<td><strong>Platform tests</strong></td>
+<td>Windows + Linux + macOS</td>
+<td>⚠️ Manual (can be automated via GitHub Actions matrix)</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

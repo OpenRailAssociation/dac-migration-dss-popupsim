@@ -1,0 +1,2047 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../04-solution-strategy/" rel="prev"/>
+<link href="../06-runtime/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Building Blocks - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#5-building-block-view-mvp">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Building Blocks
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-level-1-system-whitebox">
+<span class="md-ellipsis">
+      
+        5.1 Level 1: System Whitebox
+      
+    </span>
+</a>
+<nav aria-label="5.1 Level 1: System Whitebox" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#important-interfaces">
+<span class="md-ellipsis">
+      
+        Important Interfaces
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-level-2-configuration-context">
+<span class="md-ellipsis">
+      
+        5.2 Level 2: Configuration Context
+      
+    </span>
+</a>
+<nav aria-label="5.2 Level 2: Configuration Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#whitebox-configuration-context">
+<span class="md-ellipsis">
+      
+        Whitebox: Configuration Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks_1">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#level-3-4-layer-validation-pipeline">
+<span class="md-ellipsis">
+      
+        Level 3: 4-Layer Validation Pipeline
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-hexagonal-architecture-scenarioloader">
+<span class="md-ellipsis">
+      
+        Code Example: Hexagonal Architecture ScenarioLoader
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-data-transfer-objects-dtos">
+<span class="md-ellipsis">
+      
+        Code Example: Data Transfer Objects (DTOs)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hexagonal-architecture-benefits">
+<span class="md-ellipsis">
+      
+        Hexagonal Architecture Benefits
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-level-2-workshop-operations-context">
+<span class="md-ellipsis">
+      
+        5.3 Level 2: Workshop Operations Context
+      
+    </span>
+</a>
+<nav aria-label="5.3 Level 2: Workshop Operations Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#whitebox-workshop-operations-context">
+<span class="md-ellipsis">
+      
+        Whitebox: Workshop Operations Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks_2">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#level-3-process-coordinators">
+<span class="md-ellipsis">
+      
+        Level 3: Process Coordinators
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-actual-popupsim-orchestrator">
+<span class="md-ellipsis">
+      
+        Code Example: Actual PopupSim Orchestrator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-workshop-coordinator-with-batch-processing">
+<span class="md-ellipsis">
+      
+        Code Example: Workshop Coordinator with Batch Processing
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-level-2-analysis-reporting-context">
+<span class="md-ellipsis">
+      
+        5.4 Level 2: Analysis &amp; Reporting Context
+      
+    </span>
+</a>
+<nav aria-label="5.4 Level 2: Analysis &amp; Reporting Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#whitebox-analysis-reporting-context">
+<span class="md-ellipsis">
+      
+        Whitebox: Analysis &amp; Reporting Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks_3">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#level-3-metrics-collection-architecture">
+<span class="md-ellipsis">
+      
+        Level 3: Metrics Collection Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-actual-main-orchestrator">
+<span class="md-ellipsis">
+      
+        Code Example: Actual Main Orchestrator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-kpi-calculator">
+<span class="md-ellipsis">
+      
+        Code Example: KPI Calculator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-metrics-collector-base-class">
+<span class="md-ellipsis">
+      
+        Code Example: Metrics Collector Base Class
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-level-1-system-whitebox">
+<span class="md-ellipsis">
+      
+        5.1 Level 1: System Whitebox
+      
+    </span>
+</a>
+<nav aria-label="5.1 Level 1: System Whitebox" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#important-interfaces">
+<span class="md-ellipsis">
+      
+        Important Interfaces
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-level-2-configuration-context">
+<span class="md-ellipsis">
+      
+        5.2 Level 2: Configuration Context
+      
+    </span>
+</a>
+<nav aria-label="5.2 Level 2: Configuration Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#whitebox-configuration-context">
+<span class="md-ellipsis">
+      
+        Whitebox: Configuration Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks_1">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#level-3-4-layer-validation-pipeline">
+<span class="md-ellipsis">
+      
+        Level 3: 4-Layer Validation Pipeline
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-hexagonal-architecture-scenarioloader">
+<span class="md-ellipsis">
+      
+        Code Example: Hexagonal Architecture ScenarioLoader
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-data-transfer-objects-dtos">
+<span class="md-ellipsis">
+      
+        Code Example: Data Transfer Objects (DTOs)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hexagonal-architecture-benefits">
+<span class="md-ellipsis">
+      
+        Hexagonal Architecture Benefits
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-level-2-workshop-operations-context">
+<span class="md-ellipsis">
+      
+        5.3 Level 2: Workshop Operations Context
+      
+    </span>
+</a>
+<nav aria-label="5.3 Level 2: Workshop Operations Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#whitebox-workshop-operations-context">
+<span class="md-ellipsis">
+      
+        Whitebox: Workshop Operations Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks_2">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#level-3-process-coordinators">
+<span class="md-ellipsis">
+      
+        Level 3: Process Coordinators
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-actual-popupsim-orchestrator">
+<span class="md-ellipsis">
+      
+        Code Example: Actual PopupSim Orchestrator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-workshop-coordinator-with-batch-processing">
+<span class="md-ellipsis">
+      
+        Code Example: Workshop Coordinator with Batch Processing
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-level-2-analysis-reporting-context">
+<span class="md-ellipsis">
+      
+        5.4 Level 2: Analysis &amp; Reporting Context
+      
+    </span>
+</a>
+<nav aria-label="5.4 Level 2: Analysis &amp; Reporting Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#whitebox-analysis-reporting-context">
+<span class="md-ellipsis">
+      
+        Whitebox: Analysis &amp; Reporting Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks_3">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#level-3-metrics-collection-architecture">
+<span class="md-ellipsis">
+      
+        Level 3: Metrics Collection Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-actual-main-orchestrator">
+<span class="md-ellipsis">
+      
+        Code Example: Actual Main Orchestrator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-kpi-calculator">
+<span class="md-ellipsis">
+      
+        Code Example: KPI Calculator
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-metrics-collector-base-class">
+<span class="md-ellipsis">
+      
+        Code Example: Metrics Collector Base Class
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="5-building-block-view-mvp">5. Building Block View (MVP)<a class="headerlink" href="#5-building-block-view-mvp" title="Permanent link">¶</a></h1>
+<p><strong>Note:</strong> For complete Level 3 implementation details including all components, see <a href="../05a-level3-implementation/">Section 5a: Level 3 Implementation Details</a>.</p>
+<h2 id="51-level-1-system-whitebox">5.1 Level 1: System Whitebox<a class="headerlink" href="#51-level-1-system-whitebox" title="Permanent link">¶</a></h2>
+<p><strong>PopUpSim MVP</strong> consists of 3 bounded contexts that work together to provide simulation capabilities.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "PopUpSim MVP System"
+        CC["&lt;b&gt;Configuration Context&lt;/b&gt;&lt;br/&gt;Input validation &amp; parsing&lt;br/&gt;Pydantic + Pandas"]
+        SD["&lt;b&gt;Workshop Operations Context&lt;/b&gt;&lt;br/&gt;Simulation execution &amp; analysis&lt;br/&gt;SimPy + Analysis Engine"]
+        SC["&lt;b&gt;Analysis &amp; Reporting Context&lt;/b&gt;&lt;br/&gt;Orchestration &amp; output&lt;br/&gt;Matplotlib + CSV export"]
+    end
+
+    subgraph "External"
+        Files["Configuration Files&lt;br/&gt;JSON/CSV"]
+        Results["Result Files&lt;br/&gt;CSV/PNG/JSON"]
+    end
+
+    Files --&gt;|"Read"| CC
+    CC --&gt;|"Validated config"| SD
+    SD --&gt;|"Simulation results"| SC
+    SC --&gt;|"Write"| Results
+
+    classDef context fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class CC,SD,SC context
+    class Files,Results external</code></pre>
+<h3 id="contained-building-blocks">Contained Building Blocks<a class="headerlink" href="#contained-building-blocks" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Building Block</th>
+<th>Responsibility</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration Context</strong></td>
+<td>Parse and validate input files (JSON/CSV)</td>
+<td><a href="#52-level-2-configuration-context">Section 5.2</a></td>
+</tr>
+<tr>
+<td><strong>Workshop Operations Context</strong></td>
+<td>Execute discrete event simulation with SimPy and real-time analysis</td>
+<td><a href="#53-level-2-workshop-operations-context">Section 5.3</a></td>
+</tr>
+<tr>
+<td><strong>Analysis &amp; Reporting Context</strong></td>
+<td>Orchestrate simulation execution and generate aggregated output</td>
+<td><a href="#54-level-2-analysis--reporting-context">Section 5.4</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="important-interfaces">Important Interfaces<a class="headerlink" href="#important-interfaces" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Source</th>
+<th>Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Validated Configuration</strong></td>
+<td>Configuration Context</td>
+<td>Workshop Operations Context</td>
+<td>Pydantic-validated domain objects (scenario, workshop, topology, routes, schedules)</td>
+</tr>
+<tr>
+<td><strong>Simulation Results</strong></td>
+<td>Workshop Operations Context</td>
+<td>Analysis &amp; Reporting Context</td>
+<td>Simulation events and KPI data from analysis engine</td>
+</tr>
+<tr>
+<td><strong>File I/O</strong></td>
+<td>All Contexts</td>
+<td>File System</td>
+<td>JSON/CSV read/write operations</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="52-level-2-configuration-context">5.2 Level 2: Configuration Context<a class="headerlink" href="#52-level-2-configuration-context" title="Permanent link">¶</a></h2>
+<h3 id="whitebox-configuration-context">Whitebox: Configuration Context<a class="headerlink" href="#whitebox-configuration-context" title="Permanent link">¶</a></h3>
+<p><strong>Responsibility:</strong> Load, parse, validate, and build complete scenario configuration using hexagonal architecture with 4-layer validation pipeline.</p>
+<p><strong>Architecture Note:</strong> Implements hexagonal architecture with pluggable data source adapters and enterprise-grade 4-layer validation framework.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Configuration Context"
+        Service["ScenarioService&lt;br/&gt;Hexagonal orchestrator"]
+        Pipeline["ScenarioPipeline&lt;br/&gt;Processing pipeline"]
+        Port["ScenarioPort&lt;br/&gt;Interface"]
+        JsonAdapter["JsonScenarioAdapter&lt;br/&gt;JSON files"]
+        CsvAdapter["CsvScenarioAdapter&lt;br/&gt;CSV files"]
+        Factory["ScenarioFactory&lt;br/&gt;DTO → Domain"]
+        Builder["ScenarioBuilder&lt;br/&gt;Complex assembly"]
+        ValidationPipeline["4-Layer Validation&lt;br/&gt;SYNTAX→SEMANTIC→INTEGRITY→FEASIBILITY"]
+        Models["Domain Models&lt;br/&gt;Rich Pydantic models"]
+    end
+
+    Files["JSON/CSV Sources"] --&gt; JsonAdapter
+    Files --&gt; CsvAdapter
+    JsonAdapter --&gt; Port
+    CsvAdapter --&gt; Port
+    Port --&gt; Service
+    Service --&gt; Pipeline
+    Pipeline --&gt; Factory
+    Factory --&gt; Builder
+    Builder --&gt; ValidationPipeline
+    ValidationPipeline --&gt; Models
+    Models --&gt; Output[Validated Scenario]
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef port fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef validation fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+
+    class Service,Pipeline,JsonAdapter,CsvAdapter,Factory,Builder,Models component
+    class Files,Output external
+    class Port port
+    class ValidationPipeline validation</code></pre>
+<h3 id="contained-building-blocks_1">Contained Building Blocks<a class="headerlink" href="#contained-building-blocks_1" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+<th>Layer</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ScenarioService</strong></td>
+<td>Hexagonal orchestrator with pipeline integration</td>
+<td>Application</td>
+<td><code>application/scenario_service.py</code></td>
+</tr>
+<tr>
+<td><strong>ScenarioPipeline</strong></td>
+<td>Multi-stage processing with late validation</td>
+<td>Application</td>
+<td><code>application/pipeline/scenario_pipeline.py</code></td>
+</tr>
+<tr>
+<td><strong>ScenarioPort</strong></td>
+<td>Interface for scenario adapters (hexagonal architecture)</td>
+<td>Domain</td>
+<td><code>domain/ports/scenario_port.py</code></td>
+</tr>
+<tr>
+<td><strong>JsonScenarioAdapter</strong></td>
+<td>Load scenario data from JSON files</td>
+<td>Infrastructure</td>
+<td><code>infrastructure/adapters/json_scenario_adapter.py</code></td>
+</tr>
+<tr>
+<td><strong>CsvScenarioAdapter</strong></td>
+<td>Load scenario data from CSV files</td>
+<td>Infrastructure</td>
+<td><code>infrastructure/adapters/csv_scenario_adapter.py</code></td>
+</tr>
+<tr>
+<td><strong>ScenarioFactory</strong></td>
+<td>Transform DTOs to rich domain models</td>
+<td>Domain</td>
+<td><code>domain/factories/scenario_factory.py</code></td>
+</tr>
+<tr>
+<td><strong>ScenarioBuilder</strong></td>
+<td>Complex scenario assembly with file references</td>
+<td>Application</td>
+<td><code>application/scenario_builder.py</code></td>
+</tr>
+<tr>
+<td><strong>4-Layer Validation</strong></td>
+<td>Enterprise validation pipeline with error stacking</td>
+<td>Shared</td>
+<td><code>shared/validation/pipeline.py</code></td>
+</tr>
+<tr>
+<td><strong>Domain Models</strong></td>
+<td>Rich Pydantic models with business validation</td>
+<td>Domain</td>
+<td><code>domain/models/</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="level-3-4-layer-validation-pipeline">Level 3: 4-Layer Validation Pipeline<a class="headerlink" href="#level-3-4-layer-validation-pipeline" title="Permanent link">¶</a></h3>
+<p><strong>Enterprise-grade validation with comprehensive error stacking:</strong></p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Data Sources"
+        JsonDir["JSON Directory&lt;br/&gt;scenario.json + refs"]
+        CsvDir["CSV Directory&lt;br/&gt;scenario.csv + data files"]
+        ApiEndpoint["API Endpoint&lt;br/&gt;(future)"]
+    end
+
+    subgraph "Adapters"
+        JsonAdapter["JsonDataSourceAdapter"]
+        CsvAdapter["CsvDataSourceAdapter"]
+        ApiAdapter["ApiDataSourceAdapter&lt;br/&gt;(planned)"]
+    end
+
+    subgraph "Core"
+        Factory["DataSourceFactory&lt;br/&gt;Auto-detection"]
+        Loader["ScenarioLoader"]
+        DTO["ScenarioInputDTO"]
+    end
+
+    JsonDir --&gt; JsonAdapter
+    CsvDir --&gt; CsvAdapter
+    ApiEndpoint --&gt; ApiAdapter
+
+    JsonAdapter --&gt; Factory
+    CsvAdapter --&gt; Factory
+    ApiAdapter --&gt; Factory
+
+    Factory --&gt; Loader
+    Loader --&gt; DTO
+    DTO --&gt; Complete[Complete Scenario]
+
+    classDef source fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef adapter fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef core fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+
+    class JsonDir,CsvDir,ApiEndpoint source
+    class JsonAdapter,CsvAdapter,ApiAdapter adapter
+    class Factory,Loader,DTO,Complete core</code></pre>
+<p><strong>CSV Directory Structure:</strong>
+<div class="highlight"><pre><span></span><code>csv_scenario/
+├── scenario.csv      # Basic metadata (ID, dates, seed)
+├── trains.csv        # Train schedule with arrival times
+├── wagons.csv        # Wagon data linked to trains
+├── workshops.csv     # Workshop configuration
+├── tracks.csv        # Track definitions
+├── routes.csv        # Route definitions
+└── locomotives.csv   # Locomotive fleet data
+</code></pre></div></p>
+<h3 id="code-example-hexagonal-architecture-scenarioloader">Code Example: Hexagonal Architecture ScenarioLoader<a class="headerlink" href="#code-example-hexagonal-architecture-scenarioloader" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/configuration/application/scenario_loader.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">configuration.application.dtos.scenario_input_dto</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioInputDTO</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configuration.domain.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSourceError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configuration.domain.ports.data_source_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSourcePort</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">configuration.infrastructure.adapters.data_source_factory</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSourceFactory</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ScenarioLoader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Hexagonal architecture scenario loader.</span>
+
+<span class="sd">    Uses data source adapters to load scenario data from various sources</span>
+<span class="sd">    while maintaining separation between domain logic and infrastructure.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source_adapter</span><span class="p">:</span> <span class="n">DataSourcePort</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Initialize scenario loader.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_source_adapter : DataSourcePort | None</span>
+<span class="sd">            Specific adapter to use, or None to auto-detect</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adapter</span> <span class="o">=</span> <span class="n">data_source_adapter</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_scenario</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScenarioInputDTO</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Load scenario data using appropriate adapter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_identifier : str | Path</span>
+<span class="sd">            Source identifier (file path, directory, URL, etc.)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ScenarioInputDTO</span>
+<span class="sd">            Complete scenario data ready for domain model creation</span>
+<span class="sd">        """</span>
+        <span class="c1"># Use provided adapter or auto-detect</span>
+        <span class="n">adapter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adapter</span> <span class="ow">or</span> <span class="n">DataSourceFactory</span><span class="o">.</span><span class="n">create_adapter</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">)</span>
+
+        <span class="c1"># Validate source before loading</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_source</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">DataSourceError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid or inaccessible data source: </span><span class="si">{</span><span class="n">source_identifier</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># Load scenario data</span>
+        <span class="k">return</span> <span class="n">adapter</span><span class="o">.</span><span class="n">load_scenario</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_source_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Get information about the data source."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">adapter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adapter</span> <span class="ow">or</span> <span class="n">DataSourceFactory</span><span class="o">.</span><span class="n">create_adapter</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">)</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">get_source_metadata</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">)</span>
+            <span class="n">metadata</span><span class="p">[</span><span class="s1">'valid'</span><span class="p">]</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_source</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">metadata</span>
+        <span class="k">except</span> <span class="n">DataSourceError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">'valid'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">'error'</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="s1">'source_type'</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
+            <span class="p">}</span>
+</code></pre></div>
+<p><strong>File:</strong> <code>popupsim/backend/src/configuration/infrastructure/adapters/csv_data_source_adapter.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CsvDataSourceAdapter</span><span class="p">(</span><span class="n">DataSourcePort</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""CSV data source adapter for loading scenario data from CSV files."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_scenario</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScenarioInputDTO</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Load scenario data from CSV files in a directory."""</span>
+        <span class="n">csv_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source_identifier</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">csv_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">DataSourceError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'CSV directory not found: </span><span class="si">{</span><span class="n">csv_dir</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="c1"># Load scenario metadata</span>
+        <span class="n">scenario_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_scenario_metadata</span><span class="p">(</span><span class="n">csv_dir</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ScenarioInputDTO</span><span class="p">(</span>
+            <span class="n">scenario_id</span><span class="o">=</span><span class="n">scenario_data</span><span class="p">[</span><span class="s1">'scenario_id'</span><span class="p">],</span>
+            <span class="n">start_date</span><span class="o">=</span><span class="n">scenario_data</span><span class="p">[</span><span class="s1">'start_date'</span><span class="p">],</span>
+            <span class="n">end_date</span><span class="o">=</span><span class="n">scenario_data</span><span class="p">[</span><span class="s1">'end_date'</span><span class="p">],</span>
+            <span class="n">random_seed</span><span class="o">=</span><span class="n">scenario_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'random_seed'</span><span class="p">),</span>
+            <span class="n">train_schedule_file</span><span class="o">=</span><span class="s1">'trains.csv'</span><span class="p">,</span>
+            <span class="n">routes_file</span><span class="o">=</span><span class="s1">'routes.csv'</span><span class="p">,</span>
+            <span class="n">workshop_tracks_file</span><span class="o">=</span><span class="s1">'workshops.csv'</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_scenario_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">csv_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Load scenario metadata from scenario.csv."""</span>
+        <span class="n">scenario_file</span> <span class="o">=</span> <span class="n">csv_dir</span> <span class="o">/</span> <span class="s1">'scenario.csv'</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">scenario_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">DataSourceError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'scenario.csv not found in </span><span class="si">{</span><span class="n">csv_dir</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DataSourceError</span><span class="p">(</span><span class="s1">'pandas required for CSV processing'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">scenario_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DataSourceError</span><span class="p">(</span><span class="s1">'scenario.csv is empty'</span><span class="p">)</span>
+
+        <span class="n">row</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'scenario_id'</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s1">'scenario_id'</span><span class="p">],</span>
+            <span class="s1">'start_date'</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s1">'start_date'</span><span class="p">],</span>
+            <span class="s1">'end_date'</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s1">'end_date'</span><span class="p">],</span>
+            <span class="s1">'random_seed'</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'random_seed'</span><span class="p">),</span>
+        <span class="p">}</span>
+</code></pre></div>
+<h3 id="code-example-data-transfer-objects-dtos">Code Example: Data Transfer Objects (DTOs)<a class="headerlink" href="#code-example-data-transfer-objects-dtos" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/models/scenario.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TrackSelectionStrategy</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Strategy for selecting tracks."""</span>
+    <span class="n">ROUND_ROBIN</span> <span class="o">=</span> <span class="s1">'round_robin'</span>
+    <span class="n">LEAST_OCCUPIED</span> <span class="o">=</span> <span class="s1">'least_occupied'</span>
+    <span class="n">FIRST_AVAILABLE</span> <span class="o">=</span> <span class="s1">'first_available'</span>
+    <span class="n">RANDOM</span> <span class="o">=</span> <span class="s1">'random'</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">LocoDeliveryStrategy</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Strategy for locomotive delivery."""</span>
+    <span class="n">RETURN_TO_PARKING</span> <span class="o">=</span> <span class="s1">'return_to_parking'</span>
+    <span class="n">STAY_AT_WORKSHOP</span> <span class="o">=</span> <span class="s1">'stay_at_workshop'</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Scenario</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Complete scenario configuration."""</span>
+    <span class="n">scenario_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">datetime</span>
+
+    <span class="c1"># Optional components loaded from referenced files</span>
+    <span class="n">trains</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Train</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Track</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">workshops</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Workshop</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">locomotives</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Locomotive</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">routes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Route</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">topology</span><span class="p">:</span> <span class="n">Topology</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">process_times</span><span class="p">:</span> <span class="n">ProcessTimes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Strategy configurations</span>
+    <span class="n">track_selection_strategy</span><span class="p">:</span> <span class="n">TrackSelectionStrategy</span> <span class="o">=</span> <span class="n">TrackSelectionStrategy</span><span class="o">.</span><span class="n">LEAST_OCCUPIED</span>
+    <span class="n">retrofit_selection_strategy</span><span class="p">:</span> <span class="n">TrackSelectionStrategy</span> <span class="o">=</span> <span class="n">TrackSelectionStrategy</span><span class="o">.</span><span class="n">LEAST_OCCUPIED</span>
+    <span class="n">loco_delivery_strategy</span><span class="p">:</span> <span class="n">LocoDeliveryStrategy</span> <span class="o">=</span> <span class="n">LocoDeliveryStrategy</span><span class="o">.</span><span class="n">RETURN_TO_PARKING</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_simulation_requirements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Validate that all required components are loaded."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">trains</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Scenario must have trains configured'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshops</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Scenario must have workshops configured'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">routes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'Scenario must have routes configured'</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>File:</strong> <code>popupsim/backend/src/models/workshop.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Workshop</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Workshop configuration."""</span>
+    <span class="n">workshop_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">track_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">retrofit_stations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"Number of parallel retrofit stations"</span><span class="p">)</span>
+
+    <span class="c1"># Optional fields</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</code></pre></div>
+<h3 id="hexagonal-architecture-benefits">Hexagonal Architecture Benefits<a class="headerlink" href="#hexagonal-architecture-benefits" title="Permanent link">¶</a></h3>
+<p><strong>Key aspects:</strong>
+- <strong>Source Independence:</strong> Same domain logic works with JSON, CSV, API, or database sources
+- <strong>Testability:</strong> Easy to mock data sources for testing with fake adapters
+- <strong>Extensibility:</strong> New data sources can be added without changing core logic
+- <strong>Maintainability:</strong> Clear separation between data access and business logic
+- <strong>Auto-detection:</strong> Factory pattern automatically selects appropriate adapter
+- <strong>Type Safety:</strong> Pydantic DTOs ensure consistent data structure across adapters</p>
+<p><strong>Usage Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Auto-detect source type</span>
+<span class="n">loader</span> <span class="o">=</span> <span class="n">ScenarioLoader</span><span class="p">()</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_scenario</span><span class="p">(</span><span class="s1">'path/to/csv_directory'</span><span class="p">)</span>  <span class="c1"># CSV</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">load_scenario</span><span class="p">(</span><span class="s1">'path/to/scenario.json'</span><span class="p">)</span>  <span class="c1"># JSON</span>
+
+<span class="c1"># Use specific adapter</span>
+<span class="n">csv_adapter</span> <span class="o">=</span> <span class="n">CsvDataSourceAdapter</span><span class="p">()</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">csv_adapter</span><span class="o">.</span><span class="n">load_scenario</span><span class="p">(</span><span class="s1">'csv_directory'</span><span class="p">)</span>
+
+<span class="c1"># Get source information</span>
+<span class="n">info</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_source_info</span><span class="p">(</span><span class="s1">'data_source'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Source type: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">'source_type'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Valid: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">'valid'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Future API Integration:</strong>
+The architecture is designed for future API integration:
+- <strong>Pull APIs:</strong> Adapter fetches data from REST endpoints
+- <strong>Push APIs:</strong> Adapter receives data via webhooks/events
+- <strong>Streaming APIs:</strong> Real-time data updates during simulation</p>
+<hr/>
+<h2 id="53-level-2-workshop-operations-context">5.3 Level 2: Workshop Operations Context<a class="headerlink" href="#53-level-2-workshop-operations-context" title="Permanent link">¶</a></h2>
+<h3 id="whitebox-workshop-operations-context">Whitebox: Workshop Operations Context<a class="headerlink" href="#whitebox-workshop-operations-context" title="Permanent link">¶</a></h3>
+<p><strong>Responsibility:</strong> Execute discrete event simulation with real-time metrics collection.</p>
+<p><strong>Architecture Note:</strong> Components follow layered architecture pattern (see <a href="../08-concepts/#81-layered-architecture">Section 8.1</a>).</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Workshop Operations Context"
+        Orchestrator["PopupSim Orchestrator&lt;br/&gt;Main simulation coordinator"]
+        Coordinators["Process Coordinators&lt;br/&gt;5 specialized coordinators"]
+        Domain["Domain Services&lt;br/&gt;State managers &amp; selectors"]
+        Resources["Resource Management&lt;br/&gt;Pools &amp; capacity managers"]
+        SimAdapter["SimPy Adapter&lt;br/&gt;Simulation abstraction"]
+        Collectors["Metrics Collectors&lt;br/&gt;Real-time data collection"]
+    end
+
+    Config[Validated Config] --&gt; Orchestrator
+    Orchestrator --&gt; Coordinators
+    Coordinators --&gt; Domain
+    Coordinators --&gt; Resources
+    Coordinators --&gt; SimAdapter
+    SimAdapter --&gt; SimPy[SimPy Framework]
+    Coordinators --&gt; Collectors
+    Collectors --&gt; Results[Simulation Events &amp; Metrics]
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Orchestrator,Coordinators,Domain,Resources,SimAdapter,Collectors component
+    class Config,Results,SimPy external</code></pre>
+<h3 id="contained-building-blocks_2">Contained Building Blocks<a class="headerlink" href="#contained-building-blocks_2" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+<th>Layer</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PopupSim Orchestrator</strong></td>
+<td>Main simulation coordinator, spawns processes</td>
+<td>Business Logic</td>
+<td><code>simulation/popupsim.py</code></td>
+</tr>
+<tr>
+<td><strong>Process Coordinators</strong></td>
+<td>5 specialized coordinators for wagon flow</td>
+<td>Business Logic</td>
+<td><code>simulation/coordinators/</code></td>
+</tr>
+<tr>
+<td><strong>Domain Services</strong></td>
+<td>State managers, selectors, distributors (no SimPy deps)</td>
+<td>Domain</td>
+<td><code>domain/</code></td>
+</tr>
+<tr>
+<td><strong>Resource Management</strong></td>
+<td>ResourcePool, TrackCapacityManager, WorkshopCapacityManager</td>
+<td>Business Logic</td>
+<td><code>simulation/resource_pool.py</code>, <code>simulation/track_capacity.py</code>, <code>simulation/workshop_capacity.py</code></td>
+</tr>
+<tr>
+<td><strong>SimPy Adapter</strong></td>
+<td>Abstraction layer for SimPy operations</td>
+<td>Infrastructure</td>
+<td><code>simulation/sim_adapter.py</code></td>
+</tr>
+<tr>
+<td><strong>Metrics Collectors</strong></td>
+<td>Real-time event collection during simulation</td>
+<td>Business Logic</td>
+<td><code>analytics/collectors/</code></td>
+</tr>
+<tr>
+<td><strong>SimPy Framework</strong></td>
+<td>Discrete event simulation engine</td>
+<td>Infrastructure</td>
+<td>SimPy library</td>
+</tr>
+</tbody>
+</table>
+<h3 id="level-3-process-coordinators">Level 3: Process Coordinators<a class="headerlink" href="#level-3-process-coordinators" title="Permanent link">¶</a></h3>
+<p><strong>5 specialized coordinators orchestrate wagon flow:</strong></p>
+<pre class="mermaid"><code>graph LR
+    Train[Train Arrival&lt;br/&gt;Coordinator] --&gt; Pickup[Wagon Pickup&lt;br/&gt;Coordinator]
+    Pickup --&gt; Workshop[Workshop&lt;br/&gt;Coordinator]
+    Workshop --&gt; Retrofitted[Retrofitted Pickup&lt;br/&gt;Coordinator]
+    Retrofitted --&gt; Parking[Parking&lt;br/&gt;Coordinator]
+
+    classDef coord fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    class Train,Pickup,Workshop,Retrofitted,Parking coord</code></pre>
+<table>
+<thead>
+<tr>
+<th>Coordinator</th>
+<th>Process Function</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Train Arrival</strong></td>
+<td><code>process_train_arrivals()</code></td>
+<td>Process arriving trains, select wagons at hump, assign to collection tracks</td>
+</tr>
+<tr>
+<td><strong>Wagon Pickup</strong></td>
+<td><code>pickup_wagons_to_retrofit()</code></td>
+<td>Allocate locomotive, pickup wagons from collection, deliver to retrofit tracks</td>
+</tr>
+<tr>
+<td><strong>Workshop</strong></td>
+<td><code>move_wagons_to_stations()</code></td>
+<td>Move wagon batches to workshop, decouple sequentially, spawn retrofit processes</td>
+</tr>
+<tr>
+<td><strong>Retrofitted Pickup</strong></td>
+<td><code>pickup_retrofitted_wagons()</code></td>
+<td>Pickup completed wagons in batches, move to retrofitted track</td>
+</tr>
+<tr>
+<td><strong>Parking</strong></td>
+<td><code>move_to_parking()</code></td>
+<td>Move retrofitted wagons to parking tracks (sequential fill strategy)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="code-example-actual-popupsim-orchestrator">Code Example: Actual PopupSim Orchestrator<a class="headerlink" href="#code-example-actual-popupsim-orchestrator" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/simulation/popupsim.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PopupSim</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""High-level simulation orchestrator for PopUp-Sim."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">sim</span><span class="p">:</span> <span class="n">SimulationAdapter</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span><span class="p">,</span> 
+        <span class="n">locomotive_service</span><span class="p">:</span> <span class="n">LocomotiveService</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">:</span> <span class="n">SimulationAdapter</span> <span class="o">=</span> <span class="n">sim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span> <span class="o">=</span> <span class="n">scenario</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locomotive_service</span> <span class="o">=</span> <span class="n">locomotive_service</span> <span class="ow">or</span> <span class="n">DefaultLocomotiveService</span><span class="p">()</span>
+
+        <span class="c1"># Resource pools</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locomotives</span> <span class="o">=</span> <span class="n">ResourcePool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">locomotives_queue</span><span class="p">,</span> <span class="s1">'Locomotives'</span><span class="p">)</span>
+
+        <span class="c1"># Capacity managers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">track_capacity</span> <span class="o">=</span> <span class="n">TrackCapacityManager</span><span class="p">(</span>
+            <span class="n">scenario</span><span class="o">.</span><span class="n">tracks</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="n">scenario</span><span class="o">.</span><span class="n">topology</span><span class="p">,</span>
+            <span class="n">collection_strategy</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">track_selection_strategy</span><span class="p">,</span>
+            <span class="n">retrofit_strategy</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">retrofit_selection_strategy</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workshop_capacity</span> <span class="o">=</span> <span class="n">WorkshopCapacityManager</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshops_queue</span><span class="p">)</span>
+
+        <span class="c1"># Domain services (no SimPy dependencies)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wagon_selector</span> <span class="o">=</span> <span class="n">WagonSelector</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wagon_state</span> <span class="o">=</span> <span class="n">WagonStateManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loco_state</span> <span class="o">=</span> <span class="n">LocomotiveStateManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workshop_distributor</span> <span class="o">=</span> <span class="n">WorkshopDistributor</span><span class="p">()</span>
+
+        <span class="c1"># Metrics collection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">SimulationMetrics</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">WagonCollector</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">until</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run simulation by spawning 5 coordinator processes."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">process_train_arrivals</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">pickup_wagons_to_retrofit</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">move_wagons_to_stations</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">pickup_retrofitted_wagons</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">move_to_parking</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">until</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="code-example-workshop-coordinator-with-batch-processing">Code Example: Workshop Coordinator with Batch Processing<a class="headerlink" href="#code-example-workshop-coordinator-with-batch-processing" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/simulation/popupsim.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">move_wagons_to_stations</span><span class="p">(</span><span class="n">popupsim</span><span class="p">:</span> <span class="n">PopupSim</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Move wagon batches from retrofit track to stations.</span>
+
+<span class="sd">    Blocks until batch delivered, travels via route, decouples sequentially,</span>
+<span class="sd">    then spawns independent process for each wagon.</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">track_id</span> <span class="ow">in</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">wagons_ready_for_stations</span><span class="p">:</span>
+        <span class="n">popupsim</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">_process_track_batches</span><span class="p">,</span> <span class="n">popupsim</span><span class="p">,</span> <span class="n">track_id</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_process_track_batches</span><span class="p">(</span><span class="n">popupsim</span><span class="p">:</span> <span class="n">PopupSim</span><span class="p">,</span> <span class="n">workshop_track_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Process wagon batches for a single workshop track."""</span>
+    <span class="n">workshop</span> <span class="o">=</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">workshop_capacity</span><span class="o">.</span><span class="n">workshops_by_track</span><span class="p">[</span><span class="n">workshop_track_id</span><span class="p">]</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">workshop</span><span class="o">.</span><span class="n">retrofit_stations</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># Collect batch up to batch_size</span>
+        <span class="n">batch_wagons</span><span class="p">,</span> <span class="n">retrofit_track_id</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">_collect_wagon_batch</span><span class="p">(</span>
+            <span class="n">popupsim</span><span class="p">,</span> <span class="n">workshop_track_id</span><span class="p">,</span> <span class="n">batch_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Wait until workshop ready (track and stations empty)</span>
+        <span class="k">yield from</span> <span class="n">_wait_for_workshop_ready</span><span class="p">(</span><span class="n">popupsim</span><span class="p">,</span> <span class="n">workshop_track_id</span><span class="p">,</span> <span class="n">workshop</span><span class="p">)</span>
+
+        <span class="c1"># Allocate locomotive and deliver batch</span>
+        <span class="n">loco</span> <span class="o">=</span> <span class="k">yield from</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">locomotive_service</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">popupsim</span><span class="p">)</span>
+        <span class="k">yield from</span> <span class="n">_deliver_batch_to_workshop</span><span class="p">(</span>
+            <span class="n">popupsim</span><span class="p">,</span> <span class="n">loco</span><span class="p">,</span> <span class="n">batch_wagons</span><span class="p">,</span> <span class="n">retrofit_track_id</span><span class="p">,</span> <span class="n">workshop</span><span class="o">.</span><span class="n">workshop_id</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Sequentially decouple and spawn processing for each wagon</span>
+        <span class="k">yield from</span> <span class="n">_decouple_and_process_wagons</span><span class="p">(</span><span class="n">popupsim</span><span class="p">,</span> <span class="n">batch_wagons</span><span class="p">,</span> <span class="n">workshop_track_id</span><span class="p">)</span>
+
+        <span class="c1"># Return locomotive to parking</span>
+        <span class="k">yield from</span> <span class="n">_return_loco_to_parking</span><span class="p">(</span><span class="n">popupsim</span><span class="p">,</span> <span class="n">loco</span><span class="p">)</span>
+        <span class="k">yield from</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">locomotive_service</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="n">popupsim</span><span class="p">,</span> <span class="n">loco</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">process_single_wagon</span><span class="p">(</span><span class="n">popupsim</span><span class="p">:</span> <span class="n">PopupSim</span><span class="p">,</span> <span class="n">wagon</span><span class="p">:</span> <span class="n">Wagon</span><span class="p">,</span> <span class="n">track_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Process single wagon at workshop station using SimPy Resource."""</span>
+    <span class="n">workshop_resource</span> <span class="o">=</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">workshop_capacity</span><span class="o">.</span><span class="n">get_resource</span><span class="p">(</span><span class="n">track_id</span><span class="p">)</span>
+    <span class="n">process_times</span> <span class="o">=</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">process_times</span>
+
+    <span class="k">with</span> <span class="n">workshop_resource</span><span class="o">.</span><span class="n">request</span><span class="p">()</span> <span class="k">as</span> <span class="n">station_req</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">station_req</span>  <span class="c1"># Block until station available</span>
+
+        <span class="c1"># Station acquired - start retrofit</span>
+        <span class="n">wagon</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">WagonStatus</span><span class="o">.</span><span class="n">RETROFITTING</span>
+        <span class="n">wagon</span><span class="o">.</span><span class="n">retrofit_start_time</span> <span class="o">=</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">current_time</span><span class="p">()</span>
+
+        <span class="c1"># Perform retrofit work</span>
+        <span class="k">yield</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">process_times</span><span class="o">.</span><span class="n">wagon_retrofit_time</span><span class="p">)</span>
+
+        <span class="c1"># Retrofit complete</span>
+        <span class="n">wagon</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">WagonStatus</span><span class="o">.</span><span class="n">RETROFITTED</span>
+        <span class="n">wagon</span><span class="o">.</span><span class="n">coupler_type</span> <span class="o">=</span> <span class="n">CouplerType</span><span class="o">.</span><span class="n">DAC</span>
+        <span class="n">popupsim</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">record_event</span><span class="p">(</span><span class="s1">'wagon_retrofitted'</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s1">'wagon_id'</span><span class="p">:</span> <span class="n">wagon</span><span class="o">.</span><span class="n">wagon_id</span><span class="p">,</span> 
+            <span class="s1">'time'</span><span class="p">:</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">current_time</span><span class="p">()</span>
+        <span class="p">})</span>
+
+        <span class="c1"># Signal completion</span>
+        <span class="k">yield</span> <span class="n">popupsim</span><span class="o">.</span><span class="n">wagons_completed</span><span class="p">[</span><span class="n">track_id</span><span class="p">]</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">wagon</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Key aspects:</strong>
+- 5 independent coordinator processes run concurrently
+- Batch processing for efficient locomotive utilization
+- Sequential coupling/decoupling with timing
+- SimPy Resources for workshop station capacity
+- Real-time metrics collection during simulation
+- Domain services isolated from SimPy dependencies</p>
+<hr/>
+<h2 id="54-level-2-analysis-reporting-context">5.4 Level 2: Analysis &amp; Reporting Context<a class="headerlink" href="#54-level-2-analysis-reporting-context" title="Permanent link">¶</a></h2>
+<h3 id="whitebox-analysis-reporting-context">Whitebox: Analysis &amp; Reporting Context<a class="headerlink" href="#whitebox-analysis-reporting-context" title="Permanent link">¶</a></h3>
+<p><strong>Responsibility:</strong> Orchestrate simulation execution and generate comprehensive output.</p>
+<p><strong>Architecture Note:</strong> Components follow layered architecture pattern (see <a href="../08-concepts/#81-layered-architecture">Section 8.1</a>).</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Analysis &amp; Reporting Context"
+        Main["Main Orchestrator&lt;br/&gt;CLI entry point"]
+        KPICalc["KPI Calculator&lt;br/&gt;Compute performance metrics"]
+        Collectors["Metrics Collectors&lt;br/&gt;Wagon, Locomotive, Workshop"]
+        Statistics["Statistics Calculator&lt;br/&gt;Pandas/NumPy analysis"]
+        CSVExport["CSV Exporter&lt;br/&gt;Structured data export"]
+        Visualizer["Visualizer&lt;br/&gt;Chart generation"]
+    end
+
+    Metrics[Raw Simulation Metrics] --&gt; KPICalc
+    Metrics --&gt; Statistics
+    KPICalc --&gt; CSVExport
+    KPICalc --&gt; Visualizer
+    Statistics --&gt; CSVExport
+    CSVExport --&gt; CSV[CSV Files]
+    Visualizer --&gt; Charts[PNG Charts]
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Main,KPICalc,Collectors,Statistics,CSVExport,Visualizer component
+    class Metrics,CSV,Charts external</code></pre>
+<h3 id="contained-building-blocks_3">Contained Building Blocks<a class="headerlink" href="#contained-building-blocks_3" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+<th>Layer</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Main Orchestrator</strong></td>
+<td>CLI entry point, coordinates full pipeline</td>
+<td>Presentation</td>
+<td><code>main.py</code> (Typer CLI)</td>
+</tr>
+<tr>
+<td><strong>KPI Calculator</strong></td>
+<td>Calculate throughput, utilization, bottlenecks</td>
+<td>Business Logic</td>
+<td><code>analytics/kpi/calculator.py</code></td>
+</tr>
+<tr>
+<td><strong>Metrics Collectors</strong></td>
+<td>Real-time event collection (wagon, locomotive, workshop)</td>
+<td>Business Logic</td>
+<td><code>analytics/collectors/</code></td>
+</tr>
+<tr>
+<td><strong>Statistics Calculator</strong></td>
+<td>Pandas/NumPy statistical analysis</td>
+<td>Business Logic</td>
+<td><code>analytics/reporting/statistics.py</code></td>
+</tr>
+<tr>
+<td><strong>CSV Exporter</strong></td>
+<td>Export KPIs and metrics to CSV</td>
+<td>Presentation</td>
+<td><code>analytics/reporting/csv_exporter.py</code></td>
+</tr>
+<tr>
+<td><strong>Visualizer</strong></td>
+<td>Generate Matplotlib charts</td>
+<td>Presentation</td>
+<td><code>analytics/reporting/visualizer.py</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="level-3-metrics-collection-architecture">Level 3: Metrics Collection Architecture<a class="headerlink" href="#level-3-metrics-collection-architecture" title="Permanent link">¶</a></h3>
+<p><strong>Real-time collectors observe simulation events:</strong></p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Metrics Collection"
+        Base["MetricCollector&lt;br/&gt;(Abstract Base)"]
+        Wagon["WagonCollector&lt;br/&gt;Flow times, waiting"]
+        Loco["LocomotiveCollector&lt;br/&gt;Utilization, trips"]
+        Workshop["WorkshopCollector&lt;br/&gt;Station occupancy"]
+        TimeSeries["TimeSeriesCollector&lt;br/&gt;Time-based metrics"]
+    end
+
+    Base --&gt; Wagon
+    Base --&gt; Loco
+    Base --&gt; Workshop
+    Base --&gt; TimeSeries
+
+    SimEvents[Simulation Events] --&gt; Wagon
+    SimEvents --&gt; Loco
+    SimEvents --&gt; Workshop
+    SimEvents --&gt; TimeSeries
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Base,Wagon,Loco,Workshop,TimeSeries component
+    class SimEvents external</code></pre>
+<h3 id="code-example-actual-main-orchestrator">Code Example: Actual Main Orchestrator<a class="headerlink" href="#code-example-actual-main-orchestrator" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/main.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">analytics.kpi</span><span class="w"> </span><span class="kn">import</span> <span class="n">KPICalculator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">analytics.reporting</span><span class="w"> </span><span class="kn">import</span> <span class="n">CSVExporter</span><span class="p">,</span> <span class="n">Visualizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">builders.scenario_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simulation.popupsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">PopupSim</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">simulation.sim_adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimPyAdapter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typer</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Typer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'popupsim'</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
+    <span class="n">scenario_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">debug</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'INFO'</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Main entry point for PopUpSim application."""</span>
+    <span class="c1"># 1. Configuration Context - Load and validate</span>
+    <span class="n">scenario</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">(</span><span class="n">scenario_path</span><span class="p">)</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+    <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Scenario loaded: </span><span class="si">{</span><span class="n">scenario</span><span class="o">.</span><span class="n">scenario_id</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="c1"># 2. Workshop Operations Context - Run simulation</span>
+    <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">'Starting simulation...'</span><span class="p">)</span>
+    <span class="n">sim_adapter</span> <span class="o">=</span> <span class="n">SimPyAdapter</span><span class="o">.</span><span class="n">create_simpy_adapter</span><span class="p">()</span>
+    <span class="n">popup_sim</span> <span class="o">=</span> <span class="n">PopupSim</span><span class="p">(</span><span class="n">sim_adapter</span><span class="p">,</span> <span class="n">scenario</span><span class="p">)</span>
+    <span class="n">popup_sim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="c1"># Get raw metrics from collectors</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">popup_sim</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span>
+
+    <span class="c1"># 3. Analysis &amp; Reporting Context - Calculate KPIs</span>
+    <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">'Calculating KPIs...'</span><span class="p">)</span>
+    <span class="n">kpi_calculator</span> <span class="o">=</span> <span class="n">KPICalculator</span><span class="p">()</span>
+    <span class="n">kpi_result</span> <span class="o">=</span> <span class="n">kpi_calculator</span><span class="o">.</span><span class="n">calculate_from_simulation</span><span class="p">(</span>
+        <span class="n">metrics</span><span class="p">,</span>
+        <span class="n">scenario</span><span class="p">,</span>
+        <span class="n">popup_sim</span><span class="o">.</span><span class="n">wagons_queue</span><span class="p">,</span>
+        <span class="n">popup_sim</span><span class="o">.</span><span class="n">rejected_wagons_queue</span><span class="p">,</span>
+        <span class="n">popup_sim</span><span class="o">.</span><span class="n">workshops_queue</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Display KPIs to console</span>
+    <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Throughput: </span><span class="si">{</span><span class="n">kpi_result</span><span class="o">.</span><span class="n">throughput</span><span class="o">.</span><span class="n">wagons_per_hour</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> wagons/hour'</span><span class="p">)</span>
+
+    <span class="c1"># Export results to CSV</span>
+    <span class="n">csv_exporter</span> <span class="o">=</span> <span class="n">CSVExporter</span><span class="p">()</span>
+    <span class="n">csv_files</span> <span class="o">=</span> <span class="n">csv_exporter</span><span class="o">.</span><span class="n">export_all</span><span class="p">(</span><span class="n">kpi_result</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+    <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s1">'CSV files saved: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">csv_files</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+    <span class="c1"># Generate visualization charts</span>
+    <span class="n">visualizer</span> <span class="o">=</span> <span class="n">Visualizer</span><span class="p">()</span>
+    <span class="n">chart_paths</span> <span class="o">=</span> <span class="n">visualizer</span><span class="o">.</span><span class="n">generate_all_charts</span><span class="p">(</span><span class="n">kpi_result</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+    <span class="n">typer</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Charts saved: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chart_paths</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="code-example-kpi-calculator">Code Example: KPI Calculator<a class="headerlink" href="#code-example-kpi-calculator" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/analytics/kpi/calculator.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">analytics.models.kpi_result</span><span class="w"> </span><span class="kn">import</span> <span class="n">KPIResult</span><span class="p">,</span> <span class="n">ThroughputKPI</span><span class="p">,</span> <span class="n">UtilizationKPI</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">KPICalculator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calculate KPIs from simulation results."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_from_simulation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span>
+        <span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span><span class="p">,</span>
+        <span class="n">wagons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Wagon</span><span class="p">],</span>
+        <span class="n">rejected_wagons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Wagon</span><span class="p">],</span>
+        <span class="n">workshops</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Workshop</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KPIResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Calculate all KPIs from simulation results."""</span>
+        <span class="n">throughput</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_throughput</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">wagons</span><span class="p">,</span> <span class="n">rejected_wagons</span><span class="p">)</span>
+        <span class="n">utilization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_utilization</span><span class="p">(</span><span class="n">workshops</span><span class="p">,</span> <span class="n">wagons</span><span class="p">)</span>
+        <span class="n">bottlenecks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identify_bottlenecks</span><span class="p">(</span><span class="n">throughput</span><span class="p">,</span> <span class="n">utilization</span><span class="p">)</span>
+        <span class="n">avg_flow_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_avg_flow_time</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        <span class="n">avg_waiting_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_avg_waiting_time</span><span class="p">(</span><span class="n">wagons</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">KPIResult</span><span class="p">(</span>
+            <span class="n">scenario_id</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">scenario_id</span><span class="p">,</span>
+            <span class="n">throughput</span><span class="o">=</span><span class="n">throughput</span><span class="p">,</span>
+            <span class="n">utilization</span><span class="o">=</span><span class="n">utilization</span><span class="p">,</span>
+            <span class="n">bottlenecks</span><span class="o">=</span><span class="n">bottlenecks</span><span class="p">,</span>
+            <span class="n">avg_flow_time_minutes</span><span class="o">=</span><span class="n">avg_flow_time</span><span class="p">,</span>
+            <span class="n">avg_waiting_time_minutes</span><span class="o">=</span><span class="n">avg_waiting_time</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_throughput</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span><span class="p">,</span> <span class="n">wagons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Wagon</span><span class="p">],</span> <span class="n">rejected_wagons</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Wagon</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ThroughputKPI</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Calculate throughput metrics."""</span>
+        <span class="n">duration_hours</span> <span class="o">=</span> <span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">end_date</span> <span class="o">-</span> <span class="n">scenario</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mf">3600.0</span>
+        <span class="n">retrofitted</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">wagons</span> <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">WagonStatus</span><span class="o">.</span><span class="n">RETROFITTED</span><span class="p">)</span>
+        <span class="n">wagons_per_hour</span> <span class="o">=</span> <span class="n">retrofitted</span> <span class="o">/</span> <span class="n">duration_hours</span> <span class="k">if</span> <span class="n">duration_hours</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+        <span class="k">return</span> <span class="n">ThroughputKPI</span><span class="p">(</span>
+            <span class="n">total_wagons_processed</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">wagons</span><span class="p">),</span>
+            <span class="n">total_wagons_retrofitted</span><span class="o">=</span><span class="n">retrofitted</span><span class="p">,</span>
+            <span class="n">total_wagons_rejected</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">rejected_wagons</span><span class="p">),</span>
+            <span class="n">simulation_duration_hours</span><span class="o">=</span><span class="n">duration_hours</span><span class="p">,</span>
+            <span class="n">wagons_per_hour</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">wagons_per_hour</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">wagons_per_day</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">wagons_per_hour</span> <span class="o">*</span> <span class="mf">24.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+</code></pre></div>
+<h3 id="code-example-metrics-collector-base-class">Code Example: Metrics Collector Base Class<a class="headerlink" href="#code-example-metrics-collector-base-class" title="Permanent link">¶</a></h3>
+<p><strong>File:</strong> <code>popupsim/backend/src/analytics/collectors/base.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MetricResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Single metric result."""</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">category</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MetricCollector</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Base class for metric collectors."""</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Record an event for metric computation."""</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">MetricResult</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Get computed metrics."""</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reset collector state."""</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</code></pre></div>
+<p><strong>Key aspects:</strong>
+- Direct method calls between contexts (MVP simplification)
+- Clear pipeline: Configuration → Simulation → KPI Calculation → Export
+- Real-time metrics collection during simulation
+- Post-simulation KPI aggregation and analysis
+- Multiple output formats (console, CSV, PNG charts)
+- Typer CLI for user-friendly command-line interface</p>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>
