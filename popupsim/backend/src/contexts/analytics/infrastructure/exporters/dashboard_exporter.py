@@ -526,7 +526,7 @@ class DashboardExporter:
                         )
                         wagon_states[wagon_id] = {'location': to_track, 'event': 'ON_RETROFIT_TRACK'}
 
-                    if 'retrofitted' == to_track.lower():
+                    if to_track.lower() == 'retrofitted':
                         wagon_journey.append(
                             {
                                 'timestamp': timestamp,
