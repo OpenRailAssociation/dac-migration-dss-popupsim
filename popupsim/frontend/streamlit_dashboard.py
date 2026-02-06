@@ -708,7 +708,8 @@ def render_rejected_wagons_tab(data: dict[str, Any]) -> None:
         'collection track full': 'Collection Track Full',
     }
 
-    rejection_counts = {v: 0 for v in canonical_types.values()}
+    # not sure what is the target here but take care with what ruff suggests
+    rejection_counts = {v: 0 for v in canonical_types.values()}  # noqa: C420
     actual_counts_norm = rejected_df['rejection_type_norm'].value_counts()
     for norm_type, count in actual_counts_norm.items():
         if norm_type in canonical_types:
@@ -932,13 +933,7 @@ def _render_wagon_gantt(journey_df) -> None:  # noqa: PLR0915
 
     # Prioritize key tracks in legend - dynamically detect collection tracks
     collection_tracks_in_data = [t for t in unique_tracks if 'collection' in str(t).lower()]
-    priority_tracks = collection_tracks_in_data + [
-        'retrofit',
-        'WS_01',
-        'WS_02',
-        'retrofitted',
-        'rejected',
-    ]
+    priority_tracks = [*collection_tracks_in_data, 'retrofit', 'WS_01', 'WS_02', 'retrofitted', 'rejected']
     # Add parking as generic if any parking tracks exist
     if any('parking' in str(t).lower() for t in unique_tracks):
         priority_tracks.append('parking')
@@ -1215,7 +1210,8 @@ def main() -> None:
 
     if not data:
         st.error(
-            '❌ No data files found in output directory. Maybe you need to set a scenario folder from the dropdown first.'
+            '❌ No data files found in output directory. Maybe you need to set a scenario folder from the dropdown '
+            'first.'
         )
         st.stop()
 
