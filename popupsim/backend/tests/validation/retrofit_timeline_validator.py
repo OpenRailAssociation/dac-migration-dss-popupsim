@@ -205,6 +205,34 @@ def _validate_wagon(
         )
         assert found, f'No RETROFIT_COMPLETED event for wagon {wagon_id} at {location} at t={time}'
 
+    elif status_name == 'ON_RETROFIT_TRACK':
+        found = any(
+            abs(t - time) < 0.5
+            and type(e).__name__ == 'WagonJourneyEvent'
+            and hasattr(e, 'wagon_id')
+            and e.wagon_id == wagon_id
+            and hasattr(e, 'event_type')
+            and e.event_type == 'ON_RETROFIT_TRACK'
+            and hasattr(e, 'location')
+            and e.location == location
+            for t, e in events
+        )
+        assert found, f'No ON_RETROFIT_TRACK event for wagon {wagon_id} at {location} at t={time}'
+
+    elif status_name == 'PARKED':
+        found = any(
+            abs(t - time) < 0.5
+            and type(e).__name__ == 'WagonJourneyEvent'
+            and hasattr(e, 'wagon_id')
+            and e.wagon_id == wagon_id
+            and hasattr(e, 'event_type')
+            and e.event_type == 'PARKED'
+            and hasattr(e, 'location')
+            and e.location == location
+            for t, e in events
+        )
+        assert found, f'No PARKED event for wagon {wagon_id} at {location} at t={time}'
+
     elif status_name == 'RETROFITTING':
         # Map RETROFITTING to RETROFIT_STARTED
         found = any(
@@ -264,7 +292,13 @@ def _validate_batch(
     status_name: str,
     details: str,
 ) -> None:
-    """Validate batch events."""
+    """Validate batch events.
+
+    Batch ID can use '*' as wildcard to match any batch ID.
+    """
+    # Check if batch_id is a wildcard
+    is_wildcard = batch_id == '*'
+
     if status_name == 'FORMED':
         # Extract wagon list from details like "wagons=W01,W02"
         wagon_match = re.search(r'wagons=([A-Z0-9,]+)', details)
@@ -273,10 +307,9 @@ def _validate_batch(
             found = any(
                 abs(t - time) < 0.5
                 and type(e).__name__ == 'BatchFormed'
-                and hasattr(e, 'batch_id')
-                and e.batch_id == batch_id
                 and hasattr(e, 'wagon_ids')
                 and set(e.wagon_ids) == expected_wagons
+                and (is_wildcard or (hasattr(e, 'batch_id') and e.batch_id == batch_id))
                 for t, e in events
             )
             assert found, f'No FORMED event for batch {batch_id} with wagons {expected_wagons} at t={time}'
@@ -289,10 +322,9 @@ def _validate_batch(
             found = any(
                 abs(t - time) < 0.5
                 and type(e).__name__ == 'BatchTransportStarted'
-                and hasattr(e, 'batch_id')
-                and e.batch_id == batch_id
                 and hasattr(e, 'destination')
                 and e.destination == expected_dest
+                and (is_wildcard or (hasattr(e, 'batch_id') and e.batch_id == batch_id))
                 for t, e in events
             )
             assert found, f'No TRANSPORT_STARTED event for batch {batch_id} to {expected_dest} at t={time}'
@@ -302,10 +334,9 @@ def _validate_batch(
         found = any(
             abs(t - time) < 0.5
             and type(e).__name__ == 'BatchArrivedAtDestination'
-            and hasattr(e, 'batch_id')
-            and e.batch_id == batch_id
             and hasattr(e, 'destination')
             and e.destination == destination
+            and (is_wildcard or (hasattr(e, 'batch_id') and e.batch_id == batch_id))
             for t, e in events
         )
         assert found, f'No ARRIVED_AT_DESTINATION event for batch {batch_id} at {destination} at t={time}'
@@ -332,3 +363,24 @@ def _validate_locomotive(
             for t, e in events
         )
         assert found, f'No ALLOCATED event for locomotive {locomotive_id} with purpose {purpose} at t={time}'
+
+    elif status_name == 'MOVING':
+        # Parse "from->to" format
+        if '->' in details:
+            from_loc, to_loc = details.split('->')
+            from_loc = from_loc.strip()
+            to_loc = to_loc.strip()
+            found = any(
+                abs(t - time) < 0.5
+                and type(e).__name__ == 'LocomotiveMovementEvent'
+                and hasattr(e, 'locomotive_id')
+                and e.locomotive_id == locomotive_id
+                and hasattr(e, 'event_type')
+                and e.event_type == 'MOVING'
+                and hasattr(e, 'from_location')
+                and hasattr(e, 'to_location')
+                and e.from_location == from_loc
+                and e.to_location == to_loc
+                for t, e in events
+            )
+            assert found, f'No MOVING event for locomotive {locomotive_id} from {from_loc} to {to_loc} at t={time}'

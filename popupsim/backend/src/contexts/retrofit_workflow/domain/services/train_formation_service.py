@@ -7,6 +7,7 @@ from contexts.retrofit_workflow.domain.aggregates.batch_aggregate import BatchAg
 from contexts.retrofit_workflow.domain.aggregates.train_movement_aggregate import TrainMovement
 from contexts.retrofit_workflow.domain.aggregates.train_movement_aggregate import TrainType
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
+from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 
 
 class TrainFormationService:
@@ -15,9 +16,14 @@ class TrainFormationService:
     Handles both mainline and shunting operations with appropriate preparation times.
     """
 
-    def __init__(self) -> None:
-        """Initialize train formation service."""
+    def __init__(self, coupling_service: CouplingService) -> None:
+        """Initialize train formation service.
+
+        Args:
+            coupling_service: Service for calculating coupling/decoupling times
+        """
         self.train_counter = 0
+        self.coupling_service = coupling_service
 
     def form_train(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
@@ -29,12 +35,18 @@ class TrainFormationService:
     ) -> TrainMovement:
         """Form a train movement from locomotive and batch.
 
-        Args:
-            locomotive: Locomotive to pull the train
-            batch: BatchAggregate (rake of wagons)
-            origin: Starting location
-            destination: Target location
-            route_type: MAINLINE or SHUNTING
+        Parameters
+        ----------
+            locomotive: Locomotive
+                Locomotive to pull the train
+            batch: BatchAggregate
+                BatchAggregate (rake of wagons)
+            origin: str
+                Starting location
+            destination: str
+                Target location
+            route_type: RouteType
+                MAINLINE or SHUNTING
 
         Returns
         -------
@@ -78,7 +90,19 @@ class TrainFormationService:
         # Mark ready (will validate requirements)
         train.mark_ready_for_departure(current_time)
 
-        return train.get_preparation_time(process_times)
+        return train.get_preparation_time(process_times, self.coupling_service)
+
+    def dissolve_train(self, train: TrainMovement) -> float:
+        """Dissolve train and return loco decoupling time.
+
+        Args:
+            train: TrainMovement to dissolve
+
+        Returns
+        -------
+            Loco decoupling time in simulation ticks
+        """
+        return self.coupling_service.get_loco_decoupling_time(train.batch.wagons)
 
     def can_form_train(self, locomotive: Locomotive, batch: BatchAggregate) -> tuple[bool, str | None]:
         """Validate if train can be formed.

@@ -71,6 +71,7 @@ class Scenario(BaseModel):
     end_date: datetime
     workflow_mode: WorkflowMode = WorkflowMode.LEGACY
     track_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
+    collection_track_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
 
     @field_validator('workflow_mode', mode='before')
     @classmethod
@@ -91,7 +92,21 @@ class Scenario(BaseModel):
 
     retrofit_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     workshop_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.ROUND_ROBIN
-    parking_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
+    parking_selection_strategy: TrackSelectionStrategy = Field(
+        default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting parking tracks'
+    )
+
+    @field_validator('parking_selection_strategy', mode='before')
+    @classmethod
+    def debug_parking_strategy(cls, v: Any) -> Any:
+        """Debug parking selection strategy."""
+        print(f'DEBUG VALIDATOR: parking_selection_strategy raw value: {v}, type: {type(v)}')
+        return v
+
+    parking_strategy: str = 'opportunistic'
+    parking_normal_threshold: float = 0.3
+    parking_critical_threshold: float = 0.8
+    parking_idle_check_interval: float = 1.0
     loco_delivery_strategy: LocoDeliveryStrategy = LocoDeliveryStrategy.RETURN_TO_PARKING
     loco_priority_strategy: LocoPriorityStrategy = LocoPriorityStrategy.WORKSHOP_PRIORITY
     locomotives: list[LocomotiveInputDTO] | None = None

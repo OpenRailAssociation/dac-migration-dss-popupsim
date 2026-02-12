@@ -1,9 +1,11 @@
 """PopUpSim New Architecture CLI - Bounded contexts implementation."""
 
 from dataclasses import dataclass
+import json
 import logging
 from logging import StreamHandler
 from pathlib import Path
+import shutil
 from typing import Annotated
 from typing import Any
 
@@ -15,6 +17,7 @@ from contexts.popup_retrofit.application.popup_context import PopUpRetrofitConte
 from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
 from contexts.yard_operations.application.yard_context import YardOperationsContext
 from infrastructure.logging import init_process_logger
+from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 import typer
 
 app = typer.Typer(name='popupsim-new', help='PopUpSim New Architecture - Bounded contexts')
@@ -41,13 +44,13 @@ def print_wagon_metrics(
 
     # For retrofit workflow, read completed count from summary_metrics.json
     if not is_legacy and output_path:
-        import json  # pylint: disable=import-outside-toplevel
-
         summary_file = output_path / 'summary_metrics.json'
         if summary_file.exists():
             with open(summary_file, encoding='utf-8') as f:
                 metrics = json.load(f)
-            typer.echo(f'  Wagons completed:         {metrics.get("total_wagons_parked", 0)}')
+            # Show actual arrived count from JSON, not external_trains
+            typer.echo(f'  Total wagons in simulation: {metrics.get("wagons_arrived", 0)}')
+            typer.echo(f'  Wagons parked (completed):  {metrics.get("wagons_parked", 0)}')
         else:
             typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
     else:
@@ -172,6 +175,12 @@ def run(  # noqa: PLR0915
     # Create output directory
     output_path.mkdir(parents=True, exist_ok=True)
 
+    # Copy input scenario to output/scenario folder (overwrite if exists)
+    scenario_output = output_path / 'scenario'
+    if scenario_output.exists():
+        shutil.rmtree(scenario_output)
+    shutil.copytree(scenario_path, scenario_output)
+
     # Configure event logging to file with UTF-8 encoding (always INFO level)
     event_handler = configure_event_logging(output_path)
     console_handler = configure_console_logging()
@@ -195,7 +204,7 @@ def run(  # noqa: PLR0915
     typer.echo(f'  Total wagons: {sum(len(t.wagons) for t in scenario.trains)}')
 
     service = SimulationApplicationService(scenario)
-    until = (scenario.end_date - scenario.start_date).total_seconds() / 60.0
+    until = timedelta_to_sim_ticks(scenario.end_date - scenario.start_date)
 
     typer.echo('Running simulation...\n')
     result = service.execute(until)
@@ -229,29 +238,44 @@ def run(  # noqa: PLR0915
             print_shunting_metrics(contexts.shunting)  # type: ignore[arg-type]
         else:
             # Print retrofit workflow metrics from summary_metrics.json
-            import json  # pylint: disable=import-outside-toplevel
-
             summary_file = output_path / 'summary_metrics.json'
             if summary_file.exists():
                 with open(summary_file, encoding='utf-8') as f:
                     metrics = json.load(f)
                 typer.echo('\nRETROFIT WORKFLOW METRICS:')
-                typer.echo(f'  Wagons parked (completed): {metrics.get("total_wagons_parked", 0)}')
-                typer.echo(f'  Wagons rejected:           {metrics.get("total_wagons_rejected", 0)}')
-                wagons_in_process = (
-                    metrics.get('total_wagons_arrived', 0)
-                    - metrics.get('total_wagons_parked', 0)
-                    - metrics.get('total_wagons_rejected', 0)
-                )
+                typer.echo(f'  Total wagons in simulation: {metrics.get("wagons_arrived", 0)}')
+                typer.echo(f'  Wagons parked (completed):  {metrics.get("wagons_parked", 0)}')
+                typer.echo(f'  Wagons rejected:            {metrics.get("wagons_rejected", 0)}')
+                wagons_in_process = metrics.get('wagons_arrived', 0) - metrics.get('wagons_parked', 0)
                 if wagons_in_process > 0:
-                    typer.echo(f'  Wagons in process:         {wagons_in_process}')
-                typer.echo(f'  Completion rate:           {metrics.get("completion_rate", 0) * 100:.1f}%')
-                typer.echo(f'  Throughput (wagons/hour):  {metrics.get("throughput_per_hour", 0):.2f}')
+                    typer.echo(f'  Wagons in process:          {wagons_in_process}')
+                typer.echo(f'  Completion rate:            {metrics.get("completion_rate", 0) * 100:.1f}%')
+                typer.echo(f'  Throughput (wagons/hour):   {metrics.get("throughput_rate_per_hour", 0):.2f}')
+
+                ws_stats = metrics.get('workshop_statistics', {})
+                if ws_stats:
+                    typer.echo('\nWORKSHOP METRICS:')
+                    typer.echo(f'  Total workshops:            {ws_stats.get("total_workshops", 0)}')
+                    typer.echo(f'  Total wagons processed:     {ws_stats.get("total_wagons_processed", 0)}')
+                    typer.echo(f'  Workshop utilization:       {metrics.get("workshop_utilization", 0):.1f}%')
+                    workshops = ws_stats.get('workshops', {})
+                    if workshops:
+                        typer.echo('  Per-workshop breakdown:')
+                        for ws_id, ws_data in sorted(workshops.items()):
+                            typer.echo(f'    {ws_id}: {ws_data.get("wagons_processed", 0)} wagons')
+
+                loco_stats = metrics.get('locomotive_statistics', {})
+                if loco_stats:
+                    typer.echo('\nLOCOMOTIVE METRICS:')
+                    typer.echo(f'  Allocations:                {loco_stats.get("allocations", 0)}')
+                    typer.echo(f'  Movements:                  {loco_stats.get("movements", 0)}')
+                    typer.echo(f'  Total operations:           {loco_stats.get("total_operations", 0)}')
+
                 rejection_breakdown = metrics.get('rejection_breakdown', {})
                 if rejection_breakdown:
-                    typer.echo('  Rejection breakdown:')
+                    typer.echo('\nREJECTION BREAKDOWN:')
                     for reason, count in rejection_breakdown.items():
-                        typer.echo(f'    {reason}: {count}')
+                        typer.echo(f'  {reason}: {count}')
         typer.echo(f'\nSIMULATION TIME:            {result.duration:.1f} minutes')
         typer.echo('=' * 60)
     else:

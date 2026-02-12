@@ -3,13 +3,14 @@
 This superseeds the three separate contexts (yard, popup, shunting).
 """
 
+from contextlib import suppress
 from typing import Any
 
 from contexts.retrofit_workflow.application.builders.operations_context_builder import RetrofitWorkshopContexttBuilder
 from contexts.retrofit_workflow.application.config.coordinator_config import ArrivalCoordinatorConfig
 from contexts.retrofit_workflow.application.config.coordinator_config import CollectionCoordinatorConfig
 from contexts.retrofit_workflow.application.config.coordinator_config import ParkingCoordinatorConfig
-from contexts.retrofit_workflow.application.config.coordinator_config import WorkshopCoordinatorConfig
+from contexts.retrofit_workflow.application.config.rake_support_config import RakeSupportConfig
 from contexts.retrofit_workflow.application.coordinators.arrival_coordinator import ArrivalCoordinator
 from contexts.retrofit_workflow.application.coordinators.collection_coordinator import CollectionCoordinator
 from contexts.retrofit_workflow.application.coordinators.parking_coordinator import ParkingCoordinator
@@ -19,8 +20,10 @@ from contexts.retrofit_workflow.application.services.coordination_service import
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
 from contexts.retrofit_workflow.domain.entities.workshop import Workshop
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
+from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 from contexts.retrofit_workflow.domain.services.coupling_validation_service import CouplingValidationService
 from contexts.retrofit_workflow.domain.services.rake_formation_service import RakeFormationService
+from contexts.retrofit_workflow.domain.services.resource_selection_service import SelectionStrategy
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
 from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
@@ -50,15 +53,17 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
     Train → Collection → Retrofit → Workshop → Retrofitted → Parking
     """
 
-    def __init__(self, env: simpy.Environment, scenario: Any):
+    def __init__(self, env: simpy.Environment, scenario: Any, rake_support_config: RakeSupportConfig | None = None):
         """Initialize context.
 
         Args:
             env: SimPy environment
             scenario: Scenario configuration
+            rake_support_config: Optional rake support configuration
         """
         self.env = env
         self.scenario = scenario
+        self.rake_support_config = rake_support_config or RakeSupportConfig.create_disabled()
 
         # SimPy queues for wagon flow
         self.collection_queue: simpy.FilterStore = simpy.FilterStore(env)
@@ -78,7 +83,8 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         self.coupling_validator = CouplingValidationService()
         self.rake_formation_service = RakeFormationService()
         self.batch_formation_service = BatchFormationService()
-        self.train_formation_service = TrainFormationService()
+        self.coupling_service = CouplingService(self.scenario.process_times)
+        self.train_formation_service = TrainFormationService(self.coupling_service)
         self.route_service: RouteService | None = None
         self.track_selector: TrackSelectionService | None = None
         self.workshop_assignment_service: WorkshopAssignmentService | None = None
@@ -86,10 +92,10 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         # Event collection
         self.event_collector: EventCollector | None = None
 
-        # Coordinators
+        # Coordinators (may be original or rake-first based on configuration)
         self.arrival_coordinator: ArrivalCoordinator | None = None
         self.collection_coordinator: CollectionCoordinator | None = None
-        self.workshop_coordinator: WorkshopCoordinator | None = None
+        self.workshop_coordinator: WorkshopCoordinator | Any = None  # May be RakeBatchWorkshopCoordinator
         self.parking_coordinator: ParkingCoordinator | None = None
 
         # Coordination state for priority management (parking has priority over workshop)
@@ -100,7 +106,6 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         """Initialize context from scenario using builder pattern."""
         # Get process logger if available
         process_logger = None
-        from contextlib import suppress  # pylint: disable=import-outside-toplevel
 
         with suppress(RuntimeError):
             process_logger = get_process_logger()
@@ -204,6 +209,8 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         return {
             'workshops': len(self.workshops),
             'locomotives': len(self.locomotives),
+            'coordinator_type': 'WORKSHOP',
+            'rake_support_enabled': self.rake_support_config.enabled,
             'status': 'ready',
         }
 
@@ -228,7 +235,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         # Create route service
         self.route_service = RouteService(self.scenario.routes)
 
-        # Create track selector using SAME track instances from track_manager
+        # Build tracks_by_type dictionary
         tracks_by_type: dict[str, list[Any]] = {}
         for track_config in self.scenario.tracks:
             track_type = track_config.type
@@ -239,16 +246,44 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
                 if track:
                     tracks_by_type[track_type].append(track)
 
-        self.track_selector = TrackSelectionService(tracks_by_type)
+        # Map scenario strategies to SelectionStrategy enum
+        strategy_map = {
+            'round_robin': SelectionStrategy.ROUND_ROBIN,
+            'least_occupied': SelectionStrategy.MOST_AVAILABLE,
+            'first_available': SelectionStrategy.FIRST_AVAILABLE,
+            'best_fit': SelectionStrategy.BEST_FIT,
+        }
+
+        # Build strategy map per track type from scenario configuration
+        # Note: scenario strategies are already enums, use .value to get string
+        print(f'DEBUG: Scenario ID: {self.scenario.id}')
+        print(f'DEBUG: parking_selection_strategy from scenario: {self.scenario.parking_selection_strategy}')
+        print(f'DEBUG: parking_selection_strategy.value: {self.scenario.parking_selection_strategy.value}')
+        strategies_by_type = {
+            'collection': strategy_map.get(
+                self.scenario.collection_track_strategy.value, SelectionStrategy.MOST_AVAILABLE
+            ),
+            'retrofit': strategy_map.get(
+                self.scenario.retrofit_selection_strategy.value, SelectionStrategy.MOST_AVAILABLE
+            ),
+            'parking': strategy_map.get(self.scenario.parking_selection_strategy.value, SelectionStrategy.BEST_FIT),
+        }
+        print(f'DEBUG: Mapped parking strategy: {strategies_by_type["parking"]}')
+
+        # Create track selector with per-type strategies
+        self.track_selector = TrackSelectionService(
+            tracks_by_type, strategies_by_type=strategies_by_type, default_strategy=SelectionStrategy.BEST_FIT
+        )
         self.workshop_assignment_service = WorkshopAssignmentService(dict(self.workshops))
 
     def _build_coordinators(self) -> None:
         """Build all coordinators."""
         coordination_service = CoordinationService()
 
-        self._build_arrival_coordinator()
+        # Build collection coordinator first (needed by arrival coordinator)
         self._build_collection_coordinator(coordination_service)
-        self._build_workshop_coordinator(coordination_service)
+        self._build_arrival_coordinator()
+        self._build_workshop_coordinator()
         self._build_parking_coordinator(coordination_service)
 
     def _build_arrival_coordinator(self) -> None:
@@ -256,6 +291,9 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         arrival_config = ArrivalCoordinatorConfig(
             env=self.env,
             collection_queue=self.collection_queue,
+            track_selector=self.track_selector,
+            collection_coordinator=self.collection_coordinator,
+            track_manager=self.track_manager,
             event_publisher=self.event_collector.add_wagon_event if self.event_collector else None,
         )
         self.arrival_coordinator = ArrivalCoordinator(arrival_config)
@@ -277,18 +315,33 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             route_service=self.route_service,
             train_service=self.train_formation_service,
             scenario=self.scenario,
+            track_manager=self.track_manager,
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
             batch_event_publisher=self.event_collector.add_batch_event,
         )
+        # Use original working collection coordinator with proper interface
         self.collection_coordinator = CollectionCoordinator(collection_config, coordination_service)
 
-    def _build_workshop_coordinator(self, coordination_service: CoordinationService) -> None:
-        """Build workshop coordinator."""
+        # Add compatibility wrapper for tests
+        if not hasattr(self.collection_coordinator, 'add_wagon'):
+
+            def add_wagon_method(wagon: Any) -> None:
+                # Put wagon directly into collection queue for processing
+                self.collection_queue.put(wagon)
+                print(f'Added wagon {wagon.id} to collection queue')
+
+            self.collection_coordinator.add_wagon = add_wagon_method
+
+    def _build_workshop_coordinator(self) -> None:
+        """Build workshop coordinator with optional rake support."""
         if not self.locomotive_manager or not self.event_collector:
             raise RuntimeError('Required managers not initialized')
 
-        workshop_config = WorkshopCoordinatorConfig(
+        # Create workshop operations service directly
+
+        # Create workshop coordinator with original parameters
+        self.workshop_coordinator = WorkshopCoordinator(
             env=self.env,
             workshops=self.workshops,
             retrofit_queue=self.retrofit_queue,
@@ -298,11 +351,14 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             batch_service=self.batch_formation_service,
             train_service=self.train_formation_service,
             scenario=self.scenario,
-            wagon_event_publisher=self.event_collector.add_wagon_event,
-            loco_event_publisher=self.event_collector.add_locomotive_event,
+            wagon_event_publisher=self.event_collector.add_wagon_event if self.event_collector else None,
+            loco_event_publisher=self.event_collector.add_locomotive_event if self.event_collector else None,
+            event_publisher=self.event_collector.add_resource_event if self.event_collector else None,
         )
-        self.workshop_coordinator = WorkshopCoordinator(workshop_config, coordination_service)
+
+        # Set track manager for retrofit track capacity management
         self.workshop_coordinator.track_manager = self.track_manager
+        self.workshop_coordinator.track_selector = self.track_selector
 
     def _build_parking_coordinator(self, coordination_service: CoordinationService) -> None:
         """Build parking coordinator."""
@@ -329,10 +385,14 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
             batch_event_publisher=self.event_collector.add_batch_event,
-            strategy=getattr(self.scenario, 'parking_strategy', 'opportunistic'),
-            normal_threshold=getattr(self.scenario, 'parking_normal_threshold', 0.3),
-            critical_threshold=getattr(self.scenario, 'parking_critical_threshold', 0.8),
-            idle_check_interval=getattr(self.scenario, 'parking_idle_check_interval', 1.0),
+            strategy=self.scenario.parking_strategy,
+            normal_threshold=self.scenario.parking_normal_threshold,
+            critical_threshold=self.scenario.parking_critical_threshold,
+            idle_check_interval=self.scenario.parking_idle_check_interval,
             retrofitted_track_capacity=retrofitted_track_capacity,
         )
         self.parking_coordinator = ParkingCoordinator(parking_config, coordination_service)
+
+        # Set track manager for retrofitted and parking track capacity management
+        self.parking_coordinator.track_manager = self.track_manager
+        self.parking_coordinator.track_selector = self.track_selector

@@ -21,7 +21,7 @@ class SelectionStrategy(Enum):
 
     ROUND_ROBIN = 'ROUND_ROBIN'
     FIRST_AVAILABLE = 'FIRST_AVAILABLE'
-    LEAST_BUSY = 'LEAST_BUSY'
+    MOST_AVAILABLE = 'MOST_AVAILABLE'  # Select track with most free space
     SHORTEST_QUEUE = 'SHORTEST_QUEUE'
     BEST_FIT = 'BEST_FIT'  # Fill tracks completely before moving to next
 
@@ -119,8 +119,8 @@ class ResourceSelectionService[TResource: ResourcePort]:  # pylint: disable=inva
             return self._select_round_robin(can_use)
         if self.strategy == SelectionStrategy.FIRST_AVAILABLE:
             return self._select_first_available(can_use)
-        if self.strategy == SelectionStrategy.LEAST_BUSY:
-            return self._select_least_busy(can_use)
+        if self.strategy == SelectionStrategy.MOST_AVAILABLE:
+            return self._select_most_available(can_use)
         if self.strategy == SelectionStrategy.SHORTEST_QUEUE:
             return self._select_shortest_queue(can_use)
         if self.strategy == SelectionStrategy.BEST_FIT:
@@ -158,21 +158,7 @@ class ResourceSelectionService[TResource: ResourcePort]:  # pylint: disable=inva
         self,
         can_use: Callable[[str, TResource], bool] | None,
     ) -> str | None:
-        """Select resource using round-robin strategy for fair distribution.
-
-        Distributes load evenly across all available resources by cycling
-        through them in order, maintaining state between calls.
-
-        Parameters
-        ----------
-        can_use : Callable[[str, TResource], bool] | None
-            Optional predicate to filter usable resources
-
-        Returns
-        -------
-        str | None
-            Selected resource ID or None if no usable resources
-        """
+        """Select resource using round-robin strategy for fair distribution."""
         resource_ids = list(self.resources.keys())
         if not resource_ids:
             return None
@@ -217,25 +203,11 @@ class ResourceSelectionService[TResource: ResourcePort]:  # pylint: disable=inva
 
         return None
 
-    def _select_least_busy(
+    def _select_most_available(
         self,
         can_use: Callable[[str, TResource], bool] | None,
     ) -> str | None:
-        """Select resource with the most available capacity.
-
-        Load balancing strategy that distributes work to the resource
-        with the highest available capacity, optimizing for utilization.
-
-        Parameters
-        ----------
-        can_use : Callable[[str, TResource], bool] | None
-            Optional predicate to filter usable resources
-
-        Returns
-        -------
-        str | None
-            Selected resource ID or None if no usable resources
-        """
+        """Select resource with the most available capacity."""
         best_resource = None
         max_available: float = -1.0
 

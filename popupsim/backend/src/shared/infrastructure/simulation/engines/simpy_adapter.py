@@ -229,7 +229,7 @@ class SimPyEngineAdapter(SimulationEnginePort):
 
     def get_env(self) -> simpy.Environment:
         """Get the underlying SimPy environment.
-        
+
         Returns
         -------
         simpy.Environment

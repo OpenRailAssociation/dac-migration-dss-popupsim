@@ -49,7 +49,8 @@ class TrackSelectionService:
     def __init__(
         self,
         tracks_by_type: dict[str, list[TrackCapacityManager]],
-        strategy: SelectionStrategy = SelectionStrategy.LEAST_BUSY,
+        strategies_by_type: dict[str, SelectionStrategy] | None = None,
+        default_strategy: SelectionStrategy = SelectionStrategy.BEST_FIT,
     ) -> None:
         """Initialize the track selection service.
 
@@ -57,74 +58,53 @@ class TrackSelectionService:
         ----------
         tracks_by_type : dict[str, list[TrackCapacityManager]]
             Dictionary mapping track type names to lists of track managers
-        strategy : SelectionStrategy, default=SelectionStrategy.LEAST_BUSY
-            Selection strategy for load balancing across multiple tracks
+        strategies_by_type : dict[str, SelectionStrategy] | None
+            Dictionary mapping track types to their selection strategies
+        default_strategy : SelectionStrategy, default=SelectionStrategy.BEST_FIT
+            Default strategy for track types not in strategies_by_type
 
         Notes
         -----
-        LEAST_BUSY strategy is used by default to ensure optimal load
-        distribution across tracks of the same type.
+        Each track type can have its own selection strategy for optimal
+        resource allocation based on operational requirements.
         """
         self.tracks_by_type = tracks_by_type
-        self.strategy = strategy
-        # Create resource dict for selector
-        track_dict: dict[str, TrackCapacityManager] = {}
-        for track_list in tracks_by_type.values():
-            for track in track_list:
-                track_dict[track.track_id] = track
-        self.selector: ResourceSelectionService[TrackCapacityManager] = ResourceSelectionService(track_dict, strategy)
+        self.strategies_by_type = strategies_by_type or {}
+        self.default_strategy = default_strategy
+        # Create separate selector for each track type to maintain round-robin state
+        self.selectors: dict[str, ResourceSelectionService[TrackCapacityManager]] = {}
+        for track_type, track_list in tracks_by_type.items():
+            track_dict = {t.track_id: t for t in track_list}
+            strategy = self.strategies_by_type.get(track_type, default_strategy)
+            self.selectors[track_type] = ResourceSelectionService(track_dict, strategy)
 
     def select_track_with_capacity(self, track_type: str) -> TrackCapacityManager | None:
-        """Select a track of the specified type with available capacity.
-
-        Finds and selects the most appropriate track from the specified type
-        group that has available capacity for new wagon allocation.
-
-        Parameters
-        ----------
-        track_type : str
-            Track type identifier ('collection', 'retrofit', 'retrofitted', 'parking')
-
-        Returns
-        -------
-        TrackCapacityManager | None
-            Selected track manager with available capacity, or None if all tracks full
-
-        Notes
-        -----
-        The selection process:
-        1. Filters tracks of the specified type
-        2. Identifies tracks with available capacity
-        3. Applies the configured selection strategy
-        4. Returns the optimal track or None if no capacity available
-
-        Examples
-        --------
-        >>> service = TrackSelectionService(tracks_by_type)
-        >>> track = service.select_track_with_capacity('retrofit')
-        >>> if track:
-        ...     print(f'Selected track: {track.track_id}')
-        ... else:
-        ...     print('No retrofit tracks available')
-        """
+        """Select a track of the specified type with available capacity."""
         tracks = self.tracks_by_type.get(track_type, [])
         if not tracks:
             return None
 
-        # Find tracks with available capacity
-        available_tracks = [t for t in tracks if t.get_available_capacity() > 0]
-        if not available_tracks:
+        # Single track - return it if it has capacity
+        if len(tracks) == 1:
+            return tracks[0] if tracks[0].get_available_capacity() > 0 else None
+
+        # Multiple tracks - use selector with capacity filter
+        selector = self.selectors.get(track_type)
+        if not selector:
+            # Fallback: return first track with capacity
+            for track in tracks:
+                if track.get_available_capacity() > 0:
+                    return track
             return None
 
-        # Single track - return it
-        if len(available_tracks) == 1:
-            return available_tracks[0]
+        # Use selector with capacity filter
+        selected_id = selector.select(lambda tid, t: t.get_available_capacity() > 0)
 
-        # Multiple tracks - use selection strategy
-        track_dict = {t.track_id: t for t in available_tracks}
-        selector: ResourceSelectionService[TrackCapacityManager] = ResourceSelectionService(track_dict, self.strategy)
-        selected_id = selector.select()
-        return track_dict.get(selected_id) if selected_id else None
+        if selected_id:
+            # Get track directly from selector's resources dict
+            return selector.resources.get(selected_id)
+
+        return None
 
     def get_total_available_capacity(self, track_type: str) -> float:
         """Calculate total available capacity across all tracks of specified type.

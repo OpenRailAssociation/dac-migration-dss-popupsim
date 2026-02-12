@@ -152,12 +152,11 @@ class BatchAggregate:
         if self.wagons:
             # Use first wagon's coupler type to determine coupling time
             first_wagon = self.wagons[0]
-            if hasattr(first_wagon, 'coupler_a') and hasattr(first_wagon.coupler_a, 'type'):
-                coupler_type = first_wagon.coupler_a.type.value
-                if coupler_type == 'SCREW':
-                    coupling_time = timedelta_to_sim_ticks(process_times.screw_coupling_time)
-                elif coupler_type == 'DAC':
-                    coupling_time = timedelta_to_sim_ticks(process_times.dac_coupling_time)
+            coupler_type = first_wagon.coupler_a.type.value
+            if coupler_type == 'SCREW':
+                coupling_time = timedelta_to_sim_ticks(process_times.screw_coupling_time)
+            elif coupler_type == 'DAC':
+                coupling_time = timedelta_to_sim_ticks(process_times.dac_coupling_time)
 
         return base_transport_time + coupling_time
 

@@ -64,6 +64,9 @@ class ArrivalCoordinatorConfig:
 
     env: simpy.Environment
     collection_queue: simpy.FilterStore
+    track_selector: TrackSelectionService
+    collection_coordinator: Any  # Reference to CollectionCoordinator for adding wagons
+    track_manager: Any | None = None  # TrackResourceManager for capacity management
     event_publisher: Callable[[WagonJourneyEvent], None] | None = None
 
 
@@ -74,6 +77,7 @@ class TransportCoordinatorConfig:
     env: simpy.Environment
     move_time: float = 1.0
     coupling_time: float = 0.5
+    event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
 
 
 @dataclass
@@ -89,6 +93,7 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     route_service: RouteService
     train_service: TrainFormationService
     scenario: Any
+    track_manager: Any | None = None  # TrackResourceManager for capacity management
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
