@@ -209,7 +209,12 @@ class PopUpRetrofitContext(PopUpContextPort):
                     'wagon_retrofit_time',
                     timedelta(minutes=10),
                 )
-                retrofit_time = to_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+                # Use centralized time converter
+                from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+                retrofit_time = (
+                    timedelta_to_sim_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+                )
 
             yield from self.infra.engine.delay(retrofit_time)  # type: ignore[union-attr]
 
@@ -512,7 +517,12 @@ class PopUpRetrofitContext(PopUpContextPort):
                     'wagon_retrofit_time',
                     timedelta(minutes=10),
                 )
-                retrofit_time = to_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+                # Use centralized time converter
+                from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+                retrofit_time = (
+                    timedelta_to_sim_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+                )
 
             yield from self.infra.engine.delay(retrofit_time)  # type: ignore[union-attr]
 
@@ -769,7 +779,12 @@ class PopUpRetrofitContext(PopUpContextPort):
                 'wagon_retrofit_time',
                 timedelta(minutes=10),
             )
-            retrofit_time = to_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+            # Use centralized time converter
+            from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+            retrofit_time = (
+                timedelta_to_sim_ticks(process_time) if hasattr(process_time, 'total_seconds') else process_time
+            )
 
         # Wait for retrofit completion
         yield from self.infra.engine.delay(retrofit_time)  # type: ignore[union-attr]

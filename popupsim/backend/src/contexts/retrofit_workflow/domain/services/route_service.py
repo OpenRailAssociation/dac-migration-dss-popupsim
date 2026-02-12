@@ -77,14 +77,11 @@ class RouteService:
             if len(route.path) >= 2:
                 from_location = route.path[0]
                 to_location = route.path[-1]
-                duration = route.duration
-                # Convert timedelta to SimPy ticks (minutes by default)
-                if hasattr(duration, 'total_seconds'):
-                    duration = timedelta_to_sim_ticks(duration)
-                self.route_durations[(from_location, to_location)] = float(duration)
+                duration_ticks = timedelta_to_sim_ticks(route.duration)
+                self.route_durations[(from_location, to_location)] = duration_ticks
 
                 # Store route type (default to SHUNTING for backward compatibility)
-                route_type_str = getattr(route, 'route_type', 'SHUNTING')
+                route_type_str = route.route_type
                 try:
                     route_type = RouteType[route_type_str.upper()]
                 except (KeyError, AttributeError):

@@ -1,9 +1,9 @@
 """Application coordinators for retrofit workflow context."""
 
-from contexts.retrofit_workflow.application.coordinators.transport_coordinator import TransportCoordinator
+from contexts.retrofit_workflow.application.coordinators.base_coordinator import BaseCoordinator
 from contexts.retrofit_workflow.application.coordinators.workshop_coordinator import WorkshopCoordinator
 
 __all__ = [
-    'TransportCoordinator',
+    'BaseCoordinator',
     'WorkshopCoordinator',
 ]

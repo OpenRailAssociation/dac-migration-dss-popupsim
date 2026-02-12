@@ -12,6 +12,7 @@ class MockScenario:
     """Mock scenario for testing."""
 
     def __init__(self) -> None:
+        self.id = 'test_scenario'
         self.workshops = [
             Mock(id='ws_1', track='track_1', retrofit_stations=2),
             Mock(id='ws_2', track='track_2', retrofit_stations=3),
@@ -57,6 +58,13 @@ class MockScenario:
 
         self.process_times = Mock(wagon_retrofit_time=timedelta(minutes=10))
         self.loco_priority_strategy = Mock(value='workshop_priority')
+        self.collection_track_strategy = Mock(value='round_robin')
+        self.retrofit_selection_strategy = Mock(value='least_busy')
+        self.parking_selection_strategy = Mock(value='least_busy')
+        self.parking_strategy = Mock(value='batch_completion')
+        self.parking_normal_threshold = 0.8
+        self.parking_critical_threshold = 0.95
+        self.parking_idle_check_interval = 5.0
 
 
 class TestRetrofitWorkshopContext:
@@ -206,6 +214,14 @@ class TestRetrofitWorkshopContext:
         minimal_scenario.locomotives = [Mock(id='loco_1', track='depot')]  # Need at least one
         minimal_scenario.tracks = []
         minimal_scenario.routes = []
+        minimal_scenario.process_times = Mock(wagon_retrofit_time=timedelta(minutes=10))
+        minimal_scenario.collection_track_strategy = Mock(value='round_robin')
+        minimal_scenario.retrofit_selection_strategy = Mock(value='least_busy')
+        minimal_scenario.parking_selection_strategy = Mock(value='least_busy')
+        minimal_scenario.parking_strategy = Mock(value='batch_completion')
+        minimal_scenario.parking_normal_threshold = 0.8
+        minimal_scenario.parking_critical_threshold = 0.95
+        minimal_scenario.parking_idle_check_interval = 5.0
 
         context = RetrofitWorkshopContext(env, minimal_scenario)
 

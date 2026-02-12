@@ -46,6 +46,8 @@ class ResourceStateChangeEvent:  # pylint: disable=too-many-instance-attributes
     used_before: float | None = None
     used_after: float | None = None
     change_amount: float | None = None
+    utilization_before_percent: float | None = None
+    utilization_after_percent: float | None = None
 
     # For locomotives
     total_count: int | None = None

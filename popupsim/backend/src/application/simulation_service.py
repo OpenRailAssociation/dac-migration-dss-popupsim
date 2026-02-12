@@ -85,6 +85,18 @@ class SimulationApplicationService:
             # Run simulation
             self.engine.run(until)
 
+            # Check if simulation ended early
+            actual_time = self.engine.current_time()
+            if actual_time < until:
+                logger.warning(
+                    (
+                        '⚠️  Simulation ended early at t=%.1f (expected t=%.1f) -'
+                        ' likely deadlock or all processes completed'
+                    ),
+                    actual_time,
+                    until,
+                )
+
             # Collect results
             result = self._collect_results(until)
 

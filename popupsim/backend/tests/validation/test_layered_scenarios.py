@@ -223,11 +223,33 @@ def create_layered_scenario(
             return timedelta(minutes=coupling_time * 0.5)
         return timedelta(minutes=coupling_time)
 
+    def get_coupling_ticks(coupler_type: str) -> float:
+        """Get coupling time in SimPy ticks."""
+        from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+        return timedelta_to_sim_ticks(get_coupling_time(coupler_type))
+
+    def get_decoupling_ticks(coupler_type: str) -> float:
+        """Get decoupling time in SimPy ticks."""
+        from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+        return timedelta_to_sim_ticks(get_decoupling_time(coupler_type))
+
     process_times_mock.get_coupling_time = get_coupling_time
     process_times_mock.get_decoupling_time = get_decoupling_time
+    process_times_mock.get_coupling_ticks = get_coupling_ticks
+    process_times_mock.get_decoupling_ticks = get_decoupling_ticks
     mock_scenario.process_times = process_times_mock
 
     mock_scenario.loco_priority_strategy = Mock(value='batch_completion')
+    mock_scenario.collection_track_strategy = Mock(value='round_robin')
+    mock_scenario.retrofit_selection_strategy = Mock(value='least_busy')
+    mock_scenario.parking_selection_strategy = Mock(value='least_busy')
+    mock_scenario.parking_strategy = Mock(value='batch_completion')
+    mock_scenario.parking_normal_threshold = 0.8
+    mock_scenario.parking_critical_threshold = 0.95
+    mock_scenario.parking_idle_check_interval = 5.0
+    mock_scenario.process_logger = None  # No process logging in tests
 
     return mock_scenario
 
@@ -261,7 +283,7 @@ def run_layered_test(
 
     context.initialize()
 
-    # Hook event collector
+    # Hook event collector BEFORE starting processes
     if context.event_collector:
         original_wagon_event = context.event_collector.add_wagon_event
         original_loco_event = context.event_collector.add_locomotive_event
@@ -291,19 +313,25 @@ def run_layered_test(
         context.event_collector.add_wagon_event = capture_wagon_event
         context.event_collector.add_locomotive_event = capture_loco_event
 
-        # Re-wire coordinators
+        # Re-wire coordinators BEFORE starting processes
         if context.collection_coordinator and hasattr(context.collection_coordinator, 'config'):
             context.collection_coordinator.config.wagon_event_publisher = capture_wagon_event
+            context.collection_coordinator.config.loco_event_publisher = capture_loco_event
         if context.workshop_coordinator:
             if hasattr(context.workshop_coordinator, 'config'):
                 context.workshop_coordinator.config.wagon_event_publisher = capture_wagon_event
+                context.workshop_coordinator.config.loco_event_publisher = capture_loco_event
             else:
                 context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+                context.workshop_coordinator.loco_event_publisher = capture_loco_event
         if context.parking_coordinator:
             if hasattr(context.parking_coordinator, 'config'):
                 context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
+                context.parking_coordinator.config.loco_event_publisher = capture_loco_event
+                context.parking_coordinator.config.batch_event_publisher = lambda e: events.append((env.now, e))
             else:
                 context.parking_coordinator.wagon_event_publisher = capture_wagon_event
+                context.parking_coordinator.loco_event_publisher = capture_loco_event
 
     context.start_processes()
 
@@ -321,12 +349,17 @@ def run_layered_test(
         )
         wagon.classify()
         wagon.move_to('collection')
+        wagon.current_track_id = 'collection'  # Set physical track ID
 
         arrival_event = WagonJourneyEvent(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
         events.append((0.0, arrival_event))
-        context.collection_queue.put(wagon)
+        # Add wagon via collection coordinator instead of directly to queue
+        if context.collection_coordinator:
+            context.collection_coordinator.add_wagon(wagon)
+        else:
+            context.collection_queue.put(wagon)
 
     # Termination process
     def termination_process():
@@ -418,8 +451,8 @@ def test_scenario2_layer1_two_wagons_one_bay_pure_travel() -> None:
     t=5: wagon[W01] RETROFIT_STARTED WS1
     t=15: wagon[W01] RETROFIT_COMPLETED WS1
     t=19: wagon[W01] PARKED parking_area
-    t=22: wagon[W02] RETROFIT_STARTED WS1
-    t=32: wagon[W02] RETROFIT_COMPLETED WS1
+    t=20: wagon[W02] RETROFIT_STARTED WS1
+    t=30: wagon[W02] RETROFIT_COMPLETED WS1
     t=36: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(2, 1, 10.0, 50.0, workshop_bays=[1])

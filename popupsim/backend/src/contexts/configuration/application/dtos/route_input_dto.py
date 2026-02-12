@@ -1,5 +1,6 @@
 """Route input DTO for configuration context."""
 
+from datetime import timedelta
 from enum import Enum
 
 from pydantic import BaseModel
@@ -18,7 +19,7 @@ class RouteInputDTO(BaseModel):
 
     id: str
     description: str | None = None
-    duration: float
+    duration: timedelta
     track_sequence: list[str] = []
     path: list[str] = []
     route_type: str = 'SHUNTING'  # Default to shunting for backward compatibility

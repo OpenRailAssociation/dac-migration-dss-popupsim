@@ -29,7 +29,8 @@ class RetrofitWorkshopContexttBuilder:  # pylint: disable=too-many-instance-attr
 
     def build_event_collector(self, process_logger: Any = None) -> 'RetrofitWorkshopContexttBuilder':
         """Build event collector with optional process logger."""
-        self._event_collector = EventCollector(process_logger=process_logger)
+        start_datetime = getattr(self._scenario, 'start_date', None)
+        self._event_collector = EventCollector(process_logger=process_logger, start_datetime=start_datetime)
         return self
 
     def build_entities(self) -> 'RetrofitWorkshopContexttBuilder':

@@ -40,8 +40,15 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             end_date=data['end_date'],
             workflow_mode=data.get('workflow_mode') or WorkflowMode.LEGACY,
             track_selection_strategy=data.get('track_selection_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
+            collection_track_strategy=data.get('collection_track_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
             retrofit_selection_strategy=data.get('retrofit_selection_strategy')
             or TrackSelectionStrategy.LEAST_OCCUPIED,
+            workshop_selection_strategy=data.get('workshop_selection_strategy') or TrackSelectionStrategy.ROUND_ROBIN,
+            parking_selection_strategy=data.get('parking_selection_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
+            parking_strategy=data.get('parking_strategy', 'opportunistic'),
+            parking_normal_threshold=data.get('parking_normal_threshold', 0.3),
+            parking_critical_threshold=data.get('parking_critical_threshold', 0.8),
+            parking_idle_check_interval=data.get('parking_idle_check_interval', 1.0),
             loco_delivery_strategy=data.get('loco_delivery_strategy') or LocoDeliveryStrategy.RETURN_TO_PARKING,
         )
 
