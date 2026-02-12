@@ -107,8 +107,8 @@ class TestCollectionToRetrofitPlanner:
         track2.id = 'retrofit_2'
 
         mock_railway_context.get_track_selection_service().get_tracks_by_type.return_value = [track1, track2]
-        mock_railway_context.get_available_capacity.side_effect = (
-            lambda track_id: 20.0 if track_id == 'retrofit_1' else 50.0
+        mock_railway_context.get_available_capacity.side_effect = lambda track_id: (
+            20.0 if track_id == 'retrofit_1' else 50.0
         )
 
         best_track = planner._select_best_retrofit_track()
