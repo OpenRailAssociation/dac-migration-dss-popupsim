@@ -39,7 +39,9 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
     def start(self) -> None:
         """Start coordinator process."""
-        print(f'[t={self.config.env.now}] PARKING: Starting parking coordinator with strategy={self.config.strategy}')
+        logger.info(
+            't=%.1f: PARKING → Starting coordinator with strategy=%s', self.config.env.now, self.config.strategy
+        )
         self.config.env.process(self._parking_process())
 
     def _parking_process(self) -> Generator[Any, Any]:
@@ -52,30 +54,37 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
     def _parking_process_opportunistic(self) -> Generator[Any, Any]:
         """Opportunistic strategy: grab and go immediately."""
         while True:
-            print(f'[t={self.config.env.now}] PARKING: Waiting for wagon...')
             first_wagon = yield self.config.retrofitted_queue.get()
-            print(f'[t={self.config.env.now}] PARKING: Got {first_wagon.id}')
+            logger.info('t=%.1f: WAGON[%s] → Retrieved from retrofitted queue', self.config.env.now, first_wagon.id)
             parking_track = self.config.track_selector.select_track_with_capacity('parking')
-            print(
-                f'[t={self.config.env.now}] PARKING: Selected track {parking_track.track_id if parking_track else "None"}'
+            logger.info(
+                't=%.1f: TRACK[%s] → Selected for parking',
+                self.config.env.now,
+                parking_track.track_id if parking_track else 'None',
             )
             yield from self._process_wagon_batch(first_wagon, parking_track)
 
     def _parking_process_smart_accumulation(self) -> Generator[Any, Any]:
         """Smart accumulation strategy: accumulate to threshold, then transport."""
         while True:
-            print(f'[t={self.config.env.now}] PARKING: Waiting for first wagon...')
             first_wagon = yield self.config.retrofitted_queue.get()
-            print(f'[t={self.config.env.now}] PARKING: Got first wagon {first_wagon.id}, accumulating...')
+            logger.info(
+                't=%.1f: WAGON[%s] → Retrieved from retrofitted queue, accumulating...',
+                self.config.env.now,
+                first_wagon.id,
+            )
 
             # Accumulate to normal threshold
             wagons = yield from self._accumulate_to_threshold(first_wagon)
-            print(f'[t={self.config.env.now}] PARKING: Accumulated {len(wagons)} wagons')
+            wagon_ids = ','.join(w.id for w in wagons)
+            logger.info('t=%.1f: BATCH[%s] → Accumulated %d wagons', self.config.env.now, wagon_ids, len(wagons))
 
             # Select parking track using track selection service
             parking_track = self.config.track_selector.select_track_with_capacity('parking')
-            print(
-                f'[t={self.config.env.now}] PARKING: Selected track {parking_track.track_id if parking_track else "None"}'
+            logger.info(
+                't=%.1f: TRACK[%s] → Selected for parking',
+                self.config.env.now,
+                parking_track.track_id if parking_track else 'None',
             )
             yield from self._process_wagon_batch_with_wagons(wagons, parking_track)
 
@@ -149,6 +158,8 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         wagons = [first_wagon]
         total_length = first_wagon.length
 
+        # Collect additional wagons WITHOUT yielding if queue is empty
+        # This prevents race conditions with other coordinators
         while len(self.config.retrofitted_queue.items) > 0:
             next_wagon_length = self.config.retrofitted_queue.items[0].length
             if total_length + next_wagon_length <= parking_capacity:
@@ -157,6 +168,10 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 total_length += next_wagon.length
             else:
                 break
+
+        # Must yield at least once to make this a generator
+        if len(wagons) == 1:
+            yield self.config.env.timeout(0)
 
         return wagons
 
@@ -188,14 +203,18 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                     print(f'Wagons: {len(wagons)} ({wagon_ids})')
                     print(f'Required: {total_length:.1f}m | Available: {available:.1f}m')
                     print(
-                        f'Track capacity: {parking_track.capacity_meters:.1f}m | Used: {parking_track.get_occupied_capacity():.1f}m'
+                        f'Track capacity: {parking_track.capacity_meters:.1f}m | '
+                        f'Used: {parking_track.get_occupied_capacity():.1f}m'
                     )
                     print('Action: Wagons marked as PARKED but track capacity NOT updated\n')
 
                     # Log to logger
                     logger.warning(
-                        f'PARKING_CAPACITY_EXCEEDED: track={parking_track_id}, '
-                        f'wagons={len(wagons)}, required={total_length:.1f}m, available={available:.1f}m'
+                        'PARKING_CAPACITY_EXCEEDED: track=%s, wagons=%d, required=%.1fm, available=%.1fm',
+                        parking_track_id,
+                        len(wagons),
+                        total_length,
+                        available,
                     )
 
                     # Publish warning event for tracking
@@ -246,7 +265,18 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         route_type = self.config.route_service.get_route_type('retrofitted', parking_track_id)
         train = self.config.train_service.form_train(loco, batch_aggregate, 'retrofitted', parking_track_id, route_type)
         process_times = self.config.scenario.process_times
-        prep_time = self.config.train_service.prepare_train(train, process_times, self.config.env.now)
+        prep_time = self.config.train_service.prepare_train(
+            train,
+            process_times,
+            self.config.env.now,
+            coupling_event_publisher=self.config.coupling_event_publisher,
+        )
+        logger.info(
+            't=%.1f: LOCO[%s] → TRAIN_PREP at retrofitted (coupling + prep, %.1f min)',
+            self.config.env.now,
+            loco.id,
+            prep_time,
+        )
         yield self.config.env.timeout(prep_time)
 
         EventPublisherHelper.publish_loco_moving(
@@ -258,10 +288,31 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         yield self.config.env.timeout(base_transport_time)
 
         # Dissolve train (locomotive decoupling + rake decoupling)
-        loco_decouple_time = self.config.train_service.dissolve_train(train)
+        loco_decouple_time = self.config.train_service.dissolve_train(
+            train,
+            self.config.env.now,
+            coupling_event_publisher=self.config.coupling_event_publisher,
+        )
+        if loco_decouple_time > 0:
+            logger.info(
+                't=%.1f: LOCO[%s] → DECOUPLING at %s (%.1f min)',
+                self.config.env.now,
+                loco.id,
+                parking_track_id,
+                loco_decouple_time,
+            )
         yield self.config.env.timeout(loco_decouple_time)
 
         rake_decouple_time = self.config.train_service.coupling_service.get_rake_decoupling_time(wagons)
+        wagon_ids = ','.join(w.id for w in wagons)
+        logger.info(
+            't=%.1f: RAKE[%s] → DECOUPLING at %s (%d couplings, %.1f min)',
+            self.config.env.now,
+            wagon_ids,
+            parking_track_id,
+            len(wagons) - 1,
+            rake_decouple_time,
+        )
         yield self.config.env.timeout(rake_decouple_time)
 
         EventPublisherHelper.publish_batch_arrived(
@@ -277,10 +328,13 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         batch_id = batch_aggregate.id
         wagons = batch_aggregate.wagons
 
-        # Allocate locomotive first
-        print(f'[t={self.config.env.now}] PARKING: Allocating locomotive')
+        # Publish batch events FIRST (before allocating locomotive)
+        self._publish_batch_events(batch_aggregate, parking_track_id)
+
+        # Allocate locomotive
+        logger.info('t=%.1f: LOCO → Allocating for parking transport', self.config.env.now)
         loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
-        print(f'[t={self.config.env.now}] PARKING: Got locomotive {loco.id}')
+        logger.info('t=%.1f: LOCO[%s] → Allocated for parking transport', self.config.env.now, loco.id)
         EventPublisherHelper.publish_loco_allocated(
             self.config.loco_event_publisher, self.config.env.now, loco.id, 'batch_transport'
         )
@@ -303,13 +357,10 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                     if wagons_on_track:
                         yield from retrofitted_track.remove_wagons(wagons_on_track)
 
-            # NOW publish batch events (after locomotive arrives)
-            self._publish_batch_events(batch_aggregate, parking_track_id)
-
             yield from self._transport_to_parking_with_batch(loco, batch_aggregate, batch_id, parking_track_id)
             yield from self._park_wagons(wagons, parking_track_id)
             yield from self._return_locomotive(loco, parking_track_id)
         finally:
-            print(f'[t={self.config.env.now}] PARKING: Releasing locomotive {loco.id}')
+            logger.info('t=%.1f: LOCO[%s] → Releasing', self.config.env.now, loco.id)
             yield from self.config.locomotive_manager.release(loco)
-            print(f'[t={self.config.env.now}] PARKING: Locomotive {loco.id} released')
+            logger.info('t=%.1f: LOCO[%s] → Released', self.config.env.now, loco.id)

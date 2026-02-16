@@ -176,11 +176,12 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         wagons = batch_aggregate.wagons
 
         # Release capacity from collection track BEFORE transport
+        # Only if wagons are actually on the track (check wagon count)
         if self.track_manager and wagons:
             collection_track_id = wagons[0].current_track_id
             if collection_track_id:
                 collection_track = self.track_manager.get_track(collection_track_id)
-                if collection_track:
+                if collection_track and any(w in collection_track.wagons for w in wagons):
                     yield from collection_track.remove_wagons(wagons)
 
         # Batch events published AFTER locomotive arrives in _transport_to_retrofit_with_batch
@@ -233,9 +234,11 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         wagons = batch_aggregate.wagons
 
         # CRITICAL: Reserve retrofit track capacity BEFORE allocating locomotive to prevent deadlock
-        print(f'[t={self.config.env.now}] COLLECTION: Reserving capacity on retrofit track for {len(wagons)} wagons')
+        logger.info(
+            't=%.1f: COLLECTION → Reserving retrofit track capacity for %d wagons', self.config.env.now, len(wagons)
+        )
         yield from retrofit_track.add_wagons(wagons)
-        print(f'[t={self.config.env.now}] COLLECTION: Capacity reserved, now allocating locomotive')
+        logger.info('t=%.1f: COLLECTION → Capacity reserved, allocating locomotive', self.config.env.now)
 
         # Allocate locomotive and move to collection
         loco = yield from self.config.locomotive_manager.allocate(purpose='collection_pickup')
@@ -270,7 +273,16 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
 
         # Prepare train (loco coupling + brake test + inspection for MAINLINE)
         prep_time = self.config.train_service.prepare_train(
-            train, self.config.scenario.process_times, self.config.env.now
+            train,
+            self.config.scenario.process_times,
+            self.config.env.now,
+            coupling_event_publisher=self.config.coupling_event_publisher,
+        )
+        logger.info(
+            't=%.1f: LOCO[%s] → TRAIN_PREP at collection (coupling + prep, %.1f min)',
+            self.config.env.now,
+            loco.id,
+            prep_time,
         )
         yield self.config.env.timeout(prep_time)
 
@@ -317,10 +329,25 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             )
 
         # Dissolve train: loco decoupling + rake decoupling
-        loco_decouple_time = self.config.train_service.dissolve_train(train)
+        loco_decouple_time = self.config.train_service.dissolve_train(
+            train,
+            self.config.env.now,
+            coupling_event_publisher=self.config.coupling_event_publisher,
+        )
+        logger.info(
+            't=%.1f: LOCO[%s] → DECOUPLING at retrofit (%.1f min)', self.config.env.now, loco.id, loco_decouple_time
+        )
         yield self.config.env.timeout(loco_decouple_time)
 
         rake_decouple_time = self.config.train_service.coupling_service.get_rake_decoupling_time(wagons)
+        wagon_ids = ','.join(w.id for w in wagons)
+        logger.info(
+            't=%.1f: RAKE[%s] → DECOUPLING at retrofit (%d couplings, %.1f min)',
+            self.config.env.now,
+            wagon_ids,
+            len(wagons) - 1,
+            rake_decouple_time,
+        )
         yield self.config.env.timeout(rake_decouple_time)
 
         # Dissolve train (separate loco from rake)

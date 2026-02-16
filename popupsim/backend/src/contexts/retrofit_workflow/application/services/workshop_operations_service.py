@@ -122,7 +122,7 @@ class WorkshopOperationsService:
         # Create batch aggregate
         try:
             batch_aggregate = self._batch_formation.create_batch_aggregate(batch_wagons, target_workshop.id)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return WorkshopOperationResult(
                 operation=None,
                 success=False,

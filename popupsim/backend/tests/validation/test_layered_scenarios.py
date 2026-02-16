@@ -355,7 +355,8 @@ def run_layered_test(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
         events.append((0.0, arrival_event))
-        # Add wagon via collection coordinator instead of directly to queue
+
+        # Add wagon via collection coordinator
         if context.collection_coordinator:
             context.collection_coordinator.add_wagon(wagon)
         else:
@@ -421,9 +422,9 @@ def test_scenario1_layer3_single_wagon_with_loco_ops() -> None:
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=9: wagon[W01] RETROFIT_STARTED WS1
-    t=19: wagon[W01] RETROFIT_COMPLETED WS1
-    t=26.5: wagon[W01] PARKED parking_area
+    t=11: wagon[W01] RETROFIT_STARTED WS1
+    t=21: wagon[W01] RETROFIT_COMPLETED WS1
+    t=29.5: wagon[W01] PARKED parking_area
     """
     events, analytics = run_layered_test(
         1, 1, 10.0, 50.0, workshop_bays=[1], loco_coupling_time=1.0, loco_prep_time=1.0
@@ -450,10 +451,10 @@ def test_scenario2_layer1_two_wagons_one_bay_pure_travel() -> None:
     t=2: wagon[W02] ON_RETROFIT_TRACK retrofit
     t=5: wagon[W01] RETROFIT_STARTED WS1
     t=15: wagon[W01] RETROFIT_COMPLETED WS1
-    t=19: wagon[W01] PARKED parking_area
-    t=20: wagon[W02] RETROFIT_STARTED WS1
-    t=30: wagon[W02] RETROFIT_COMPLETED WS1
-    t=36: wagon[W02] PARKED parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=23: wagon[W02] RETROFIT_STARTED WS1
+    t=33: wagon[W02] RETROFIT_COMPLETED WS1
+    t=38: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(2, 1, 10.0, 50.0, workshop_bays=[1])
 
@@ -471,12 +472,12 @@ def test_scenario2_layer3_two_wagons_one_bay_with_loco_ops() -> None:
     t=0: wagon[W02] ARRIVED collection
     t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
     t=4: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=9: wagon[W01] RETROFIT_STARTED WS1
-    t=19: wagon[W01] RETROFIT_COMPLETED WS1
-    t=26.5: wagon[W01] PARKED parking_area
-    t=32.5: wagon[W02] RETROFIT_STARTED WS1
-    t=42.5: wagon[W02] RETROFIT_COMPLETED WS1
-    t=50: wagon[W02] PARKED parking_area
+    t=12: wagon[W01] RETROFIT_STARTED WS1
+    t=22: wagon[W01] RETROFIT_COMPLETED WS1
+    t=30.5: wagon[W01] PARKED parking_area
+    t=36.5: wagon[W02] RETROFIT_STARTED WS1
+    t=46.5: wagon[W02] RETROFIT_COMPLETED WS1
+    t=55: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         2, 1, 10.0, 80.0, workshop_bays=[1], loco_coupling_time=1.0, loco_prep_time=1.0
@@ -533,14 +534,14 @@ def test_scenario3_layer3_two_wagons_two_bays_with_loco_ops() -> None:
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
-    t=6: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=6: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=10: wagon[W01] RETROFIT_STARTED WS1
-    t=10: wagon[W02] RETROFIT_STARTED WS1
-    t=20: wagon[W01] RETROFIT_COMPLETED WS1
-    t=20: wagon[W02] RETROFIT_COMPLETED WS1
-    t=29: wagon[W01] PARKED parking_area
-    t=29: wagon[W02] PARKED parking_area
+    t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=4: wagon[W02] ON_RETROFIT_TRACK retrofit
+    t=14: wagon[W01] RETROFIT_STARTED WS1
+    t=14: wagon[W02] RETROFIT_STARTED WS1
+    t=24: wagon[W01] RETROFIT_COMPLETED WS1
+    t=24: wagon[W02] RETROFIT_COMPLETED WS1
+    t=33.5: wagon[W01] PARKED parking_area
+    t=33.5: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         2, 1, 10.0, 50.0, workshop_bays=[2], loco_coupling_time=1.0, loco_prep_time=1.0

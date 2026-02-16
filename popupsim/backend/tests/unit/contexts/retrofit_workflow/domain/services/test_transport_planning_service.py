@@ -73,6 +73,7 @@ def test_plan_transport_null_rake(transport_service: TransportPlanningService) -
 
     assert not result.success
     assert result.plan is None
+    assert result.error_message is not None
     assert 'null rake' in result.error_message
 
 

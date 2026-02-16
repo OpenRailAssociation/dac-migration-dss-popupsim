@@ -246,7 +246,7 @@ class TrainMovement:  # pylint: disable=too-many-instance-attributes
 
         # Use first wagon's coupler type
         first_wagon = self.batch.wagons[0]
-        if True:
+        if hasattr(first_wagon, 'coupler_a') and hasattr(first_wagon.coupler_a, 'type'):
             coupler_type = first_wagon.coupler_a.type.value
             return timedelta_to_sim_ticks(process_times.get_coupling_time(coupler_type))
 

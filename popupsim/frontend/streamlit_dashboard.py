@@ -1,4 +1,9 @@
-"""PopUpSim Streamlit Dashboard - Comprehensive post-simulation analysis."""
+# pylint: disable=all
+"""PopUpSim Streamlit Dashboard - Comprehensive post-simulation analysis.
+
+NOTE: This dashboard is deprecated and will be removed.
+Please use dashboard_v2.py instead.
+"""
 
 import contextlib
 import json

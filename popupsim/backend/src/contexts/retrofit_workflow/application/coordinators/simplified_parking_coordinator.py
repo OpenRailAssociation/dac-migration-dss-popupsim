@@ -12,8 +12,11 @@ from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 logger = logging.getLogger(__name__)
 
 
-class SimplifiedParkingCoordinator:
-    """Simplified parking coordinator focused purely on coordination logic."""
+class SimplifiedParkingCoordinator:  # pylint: disable=too-few-public-methods
+    """Simplified parking coordinator focused purely on coordination logic.
+
+    Note: Single public method (start) for coordinator pattern.
+    """
 
     def __init__(self, config: ParkingCoordinatorConfig, coordination: CoordinationService):
         """Initialize coordinator with minimal dependencies."""

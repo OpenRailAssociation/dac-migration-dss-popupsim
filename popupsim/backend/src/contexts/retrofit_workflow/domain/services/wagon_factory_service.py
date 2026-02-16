@@ -8,11 +8,13 @@ from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
 
 
-class WagonFactoryService:
+class WagonFactoryService:  # pylint: disable=too-few-public-methods
     """Factory service for creating wagon entities.
 
     Encapsulates wagon creation logic and provides consistent
     entity instantiation with proper validation.
+
+    Note: Single-purpose domain service with focused responsibility.
     """
 
     def create_wagon(

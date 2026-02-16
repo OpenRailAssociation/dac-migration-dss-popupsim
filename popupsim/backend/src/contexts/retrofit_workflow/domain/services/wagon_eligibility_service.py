@@ -14,8 +14,11 @@ class EligibilityResult:
     rejection_status: str | None = None
 
 
-class WagonEligibilityService:
-    """Domain service for determining wagon eligibility for retrofit processing."""
+class WagonEligibilityService:  # pylint: disable=too-few-public-methods
+    """Domain service for determining wagon eligibility for retrofit processing.
+
+    Note: Single-purpose domain service with focused responsibility.
+    """
 
     def is_eligible_for_retrofit(self, wagon_config: dict[str, Any]) -> EligibilityResult:
         """Check if wagon is eligible for retrofit processing.

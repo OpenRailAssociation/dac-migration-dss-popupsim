@@ -66,6 +66,7 @@ def test_form_rake_empty_wagons(rake_manager: RakeLifecycleManager) -> None:
 
     assert not result.success
     assert result.rake is None
+    assert result.error_message is not None
     assert 'no wagons' in result.error_message
 
 
@@ -98,6 +99,7 @@ def test_validate_rake_formation_empty(rake_manager: RakeLifecycleManager) -> No
     result = rake_manager.validate_rake_formation([])
 
     assert not result.is_valid
+    assert result.error_message is not None
     assert 'empty wagon list' in result.error_message
 
 

@@ -77,6 +77,25 @@ class LocomotiveAssemblyEvent:  # pylint: disable=too-many-instance-attributes
     location: str | None = None
 
 
+@dataclass
+class CouplingEvent:  # pylint: disable=too-many-instance-attributes
+    """Tracks coupling/decoupling operations.
+
+    Note: Multiple attributes needed to capture coupling operation details.
+    """
+
+    timestamp: float
+    locomotive_id: str
+    event_type: str
+    # Event types: COUPLING_STARTED, COUPLING_COMPLETED, DECOUPLING_STARTED,
+    # DECOUPLING_COMPLETED, TRAIN_PREPARATION, BRAKE_TEST, INSPECTION
+    location: str
+    coupler_type: str  # 'screw', 'automatic'
+    wagon_count: int
+    duration: float | None = None
+    operation_id: str | None = None
+
+
 class RejectionReason:  # pylint: disable=too-few-public-methods
     """Standard rejection reasons with human-readable descriptions."""
 

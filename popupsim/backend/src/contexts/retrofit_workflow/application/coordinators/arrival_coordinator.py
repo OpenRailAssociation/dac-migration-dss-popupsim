@@ -23,7 +23,7 @@ from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
 from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
 
 
-class ArrivalCoordinator(BaseCoordinator):
+class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-attributes
     """Coordinator for managing train arrivals and initial wagon processing.
 
     Responsibilities:
@@ -36,6 +36,8 @@ class ArrivalCoordinator(BaseCoordinator):
     - Business rules for wagon filtering (delegated to domain service)
     - Track selection logic (delegated to track selector)
     - Collection queue management (delegated to collection coordinator)
+
+    Note: Multiple attributes needed for coordination responsibilities.
     """
 
     def __init__(self, config: ArrivalCoordinatorConfig) -> None:
@@ -49,7 +51,7 @@ class ArrivalCoordinator(BaseCoordinator):
         self._track_selector = config.track_selector
         self._collection_coordinator = config.collection_coordinator
         self._event_publisher = config.event_publisher
-        self._track_manager = config.track_manager  # Add track manager for capacity management
+        self._track_manager = config.track_manager
         self._wagon_factory = WagonFactoryService()
         self._eligibility_service = WagonEligibilityService()
         self._rejection_factory = RejectionEventFactory()

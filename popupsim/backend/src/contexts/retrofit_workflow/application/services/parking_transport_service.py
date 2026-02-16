@@ -127,7 +127,7 @@ class ParkingTransportService:
     def _transport_to_parking_simple(
         self, loco: Any, wagons: list[Wagon], batch_id: str, parking_track_id: str
     ) -> Generator[Any, Any]:
-        """Perform transport without train formation (fallback)"""
+        """Perform transport without train formation (fallback)."""
         EventPublisherHelper.publish_batch_transport_started(
             self.config.batch_event_publisher,
             self.config.env.now,

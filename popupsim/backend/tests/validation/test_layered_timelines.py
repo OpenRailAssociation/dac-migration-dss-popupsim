@@ -1,10 +1,9 @@
 """Layered timeline tests - progressively adding time components.
 
 Test Structure:
-- Layer 1: Pure travel times (no coupling, no loco prep)
-- Layer 2: Rake coupling/decoupling times (wagon-to-wagon)
-- Layer 3: Locomotive operations (loco coupling + prep, no rake coupling)
-- Layer 4: Complete times (all operations)
+- Layer 1: Pure travel times (no coupling, no prep)
+- Layer 2: Preparation times only (no coupling)
+- Layer 3: Complete times (coupling + preparation)
 """
 
 from datetime import timedelta
@@ -22,11 +21,10 @@ def create_layered_scenario(
     retrofit_time: float = 10.0,
     workshop_bays: list[int] | None = None,
     # Layer controls
-    rake_coupling_time: float = 0.0,  # Layer 2: wagon-to-wagon coupling
-    loco_coupling_time: float = 0.0,  # Layer 3: locomotive coupling
-    loco_prep_time: float = 0.0,  # Layer 3: locomotive preparation (shunting)
-    brake_test_time: float = 0.0,  # Layer 3: brake test (mainline)
-    inspection_time: float = 0.0,  # Layer 3: inspection (mainline)
+    coupling_time: float = 0.0,  # Layer 3: All coupling/decoupling (rake + loco)
+    loco_prep_time: float = 0.0,  # Layer 2+3: Locomotive preparation
+    brake_test_time: float = 0.0,  # Future: brake tests
+    inspection_time: float = 0.0,  # Future: inspections
 ) -> Mock:
     """Create scenario with layered time configuration."""
     mock_scenario = Mock()
@@ -164,37 +162,37 @@ def create_layered_scenario(
 
     process_times_mock = MagicMock()
     process_times_mock.wagon_retrofit_time = timedelta(minutes=retrofit_time)
-    # Layer 2: Rake coupling/decoupling (wagon-to-wagon)
-    process_times_mock.screw_coupling_time = timedelta(minutes=rake_coupling_time)
-    process_times_mock.screw_decoupling_time = timedelta(minutes=rake_coupling_time)
-    process_times_mock.dac_coupling_time = timedelta(minutes=rake_coupling_time * 0.5)
-    process_times_mock.dac_decoupling_time = timedelta(minutes=rake_coupling_time * 0.5)
-    # Layer 3: Locomotive operations
+    # Layer 3: All coupling/decoupling times (same for rake and loco)
+    process_times_mock.screw_coupling_time = timedelta(minutes=coupling_time)
+    process_times_mock.screw_decoupling_time = timedelta(minutes=coupling_time)
+    process_times_mock.dac_coupling_time = timedelta(minutes=coupling_time * 0.5)
+    process_times_mock.dac_decoupling_time = timedelta(minutes=coupling_time * 0.5)
+    # Layer 2+3: Locomotive preparation
     process_times_mock.shunting_preparation_time = timedelta(minutes=loco_prep_time)
     process_times_mock.full_brake_test_time = timedelta(minutes=brake_test_time)
     process_times_mock.technical_inspection_time = timedelta(minutes=inspection_time)
     process_times_mock.brake_continuity_check_time = timedelta(seconds=0.0)
 
-    # Add get_coupling_time method for dynamic loco coupling based on wagon coupler types
+    # Add get_coupling_time method for dynamic coupling based on coupler types
     def get_coupling_time(coupler_type: str) -> timedelta:
         if coupler_type.upper() == 'DAC':
-            return timedelta(minutes=loco_coupling_time * 0.5)
-        return timedelta(minutes=loco_coupling_time)
+            return timedelta(minutes=coupling_time * 0.5)
+        return timedelta(minutes=coupling_time)
 
     def get_decoupling_time(coupler_type: str) -> timedelta:
         if coupler_type.upper() == 'DAC':
-            return timedelta(minutes=loco_coupling_time * 0.5)
-        return timedelta(minutes=loco_coupling_time)
+            return timedelta(minutes=coupling_time * 0.5)
+        return timedelta(minutes=coupling_time)
 
     def get_coupling_ticks(coupler_type: str) -> float:
         if coupler_type.upper() == 'DAC':
-            return loco_coupling_time * 0.5
-        return loco_coupling_time
+            return coupling_time * 0.5
+        return coupling_time
 
     def get_decoupling_ticks(coupler_type: str) -> float:
         if coupler_type.upper() == 'DAC':
-            return loco_coupling_time * 0.5
-        return loco_coupling_time
+            return coupling_time * 0.5
+        return coupling_time
 
     process_times_mock.get_coupling_time = get_coupling_time
     process_times_mock.get_decoupling_time = get_decoupling_time
@@ -219,14 +217,14 @@ def create_layered_scenario(
     return mock_scenario
 
 
-def run_layered_test(
+# pylint: disable=too-many-branches
+def run_layered_test(  # noqa: PLR0912
     num_wagons: int,
     num_workshops: int,
     retrofit_time: float,
     until: float,
     workshop_bays: list[int] | None = None,
-    rake_coupling_time: float = 0.0,
-    loco_coupling_time: float = 0.0,
+    coupling_time: float = 0.0,
     loco_prep_time: float = 0.0,
     brake_test_time: float = 0.0,
     inspection_time: float = 0.0,
@@ -237,8 +235,7 @@ def run_layered_test(
         num_workshops,
         retrofit_time,
         workshop_bays,
-        rake_coupling_time,
-        loco_coupling_time,
+        coupling_time,
         loco_prep_time,
         brake_test_time,
         inspection_time,
@@ -344,6 +341,15 @@ def run_layered_test(
                 print(f't={int(t)}: locomotive[{e.locomotive_id}] {e.event_type} {e.purpose}')
             elif hasattr(e, 'from_location') and hasattr(e, 'to_location') and e.from_location:
                 print(f't={int(t)}: locomotive[{e.locomotive_id}] MOVING {e.from_location}->{e.to_location}')
+        elif event_type == 'CouplingEvent':
+            if e.locomotive_id:
+                print(
+                    f't={int(t)}: {e.event_type} at {e.location} (loco={e.locomotive_id}, wagons={e.wagon_count}, duration={e.duration})'
+                )
+            else:
+                print(
+                    f't={int(t)}: {e.event_type} at {e.location} (wagons={e.wagon_count}, couplings={e.coupling_count}, duration={e.duration})'
+                )
         elif event_type == 'BatchFormed':
             wagon_list = ','.join(e.wagon_ids)
             print(f't={int(t)}: batch[{e.batch_id}] FORMED wagons={wagon_list}')
@@ -360,7 +366,7 @@ def run_layered_test(
 
 
 # ============================================================================
-# LAYER 1: PURE TRAVEL TIMES (no coupling, no loco prep)
+# LAYER 1: PURE TRAVEL TIMES (no coupling, no prep)
 # ============================================================================
 
 
@@ -396,8 +402,7 @@ def test_layer1_single_wagon_pure_travel() -> None:
         until=30.0,
         workshop_bays=[1],
         # Layer 1: All times = 0
-        rake_coupling_time=0.0,
-        loco_coupling_time=0.0,
+        coupling_time=0.0,
         loco_prep_time=0.0,
     )
 
@@ -429,18 +434,19 @@ def test_layer1_two_wagons_pure_travel() -> None:
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
     t=18: locomotive[L1] MOVING loco_parking->retrofitted
     t=19: locomotive[L1] MOVING retrofitted->parking_area
-    t=19: wagon[W01] PARKED parking_area
+    t=20: wagon[W01] PARKED parking_area
     t=20: locomotive[L1] MOVING parking_area->loco_parking
-    t=21: locomotive[L1] MOVING retrofit->WS1
-    t=22: wagon[W02] RETROFIT_STARTED WS1
-    t=22: locomotive[L1] MOVING WS1->loco_parking
-    t=32: wagon[W02] RETROFIT_COMPLETED WS1
-    t=32: locomotive[L1] MOVING loco_parking->WS1
-    t=33: locomotive[L1] MOVING WS1->retrofitted
-    t=34: locomotive[L1] MOVING retrofitted->loco_parking
-    t=35: locomotive[L1] MOVING loco_parking->retrofitted
-    t=36: locomotive[L1] MOVING retrofitted->parking_area
-    t=36: wagon[W02] PARKED parking_area
+    t=21: locomotive[L1] MOVING loco_parking->retrofit
+    t=22: locomotive[L1] MOVING retrofit->WS1
+    t=23: wagon[W02] RETROFIT_STARTED WS1
+    t=23: locomotive[L1] MOVING WS1->loco_parking
+    t=33: wagon[W02] RETROFIT_COMPLETED WS1
+    t=33: locomotive[L1] MOVING loco_parking->WS1
+    t=34: locomotive[L1] MOVING WS1->retrofitted
+    t=35: locomotive[L1] MOVING retrofitted->loco_parking
+    t=36: locomotive[L1] MOVING loco_parking->retrofitted
+    t=37: locomotive[L1] MOVING retrofitted->parking_area
+    t=38: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         num_wagons=2,
@@ -448,8 +454,7 @@ def test_layer1_two_wagons_pure_travel() -> None:
         retrofit_time=10.0,
         until=50.0,
         workshop_bays=[1],
-        rake_coupling_time=0.0,
-        loco_coupling_time=0.0,
+        coupling_time=0.0,
         loco_prep_time=0.0,
     )
 
@@ -460,82 +465,39 @@ def test_layer1_two_wagons_pure_travel() -> None:
 
 
 # ============================================================================
-# LAYER 2: RAKE COUPLING/DECOUPLING (wagon-to-wagon)
+# LAYER 2: PREPARATION TIMES ONLY (no coupling)
 # ============================================================================
 
 
-def test_layer2_two_wagons_with_rake_coupling() -> None:
-    """Layer 2: Two wagons with rake coupling/decoupling (1 min per coupling).
+def test_layer2_single_wagon_with_prep() -> None:
+    """Layer 2: Single wagon with preparation times only (no coupling).
 
-    Rake has 1 coupling between 2 wagons.
+    Shunting prep: 1 min (added at each train formation)
+    No coupling/decoupling
 
-    DETAILED TIMELINE:
-    t=0: wagon[W01] ARRIVED collection
-    t=0: wagon[W02] ARRIVED collection
-    t=3: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=3: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=6: wagon[W01] RETROFIT_STARTED WS1
-    t=16: wagon[W01] RETROFIT_COMPLETED WS1
-    t=20: wagon[W01] PARKED parking_area
-    t=24.5: wagon[W02] RETROFIT_STARTED WS1
-    t=34.5: wagon[W02] RETROFIT_COMPLETED WS1
-    t=39: wagon[W02] PARKED parking_area
-    """
-    events, analytics = run_layered_test(
-        num_wagons=2,
-        num_workshops=1,
-        retrofit_time=10.0,
-        until=50.0,
-        workshop_bays=[1],
-        # Layer 2: Add rake coupling
-        rake_coupling_time=1.0,
-        loco_coupling_time=0.0,
-        loco_prep_time=0.0,
-    )
-
-    parked = [e for t, e in events if hasattr(e, 'event_type') and e.event_type == 'PARKED']
-    assert len(parked) == 2
-
-    validate_retrofit_timeline_from_docstring(events, test_layer2_two_wagons_with_rake_coupling, analytics)
-
-
-# ============================================================================
-# LAYER 3: LOCOMOTIVE OPERATIONS (loco coupling + prep, NO rake coupling)
-# ============================================================================
-
-
-def test_layer3_single_wagon_with_loco_ops() -> None:
-    """Layer 3: Single wagon with locomotive operations (no rake coupling).
-
-    Loco coupling: 3 min
-    Shunting prep: 1 min
-    Total loco prep: 4 min
+    Prep times added at:
+    - t=1: After loco arrives at collection
+    - t=5: After loco arrives at retrofit
+    - t=18: After loco arrives at workshop
+    - t=22: After loco arrives at retrofitted
 
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=0: locomotive[L1] MOVING loco_parking->collection
-    t=1: LOCO_COUPLING (3 min)
-    t=4: SHUNTING_PREP (1 min)
-    t=5: locomotive[L1] MOVING collection->retrofit
-    t=6: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=6: locomotive[L1] MOVING retrofit->loco_parking
-    t=7: locomotive[L1] MOVING loco_parking->retrofit
-    t=8: LOCO_COUPLING (3 min)
-    t=11: SHUNTING_PREP (1 min)
-    t=12: locomotive[L1] MOVING retrofit->WS1
-    t=13: wagon[W01] RETROFIT_STARTED WS1
-    t=13: locomotive[L1] MOVING WS1->loco_parking
-    t=23: wagon[W01] RETROFIT_COMPLETED WS1
-    t=23: locomotive[L1] MOVING loco_parking->WS1
-    t=24: LOCO_COUPLING (3 min)
-    t=27: SHUNTING_PREP (1 min)
-    t=28: locomotive[L1] MOVING WS1->retrofitted
-    t=29: locomotive[L1] MOVING retrofitted->loco_parking
-    t=30: locomotive[L1] MOVING loco_parking->retrofitted
-    t=31: LOCO_COUPLING (3 min)
-    t=34: SHUNTING_PREP (1 min)
-    t=35: locomotive[L1] MOVING retrofitted->parking_area
-    t=36: wagon[W01] PARKED parking_area
+    t=2: locomotive[L1] MOVING collection->retrofit
+    t=3: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=3: locomotive[L1] MOVING retrofit->loco_parking
+    t=4: locomotive[L1] MOVING loco_parking->retrofit
+    t=6: locomotive[L1] MOVING retrofit->WS1
+    t=7: wagon[W01] RETROFIT_STARTED WS1
+    t=7: locomotive[L1] MOVING WS1->loco_parking
+    t=17: wagon[W01] RETROFIT_COMPLETED WS1
+    t=17: locomotive[L1] MOVING loco_parking->WS1
+    t=19: locomotive[L1] MOVING WS1->retrofitted
+    t=20: locomotive[L1] MOVING retrofitted->loco_parking
+    t=21: locomotive[L1] MOVING loco_parking->retrofitted
+    t=23: locomotive[L1] MOVING retrofitted->parking_area
+    t=24: wagon[W01] PARKED parking_area
     """
     events, analytics = run_layered_test(
         num_wagons=1,
@@ -543,55 +505,58 @@ def test_layer3_single_wagon_with_loco_ops() -> None:
         retrofit_time=10.0,
         until=50.0,
         workshop_bays=[1],
-        # Layer 3: Add loco operations, NO rake coupling
-        rake_coupling_time=0.0,
-        loco_coupling_time=3.0,
+        # Layer 2: Add prep only
+        coupling_time=0.0,
         loco_prep_time=1.0,
     )
 
     parked = [e for t, e in events if hasattr(e, 'event_type') and e.event_type == 'PARKED']
     assert len(parked) == 1
 
-    validate_retrofit_timeline_from_docstring(events, test_layer3_single_wagon_with_loco_ops, analytics)
+    validate_retrofit_timeline_from_docstring(events, test_layer2_single_wagon_with_prep, analytics)
 
 
 # ============================================================================
-# LAYER 4: COMPLETE TIMES (all operations)
+# LAYER 3: COMPLETE TIMES (coupling + preparation)
 # ============================================================================
 
 
-def test_layer4_two_wagons_complete_times() -> None:
-    """Layer 4: Two wagons with all time components.
+def test_layer3_single_wagon_complete() -> None:
+    """Layer 3: Single wagon with all time components.
 
-    Rake coupling: 1 min (wagon-to-wagon)
-    Loco coupling: 1 min SCREW (before retrofit), 0.5 min DAC (after retrofit)
+    Coupling: 1 min (SCREW before retrofit), 0.5 min (DAC after retrofit)
     Shunting prep: 1 min
 
-    DETAILED TIMELINE:
+    TIMELINE:
     t=0: wagon[W01] ARRIVED collection
-    t=0: wagon[W02] ARRIVED collection
-    t=5: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=5: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=10: wagon[W01] RETROFIT_STARTED WS1
-    t=20: wagon[W01] RETROFIT_COMPLETED WS1
-    t=27: wagon[W01] PARKED parking_area
-    t=33.5: wagon[W02] RETROFIT_STARTED WS1
-    t=43.5: wagon[W02] RETROFIT_COMPLETED WS1
-    t=51: wagon[W02] PARKED parking_area
+    t=0: locomotive[L1] MOVING loco_parking->collection
+    t=3: locomotive[L1] MOVING collection->retrofit
+    t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=5: locomotive[L1] MOVING retrofit->loco_parking
+    t=6: locomotive[L1] MOVING loco_parking->retrofit
+    t=9: locomotive[L1] MOVING retrofit->WS1
+    t=11: wagon[W01] RETROFIT_STARTED WS1
+    t=11: locomotive[L1] MOVING WS1->loco_parking
+    t=21: wagon[W01] RETROFIT_COMPLETED WS1
+    t=21: locomotive[L1] MOVING loco_parking->WS1
+    t=23.5: locomotive[L1] MOVING WS1->retrofitted
+    t=24.5: locomotive[L1] MOVING retrofitted->loco_parking
+    t=25.5: locomotive[L1] MOVING loco_parking->retrofitted
+    t=28: locomotive[L1] MOVING retrofitted->parking_area
+    t=29.5: wagon[W01] PARKED parking_area
     """
     events, analytics = run_layered_test(
-        num_wagons=2,
+        num_wagons=1,
         num_workshops=1,
         retrofit_time=10.0,
-        until=80.0,
+        until=50.0,
         workshop_bays=[1],
-        # Layer 4: All times with dynamic loco coupling
-        rake_coupling_time=1.0,
-        loco_coupling_time=1.0,  # Dynamic: 1 min SCREW, 0.5 min DAC
+        # Layer 3: All times
+        coupling_time=1.0,
         loco_prep_time=1.0,
     )
 
     parked = [e for t, e in events if hasattr(e, 'event_type') and e.event_type == 'PARKED']
-    assert len(parked) == 2
+    assert len(parked) == 1
 
-    validate_retrofit_timeline_from_docstring(events, test_layer4_two_wagons_complete_times, analytics)
+    validate_retrofit_timeline_from_docstring(events, test_layer3_single_wagon_complete, analytics)

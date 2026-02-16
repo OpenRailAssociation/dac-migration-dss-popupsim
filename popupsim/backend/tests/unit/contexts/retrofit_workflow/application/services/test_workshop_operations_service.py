@@ -134,6 +134,7 @@ class TestWorkshopOperationsService:
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'no wagons' in result.error_message
         assert result.operation is None
         assert result.processed_wagons == []
@@ -154,6 +155,7 @@ class TestWorkshopOperationsService:
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'No wagons can be processed' in result.error_message
         assert result.operation is None
         assert result.processed_wagons == []
@@ -210,6 +212,7 @@ class TestWorkshopOperationsService:
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'Failed to create batch aggregate' in result.error_message
         assert result.operation is None
         assert result.processed_wagons == []
@@ -258,6 +261,7 @@ class TestWorkshopOperationsService:
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'No suitable workshop available' in result.error_message
         assert result.operation is None
         assert result.processed_wagons == []
@@ -321,6 +325,7 @@ class TestWorkshopOperationsService:
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'cannot be assigned to workshop' in result.error_message
         assert result.operation is None
         assert result.processed_wagons == []

@@ -9,6 +9,7 @@ from contexts.retrofit_workflow.application.config.queue_config import QueueConf
 from contexts.retrofit_workflow.application.config.service_config import ServiceConfig
 from contexts.retrofit_workflow.application.interfaces.resource_interfaces import TrackSelector
 from contexts.retrofit_workflow.application.interfaces.transport_interfaces import LocomotiveManager
+from contexts.retrofit_workflow.domain.events import CouplingEvent
 from contexts.retrofit_workflow.domain.events import LocomotiveMovementEvent
 from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
 from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAtDestination
@@ -99,6 +100,7 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
         None
     )
+    coupling_event_publisher: Callable[[CouplingEvent], None] | None = None
 
 
 @dataclass
@@ -116,6 +118,7 @@ class WorkshopCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
+    coupling_event_publisher: Callable[[CouplingEvent], None] | None = None
 
 
 @dataclass
@@ -135,6 +138,7 @@ class ParkingCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
         None
     )
+    coupling_event_publisher: Callable[[CouplingEvent], None] | None = None
     # Strategy configuration
     strategy: str = 'opportunistic'  # 'opportunistic' or 'smart_accumulation'
     normal_threshold: float = 0.3  # 30% of retrofitted track capacity for smart_accumulation
