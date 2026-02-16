@@ -1,5 +1,0 @@
-id,name,type,capacity,edges
-T_COL1,Collection Track 1,collection,1000.0,e1
-T_WS1,Workshop Track 1,workshop,500.0,e2
-T_RET1,Retrofitted Track 1,retrofitted,1000.0,e3
-T_PARK1,Parking Track 1,parking,2000.0,e4

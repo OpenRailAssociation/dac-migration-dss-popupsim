@@ -412,23 +412,23 @@ def log_memory_usage(phase: str) -> None:
 graph TB
     subgraph "Validation Pipeline"
         Input["Scenario Data"]
-        
+
         subgraph "Layer 1: SYNTAX"
             Syntax["Field format validation<br/>Type checking<br/>Required fields"]
         end
-        
+
         subgraph "Layer 2: SEMANTIC"
             Semantic["Business rules<br/>Date logic<br/>Strategy validation"]
         end
-        
+
         subgraph "Layer 3: INTEGRITY"
             Integrity["Cross-references<br/>Data consistency<br/>Duplicate detection"]
         end
-        
+
         subgraph "Layer 4: FEASIBILITY"
             Feasibility["Capacity constraints<br/>Resource allocation<br/>Simulation readiness"]
         end
-        
+
         Result["ValidationResult<br/>All issues stacked"]
     end
 
@@ -463,11 +463,11 @@ class IntegrityValidator:
 
     def validate(self, scenario: Scenario) -> ValidationResult:
         result = ValidationResult(is_valid=True)
-        
+
         # Collect all available IDs
         locomotive_ids = {loco.id for loco in scenario.locomotives or []}
         route_ids = {route.id for route in scenario.routes or []}
-        
+
         # Validate train references
         for i, train in enumerate(scenario.trains or []):
             if train.locomotive_id not in locomotive_ids:
@@ -477,7 +477,7 @@ class IntegrityValidator:
                     category=ValidationCategory.INTEGRITY,
                     suggestion=f"Use one of: {', '.join(locomotive_ids)}"
                 )
-        
+
         return result
 
 # ACTUAL IMPLEMENTATION - Validation Pipeline Usage
@@ -500,7 +500,7 @@ SYNTAX ERRORS:
 - Scenario ID too long (Field: id)
   → Suggestion: Keep scenario ID under 50 characters
 
-INTEGRITY ERRORS:  
+INTEGRITY ERRORS:
 - Train T1 references non-existent locomotive 'L99' (Field: trains[0].locomotive_id)
   → Suggestion: Use one of: L1, L2, L3
 - Route R1 references non-existent track 'T99' (Field: routes[0].track_sequence[2])

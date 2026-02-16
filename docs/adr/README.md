@@ -15,9 +15,9 @@ Each ADR follows this structure:
 - **Decision:** What is the change that we're proposing/doing
 - **Consequences:** What becomes easier or more difficult to do because of this change
 
-## Index
+## Performance Optimizations Summary
 
-### Performance Optimizations
+The PopUpSim project has undergone significant performance optimizations:
 
 The following ADRs document performance optimizations made to the PopUpSim codebase:
 
@@ -33,38 +33,46 @@ The following ADRs document performance optimizations made to the PopUpSim codeb
 | 008 | Track Length Caching | Accepted | Avoid recomputation |
 | 009 | JSON Loading Strategy and Future Scalability | Accepted | Future planning |
 
-## Summary of Performance Improvements
+| # | Title | Status | Impact |
+|---|-------|--------|--------|
+| 001 | Resource Pool Incremental Utilization Tracking | Accepted | 30-3000x speedup |
+| 002 | Wagon Collector Memory Leak Fix and Simplification | Accepted | 5000x memory reduction |
+| 003 | CSV Adapter Dict Grouping for Train Processing | Accepted | 10-16x speedup |
+| 004 | Event Type Routing for Metrics Collection | Accepted | 1.7x speedup |
+| 005 | Track Selection Cached Ratios Optimization | Accepted | 1.57x speedup (large) |
+| 006 | Batch Collection Immediate Break Optimization | Accepted | 15% avg speedup |
+| 007 | Lazy Logging String Formatting | Accepted | ~1% improvement |
+| 008 | Track Length Caching | Accepted | Avoid recomputation |
+| 009 | JSON Loading Strategy and Future Scalability | Accepted | Future planning |
 
-### Phase 1: Critical Fixes (Completed)
-
-**Issue #1: Resource Pool Utilization**
+**Resource Pool Utilization**
 - Problem: O(n*m) quadratic complexity
 - Solution: Incremental tracking with O(1) updates
 - Result: 3,128x speedup for large scenarios
 
-**Issue #2: Wagon Collector Memory Leak**
+**Wagon Collector Memory Management**
 - Problem: Unbounded dictionary growth (50MB leak)
 - Solution: Cleanup on exit + design simplification
 - Result: 5,000x memory reduction
 
-**Issue #3: CSV Adapter Performance**
+**CSV Adapter Performance**
 - Problem: O(n*m) pandas iterrows() with nested filtering
 - Solution: Pure Python dict grouping O(n+m)
 - Result: 10.7x speedup for large scenarios
 
-### Phase 2: High Priority Optimizations (In Progress)
+### High Priority Optimizations
 
-**Issue #4: Event Broadcasting**
+**Event Broadcasting**
 - Problem: Broadcasting all events to all collectors
 - Solution: Event type registration and routing
 - Result: 1.7x speedup, 67% fewer method calls
 
-**Issue #5: Track Selection Lookups**
+**Track Selection Lookups**
 - Problem: 4 dictionary lookups per track in LEAST_OCCUPIED strategy
 - Solution: Cache occupancy ratios during filtering
 - Result: 1.57x speedup for large scenarios (20+ tracks)
 
-**Issue #7: Batch Collection Timeouts**
+**Batch Collection Timeouts**
 - Problem: Timeout events created when collecting wagon batches
 - Solution: Immediate break when queue empty (no timeout)
 - Result: 15% average speedup, simpler code

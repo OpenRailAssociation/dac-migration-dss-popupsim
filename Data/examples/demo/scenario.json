@@ -1,0 +1,19 @@
+{
+  "id": "test_scenario_01",
+  "description": "DAC restrofit simualation",
+  "version": "1.0.0",
+  "start_date": "2025-12-01T00:00:00+00:00",
+  "end_date": "2025-12-09T00:00:00+00:00",
+  "track_selection_strategy": "least_occupied",
+  "workshop_selection_strategy": "least_occupied",
+  "parking_selection_strategy": "least_occupied",
+  "references": {
+    "locomotives": "locomotive.json",
+    "process_times": "process_times.json",
+    "routes": "routes.json",
+    "trains": "train_schedule.csv",
+    "topology": "topology.json",
+    "tracks": "tracks.json",
+    "workshops": "workshops.json"
+  }
+}

@@ -1,6 +1,0 @@
-route_id;from_track;to_track;track_sequence;distance_m;time_min
-ROUTE01;sammelgleis;werkstattzufuehrung;"sammelgleis,werkstattzufuehrung";450;5
-ROUTE02;werkstattzufuehrung;werkstattgleis;"werkstattzufuehrung,werkstattgleis";120;2
-ROUTE03;werkstattgleis;werkstattabfuehrung;"werkstattgleis,werkstattabfuehrung";120;2
-ROUTE04;werkstattabfuehrung;parkgleis;"werkstattabfuehrung,parkgleis";380;4
-ROUTE05;sammelgleis;bahnhofskopf;"sammelgleis,bahnhofskopf";200;3

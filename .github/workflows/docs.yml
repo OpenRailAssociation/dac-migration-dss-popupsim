@@ -25,22 +25,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
-      
+      - uses: actions/checkout@v6.0.2
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
-      
+
       - name: Install dependencies
         run: uv sync --group docs
-      
+
       - name: Build documentation
         run: uv run mkdocs build --strict
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v6.0.0
         with:
@@ -51,29 +51,31 @@ jobs:
     needs: build
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6.0.1
-      
+      - uses: actions/checkout@v6.0.2
+
       - name: Download artifact
         uses: actions/download-artifact@v7
         with:
           name: docs-site
           path: site/
-      
+
       - name: Deploy preview
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: site/
           preview-branch: gh-pages
           umbrella-dir: pr-preview
-      
+
       - name: Create deployment
         uses: actions/github-script@v8
         with:
           script: |
             const prNumber = context.issue.number;
             const previewUrl = `https://openrailassociation.github.io/dac-migration-dss-popupsim/pr-preview/pr-${prNumber}/`;
-            
+
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -83,7 +85,7 @@ jobs:
               required_contexts: [],
               description: `PR #${prNumber} documentation preview`
             });
-            
+
             await github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -97,15 +99,17 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v6.0.1
-      
+      - uses: actions/checkout@v6.0.2
+
       - name: Download artifact
         uses: actions/download-artifact@v7
         with:
           name: docs-site
           path: site/
-      
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:

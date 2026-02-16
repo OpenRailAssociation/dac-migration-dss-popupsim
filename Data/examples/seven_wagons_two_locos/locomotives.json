@@ -1,6 +1,0 @@
-{
-  "locomotives": [
-    {"id": "L1", "track": "loco_parking"},
-    {"id": "L2", "track": "loco_parking"}
-  ]
-}

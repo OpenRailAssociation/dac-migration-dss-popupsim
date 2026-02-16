@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
-from enum import Enum
+from enum import StrEnum
 import logging
 from typing import Any
 
@@ -23,7 +23,7 @@ from .process_times import ProcessTimes
 logger = logging.getLogger(__name__)
 
 
-class TrackSelectionStrategy(str, Enum):
+class TrackSelectionStrategy(StrEnum):
     """Strategy for selecting tracks."""
 
     ROUND_ROBIN = 'round_robin'
@@ -32,18 +32,35 @@ class TrackSelectionStrategy(str, Enum):
     RANDOM = 'random'
 
 
-class LocoDeliveryStrategy(str, Enum):
+class LocoDeliveryStrategy(StrEnum):
     """Strategy for locomotive delivery."""
 
     RETURN_TO_PARKING = 'return_to_parking'
     DIRECT_DELIVERY = 'direct_delivery'
 
 
-class LocoPriorityStrategy(str, Enum):
+class LocoPriorityStrategy(StrEnum):
     """Strategy for locomotive task prioritization."""
 
     WORKSHOP_PRIORITY = 'workshop_priority'  # Park wagons immediately when loco available
     BATCH_COMPLETION = 'batch_completion'  # Complete workshop pickups before parking
+
+
+class WorkflowMode(StrEnum):
+    """Workflow execution mode."""
+
+    LEGACY = 'legacy'
+    RETROFIT_WORKFLOW = 'retrofit_workflow'
+
+    @classmethod
+    def _missing_(cls, value: object) -> 'WorkflowMode':
+        """Handle missing values by returning default."""
+        if isinstance(value, str):
+            # Try case-insensitive match
+            for member in cls:
+                if member.value.lower() == value.lower():
+                    return member
+        return cls.LEGACY
 
 
 class Scenario(BaseModel):
@@ -52,6 +69,7 @@ class Scenario(BaseModel):
     id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
     start_date: datetime
     end_date: datetime
+    workflow_mode: WorkflowMode = WorkflowMode.LEGACY
     track_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     collection_track_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
 
