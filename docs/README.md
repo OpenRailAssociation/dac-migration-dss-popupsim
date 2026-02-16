@@ -44,10 +44,9 @@ PopUpSim MVP uses a 3-context architecture:
 
 ## Getting Started
 
-1. **For Users**: Start with [Tutorial](tutorial/README.md)
-2. **For Developers**: See [MVP Architecture](mvp/architecture/README.md)
-3. **For Requirements**: Review [Use Cases](requirements/use-cases.md)
-4. **For Decisions**: Browse [ADR Overview](adr/README.md)
+1. **For MVP Development**: Start with [MVP Architecture](mvp/architecture/README.md)
+2. **For Requirements**: Review [Use Cases](requirements/use-cases.md)
+3. **For Architecture Decisions**: Browse [MVP ADRs](mvp/architecture/decisions/)
 
 ## Contributing to Documentation
 

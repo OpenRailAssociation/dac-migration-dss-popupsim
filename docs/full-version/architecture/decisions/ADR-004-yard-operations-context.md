@@ -221,6 +221,7 @@ yards = {
 
 ## Related ADRs
 - ADR-001: External Train Context - Delivers trains to yards
+- ADR-003: Railway Infrastructure Context (future)
 - ADR-007: Shunting Operations Context - Handles yard movements
 
 ## Migration Strategy

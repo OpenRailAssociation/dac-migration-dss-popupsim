@@ -215,6 +215,7 @@ This decision supports:
 
 ## References
 
+- Project Rules (see `.amazonq/rules/project-rules.md` in repository root)
 - [Python Type Hints Documentation](https://docs.python.org/3/library/typing.html)
 - [MyPy Documentation](https://mypy.readthedocs.io/)
 

@@ -142,4 +142,6 @@ class WagonsDeliveredEvent(DomainEvent):
 
 ## References
 
+- ADR-001: Hexagonal Pipeline Architecture (see mvp/architecture/decisions/)
+- ADR-004: 3 Bounded Context Architecture (see mvp/architecture/decisions/)
 - Railway Industry EDI Standards
