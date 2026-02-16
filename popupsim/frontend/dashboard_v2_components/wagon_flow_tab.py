@@ -19,7 +19,7 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:
 
     # Section 1: Wagon Journeys Over Time
     st.subheader('Wagon Journeys Over Time')
-    all_wagon_ids = sorted(wagon_journey['wagon_id'].unique(), key=lambda x: (int(x[1:]) if x[1:].isdigit() else 0))
+    all_wagon_ids = sorted(wagon_journey['wagon_id'].unique(), key=lambda x: int(x[1:]) if x[1:].isdigit() else 0)
     _render_wagon_gantt(wagon_journey, all_wagon_ids)
 
     st.markdown('---')
@@ -58,14 +58,14 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:
     st.subheader('Track Specific Wagons')
     st.write('Select specific wagons to analyze their journey in detail:')
 
-    all_wagon_ids = sorted(wagon_journey['wagon_id'].unique(), key=lambda x: (int(x[1:]) if x[1:].isdigit() else 0))
+    all_wagon_ids = sorted(wagon_journey['wagon_id'].unique(), key=lambda x: int(x[1:]) if x[1:].isdigit() else 0)
     selected_wagons = st.multiselect(
         'Select wagons:', options=all_wagon_ids, default=[], placeholder='Choose wagon IDs to track...'
     )
 
     if selected_wagons:
         filtered_journey = wagon_journey[wagon_journey['wagon_id'].isin(selected_wagons)]
-        selected_sorted = sorted(selected_wagons, key=lambda x: (int(x[1:]) if x[1:].isdigit() else 0))
+        selected_sorted = sorted(selected_wagons, key=lambda x: int(x[1:]) if x[1:].isdigit() else 0)
         _render_wagon_gantt(filtered_journey, selected_sorted)
 
 
