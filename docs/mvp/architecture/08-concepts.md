@@ -405,7 +405,7 @@ def log_memory_usage(phase: str) -> None:
 
 ## 8.8 4-Layer Validation Framework
 
-**Enterprise-grade validation** with comprehensive error stacking ensures **Simulation Accuracy & Reliability** (Priority 2). See [Validation Framework README](../../../popupsim/backend/src/shared/validation/README.md) for complete documentation.
+**Enterprise-grade validation** with comprehensive error stacking ensures **Simulation Accuracy & Reliability** (Priority 2). See validation framework documentation in the codebase for complete details.
 
 ### 4-Layer Validation Architecture
 

@@ -19,11 +19,6 @@ docs/
 ### MVP Documentation
 - **[MVP Architecture](mvp/architecture/README.md)** - Complete arc42 architecture for the MVP
 - **[MVP Development Guide](mvp/development/README.md)** - Implementation details and examples
-- **[MVP Quick Reference](mvp/QUICK_REFERENCE.md)** - Quick reference for developers
-
-### Full Version Documentation
-- **[Full Version Architecture](full-version/architecture/README.md)** - Future architecture design
-- **[Architecture Decisions (ADRs)](full-version/architecture/decisions/)** - All architectural decisions
 
 ### Requirements & Use Cases
 - **[Use Cases](requirements/use-cases.md)** - User stories and requirements
@@ -58,9 +53,8 @@ Located in `full-version/architecture/decisions/`:
 ## Getting Started
 
 1. **For MVP Development**: Start with [MVP Architecture](mvp/architecture/README.md)
-2. **For Full Version Planning**: See [Full Version Architecture](full-version/architecture/README.md)
-3. **For Requirements**: Review [Use Cases](requirements/use-cases.md)
-4. **For Decisions**: Browse [Architecture Decisions](full-version/architecture/decisions/)
+2. **For Requirements**: Review [Use Cases](requirements/use-cases.md)
+3. **For Architecture Decisions**: Browse [MVP ADRs](mvp/architecture/decisions/)
 
 ## Contributing to Documentation
 
