@@ -118,10 +118,7 @@ def main() -> None:
 
     # Footer
     st.sidebar.markdown('---')
-    st.sidebar.info(
-        '**PopUpSim Dashboard**'
-        '\n📂 Load output directory to view results.'
-    )
+    st.sidebar.info('**PopUpSim Dashboard**\n📂 Load output directory to view results.')
 
 
 if __name__ == '__main__':
