@@ -24,7 +24,6 @@ docs/
 ### MVP Documentation
 - **[MVP Architecture](mvp/architecture/README.md)** - Complete arc42 architecture for the MVP
 - **[MVP Development Guide](mvp/development/README.md)** - Implementation details and examples
-- **[MVP Quick Reference](mvp/QUICK_REFERENCE.md)** - Quick reference for developers
 
 ### Requirements & Use Cases
 - **[Use Cases](requirements/use-cases.md)** - User stories and requirements
