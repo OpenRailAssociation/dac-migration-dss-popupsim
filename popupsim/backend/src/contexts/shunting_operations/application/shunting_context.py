@@ -296,7 +296,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         wagon_count: int,
         coupler_type: str | None = None,
         wagon_ids: list[str] | None = None,
-    ) -> Any:  # ruff: C901
+    ) -> Any:
         """Decouple wagons from locomotive."""
 
         def decouple_gen() -> Generator:
