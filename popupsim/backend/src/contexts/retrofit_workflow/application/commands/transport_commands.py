@@ -45,7 +45,7 @@ class BatchToWorkshopTransport(TransportCommand):  # pylint: disable=too-few-pub
         self.batch_context = batch_context
         self.publishers = event_publishers
 
-    def execute(self) -> Generator[Any, Any]:
+    def execute(self) -> Generator[Any, Any]:  # noqa: C901
         """Execute batch transport to workshop."""
         # Allocate locomotive
         loco = yield from self.config.locomotive_manager.allocate()
@@ -195,7 +195,7 @@ class BatchFromWorkshopTransport(TransportCommand):  # pylint: disable=too-few-p
         self.retrofitted_queue = retrofitted_queue
         self.publishers = event_publishers
 
-    def execute(self) -> Generator[Any, Any]:
+    def execute(self) -> Generator[Any, Any]:  # noqa: C901
         """Execute batch transport from workshop to retrofitted track."""
         # Allocate locomotive for pickup
         loco = yield from self.config.locomotive_manager.allocate()

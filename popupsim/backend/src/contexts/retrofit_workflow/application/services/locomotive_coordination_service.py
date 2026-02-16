@@ -4,8 +4,11 @@ from collections.abc import Generator
 from typing import Any
 
 
-class LocomotiveCoordinationService:
-    """Application service for locomotive coordination and availability management."""
+class LocomotiveCoordinationService:  # pylint: disable=too-few-public-methods
+    """Application service for locomotive coordination and availability management.
+
+    Note: Single-purpose service with focused responsibility.
+    """
 
     def __init__(self, config: Any):
         """Initialize locomotive coordination service."""

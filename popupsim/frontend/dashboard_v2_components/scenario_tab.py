@@ -9,8 +9,11 @@ import streamlit as st
 from dashboard_v2_components.scenario_analyzer import ScenarioAnalyzer
 
 
-def render_scenario_tab(data: dict[str, Any]) -> None:
-    """Render scenario configuration tab."""
+def render_scenario_tab(data: dict[str, Any]) -> None:  # pylint: disable=too-many-locals
+    """Render scenario configuration tab.
+
+    Note: Multiple local variables needed for comprehensive scenario analysis.
+    """
     scenario_config = data.get('scenario_config', {})
 
     if not scenario_config:
@@ -40,9 +43,6 @@ def render_scenario_tab(data: dict[str, Any]) -> None:
     _render_schedule_section(analyzer)
 
     st.markdown('---')
-
-    # Section 5: Capacity Analysis
-    _render_capacity_analysis_section(analyzer)
 
 
 def _render_overview_section(analyzer: ScenarioAnalyzer) -> None:
@@ -75,8 +75,11 @@ def _render_overview_section(analyzer: ScenarioAnalyzer) -> None:
         st.dataframe(strategy_df, use_container_width=True, hide_index=True)
 
 
-def _render_infrastructure_section(analyzer: ScenarioAnalyzer) -> None:
-    """Render infrastructure layout schematic."""
+def _render_infrastructure_section(analyzer: ScenarioAnalyzer) -> None:  # pylint: disable=too-many-locals
+    """Render infrastructure layout schematic.
+
+    Note: Multiple local variables needed for infrastructure visualization.
+    """
     st.subheader('🛤️ Infrastructure Layout')
 
     track_summary = analyzer.get_track_summary()
@@ -125,7 +128,6 @@ def _render_infrastructure_section(analyzer: ScenarioAnalyzer) -> None:
         for track in tracks:
             track_id = track['id']
             length_m = track['length_m']
-            capacity = track['capacity_wagons']
 
             # Track bar (scale width based on length)
             width = min(7, max(1, length_m / 100))
@@ -134,7 +136,7 @@ def _render_infrastructure_section(analyzer: ScenarioAnalyzer) -> None:
             )
 
             # Track label
-            label = f'{track_id}: {length_m:.0f}m ({capacity} wagons)'
+            label = f'{track_id}: {length_m:.0f}m'
             ax.text(1.5 + width + 0.1, current_y, label, va='center', fontsize=8)
 
             current_y -= track_height + track_spacing
@@ -233,52 +235,3 @@ def _render_schedule_section(analyzer: ScenarioAnalyzer) -> None:
         display_df = train_arrivals.copy()
         display_df['arrival_time'] = display_df['arrival_time'].dt.strftime('%Y-%m-%d %H:%M')
         st.dataframe(display_df, use_container_width=True, hide_index=True)
-
-
-def _render_capacity_analysis_section(analyzer: ScenarioAnalyzer) -> None:
-    """Render capacity vs demand analysis."""
-    st.subheader('⚖️ Capacity vs Demand Analysis')
-
-    analysis = analyzer.calculate_capacity_analysis()
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric('Collection Capacity', f'{analysis["collection_capacity"]} wagons')
-        st.metric('Retrofit Capacity', f'{analysis["retrofit_capacity"]} wagons')
-
-    with col2:
-        st.metric('Workshop Bays', analysis['workshop_bays'])
-        st.metric('Wagons to Process', analysis['wagons_to_process'])
-
-    with col3:
-        st.metric('Theoretical Min Duration', f'{analysis["theoretical_min_duration_hours"]:.1f} hours')
-
-        # Bottleneck indicator
-        bottleneck = analysis['bottleneck_track']
-        bottleneck_capacity = analysis['bottleneck_capacity']
-        st.warning(f'⚠️ Bottleneck: {bottleneck.upper()} track ({bottleneck_capacity} wagons)')
-
-    # Capacity comparison chart
-    fig, ax = plt.subplots(figsize=(10, 4))
-
-    categories = ['Collection\nCapacity', 'Retrofit\nCapacity', 'Wagons to\nProcess']
-    values = [analysis['collection_capacity'], analysis['retrofit_capacity'], analysis['wagons_to_process']]
-    colors_list = ['#27ae60', '#f39c12', '#3498db']
-
-    bars = ax.bar(categories, values, color=colors_list, alpha=0.7, edgecolor='black')
-
-    # Add value labels on bars
-    for bar in bars:
-        height = bar.get_height()
-        ax.text(
-            bar.get_x() + bar.get_width() / 2.0, height, f'{int(height)}', ha='center', va='bottom', fontweight='bold'
-        )
-
-    ax.set_ylabel('Wagons', fontsize=11)
-    ax.set_title('Capacity vs Demand', fontsize=12, fontweight='bold')
-    ax.grid(axis='y', alpha=0.3)
-    plt.tight_layout()
-
-    st.pyplot(fig)
-    plt.close()

@@ -15,6 +15,7 @@ from contexts.retrofit_workflow.application.coordinators.arrival_coordinator imp
 from contexts.retrofit_workflow.application.coordinators.collection_coordinator import CollectionCoordinator
 from contexts.retrofit_workflow.application.coordinators.parking_coordinator import ParkingCoordinator
 from contexts.retrofit_workflow.application.coordinators.workshop_coordinator import WorkshopCoordinator
+from contexts.retrofit_workflow.application.coordinators.workshop_coordinator import WorkshopCoordinatorConfig
 from contexts.retrofit_workflow.application.event_collector import EventCollector
 from contexts.retrofit_workflow.application.services.coordination_service import CoordinationService
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
@@ -193,7 +194,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             Directory to write event files
         """
         if self.event_collector:
-            self.event_collector.export_all(output_dir)
+            self.event_collector.export_all(output_dir, self.env.now)
 
     def cleanup(self) -> None:
         """Cleanup context resources."""
@@ -319,6 +320,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
             batch_event_publisher=self.event_collector.add_batch_event,
+            coupling_event_publisher=self.event_collector.add_coupling_event,
         )
         # Use original working collection coordinator with proper interface
         self.collection_coordinator = CollectionCoordinator(collection_config, coordination_service)
@@ -338,10 +340,8 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         if not self.locomotive_manager or not self.event_collector:
             raise RuntimeError('Required managers not initialized')
 
-        # Create workshop operations service directly
-
-        # Create workshop coordinator with original parameters
-        self.workshop_coordinator = WorkshopCoordinator(
+        # Create workshop coordinator config
+        workshop_config = WorkshopCoordinatorConfig(
             env=self.env,
             workshops=self.workshops,
             retrofit_queue=self.retrofit_queue,
@@ -354,7 +354,10 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             wagon_event_publisher=self.event_collector.add_wagon_event if self.event_collector else None,
             loco_event_publisher=self.event_collector.add_locomotive_event if self.event_collector else None,
             event_publisher=self.event_collector.add_resource_event if self.event_collector else None,
+            coupling_event_publisher=self.event_collector.add_coupling_event if self.event_collector else None,
         )
+
+        self.workshop_coordinator = WorkshopCoordinator(workshop_config)
 
         # Set track manager for retrofit track capacity management
         self.workshop_coordinator.track_manager = self.track_manager
@@ -385,6 +388,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             wagon_event_publisher=self.event_collector.add_wagon_event,
             loco_event_publisher=self.event_collector.add_locomotive_event,
             batch_event_publisher=self.event_collector.add_batch_event,
+            coupling_event_publisher=self.event_collector.add_coupling_event,
             strategy=self.scenario.parking_strategy,
             normal_threshold=self.scenario.parking_normal_threshold,
             critical_threshold=self.scenario.parking_critical_threshold,

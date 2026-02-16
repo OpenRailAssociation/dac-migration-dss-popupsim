@@ -98,7 +98,7 @@ class SimulationApplicationService:
                 )
 
             # Collect results
-            result = self._collect_results(until)
+            result = self._collect_results(self.engine.current_time() - start_time)
 
             # Publish simulation ended event
             ended_event = SimulationEndedEvent.create(

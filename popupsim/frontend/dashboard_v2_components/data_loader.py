@@ -7,8 +7,11 @@ from typing import Any
 import pandas as pd
 
 
-class DataLoader:
-    """Loads simulation data from output directory."""
+class DataLoader:  # pylint: disable=too-few-public-methods
+    """Loads simulation data from output directory.
+
+    Note: Single public method is sufficient for this utility class.
+    """
 
     def __init__(self, output_dir: Path) -> None:
         """Initialize data loader with output directory."""
@@ -24,6 +27,7 @@ class DataLoader:
         data['wagon_journey'] = self._load_csv('wagon_journey.csv')
         data['rejected_wagons'] = self._load_csv('rejected_wagons.csv')
         data['locomotive_movements'] = self._load_csv('locomotive_movements.csv')
+        data['locomotive_journey'] = self._load_csv('locomotive_journey.csv')
         data['track_capacity'] = self._load_csv('track_capacity.csv')
         data['workshop_utilization'] = self._load_csv('workshop_utilization.csv')
         data['locomotive_utilization'] = self._load_csv('locomotive_utilization.csv')

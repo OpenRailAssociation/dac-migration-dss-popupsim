@@ -15,9 +15,13 @@ from contexts.retrofit_workflow.domain.services.rake_lifecycle_manager import Ra
 from contexts.retrofit_workflow.domain.services.transport_planning_service import TransportPlanningService
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class RakeOperation:
-    """Complete rake operation with formation, transport, and dissolution."""
+    """Complete rake operation with formation, transport, and dissolution.
+
+    Note: 8 attributes needed to capture complete operation lifecycle.
+    """
 
     rake_id: str
     formation_track: str
@@ -71,10 +75,7 @@ class RakeOperationsService:
     def create_formation_operation(
         self,
         wagons: list[Wagon],
-        formation_track: str,
-        target_track: str,
-        rake_type: RakeType,
-        formation_time: float,
+        context: RakeFormationContext,
     ) -> RakeOperationResult:
         """Create rake formation operation with timing.
 
@@ -82,14 +83,8 @@ class RakeOperationsService:
         ----------
         wagons : list[Wagon]
             Wagons to form into rake
-        formation_track : str
-            Track where rake is formed
-        target_track : str
-            Destination track for rake
-        rake_type : RakeType
-            Type of rake being formed
-        formation_time : float
-            Simulation time when formation starts
+        context : RakeFormationContext
+            Formation context with track, type, and timing info
 
         Returns
         -------
@@ -103,14 +98,6 @@ class RakeOperationsService:
                 error_message='Cannot create formation operation with no wagons',
                 completed_wagons=[],
             )
-
-        # Create formation context
-        context = RakeFormationContext(
-            formation_track=formation_track,
-            target_track=target_track,
-            rake_type=rake_type,
-            formation_time=formation_time,
-        )
 
         # Form rake using domain service
         formation_result = self._rake_lifecycle.form_rake(wagons, context)
@@ -126,9 +113,9 @@ class RakeOperationsService:
         # Create operation with formation timing only
         operation = RakeOperation(
             rake_id=formation_result.rake.id if formation_result.rake else 'unknown',
-            formation_track=formation_track,
-            target_track=target_track,
-            rake_type=rake_type,
+            formation_track=context.formation_track,
+            target_track=context.target_track,
+            rake_type=context.rake_type,
             formation_time=formation_result.formation_duration,
             transport_time=timedelta(0),
             dissolution_time=timedelta(0),

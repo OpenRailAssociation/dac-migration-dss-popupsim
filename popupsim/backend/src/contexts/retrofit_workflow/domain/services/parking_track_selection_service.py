@@ -5,8 +5,11 @@ from typing import Any
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 
 
-class ParkingTrackSelectionService:
-    """Domain service for selecting optimal parking tracks."""
+class ParkingTrackSelectionService:  # pylint: disable=too-few-public-methods
+    """Domain service for selecting optimal parking tracks.
+
+    Note: Single-purpose domain service with focused responsibility.
+    """
 
     def select_best_fit_track(self, wagons: list[Wagon], available_tracks: list[Any]) -> Any | None:
         """Select parking track that best fits batch size (smallest available capacity).

@@ -9,11 +9,13 @@ from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 import simpy
 
 
-class BaseCoordinator(ABC):
+class BaseCoordinator(ABC):  # pylint: disable=too-few-public-methods
     """Base class for refactored coordinators.
 
     Provides common functionality for SimPy orchestration while ensuring
     all business logic is delegated to application services.
+
+    Note: Abstract base class with minimal interface.
     """
 
     def __init__(self, env: simpy.Environment):

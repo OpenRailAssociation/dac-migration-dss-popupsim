@@ -98,7 +98,7 @@ class TrackSelectionService:
             return None
 
         # Use selector with capacity filter
-        selected_id = selector.select(lambda tid, t: t.get_available_capacity() > 0)
+        selected_id = selector.select(lambda _tid, t: t.get_available_capacity() > 0)
 
         if selected_id:
             # Get track directly from selector's resources dict

@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from collections.abc import Generator
+from dataclasses import dataclass
 from typing import Any
 
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
@@ -10,43 +11,36 @@ from contexts.retrofit_workflow.domain.aggregates.batch_aggregate import BatchAg
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 
 
+@dataclass
 class RailwayServices:
-    """Container for railway services needed by operations."""
+    """Container for railway services and infrastructure needed by operations."""
 
-    def __init__(
-        self,
-        locomotive_manager: Any,
-        train_service: Any,
-        route_service: Any,
-        process_times: Any,
-        batch_event_publisher: Any = None,
-        loco_event_publisher: Any = None,
-    ) -> None:
-        self.locomotive_manager = locomotive_manager
-        self.train_service = train_service
-        self.route_service = route_service
-        self.process_times = process_times
-        self.batch_event_publisher = batch_event_publisher
-        self.loco_event_publisher = loco_event_publisher
+    env: Any
+    locomotive_manager: Any
+    train_service: Any
+    route_service: Any
+    process_times: Any
+    batch_event_publisher: Any = None
+    loco_event_publisher: Any = None
 
 
 class RailwayOperationsService:
     """Universal application service for railway operations with SimPy encapsulation."""
 
     def transport_rake_between_tracks(
-        self, env: Any, rake: BatchAggregate, origin: str, destination: str, services: RailwayServices
+        self, rake: BatchAggregate, origin: str, destination: str, services: RailwayServices
     ) -> Generator[Any, Any]:
         """Complete rake transport: allocate loco → form train → transport → dissolve → release loco.
 
         Args:
-            env: SimPy environment
             rake: BatchAggregate (rake of coupled wagons) to transport
             origin: Starting track/location
             destination: Target track/location
-            services: Railway services container
+            services: Railway services container (includes env)
         """
         batch_id = rake.id
         wagons = rake.wagons
+        env = services.env
 
         # 1. Allocate locomotive
         loco = yield from services.locomotive_manager.allocate(purpose='batch_transport')

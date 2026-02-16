@@ -44,8 +44,8 @@ class MetricsCalculationService:  # pylint: disable=too-few-public-methods
         wagons_classified = self.event_counts.get('WagonClassifiedEvent', 0)
         wagons_distributed = self.event_counts.get('WagonDistributedEvent', 0)
         wagons_parked = self.event_counts.get('WagonParkedEvent', 0)
-        # Count actual wagon rejections from events
         wagons_rejected = sum(1 for _, e in self.events if type(e).__name__ == 'WagonRejectedEvent')
+        wagons_in_process = wagons_arrived - wagons_rejected - wagons_parked
 
         return {
             'trains_arrived': trains_arrived,
@@ -55,7 +55,10 @@ class MetricsCalculationService:  # pylint: disable=too-few-public-methods
             'wagons_parked': wagons_parked,
             'retrofits_completed': retrofits_completed,
             'wagons_rejected': wagons_rejected,
-            'completion_rate': retrofits_completed / wagons_arrived if wagons_arrived > 0 else 0.0,
+            'wagons_in_process': wagons_in_process,
+            'completion_rate': wagons_parked / (wagons_arrived - wagons_rejected)
+            if (wagons_arrived - wagons_rejected) > 0
+            else 0.0,
         }
 
     def _calculate_throughput(self) -> float:

@@ -11,6 +11,7 @@ from contexts.retrofit_workflow.domain.aggregates.rake_aggregate import Rake
 from contexts.retrofit_workflow.domain.aggregates.rake_aggregate import RakeType
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.services.rake_lifecycle_manager import RakeDissolutionResult
+from contexts.retrofit_workflow.domain.services.rake_lifecycle_manager import RakeFormationContext
 from contexts.retrofit_workflow.domain.services.rake_lifecycle_manager import RakeFormationResult
 from contexts.retrofit_workflow.domain.services.transport_planning_service import TransportPlan
 from contexts.retrofit_workflow.domain.services.transport_planning_service import TransportPlanResult
@@ -91,12 +92,15 @@ class TestRakeOperationsService:
         mock_rake_lifecycle.form_rake.return_value = formation_result
 
         # Act
-        result = service.create_formation_operation(
-            wagons=sample_wagons,
+        context = RakeFormationContext(
             formation_track='collection',
             target_track='retrofit',
             rake_type=RakeType.WORKSHOP_RAKE,
             formation_time=100.0,
+        )
+        result = service.create_formation_operation(
+            wagons=sample_wagons,
+            context=context,
         )
 
         # Assert
@@ -114,16 +118,20 @@ class TestRakeOperationsService:
     ) -> None:
         """Test formation operation with empty wagon list."""
         # Act
-        result = service.create_formation_operation(
-            wagons=[],
+        context = RakeFormationContext(
             formation_track='collection',
             target_track='retrofit',
             rake_type=RakeType.WORKSHOP_RAKE,
             formation_time=100.0,
         )
+        result = service.create_formation_operation(
+            wagons=[],
+            context=context,
+        )
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'no wagons' in result.error_message
         assert result.operation is None
         assert result.completed_wagons == []
@@ -145,12 +153,15 @@ class TestRakeOperationsService:
         mock_rake_lifecycle.form_rake.return_value = formation_result
 
         # Act
-        result = service.create_formation_operation(
-            wagons=sample_wagons,
+        context = RakeFormationContext(
             formation_track='collection',
             target_track='retrofit',
             rake_type=RakeType.WORKSHOP_RAKE,
             formation_time=100.0,
+        )
+        result = service.create_formation_operation(
+            wagons=sample_wagons,
+            context=context,
         )
 
         # Assert
@@ -282,6 +293,7 @@ class TestRakeOperationsService:
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'dissolution failed' in result.error_message
         assert result.operation is None
         assert result.completed_wagons == []
@@ -305,7 +317,6 @@ class TestRakeOperationsService:
             formation_track='collection',
             target_track='retrofit',
             rake_type=RakeType.WORKSHOP_RAKE,
-            formation_time=100.0,
         )
 
         # Assert
@@ -329,11 +340,11 @@ class TestRakeOperationsService:
             formation_track='collection',
             target_track='retrofit',
             rake_type=RakeType.WORKSHOP_RAKE,
-            formation_time=100.0,
         )
 
         # Assert
         assert result.success is False
+        assert result.error_message is not None
         assert 'no wagons' in result.error_message
         assert result.operation is None
         assert result.completed_wagons == []

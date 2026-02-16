@@ -6,8 +6,11 @@ from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
 from contexts.retrofit_workflow.domain.services.wagon_eligibility_service import EligibilityResult
 
 
-class RejectionEventFactory:
-    """Factory for creating wagon rejection events."""
+class RejectionEventFactory:  # pylint: disable=too-few-public-methods
+    """Factory for creating wagon rejection events.
+
+    Note: Single-purpose domain service with focused responsibility.
+    """
 
     def create_rejection_event(
         self,

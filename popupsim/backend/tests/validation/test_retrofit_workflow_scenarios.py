@@ -345,7 +345,6 @@ def run_timeline_test(  # noqa: PLR0912
         wagon.current_track_id = 'collection'  # Set physical track ID for coordinator
 
         # Add wagon arrival event manually
-
         arrival_event = WagonJourneyEvent(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
@@ -439,6 +438,7 @@ def test_single_wagon_single_station() -> None:
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
     t=17: batch[*] FORMED wagons=W01
     t=18: locomotive[L1] ALLOCATED batch_transport
+    t=18: locomotive[L1] MOVING loco_parking->retrofitted
     t=19: batch[*] TRANSPORT_STARTED destination=parking_area
     t=19: locomotive[L1] MOVING retrofitted->parking_area
     t=20: batch[*] ARRIVED_AT_DESTINATION parking_area

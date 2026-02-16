@@ -4,7 +4,9 @@ from unittest.mock import Mock
 
 from contexts.retrofit_workflow.application.config.coordinator_config import ArrivalCoordinatorConfig
 from contexts.retrofit_workflow.application.config.coordinator_config import CollectionCoordinatorConfig
-from contexts.retrofit_workflow.application.coordinators.archive.arrival_coordinator import ArrivalCoordinator
+
+# from contexts.retrofit_workflow.application.coordinators.archive.arrival_coordinator import ArrivalCoordinator  # type: ignore[import-not-found]
+from contexts.retrofit_workflow.application.coordinators.arrival_coordinator import ArrivalCoordinator
 from contexts.retrofit_workflow.application.coordinators.collection_coordinator import CollectionCoordinator
 from contexts.retrofit_workflow.application.services.coordination_service import CoordinationService
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
@@ -72,7 +74,10 @@ class TestMultiTrackDistribution:
             collection_coordinator=collection_coordinator,
             event_publisher=None,
         )
-        return ArrivalCoordinator(config)
+        coordinator = ArrivalCoordinator(config)
+        # Store mock for test access
+        coordinator.collection_coordinator = collection_coordinator
+        return coordinator
 
     @pytest.fixture
     def collection_coordinator(
