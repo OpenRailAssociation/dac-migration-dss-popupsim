@@ -1,5 +1,0 @@
-wagon_id,train_id,rejection_reason,rejection_description,timestamp
-W0062,T3,No Retrofit Needed,Wagon doesn't need retrofit,936.0
-W0080,T4,No Retrofit Needed,Wagon doesn't need retrofit,1224.0
-W0119,T6,No Retrofit Needed,Wagon doesn't need retrofit,1800.0
-W0211,T9,No Retrofit Needed,Wagon doesn't need retrofit,2664.0
