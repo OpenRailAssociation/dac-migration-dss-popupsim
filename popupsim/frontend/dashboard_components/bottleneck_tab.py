@@ -50,83 +50,100 @@ def _render_process_flow_heatmap(wagon_journey: pd.DataFrame) -> None:  # pylint
 
     Note: Multiple local variables needed for heatmap visualization.
     """
-    # Define meaningful process stages (exclude transient ARRIVED state)
-    process_stages = ['WAITING', 'PROCESSING', 'COMPLETED', 'PARKED', 'REJECTED']
+    with st.spinner('Generating process flow heatmap...'):
+        # Define meaningful process stages (exclude transient ARRIVED state)
+        process_stages = ['WAITING', 'PROCESSING', 'COMPLETED', 'PARKED', 'REJECTED']
 
-    # Create time bins
-    max_time = wagon_journey['timestamp'].max()
-    bin_size = max(60, max_time / 40)  # 40 time bins
-    time_bins = list(range(0, int(max_time) + int(bin_size), int(bin_size)))
+        # Create time bins
+        max_time = wagon_journey['timestamp'].max()
+        bin_size = max(60, max_time / 40)  # 40 time bins
+        time_bins = list(range(0, int(max_time) + int(bin_size), int(bin_size)))
 
-    # Count wagons in each stage for each time bin
-    heatmap_data = []
-    for stage in process_stages:
-        stage_counts = []
-        for i in range(len(time_bins) - 1):
-            bin_start, bin_end = time_bins[i], time_bins[i + 1]
+        # Count wagons in each stage for each time bin
+        heatmap_data = []
+        for stage in process_stages:
+            stage_counts = []
+            for i in range(len(time_bins) - 1):
+                bin_start, bin_end = time_bins[i], time_bins[i + 1]
 
-            # Count unique wagons in this stage during this time bin
-            bin_data = wagon_journey[
-                (wagon_journey['timestamp'] >= bin_start)
-                & (wagon_journey['timestamp'] < bin_end)
-                & (wagon_journey['status'] == stage)
+                # Count unique wagons in this stage during this time bin
+                bin_data = wagon_journey[
+                    (wagon_journey['timestamp'] >= bin_start)
+                    & (wagon_journey['timestamp'] < bin_end)
+                    & (wagon_journey['status'] == stage)
+                ]
+                wagon_count = len(bin_data['wagon_id'].unique())
+                stage_counts.append(wagon_count)
+
+            heatmap_data.append(stage_counts)
+
+        # Create heatmap
+        fig = go.Figure(
+            data=go.Heatmap(
+                z=heatmap_data,
+                x=[f'{time_bins[i]:.0f}' for i in range(len(time_bins) - 1)],
+                y=process_stages,
+                colorscale='YlOrRd',  # Yellow to Orange to Red
+                colorbar={'title': 'Wagon Count'},
+                hovertemplate='Stage: %{y}<br>Time: %{x} min<br>Wagons: %{z}<extra></extra>',
+            )
+        )
+
+        fig.update_layout(
+            title='Wagon Count by Process Stage Over Time',
+            xaxis_title='Simulation Time (minutes)',
+            yaxis_title='Process Stage',
+            height=400,
+        )
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+            config={
+                'displayModeBar': True,
+                'toImageButtonOptions': {
+                    'format': 'png',
+                    'filename': 'process_flow_heatmap',
+                    'height': 600,
+                    'width': 1400,
+                },
+            },
+        )
+        st.caption('🟡 Light: Few wagons (smooth flow) | 🟠 Medium: Moderate load | 🔴 Dark: Many wagons (bottleneck)')
+
+        # Add insights
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            # Find stage with highest average count
+            avg_counts = [sum(counts) / len(counts) for counts in heatmap_data]
+            max_stage_idx = avg_counts.index(max(avg_counts))
+            st.metric(
+                'Most Congested Stage', process_stages[max_stage_idx], f'{avg_counts[max_stage_idx]:.1f} avg wagons'
+            )
+
+        with col2:
+            # Find peak time
+            total_by_time = [
+                sum(heatmap_data[j][i] for j in range(len(process_stages))) for i in range(len(time_bins) - 1)
             ]
-            wagon_count = len(bin_data['wagon_id'].unique())
-            stage_counts.append(wagon_count)
+            peak_time_idx = total_by_time.index(max(total_by_time))
+            st.metric(
+                'Peak Congestion Time',
+                f'{time_bins[peak_time_idx]:.0f} min',
+                f'{total_by_time[peak_time_idx]} total wagons',
+            )
 
-        heatmap_data.append(stage_counts)
-
-    # Create heatmap
-    fig = go.Figure(
-        data=go.Heatmap(
-            z=heatmap_data,
-            x=[f'{time_bins[i]:.0f}' for i in range(len(time_bins) - 1)],
-            y=process_stages,
-            colorscale='YlOrRd',  # Yellow to Orange to Red
-            colorbar={'title': 'Wagon Count'},
-            hovertemplate='Stage: %{y}<br>Time: %{x} min<br>Wagons: %{z}<extra></extra>',
-        )
-    )
-
-    fig.update_layout(
-        title='Wagon Count by Process Stage Over Time',
-        xaxis_title='Simulation Time (minutes)',
-        yaxis_title='Process Stage',
-        height=400,
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption('🟡 Light: Few wagons (smooth flow) | 🟠 Medium: Moderate load | 🔴 Dark: Many wagons (bottleneck)')
-
-    # Add insights
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        # Find stage with highest average count
-        avg_counts = [sum(counts) / len(counts) for counts in heatmap_data]
-        max_stage_idx = avg_counts.index(max(avg_counts))
-        st.metric('Most Congested Stage', process_stages[max_stage_idx], f'{avg_counts[max_stage_idx]:.1f} avg wagons')
-
-    with col2:
-        # Find peak time
-        total_by_time = [sum(heatmap_data[j][i] for j in range(len(process_stages))) for i in range(len(time_bins) - 1)]
-        peak_time_idx = total_by_time.index(max(total_by_time))
-        st.metric(
-            'Peak Congestion Time',
-            f'{time_bins[peak_time_idx]:.0f} min',
-            f'{total_by_time[peak_time_idx]} total wagons',
-        )
-
-    with col3:
-        # Calculate flow efficiency (ratio of processing to waiting)
-        processing_total = sum(heatmap_data[process_stages.index('PROCESSING')])
-        waiting_total = sum(heatmap_data[process_stages.index('WAITING')])
-        efficiency = (
-            (processing_total / (processing_total + waiting_total) * 100)
-            if (processing_total + waiting_total) > 0
-            else 0
-        )
-        st.metric('Processing Efficiency', f'{efficiency:.1f}%', 'Processing vs Waiting')
+        with col3:
+            # Calculate flow efficiency (ratio of processing to waiting)
+            processing_total = sum(heatmap_data[process_stages.index('PROCESSING')])
+            waiting_total = sum(heatmap_data[process_stages.index('WAITING')])
+            efficiency = (
+                (processing_total / (processing_total + waiting_total) * 100)
+                if (processing_total + waiting_total) > 0
+                else 0
+            )
+            st.metric('Processing Efficiency', f'{efficiency:.1f}%', 'Processing vs Waiting')
 
 
 def _render_resource_overview(timeline: pd.DataFrame) -> None:

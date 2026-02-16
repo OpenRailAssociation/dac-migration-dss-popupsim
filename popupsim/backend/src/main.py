@@ -44,7 +44,6 @@ def print_wagon_metrics(external_trains: ExternalTrainsContext, output_path: Pat
             typer.echo(f'  Wagons completed:         {ext_metrics.get("completed_wagons", 0)}')
 
 
-
 def configure_event_logging(output_path: Path) -> Any:
     """Configure the event logging."""
     event_handler = logging.FileHandler(output_path / 'events.log', mode='w', encoding='utf-8')
@@ -77,7 +76,6 @@ def _configure_logging(output_path: Path) -> None:
     console_handler = configure_console_logging()
     logging.basicConfig(level=logging.INFO, handlers=[event_handler, console_handler])
     init_process_logger(output_path)
-
 
 
 def _print_retrofit_statistics(output_path: Path) -> None:
@@ -125,8 +123,13 @@ def _print_retrofit_statistics(output_path: Path) -> None:
             typer.echo(f'  {reason}: {count}')
 
 
-def output_visualization(contexts: Contexts, output_path: Path, service: Any = None) -> None:
-    """Write files for visualization onto the disk."""
+def output_visualization(output_path: Path, service: Any) -> None:
+    """Write files for visualization onto the disk.
+
+    Args:
+        output_path: Path to output directory
+        service: Simulation service containing retrofit workflow context
+    """
     # Export retrofit workflow events
     retrofit_context = service.contexts.get('retrofit_workflow')
     if retrofit_context and hasattr(retrofit_context, 'export_events'):
@@ -157,8 +160,8 @@ def run(
     # Load and run simulation
     scenario = ConfigurationBuilder(scenario_path).build()
     typer.echo(f'Loaded scenario: {scenario.id}')
-    typer.echo(f'  Trains: {len(scenario.trains)}')
-    typer.echo(f'  Total wagons: {sum(len(t.wagons) for t in scenario.trains)}')
+    typer.echo(f'  Trains: {len(scenario.trains or [])}')
+    typer.echo(f'  Total wagons: {sum(len(t.wagons) for t in (scenario.trains or []))}')
 
     service = SimulationApplicationService(scenario)
     until = timedelta_to_sim_ticks(scenario.end_date - scenario.start_date)
@@ -174,12 +177,8 @@ def run(
     typer.echo('SIMULATION COMPLETED SUCCESSFULLY')
     typer.echo('=' * 60)
 
-    contexts = Contexts(
-        external_trains=service.context_registry.contexts.get('external_trains'),  # type: ignore[arg-type]
-    )
-
     typer.echo('\nGenerating outputs...')
-    output_visualization(contexts, output_path, service)
+    output_visualization(output_path, service)
 
     typer.echo('\n' + '=' * 60)
     typer.echo('SIMULATION STATISTICS')

@@ -2,9 +2,9 @@
 
 ## Overview
 
-**Note:** See actual implementation in `popupsim/backend/src/configuration/model_*.py`
+**Note:** See actual implementation in `popupsim/backend/src/contexts/configuration/domain/models/`
 
-This document describes Pydantic validation patterns used in the MVP.
+This document describes Pydantic validation patterns used across the 4 contexts.
 
 ## Pydantic 2.0 Validation
 

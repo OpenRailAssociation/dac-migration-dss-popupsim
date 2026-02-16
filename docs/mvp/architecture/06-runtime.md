@@ -17,8 +17,9 @@ sequenceDiagram
     participant Planner as Strategic Planner
     participant CLI as CLI
     participant Config as Configuration Context
-    participant Domain as Workshop Operations Context
-    participant Control as Analysis & Reporting Context
+    participant Retrofit as Retrofit Workflow Context
+    participant Railway as Railway Infrastructure Context
+    participant External as External Trains Context
     participant Files as File System
 
     Planner->>Files: Create workshop_2stations.json
@@ -30,25 +31,30 @@ sequenceDiagram
         CLI->>Config: load_configuration()
         Config->>Files: Read JSON/CSV
         Config->>Config: Validate with Pydantic
-        Config-->>CLI: Validated config objects
+        Config-->>CLI: Validated scenario
 
-        CLI->>Domain: setup_domain(config)
-        Domain->>Domain: Create stations, tracks, resources
-        Domain-->>CLI: Domain ready
+        CLI->>Railway: build_tracks(scenario)
+        Railway-->>CLI: Track infrastructure ready
+        
+        CLI->>External: initialize_trains(scenario)
+        External-->>CLI: Train arrivals scheduled
+        
+        CLI->>Retrofit: initialize(scenario, railway, external)
+        Retrofit-->>CLI: Workflow ready
 
-        CLI->>Control: run_simulation(domain, 24h)
-        Control->>Domain: Start SimPy environment
+        CLI->>Retrofit: run_simulation(24h)
 
         loop Simulation time (24h)
-            Domain->>Domain: Train arrivals (hourly)
-            Domain->>Domain: Wagon processing
-            Domain->>Domain: Calculate KPIs (real-time)
+            External->>Retrofit: TrainArrivedEvent
+            Retrofit->>Railway: Query track capacity
+            Retrofit->>Retrofit: Process wagons
+            Retrofit->>Retrofit: Calculate KPIs
         end
 
-        Control->>Control: Aggregate results
-        Control->>Files: Write simulation_results_Xstations.csv
-        Control->>Files: Write kpi_charts_Xstations.png
-        Control-->>CLI: Simulation complete
+        Retrofit->>Retrofit: Aggregate results
+        Retrofit->>Files: Write simulation_results_Xstations.csv
+        Retrofit->>Files: Write kpi_charts_Xstations.png
+        Retrofit-->>CLI: Simulation complete
         CLI-->>Planner: Results available
     end
 
@@ -88,9 +94,10 @@ sequenceDiagram
     participant Planner as Strategic Planner
     participant CLI as CLI
     participant Config as Configuration Context
-    participant Domain as Workshop Operations Context
-    participant Analysis as Analysis Engine
-    participant Control as Analysis & Reporting Context
+    participant Retrofit as Retrofit Workflow Context
+    participant Railway as Railway Infrastructure Context
+    participant External as External Trains Context
+    participant Metrics as Metrics Collection
     participant Files as File System
 
     Planner->>Files: Create scenario_high_load.json
@@ -98,43 +105,48 @@ sequenceDiagram
 
     Planner->>CLI: python main.py --config scenario_high_load.json
     CLI->>Config: load_configuration()
-    Config-->>CLI: Validated config
+    Config-->>CLI: Validated scenario
 
-    CLI->>Domain: setup_domain(config)
-    Domain-->>CLI: Domain ready
+    CLI->>Railway: build_tracks(scenario)
+    Railway-->>CLI: Track infrastructure ready
+    
+    CLI->>External: initialize_trains(scenario)
+    External-->>CLI: Train arrivals scheduled
+    
+    CLI->>Retrofit: initialize(scenario, railway, external)
+    Retrofit-->>CLI: Workflow ready
 
-    CLI->>Control: run_simulation(domain, 24h)
-    Control->>Domain: Start SimPy environment
+    CLI->>Retrofit: run_simulation(24h)
 
     loop Every simulation hour
-        Domain->>Domain: Train arrives (30 wagons)
-        Domain->>Domain: Assign wagons to stations
+        External->>Retrofit: TrainArrivedEvent (30 wagons)
+        Retrofit->>Railway: Query workshop capacity
 
-        alt Station available
-            Domain->>Domain: Start retrofit process
-            Domain->>Analysis: Record: wagon_processing_started
-        else All stations busy
-            Domain->>Domain: Add to queue
-            Domain->>Analysis: Record: wagon_queued
-            Analysis->>Analysis: Calculate queue length
+        alt Workshop available
+            Retrofit->>Retrofit: Start retrofit process
+            Retrofit->>Metrics: Record: wagon_processing_started
+        else All workshops busy
+            Retrofit->>Retrofit: Add to queue
+            Retrofit->>Metrics: Record: wagon_queued
+            Metrics->>Metrics: Calculate queue length
         end
 
-        Domain->>Domain: Complete retrofits
-        Domain->>Analysis: Record: wagon_completed
-        Analysis->>Analysis: Calculate throughput
-        Analysis->>Analysis: Calculate utilization
+        Retrofit->>Retrofit: Complete retrofits
+        Retrofit->>Metrics: Record: wagon_completed
+        Metrics->>Metrics: Calculate throughput
+        Metrics->>Metrics: Calculate utilization
 
         alt Queue length > threshold
-            Analysis->>Analysis: Flag: bottleneck detected
+            Metrics->>Metrics: Flag: bottleneck detected
         end
     end
 
-    Control->>Analysis: Get aggregated KPIs
-    Analysis-->>Control: Throughput, utilization, bottlenecks
+    Retrofit->>Metrics: Get aggregated KPIs
+    Metrics-->>Retrofit: Throughput, utilization, bottlenecks
 
-    Control->>Files: Write throughput_analysis.csv
-    Control->>Files: Write bottleneck_chart.png
-    Control-->>CLI: Analysis complete
+    Retrofit->>Files: Write throughput_analysis.csv
+    Retrofit->>Files: Write bottleneck_chart.png
+    Retrofit-->>CLI: Analysis complete
 
     CLI-->>Planner: Results with bottleneck identification
     Planner->>Files: Review bottleneck_chart.png
@@ -282,9 +294,10 @@ sequenceDiagram
     participant Planner as Company Planner
     participant CLI as CLI
     participant Config as Configuration Context
-    participant Domain as Workshop Operations Context
-    participant Analysis as Analysis Engine
-    participant Control as Analysis & Reporting Context
+    participant Railway as Railway Infrastructure Context
+    participant External as External Trains Context
+    participant Retrofit as Retrofit Workflow Context
+    participant Metrics as Metrics Collection
     participant Files as File System
 
     Note over Planner: Has imported infrastructure (US-003)
@@ -300,36 +313,41 @@ sequenceDiagram
     Config->>Files: Read company_wagon_schedule.csv
     Config-->>CLI: Configuration with capacity target
 
-    CLI->>Domain: setup_domain(config)
-    Domain->>Domain: Create imported infrastructure
-    Domain->>Domain: Load company wagon schedule
-    Domain-->>CLI: Domain ready
+    CLI->>Railway: build_tracks(scenario)
+    Railway->>Railway: Create imported infrastructure
+    Railway-->>CLI: Track infrastructure ready
+    
+    CLI->>External: initialize_trains(scenario)
+    External->>External: Load company wagon schedule
+    External-->>CLI: Train arrivals scheduled
+    
+    CLI->>Retrofit: initialize(scenario, railway, external)
+    Retrofit-->>CLI: Workflow ready
 
-    CLI->>Control: run_simulation(domain, 168h)
-    Note over Control: 1 week simulation
-    Control->>Domain: Start SimPy environment
+    CLI->>Retrofit: run_simulation(168h)
+    Note over Retrofit: 1 week simulation
 
     loop Every hour (168 hours)
-        Domain->>Domain: Process scheduled arrivals
-        Domain->>Domain: Wagon processing
-        Domain->>Analysis: Record wagon events
-        Analysis->>Analysis: Track throughput
+        External->>Retrofit: Process scheduled arrivals
+        Retrofit->>Retrofit: Wagon processing
+        Retrofit->>Metrics: Record wagon events
+        Metrics->>Metrics: Track throughput
     end
 
-    Control->>Analysis: Get capacity
-    Analysis->>Analysis: Calculate: actual vs target
+    Retrofit->>Metrics: Get capacity
+    Metrics->>Metrics: Calculate: actual vs target
 
     alt Capacity target met
-        Analysis-->>Control: Throughput: 520 wagons (target: 500)
-        Control->>Files: Write capacity_assessment_PASS.csv
-        Control->>Files: Write capacity_chart.png
-        Control-->>CLI: Capacity target achieved
+        Metrics-->>Retrofit: Throughput: 520 wagons (target: 500)
+        Retrofit->>Files: Write capacity_assessment_PASS.csv
+        Retrofit->>Files: Write capacity_chart.png
+        Retrofit-->>CLI: Capacity target achieved
         CLI-->>Planner: Workshop layout sufficient
     else Capacity target not met
-        Analysis-->>Control: Throughput: 450 wagons (target: 500)
-        Control->>Files: Write capacity_assessment_FAIL.csv
-        Control->>Files: Write bottleneck_analysis.png
-        Control-->>CLI: Capacity target missed
+        Metrics-->>Retrofit: Throughput: 450 wagons (target: 500)
+        Retrofit->>Files: Write capacity_assessment_FAIL.csv
+        Retrofit->>Files: Write bottleneck_analysis.png
+        Retrofit-->>CLI: Capacity target missed
         CLI-->>Planner: Workshop needs optimization
         Planner->>Planner: Review bottlenecks, adjust layout
     end

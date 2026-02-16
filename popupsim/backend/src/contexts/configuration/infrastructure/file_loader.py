@@ -3,7 +3,6 @@
 # ruff: noqa: C901, PLR0912, PLR0915
 import json
 from pathlib import Path
-from typing import Any
 
 from contexts.configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from contexts.configuration.application.dtos.route_input_dto import RouteInputDTO
@@ -26,7 +25,7 @@ class FileLoader:  # pylint: disable=too-few-public-methods
         self.path = path if path.is_dir() else path.parent
         self.scenario_file = path if path.is_file() else path / 'scenario.json'
 
-    def load(self) -> Any:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    def load(self) -> Scenario:  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         """Load scenario from files."""
         with open(self.scenario_file, encoding='utf-8') as f:
             data = json.load(f)

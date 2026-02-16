@@ -62,8 +62,6 @@ class LocomotiveResourceManager:
         -------
             Allocated locomotive
         """
-        print(f'[t={self.env.now}] LOCO: REQUEST from {purpose}')
-
         if purpose == 'workshop_pickup':
             self._workshop_pickup_pending += 1
 
@@ -72,8 +70,6 @@ class LocomotiveResourceManager:
         # Get locomotive from store (FIFO)
         loco: Locomotive = yield self.store.get()
         self._allocated.add(loco.id)
-
-        print(f'[t={self.env.now}] LOCO: ALLOCATED {loco.id} for {purpose}')
 
         if purpose == 'workshop_pickup':
             self._workshop_pickup_pending = max(0, self._workshop_pickup_pending - 1)
@@ -106,8 +102,6 @@ class LocomotiveResourceManager:
         ------
             SimPy event
         """
-        print(f'[t={self.env.now}] LOCO: RELEASE {loco.id} from {purpose}')
-
         busy_before = len(self._allocated)
 
         if loco.id in self._allocated:

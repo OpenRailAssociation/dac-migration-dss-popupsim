@@ -52,10 +52,9 @@ graph TB
 
 | Layer | Responsibility | Components |
 |-------|----------------|------------|
-| **Presentation** | User interaction, file I/O | CLI, File readers/writers |
-| **Business Logic** | Domain logic, services | Configuration validator, Workshop operations, Analysis orchestrator |
-| **Domain** | Domain entities and models | Wagon, Track, Workshop, ScenarioConfig |
-| **Infrastructure** | External frameworks | SimPy, Matplotlib, Pydantic, Pandas |
+| **Application** | Coordinators, context orchestration | ArrivalCoordinator, CollectionCoordinator, WorkshopCoordinator, ParkingCoordinator |
+| **Domain** | Business logic, domain services | BatchFormationService, RakeFormationService, TrainFormationService, WorkshopSchedulingService |
+| **Infrastructure** | External frameworks, resource management | SimPy, LocomotiveResourceManager, TrackCapacityManager, WorkshopResourceManager |
 
 **Rationale:** Layered architecture provides clear separation of concerns within each bounded context, enabling rapid MVP development while maintaining code organization. See [Section 4.3](04-solution-strategy.md#43-technical-architecture-pattern) for architectural pattern decision.
 

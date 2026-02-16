@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from typing import Any
 
+from contexts.configuration.domain.models.scenario import Scenario
 from contexts.external_trains.domain.aggregates.train_schedule import TrainSchedule
 from contexts.external_trains.domain.entities.external_train import ExternalTrain
 from contexts.external_trains.domain.value_objects.train_id import TrainId
@@ -35,13 +36,17 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
         self.event_bus = event_bus
         self.train_schedule = TrainSchedule()
         self.infra: SimulationInfrastructure | None = None
-        self.scenario = None
+        self.scenario: Scenario | None = None
         self._wagons: dict[str, Any] = {}  # Single source of truth for wagon state
 
-    def initialize(self, infra: Any, scenario: Any) -> None:
-        """Initialize with infrastructure and scenario."""
+    def initialize(self, infra: Any) -> None:
+        """Initialize with infrastructure.
+
+        Args:
+            infra: Simulation infrastructure
+        """
         self.infra = infra
-        self.scenario = scenario
+        # Don't reset scenario - it's set before initialization
 
     def start_processes(self) -> None:
         """Start train arrival processes."""

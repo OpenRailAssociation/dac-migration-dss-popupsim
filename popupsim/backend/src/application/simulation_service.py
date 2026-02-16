@@ -5,7 +5,6 @@ import logging
 from typing import Any
 
 from application.context_registry import ContextRegistry
-from contexts.configuration.application.configuration_context import ConfigurationContext
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.railway_infrastructure.infrastructure.di_container import create_railway_context
@@ -149,16 +148,10 @@ class SimulationApplicationService:
         self._register_shared_contexts()
 
         # Initialize shared contexts
-        self.context_registry.initialize_all(self.infra, self.scenario)
+        self.context_registry.initialize_all(self.infra)
 
     def _register_shared_contexts(self) -> None:
         """Register contexts shared by both workflows."""
-        # Configuration Context
-        config_context = ConfigurationContext(self.infra.event_bus)
-        config_context.finalize_scenario(self.scenario.id)
-        self.context_registry.register_context('configuration', config_context)
-        self.contexts['configuration'] = config_context
-
         # Railway Infrastructure Context (needed for track management)
         railway_context = create_railway_context(self.scenario)
         self.context_registry.register_context('railway', railway_context)
@@ -166,10 +159,9 @@ class SimulationApplicationService:
 
         # External Trains Context
         external_trains_context = ExternalTrainsContext(self.infra.event_bus)
+        external_trains_context.scenario = self.scenario  # Set scenario before initialization
         self.context_registry.register_context('external_trains', external_trains_context)
         self.contexts['external_trains'] = external_trains_context
-
-
 
     def _start_processes(self) -> None:
         """Start all context processes."""
@@ -184,8 +176,6 @@ class SimulationApplicationService:
 
         # Start main simulation orchestration process
         self.engine.schedule_process(self._orchestrate_simulation())
-
-
 
     def _collect_results(self, duration: float) -> SimulationResult:
         """Collect results from all contexts using registry."""

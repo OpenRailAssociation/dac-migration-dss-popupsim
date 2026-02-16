@@ -13,13 +13,8 @@ class RetrofitWorkflowStrategy:
         self.event_bus = event_bus
         self.contexts = {'retrofit_workflow': self.retrofit_workflow}
 
-    def initialize(self, infra: Any, scenario: Any) -> None:  # noqa: ARG002
-        """Initialize retrofit workflow context.
-
-        Args:
-            infra: Simulation infrastructure (unused, for protocol compatibility)
-            scenario: Scenario configuration (unused, for protocol compatibility)
-        """
+    def initialize(self) -> None:
+        """Initialize retrofit workflow context."""
         self.retrofit_workflow.initialize()  # type: ignore[call-arg]
         self.retrofit_workflow.subscribe_to_train_arrivals(self.event_bus)
 

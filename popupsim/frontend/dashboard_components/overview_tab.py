@@ -2,6 +2,7 @@
 
 from typing import Any
 
+import pandas as pd
 import streamlit as st
 
 
@@ -105,6 +106,18 @@ def render_overview_tab(data: dict[str, Any]) -> None:
 
     # KPI Cards
     _render_kpi_cards(metrics)
+
+    # CSV Export
+    col1, col2, col3 = st.columns([1, 1, 4])
+    with col1:
+        if st.button('📥 Export Metrics CSV'):
+            csv = pd.DataFrame([metrics]).to_csv(index=False)
+            st.download_button('Download metrics.csv', csv, 'metrics.csv', 'text/csv')
+    with col2:
+        loco_journey = data.get('locomotive_journey')
+        if loco_journey is not None and not loco_journey.empty and st.button('📥 Export Locomotive CSV'):
+            csv = loco_journey.to_csv(index=False)
+            st.download_button('Download locomotive_journey.csv', csv, 'locomotive_journey.csv', 'text/csv')
 
     st.markdown('---')
 

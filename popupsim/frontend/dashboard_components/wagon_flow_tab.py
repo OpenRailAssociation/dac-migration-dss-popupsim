@@ -17,6 +17,11 @@ def render_wagon_flow_tab(data: dict[str, Any]) -> None:
         st.warning('⚠️ No wagon journey data available')
         return
 
+    # CSV Export
+    if st.button('📥 Export Wagon Journey CSV'):
+        csv = wagon_journey.to_csv(index=False)
+        st.download_button('Download wagon_journey.csv', csv, 'wagon_journey.csv', 'text/csv')
+
     # Section 1: Wagon Journeys Over Time
     st.subheader('Wagon Journeys Over Time')
     all_wagon_ids = sorted(wagon_journey['wagon_id'].unique(), key=lambda x: (int(x[1:]) if x[1:].isdigit() else 0))
@@ -174,16 +179,17 @@ def _process_wagon_segments(wagon_data: pd.DataFrame, wagon_id: str, journey_df:
 
 def _render_wagon_gantt(journey_df, wagon_ids: list[str]) -> None:
     """Render interactive Gantt chart showing wagon journeys with Plotly."""
-    event_colors = {
-        'WAITING': '#f39c12',
-        'BATCH_COUPLING': '#2ecc71',
-        'BATCH_DECOUPLING': '#e67e22',
-        'RETROFITTING': '#3498db',
-        'COMPLETED': '#9b59b6',
-        'PARKED': '#34495e',
-        'REJECTED': '#d62728',
-        'ARRIVED': '#95a5a6',
-    }
+    with st.spinner('Generating wagon journey Gantt chart...'):
+        event_colors = {
+            'WAITING': '#f39c12',
+            'BATCH_COUPLING': '#2ecc71',
+            'BATCH_DECOUPLING': '#e67e22',
+            'RETROFITTING': '#3498db',
+            'COMPLETED': '#9b59b6',
+            'PARKED': '#34495e',
+            'REJECTED': '#d62728',
+            'ARRIVED': '#95a5a6',
+        }
 
     # Build segments
     segments = []
@@ -191,14 +197,6 @@ def _render_wagon_gantt(journey_df, wagon_ids: list[str]) -> None:
         wagon_data = journey_df[journey_df['wagon_id'] == wagon_id].sort_values('timestamp')
         if wagon_data.empty:
             continue
-
-        # Check if wagon is rejected - if so, skip ARRIVED events
-        is_rejected = (wagon_data['status'] == 'REJECTED').any()
-        if is_rejected:
-            wagon_data = wagon_data[wagon_data['event'] != 'ARRIVED']
-
-        wagon_segments = _process_wagon_segments(wagon_data, wagon_id, journey_df)
-        segments.extend(wagon_segments)
 
         # Check if wagon is rejected - if so, skip ARRIVED events
         is_rejected = (wagon_data['status'] == 'REJECTED').any()
@@ -249,7 +247,14 @@ def _render_wagon_gantt(journey_df, wagon_ids: list[str]) -> None:
         legend={'orientation': 'h', 'yanchor': 'bottom', 'y': 1.02, 'xanchor': 'right', 'x': 1},
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={
+            'displayModeBar': True,
+            'toImageButtonOptions': {'format': 'png', 'filename': 'wagon_journeys', 'height': 800, 'width': 1400},
+        },
+    )
     st.caption(
         f'Showing {len(wagon_ids)} wagons. ⚙️ = Retrofitting. ❌ = Rejected. Coupling/Decoupling = Batch rake formation.'
     )
