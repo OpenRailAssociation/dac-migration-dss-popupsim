@@ -15,8 +15,6 @@ from contexts.analytics.infrastructure.exporters.csv_exporter import CSVExporter
 from contexts.analytics.infrastructure.exporters.dashboard_exporter import DashboardExporter
 from contexts.analytics.infrastructure.exporters.json_exporter import JSONExporter
 from contexts.analytics.infrastructure.visualization import Visualizer
-from contexts.yard_operations.domain.events.yard_events import WagonDistributedEvent
-from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from infrastructure.event_bus.event_bus import EventBus
 from shared.domain.events.rake_events import RakeFormedEvent
 from shared.domain.events.rake_events import RakeProcessingCompletedEvent
@@ -433,27 +431,7 @@ class AnalyticsContext:  # pylint: disable=too-many-public-methods, too-many-ins
 
     def _subscribe_to_wagon_events(self) -> None:
         """Subscribe to wagon events for track capacity monitoring."""
-        self.event_bus.subscribe(WagonParkedEvent, self._handle_wagon_parked)
-        self.event_bus.subscribe(WagonDistributedEvent, self._handle_wagon_distributed)
-
-    def _handle_wagon_parked(self, event: Any) -> None:
-        """Track wagon parking for capacity monitoring."""
-        parking_id = getattr(event, 'parking_area_id', None)
-        if parking_id and parking_id in self.track_capacities:
-            # Assume 15m per wagon
-            self.track_occupancy[parking_id] = self.track_occupancy.get(parking_id, 0) + 15.0
-
-            # Remove from retrofitted track when moved to parking
-            retrofitted_id = 'retrofitted'
-            if retrofitted_id in self.track_capacities:
-                self.track_occupancy[retrofitted_id] = max(0.0, self.track_occupancy.get(retrofitted_id, 0) - 15.0)
-
-    def _handle_wagon_distributed(self, event: Any) -> None:
-        """Track wagon distribution for capacity monitoring."""
-        # Wagons distributed to track specified in event
-        track_id = getattr(event, 'track_id', 'retrofitted')
-        if track_id in self.track_capacities:
-            self.track_occupancy[track_id] = self.track_occupancy.get(track_id, 0) + 15.0
+        # Legacy wagon events removed - track capacity monitoring now handled by retrofit workflow
 
     def _handle_rake_formed(self, event: RakeFormedEvent) -> None:
         """Handle rake formation event."""

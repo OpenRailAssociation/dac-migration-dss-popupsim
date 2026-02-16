@@ -1,1 +1,0 @@
-"""Yard operations services tests."""

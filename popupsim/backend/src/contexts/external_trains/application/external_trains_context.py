@@ -14,7 +14,6 @@ from typing import Any
 from contexts.external_trains.domain.aggregates.train_schedule import TrainSchedule
 from contexts.external_trains.domain.entities.external_train import ExternalTrain
 from contexts.external_trains.domain.value_objects.train_id import TrainId
-from contexts.yard_operations.domain.events.yard_events import WagonParkedEvent
 from infrastructure.event_bus.event_bus import EventBus
 from infrastructure.logging import get_process_logger
 from shared.domain.entities.wagon import Wagon
@@ -52,9 +51,7 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
                 self.infra.engine.schedule_process(self._process_single_train_arrival(train))
 
         # Subscribe to completion events to update wagon state
-        # TODO: Check if this is really necessary
         self.event_bus.subscribe(WagonRetrofitCompletedEvent, self._handle_wagon_completed)  # type: ignore[arg-type]
-        self.event_bus.subscribe(WagonParkedEvent, self._handle_wagon_parked)  # type: ignore[arg-type]
 
     def _process_single_train_arrival(self, train: Any) -> Any:
         """Process a single train arrival."""
@@ -144,12 +141,6 @@ class ExternalTrainsContext(ExternalTrainsContextPort):
         if wagon:
             wagon.status = WagonStatus.RETROFITTED
             wagon.retrofit_end_time = event.completion_time
-
-    def _handle_wagon_parked(self, event: WagonParkedEvent) -> None:
-        """Handle wagon parked - update wagon state."""
-        wagon = self._wagons.get(event.wagon_id)
-        if wagon:
-            wagon.status = WagonStatus.PARKING
 
     def get_completed_wagons(self) -> list[Wagon]:
         """Get all completed wagons for test validation."""

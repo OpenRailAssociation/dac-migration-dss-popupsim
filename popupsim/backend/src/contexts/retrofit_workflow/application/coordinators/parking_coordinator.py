@@ -44,14 +44,18 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         )
         self.config.env.process(self._parking_process())
 
-    def _parking_process(self) -> Generator[Any, Any]:
+    def _parking_process(self) -> Generator[Any, Any, None]:
         """Run main parking process continuously."""
-        if self.config.strategy == 'smart_accumulation':
-            yield from self._parking_process_smart_accumulation()
-        else:
-            yield from self._parking_process_opportunistic()
+        try:
+            if self.config.strategy == 'smart_accumulation':
+                yield from self._parking_process_smart_accumulation()
+            else:
+                yield from self._parking_process_opportunistic()
+        except GeneratorExit:
+            # Gracefully handle simulation shutdown
+            return
 
-    def _parking_process_opportunistic(self) -> Generator[Any, Any]:
+    def _parking_process_opportunistic(self) -> Generator[Any, Any, None]:
         """Opportunistic strategy: grab and go immediately."""
         while True:
             first_wagon = yield self.config.retrofitted_queue.get()
@@ -64,7 +68,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             )
             yield from self._process_wagon_batch(first_wagon, parking_track)
 
-    def _parking_process_smart_accumulation(self) -> Generator[Any, Any]:
+    def _parking_process_smart_accumulation(self) -> Generator[Any, Any, None]:
         """Smart accumulation strategy: accumulate to threshold, then transport."""
         while True:
             first_wagon = yield self.config.retrofitted_queue.get()
@@ -117,7 +121,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             total_length / self.config.retrofitted_track_capacity if self.config.retrofitted_track_capacity > 0 else 0.0
         )
 
-    def _process_wagon_batch_with_wagons(self, wagons: list[Wagon], parking_track: Any) -> Generator[Any, Any]:
+    def _process_wagon_batch_with_wagons(self, wagons: list[Wagon], parking_track: Any) -> Generator[Any, Any, None]:
         """Process a batch of wagons (for smart_accumulation strategy)."""
         parking_track_id = parking_track.track_id
 
@@ -132,7 +136,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, parking_track_id)
         yield from self._transport_batch_aggregate(batch_aggregate, parking_track_id)
 
-    def _process_wagon_batch(self, first_wagon: Wagon, parking_track: Any) -> Generator[Any, Any]:
+    def _process_wagon_batch(self, first_wagon: Wagon, parking_track: Any) -> Generator[Any, Any, None]:
         """Process a batch of wagons."""
         parking_track_id = parking_track.track_id
 
@@ -184,7 +188,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             parking_track_id,
         )
 
-    def _park_wagons(self, wagons: list[Wagon], parking_track_id: str) -> Generator[Any, Any]:
+    def _park_wagons(self, wagons: list[Wagon], parking_track_id: str) -> Generator[Any, Any, None]:
         """Park wagons in parking area."""
         if self.track_manager:
             parking_track = self.track_manager.get_track(parking_track_id)
@@ -237,7 +241,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
         yield self.config.env.timeout(0)
 
-    def _return_locomotive(self, loco: Any, parking_track_id: str) -> Generator[Any, Any]:
+    def _return_locomotive(self, loco: Any, parking_track_id: str) -> Generator[Any, Any, None]:
         """Return locomotive to home track."""
         EventPublisherHelper.publish_loco_moving(
             self.config.loco_event_publisher, self.config.env.now, loco.id, parking_track_id, loco.home_track
@@ -248,7 +252,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
     def _transport_to_parking_with_batch(
         self, loco: Any, batch_aggregate: Any, batch_id: str, parking_track_id: str
-    ) -> Generator[Any, Any]:
+    ) -> Generator[Any, Any, None]:
         """Transport batch aggregate to parking area with proper train formation."""
         wagons = batch_aggregate.wagons
 
@@ -323,7 +327,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             len(wagons),
         )
 
-    def _transport_batch_aggregate(self, batch_aggregate: Any, parking_track_id: str) -> Generator[Any, Any]:
+    def _transport_batch_aggregate(self, batch_aggregate: Any, parking_track_id: str) -> Generator[Any, Any, None]:
         """Transport batch aggregate to parking area."""
         batch_id = batch_aggregate.id
         wagons = batch_aggregate.wagons
