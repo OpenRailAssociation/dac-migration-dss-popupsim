@@ -15,9 +15,11 @@ from contexts.analytics.application.analytics_context import AnalyticsContext
 from contexts.analytics.infrastructure.repositories.in_memory_analytics_repository import InMemoryAnalyticsRepository
 from contexts.configuration.application.configuration_context import ConfigurationContext
 from contexts.configuration.domain.models.scenario import Scenario
+from contexts.configuration.domain.models.scenario import WorkflowMode
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.popup_retrofit.application.popup_context import PopUpRetrofitContext
 from contexts.railway_infrastructure.infrastructure.di_container import create_railway_context
+from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkshopContext
 from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
 from contexts.yard_operations.application.yard_context import YardOperationsContext
 from shared.domain.events.simulation_lifecycle_events import SimulationEndedEvent
@@ -83,8 +85,20 @@ class SimulationApplicationService:
             # Run simulation
             self.engine.run(until)
 
+            # Check if simulation ended early
+            actual_time = self.engine.current_time()
+            if actual_time < until:
+                logger.warning(
+                    (
+                        '⚠️  Simulation ended early at t=%.1f (expected t=%.1f) -'
+                        ' likely deadlock or all processes completed'
+                    ),
+                    actual_time,
+                    until,
+                )
+
             # Collect results
-            result = self._collect_results(until)
+            result = self._collect_results(self.engine.current_time() - start_time)
 
             # Publish simulation ended event
             ended_event = SimulationEndedEvent.create(
@@ -129,8 +143,43 @@ class SimulationApplicationService:
         return self.infra.engine.current_time()
 
     def _initialize_contexts(self) -> None:
-        """Initialize all bounded contexts using registry."""
+        """Initialize all bounded contexts based on workflow mode."""
         logger.info(' Initializing contexts for scenario %s', self.scenario.id)
+
+        # Check workflow mode
+
+        use_retrofit = self.scenario.workflow_mode == WorkflowMode.RETROFIT_WORKFLOW
+        logger.info(' Workflow mode: %s (use_retrofit=%s)', self.scenario.workflow_mode, use_retrofit)
+
+        if use_retrofit:
+            self._initialize_retrofit_workflow()
+        else:
+            self._initialize_legacy_workflow()
+
+    def _initialize_retrofit_workflow(self) -> None:
+        """Initialize retrofit workflow (bypass context registry for retrofit context)."""
+        logger.info(' Using RETROFIT WORKFLOW mode')
+
+        # Create and initialize retrofit context directly (like tests)
+        retrofit_context = RetrofitWorkshopContext(
+            self.engine.get_env(),
+            self.scenario,
+        )
+        retrofit_context.initialize()
+        self.contexts['retrofit_workflow'] = retrofit_context
+
+        # Subscribe to train arrivals
+        retrofit_context.subscribe_to_train_arrivals(self.infra.event_bus)
+
+        # Register shared contexts via registry
+        self._register_shared_contexts()
+
+        # Initialize shared contexts only
+        self.context_registry.initialize_all(self.infra, self.scenario)
+
+    def _initialize_legacy_workflow(self) -> None:
+        """Initialize legacy workflow (use context registry)."""
+        logger.info(' Using LEGACY WORKFLOW mode')
 
         # Register all contexts with the registry
         self._register_all_contexts()
@@ -144,6 +193,30 @@ class SimulationApplicationService:
 
         # Setup workshop infrastructure
         self._setup_workshop_infrastructure()
+
+    def _register_shared_contexts(self) -> None:
+        """Register contexts shared by both workflows."""
+        # Configuration Context
+        config_context = ConfigurationContext(self.infra.event_bus)
+        config_context.finalize_scenario(self.scenario.id)
+        self.context_registry.register_context('configuration', config_context)
+        self.contexts['configuration'] = config_context
+
+        # Railway Infrastructure Context
+        railway_context = create_railway_context(self.scenario)
+        self.context_registry.register_context('railway', railway_context)
+        self.contexts['railway'] = railway_context
+
+        # External Trains Context
+        external_trains_context = ExternalTrainsContext(self.infra.event_bus)
+        self.context_registry.register_context('external_trains', external_trains_context)
+        self.contexts['external_trains'] = external_trains_context
+
+        # Analytics Context
+        analytics_repository = InMemoryAnalyticsRepository()
+        analytics_context = AnalyticsContext(self.infra.event_bus, analytics_repository)
+        self.context_registry.register_context('analytics', analytics_context)
+        self.contexts['analytics'] = analytics_context
 
     def _register_all_contexts(self) -> None:
         """Register all bounded contexts with the registry."""
@@ -187,11 +260,16 @@ class SimulationApplicationService:
         self.contexts['analytics'] = analytics_context
 
     def _start_processes(self) -> None:
-        """Start all context processes using registry."""
+        """Start all context processes."""
         logger.info(' Starting processes for all contexts')
 
         # Start all context processes through registry
         self.context_registry.start_all_processes()
+
+        # Start retrofit workflow if present (manual start like tests)
+        if 'retrofit_workflow' in self.contexts:
+            logger.info(' Starting retrofit workflow processes')
+            self.contexts['retrofit_workflow'].start_processes()
 
         # Start main simulation orchestration process
         self.engine.schedule_process(self._orchestrate_simulation())

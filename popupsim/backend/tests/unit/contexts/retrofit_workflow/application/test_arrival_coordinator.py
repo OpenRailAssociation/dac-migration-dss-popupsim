@@ -1,5 +1,7 @@
 """Tests for ArrivalCoordinator application component."""
 
+from unittest.mock import Mock
+
 from contexts.retrofit_workflow.application.config.coordinator_config import ArrivalCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.arrival_coordinator import ArrivalCoordinator
 from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
@@ -26,16 +28,41 @@ class TestArrivalCoordinator:
         return []
 
     @pytest.fixture
+    def track_selector(self) -> Mock:
+        """Create mock track selector."""
+        mock_track = Mock()
+        mock_track.track_id = 'collection_1'
+        selector = Mock()
+        selector.select_track_with_capacity.return_value = mock_track
+        return selector
+
+    @pytest.fixture
+    def collection_coordinator(self) -> Mock:
+        """Create mock collection coordinator."""
+        return Mock()
+
+    @pytest.fixture
     def coordinator(
-        self, env: simpy.Environment, collection_queue: simpy.FilterStore, events: list[WagonJourneyEvent]
+        self,
+        env: simpy.Environment,
+        collection_queue: simpy.FilterStore,
+        events: list[WagonJourneyEvent],
+        track_selector: Mock,
+        collection_coordinator: Mock,
     ) -> ArrivalCoordinator:
         """Create arrival coordinator."""
-        config = ArrivalCoordinatorConfig(env=env, collection_queue=collection_queue, event_publisher=events.append)
+        config = ArrivalCoordinatorConfig(
+            env=env,
+            collection_queue=collection_queue,
+            track_selector=track_selector,
+            collection_coordinator=collection_coordinator,
+            event_publisher=events.append,
+        )
         return ArrivalCoordinator(config)
 
     def test_initialization(self, coordinator: ArrivalCoordinator) -> None:
         """Test coordinator initialization."""
-        assert len(coordinator.trains) == 0
+        assert len(coordinator.get_trains()) == 0
 
     def test_schedule_train_immediate_arrival(
         self,
@@ -43,6 +70,7 @@ class TestArrivalCoordinator:
         coordinator: ArrivalCoordinator,
         collection_queue: simpy.FilterStore,
         events: list[WagonJourneyEvent],
+        collection_coordinator: Mock,
     ) -> None:
         """Test scheduling train with immediate arrival."""
         wagon_configs = [{'id': 'wagon_1', 'length': 15.0}, {'id': 'wagon_2', 'length': 20.0}]
@@ -53,23 +81,26 @@ class TestArrivalCoordinator:
         env.run(until=1.0)
 
         # Check train created
-        assert len(coordinator.trains) == 1
-        train = coordinator.trains[0]
+        assert len(coordinator.get_trains()) == 1
+        train = coordinator.get_trains()[0]
         assert train.id == 'train_1'
         assert len(train.wagons) == 2
 
-        # Check wagons in collection queue
-        assert len(collection_queue.items) == 2
+        # Check wagons added via collection coordinator
+        assert collection_coordinator.add_wagon.call_count == 2
 
         # Check events published
         assert len(events) == 2
         for event in events:
             assert event.event_type == 'ARRIVED'
-            assert event.location == 'collection'
+            assert event.location == 'collection_1'  # Track ID from track_selector
             assert event.train_id == 'train_1'
 
     def test_schedule_train_delayed_arrival(
-        self, env: simpy.Environment, coordinator: ArrivalCoordinator, collection_queue: simpy.FilterStore
+        self,
+        env: simpy.Environment,
+        coordinator: ArrivalCoordinator,
+        collection_coordinator: Mock,
     ) -> None:
         """Test scheduling train with delayed arrival."""
         wagon_configs = [{'id': 'wagon_1', 'length': 15.0}]
@@ -78,18 +109,18 @@ class TestArrivalCoordinator:
 
         # Run until before arrival
         env.run(until=5.0)
-        assert len(collection_queue.items) == 0
+        assert collection_coordinator.add_wagon.call_count == 0
 
         # Run until after arrival
         env.run(until=15.0)
-        assert len(collection_queue.items) == 1
+        assert collection_coordinator.add_wagon.call_count == 1
 
     def test_schedule_multiple_trains(
         self,
         env: simpy.Environment,
         coordinator: ArrivalCoordinator,
-        collection_queue: simpy.FilterStore,
         events: list[WagonJourneyEvent],
+        collection_coordinator: Mock,
     ) -> None:
         """Test scheduling multiple trains."""
         # Schedule first train
@@ -107,10 +138,10 @@ class TestArrivalCoordinator:
         env.run(until=10.0)
 
         # Check both trains created
-        assert len(coordinator.trains) == 2
+        assert len(coordinator.get_trains()) == 2
 
-        # Check all wagons in collection queue
-        assert len(collection_queue.items) == 3
+        # Check all wagons added via collection coordinator
+        assert collection_coordinator.add_wagon.call_count == 3
 
         # Check events for both trains
         train_1_events = [e for e in events if e.train_id == 'train_1']
@@ -119,7 +150,10 @@ class TestArrivalCoordinator:
         assert len(train_2_events) == 2
 
     def test_wagon_creation_with_default_values(
-        self, env: simpy.Environment, coordinator: ArrivalCoordinator, collection_queue: simpy.FilterStore
+        self,
+        env: simpy.Environment,
+        coordinator: ArrivalCoordinator,
+        collection_coordinator: Mock,
     ) -> None:
         """Test wagon creation uses default values when not specified."""
         wagon_configs = [
@@ -131,22 +165,32 @@ class TestArrivalCoordinator:
 
         env.run(until=1.0)
 
-        # Get wagons from queue
-        wagons = []
-        while collection_queue.items:
-            wagon = collection_queue.items.pop(0)
-            wagons.append(wagon)
+        # Check wagons were added
+        assert collection_coordinator.add_wagon.call_count == 2
 
-        # Check default length applied
-        wagon_1 = next(w for w in wagons if w.id == 'wagon_1')
-        wagon_2 = next(w for w in wagons if w.id == 'wagon_2')
+        # Check wagon properties from train
+        train = coordinator.get_trains()[0]
+        wagon_1 = next(w for w in train.wagons if w.id == 'wagon_1')
+        wagon_2 = next(w for w in train.wagons if w.id == 'wagon_2')
 
         assert wagon_1.length == 15.0  # Default
         assert wagon_2.length == 25.0  # Specified
 
-    def test_no_event_publisher(self, env: simpy.Environment, collection_queue: simpy.FilterStore) -> None:
+    def test_no_event_publisher(
+        self,
+        env: simpy.Environment,
+        collection_queue: simpy.FilterStore,
+        track_selector: Mock,
+        collection_coordinator: Mock,
+    ) -> None:
         """Test coordinator works without event publisher."""
-        config = ArrivalCoordinatorConfig(env=env, collection_queue=collection_queue, event_publisher=None)
+        config = ArrivalCoordinatorConfig(
+            env=env,
+            collection_queue=collection_queue,
+            track_selector=track_selector,
+            collection_coordinator=collection_coordinator,
+            event_publisher=None,
+        )
         coordinator = ArrivalCoordinator(config)
 
         coordinator.schedule_train(
@@ -156,8 +200,8 @@ class TestArrivalCoordinator:
         # Should not raise exception
         env.run(until=1.0)
 
-        # Wagon should still be in queue
-        assert len(collection_queue.items) == 1
+        # Wagon should still be added via collection coordinator
+        assert collection_coordinator.add_wagon.call_count == 1
 
     def test_empty_wagon_configs(
         self, env: simpy.Environment, coordinator: ArrivalCoordinator, collection_queue: simpy.FilterStore

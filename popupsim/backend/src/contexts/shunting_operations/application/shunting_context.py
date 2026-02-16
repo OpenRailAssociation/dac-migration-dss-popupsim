@@ -241,7 +241,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
             for route in context.scenario.routes:
                 # if route.track_sequence and len(route.track_sequence) >= 2:
                 if route.track_sequence[0] == from_track and route.track_sequence[-1] == to_track:
-                    move_time = to_ticks(timedelta(minutes=route.duration))
+                    move_time = to_ticks(route.duration)
                     break
         return move_time
 
@@ -296,7 +296,7 @@ class ShuntingOperationsContext(ShuntingContextPort):  # pylint: disable=too-man
         wagon_count: int,
         coupler_type: str | None = None,
         wagon_ids: list[str] | None = None,
-    ) -> Any:  # ruff: C901
+    ) -> Any:
         """Decouple wagons from locomotive."""
 
         def decouple_gen() -> Generator:

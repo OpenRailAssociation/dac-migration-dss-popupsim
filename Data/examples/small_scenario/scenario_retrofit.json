@@ -1,0 +1,10 @@
+{
+  "id": "small_retrofit",
+  "start_date": "2025-01-15",
+  "end_date": "2025-01-16",
+  "workflow_mode": "retrofit_workflow",
+  "random_seed": 42,
+  "train_schedule_file": "train_schedule.csv",
+  "routes_file": "routes.csv",
+  "workshop_tracks_file": "workshop_tracks.csv"
+}

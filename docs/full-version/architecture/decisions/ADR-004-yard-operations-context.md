@@ -1,8 +1,8 @@
 # ADR-004: Yard Operations Context
 
-**Status:** Proposed  
-**Date:** 2025-01-16  
-**Deciders:** Architecture Team  
+**Status:** Proposed
+**Date:** 2025-01-16
+**Deciders:** Architecture Team
 
 ## Context
 
@@ -76,10 +76,10 @@ class Yard:
     areas: dict[str, YardArea]           # Classification, retrofitting, parking, etc.
     shared_resources: ResourcePool       # Locomotives, mobile equipment
     yard_layout: YardLayout              # Physical track connections
-    
+
     def route_wagon_to_area(self, wagon: Wagon, operation: Operation) -> YardArea:
         """Route wagon to appropriate area based on required operation."""
-        
+
     def allocate_resources(self, area: YardArea, resource_type: ResourceType) -> Resource:
         """Allocate shared resources to specific area."""
 
@@ -90,15 +90,15 @@ class YardArea:
     tracks: list[Track]
     dedicated_resources: ResourcePool    # Area-specific equipment
     capacity: AreaCapacity
-    
+
 class ClassificationArea(YardArea):
     """Hump/selector operations for wagon sorting."""
     hump_tracks: list[Track]
     collection_tracks: list[Track]
-    
+
     def process_incoming_train(self, train: Train) -> list[WagonGroup]:
         """Sort wagons by destination/operation type."""
-    
+
     def classify_wagon(self, wagon: Wagon) -> ClassificationDecision:
         """Determine wagon routing (retrofit, reject, bypass)."""
 
@@ -106,10 +106,10 @@ class RetrofittingArea(YardArea):
     """DAC installation workshop operations."""
     workshop_tracks: list[Track]
     retrofit_stations: list[RetrofitStation]  # Work bays with tools
-    
+
     def retrofit_wagon(self, wagon: Wagon) -> None:
         """Perform DAC installation with technicians and hand tools."""
-    
+
     def allocate_station(self, wagon: Wagon) -> RetrofitStation | None:
         """Allocate available retrofit station for wagon."""
 
@@ -117,10 +117,10 @@ class ParkingArea(YardArea):
     """Storage for wagons awaiting processing or pickup."""
     storage_tracks: list[Track]
     storage_capacity: int
-    
+
     def store_wagon(self, wagon: Wagon, expected_duration: float) -> None:
         """Store wagon for specified duration."""
-    
+
     def retrieve_wagon(self, wagon_id: str) -> Wagon | None:
         """Retrieve wagon from storage."""
 ```
@@ -221,6 +221,7 @@ yards = {
 
 ## Related ADRs
 - ADR-001: External Train Context - Delivers trains to yards
+- ADR-003: Railway Infrastructure Context (future)
 - ADR-007: Shunting Operations Context - Handles yard movements
 
 ## Migration Strategy

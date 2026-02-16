@@ -1,8 +1,8 @@
 # ADR-006: External Train Context with Hexagonal Architecture
 
-**Status:** Accepted  
-**Date:** 2025-01-27  
-**Deciders:** Architecture Team  
+**Status:** Accepted
+**Date:** 2025-01-27
+**Deciders:** Architecture Team
 
 ## Context
 
@@ -69,7 +69,7 @@ We will create a dedicated **External Train Context** as a separate bounded cont
 class ExternalTrainPort(ABC):
     @abstractmethod
     def get_arrival_schedule(self, date_range: DateRange) -> list[TrainArrival]: ...
-    
+
     @abstractmethod
     def get_delivery_manifest(self, train_id: str) -> DeliveryManifest: ...
 ```
@@ -88,8 +88,8 @@ class ExternalTrainArrivedEvent(DomainEvent):
     train_id: str
     arrival_time: datetime
     origin_station: str
-    
-@dataclass(frozen=True) 
+
+@dataclass(frozen=True)
 class WagonsDeliveredEvent(DomainEvent):
     train_id: str
     wagons: list[Wagon]
@@ -142,4 +142,6 @@ class WagonsDeliveredEvent(DomainEvent):
 
 ## References
 
+- ADR-001: Hexagonal Pipeline Architecture (see mvp/architecture/decisions/)
+- ADR-004: 3 Bounded Context Architecture (see mvp/architecture/decisions/)
 - Railway Industry EDI Standards

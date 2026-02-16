@@ -77,14 +77,11 @@ class RouteService:
             if len(route.path) >= 2:
                 from_location = route.path[0]
                 to_location = route.path[-1]
-                duration = route.duration
-                # Convert timedelta to SimPy ticks (minutes by default)
-                if hasattr(duration, 'total_seconds'):
-                    duration = timedelta_to_sim_ticks(duration)
-                self.route_durations[(from_location, to_location)] = float(duration)
+                duration_ticks = timedelta_to_sim_ticks(route.duration)
+                self.route_durations[(from_location, to_location)] = duration_ticks
 
                 # Store route type (default to SHUNTING for backward compatibility)
-                route_type_str = getattr(route, 'route_type', 'SHUNTING')
+                route_type_str = route.route_type
                 try:
                     route_type = RouteType[route_type_str.upper()]
                 except (KeyError, AttributeError):
@@ -245,6 +242,7 @@ class RouteService:
         -------
         RouteType
             Route type (MAINLINE or SHUNTING), defaults to SHUNTING if not found
+            Exception: collection→retrofit defaults to MAINLINE (requires brake test)
 
         Examples
         --------
@@ -253,4 +251,13 @@ class RouteService:
         >>> if route_type == RouteType.MAINLINE:
         ...     print('Full brake test required')
         """
-        return self.route_types.get((from_location, to_location), RouteType.SHUNTING)
+        # Check if route type is explicitly configured
+        if (from_location, to_location) in self.route_types:
+            return self.route_types[(from_location, to_location)]
+
+        # Default: collection→retrofit is MAINLINE (requires brake test + inspection)
+        if from_location == 'collection' and to_location == 'retrofit':
+            return RouteType.MAINLINE
+
+        # All other routes default to SHUNTING
+        return RouteType.SHUNTING

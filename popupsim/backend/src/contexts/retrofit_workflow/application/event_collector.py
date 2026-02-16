@@ -1,215 +1,182 @@
-"""Event collector for exporting simulation data."""
+"""Backward-compatible facade for EventCollector (delegates to refactored components)."""
 
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
+from contexts.retrofit_workflow.application.services.event_collection_service import EventCollectionService
+from contexts.retrofit_workflow.application.services.metrics_aggregator import MetricsAggregator
+from contexts.retrofit_workflow.domain.events import CouplingEvent
 from contexts.retrofit_workflow.domain.events import LocomotiveMovementEvent
 from contexts.retrofit_workflow.domain.events import ResourceStateChangeEvent
 from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
 from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAtDestination
 from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
 from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
-import pandas as pd
+from contexts.retrofit_workflow.infrastructure.exporters.csv_event_exporter import CsvEventExporter
+from shared.infrastructure.simpy_time_converters import sim_ticks_to_datetime
+
+if TYPE_CHECKING:
+    from infrastructure.logging import ProcessLogger
 
 
-class EventCollector:
-    """Collects all simulation events and exports to CSV/JSON."""
+class EventCollector:  # pylint: disable=too-many-public-methods
+    """Facade maintaining backward compatibility (delegates to refactored services).
 
-    def __init__(self) -> None:
-        self.wagon_events: list[WagonJourneyEvent] = []
-        self.locomotive_events: list[LocomotiveMovementEvent] = []
-        self.resource_events: list[ResourceStateChangeEvent] = []
-        self.batch_events: list[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination] = []
+    Note: Multiple public methods needed for backward compatibility with existing code.
+    """
+
+    def __init__(self, process_logger: 'ProcessLogger | None' = None, start_datetime: str | None = None) -> None:
+        """Initialize event collector facade."""
+        self._collection_service = EventCollectionService(process_logger)
+        self._csv_exporter = CsvEventExporter(start_datetime)
+        self._metrics = MetricsAggregator()
+        self.start_datetime = start_datetime
+
+    @property
+    def wagon_events(self) -> list[WagonJourneyEvent]:
+        """Get wagon events."""
+        return self._collection_service.wagon_events
+
+    @property
+    def locomotive_events(self) -> list[LocomotiveMovementEvent]:
+        """Get locomotive events."""
+        return self._collection_service.locomotive_events
+
+    @property
+    def resource_events(self) -> list[ResourceStateChangeEvent]:
+        """Get resource events."""
+        return self._collection_service.resource_events
+
+    @property
+    def batch_events(self) -> list[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination]:
+        """Get batch events."""
+        return self._collection_service.batch_events
+
+    @property
+    def coupling_events(self) -> list[CouplingEvent]:
+        """Get coupling events."""
+        return self._collection_service.coupling_events
 
     def add_wagon_event(self, event: WagonJourneyEvent) -> None:
-        """Add wagon journey event."""
-        self.wagon_events.append(event)
+        """Add wagon event."""
+        self._collection_service.add_wagon_event(event)
 
     def add_locomotive_event(self, event: LocomotiveMovementEvent) -> None:
-        """Add locomotive movement event."""
-        self.locomotive_events.append(event)
+        """Add locomotive event."""
+        self._collection_service.add_locomotive_event(event)
 
     def add_resource_event(self, event: ResourceStateChangeEvent) -> None:
-        """Add resource state change event."""
-        self.resource_events.append(event)
+        """Add resource event."""
+        self._collection_service.add_resource_event(event)
 
     def add_batch_event(self, event: BatchFormed | BatchTransportStarted | BatchArrivedAtDestination) -> None:
         """Add batch event."""
-        self.batch_events.append(event)
+        self._collection_service.add_batch_event(event)
 
-    def export_all(self, output_dir: str) -> None:
-        """Export all data to output directory."""
+    def add_coupling_event(self, event: CouplingEvent) -> None:
+        """Add coupling event."""
+        self._collection_service.add_coupling_event(event)
+
+    def _sim_time_to_datetime(self, sim_time: float) -> str:
+        """Convert simulation time to datetime (delegates to shared converter)."""
+        if not self.start_datetime:
+            return ''
+        return sim_ticks_to_datetime(sim_time, self.start_datetime)
+
+    def export_wagon_journey(self, filepath: str) -> None:
+        """Export wagon journey."""
+        self._csv_exporter.export_wagon_journey(self.wagon_events, filepath)
+
+    def export_rejected_wagons(self, filepath: str) -> None:
+        """Export rejected wagons."""
+        self._csv_exporter.export_rejected_wagons(self.wagon_events, filepath)
+
+    def export_locomotive_movements(self, filepath: str) -> None:
+        """Export locomotive movements."""
+        self._csv_exporter.export_locomotive_movements(self.locomotive_events, filepath)
+
+    def export_track_capacity(self, filepath: str) -> None:
+        """Export track capacity."""
+        self._csv_exporter.export_track_capacity(self.resource_events, filepath)
+
+    def export_locomotive_utilization(self, filepath: str) -> None:
+        """Export locomotive utilization."""
+        self._csv_exporter.export_locomotive_utilization(self.resource_events, filepath)
+
+    def export_locomotive_util(self, filepath: str) -> None:
+        """Export locomotive util (alias for backward compatibility)."""
+        self._csv_exporter.export_locomotive_utilization(self.resource_events, filepath)
+
+    def export_workshop_utilization(self, filepath: str) -> None:
+        """Export workshop utilization."""
+        self._csv_exporter.export_workshop_utilization(self.resource_events, filepath)
+
+    def export_summary_metrics(self, filepath: str, simulation_end_time: float | None = None) -> None:
+        """Export summary metrics.
+
+        Args:
+            filepath: Path to export file
+            simulation_end_time: Actual simulation end time (if None, uses max event timestamp)
+        """
+        duration = (
+            simulation_end_time
+            if simulation_end_time is not None
+            else self._metrics.get_sim_duration(self.wagon_events, self.locomotive_events, self.resource_events)
+        )
+
+        summary = {
+            **self._metrics.get_event_counts(self.wagon_events, self.locomotive_events, self.batch_events),
+            **self._metrics.get_wagon_metrics(self.wagon_events),
+            **self._metrics.get_workshop_metrics(self.wagon_events, self.resource_events),
+            **self._metrics.get_locomotive_metrics(self.locomotive_events, self.resource_events),
+            **self._metrics.get_static_metrics(),
+            'simulation_duration_minutes': duration,
+        }
+
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(summary, f, indent=2)
+
+    def export_events_csv(self, filepath: str) -> None:
+        """Export all events CSV."""
+        self._csv_exporter.export_events_csv(self.wagon_events, self.locomotive_events, self.batch_events, filepath)
+
+    def export_timeline(self, filepath: str) -> None:
+        """Export timeline."""
+        self._csv_exporter.export_timeline(self.wagon_events, self.resource_events, filepath)
+
+    def export_workshop_metrics(self, filepath: str) -> None:
+        """Export workshop metrics."""
+        self._csv_exporter.export_workshop_metrics(self.wagon_events, filepath)
+
+    def export_locomotive_time_breakdown(self, filepath: str) -> None:
+        """Export locomotive time breakdown with coupling details."""
+        self._csv_exporter.export_locomotive_time_breakdown(self.locomotive_events, self.coupling_events, filepath)
+
+    def export_locomotive_journey(self, filepath: str) -> None:
+        """Export detailed locomotive journey."""
+        self._csv_exporter.export_locomotive_journey(self.locomotive_events, self.coupling_events, filepath)
+
+    def export_all(self, output_dir: str, simulation_end_time: float | None = None) -> None:
+        """Export all data.
+
+        Args:
+            output_dir: Directory to export files
+            simulation_end_time: Actual simulation end time for duration calculation
+        """
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
         self.export_wagon_journey(str(output_path / 'wagon_journey.csv'))
         self.export_rejected_wagons(str(output_path / 'rejected_wagons.csv'))
         self.export_locomotive_movements(str(output_path / 'locomotive_movements.csv'))
+        self.export_locomotive_journey(str(output_path / 'locomotive_journey.csv'))
         self.export_track_capacity(str(output_path / 'track_capacity.csv'))
         self.export_locomotive_utilization(str(output_path / 'locomotive_utilization.csv'))
+        self.export_locomotive_util(str(output_path / 'locomotive_util.csv'))
+        self.export_locomotive_time_breakdown(str(output_path / 'locomotive_time_breakdown.csv'))
         self.export_workshop_utilization(str(output_path / 'workshop_utilization.csv'))
-        self.export_summary_metrics(str(output_path / 'summary_metrics.json'))
-
-    def export_wagon_journey(self, filepath: str) -> None:
-        """Export complete wagon journey timeline."""
-        df = pd.DataFrame(
-            [
-                {
-                    'timestamp': e.timestamp,
-                    'wagon_id': e.wagon_id,
-                    'train_id': e.train_id or '',
-                    'event': e.event_type,
-                    'location': e.location,
-                    'status': e.status,
-                    'rejection_reason': e.rejection_reason or '',
-                    'rejection_description': e.rejection_description or '',
-                }
-                for e in self.wagon_events
-            ]
-        )
-        df.to_csv(filepath, index=False)
-
-    def export_rejected_wagons(self, filepath: str) -> None:
-        """Export rejected wagons with reasons."""
-        rejected = [e for e in self.wagon_events if e.event_type == 'REJECTED']
-        df = pd.DataFrame(
-            [
-                {
-                    'wagon_id': e.wagon_id,
-                    'train_id': e.train_id,
-                    'rejection_reason': e.rejection_reason,
-                    'rejection_description': e.rejection_description,
-                    'timestamp': e.timestamp,
-                }
-                for e in rejected
-            ]
-        )
-        df.to_csv(filepath, index=False)
-
-    def export_locomotive_movements(self, filepath: str) -> None:
-        """Export locomotive movement timeline."""
-        df = pd.DataFrame(
-            [
-                {
-                    'timestamp': e.timestamp,
-                    'locomotive_id': e.locomotive_id,
-                    'event': e.event_type,
-                    'from_location': e.from_location or '',
-                    'to_location': e.to_location or '',
-                    'purpose': e.purpose or '',
-                }
-                for e in self.locomotive_events
-            ]
-        )
-        df.to_csv(filepath, index=False)
-
-    def export_track_capacity(self, filepath: str) -> None:
-        """Export track capacity changes over time."""
-        track_events = [e for e in self.resource_events if e.resource_type == 'track']
-        df = pd.DataFrame(
-            [
-                {
-                    'timestamp': e.timestamp,
-                    'track_id': e.resource_id,
-                    'change_type': e.change_type,
-                    'capacity': e.capacity,
-                    'used_before': e.used_before,
-                    'used_after': e.used_after,
-                    'utilization_before_percent': 0.0,  # Disabled due to None handling
-                    'utilization_after_percent': 0.0,  # Disabled due to None handling
-                    'change_amount': e.change_amount,
-                    'triggered_by': e.triggered_by or '',
-                }
-                for e in track_events
-            ]
-        )
-        df.to_csv(filepath, index=False)
-
-    def export_locomotive_utilization(self, filepath: str) -> None:
-        """Export locomotive utilization changes over time."""
-        loco_events = [e for e in self.resource_events if e.resource_type == 'locomotive']
-        df = pd.DataFrame(
-            [
-                {
-                    'timestamp': e.timestamp,
-                    'change_type': e.change_type,
-                    'total_locomotives': e.total_count,
-                    'busy_before': e.busy_count_before,
-                    'busy_after': e.busy_count_after,
-                    'available_before': e.total_count - e.busy_count_before
-                    if e.total_count and e.busy_count_before is not None and e.total_count > 0
-                    else None,
-                    'available_after': e.total_count - e.busy_count_after
-                    if e.total_count and e.busy_count_after is not None and e.total_count > 0
-                    else None,
-                    'utilization_before_percent': 0.0,  # type: ignore[operator]
-                    'utilization_after_percent': 0.0,  # type: ignore[operator]
-                }
-                for e in loco_events
-            ]
-        )
-        df.to_csv(filepath, index=False)
-
-    def export_workshop_utilization(self, filepath: str) -> None:
-        """Export workshop bay utilization changes over time."""
-        workshop_events = [e for e in self.resource_events if e.resource_type == 'workshop']
-        df = pd.DataFrame(
-            [
-                {
-                    'timestamp': e.timestamp,
-                    'workshop_id': e.resource_id,
-                    'change_type': e.change_type,
-                    'total_bays': e.total_bays,
-                    'busy_before': e.busy_bays_before,
-                    'busy_after': e.busy_bays_after,
-                    'available_before': e.total_bays - e.busy_bays_before
-                    if e.total_bays and e.busy_bays_before is not None
-                    else None,
-                    'available_after': e.total_bays - e.busy_bays_after
-                    if e.total_bays and e.busy_bays_after is not None
-                    else None,
-                    'utilization_before_percent': (e.busy_bays_before / e.total_bays * 100)
-                    if e.total_bays and e.busy_bays_before is not None
-                    else 0,
-                    'utilization_after_percent': (e.busy_bays_after / e.total_bays * 100)
-                    if e.total_bays and e.busy_bays_after is not None
-                    else 0,
-                }
-                for e in workshop_events
-            ]
-        )
-        df.to_csv(filepath, index=False)
-
-    def export_summary_metrics(self, filepath: str) -> None:
-        """Export summary metrics as JSON."""
-        arrived = [e for e in self.wagon_events if e.event_type == 'ARRIVED']
-        parked = [e for e in self.wagon_events if e.event_type == 'PARKED']
-        rejected = [e for e in self.wagon_events if e.event_type == 'REJECTED']
-
-        # Rejection breakdown
-        rejection_counts: dict[str, int] = {}
-        for e in rejected:
-            reason = e.rejection_reason or 'unknown'
-            rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
-
-        # Calculate simulation duration
-        all_timestamps = [e.timestamp for e in self.wagon_events + self.locomotive_events + self.resource_events]
-        sim_duration = max(all_timestamps) if all_timestamps else 0
-
-        metrics = {
-            'total_wagons_arrived': len(arrived),
-            'total_wagons_parked': len(parked),
-            'total_wagons_rejected': len(rejected),
-            'rejection_breakdown': rejection_counts,
-            'completion_rate': len(parked) / len(arrived) if arrived else 0,
-            'throughput_per_hour': (len(parked) / sim_duration * 60) if sim_duration > 0 else 0,
-            'simulation_duration_minutes': sim_duration,
-            'total_events': {
-                'wagon_events': len(self.wagon_events),
-                'locomotive_events': len(self.locomotive_events),
-                'resource_events': len(self.resource_events),
-            },
-        }
-
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(metrics, f, indent=2)
+        self.export_summary_metrics(str(output_path / 'summary_metrics.json'), simulation_end_time)
+        self.export_events_csv(str(output_path / 'events.csv'))
+        self.export_timeline(str(output_path / 'timeline.csv'))
+        self.export_workshop_metrics(str(output_path / 'workshop_metrics.csv'))

@@ -46,6 +46,8 @@ class ResourceStateChangeEvent:  # pylint: disable=too-many-instance-attributes
     used_before: float | None = None
     used_after: float | None = None
     change_amount: float | None = None
+    utilization_before_percent: float | None = None
+    utilization_after_percent: float | None = None
 
     # For locomotives
     total_count: int | None = None
@@ -73,6 +75,25 @@ class LocomotiveAssemblyEvent:  # pylint: disable=too-many-instance-attributes
     total_rakes: int | None = None
     duration: float | None = None
     location: str | None = None
+
+
+@dataclass
+class CouplingEvent:  # pylint: disable=too-many-instance-attributes
+    """Tracks coupling/decoupling operations.
+
+    Note: Multiple attributes needed to capture coupling operation details.
+    """
+
+    timestamp: float
+    locomotive_id: str
+    event_type: str
+    # Event types: COUPLING_STARTED, COUPLING_COMPLETED, DECOUPLING_STARTED,
+    # DECOUPLING_COMPLETED, TRAIN_PREPARATION, BRAKE_TEST, INSPECTION
+    location: str
+    coupler_type: str  # 'screw', 'automatic'
+    wagon_count: int
+    duration: float | None = None
+    operation_id: str | None = None
 
 
 class RejectionReason:  # pylint: disable=too-few-public-methods

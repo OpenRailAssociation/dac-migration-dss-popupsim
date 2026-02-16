@@ -7,6 +7,7 @@ from .batch_events import BatchProcessingCompleted
 from .batch_events import BatchTransportStarted
 from .batch_events import DomainEvent
 from .batch_events import WorkshopRetrofitCompleted
+from .observability_events import CouplingEvent
 from .observability_events import LocomotiveAssemblyEvent
 from .observability_events import LocomotiveMovementEvent
 from .observability_events import RejectionReason
@@ -21,8 +22,9 @@ __all__ = [
     'BatchFormed',
     'BatchProcessingCompleted',
     'BatchTransportStarted',
-    'DomainEvent',
     # Observability events
+    'CouplingEvent',
+    'DomainEvent',
     'LocomotiveAssemblyEvent',
     'LocomotiveMovementEvent',
     'RejectionReason',

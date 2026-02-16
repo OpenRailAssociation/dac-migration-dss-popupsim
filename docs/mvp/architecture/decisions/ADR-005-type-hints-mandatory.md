@@ -27,7 +27,7 @@ Implement **mandatory type hints** across the entire codebase with **MyPy strict
 
 ### Type Hint Requirements
 - **All Functions**: Must have explicit return type annotations
-- **All Methods**: Must have explicit return type annotations  
+- **All Methods**: Must have explicit return type annotations
 - **All Parameters**: Must have type annotations
 - **Complex Variables**: Must have type hints when type unclear
 - **Generic Types**: Must use proper generic type annotations
@@ -84,7 +84,7 @@ def validate_scenario(scenario: Scenario) -> ValidationResult:
     return ValidationResult(is_valid=True)
 
 def calculate_throughput(
-    wagons: list[Wagon], 
+    wagons: list[Wagon],
     duration: float
 ) -> ThroughputKPI:
     """Calculate throughput metrics."""
@@ -111,10 +111,10 @@ def process_wagons() -> Generator[Wagon, None, None]:
 ```python
 class ValidationPipeline:
     """Pipeline with typed methods."""
-    
+
     def __init__(self, validators: list[Validator]) -> None:
         self.validators = validators
-    
+
     def validate(self, scenario: Scenario) -> ValidationResult:
         """Validate with explicit return type."""
         result = ValidationResult(is_valid=True)
@@ -133,7 +133,7 @@ class Wagon(BaseModel):
     length: float = Field(gt=0)
     needs_retrofit: bool = True
     status: WagonStatus = WagonStatus.ARRIVED
-    
+
     def update_status(self, new_status: WagonStatus) -> None:
         """Update status with type safety."""
         self.status = new_status
@@ -152,7 +152,7 @@ from datetime import datetime
 ```bash
 # Development workflow
 uv run ruff format .                    # Format code
-uv run ruff check .                     # Lint code  
+uv run ruff check .                     # Lint code
 uv run mypy backend/src/                # Type checking
 uv run pylint backend/src/              # Code quality
 uv run pytest                          # Run tests
@@ -215,11 +215,12 @@ This decision supports:
 
 ## References
 
+- Project Rules (see `.amazonq/rules/project-rules.md` in repository root)
 - [Python Type Hints Documentation](https://docs.python.org/3/library/typing.html)
 - [MyPy Documentation](https://mypy.readthedocs.io/)
 
 ---
 
-**Decision Date**: January 2025  
-**Decision Makers**: Architecture Team  
+**Decision Date**: January 2025
+**Decision Makers**: Architecture Team
 **Implementation Status**: ✅ Complete

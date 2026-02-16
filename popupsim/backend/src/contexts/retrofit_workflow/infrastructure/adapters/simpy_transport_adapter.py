@@ -46,20 +46,15 @@ class SimPyTransportAdapter(TransportPort):
 
     def transport_batch_from_workshop(self, batch: BatchAggregate, destination: str) -> Generator[Any, Any]:
         """Transport batch from workshop using SimPy."""
-        print(f'Transport adapter: transporting batch from workshop to {destination} at t={self._env.now}')
-
         # Simulate transport time
         transport_time = self._calculate_transport_time(batch.total_length, destination)
-        print(f'Transport adapter: transport time = {transport_time} minutes')
         yield self._env.timeout(transport_time)
 
         # Move wagons to retrofitted queue
         if self._retrofitted_queue:
-            print(f'Transport adapter: moving {len(batch.wagons)} wagons to retrofitted queue at t={self._env.now}')
             for wagon in batch.wagons:
                 wagon.move_to('retrofitted')
                 self._retrofitted_queue.put(wagon)
-                print(f'Transport adapter: moved wagon {wagon.id} to retrofitted queue')
         else:
             print('Transport adapter: ERROR - no retrofitted queue available!')
 

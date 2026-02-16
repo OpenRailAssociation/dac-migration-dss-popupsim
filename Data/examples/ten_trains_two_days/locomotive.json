@@ -9,6 +9,11 @@
       "id": "LOCO_01",
       "name": "Shunting loco",
       "home track": "track_19"
+    },
+    {
+      "id": "LOCO_02",
+      "name": "Shunting loco",
+      "home track": "track_19"
     }
   ]
 }

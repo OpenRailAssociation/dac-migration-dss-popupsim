@@ -85,6 +85,21 @@ class TrackCapacityManager(ResourcePort):
 
         return (self.container.level / self.capacity_meters) * 100.0
 
+    def get_utilization_and_state(self) -> (float, str):
+        """Get track utilization and the state.
+
+        Returns
+        -------
+            utilization : float
+                Utilization as percentage (0-100)
+            state : str
+                State of the track based on utilization.
+        """
+        utilization: float = self.get_utilization()
+        state: str = 'green' if utilization < 70 else 'yellow' if utilization < 90 else 'red'
+
+        return utilization, state
+
     def can_fit_wagons(self, wagons: list[Wagon]) -> bool:
         """Check if wagons can fit on track (non-blocking check).
 
@@ -116,25 +131,44 @@ class TrackCapacityManager(ResourcePort):
         """
         # Calculate total length needed (float!)
         total_length = sum(w.length for w in wagons)
-        print(
-            f't={self.env.now}: TrackCapacityManager.add_wagons: '
-            f'adding {total_length}m, current level={self.container.level}'
-        )
+        wagon_ids = ','.join(w.id for w in wagons)
 
-        # Capture state before
+        # Capture state before (BEFORE any blocking)
         used_before = self.container.level
+        available_before = self.capacity_meters - used_before
+        will_block = total_length > available_before
+
+        # Publish pre-operation event if will block
+        if self.event_publisher and will_block:
+            util_before = (used_before / self.capacity_meters * 100) if self.capacity_meters > 0 else 0.0
+            self.event_publisher(
+                ResourceStateChangeEvent(
+                    timestamp=self.env.now,
+                    resource_type='track',
+                    resource_id=self.track_id,
+                    change_type='capacity_reserve_blocked',
+                    capacity=self.capacity_meters,
+                    used_before=used_before,
+                    used_after=used_before,  # No change yet
+                    change_amount=total_length,
+                    triggered_by=f'batch_{len(wagons)}_wagons_WAITING[{wagon_ids}]',
+                    utilization_before_percent=util_before,
+                    utilization_after_percent=util_before,
+                )
+            )
 
         # Request space - BLOCKS if not enough capacity!
         # SimPy automatically queues and waits for space
         yield self.container.put(total_length)
 
-        print(
-            f't={self.env.now}: TrackCapacityManager.add_wagons: '
-            f'added {total_length}m, new level={self.container.level}'
-        )
-
-        # Capture state after
+        # Capture state after (AFTER blocking completes)
         used_after = self.container.level
+        util_before = (
+            ((used_before if not will_block else used_after - total_length) / self.capacity_meters * 100)
+            if self.capacity_meters > 0
+            else 0.0
+        )
+        util_after = (used_after / self.capacity_meters * 100) if self.capacity_meters > 0 else 0.0
 
         # Publish event
         if self.event_publisher:
@@ -145,10 +179,12 @@ class TrackCapacityManager(ResourcePort):
                     resource_id=self.track_id,
                     change_type='capacity_reserved',
                     capacity=self.capacity_meters,
-                    used_before=used_before,
+                    used_before=used_before if not will_block else self.container.level - total_length,
                     used_after=used_after,
                     change_amount=total_length,
-                    triggered_by=f'batch_{len(wagons)}_wagons',
+                    triggered_by=f'batch_{len(wagons)}_wagons[{wagon_ids}]',
+                    utilization_before_percent=util_before,
+                    utilization_after_percent=util_after,
                 )
             )
 
@@ -169,38 +205,53 @@ class TrackCapacityManager(ResourcePort):
         """
         # Calculate total length to free (float!)
         total_length = sum(w.length for w in wagons)
-        print(
-            f't={self.env.now}: TrackCapacityManager.remove_wagons: '
-            f'removing {total_length}m, current level={self.container.level}'
-        )
+        wagon_ids = ','.join(w.id for w in wagons)
 
-        # Capture state before
+        # Capture state before (BEFORE any operation)
         used_before = self.container.level
 
+        # CRITICAL: Handle floating point precision errors
+        # Clamp removal to available capacity to prevent blocking on FP errors
+        actual_removal = min(total_length, used_before)
+
+        # Warn if significant discrepancy (not just FP error)
+        if total_length - actual_removal > 0.1:  # More than 10cm difference
+            raise ValueError(
+                f'Track {self.track_id}: Trying to remove {total_length:.2f}m '
+                f'but only {used_before:.2f}m available. Wagons not on track?'
+            )
+
+        # Log FP precision fix if applied
+        fp_fix_applied = abs(total_length - actual_removal) > 1e-10
+
         # Free space - automatically unblocks waiting processes!
-        yield self.container.get(total_length)
+        yield self.container.get(actual_removal)
 
-        print(
-            f't={self.env.now}: TrackCapacityManager.remove_wagons: '
-            f'removed {total_length}m, new level={self.container.level}'
-        )
-
-        # Capture state after
+        # Capture state after (AFTER operation completes)
         used_after = self.container.level
+        util_before = (used_before / self.capacity_meters * 100) if self.capacity_meters > 0 else 0.0
+        util_after = (used_after / self.capacity_meters * 100) if self.capacity_meters > 0 else 0.0
 
-        # Publish event
+        # Publish event with accurate before/after states
         if self.event_publisher:
+            change_type = 'capacity_released' + ('_FP_CLAMPED' if fp_fix_applied else '')
+            triggered_by = f'batch_{len(wagons)}_wagons[{wagon_ids}]'
+            if fp_fix_applied:
+                triggered_by += f'_CLAMPED_{total_length:.15f}_to_{actual_removal:.15f}'
+
             self.event_publisher(
                 ResourceStateChangeEvent(
                     timestamp=self.env.now,
                     resource_type='track',
                     resource_id=self.track_id,
-                    change_type='capacity_released',
+                    change_type=change_type,
                     capacity=self.capacity_meters,
                     used_before=used_before,
                     used_after=used_after,
-                    change_amount=-total_length,
-                    triggered_by=f'batch_{len(wagons)}_wagons',
+                    change_amount=-actual_removal,
+                    triggered_by=triggered_by,
+                    utilization_before_percent=util_before,
+                    utilization_after_percent=util_after,
                 )
             )
 
@@ -234,13 +285,16 @@ class TrackCapacityManager(ResourcePort):
         -------
             Dict with capacity metrics
         """
+        utilization, state = self.get_utilization_and_state()
         return {
             'track_id': self.track_id,
             'capacity_meters': self.capacity_meters,
+            'max_capacity': 0.0,
             'occupied_meters': self.get_occupied_capacity(),
             'available_meters': self.get_available_capacity(),
-            'utilization_percent': self.get_utilization(),
+            'utilization_percent': utilization,
             'wagon_count': self.get_wagon_count(),
+            'state': state,
         }
 
 

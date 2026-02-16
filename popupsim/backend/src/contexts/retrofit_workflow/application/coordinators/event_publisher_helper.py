@@ -54,6 +54,60 @@ class EventPublisherHelper:
             )
 
     @staticmethod
+    def publish_loco_parking(
+        publisher: Callable[[LocomotiveMovementEvent], None] | None,
+        timestamp: float,
+        loco_id: str,
+        location: str,
+    ) -> None:
+        """Publish locomotive parking event."""
+        if publisher:
+            publisher(
+                LocomotiveMovementEvent(
+                    timestamp=timestamp,
+                    locomotive_id=loco_id,
+                    event_type='PARKING',
+                    current_location=location,
+                )
+            )
+
+    @staticmethod
+    def publish_loco_coupling(
+        publisher: Callable[[LocomotiveMovementEvent], None] | None,
+        timestamp: float,
+        loco_id: str,
+        location: str,
+    ) -> None:
+        """Publish locomotive coupling event."""
+        if publisher:
+            publisher(
+                LocomotiveMovementEvent(
+                    timestamp=timestamp,
+                    locomotive_id=loco_id,
+                    event_type='COUPLING',
+                    current_location=location,
+                )
+            )
+
+    @staticmethod
+    def publish_loco_decoupling(
+        publisher: Callable[[LocomotiveMovementEvent], None] | None,
+        timestamp: float,
+        loco_id: str,
+        location: str,
+    ) -> None:
+        """Publish locomotive decoupling event."""
+        if publisher:
+            publisher(
+                LocomotiveMovementEvent(
+                    timestamp=timestamp,
+                    locomotive_id=loco_id,
+                    event_type='DECOUPLING',
+                    current_location=location,
+                )
+            )
+
+    @staticmethod
     def publish_wagon_event(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments
         publisher: Callable[[WagonJourneyEvent], None] | None,
         timestamp: float,

@@ -45,7 +45,7 @@ class BatchToWorkshopTransport(TransportCommand):  # pylint: disable=too-few-pub
         self.batch_context = batch_context
         self.publishers = event_publishers
 
-    def execute(self) -> Generator[Any, Any]:
+    def execute(self) -> Generator[Any, Any]:  # noqa: C901
         """Execute batch transport to workshop."""
         # Allocate locomotive
         loco = yield from self.config.locomotive_manager.allocate()
@@ -77,6 +77,28 @@ class BatchToWorkshopTransport(TransportCommand):  # pylint: disable=too-few-pub
         pickup_time = self.config.route_service.get_retrofit_to_workshop_time(self.batch_context.workshop_id)
         yield self.config.env.timeout(pickup_time)
 
+        # Emit PARKING event after arrival at retrofit track
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='PARKING',
+                    current_location='retrofit',
+                )
+            )
+
+        # Emit COUPLING event before removing wagons
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='COUPLING',
+                    current_location='retrofit',
+                )
+            )
+
         # Remove wagons from retrofit track
         retrofit_tracks = self.config.track_selector.get_tracks_of_type('retrofit')
         for track in retrofit_tracks:
@@ -98,6 +120,28 @@ class BatchToWorkshopTransport(TransportCommand):  # pylint: disable=too-few-pub
 
         transport_time = self.config.route_service.get_retrofit_to_workshop_time(self.batch_context.workshop_id)
         yield self.config.env.timeout(transport_time)
+
+        # Emit PARKING event after arrival at workshop
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='PARKING',
+                    current_location=self.batch_context.workshop_id,
+                )
+            )
+
+        # Emit DECOUPLING event
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='DECOUPLING',
+                    current_location=self.batch_context.workshop_id,
+                )
+            )
 
         # Publish arrival events
         if self.publishers.loco_event_publisher:
@@ -151,7 +195,7 @@ class BatchFromWorkshopTransport(TransportCommand):  # pylint: disable=too-few-p
         self.retrofitted_queue = retrofitted_queue
         self.publishers = event_publishers
 
-    def execute(self) -> Generator[Any, Any]:
+    def execute(self) -> Generator[Any, Any]:  # noqa: C901
         """Execute batch transport from workshop to retrofitted track."""
         # Allocate locomotive for pickup
         loco = yield from self.config.locomotive_manager.allocate()
@@ -181,6 +225,28 @@ class BatchFromWorkshopTransport(TransportCommand):  # pylint: disable=too-few-p
         pickup_time = self.config.route_service.get_retrofit_to_workshop_time(self.batch_context.workshop_id)
         yield self.config.env.timeout(pickup_time)
 
+        # Emit PARKING event after arrival at workshop
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='PARKING',
+                    current_location=self.batch_context.workshop_id,
+                )
+            )
+
+        # Emit COUPLING event before picking up wagons
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='COUPLING',
+                    current_location=self.batch_context.workshop_id,
+                )
+            )
+
         # Transport to retrofitted track
         if self.publishers.loco_event_publisher:
             self.publishers.loco_event_publisher(
@@ -195,6 +261,28 @@ class BatchFromWorkshopTransport(TransportCommand):  # pylint: disable=too-few-p
 
         transport_time = self.config.route_service.get_workshop_to_retrofitted_time(self.batch_context.workshop_id)
         yield self.config.env.timeout(transport_time)
+
+        # Emit PARKING event after arrival at retrofitted track
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='PARKING',
+                    current_location='retrofitted',
+                )
+            )
+
+        # Emit DECOUPLING event
+        if self.publishers.loco_event_publisher:
+            self.publishers.loco_event_publisher(
+                LocomotiveMovementEvent(
+                    timestamp=self.config.env.now,
+                    locomotive_id=loco.id,
+                    event_type='DECOUPLING',
+                    current_location='retrofitted',
+                )
+            )
 
         # Add to retrofitted track
         retrofitted_tracks = self.config.track_selector.get_tracks_of_type('retrofitted')

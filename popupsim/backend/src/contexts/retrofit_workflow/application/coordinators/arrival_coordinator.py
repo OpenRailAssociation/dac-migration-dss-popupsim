@@ -1,71 +1,61 @@
 """Arrival coordinator for managing train arrivals and wagon processing.
 
-This module provides coordination services for handling train arrivals in the
-DAC migration simulation system. It manages the arrival process, wagon creation,
-and initial classification operations.
+Refactored version with improved separation of concerns:
+- Pure coordination logic (no domain business rules)
+- Minimal dependencies
+- Clear single responsibility
+- Proper error handling
 """
 
 from collections.abc import Generator
 from typing import Any
 
 from contexts.retrofit_workflow.application.config.coordinator_config import ArrivalCoordinatorConfig
+from contexts.retrofit_workflow.application.coordinators.base_coordinator import BaseCoordinator
 from contexts.retrofit_workflow.domain.aggregates.train_aggregate import Train
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
+from contexts.retrofit_workflow.domain.services.rejection_event_factory import RejectionEventFactory
+from contexts.retrofit_workflow.domain.services.wagon_eligibility_service import EligibilityResult
+from contexts.retrofit_workflow.domain.services.wagon_eligibility_service import WagonEligibilityService
+from contexts.retrofit_workflow.domain.services.wagon_factory_service import WagonFactoryService
 from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
 from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
 
 
-class ArrivalCoordinator:  # pylint: disable=too-few-public-methods
+class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-attributes
     """Coordinator for managing train arrivals and initial wagon processing.
 
-    This coordinator handles the arrival phase of the DAC migration process,
-    managing train scheduling, wagon entity creation, and initial classification
-    operations. It serves as the entry point for wagons into the simulation system.
+    Responsibilities:
+    - Schedule train arrivals
+    - Create wagon entities from configuration
+    - Coordinate with collection system
+    - Publish arrival events
 
-    Responsibilities
-    ----------------
-    - Schedule and process train arrivals based on scenario configuration
-    - Create wagon entities from train configuration data
-    - Manage initial wagon classification and status transitions
-    - Place classified wagons on collection tracks for further processing
-    - Publish arrival events for system monitoring and coordination
+    Does NOT handle:
+    - Business rules for wagon filtering (delegated to domain service)
+    - Track selection logic (delegated to track selector)
+    - Collection queue management (delegated to collection coordinator)
 
-    Attributes
-    ----------
-    env : simpy.Environment
-        SimPy simulation environment for process scheduling
-    collection_queue : simpy.FilterStore
-        Queue for storing classified wagons awaiting collection
-    event_publisher : callable
-        Function for publishing domain events to the system
-    trains : list[Train]
-        List of scheduled trains for tracking and management
-
-    Examples
-    --------
-    >>> config = ArrivalCoordinatorConfig(env, collection_queue, event_publisher)
-    >>> coordinator = ArrivalCoordinator(config)
-    >>> coordinator.schedule_train('TRAIN_001', 60.0, wagon_configs)
+    Note: Multiple attributes needed for coordination responsibilities.
     """
 
     def __init__(self, config: ArrivalCoordinatorConfig) -> None:
-        """Initialize the arrival coordinator with configuration.
+        """Initialize arrival coordinator.
 
-        Parameters
-        ----------
-        config : ArrivalCoordinatorConfig
-            Configuration object containing required dependencies and settings
-
-        Notes
-        -----
-        The configuration object provides all necessary dependencies including
-        the simulation environment, collection queue, and event publisher.
+        Args:
+            config: Configuration with all required dependencies
         """
-        self.env = config.env
-        self.collection_queue = config.collection_queue
-        self.event_publisher = config.event_publisher
-        self.trains: list[Train] = []
+        super().__init__(config.env)
+        self._collection_queue = config.collection_queue
+        self._track_selector = config.track_selector
+        self._collection_coordinator = config.collection_coordinator
+        self._event_publisher = config.event_publisher
+        self._track_manager = config.track_manager
+        self._wagon_factory = WagonFactoryService()
+        self._eligibility_service = WagonEligibilityService()
+        self._rejection_factory = RejectionEventFactory()
+        self._trains: list[Train] = []
 
     def schedule_train(
         self,
@@ -73,127 +63,266 @@ class ArrivalCoordinator:  # pylint: disable=too-few-public-methods
         arrival_time: float,
         wagon_configs: list[dict[str, Any]],
     ) -> None:
-        """Schedule a train arrival with specified wagons and timing.
+        """Schedule a train arrival.
 
-        Creates wagon entities from configuration data, assembles them into
-        a train aggregate, and schedules the arrival process for execution
-        at the specified simulation time.
-
-        Parameters
-        ----------
-        train_id : str
-            Unique identifier for the arriving train
-        arrival_time : float
-            Simulation time when the train should arrive (in simulation ticks)
-        wagon_configs : list[dict[str, Any]]
-            List of wagon configuration dictionaries containing wagon specifications
-
-        Notes
-        -----
-        Wagon configurations should contain:
-        - 'id': Unique wagon identifier
-        - 'length': Wagon length in meters (defaults to 15.0)
-        - Additional properties as needed for specific wagon types
-
-        The method creates a SimPy process that will execute the arrival
-        at the specified time, handling all necessary coordination.
-
-        Examples
-        --------
-        >>> wagon_configs = [
-        ...     {'id': 'W001', 'length': 18.5},
-        ...     {'id': 'W002', 'length': 16.0},
-        ...     {'id': 'W003', 'length': 20.0},
-        ... ]
-        >>> coordinator.schedule_train('TRAIN_001', 120.0, wagon_configs)
+        Args:
+            train_id: Unique train identifier
+            arrival_time: When train should arrive (simulation time)
+            wagon_configs: List of wagon configuration dictionaries
         """
-        # Create wagons
-        wagons = [
-            Wagon(
-                id=cfg['id'],
-                length=cfg.get('length', 15.0),
-                coupler_a=Coupler(CouplerType.SCREW, 'A'),
-                coupler_b=Coupler(CouplerType.SCREW, 'B'),
-            )
-            for cfg in wagon_configs
-        ]
+        # Create wagons using domain service
+        wagons = self._create_wagons_from_configs(wagon_configs, train_id, arrival_time)
 
-        # Create train aggregate (owns wagons during arrival)
+        if not wagons:
+            raise ValueError(f'Train {train_id} must have at least one wagon')
+
+        # Create train aggregate
         train = Train(
             id=train_id,
             arrival_time=arrival_time,
             wagons=wagons,
         )
 
-        self.trains.append(train)
+        self._trains.append(train)
 
         # Schedule arrival process
-        self.env.process(self._process_arrival(train, arrival_time))
+        self.env.process(self._process_arrival(train))
 
-    def _process_arrival(
-        self,
-        train: Train,
-        arrival_time: float,
-    ) -> Generator[Any, Any]:
-        """Process a single train arrival through the complete arrival workflow.
+    def start(self) -> None:
+        """Start arrival coordinator.
 
-        Handles the complete arrival process including timing coordination,
-        classification operations, event publishing, and wagon placement
-        on collection tracks.
+        Note: Arrival coordinator is event-driven and doesn't need
+        continuous processes. Trains are scheduled via schedule_train().
+        """
 
-        Parameters
-        ----------
-        train : Train
-            Train aggregate containing wagons to process
-        arrival_time : float
-            Scheduled arrival time in simulation ticks
+    def get_trains(self) -> list[Train]:
+        """Get all scheduled trains.
+
+        Returns
+        -------
+            List of train aggregates
+        """
+        return self._trains.copy()
+
+    def _create_wagons_from_configs(
+        self, wagon_configs: list[dict[str, Any]], train_id: str, arrival_time: float
+    ) -> list[Wagon]:
+        """Create wagon entities from configuration data.
+
+        Args:
+            wagon_configs: Wagon configuration dictionaries
+            train_id: Train identifier for event publishing
+            arrival_time: Arrival time for event publishing
+
+        Returns
+        -------
+            List of eligible wagon entities
+        """
+        eligible_wagons = []
+
+        for config in wagon_configs:
+            # Check eligibility using domain service
+            eligibility_result = self._eligibility_service.is_eligible_for_retrofit(config)
+
+            if not eligibility_result.is_eligible:
+                self._publish_rejection_event(config, eligibility_result, train_id, arrival_time)
+                continue
+
+            # Create wagon entity
+            wagon = self._wagon_factory.create_wagon(
+                wagon_id=config['id'],
+                length=config.get('length', 15.0),
+                coupler_a=Coupler(CouplerType.SCREW, 'A'),
+                coupler_b=Coupler(CouplerType.SCREW, 'B'),
+            )
+
+            # Set train_id for rejection tracking
+            wagon.train_id = train_id
+
+            eligible_wagons.append(wagon)
+
+        return eligible_wagons
+
+    def _publish_rejection_event(
+        self, config: dict[str, Any], eligibility_result: EligibilityResult, train_id: str, arrival_time: float
+    ) -> None:
+        """Publish rejection event for ineligible wagon.
+
+        Args:
+            config: Wagon configuration
+            eligibility_result: Result from eligibility check
+            train_id: Train identifier
+            arrival_time: Arrival time
+        """
+        if not self._event_publisher:
+            return
+
+        rejection_event = self._rejection_factory.create_rejection_event(
+            config, eligibility_result, train_id, arrival_time
+        )
+        # Override location to 'REJECTED' since wagon never gets on a track
+        rejection_event = WagonJourneyEvent(
+            timestamp=rejection_event.timestamp,
+            wagon_id=rejection_event.wagon_id,
+            event_type=rejection_event.event_type,
+            location='REJECTED',
+            status=rejection_event.status,
+            train_id=rejection_event.train_id,
+            rejection_reason=rejection_event.rejection_reason,
+            rejection_description=rejection_event.rejection_description,
+        )
+        self._event_publisher(rejection_event)
+
+    def _process_arrival(self, train: Train) -> Generator[Any, Any]:
+        """Process train arrival through complete workflow.
+
+        Args:
+            train: Train aggregate to process
 
         Yields
         ------
-        Generator[Any, Any, None]
-            SimPy process generator for simulation execution
-
-        Notes
-        -----
-        The arrival process follows these steps:
-        1. Wait until the scheduled arrival time
-        2. Start train classification process
-        3. Publish arrival events for each wagon
-        4. Complete classification and transfer wagon ownership
-        5. Place classified wagons on collection queue
-
-        This method is private and called automatically by the SimPy
-        process scheduler when trains are scheduled.
-
-        Examples
-        --------
-        This method is called internally by schedule_train() and should
-        not be invoked directly by external code.
+            SimPy process events
         """
         # Wait until arrival time
-        if arrival_time > self.env.now:
-            yield self.env.timeout(arrival_time - self.env.now)
+        if train.arrival_time > self.env.now:
+            yield self.env.timeout(train.arrival_time - self.env.now)
 
-        # Train arrives - start classification
+        # Start classification
         train.start_classification(self.env.now)
 
-        # Publish ARRIVED events for each wagon
-        for wagon in train.wagons:
-            if self.event_publisher:
-                self.event_publisher(
-                    WagonJourneyEvent(
-                        timestamp=self.env.now,
-                        wagon_id=wagon.id,
-                        event_type='ARRIVED',
-                        location='collection',
-                        status='ARRIVED',
-                        train_id=train.id,
-                    )
-                )
-
-        # Complete classification - transfers ownership and classifies wagons
+        # Complete classification and get wagons
         classified_wagons = train.complete_classification()
 
-        # Put wagons on collection track (FIFO queue)
-        for wagon in classified_wagons:
-            self.collection_queue.put(wagon)
+        # Distribute wagons to collection tracks with capacity reservation
+        yield from self._distribute_wagons_to_collection_async(classified_wagons)
+
+        # Publish arrival events AFTER track assignment
+        self._publish_arrival_events(train)
+
+    def _publish_arrival_events(self, train: Train) -> None:
+        """Publish arrival events for all wagons in train.
+
+        Args:
+            train: Train aggregate
+        """
+        if not self._event_publisher:
+            return
+
+        for wagon in train.wagons:
+            # Use actual track ID if assigned, otherwise 'collection'
+            location = wagon.current_track_id if wagon.current_track_id else 'collection'
+            self._event_publisher(
+                WagonJourneyEvent(
+                    timestamp=self.env.now,
+                    wagon_id=wagon.id,
+                    event_type='ARRIVED',
+                    location=location,
+                    status='ARRIVED',
+                    train_id=train.id,
+                )
+            )
+
+    def _distribute_wagons_to_collection(self, wagons: list[Wagon]) -> None:
+        """Distribute wagons to collection tracks with capacity management.
+
+        Args:
+            wagons: List of classified wagons
+        """
+        for wagon in wagons:
+            # Select collection track
+            collection_track = self._track_selector.select_track_with_capacity('collection')
+            if not collection_track:
+                continue  # Skip if no track available
+
+            # Assign wagon to track
+            wagon.current_track_id = collection_track.track_id
+
+            # Add to collection system
+            self._collection_coordinator.add_wagon(wagon)
+
+    def _distribute_wagons_to_collection_async(self, wagons: list[Wagon]) -> Generator[Any, Any]:
+        """Distribute wagons to collection tracks with capacity reservation (async version).
+
+        Args:
+            wagons: List of classified wagons
+
+        Yields
+        ------
+            SimPy events for capacity reservation
+        """
+        for wagon in wagons:
+            # Select collection track
+            collection_track = self._track_selector.select_track_with_capacity('collection')
+            if not collection_track:
+                # No collection track available - reject wagon
+                self._reject_wagon_no_track(wagon)
+                continue
+
+            # Check if wagon fits on collection track
+            if self._track_manager:
+                track = self._track_manager.get_track(collection_track.track_id)
+                if track:
+                    available_capacity = track.get_available_capacity()
+                    if wagon.length > available_capacity:
+                        # Collection track full - reject wagon with detailed message
+                        self._reject_wagon_track_full(wagon, collection_track.track_id, available_capacity)
+                        continue
+
+            # Assign wagon to track
+            wagon.current_track_id = collection_track.track_id
+
+            # Reserve capacity on collection track (should not block since we checked capacity)
+            if self._track_manager:
+                track = self._track_manager.get_track(collection_track.track_id)
+                if track:
+                    yield from track.add_wagons([wagon])
+
+            # Add to collection system
+            self._collection_coordinator.add_wagon(wagon)
+
+    def _reject_wagon_no_track(self, wagon: Wagon) -> None:
+        """Reject wagon when no collection track is available.
+
+        Args:
+            wagon: Wagon to reject
+        """
+        if not self._event_publisher:
+            return
+
+        self._event_publisher(
+            WagonJourneyEvent(
+                timestamp=self.env.now,
+                wagon_id=wagon.id,
+                event_type='REJECTED',
+                location='REJECTED',
+                status='REJECTED',
+                train_id=wagon.train_id if hasattr(wagon, 'train_id') else '',
+                rejection_reason='NO_COLLECTION_TRACK',
+                rejection_description='No collection track available',
+            )
+        )
+
+    def _reject_wagon_track_full(self, wagon: Wagon, track_id: str, available_capacity: float) -> None:
+        """Reject wagon when collection track is full.
+
+        Args:
+            wagon: Wagon to reject
+            track_id: ID of the full collection track
+            available_capacity: Available capacity on the track
+        """
+        if not self._event_publisher:
+            return
+
+        self._event_publisher(
+            WagonJourneyEvent(
+                timestamp=self.env.now,
+                wagon_id=wagon.id,
+                event_type='REJECTED',
+                location='REJECTED',
+                status='REJECTED',
+                train_id=wagon.train_id if hasattr(wagon, 'train_id') else '',
+                rejection_reason='COLLECTION_TRACK_FULL',
+                rejection_description=f'Collection track {track_id} capacity exceeded '
+                f'({available_capacity:.1f} meters available, {wagon.length:.1f} meters needed)',
+            )
+        )

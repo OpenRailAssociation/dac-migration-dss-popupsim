@@ -11,6 +11,7 @@ from contexts.retrofit_workflow.domain.aggregates.train_movement_aggregate impor
 from contexts.retrofit_workflow.domain.aggregates.train_movement_aggregate import TrainType
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
 from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
@@ -216,7 +217,8 @@ def test_train_formation_service_shunting(
     mock_locomotive: Locomotive, mock_batch: BatchAggregate, process_times: ProcessTimes
 ) -> None:
     """Test TrainFormationService for shunting operations."""
-    service = TrainFormationService()
+    coupling_service = CouplingService(process_times)
+    service = TrainFormationService(coupling_service)
 
     train = service.form_train(
         locomotive=mock_locomotive,
@@ -240,7 +242,8 @@ def test_train_formation_service_mainline(
     mock_locomotive: Locomotive, mock_batch: BatchAggregate, process_times: ProcessTimes
 ) -> None:
     """Test TrainFormationService for mainline operations."""
-    service = TrainFormationService()
+    coupling_service = CouplingService(process_times)
+    service = TrainFormationService(coupling_service)
 
     train = service.form_train(
         locomotive=mock_locomotive,

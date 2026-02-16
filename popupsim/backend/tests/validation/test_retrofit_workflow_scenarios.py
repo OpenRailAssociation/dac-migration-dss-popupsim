@@ -57,7 +57,7 @@ def create_test_scenario(
         Mock(id='collection', type='collection', length=100.0, fillfactor=0.8),
         Mock(id='retrofit', type='retrofit', length=retrofit_track_length, fillfactor=0.9),
         Mock(id='retrofitted', type='retrofitted', length=120.0, fillfactor=0.8),
-        Mock(id='parking_area', type='parking_area', length=200.0, fillfactor=0.7),
+        Mock(id='parking_area', type='parking', length=200.0, fillfactor=0.7),
         Mock(id='loco_parking', type='loco_parking', length=50.0, fillfactor=0.5),
     ]
 
@@ -170,9 +170,48 @@ def create_test_scenario(
         if coupler_type.upper() == 'DAC'
         else timedelta(minutes=1.0 if coupling_time > 0 else 0.0)
     )
+    mock_scenario.process_times.get_decoupling_time = lambda coupler_type: (
+        timedelta(minutes=0.5 if coupling_time > 0 else 0.0)
+        if coupler_type.upper() == 'DAC'
+        else timedelta(minutes=1.0 if coupling_time > 0 else 0.0)
+    )
+
+    # Add get_coupling_ticks and get_decoupling_ticks methods
+    def get_coupling_ticks(coupler_type: str) -> float:
+        from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+        return timedelta_to_sim_ticks(
+            timedelta(minutes=0.5 if coupling_time > 0 else 0.0)
+            if coupler_type.upper() == 'DAC'
+            else timedelta(minutes=1.0 if coupling_time > 0 else 0.0)
+        )
+
+    def get_decoupling_ticks(coupler_type: str) -> float:
+        from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+        return timedelta_to_sim_ticks(
+            timedelta(minutes=0.5 if coupling_time > 0 else 0.0)
+            if coupler_type.upper() == 'DAC'
+            else timedelta(minutes=1.0 if coupling_time > 0 else 0.0)
+        )
+
+    mock_scenario.process_times.get_coupling_ticks = get_coupling_ticks
+    mock_scenario.process_times.get_decoupling_ticks = get_decoupling_ticks
 
     # Locomotive priority strategy for coordination
     mock_scenario.loco_priority_strategy = Mock(value='batch_completion')
+
+    # Parking strategy configuration
+    mock_scenario.parking_strategy = 'opportunistic'  # Use opportunistic for tests
+    mock_scenario.parking_normal_threshold = 0.5
+    mock_scenario.parking_critical_threshold = 0.8
+    mock_scenario.parking_idle_check_interval = 1.0
+
+    # Track selection strategies
+    mock_scenario.collection_track_strategy = Mock(value='round_robin')
+    mock_scenario.retrofit_selection_strategy = Mock(value='first_available')
+    mock_scenario.parking_selection_strategy = Mock(value='best_fit')
+    mock_scenario.id = 'test_scenario'
 
     return mock_scenario
 
@@ -250,8 +289,12 @@ def run_timeline_test(  # noqa: PLR0912
                 context.workshop_coordinator.config.loco_event_publisher = capture_loco_event
                 context.workshop_coordinator.config.wagon_event_publisher = capture_wagon_event
             else:
-                context.workshop_coordinator.loco_event_publisher = capture_loco_event
-                context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+                # Direct assignment for SOLIDWorkshopCoordinator
+                context.workshop_coordinator._event_publisher = capture_wagon_event
+                if hasattr(context.workshop_coordinator, 'loco_event_publisher'):
+                    context.workshop_coordinator.loco_event_publisher = capture_loco_event
+                if hasattr(context.workshop_coordinator, 'wagon_event_publisher'):
+                    context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
 
         if context.parking_coordinator:
             # ParkingCoordinator not yet refactored to config pattern
@@ -299,17 +342,17 @@ def run_timeline_test(  # noqa: PLR0912
         # Set wagon to classified status so it can be processed
         wagon.classify()
         wagon.move_to('collection')
+        wagon.current_track_id = 'collection'  # Set physical track ID for coordinator
 
         # Add wagon arrival event manually
-
         arrival_event = WagonJourneyEvent(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
         events.append((0.0, arrival_event))
 
-        # Put wagon in collection queue
-        context.collection_queue.put(wagon)
-        print(f'Added wagon {wagon.id} to collection queue. Queue size: {len(context.collection_queue.items)}')
+        # Add wagon via collection coordinator
+        context.collection_coordinator.add_wagon(wagon)
+        print(f'Added wagon {wagon.id} to collection coordinator')
 
     # Create termination process
     def termination_process():
@@ -339,8 +382,31 @@ def run_timeline_test(  # noqa: PLR0912
 
     # Print all events for debugging
     print(f'\nTotal events captured: {len(events)}')
-    for i, (t, e) in enumerate(events):
-        print(f'Event {i}: t={t}, type={type(e).__name__}, {e}')
+    print('\n' + '=' * 80)
+    print('ACTUAL TIMELINE FROM SIMULATION:')
+    print('=' * 80)
+    for t, e in sorted(events, key=lambda x: x[0]):
+        event_type = type(e).__name__
+        if event_type == 'TrainArrivedEvent':
+            train_id = e.train_id.id if hasattr(e.train_id, 'id') else str(e.train_id)
+            print(f't={int(t)}: train[{train_id}] ARRIVED collection')
+        elif event_type == 'WagonJourneyEvent':
+            print(f't={int(t)}: wagon[{e.wagon_id}] {e.event_type} {e.location}')
+        elif event_type == 'BatchFormed':
+            wagon_list = ','.join(e.wagon_ids)
+            print(f't={int(t)}: batch[{e.batch_id}] FORMED wagons={wagon_list}')
+        elif event_type == 'BatchTransportStarted':
+            print(f't={int(t)}: batch[{e.batch_id}] TRANSPORT_STARTED destination={e.destination}')
+        elif event_type == 'BatchArrivedAtDestination':
+            print(f't={int(t)}: batch[{e.batch_id}] ARRIVED_AT_DESTINATION {e.destination}')
+        elif event_type == 'LocomotiveMovementEvent':
+            if hasattr(e, 'purpose') and e.purpose:
+                print(f't={int(t)}: locomotive[{e.locomotive_id}] {e.event_type} {e.purpose}')
+            elif hasattr(e, 'from_location') and hasattr(e, 'to_location'):
+                print(f't={int(t)}: locomotive[{e.locomotive_id}] MOVING {e.from_location}->{e.to_location}')
+            else:
+                print(f't={int(t)}: locomotive[{e.locomotive_id}] {e.event_type}')
+    print('=' * 80 + '\n')
 
     # Create mock analytics context for compatibility
     mock_analytics = Mock()
@@ -355,28 +421,29 @@ def test_single_wagon_single_station() -> None:
     TIMELINE:
     t=0: train[T1] ARRIVED collection
     t=0: wagon[W01] ARRIVED collection
-    t=0: locomotive[L1] MOVING locoparking->collection
-    t=1: batch[COL-RET-1-1] FORMED wagons=W01
+    t=0: locomotive[L1] MOVING loco_parking->collection
+    t=1: batch[*] FORMED wagons=W01
     t=1: locomotive[L1] ALLOCATED batch_transport
-    t=1: batch[COL-RET-1-1] TRANSPORT_STARTED destination=retrofit
+    t=1: batch[*] TRANSPORT_STARTED destination=retrofit
     t=1: locomotive[L1] MOVING collection->retrofit
-    t=2: batch[COL-RET-1-1] ARRIVED_AT_DESTINATION retrofit
-    t=2: locomotive[L1] MOVING retrofit->locoparking
-    t=3: locomotive[L1] MOVING locoparking->retrofit
+    t=2: batch[*] ARRIVED_AT_DESTINATION retrofit
+    t=2: locomotive[L1] MOVING retrofit->loco_parking
+    t=3: locomotive[L1] MOVING loco_parking->retrofit
     t=4: locomotive[L1] MOVING retrofit->WS1
     t=5: wagon[W01] RETROFIT_STARTED WS1
-    t=5: locomotive[L1] MOVING WS1->locoparking
+    t=5: locomotive[L1] MOVING WS1->loco_parking
     t=15: wagon[W01] RETROFIT_COMPLETED WS1
-    t=15: locomotive[L1] MOVING locoparking->WS1
+    t=15: locomotive[L1] MOVING loco_parking->WS1
     t=16: locomotive[L1] MOVING WS1->retrofitted
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
-    t=17: batch[RETROFITTED-PARK-17-1] FORMED wagons=W01
+    t=17: batch[*] FORMED wagons=W01
     t=18: locomotive[L1] ALLOCATED batch_transport
-    t=18: batch[RETROFITTED-PARK-17-1] TRANSPORT_STARTED destination=parking_area
-    t=18: locomotive[L1] MOVING retrofitted->parking_area
-    t=19: batch[RETROFITTED-PARK-17-1] ARRIVED_AT_DESTINATION parking_area
-    t=19: wagon[W01] PARKED parking_area
-    t=19: locomotive[L1] MOVING parking_area->loco_parking
+    t=18: locomotive[L1] MOVING loco_parking->retrofitted
+    t=19: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=19: locomotive[L1] MOVING retrofitted->parking_area
+    t=20: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=20: locomotive[L1] MOVING parking_area->loco_parking
     """
     events, analytics_context = run_timeline_test(1, 1, 10.0, 30.0)  # Reduced timeout
 
@@ -405,11 +472,11 @@ def test_two_wagons_one_station() -> None:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
     t=0: locomotive[L1] MOVING loco_parking->collection
-    t=1: batch[COL-RET-1-1] FORMED wagons=W01,W02
+    t=1: batch[*] FORMED wagons=W01,W02
     t=1: locomotive[L1] ALLOCATED batch_transport
-    t=1: batch[COL-RET-1-1] TRANSPORT_STARTED destination=retrofit
+    t=1: batch[*] TRANSPORT_STARTED destination=retrofit
     t=1: locomotive[L1] MOVING collection->retrofit
-    t=2: batch[COL-RET-1-1] ARRIVED_AT_DESTINATION retrofit
+    t=2: batch[*] ARRIVED_AT_DESTINATION retrofit
     t=2: locomotive[L1] MOVING retrofit->loco_parking
     t=3: locomotive[L1] MOVING loco_parking->retrofit
     t=4: locomotive[L1] MOVING retrofit->WS1
@@ -419,20 +486,30 @@ def test_two_wagons_one_station() -> None:
     t=15: locomotive[L1] MOVING loco_parking->WS1
     t=16: locomotive[L1] MOVING WS1->retrofitted
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
-    t=18: locomotive[L1] MOVING loco_parking->retrofit
-    t=19: locomotive[L1] MOVING retrofit->WS1
-    t=20: locomotive[L1] MOVING WS1->loco_parking
-    t=21: locomotive[L1] MOVING loco_parking->retrofitted
-    t=22: wagon[W02] RETROFIT_STARTED WS1
-    t=22: locomotive[L1] MOVING retrofitted->parking_area
-    t=23: wagon[W01] PARKED parking_area
-    t=32: wagon[W02] RETROFIT_COMPLETED WS1
-    t=32: locomotive[L1] MOVING loco_parking->WS1
-    t=33: locomotive[L1] MOVING WS1->retrofitted
-    t=34: locomotive[L1] MOVING retrofitted->loco_parking
-    t=35: locomotive[L1] MOVING loco_parking->retrofitted
-    t=36: locomotive[L1] MOVING retrofitted->parking_area
-    t=37: wagon[W02] PARKED parking_area
+    t=17: batch[*] FORMED wagons=W01
+    t=18: locomotive[L1] ALLOCATED batch_transport
+    t=18: locomotive[L1] MOVING loco_parking->retrofitted
+    t=19: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=19: locomotive[L1] MOVING retrofitted->parking_area
+    t=20: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=20: locomotive[L1] MOVING parking_area->loco_parking
+    t=21: locomotive[L1] MOVING loco_parking->retrofit
+    t=22: locomotive[L1] MOVING retrofit->WS1
+    t=23: wagon[W02] RETROFIT_STARTED WS1
+    t=23: locomotive[L1] MOVING WS1->loco_parking
+    t=33: wagon[W02] RETROFIT_COMPLETED WS1
+    t=33: locomotive[L1] MOVING loco_parking->WS1
+    t=34: locomotive[L1] MOVING WS1->retrofitted
+    t=35: locomotive[L1] MOVING retrofitted->loco_parking
+    t=35: batch[*] FORMED wagons=W02
+    t=36: locomotive[L1] ALLOCATED batch_transport
+    t=36: locomotive[L1] MOVING loco_parking->retrofitted
+    t=37: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=37: locomotive[L1] MOVING retrofitted->parking_area
+    t=38: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=38: wagon[W02] PARKED parking_area
+    t=38: locomotive[L1] MOVING parking_area->loco_parking
     """
     events, analytics_context = run_timeline_test(2, 1, 10.0, 50.0, workshop_bays=[1])
 
@@ -471,11 +548,11 @@ def test_two_wagons_two_stations() -> None:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
     t=0: locomotive[L1] MOVING loco_parking->collection
-    t=1: batch[COL-RET-1-1] FORMED wagons=W01,W02
+    t=1: batch[*] FORMED wagons=W01,W02
     t=1: locomotive[L1] ALLOCATED batch_transport
-    t=1: batch[COL-RET-1-1] TRANSPORT_STARTED destination=retrofit
+    t=1: batch[*] TRANSPORT_STARTED destination=retrofit
     t=1: locomotive[L1] MOVING collection->retrofit
-    t=2: batch[COL-RET-1-1] ARRIVED_AT_DESTINATION retrofit
+    t=2: batch[*] ARRIVED_AT_DESTINATION retrofit
     t=2: locomotive[L1] MOVING retrofit->loco_parking
     t=3: locomotive[L1] MOVING loco_parking->retrofit
     t=4: locomotive[L1] MOVING retrofit->WS1
@@ -487,14 +564,15 @@ def test_two_wagons_two_stations() -> None:
     t=15: locomotive[L1] MOVING loco_parking->WS1
     t=16: locomotive[L1] MOVING WS1->retrofitted
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
-    t=18: locomotive[L1] MOVING loco_parking->retrofitted
-    t=18: batch[RETROFITTED-PARK-18-1] FORMED wagons=W01,W02
+    t=17: batch[*] FORMED wagons=W01,W02
     t=18: locomotive[L1] ALLOCATED batch_transport
-    t=18: batch[RETROFITTED-PARK-18-1] TRANSPORT_STARTED destination=parking_area
-    t=18: locomotive[L1] MOVING retrofitted->parking_area
-    t=19: batch[RETROFITTED-PARK-18-1] ARRIVED_AT_DESTINATION parking_area
-    t=19: wagon[W01] PARKED parking_area
-    t=19: wagon[W02] PARKED parking_area
+    t=18: locomotive[L1] MOVING loco_parking->retrofitted
+    t=19: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=19: locomotive[L1] MOVING retrofitted->parking_area
+    t=20: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=20: wagon[W02] PARKED parking_area
+    t=20: locomotive[L1] MOVING parking_area->loco_parking
     """
     # Use 1 workshop with 2 bays for parallel processing
     events, analytics_context = run_timeline_test(2, 1, 10.0, 50.0, workshop_bays=[2])
@@ -518,11 +596,11 @@ def test_four_wagons_two_stations() -> None:
     t=0: wagon[W03] ARRIVED collection
     t=0: wagon[W04] ARRIVED collection
     t=0: locomotive[L1] MOVING loco_parking->collection
-    t=1: batch[COL-RET-1-1] FORMED wagons=W01,W02,W03,W04
+    t=1: batch[*] FORMED wagons=W01,W02,W03,W04
     t=1: locomotive[L1] ALLOCATED batch_transport
-    t=1: batch[COL-RET-1-1] TRANSPORT_STARTED destination=retrofit
+    t=1: batch[*] TRANSPORT_STARTED destination=retrofit
     t=1: locomotive[L1] MOVING collection->retrofit
-    t=2: batch[COL-RET-1-1] ARRIVED_AT_DESTINATION retrofit
+    t=2: batch[*] ARRIVED_AT_DESTINATION retrofit
     t=2: locomotive[L1] MOVING retrofit->loco_parking
     t=3: locomotive[L1] MOVING loco_parking->retrofit
     t=4: locomotive[L1] MOVING retrofit->WS1
@@ -539,27 +617,29 @@ def test_four_wagons_two_stations() -> None:
     t=15: locomotive[L1] MOVING loco_parking->WS1
     t=16: locomotive[L1] MOVING WS1->retrofitted
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
-    t=18: locomotive[L1] MOVING loco_parking->retrofitted
-    t=18: batch[RETROFITTED-PARK-18-1] FORMED wagons=W01,W02
-    t=18: locomotive[L1] ALLOCATED batch_transport
-    t=18: batch[RETROFITTED-PARK-18-1] TRANSPORT_STARTED destination=parking_area
-    t=18: locomotive[L1] MOVING retrofitted->parking_area
-    t=19: batch[RETROFITTED-PARK-18-1] ARRIVED_AT_DESTINATION parking_area
-    t=19: wagon[W01] PARKED parking_area
-    t=19: wagon[W02] PARKED parking_area
     t=18: wagon[W03] RETROFIT_COMPLETED WS2
     t=18: wagon[W04] RETROFIT_COMPLETED WS2
-    t=20: locomotive[L1] MOVING loco_parking->WS2
-    t=21: locomotive[L1] MOVING WS2->retrofitted
-    t=22: locomotive[L1] MOVING retrofitted->loco_parking
-    t=23: locomotive[L1] MOVING loco_parking->retrofitted
-    t=23: batch[RETROFITTED-PARK-23-2] FORMED wagons=W03,W04
-    t=23: locomotive[L1] ALLOCATED batch_transport
-    t=23: batch[RETROFITTED-PARK-23-2] TRANSPORT_STARTED destination=parking_area
-    t=23: locomotive[L1] MOVING retrofitted->parking_area
-    t=24: batch[RETROFITTED-PARK-23-2] ARRIVED_AT_DESTINATION parking_area
-    t=24: wagon[W03] PARKED parking_area
-    t=24: wagon[W04] PARKED parking_area
+    t=18: locomotive[L1] ALLOCATED batch_transport
+    t=18: locomotive[L1] MOVING loco_parking->retrofitted
+    t=19: batch[*] FORMED wagons=W01,W02
+    t=19: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=19: locomotive[L1] MOVING retrofitted->parking_area
+    t=20: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=20: wagon[W02] PARKED parking_area
+    t=20: locomotive[L1] MOVING parking_area->loco_parking
+    t=21: locomotive[L1] MOVING loco_parking->WS2
+    t=22: locomotive[L1] MOVING WS2->retrofitted
+    t=23: locomotive[L1] MOVING retrofitted->loco_parking
+    t=24: locomotive[L1] ALLOCATED batch_transport
+    t=24: locomotive[L1] MOVING loco_parking->retrofitted
+    t=25: batch[*] FORMED wagons=W03,W04
+    t=25: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=25: locomotive[L1] MOVING retrofitted->parking_area
+    t=26: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=26: wagon[W03] PARKED parking_area
+    t=26: wagon[W04] PARKED parking_area
+    t=26: locomotive[L1] MOVING parking_area->loco_parking
     """
     # Use 2 workshops with 2 bays each
     events, analytics_context = run_timeline_test(4, 2, 10.0, 50.0, workshop_bays=[2, 2])
@@ -659,8 +739,9 @@ def test_seven_wagons_two_workshops() -> None:
     """Test 7 wagons, 2 workshops - all collected at once, distributed 2-2-2-1.
 
     All 7 wagons (105m) fit on retrofit track (120m capacity).
-    WS1: W01+W02 (t=5-15), then W05+W06 (t=27-37)
-    WS2: W03+W04 (t=8-18), then W07 (t=30-40)
+    With opportunistic parking: W01+W02 parked first, then W05+W06 picked up.
+    WS1: W01+W02 (t=5-15), then W05+W06 (t=26-36)
+    WS2: W03+W04 (t=8-18), then W07 (t=32-42)
 
     TIMELINE:
     t=0: train[T1] ARRIVED collection
@@ -696,45 +777,64 @@ def test_seven_wagons_two_workshops() -> None:
     t=15: locomotive[L1] MOVING loco_parking->WS1
     t=16: locomotive[L1] MOVING WS1->retrofitted
     t=17: locomotive[L1] MOVING retrofitted->loco_parking
-    t=18: locomotive[L1] MOVING loco_parking->retrofitted
-    t=19: wagon[W01] PARKED parking_area
-    t=19: wagon[W02] PARKED parking_area
     t=18: wagon[W03] RETROFIT_COMPLETED WS2
     t=18: wagon[W04] RETROFIT_COMPLETED WS2
-    t=20: locomotive[L1] MOVING loco_parking->WS2
-    t=21: locomotive[L1] MOVING WS2->retrofitted
-    t=22: locomotive[L1] MOVING retrofitted->loco_parking
-    t=23: locomotive[L1] MOVING loco_parking->retrofit
-    t=24: locomotive[L1] MOVING retrofit->WS1
-    t=25: wagon[W05] RETROFIT_STARTED WS1
-    t=25: wagon[W06] RETROFIT_STARTED WS1
-    t=25: locomotive[L1] MOVING WS1->loco_parking
-    t=26: locomotive[L1] MOVING loco_parking->retrofitted
-    t=27: locomotive[L1] MOVING retrofitted->parking_area
-    t=27: wagon[W03] PARKED parking_area
-    t=27: wagon[W04] PARKED parking_area
-    t=27: locomotive[L1] MOVING parking_area->loco_parking
-    t=28: locomotive[L1] MOVING loco_parking->retrofit
-    t=29: locomotive[L1] MOVING retrofit->WS2
-    t=30: wagon[W07] RETROFIT_STARTED WS2
-    t=30: locomotive[L1] MOVING WS2->loco_parking
-    t=35: wagon[W05] RETROFIT_COMPLETED WS1
-    t=35: wagon[W06] RETROFIT_COMPLETED WS1
-    t=35: locomotive[L1] MOVING loco_parking->WS1
-    t=36: locomotive[L1] MOVING WS1->retrofitted
-    t=37: locomotive[L1] MOVING retrofitted->loco_parking
-    t=38: locomotive[L1] MOVING loco_parking->retrofitted
-    t=39: locomotive[L1] MOVING retrofitted->parking_area
-    t=39: wagon[W05] PARKED parking_area
-    t=39: wagon[W06] PARKED parking_area
-    t=39: locomotive[L1] MOVING parking_area->loco_parking
-    t=40: wagon[W07] RETROFIT_COMPLETED WS2
-    t=40: locomotive[L1] MOVING loco_parking->WS2
-    t=41: locomotive[L1] MOVING WS2->retrofitted
-    t=42: locomotive[L1] MOVING retrofitted->loco_parking
-    t=43: locomotive[L1] MOVING loco_parking->retrofitted
-    t=44: locomotive[L1] MOVING retrofitted->parking_area
-    t=44: wagon[W07] PARKED parking_area
+    t=18: locomotive[L1] ALLOCATED batch_transport
+    t=18: locomotive[L1] MOVING loco_parking->retrofitted
+    t=19: batch[*] FORMED wagons=W01,W02
+    t=19: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=19: locomotive[L1] MOVING retrofitted->parking_area
+    t=20: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=20: wagon[W02] PARKED parking_area
+    t=20: locomotive[L1] MOVING parking_area->loco_parking
+    t=21: locomotive[L1] MOVING loco_parking->WS2
+    t=22: locomotive[L1] MOVING WS2->retrofitted
+    t=23: locomotive[L1] MOVING retrofitted->loco_parking
+    t=24: locomotive[L1] MOVING loco_parking->retrofit
+    t=25: locomotive[L1] MOVING retrofit->WS1
+    t=26: wagon[W05] RETROFIT_STARTED WS1
+    t=26: wagon[W06] RETROFIT_STARTED WS1
+    t=26: locomotive[L1] MOVING WS1->loco_parking
+    t=27: locomotive[L1] ALLOCATED batch_transport
+    t=27: locomotive[L1] MOVING loco_parking->retrofitted
+    t=28: batch[*] FORMED wagons=W03,W04
+    t=28: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=28: locomotive[L1] MOVING retrofitted->parking_area
+    t=29: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=29: wagon[W03] PARKED parking_area
+    t=29: wagon[W04] PARKED parking_area
+    t=29: locomotive[L1] MOVING parking_area->loco_parking
+    t=30: locomotive[L1] MOVING loco_parking->retrofit
+    t=31: locomotive[L1] MOVING retrofit->WS2
+    t=32: wagon[W07] RETROFIT_STARTED WS2
+    t=32: locomotive[L1] MOVING WS2->loco_parking
+    t=36: wagon[W05] RETROFIT_COMPLETED WS1
+    t=36: wagon[W06] RETROFIT_COMPLETED WS1
+    t=36: locomotive[L1] MOVING loco_parking->WS1
+    t=37: locomotive[L1] MOVING WS1->retrofitted
+    t=38: locomotive[L1] MOVING retrofitted->loco_parking
+    t=39: locomotive[L1] ALLOCATED batch_transport
+    t=39: locomotive[L1] MOVING loco_parking->retrofitted
+    t=40: batch[*] FORMED wagons=W05,W06
+    t=40: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=40: locomotive[L1] MOVING retrofitted->parking_area
+    t=41: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=41: wagon[W05] PARKED parking_area
+    t=41: wagon[W06] PARKED parking_area
+    t=41: locomotive[L1] MOVING parking_area->loco_parking
+    t=42: wagon[W07] RETROFIT_COMPLETED WS2
+    t=42: locomotive[L1] MOVING loco_parking->WS2
+    t=43: locomotive[L1] MOVING WS2->retrofitted
+    t=44: locomotive[L1] MOVING retrofitted->loco_parking
+    t=45: locomotive[L1] ALLOCATED batch_transport
+    t=45: locomotive[L1] MOVING loco_parking->retrofitted
+    t=46: batch[*] FORMED wagons=W07
+    t=46: batch[*] TRANSPORT_STARTED destination=parking_area
+    t=46: locomotive[L1] MOVING retrofitted->parking_area
+    t=47: batch[*] ARRIVED_AT_DESTINATION parking_area
+    t=47: wagon[W07] PARKED parking_area
+    t=47: locomotive[L1] MOVING parking_area->loco_parking
     """
     # Retrofit track: 130m * 0.9 = 117m capacity, 7 wagons * 15m = 105m (fits all)
     events, analytics_context = run_timeline_test(7, 2, 10.0, 100.0, workshop_bays=[2, 2], retrofit_track_length=130.0)

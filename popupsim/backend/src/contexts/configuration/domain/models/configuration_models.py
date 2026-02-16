@@ -2,10 +2,10 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class ComponentStatus(str, Enum):
+class ComponentStatus(StrEnum):
     """Status of configuration component."""
 
     MISSING = 'missing'
@@ -13,7 +13,7 @@ class ComponentStatus(str, Enum):
     COMPLETE = 'complete'
 
 
-class ConfigurationStatus(str, Enum):
+class ConfigurationStatus(StrEnum):
     """Overall configuration status."""
 
     DRAFT = 'draft'

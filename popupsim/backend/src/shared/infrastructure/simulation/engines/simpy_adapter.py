@@ -227,6 +227,16 @@ class SimPyEngineAdapter(SimulationEnginePort):
         """Add post-run hook."""
         self._post_run_hooks.append(hook)
 
+    def get_env(self) -> simpy.Environment:
+        """Get the underlying SimPy environment.
+
+        Returns
+        -------
+        simpy.Environment
+            SimPy environment instance
+        """
+        return self._env
+
     def _handle_process_error(self, error: Exception) -> None:
         """Handle process errors."""
         for handler in self._error_handlers:

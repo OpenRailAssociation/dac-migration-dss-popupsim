@@ -19,7 +19,19 @@ Each ADR follows this structure:
 
 The PopUpSim project has undergone significant performance optimizations:
 
-### Critical Fixes
+The following ADRs document performance optimizations made to the PopUpSim codebase:
+
+| # | Title | Status | Impact |
+|---|-------|--------|--------|
+| 001 | Resource Pool Incremental Utilization Tracking | Accepted | 30-3000x speedup |
+| 002 | Wagon Collector Memory Leak Fix and Simplification | Accepted | 5000x memory reduction |
+| 003 | CSV Adapter Dict Grouping for Train Processing | Accepted | 10-16x speedup |
+| 004 | Event Type Routing for Metrics Collection | Accepted | 1.7x speedup |
+| 005 | Track Selection Cached Ratios Optimization | Accepted | 1.57x speedup (large) |
+| 006 | Batch Collection Immediate Break Optimization | Accepted | 15% avg speedup |
+| 007 | Lazy Logging String Formatting | Accepted | ~1% improvement |
+| 008 | Track Length Caching | Accepted | Avoid recomputation |
+| 009 | JSON Loading Strategy and Future Scalability | Accepted | Future planning |
 
 **Resource Pool Utilization**
 - Problem: O(n*m) quadratic complexity
@@ -53,6 +65,25 @@ The PopUpSim project has undergone significant performance optimizations:
 - Solution: Immediate break when queue empty (no timeout)
 - Result: 15% average speedup, simpler code
 
+### Phase 3: Polish (In Progress)
+
+**Issue #8: Lazy Logging String Formatting**
+- Problem: F-strings evaluated even when log level filters them out
+- Solution: Use %-formatting for lazy evaluation
+- Result: ~1% improvement when debug logging disabled
+
+**Issue #9: Track Length Caching**
+- Problem: Track total length recalculated if needed elsewhere
+- Solution: Cache computed length in Track entity
+- Result: Avoid recomputation, better encapsulation
+
+### Phase 4: Future Considerations
+
+**Issue #10: JSON Loading Strategy**
+- Problem: Large JSON files loaded entirely into memory
+- Decision: Keep current for post-MVP (<50MB files)
+- Future: Streaming, file splitting, database, or distributed architecture
+
 ### Combined Impact
 
 For a typical large scenario (20 resources, 10 trains, 500 wagons, 10,000 events):
@@ -61,7 +92,3 @@ For a typical large scenario (20 resources, 10 trains, 500 wagons, 10,000 events
 - **CSV Loading:** 25.35 ms → 2.37 ms (10.7x faster)
 
 **Total improvement:** Simulation initialization and metrics calculation are now **orders of magnitude faster** with **minimal memory footprint**.
-
-## Note
-
-Detailed ADR documents are maintained separately. This summary provides an overview of key architectural decisions and their impact on performance.
