@@ -1,360 +1,253 @@
-# MVP Examples (Synthetic)
+# Example Scenarios
 
 ## Overview
 
-This document provides concrete examples for MVP implementation. All values are **synthetic** for development purposes.
+PopUpSim includes real example scenarios in `Data/examples/`. These scenarios demonstrate different configurations and use cases.
 
-**Note:** Actual performance will be measured during MVP implementation.
-
----
-
-## Workshop Configurations
-
-### Small Workshop
-
-**Configuration:**
-- **Tracks:** 2 werkstattgleis
-- **Capacity per track:** 3 wagons
-- **Retrofit time:** 30 minutes per wagon
-- **Operating hours:** 24/7
-
-**Expected Performance (Synthetic):**
-- **Throughput:** ~48 wagons/day
-- **Utilization:** ~75%
-- **Average waiting time:** TODO
-- **Peak queue length:** TODO
-
-**Use Case:** Small Pop-Up site, limited space
+**Location:** `Data/examples/`
 
 ---
 
-### Medium Workshop
+## Available Scenarios
 
-**Configuration:**
-- **Tracks:** 4 werkstattgleis
-- **Capacity per track:** 4 wagons
-- **Retrofit time:** 30 minutes per wagon
-- **Operating hours:** 24/7
+### Small Scenarios
 
-**Expected Performance (Synthetic):**
-- **Throughput:** ~96 wagons/day
-- **Utilization:** ~80%
-- **Average waiting time:** TODO
-- **Peak queue length:** TODO
+#### two_trains
+- **Purpose:** Minimal test scenario
+- **Configuration:** 2 trains, basic workshop setup
+- **Files:** JSON format (scenario.json, tracks.json, workshops.json, trains.csv)
+- **Use case:** Quick functionality testing
 
-**Use Case:** Standard Pop-Up site
+#### seven_wagons_two_locos
+- **Purpose:** Test locomotive allocation
+- **Configuration:** 7 wagons, 2 locomotives
+- **Files:** JSON format
+- **Use case:** Resource management testing
 
----
+#### seven_wagons_two_workshops
+- **Purpose:** Test workshop distribution
+- **Configuration:** 7 wagons, 2 workshops
+- **Files:** JSON format
+- **Use case:** Workshop scheduling testing
 
-### Large Workshop
+### Medium Scenarios
 
-**Configuration:**
-- **Tracks:** 6 werkstattgleis
-- **Capacity per track:** 4 wagons
-- **Retrofit time:** 30 minutes per wagon
-- **Operating hours:** 24/7
+#### medium_scenario
+- **Purpose:** Standard workshop simulation
+- **Configuration:** Multiple trains, realistic workshop
+- **Files:** JSON + CSV (scenario.json, train_schedule.csv, routes.csv, workshop_tracks.csv)
+- **Use case:** Capacity assessment
+- **README:** See `Data/examples/medium_scenario/README.md`
 
-**Expected Performance (Synthetic):**
-- **Throughput:** ~144 wagons/day
-- **Utilization:** ~85%
-- **Average waiting time:** TODO
-- **Peak queue length:** TODO
+#### ten_trains_two_days
+- **Purpose:** Multi-day simulation
+- **Configuration:** 10 trains over 2 days
+- **Files:** JSON format
+- **Use case:** Throughput estimation
 
-**Use Case:** Large Pop-Up site, high volume
+### Large Scenarios
 
----
+#### large_scenario
+- **Purpose:** High-volume testing
+- **Configuration:** Many trains, complex workshop
+- **Files:** JSON + CSV
+- **Use case:** Stress testing, bottleneck identification
+- **README:** See `Data/examples/large_scenario/README.md`
 
-## Train Schedules
+### Special Test Scenarios
 
-### Light Schedule
+#### retrofit_overflow
+- **Purpose:** Test retrofit track overflow handling
+- **Configuration:** Designed to exceed retrofit track capacity
+- **Use case:** Capacity limit testing
 
-**Configuration:**
-- **Trains per day:** 4
-- **Wagons per train:** 10
-- **Total wagons:** 40/day
-- **Arrival pattern:** Evenly distributed
+#### ten_trains_two_days_collection_track_overflow
+- **Purpose:** Test collection track overflow
+- **Configuration:** Designed to exceed collection track capacity
+- **Use case:** Queue management testing
 
-**Suitable for:** Small workshop testing
-
----
-
-### Medium Schedule
-
-**Configuration:**
-- **Trains per day:** 8
-- **Wagons per train:** 12
-- **Total wagons:** 96/day
-- **Arrival pattern:** Peak hours (morning/evening)
-
-**Suitable for:** Medium workshop testing
-
----
-
-### Heavy Schedule
-
-**Configuration:**
-- **Trains per day:** 12
-- **Wagons per train:** 15
-- **Total wagons:** 180/day
-- **Arrival pattern:** Continuous with peaks
-
-**Suitable for:** Large workshop stress testing
+#### csv_scenario
+- **Purpose:** Demonstrate CSV-based configuration
+- **Configuration:** All configuration in CSV files
+- **Files:** CSV format (scenario.csv, trains.csv, wagons.csv, tracks.csv, workshops.csv, locomotives.csv, routes.csv)
+- **Use case:** CSV import testing
+- **README:** See `Data/examples/csv_scenario/README.md`
 
 ---
 
-## Scenario Examples
+## Running Examples
 
-### Scenario 1: Baseline Test
+### Basic Usage
 
-**Purpose:** Verify basic simulation functionality
+```bash
+# Run small scenario
+uv run python popupsim/backend/src/main.py --config Data/examples/two_trains/
 
-**Configuration:**
+# Run medium scenario
+uv run python popupsim/backend/src/main.py --config Data/examples/medium_scenario/
+
+# Run large scenario
+uv run python popupsim/backend/src/main.py --config Data/examples/large_scenario/
+```
+
+### With Custom Output
+
+```bash
+# Specify output directory
+uv run python popupsim/backend/src/main.py \
+  --config Data/examples/medium_scenario/ \
+  --output results/medium_test/
+```
+
+---
+
+## Scenario Structure
+
+### JSON-based Scenarios
+
+Typical structure:
+```
+scenario_name/
+├── scenario.json          # Main configuration
+├── tracks.json            # Track definitions
+├── workshops.json         # Workshop configuration
+├── locomotives.json       # Locomotive fleet
+├── routes.json            # Route definitions
+├── topology.json          # Network topology
+├── process_times.json     # Timing parameters
+└── trains.csv             # Train schedule
+```
+
+### CSV-based Scenarios
+
+Alternative structure:
+```
+csv_scenario/
+├── scenario.csv           # Main configuration
+├── tracks.csv             # Track definitions
+├── workshops.csv          # Workshop configuration
+├── locomotives.csv        # Locomotive fleet
+├── routes.csv             # Route definitions
+├── trains.csv             # Train schedule
+└── wagons.csv             # Wagon details
+```
+
+---
+
+## Creating Custom Scenarios
+
+### 1. Copy Existing Scenario
+
+```bash
+cp -r Data/examples/medium_scenario/ Data/examples/my_scenario/
+```
+
+### 2. Edit Configuration
+
+Edit `scenario.json`:
 ```json
 {
-  "scenario_id": "baseline_test",
-  "start_date": "2025-01-01",
-  "end_date": "2025-01-02",
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "function": "werkstattgleis",
-        "capacity": 3,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK02",
-        "function": "werkstattgleis",
-        "capacity": 3,
-        "retrofit_time_min": 30
-      }
-    ]
-  },
-  "train_schedule_file": "light_schedule.csv"
+  "id": "my_scenario",
+  "start_date": "2025-01-01T00:00:00",
+  "end_date": "2025-01-02T00:00:00",
+  "tracks_file": "tracks.json",
+  "workshops_file": "workshops.json",
+  "locomotives_file": "locomotives.json",
+  "routes_file": "routes.json",
+  "trains_file": "trains.csv"
 }
 ```
 
-**Expected Result:** All wagons processed, no queue buildup
+### 3. Adjust Parameters
 
----
+- **workshops.json**: Change retrofit_stations count
+- **trains.csv**: Modify arrival times and wagon counts
+- **tracks.json**: Adjust track capacities
 
-### Scenario 2: Capacity Test
+### 4. Run Simulation
 
-**Purpose:** Test workshop at 90% capacity
-
-**Configuration:**
-```json
-{
-  "scenario_id": "capacity_test",
-  "start_date": "2025-01-01",
-  "end_date": "2025-01-02",
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "function": "werkstattgleis",
-        "capacity": 4,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK02",
-        "function": "werkstattgleis",
-        "capacity": 4,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK03",
-        "function": "werkstattgleis",
-        "capacity": 4,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK04",
-        "function": "werkstattgleis",
-        "capacity": 4,
-        "retrofit_time_min": 30
-      }
-    ]
-  },
-  "train_schedule_file": "medium_schedule.csv"
-}
-```
-
-**Expected Result:** High utilization, minimal waiting
-
----
-
-### Scenario 3: Overload Test
-
-**Purpose:** Test workshop beyond capacity
-
-**Configuration:**
-```json
-{
-  "scenario_id": "overload_test",
-  "start_date": "2025-01-01",
-  "end_date": "2025-01-02",
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "function": "werkstattgleis",
-        "capacity": 3,
-        "retrofit_time_min": 30
-      },
-      {
-        "id": "TRACK02",
-        "function": "werkstattgleis",
-        "capacity": 3,
-        "retrofit_time_min": 30
-      }
-    ]
-  },
-  "train_schedule_file": "heavy_schedule.csv"
-}
-```
-
-**Expected Result:** Queue buildup, increased waiting times
-
----
-
-## KPI Examples (Synthetic)
-
-### Throughput Calculation
-
-**Formula:** `wagons_processed / simulation_hours`
-
-**Example:**
-- Wagons processed: 96
-- Simulation duration: 24 hours
-- Throughput: 96 / 24 = 4 wagons/hour
-
----
-
-### Utilization Calculation
-
-**Formula:** `busy_time / total_time * 100`
-
-**Example:**
-- Track busy time: 19.2 hours
-- Total time: 24 hours
-- Utilization: 19.2 / 24 * 100 = 80%
-
----
-
-### Waiting Time Calculation
-
-**Formula:** `sum(waiting_times) / wagon_count`
-
-**Example:**
-- Total waiting time: 240 minutes
-- Wagons: 96
-- Average waiting: 240 / 96 = 2.5 minutes
-
----
-
-## Performance Benchmarks (Synthetic)
-
-### Small Scenario (100 wagons)
-
-**Expected Performance:**
-- **Execution time:** < 5 seconds
-- **Memory usage:** < 100 MB
-- **CPU usage:** Single-threaded
-
----
-
-### Medium Scenario (1000 wagons)
-
-**Expected Performance:**
-- **Execution time:** < 30 seconds
-- **Memory usage:** < 500 MB
-- **CPU usage:** Single-threaded
-
----
-
-### Large Scenario (5000 wagons)
-
-**Expected Performance:**
-- **Execution time:** To be measured
-- **Memory usage:** To be measured
-- **CPU usage:** Single-threaded
-
----
-
-## Error Scenarios
-
-### Example 1: Invalid Configuration
-
-**Input:**
-```json
-{
-  "scenario_id": "invalid",
-  "start_date": "2025-01-02",
-  "end_date": "2025-01-01",
-  "workshop": {
-    "tracks": []
-  }
-}
-```
-
-**Expected Error:**
-```
-ValidationError: 2 validation errors
-- end_date must be after start_date
-- workshop must have at least one track
+```bash
+uv run python popupsim/backend/src/main.py --config Data/examples/my_scenario/
 ```
 
 ---
 
-### Example 2: Missing Required Track
+## Scenario Documentation
 
-**Input:**
-```json
-{
-  "workshop": {
-    "tracks": [
-      {
-        "id": "TRACK01",
-        "function": "sammelgleis",
-        "capacity": 5,
-        "retrofit_time_min": 0
-      }
-    ]
-  }
-}
-```
+Each major scenario includes a README.md with:
+- Scenario description
+- Configuration details
+- Expected behavior
+- Known issues (if any)
 
-**Expected Error:**
-```
-ValidationError: Workshop must have at least one werkstattgleis track
+**Example READMEs:**
+- `Data/examples/small_scenario/README.md`
+- `Data/examples/medium_scenario/README.md`
+- `Data/examples/large_scenario/README.md`
+- `Data/examples/csv_scenario/README.md`
+
+---
+
+## Testing Scenarios
+
+All scenarios are used in automated tests:
+
+```bash
+# Run all scenario tests
+uv run pytest popupsim/backend/tests/
+
+# Run specific scenario test
+uv run pytest popupsim/backend/tests/ -k "test_medium_scenario"
 ```
 
 ---
 
-## Test Data Files
+## Performance Benchmarks
 
-### Example: light_schedule.csv
+Performance varies by scenario size:
 
-```csv
-train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-TRAIN001,2025-01-01,08:00,W001,15.5,true,true
-TRAIN001,2025-01-01,08:00,W002,15.5,false,true
-TRAIN002,2025-01-01,14:00,W003,18.0,true,true
-TRAIN002,2025-01-01,14:00,W004,18.0,false,true
-```
+| Scenario | Trains | Wagons | Typical Runtime |
+|----------|--------|--------|-----------------|
+| two_trains | 2 | ~7 | < 1 second |
+| medium_scenario | ~4 | ~160 | < 5 seconds |
+| large_scenario | ~10 | ~500 | < 30 seconds |
 
-### Example: medium_schedule.csv
-
-```csv
-train_id,arrival_date,arrival_time,wagon_id,length,is_loaded,needs_retrofit
-TRAIN001,2025-01-01,06:00,W001,15.5,true,true
-TRAIN001,2025-01-01,06:00,W002,15.5,true,true
-TRAIN001,2025-01-01,06:00,W003,15.5,false,true
-TRAIN002,2025-01-01,09:00,W004,18.0,true,true
-TRAIN002,2025-01-01,09:00,W005,18.0,true,true
-TRAIN002,2025-01-01,09:00,W006,18.0,false,true
-```
+**Note:** Actual performance depends on hardware and configuration.
 
 ---
 
+## Troubleshooting
+
+### Scenario Won't Load
+
+Check:
+1. All referenced files exist
+2. JSON syntax is valid
+3. CSV files have correct headers
+4. File paths in scenario.json are correct
+
+### Validation Errors
+
+Common issues:
+- Missing required fields
+- Invalid date formats
+- Track references don't exist
+- Workshop has no retrofit stations
+
+### Simulation Errors
+
+Check:
+- Sufficient track capacity
+- Locomotives available
+- Routes defined between all tracks
+- Process times are positive
+
+---
+
+## Further Reading
+
+- **[File Formats](07-mvp-file-formats.md)** - Detailed format specifications
+- **[Configuration Validation](configuration-validation.md)** - Validation rules
+- **[Architecture](../architecture/README.md)** - System architecture
+
+---

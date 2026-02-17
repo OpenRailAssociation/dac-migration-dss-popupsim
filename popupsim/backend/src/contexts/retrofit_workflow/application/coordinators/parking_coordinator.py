@@ -46,10 +46,14 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
     def _parking_process(self) -> Generator[Any, Any]:
         """Run main parking process continuously."""
-        if self.config.strategy == 'smart_accumulation':
-            yield from self._parking_process_smart_accumulation()
-        else:
-            yield from self._parking_process_opportunistic()
+        try:
+            if self.config.strategy == 'smart_accumulation':
+                yield from self._parking_process_smart_accumulation()
+            else:
+                yield from self._parking_process_opportunistic()
+        except GeneratorExit:
+            # Gracefully handle simulation shutdown
+            pass
 
     def _parking_process_opportunistic(self) -> Generator[Any, Any]:
         """Opportunistic strategy: grab and go immediately."""

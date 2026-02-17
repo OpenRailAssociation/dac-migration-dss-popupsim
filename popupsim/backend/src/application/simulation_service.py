@@ -1,27 +1,14 @@
-"""Enhanced simulation application service with context registry and lifecycle events.
-
-Todo
------
-    Check if te context registry is still needed or can be removed. The
-    implementation was used by the old version.
-"""
+"""Enhanced simulation application service with context registry and lifecycle events."""
 
 from dataclasses import dataclass
 import logging
 from typing import Any
 
 from application.context_registry import ContextRegistry
-from contexts.analytics.application.analytics_context import AnalyticsContext
-from contexts.analytics.infrastructure.repositories.in_memory_analytics_repository import InMemoryAnalyticsRepository
-from contexts.configuration.application.configuration_context import ConfigurationContext
 from contexts.configuration.domain.models.scenario import Scenario
-from contexts.configuration.domain.models.scenario import WorkflowMode
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
-from contexts.popup_retrofit.application.popup_context import PopUpRetrofitContext
 from contexts.railway_infrastructure.infrastructure.di_container import create_railway_context
 from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkshopContext
-from contexts.shunting_operations.application.shunting_context import ShuntingOperationsContext
-from contexts.yard_operations.application.yard_context import YardOperationsContext
 from shared.domain.events.simulation_lifecycle_events import SimulationEndedEvent
 from shared.domain.events.simulation_lifecycle_events import SimulationFailedEvent
 from shared.domain.events.simulation_lifecycle_events import SimulationStartedEvent
@@ -143,24 +130,10 @@ class SimulationApplicationService:
         return self.infra.engine.current_time()
 
     def _initialize_contexts(self) -> None:
-        """Initialize all bounded contexts based on workflow mode."""
+        """Initialize all bounded contexts."""
         logger.info(' Initializing contexts for scenario %s', self.scenario.id)
 
-        # Check workflow mode
-
-        use_retrofit = self.scenario.workflow_mode == WorkflowMode.RETROFIT_WORKFLOW
-        logger.info(' Workflow mode: %s (use_retrofit=%s)', self.scenario.workflow_mode, use_retrofit)
-
-        if use_retrofit:
-            self._initialize_retrofit_workflow()
-        else:
-            self._initialize_legacy_workflow()
-
-    def _initialize_retrofit_workflow(self) -> None:
-        """Initialize retrofit workflow (bypass context registry for retrofit context)."""
-        logger.info(' Using RETROFIT WORKFLOW mode')
-
-        # Create and initialize retrofit context directly (like tests)
+        # Create and initialize retrofit context
         retrofit_context = RetrofitWorkshopContext(
             self.engine.get_env(),
             self.scenario,
@@ -171,93 +144,24 @@ class SimulationApplicationService:
         # Subscribe to train arrivals
         retrofit_context.subscribe_to_train_arrivals(self.infra.event_bus)
 
-        # Register shared contexts via registry
+        # Register shared contexts
         self._register_shared_contexts()
 
-        # Initialize shared contexts only
-        self.context_registry.initialize_all(self.infra, self.scenario)
-
-    def _initialize_legacy_workflow(self) -> None:
-        """Initialize legacy workflow (use context registry)."""
-        logger.info(' Using LEGACY WORKFLOW mode')
-
-        # Register all contexts with the registry
-        self._register_all_contexts()
-
-        # Add cross-context references BEFORE initialization
-        self.infra.contexts = self.contexts
-        self.infra.shunting_context = self.contexts.get('shunting')
-
-        # Initialize all contexts through registry
-        self.context_registry.initialize_all(self.infra, self.scenario)
-
-        # Setup workshop infrastructure
-        self._setup_workshop_infrastructure()
+        # Initialize shared contexts
+        self.context_registry.initialize_all(self.infra)
 
     def _register_shared_contexts(self) -> None:
         """Register contexts shared by both workflows."""
-        # Configuration Context
-        config_context = ConfigurationContext(self.infra.event_bus)
-        config_context.finalize_scenario(self.scenario.id)
-        self.context_registry.register_context('configuration', config_context)
-        self.contexts['configuration'] = config_context
-
-        # Railway Infrastructure Context
+        # Railway Infrastructure Context (needed for track management)
         railway_context = create_railway_context(self.scenario)
         self.context_registry.register_context('railway', railway_context)
         self.contexts['railway'] = railway_context
 
         # External Trains Context
         external_trains_context = ExternalTrainsContext(self.infra.event_bus)
+        external_trains_context.scenario = self.scenario  # Set scenario before initialization
         self.context_registry.register_context('external_trains', external_trains_context)
         self.contexts['external_trains'] = external_trains_context
-
-        # Analytics Context
-        analytics_repository = InMemoryAnalyticsRepository()
-        analytics_context = AnalyticsContext(self.infra.event_bus, analytics_repository)
-        self.context_registry.register_context('analytics', analytics_context)
-        self.contexts['analytics'] = analytics_context
-
-    def _register_all_contexts(self) -> None:
-        """Register all bounded contexts with the registry."""
-        # Initialize Configuration Context (static configuration)
-        config_context = ConfigurationContext(self.infra.event_bus)
-
-        config_context.finalize_scenario(self.scenario.id)
-
-        self.context_registry.register_context('configuration', config_context)
-        self.contexts['configuration'] = config_context  # Backward compatibility
-
-        # Register Railway Infrastructure Context
-        railway_context = create_railway_context(self.scenario)
-        self.context_registry.register_context('railway', railway_context)
-        self.contexts['railway'] = railway_context
-
-        # Register Shunting Operations Context
-        shunting_context = ShuntingOperationsContext(self.infra.event_bus, self._rake_registry)
-        self.context_registry.register_context('shunting', shunting_context)
-        self.contexts['shunting'] = shunting_context
-
-        # Register External Trains Context
-        external_trains_context = ExternalTrainsContext(self.infra.event_bus)
-        self.context_registry.register_context('external_trains', external_trains_context)
-        self.contexts['external_trains'] = external_trains_context
-
-        # Register Yard Operations Context
-        yard_context = YardOperationsContext(self.infra, self._rake_registry)
-        self.context_registry.register_context('yard', yard_context)
-        self.contexts['yard'] = yard_context
-
-        # Register PopUp Retrofit Context
-        popup_context = PopUpRetrofitContext(self.infra.event_bus, self._rake_registry)
-        self.context_registry.register_context('popup', popup_context)
-        self.contexts['popup'] = popup_context
-
-        # Register Analytics Context
-        analytics_repository = InMemoryAnalyticsRepository()
-        analytics_context = AnalyticsContext(self.infra.event_bus, analytics_repository)
-        self.context_registry.register_context('analytics', analytics_context)
-        self.contexts['analytics'] = analytics_context
 
     def _start_processes(self) -> None:
         """Start all context processes."""
@@ -266,35 +170,12 @@ class SimulationApplicationService:
         # Start all context processes through registry
         self.context_registry.start_all_processes()
 
-        # Start retrofit workflow if present (manual start like tests)
-        if 'retrofit_workflow' in self.contexts:
-            logger.info(' Starting retrofit workflow processes')
-            self.contexts['retrofit_workflow'].start_processes()
+        # Start retrofit workflow
+        logger.info(' Starting retrofit workflow processes')
+        self.contexts['retrofit_workflow'].start_processes()
 
         # Start main simulation orchestration process
         self.engine.schedule_process(self._orchestrate_simulation())
-
-    def _setup_workshop_infrastructure(self) -> None:
-        """Set workshop infrastructure from scenario configuration up."""
-        # Create PopUp workshops from scenario
-        popup_context = self.contexts.get('popup')
-        if popup_context and self.scenario.workshops:
-            for workshop_dto in self.scenario.workshops:
-                popup_context.create_workshop(
-                    workshop_id=workshop_dto.track,
-                    location=workshop_dto.track,
-                    num_bays=workshop_dto.retrofit_stations,
-                )
-                popup_context.start_workshop_operations(workshop_dto.track)
-
-        # Setup wagon flow infrastructure
-        if self.scenario.workshops:
-            for workshop in self.scenario.workshops:
-                workshop_id = workshop.track
-                if workshop_id not in self.infra.wagons_for_retrofit:
-                    self.infra.wagons_for_retrofit[workshop_id] = self.engine.create_store()
-
-        # Cross-context references already set in _initialize_contexts
 
     def _collect_results(self, duration: float) -> SimulationResult:
         """Collect results from all contexts using registry."""
@@ -302,12 +183,6 @@ class SimulationApplicationService:
 
         # Get metrics from all contexts through registry
         all_metrics = self.context_registry.get_all_metrics()
-
-        # Enhanced metrics from Analytics Context if available
-        analytics_context = self.contexts.get('analytics')
-        if analytics_context and hasattr(analytics_context, 'compute_all_metrics'):
-            enhanced_metrics = analytics_context.compute_all_metrics(self.scenario)
-            all_metrics.update(enhanced_metrics)
 
         # Add infrastructure metrics
         all_metrics['infrastructure'] = self.infra.get_metrics()

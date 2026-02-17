@@ -9,8 +9,8 @@ class SimulationContextProtocol(Protocol):
     """Protocol for bounded contexts participating in simulation."""
 
     @abstractmethod
-    def initialize(self, infrastructure: Any, scenario: Any) -> None:
-        """Initialize context with infrastructure and scenario."""
+    def initialize(self, infrastructure: Any) -> None:
+        """Initialize context with infrastructure."""
 
     @abstractmethod
     def start_processes(self) -> None:

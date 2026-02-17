@@ -2,9 +2,9 @@
 
 ## 3.1 Domain Model Overview
 
-**Note:** See actual implementation in `popupsim/backend/src/domain/` and `popupsim/backend/src/configuration/`
+**Note:** See actual implementation in `popupsim/backend/src/contexts/`
 
-The MVP domain model focuses on **core business logic** for Pop-Up workshop simulation with simplified patterns for rapid development.
+The MVP domain model follows Domain-Driven Design principles across 4 bounded contexts.
 
 ```mermaid
 classDiagram
@@ -47,116 +47,76 @@ classDiagram
     Train --o Wagon
 ```
 
-## 3.2 Configuration Models
+## 3.2 Configuration Context Models
 
-**Actual implementation:** `popupsim/backend/src/configuration/model_*.py`
+**Actual implementation:** `popupsim/backend/src/contexts/configuration/domain/models/`
 
-### ScenarioConfig
+### Scenario
 
 ```python
-from pydantic import BaseModel, Field
-from datetime import date
+from pydantic import BaseModel
+from datetime import datetime
 
-class ScenarioConfig(BaseModel):
-    """Configuration model for simulation scenarios"""
-    scenario_id: str = Field(
-        pattern=r'^[a-zA-Z0-9_-]+$',
-        min_length=1,
-        max_length=50
-    )
-    start_date: date
-    end_date: date
-    workshop: Workshop | None = None
-    train_schedule_file: str
-    routes_file: str | None = None
-    workshop_tracks_file: str | None = None
+class Scenario(BaseModel):
+    """Root configuration model."""
+    id: str
+    start_date: datetime
+    end_date: datetime
+    trains: list[Train] | None = None
+    tracks: list[Track] | None = None
+    workshops: list[Workshop] | None = None
+    locomotives: list[Locomotive] | None = None
+    routes: list[Route] | None = None
+    process_times: ProcessTimes | None = None
 ```
 
 ### Workshop
 
 ```python
 class Workshop(BaseModel):
-    """Workshop models with available tracks"""
-    tracks: list[WorkshopTrack] = Field(min_length=1)
-
-    @field_validator('tracks')
-    @classmethod
-    def validate_unique_track_ids(cls, tracks: list[WorkshopTrack]) -> list[WorkshopTrack]:
-        """Ensures all track IDs are unique"""
-        track_ids = [t.id for t in tracks]
-        if len(track_ids) != len(set(track_ids)):
-            raise ValueError("Track IDs must be unique")
-        return tracks
-
-    @field_validator('tracks')
-    @classmethod
-    def validate_track_functions(cls, tracks: list[WorkshopTrack]) -> list[WorkshopTrack]:
-        """Ensures at least one WERKSTATTGLEIS exists"""
-        functions = [t.function for t in tracks]
-        if TrackFunction.WERKSTATTGLEIS not in functions:
-            raise ValueError("At least one WERKSTATTGLEIS required")
-        return tracks
+    """Workshop configuration."""
+    workshop_id: str
+    track_id: str
+    retrofit_stations: int
+    name: str | None = None
 ```
 
-### WorkshopTrack
+## 3.3 Retrofit Workflow Domain Services
+
+**Actual implementation:** `popupsim/backend/src/contexts/retrofit_workflow/domain/services/`
+
+### Batch Formation Service
 
 ```python
-from enum import Enum
-
-class TrackFunction(str, Enum):
-    """Track function types"""
-    WERKSTATTGLEIS = "werkstattgleis"  # Main retrofit tracks
-    SAMMELGLEIS = "sammelgleis"  # Collection tracks
-    PARKGLEIS = "parkgleis"  # Parking tracks
-    WERKSTATTZUFUEHRUNG = "werkstattzufuehrung"  # Feeder tracks
-    WERKSTATTABFUEHRUNG = "werkstattabfuehrung"  # Exit tracks
-    BAHNHOFSKOPF = "bahnhofskopf"  # Station head tracks
-
-class WorkshopTrack(BaseModel):
-    """Individual track within workshop"""
-    id: str
-    function: TrackFunction
-    retrofit_time_min: int = Field(ge=0)
+class BatchFormationService:
+    """Form wagon batches (no SimPy dependencies)."""
+    
+    @staticmethod
+    def can_form_batch(
+        wagons: list[Wagon],
+        min_batch_size: int,
+        max_batch_size: int,
+    ) -> bool:
+        """Check if batch can be formed."""
+        return min_batch_size <= len(wagons) <= max_batch_size
 ```
 
-## 3.3 Domain Entities
-
-**Actual implementation:** `popupsim/backend/src/domain/`
-
-### Train and Wagon
+### Workshop Scheduling Service
 
 ```python
-from dataclasses import dataclass
-from datetime import datetime
-
-@dataclass
-class Train:
-    """Train with multiple wagons"""
-    id: str
-    arrival_time: datetime
-    wagons: list[Wagon]
-    origin: str
-    destination: str
-
-    def get_total_length(self) -> float:
-        """Calculates total train length"""
-        return sum(wagon.length for wagon in self.wagons)
-
-    def get_retrofit_wagons(self) -> list[Wagon]:
-        """Returns wagons needing retrofit"""
-        return [w for w in self.wagons if w.needs_retrofit]
-
-@dataclass
-class Wagon:
-    """Individual freight wagon"""
-    id: str
-    train_id: str
-    length: float
-    needs_retrofit: bool
-    status: str = "arriving"
-    arrival_time: float | None = None
-    retrofit_start_time: float | None = None
-    retrofit_end_time: float | None = None
+class WorkshopSchedulingService:
+    """Schedule wagon batches to workshops (no SimPy dependencies)."""
+    
+    @staticmethod
+    def select_workshop(
+        workshops: list[Workshop],
+        batch_size: int,
+    ) -> Workshop | None:
+        """Select workshop with sufficient capacity."""
+        for workshop in workshops:
+            if workshop.retrofit_stations >= batch_size:
+                return workshop
+        return None
 ```
 
 ## 3.4 Value Objects

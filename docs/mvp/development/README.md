@@ -8,7 +8,7 @@ This folder contains **developer-focused documentation** for implementing the Po
 
 ### Core Documents
 1. **[MVP Overview](01-mvp-overview.md)** - System overview, goals, constraints
-2. **[Bounded Contexts](02-mvp-contexts.md)** - 3 MVP contexts and their responsibilities
+2. **[Bounded Contexts](02-mvp-contexts.md)** - 4 MVP contexts and their responsibilities
 3. **[Domain Model](03-mvp-domain-model.md)** - Domain entities, value objects, services
 4. **[SimPy Integration](04-mvp-simpy-integration.md)** - Discrete event simulation integration
 5. **[Data Flow](05-mvp-data-flow.md)** - Data flow through system
@@ -20,10 +20,10 @@ This folder contains **developer-focused documentation** for implementing the Po
 11. **[Domain Processes](11-mvp-domain-processes.md)** - Process flows, state machines, business rules (TEMPLATE)
 
 ### Reference Documents
-- **[Business Rules](business-rules.md)** - Consolidated business rules (FOR REVIEW)
+- **[Business Rules](business-rules.md)** - Consolidated business rules
 - **[Configuration Validation](configuration-validation.md)** - Pydantic validation patterns
 - **[Domain Models](domain-models.md)** - Detailed domain model reference
-- **[Examples](examples.md)** - Synthetic workshop scenarios and test data
+- **[Examples](examples.md)** - Real example scenarios
 
 ## Main Architecture Documentation
 
@@ -39,7 +39,7 @@ For complete architecture documentation, see:
 | **Focus** | Decisions, structure, quality | Implementation, code, patterns |
 | **Format** | arc42 template | Developer guides |
 | **Code Examples** | Conceptual | Detailed with type hints |
-| **Status** | Complete | Partially updated |
+| **Status** | Complete | Complete |
 
 ## Development Guidelines
 
@@ -64,28 +64,25 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 
 ## Documentation Status
 
-| Document | Status | Last Updated |
-|----------|--------|-------------|
-| Core Documents (1-10) | ✅ Complete | 2025 |
-| Domain Processes (11) | 📋 Template | 2025 |
-| Reference Documents | ✅ Complete | 2025 |
-| Code Examples | ✅ Actual implementation | 2025 |
-| Level 3 Architecture | ✅ Added | 2025 |
-| Cross-references | ✅ Added | 2025 |
-| Translation | ✅ English | 2025 |
+| Document | Status | Notes |
+|----------|--------|-------|
+| Core Documents (1-11) | ✅ Complete | Updated for 4 contexts |
+| Reference Documents | ✅ Complete | Updated for 4 contexts |
+| Code Examples | ✅ Actual implementation | Real code from codebase |
 
 ## Implementation Status
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| Configuration Context | ✅ Implemented | `popupsim/backend/src/builders/`, `models/`, `validators/` |
-| Workshop Operations Context | ✅ Implemented | `popupsim/backend/src/simulation/`, `domain/` |
-| Analysis & Reporting Context | ✅ Implemented | `popupsim/backend/src/main.py`, `analytics/` |
-| SimPy Integration | ✅ Implemented | `popupsim/backend/src/simulation/popupsim.py`, `sim_adapter.py` |
-| Resource Management | ✅ Implemented | `popupsim/backend/src/simulation/resource_pool.py`, `track_capacity.py`, `workshop_capacity.py` |
-| Metrics Collection | ✅ Implemented | `popupsim/backend/src/analytics/collectors/` |
-| 5 Process Coordinators | ✅ Implemented | `popupsim/backend/src/simulation/` (train arrival, pickup, workshop, retrofitted pickup, parking) |
-| Testing | 🚧 In Progress | `popupsim/backend/tests/` |
+| Configuration Context | ✅ Implemented | `contexts/configuration/` |
+| Retrofit Workflow Context | ✅ Implemented | `contexts/retrofit_workflow/` |
+| Railway Infrastructure Context | ✅ Implemented | `contexts/railway_infrastructure/` |
+| External Trains Context | ✅ Implemented | `contexts/external_trains/` |
+| SimPy Integration | ✅ Implemented | `contexts/shared/infrastructure/simpy_adapter.py` |
+| Resource Management | ✅ Implemented | `contexts/retrofit_workflow/infrastructure/resource_managers/` |
+| Metrics Collection | ✅ Implemented | `contexts/retrofit_workflow/infrastructure/metrics/` |
+| 4 Process Coordinators | ✅ Implemented | `contexts/retrofit_workflow/application/coordinators/` |
+| Testing | ✅ Complete | `popupsim/backend/tests/` (374 tests passing) |
 
 ## Contributing
 

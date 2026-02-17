@@ -73,23 +73,6 @@ class Scenario(BaseModel):
     track_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     collection_track_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
 
-    @field_validator('workflow_mode', mode='before')
-    @classmethod
-    def validate_workflow_mode(cls, v: str | WorkflowMode) -> WorkflowMode:
-        """Validate and convert workflow_mode."""
-        if isinstance(v, WorkflowMode):
-            return v
-        if isinstance(v, str):
-            # Try exact match first
-            for mode in WorkflowMode:
-                if mode.value == v:
-                    return mode
-            # Try case-insensitive
-            for mode in WorkflowMode:
-                if mode.value.lower() == v.lower():
-                    return mode
-        return WorkflowMode.LEGACY
-
     retrofit_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     workshop_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.ROUND_ROBIN
     parking_selection_strategy: TrackSelectionStrategy = Field(

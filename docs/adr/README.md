@@ -33,6 +33,18 @@ The following ADRs document performance optimizations made to the PopUpSim codeb
 | 008 | Track Length Caching | Accepted | Avoid recomputation |
 | 009 | JSON Loading Strategy and Future Scalability | Accepted | Future planning |
 
+| # | Title | Status | Impact |
+|---|-------|--------|--------|
+| 001 | Resource Pool Incremental Utilization Tracking | Accepted | 30-3000x speedup |
+| 002 | Wagon Collector Memory Leak Fix and Simplification | Accepted | 5000x memory reduction |
+| 003 | CSV Adapter Dict Grouping for Train Processing | Accepted | 10-16x speedup |
+| 004 | Event Type Routing for Metrics Collection | Accepted | 1.7x speedup |
+| 005 | Track Selection Cached Ratios Optimization | Accepted | 1.57x speedup (large) |
+| 006 | Batch Collection Immediate Break Optimization | Accepted | 15% avg speedup |
+| 007 | Lazy Logging String Formatting | Accepted | ~1% improvement |
+| 008 | Track Length Caching | Accepted | Avoid recomputation |
+| 009 | JSON Loading Strategy and Future Scalability | Accepted | Future planning |
+
 **Resource Pool Utilization**
 - Problem: O(n*m) quadratic complexity
 - Solution: Incremental tracking with O(1) updates
