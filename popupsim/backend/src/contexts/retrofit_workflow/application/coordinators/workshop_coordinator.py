@@ -80,10 +80,18 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         self.env.process(self._assignment_process())
 
     def _assignment_process(self) -> Generator[Any, Any]:
-        """Single process that assigns wagons from retrofit queue to workshops."""
+        """Single process that assigns wagons from retrofit track queue to workshops."""
+        # Get retrofit track and its queue
+        retrofit_tracks = self._get_tracks_by_type('retrofit')
+        if not retrofit_tracks:
+            logger.error('No retrofit tracks configured')
+            return
+        retrofit_track = retrofit_tracks[0]
+        retrofit_queue = retrofit_track.queue
+        
         while True:
-            wagon = yield self.retrofit_queue.get()
-            logger.info('t=%.1f: WAGON[%s] → Retrieved from retrofit queue', self.env.now, wagon.id)
+            wagon = yield retrofit_queue.get()
+            logger.info('t=%.1f: WAGON[%s] → Retrieved from retrofit track queue', self.env.now, wagon.id)
 
             available_workshop = self._find_available_workshop()
             if not available_workshop:
@@ -103,8 +111,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             wagons = [wagon]
 
             for _ in range(available_bays - 1):
-                if len(self.retrofit_queue.items) > 0:
-                    additional_wagon = yield self.retrofit_queue.get()
+                if len(retrofit_queue.items) > 0:
+                    additional_wagon = yield retrofit_queue.get()
                     wagons.append(additional_wagon)
                     logger.info('t=%.1f: WAGON[%s] → Added to batch', self.env.now, additional_wagon.id)
                 else:
@@ -458,17 +466,17 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         yield self.env.timeout(transport_time)
         train.arrive(self.env.now)
 
-        # Put wagons on retrofitted queue
-        logger.info('t=%.1f: BATCH → Putting %d wagons in retrofitted_queue', self.env.now, len(wagons))
-        # Get retrofitted tracks by type (same pattern as collection_coordinator)
+        # Put wagons on retrofitted track capacity AND queue
+        logger.info('t=%.1f: BATCH → Putting %d wagons on retrofitted track', self.env.now, len(wagons))
         retrofitted_tracks = self._get_tracks_by_type('retrofitted')
         if retrofitted_tracks:
             retrofitted_track = retrofitted_tracks[0]
             yield from retrofitted_track.add_wagons(wagons)
-        for wagon in wagons:
-            wagon.move_to('retrofitted')
-            self.retrofitted_queue.put(wagon)
-            logger.info('t=%.1f: WAGON[%s] → Added to retrofitted_queue', self.env.now, wagon.id)
+            for wagon in wagons:
+                wagon.move_to(retrofitted_track.track_id)
+                retrofitted_track.queue.put(wagon)  # Add to workflow queue
+                logger.info('t=%.1f: WAGON[%s] → Added to retrofitted track %s', 
+                           self.env.now, wagon.id, retrofitted_track.track_id)
 
         EventPublisherHelper.publish_loco_moving(
             self.loco_event_publisher, self.env.now, loco.id, 'retrofitted', 'loco_parking'
