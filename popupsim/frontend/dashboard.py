@@ -141,7 +141,7 @@ def main() -> None:
 
 def _render_comparison_view(base_path: Path, selected_scenarios: list[str]) -> None:  # noqa: C901, PLR0912, PLR0915  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Render scenario comparison view.
-    
+
     Note: High complexity acceptable for comprehensive comparison dashboard.
     """
     st.title('🔄 Scenario Comparison')

@@ -6,7 +6,6 @@ from typing import Any
 
 from application.context_registry import ContextRegistry
 from contexts.configuration.domain.models.scenario import Scenario
-from contexts.configuration.domain.models.scenario import WorkflowMode
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.railway_infrastructure.infrastructure.di_container import create_railway_context
 from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkshopContext
