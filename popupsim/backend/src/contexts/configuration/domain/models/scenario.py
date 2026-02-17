@@ -70,7 +70,6 @@ class Scenario(BaseModel):
     start_date: datetime
     end_date: datetime
     workflow_mode: WorkflowMode = WorkflowMode.LEGACY
-    track_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
     collection_track_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
 
     retrofit_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED

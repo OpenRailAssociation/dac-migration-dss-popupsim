@@ -38,7 +38,6 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             start_date=data['start_date'],
             end_date=data['end_date'],
             workflow_mode=data.get('workflow_mode') or WorkflowMode.LEGACY,
-            track_selection_strategy=data.get('track_selection_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
             collection_track_strategy=data.get('collection_track_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
             retrofit_selection_strategy=data.get('retrofit_selection_strategy')
             or TrackSelectionStrategy.LEAST_OCCUPIED,
