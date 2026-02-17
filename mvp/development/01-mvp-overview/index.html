@@ -1,0 +1,1218 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>1. MVP System Overview - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#1-mvp-system-overview">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              1. MVP System Overview
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../architecture/">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../architecture/13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#11-mvp-scope-and-goals">
+<span class="md-ellipsis">
+      
+        1.1 MVP Scope and Goals
+      
+    </span>
+</a>
+<nav aria-label="1.1 MVP Scope and Goals" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#primary-goal">
+<span class="md-ellipsis">
+      
+        Primary Goal
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-user-stories-priority-1">
+<span class="md-ellipsis">
+      
+        MVP User Stories (Priority 1)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#not-in-mvp-scope">
+<span class="md-ellipsis">
+      
+        Not in MVP Scope
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#12-system-context">
+<span class="md-ellipsis">
+      
+        1.2 System Context
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#13-container-architecture-c4-level-2">
+<span class="md-ellipsis">
+      
+        1.3 Container Architecture (C4 Level 2)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#14-technology-stack">
+<span class="md-ellipsis">
+      
+        1.4 Technology Stack
+      
+    </span>
+</a>
+<nav aria-label="1.4 Technology Stack" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#core">
+<span class="md-ellipsis">
+      
+        Core
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development">
+<span class="md-ellipsis">
+      
+        Development
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#not-in-mvp">
+<span class="md-ellipsis">
+      
+        Not in MVP
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#15-deployment-architecture">
+<span class="md-ellipsis">
+      
+        1.5 Deployment Architecture
+      
+    </span>
+</a>
+<nav aria-label="1.5 Deployment Architecture" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#installation-requirements">
+<span class="md-ellipsis">
+      
+        Installation Requirements
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#16-quality-attributes-mvp">
+<span class="md-ellipsis">
+      
+        1.6 Quality Attributes MVP
+      
+    </span>
+</a>
+<nav aria-label="1.6 Quality Attributes MVP" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-goals">
+<span class="md-ellipsis">
+      
+        Performance Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#functional-goals">
+<span class="md-ellipsis">
+      
+        Functional Goals
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#technical-goals">
+<span class="md-ellipsis">
+      
+        Technical Goals
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#17-constraints-and-assumptions">
+<span class="md-ellipsis">
+      
+        1.7 Constraints and Assumptions
+      
+    </span>
+</a>
+<nav aria-label="1.7 Constraints and Assumptions" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#technical-constraints">
+<span class="md-ellipsis">
+      
+        Technical Constraints
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#business-constraints">
+<span class="md-ellipsis">
+      
+        Business Constraints
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#assumptions">
+<span class="md-ellipsis">
+      
+        Assumptions
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#18-risks-and-mitigation">
+<span class="md-ellipsis">
+      
+        1.8 Risks and Mitigation
+      
+    </span>
+</a>
+<nav aria-label="1.8 Risks and Mitigation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#technical-risks">
+<span class="md-ellipsis">
+      
+        Technical Risks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#business-risks">
+<span class="md-ellipsis">
+      
+        Business Risks
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#19-success-criteria">
+<span class="md-ellipsis">
+      
+        1.9 Success Criteria
+      
+    </span>
+</a>
+<nav aria-label="1.9 Success Criteria" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#technical-metrics">
+<span class="md-ellipsis">
+      
+        Technical Metrics
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#functional-metrics">
+<span class="md-ellipsis">
+      
+        Functional Metrics
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#acceptance-criteria">
+<span class="md-ellipsis">
+      
+        Acceptance Criteria
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="1-mvp-system-overview">1. MVP System Overview<a class="headerlink" href="#1-mvp-system-overview" title="Permanent link">¶</a></h1>
+<h2 id="11-mvp-scope-and-goals">1.1 MVP Scope and Goals<a class="headerlink" href="#11-mvp-scope-and-goals" title="Permanent link">¶</a></h2>
+<h3 id="primary-goal">Primary Goal<a class="headerlink" href="#primary-goal" title="Permanent link">¶</a></h3>
+<p>Functional prototype for Pop-Up workshop simulation that <strong>solves real business problems</strong> and serves as foundation for community development.</p>
+<h3 id="mvp-user-stories-priority-1">MVP User Stories (Priority 1)<a class="headerlink" href="#mvp-user-stories-priority-1" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>US-001</strong>: Develop standardized Pop-Up workshops (Templates)</li>
+<li><strong>US-002</strong>: Estimate throughput for workshop layouts</li>
+<li><strong>US-003</strong>: Import infrastructure data (CSV/JSON)</li>
+<li><strong>US-004</strong>: Assess capacity for planned workshop</li>
+</ul>
+<h3 id="not-in-mvp-scope">Not in MVP Scope<a class="headerlink" href="#not-in-mvp-scope" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>US-005-008</strong>: Advanced visualization and real-time features</li>
+<li><strong>Web UI</strong>: CLI-only, no web interface</li>
+<li><strong>Database</strong>: File-based configuration only</li>
+<li><strong>Advanced Security</strong>: Local application without authentication</li>
+</ul>
+<h2 id="12-system-context">1.2 System Context<a class="headerlink" href="#12-system-context" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/03-context/">Architecture Section 3</a> for detailed context diagram.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "PopUpSim MVP System"
+        PopUpSim[PopUpSim MVP&lt;br/&gt;Pop-Up Workshop Simulation]
+    end
+
+    subgraph "Users"
+        Planner[Strategic Planner&lt;br/&gt;Workshop Templates]
+        DetailPlanner[Company Planner&lt;br/&gt;Capacity Assessment]
+    end
+
+    subgraph "External Systems"
+        Files[Configuration Files&lt;br/&gt;JSON, CSV]
+        ExtSys[External Systems&lt;br/&gt;Infrastructure Data]
+        Results[Result Export&lt;br/&gt;CSV, PNG]
+    end
+
+    Planner --&gt;|Creates Templates| PopUpSim
+    DetailPlanner --&gt;|Configures Scenarios| PopUpSim
+
+    PopUpSim --&gt;|Loads Configuration| Files
+    PopUpSim --&gt;|Imports Infrastructure| ExtSys
+    PopUpSim --&gt;|Exports Results| Results
+
+    classDef system fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef user fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class PopUpSim system
+    class Planer,Detailplaner user
+    class Files,ExtSys,Results external</code></pre>
+<h2 id="13-container-architecture-c4-level-2">1.3 Container Architecture (C4 Level 2)<a class="headerlink" href="#13-container-architecture-c4-level-2" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/05-building-blocks/">Architecture Section 5</a> for detailed building blocks.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "PopUpSim MVP - Desktop Application"
+        subgraph "Python Application"
+            CFG[Configuration Context&lt;br/&gt;File loading &amp; validation&lt;br/&gt;CONTAINER]
+            RWF[Retrofit Workflow Context&lt;br/&gt;Core simulation logic&lt;br/&gt;CONTAINER]
+            RLY[Railway Infrastructure Context&lt;br/&gt;Track management&lt;br/&gt;CONTAINER]
+            EXT[External Trains Context&lt;br/&gt;Train arrivals&lt;br/&gt;CONTAINER]
+        end
+
+        subgraph "Data (File System)"
+            ConfigFiles[Input Files&lt;br/&gt;JSON/CSV&lt;br/&gt;DATA]
+            ResultFiles[Output Files&lt;br/&gt;CSV/PNG&lt;br/&gt;DATA]
+        end
+
+        subgraph "External Libraries"
+            SimPy[SimPy Framework&lt;br/&gt;EXTERNAL]
+            Matplotlib[Matplotlib&lt;br/&gt;EXTERNAL]
+            Pydantic[Pydantic&lt;br/&gt;EXTERNAL]
+        end
+    end
+
+    subgraph "User"
+        Developer[Developer&lt;br/&gt;CLI/Editor&lt;br/&gt;PERSON]
+    end
+
+    Developer --&gt;|Creates Config| ConfigFiles
+    Developer --&gt;|Starts| CFG
+    Developer --&gt;|Analyzes| ResultFiles
+
+    CFG --&gt;|Reads| ConfigFiles
+    CFG --&gt;|Validates| Pydantic
+    CFG --&gt;|Scenario| RWF
+    CFG --&gt;|Scenario| RLY
+    CFG --&gt;|Scenario| EXT
+
+    RLY &lt;--&gt;|Track state| RWF
+    EXT --&gt;|Train arrivals| RWF
+    RWF --&gt;|Uses| SimPy
+    RWF --&gt;|Uses| Matplotlib
+    RWF --&gt;|Writes| ResultFiles
+
+    classDef container fill:#1168bd,stroke:#0b4884,stroke-width:2px,color:#fff
+    classDef data fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    classDef external fill:#999999,stroke:#6b6b6b,stroke-width:2px,color:#fff
+    classDef person fill:#08427b,stroke:#052e56,stroke-width:2px,color:#fff
+
+    class CFG,RWF,RLY,EXT container
+    class ConfigFiles,ResultFiles data
+    class SimPy,Matplotlib,Pydantic external
+    class Developer person</code></pre>
+<h2 id="14-technology-stack">1.4 Technology Stack<a class="headerlink" href="#14-technology-stack" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/07-deployment/#710-technology-stack-summary">Architecture Section 7.10</a> for complete stack.</p>
+<h3 id="core">Core<a class="headerlink" href="#core" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Python 3.13+</strong>: Main language</li>
+<li><strong>SimPy</strong>: Discrete event simulation</li>
+<li><strong>Pydantic 2.0+</strong>: Data validation</li>
+<li><strong>Matplotlib</strong>: Visualization (charts)</li>
+<li><strong>Pandas</strong>: Data processing (CSV)</li>
+</ul>
+<h3 id="development">Development<a class="headerlink" href="#development" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>uv</strong>: Package manager</li>
+<li><strong>pytest</strong>: Testing framework</li>
+<li><strong>Ruff</strong>: Code formatting and linting</li>
+<li><strong>MyPy</strong>: Type checking</li>
+<li><strong>Pylint</strong>: Static analysis</li>
+</ul>
+<h3 id="not-in-mvp">Not in MVP<a class="headerlink" href="#not-in-mvp" title="Permanent link">¶</a></h3>
+<ul>
+<li>❌ <strong>Web Frontend</strong>: CLI/Desktop only</li>
+<li>❌ <strong>REST API</strong>: Direct Python calls</li>
+<li>❌ <strong>Database</strong>: File-based only</li>
+</ul>
+<h2 id="15-deployment-architecture">1.5 Deployment Architecture<a class="headerlink" href="#15-deployment-architecture" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/07-deployment/">Architecture Section 7</a> for detailed deployment view.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Developer Laptop"
+        subgraph "PopUpSim MVP"
+            Python[Python 3.13+&lt;br/&gt;SimPy + Matplotlib]
+        end
+
+        subgraph "File System"
+            Input[config/&lt;br/&gt;scenario.json&lt;br/&gt;train_schedule.csv]
+            Output[results/&lt;br/&gt;*.csv&lt;br/&gt;charts/*.png]
+        end
+
+        CLI[Terminal/IDE&lt;br/&gt;python main.py]
+    end
+
+    CLI --&gt;|Starts| Python
+    Python --&gt;|Reads| Input
+    Python --&gt;|Writes| Output
+    CLI --&gt;|Opens| Output
+
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef files fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef user fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Python process
+    class Input,Output files
+    class CLI user</code></pre>
+<h3 id="installation-requirements">Installation Requirements<a class="headerlink" href="#installation-requirements" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Python 3.13+</strong> with uv</li>
+<li><strong>RAM</strong>: To be measured during implementation</li>
+<li><strong>Disk</strong>: ~500MB for installation and data</li>
+<li><strong>No web browser</strong> required</li>
+</ul>
+<h2 id="16-quality-attributes-mvp">1.6 Quality Attributes MVP<a class="headerlink" href="#16-quality-attributes-mvp" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/01-introduction-goals/#12-quality-goals">Architecture Section 1.2</a> for quality goals.</p>
+<h3 id="performance-goals">Performance Goals<a class="headerlink" href="#performance-goals" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Startup Time</strong>: To be measured</li>
+<li><strong>Simulation Speed</strong>: To be measured</li>
+<li><strong>Chart Generation</strong>: To be measured</li>
+<li><strong>Memory Usage</strong>: To be measured</li>
+</ul>
+<h3 id="functional-goals">Functional Goals<a class="headerlink" href="#functional-goals" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Determinism</strong>: Identical results with same inputs</li>
+<li><strong>Accuracy</strong>: Plausible throughput estimates</li>
+<li><strong>Completeness</strong>: All MVP user stories covered</li>
+<li><strong>Usability</strong>: Quick scenario setup</li>
+</ul>
+<h3 id="technical-goals">Technical Goals<a class="headerlink" href="#technical-goals" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Testability</strong>: High code coverage for domain logic</li>
+<li><strong>Maintainability</strong>: Clear separation between contexts</li>
+<li><strong>Extensibility</strong>: Easy to add new features</li>
+<li><strong>Portability</strong>: Runs on Windows, macOS, Linux</li>
+</ul>
+<h2 id="17-constraints-and-assumptions">1.7 Constraints and Assumptions<a class="headerlink" href="#17-constraints-and-assumptions" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/02-constraints/">Architecture Section 2</a> for detailed constraints.</p>
+<h3 id="technical-constraints">Technical Constraints<a class="headerlink" href="#technical-constraints" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Desktop Application</strong>: No web interface</li>
+<li><strong>File-based I/O</strong>: No database</li>
+<li><strong>CLI-based</strong>: No graphical user interface</li>
+<li><strong>Synchronous Processing</strong>: No async/parallel processing</li>
+</ul>
+<h3 id="business-constraints">Business Constraints<a class="headerlink" href="#business-constraints" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Pop-Up Workshops</strong>: Focus on DAC retrofit</li>
+<li><strong>Microscopic Simulation</strong>: Individual wagons and resources</li>
+<li><strong>Deterministic</strong>: Reproducible results</li>
+<li><strong>Planning Tool</strong>: Not for real-time operations</li>
+</ul>
+<h3 id="assumptions">Assumptions<a class="headerlink" href="#assumptions" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Users</strong>: Developers and technical planners</li>
+<li><strong>Data Quality</strong>: Correct and complete input data</li>
+<li><strong>Hardware</strong>: Standard business laptop</li>
+<li><strong>Network</strong>: No network dependencies</li>
+<li><strong>Editor</strong>: Users can manually edit JSON/CSV</li>
+</ul>
+<h2 id="18-risks-and-mitigation">1.8 Risks and Mitigation<a class="headerlink" href="#18-risks-and-mitigation" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> See <a href="../../architecture/11-risks-technical-debt/">Architecture Section 11</a> for detailed risks.</p>
+<h3 id="technical-risks">Technical Risks<a class="headerlink" href="#technical-risks" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Probability</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Performance with large scenarios</strong></td>
+<td>Medium</td>
+<td>High</td>
+<td>Early benchmarking</td>
+</tr>
+<tr>
+<td><strong>SimPy learning curve</strong></td>
+<td>High</td>
+<td>Medium</td>
+<td>Prototyping and documentation</td>
+</tr>
+<tr>
+<td><strong>Matplotlib limitations</strong></td>
+<td>Low</td>
+<td>Low</td>
+<td>Simple 2D charts sufficient</td>
+</tr>
+</tbody>
+</table>
+<h3 id="business-risks">Business Risks<a class="headerlink" href="#business-risks" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Probability</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Incomplete domain model</strong></td>
+<td>Medium</td>
+<td>High</td>
+<td>Close alignment with domain experts</td>
+</tr>
+<tr>
+<td><strong>Unrealistic results</strong></td>
+<td>Medium</td>
+<td>High</td>
+<td>Validation with real data</td>
+</tr>
+<tr>
+<td><strong>User acceptance</strong></td>
+<td>Low</td>
+<td>High</td>
+<td>Focus on visualization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="19-success-criteria">1.9 Success Criteria<a class="headerlink" href="#19-success-criteria" title="Permanent link">¶</a></h2>
+<h3 id="technical-metrics">Technical Metrics<a class="headerlink" href="#technical-metrics" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Development Time:</strong> 5 weeks</li>
+<li><strong>Simulation Speed:</strong> To be measured</li>
+<li><strong>Scalability:</strong> To be measured</li>
+<li><strong>Portability:</strong> Runs on Windows/Mac/Linux with uv</li>
+</ul>
+<h3 id="functional-metrics">Functional Metrics<a class="headerlink" href="#functional-metrics" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Functionality:</strong> Basic retrofitting simulation works</li>
+<li><strong>Output:</strong> KPIs are correctly calculated and exported</li>
+<li><strong>Visualization:</strong> Matplotlib charts display simulation results</li>
+<li><strong>Extensibility:</strong> Architecture foundation for full version established</li>
+</ul>
+<h3 id="acceptance-criteria">Acceptance Criteria<a class="headerlink" href="#acceptance-criteria" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ <strong>Template Creation</strong>: Standardized workshop templates can be created</li>
+<li>✅ <strong>Throughput Estimation</strong>: Plausible throughput calculations</li>
+<li>✅ <strong>Data Import</strong>: CSV/JSON import works without errors</li>
+<li>✅ <strong>Capacity Analysis</strong>: Capacity bottlenecks are identified</li>
+<li>✅ <strong>Stability</strong>: Multiple simulations run consecutively without crashes</li>
+<li>✅ <strong>Usability</strong>: Developer creates scenario quickly</li>
+<li>✅ <strong>Expert Validation</strong>: Positive evaluation by domain experts</li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

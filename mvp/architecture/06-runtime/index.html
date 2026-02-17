@@ -1,0 +1,1784 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../05-building-blocks/" rel="prev"/>
+<link href="../07-deployment/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Runtime - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#6-runtime-view-mvp">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Runtime
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-runtime-scenario-develop-standardized-pop-up-workshop-us-001">
+<span class="md-ellipsis">
+      
+        6.1 Runtime Scenario: Develop Standardized Pop-Up Workshop (US-001)
+      
+    </span>
+</a>
+<nav aria-label="6.1 Runtime Scenario: Develop Standardized Pop-Up Workshop (US-001)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-runtime-scenario-estimate-workshop-throughput-us-002">
+<span class="md-ellipsis">
+      
+        6.2 Runtime Scenario: Estimate Workshop Throughput (US-002)
+      
+    </span>
+</a>
+<nav aria-label="6.2 Runtime Scenario: Estimate Workshop Throughput (US-002)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description_1">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction_1">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects_1">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#state-transitions-wagon-processing">
+<span class="md-ellipsis">
+      
+        State Transitions: Wagon Processing
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics_1">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#63-runtime-scenario-import-infrastructure-data-us-003">
+<span class="md-ellipsis">
+      
+        6.3 Runtime Scenario: Import Infrastructure Data (US-003)
+      
+    </span>
+</a>
+<nav aria-label="6.3 Runtime Scenario: Import Infrastructure Data (US-003)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description_2">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction_2">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects_2">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#data-validation-checks">
+<span class="md-ellipsis">
+      
+        Data Validation Checks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics_2">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#64-runtime-scenario-assess-planned-workshop-capacity-us-004">
+<span class="md-ellipsis">
+      
+        6.4 Runtime Scenario: Assess Planned Workshop Capacity (US-004)
+      
+    </span>
+</a>
+<nav aria-label="6.4 Runtime Scenario: Assess Planned Workshop Capacity (US-004)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description_3">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction_3">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects_3">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#capacity-assessment-logic">
+<span class="md-ellipsis">
+      
+        Capacity Assessment Logic
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics_3">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#65-error-scenarios">
+<span class="md-ellipsis">
+      
+        6.5 Error Scenarios
+      
+    </span>
+</a>
+<nav aria-label="6.5 Error Scenarios" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#651-invalid-configuration">
+<span class="md-ellipsis">
+      
+        6.5.1 Invalid Configuration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#652-simulation-failure">
+<span class="md-ellipsis">
+      
+        6.5.2 Simulation Failure
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#66-performance-considerations">
+<span class="md-ellipsis">
+      
+        6.6 Performance Considerations
+      
+    </span>
+</a>
+<nav aria-label="6.6 Performance Considerations" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-aspects-to-measure">
+<span class="md-ellipsis">
+      
+        Performance Aspects to Measure
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scalability-testing-plan">
+<span class="md-ellipsis">
+      
+        Scalability Testing Plan
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#61-runtime-scenario-develop-standardized-pop-up-workshop-us-001">
+<span class="md-ellipsis">
+      
+        6.1 Runtime Scenario: Develop Standardized Pop-Up Workshop (US-001)
+      
+    </span>
+</a>
+<nav aria-label="6.1 Runtime Scenario: Develop Standardized Pop-Up Workshop (US-001)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#62-runtime-scenario-estimate-workshop-throughput-us-002">
+<span class="md-ellipsis">
+      
+        6.2 Runtime Scenario: Estimate Workshop Throughput (US-002)
+      
+    </span>
+</a>
+<nav aria-label="6.2 Runtime Scenario: Estimate Workshop Throughput (US-002)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description_1">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction_1">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects_1">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#state-transitions-wagon-processing">
+<span class="md-ellipsis">
+      
+        State Transitions: Wagon Processing
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics_1">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#63-runtime-scenario-import-infrastructure-data-us-003">
+<span class="md-ellipsis">
+      
+        6.3 Runtime Scenario: Import Infrastructure Data (US-003)
+      
+    </span>
+</a>
+<nav aria-label="6.3 Runtime Scenario: Import Infrastructure Data (US-003)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description_2">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction_2">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects_2">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#data-validation-checks">
+<span class="md-ellipsis">
+      
+        Data Validation Checks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics_2">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#64-runtime-scenario-assess-planned-workshop-capacity-us-004">
+<span class="md-ellipsis">
+      
+        6.4 Runtime Scenario: Assess Planned Workshop Capacity (US-004)
+      
+    </span>
+</a>
+<nav aria-label="6.4 Runtime Scenario: Assess Planned Workshop Capacity (US-004)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-description_3">
+<span class="md-ellipsis">
+      
+        Scenario Description
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-interaction_3">
+<span class="md-ellipsis">
+      
+        Runtime Interaction
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-runtime-aspects_3">
+<span class="md-ellipsis">
+      
+        Key Runtime Aspects
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#capacity-assessment-logic">
+<span class="md-ellipsis">
+      
+        Capacity Assessment Logic
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-characteristics_3">
+<span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#65-error-scenarios">
+<span class="md-ellipsis">
+      
+        6.5 Error Scenarios
+      
+    </span>
+</a>
+<nav aria-label="6.5 Error Scenarios" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#651-invalid-configuration">
+<span class="md-ellipsis">
+      
+        6.5.1 Invalid Configuration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#652-simulation-failure">
+<span class="md-ellipsis">
+      
+        6.5.2 Simulation Failure
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#66-performance-considerations">
+<span class="md-ellipsis">
+      
+        6.6 Performance Considerations
+      
+    </span>
+</a>
+<nav aria-label="6.6 Performance Considerations" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-aspects-to-measure">
+<span class="md-ellipsis">
+      
+        Performance Aspects to Measure
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scalability-testing-plan">
+<span class="md-ellipsis">
+      
+        Scalability Testing Plan
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="6-runtime-view-mvp">6. Runtime View (MVP)<a class="headerlink" href="#6-runtime-view-mvp" title="Permanent link">¶</a></h1>
+<h2 id="61-runtime-scenario-develop-standardized-pop-up-workshop-us-001">6.1 Runtime Scenario: Develop Standardized Pop-Up Workshop (US-001)<a class="headerlink" href="#61-runtime-scenario-develop-standardized-pop-up-workshop-us-001" title="Permanent link">¶</a></h2>
+<p><strong>Use Case:</strong> <a href="../../../requirements/use-cases/#us-001">US-001</a> - Strategic Migration Planner develops standardized workshop designs</p>
+<p><strong>Goal:</strong> Test different workshop configurations to find optimal standardized design</p>
+<h3 id="scenario-description">Scenario Description<a class="headerlink" href="#scenario-description" title="Permanent link">¶</a></h3>
+<p>Strategic planner creates multiple workshop configuration variants (2 stations, 4 stations, 6 stations) and runs simulations to compare throughput and identify optimal design.</p>
+<h3 id="runtime-interaction">Runtime Interaction<a class="headerlink" href="#runtime-interaction" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Planner as Strategic Planner
+    participant CLI as CLI
+    participant Config as Configuration Context
+    participant Retrofit as Retrofit Workflow Context
+    participant Railway as Railway Infrastructure Context
+    participant External as External Trains Context
+    participant Files as File System
+
+    Planner-&gt;&gt;Files: Create workshop_2stations.json
+    Planner-&gt;&gt;Files: Create workshop_4stations.json
+    Planner-&gt;&gt;Files: Create workshop_6stations.json
+
+    loop For each configuration
+        Planner-&gt;&gt;CLI: python main.py --config workshop_Xstations.json
+        CLI-&gt;&gt;Config: load_configuration()
+        Config-&gt;&gt;Files: Read JSON/CSV
+        Config-&gt;&gt;Config: Validate with Pydantic
+        Config--&gt;&gt;CLI: Validated scenario
+
+        CLI-&gt;&gt;Railway: build_tracks(scenario)
+        Railway--&gt;&gt;CLI: Track infrastructure ready
+
+        CLI-&gt;&gt;External: initialize_trains(scenario)
+        External--&gt;&gt;CLI: Train arrivals scheduled
+
+        CLI-&gt;&gt;Retrofit: initialize(scenario, railway, external)
+        Retrofit--&gt;&gt;CLI: Workflow ready
+
+        CLI-&gt;&gt;Retrofit: run_simulation(24h)
+
+        loop Simulation time (24h)
+            External-&gt;&gt;Retrofit: TrainArrivedEvent
+            Retrofit-&gt;&gt;Railway: Query track capacity
+            Retrofit-&gt;&gt;Retrofit: Process wagons
+            Retrofit-&gt;&gt;Retrofit: Calculate KPIs
+        end
+
+        Retrofit-&gt;&gt;Retrofit: Aggregate results
+        Retrofit-&gt;&gt;Files: Write simulation_results_Xstations.csv
+        Retrofit-&gt;&gt;Files: Write kpi_charts_Xstations.png
+        Retrofit--&gt;&gt;CLI: Simulation complete
+        CLI--&gt;&gt;Planner: Results available
+    end
+
+    Planner-&gt;&gt;Files: Compare CSV results
+    Planner-&gt;&gt;Planner: Select optimal configuration</code></pre>
+<h3 id="key-runtime-aspects">Key Runtime Aspects<a class="headerlink" href="#key-runtime-aspects" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Description</th>
+<th>Quality Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration Validation</strong></td>
+<td>Pydantic validates workshop parameters before simulation starts</td>
+<td>Reliability</td>
+</tr>
+<tr>
+<td><strong>Iterative Testing</strong></td>
+<td>Planner runs multiple configurations sequentially</td>
+<td>Usability</td>
+</tr>
+<tr>
+<td><strong>Real-time KPI Calculation</strong></td>
+<td>Analysis Engine calculates metrics during simulation</td>
+<td>Accuracy</td>
+</tr>
+<tr>
+<td><strong>File-based Comparison</strong></td>
+<td>Results exported to CSV for manual comparison</td>
+<td>Simplicity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Performance metrics will be measured during MVP implementation. Estimates are placeholders for architecture documentation.</p>
+</blockquote>
+<hr/>
+<h2 id="62-runtime-scenario-estimate-workshop-throughput-us-002">6.2 Runtime Scenario: Estimate Workshop Throughput (US-002)<a class="headerlink" href="#62-runtime-scenario-estimate-workshop-throughput-us-002" title="Permanent link">¶</a></h2>
+<p><strong>Use Case:</strong> <a href="../../../requirements/use-cases/#us-002">US-002</a> - Strategic planner estimates throughput capacity</p>
+<p><strong>Goal:</strong> Determine maximum wagon throughput for a given workshop layout</p>
+<h3 id="scenario-description_1">Scenario Description<a class="headerlink" href="#scenario-description_1" title="Permanent link">¶</a></h3>
+<p>Strategic planner runs simulation with increasing wagon arrival rates to find throughput limits and identify bottlenecks.</p>
+<h3 id="runtime-interaction_1">Runtime Interaction<a class="headerlink" href="#runtime-interaction_1" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Planner as Strategic Planner
+    participant CLI as CLI
+    participant Config as Configuration Context
+    participant Retrofit as Retrofit Workflow Context
+    participant Railway as Railway Infrastructure Context
+    participant External as External Trains Context
+    participant Metrics as Metrics Collection
+    participant Files as File System
+
+    Planner-&gt;&gt;Files: Create scenario_high_load.json
+    Note over Files: 30 wagons/hour arrival rate
+
+    Planner-&gt;&gt;CLI: python main.py --config scenario_high_load.json
+    CLI-&gt;&gt;Config: load_configuration()
+    Config--&gt;&gt;CLI: Validated scenario
+
+    CLI-&gt;&gt;Railway: build_tracks(scenario)
+    Railway--&gt;&gt;CLI: Track infrastructure ready
+
+    CLI-&gt;&gt;External: initialize_trains(scenario)
+    External--&gt;&gt;CLI: Train arrivals scheduled
+
+    CLI-&gt;&gt;Retrofit: initialize(scenario, railway, external)
+    Retrofit--&gt;&gt;CLI: Workflow ready
+
+    CLI-&gt;&gt;Retrofit: run_simulation(24h)
+
+    loop Every simulation hour
+        External-&gt;&gt;Retrofit: TrainArrivedEvent (30 wagons)
+        Retrofit-&gt;&gt;Railway: Query workshop capacity
+
+        alt Workshop available
+            Retrofit-&gt;&gt;Retrofit: Start retrofit process
+            Retrofit-&gt;&gt;Metrics: Record: wagon_processing_started
+        else All workshops busy
+            Retrofit-&gt;&gt;Retrofit: Add to queue
+            Retrofit-&gt;&gt;Metrics: Record: wagon_queued
+            Metrics-&gt;&gt;Metrics: Calculate queue length
+        end
+
+        Retrofit-&gt;&gt;Retrofit: Complete retrofits
+        Retrofit-&gt;&gt;Metrics: Record: wagon_completed
+        Metrics-&gt;&gt;Metrics: Calculate throughput
+        Metrics-&gt;&gt;Metrics: Calculate utilization
+
+        alt Queue length &gt; threshold
+            Metrics-&gt;&gt;Metrics: Flag: bottleneck detected
+        end
+    end
+
+    Retrofit-&gt;&gt;Metrics: Get aggregated KPIs
+    Metrics--&gt;&gt;Retrofit: Throughput, utilization, bottlenecks
+
+    Retrofit-&gt;&gt;Files: Write throughput_analysis.csv
+    Retrofit-&gt;&gt;Files: Write bottleneck_chart.png
+    Retrofit--&gt;&gt;CLI: Analysis complete
+
+    CLI--&gt;&gt;Planner: Results with bottleneck identification
+    Planner-&gt;&gt;Files: Review bottleneck_chart.png
+    Planner-&gt;&gt;Planner: Decide: Add stations or optimize layout</code></pre>
+<h3 id="key-runtime-aspects_1">Key Runtime Aspects<a class="headerlink" href="#key-runtime-aspects_1" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Description</th>
+<th>Quality Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Real-time Bottleneck Detection</strong></td>
+<td>Analysis Engine identifies bottlenecks during simulation</td>
+<td>Accuracy</td>
+</tr>
+<tr>
+<td><strong>Queue Monitoring</strong></td>
+<td>Tracks queue length at each station</td>
+<td>Reliability</td>
+</tr>
+<tr>
+<td><strong>Utilization Tracking</strong></td>
+<td>Calculates station utilization continuously</td>
+<td>Accuracy</td>
+</tr>
+<tr>
+<td><strong>Threshold-based Alerts</strong></td>
+<td>Flags when queue exceeds acceptable limits</td>
+<td>Usability</td>
+</tr>
+</tbody>
+</table>
+<h3 id="state-transitions-wagon-processing">State Transitions: Wagon Processing<a class="headerlink" href="#state-transitions-wagon-processing" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; Arrived: Train arrival
+    Arrived --&gt; Queued: No station available
+    Arrived --&gt; InRetrofit: Station available
+    Queued --&gt; InRetrofit: Station becomes available
+    InRetrofit --&gt; Completed: Retrofit finished
+    Completed --&gt; [*]
+
+    note right of Queued
+        Analysis Engine tracks
+        queue length here
+    end note
+
+    note right of InRetrofit
+        Analysis Engine calculates
+        utilization here
+    end note</code></pre>
+<blockquote>
+<p><strong>Note:</strong> This needs to be updated since it does not reflect the process correctly.</p>
+</blockquote>
+<h3 id="performance-characteristics_1">Performance Characteristics<a class="headerlink" href="#performance-characteristics_1" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Performance metrics will be measured during MVP implementation. Actual timing depends on hardware and simulation complexity.</p>
+</blockquote>
+<hr/>
+<h2 id="63-runtime-scenario-import-infrastructure-data-us-003">6.3 Runtime Scenario: Import Infrastructure Data (US-003)<a class="headerlink" href="#63-runtime-scenario-import-infrastructure-data-us-003" title="Permanent link">¶</a></h2>
+<p><strong>Use Case:</strong> <a href="../../../requirements/use-cases/#us-003">US-003</a> - Company Planner imports existing infrastructure data</p>
+<p><strong>Goal:</strong> Import track topology and workshop layout from existing railway infrastructure data</p>
+<h3 id="scenario-description_2">Scenario Description<a class="headerlink" href="#scenario-description_2" title="Permanent link">¶</a></h3>
+<p>Company planner has existing infrastructure data (track layouts, station locations) in CSV format and wants to import it into PopUpSim for capacity assessment.</p>
+<h3 id="runtime-interaction_2">Runtime Interaction<a class="headerlink" href="#runtime-interaction_2" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Planner as Company Planner
+    participant CLI as CLI
+    participant Config as Configuration Context
+    participant Parser as CSV Parser
+    participant Validator as Pydantic Validator
+    participant Files as File System
+
+    Planner-&gt;&gt;Files: Prepare infrastructure_topology.csv
+    Note over Files: Contains: track_id, length, connections
+    Planner-&gt;&gt;Files: Prepare workshop_layout.csv
+    Note over Files: Contains: station_id, location, capacity
+
+    Planner-&gt;&gt;CLI: python main.py --import-infra infrastructure_topology.csv workshop_layout.csv
+    CLI-&gt;&gt;Config: import_infrastructure()
+
+    Config-&gt;&gt;Files: Read infrastructure_topology.csv
+    Files--&gt;&gt;Config: CSV data (tracks)
+    Config-&gt;&gt;Parser: Parse track data
+    Parser-&gt;&gt;Parser: Convert to Track objects
+    Parser--&gt;&gt;Config: Parsed tracks
+
+    Config-&gt;&gt;Files: Read workshop_layout.csv
+    Files--&gt;&gt;Config: CSV data (workshops)
+    Config-&gt;&gt;Parser: Parse workshop data
+    Parser-&gt;&gt;Parser: Convert to Workshop objects
+    Parser--&gt;&gt;Config: Parsed workshops
+
+    Config-&gt;&gt;Validator: Validate infrastructure consistency
+    Validator-&gt;&gt;Validator: Check track connections valid
+    Validator-&gt;&gt;Validator: Check workshop locations on tracks
+    Validator-&gt;&gt;Validator: Check capacity constraints
+
+    alt Validation successful
+        Validator--&gt;&gt;Config: Infrastructure valid
+        Config-&gt;&gt;Files: Write validated_scenario.json
+        Config--&gt;&gt;CLI: Import successful
+        CLI--&gt;&gt;Planner: Infrastructure imported, ready for simulation
+    else Validation failed
+        Validator--xConfig: ValidationError: Invalid track connections
+        Config--&gt;&gt;CLI: Import failed with errors
+        CLI--&gt;&gt;Planner: Error summary + data issues
+    end</code></pre>
+<h3 id="key-runtime-aspects_2">Key Runtime Aspects<a class="headerlink" href="#key-runtime-aspects_2" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Description</th>
+<th>Quality Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CSV Parsing</strong></td>
+<td>Flexible parsing of company-specific CSV formats</td>
+<td>Usability</td>
+</tr>
+<tr>
+<td><strong>Data Validation</strong></td>
+<td>Validates infrastructure consistency (track connections, locations)</td>
+<td>Reliability</td>
+</tr>
+<tr>
+<td><strong>Error Reporting</strong></td>
+<td>Clear feedback on data quality issues</td>
+<td>Usability</td>
+</tr>
+<tr>
+<td><strong>JSON Export</strong></td>
+<td>Converts imported data to PopUpSim format</td>
+<td>Accessibility</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-validation-checks">Data Validation Checks<a class="headerlink" href="#data-validation-checks" title="Permanent link">¶</a></h3>
+<p><strong>Infrastructure Consistency:</strong>
+- Track connections form valid network (no orphaned tracks)
+- Workshop locations reference existing tracks
+- Station capacities are positive integers
+- Track lengths are positive values</p>
+<p><strong>Business Rules:</strong>
+- At least one workshop station defined
+- Track network is connected (no isolated segments)
+- Workshop locations don't overlap</p>
+<h3 id="performance-characteristics_2">Performance Characteristics<a class="headerlink" href="#performance-characteristics_2" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Import performance depends on infrastructure size. Will be measured during MVP implementation.</p>
+</blockquote>
+<hr/>
+<h2 id="64-runtime-scenario-assess-planned-workshop-capacity-us-004">6.4 Runtime Scenario: Assess Planned Workshop Capacity (US-004)<a class="headerlink" href="#64-runtime-scenario-assess-planned-workshop-capacity-us-004" title="Permanent link">¶</a></h2>
+<p><strong>Use Case:</strong> <a href="../../../requirements/use-cases/#us-004">US-004</a> - Company Planner assesses capacity for planned workshop</p>
+<p><strong>Goal:</strong> Evaluate if planned workshop layout meets company's retrofit capacity requirements</p>
+<h3 id="scenario-description_3">Scenario Description<a class="headerlink" href="#scenario-description_3" title="Permanent link">¶</a></h3>
+<p>Company planner has imported infrastructure data (US-003) and now runs simulation with company-specific wagon schedules to assess if planned workshop meets capacity targets.</p>
+<h3 id="runtime-interaction_3">Runtime Interaction<a class="headerlink" href="#runtime-interaction_3" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Planner as Company Planner
+    participant CLI as CLI
+    participant Config as Configuration Context
+    participant Railway as Railway Infrastructure Context
+    participant External as External Trains Context
+    participant Retrofit as Retrofit Workflow Context
+    participant Metrics as Metrics Collection
+    participant Files as File System
+
+    Note over Planner: Has imported infrastructure (US-003)
+
+    Planner-&gt;&gt;Files: Create company_wagon_schedule.csv
+    Note over Files: Company-specific arrival patterns
+    Planner-&gt;&gt;Files: Update validated_scenario.json
+    Note over Files: Add capacity target: 500 wagons/week
+
+    Planner-&gt;&gt;CLI: python main.py --config validated_scenario.json --schedule company_wagon_schedule.csv
+    CLI-&gt;&gt;Config: load_configuration()
+    Config-&gt;&gt;Files: Read validated_scenario.json
+    Config-&gt;&gt;Files: Read company_wagon_schedule.csv
+    Config--&gt;&gt;CLI: Configuration with capacity target
+
+    CLI-&gt;&gt;Railway: build_tracks(scenario)
+    Railway-&gt;&gt;Railway: Create imported infrastructure
+    Railway--&gt;&gt;CLI: Track infrastructure ready
+
+    CLI-&gt;&gt;External: initialize_trains(scenario)
+    External-&gt;&gt;External: Load company wagon schedule
+    External--&gt;&gt;CLI: Train arrivals scheduled
+
+    CLI-&gt;&gt;Retrofit: initialize(scenario, railway, external)
+    Retrofit--&gt;&gt;CLI: Workflow ready
+
+    CLI-&gt;&gt;Retrofit: run_simulation(168h)
+    Note over Retrofit: 1 week simulation
+
+    loop Every hour (168 hours)
+        External-&gt;&gt;Retrofit: Process scheduled arrivals
+        Retrofit-&gt;&gt;Retrofit: Wagon processing
+        Retrofit-&gt;&gt;Metrics: Record wagon events
+        Metrics-&gt;&gt;Metrics: Track throughput
+    end
+
+    Retrofit-&gt;&gt;Metrics: Get capacity
+    Metrics-&gt;&gt;Metrics: Calculate: actual vs target
+
+    alt Capacity target met
+        Metrics--&gt;&gt;Retrofit: Throughput: 520 wagons (target: 500)
+        Retrofit-&gt;&gt;Files: Write capacity_assessment_PASS.csv
+        Retrofit-&gt;&gt;Files: Write capacity_chart.png
+        Retrofit--&gt;&gt;CLI: Capacity target achieved
+        CLI--&gt;&gt;Planner: Workshop layout sufficient
+    else Capacity target not met
+        Metrics--&gt;&gt;Retrofit: Throughput: 450 wagons (target: 500)
+        Retrofit-&gt;&gt;Files: Write capacity_assessment_FAIL.csv
+        Retrofit-&gt;&gt;Files: Write bottleneck_analysis.png
+        Retrofit--&gt;&gt;CLI: Capacity target missed
+        CLI--&gt;&gt;Planner: Workshop needs optimization
+        Planner-&gt;&gt;Planner: Review bottlenecks, adjust layout
+    end</code></pre>
+<h3 id="key-runtime-aspects_3">Key Runtime Aspects<a class="headerlink" href="#key-runtime-aspects_3" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Description</th>
+<th>Quality Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Company-Specific Schedules</strong></td>
+<td>Uses actual wagon arrival patterns from company data</td>
+<td>Accuracy</td>
+</tr>
+<tr>
+<td><strong>Capacity Target Comparison</strong></td>
+<td>Compares simulation results against company requirements</td>
+<td>Reliability</td>
+</tr>
+<tr>
+<td><strong>Pass/Fail Assessment</strong></td>
+<td>Clear indication if workshop meets capacity needs</td>
+<td>Usability</td>
+</tr>
+<tr>
+<td><strong>Bottleneck Identification</strong></td>
+<td>Identifies specific constraints when target not met</td>
+<td>Accuracy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="capacity-assessment-logic">Capacity Assessment Logic<a class="headerlink" href="#capacity-assessment-logic" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; RunSimulation: Load config + schedule
+    RunSimulation --&gt; CalculateCapacity: Simulation complete
+    CalculateCapacity --&gt; CompareTarget: Throughput calculated
+
+    CompareTarget --&gt; CapacityMet: Actual &gt;= Target
+    CompareTarget --&gt; CapacityMissed: Actual &lt; Target
+
+    CapacityMet --&gt; GenerateReport: PASS
+    CapacityMissed --&gt; AnalyzeBottlenecks: FAIL
+    AnalyzeBottlenecks --&gt; GenerateReport: With recommendations
+
+    GenerateReport --&gt; [*]
+
+    note right of CompareTarget
+        Target from company requirements
+        Actual from simulation results
+    end note
+
+    note right of AnalyzeBottlenecks
+        Identify limiting factors:
+        - Station capacity
+        - Track congestion
+        - Resource availability
+    end note</code></pre>
+<h3 id="performance-characteristics_3">Performance Characteristics<a class="headerlink" href="#performance-characteristics_3" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong>  Performance will be measured during MVP implementation.</p>
+</blockquote>
+<hr/>
+<h2 id="65-error-scenarios">6.5 Error Scenarios<a class="headerlink" href="#65-error-scenarios" title="Permanent link">¶</a></h2>
+<h3 id="651-invalid-configuration">6.5.1 Invalid Configuration<a class="headerlink" href="#651-invalid-configuration" title="Permanent link">¶</a></h3>
+<p><strong>Trigger:</strong> User provides configuration with multiple validation errors</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant User
+    participant CLI
+    participant Config as Configuration Context
+    participant Validator as Pydantic Validator
+    participant Files as File System
+
+    User-&gt;&gt;CLI: python main.py --config invalid.json
+    CLI-&gt;&gt;Config: load_configuration()
+    Config-&gt;&gt;Files: Read invalid.json
+    Files--&gt;&gt;Config: JSON data
+
+    Config-&gt;&gt;Validator: Validate all fields
+    Validator-&gt;&gt;Validator: Collect all validation errors
+    Note over Validator: Does NOT stop at first error
+    Validator-&gt;&gt;Validator: Check station_count &lt;= 0
+    Validator-&gt;&gt;Validator: Check workers_per_station &gt; 10
+    Validator-&gt;&gt;Validator: Check retrofit_time &lt; 0
+    Validator--&gt;&gt;Config: ValidationError with 3 errors
+
+    Config-&gt;&gt;Config: Format error summary
+    Config--xCLI: ValidationError with error list
+
+    CLI-&gt;&gt;CLI: Print validation summary:
+    Note over CLI: Configuration validation failed (3 errors):&lt;br/&gt;1. station_count must be &gt; 0 (got: -1)&lt;br/&gt;2. workers_per_station must be &lt;= 10 (got: 15)&lt;br/&gt;3. retrofit_time must be &gt; 0 (got: -5)
+
+    CLI--&gt;&gt;User: Complete error summary + example config
+    Note over User: User fixes all errors at once</code></pre>
+<p><strong>Key Behavior:</strong>
+- Pydantic collects ALL validation errors before reporting
+- User sees complete list of issues in one summary
+- Enables fixing all problems in single iteration</p>
+<p><strong>Recovery:</strong> User corrects all configuration errors based on comprehensive error summary</p>
+<h3 id="652-simulation-failure">6.5.2 Simulation Failure<a class="headerlink" href="#652-simulation-failure" title="Permanent link">¶</a></h3>
+<p><strong>Trigger:</strong> Unexpected error during simulation execution</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant CLI
+    participant Control as Analysis &amp; Reporting Context
+    participant Domain as Workshop Operations Context
+    participant Files as File System
+
+    CLI-&gt;&gt;Control: run_simulation()
+    Control-&gt;&gt;Domain: Start SimPy
+    Domain-&gt;&gt;Domain: Processing...
+    Domain--xControl: SimulationError: Resource conflict
+    Control-&gt;&gt;Control: Catch exception
+    Control-&gt;&gt;Files: Write partial_results.csv
+    Control-&gt;&gt;Files: Write error_log.json
+    Control--&gt;&gt;CLI: Simulation failed (partial results saved)
+    CLI--&gt;&gt;CLI: Log error details</code></pre>
+<p><strong>Recovery:</strong> Partial results saved for debugging, user can adjust configuration</p>
+<h2 id="66-performance-considerations">6.6 Performance Considerations<a class="headerlink" href="#66-performance-considerations" title="Permanent link">¶</a></h2>
+<blockquote>
+<p><strong>Note:</strong> Performance requirements and actual measurements will be determined during MVP implementation. The following aspects will be evaluated:</p>
+</blockquote>
+<h3 id="performance-aspects-to-measure">Performance Aspects to Measure<a class="headerlink" href="#performance-aspects-to-measure" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Measurement Goal</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration Loading</strong></td>
+<td>Time to load and validate JSON/CSV files</td>
+<td>Affects user experience for iterative testing</td>
+</tr>
+<tr>
+<td><strong>Domain Setup</strong></td>
+<td>Time to create simulation entities</td>
+<td>Impacts startup time</td>
+</tr>
+<tr>
+<td><strong>Simulation Execution</strong></td>
+<td>Time to run 24h simulation with varying wagon counts</td>
+<td>Core performance metric</td>
+</tr>
+<tr>
+<td><strong>Output Generation</strong></td>
+<td>Time to create CSV files and charts</td>
+<td>Affects result availability</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scalability-testing-plan">Scalability Testing Plan<a class="headerlink" href="#scalability-testing-plan" title="Permanent link">¶</a></h3>
+<p><strong>Test scenarios to evaluate:</strong>
+- Small workshop (one Workshop with two retrofit stations, low wagon volume)
+- Standard workshop (two workshops with three retrofit stations, medium wagon volume)
+- High-load scenario (four workshops with three, high wagon volume)</p>
+<p><strong>Success criteria:</strong>
+- Simulation completes without errors
+- Results are accurate and reproducible
+- User experience is acceptable for iterative testing (see Quality Goal 1: Rapid development)</p>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

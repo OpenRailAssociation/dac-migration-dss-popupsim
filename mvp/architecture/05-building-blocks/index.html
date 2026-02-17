@@ -1,0 +1,1780 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../04-solution-strategy/" rel="prev"/>
+<link href="../06-runtime/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Building Blocks - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#5-building-block-view">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Building Blocks
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-level-1-system-context">
+<span class="md-ellipsis">
+      
+        5.1 Level 1: System Context
+      
+    </span>
+</a>
+<nav aria-label="5.1 Level 1: System Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-interfaces">
+<span class="md-ellipsis">
+      
+        Key Interfaces
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-level-2-configuration-context">
+<span class="md-ellipsis">
+      
+        5.2 Level 2: Configuration Context
+      
+    </span>
+</a>
+<nav aria-label="5.2 Level 2: Configuration Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example">
+<span class="md-ellipsis">
+      
+        Code Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-level-2-retrofit-workflow-context">
+<span class="md-ellipsis">
+      
+        5.3 Level 2: Retrofit Workflow Context
+      
+    </span>
+</a>
+<nav aria-label="5.3 Level 2: Retrofit Workflow Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility_1">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_1">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+<nav aria-label="Components" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#coordinators-application-layer">
+<span class="md-ellipsis">
+      
+        Coordinators (Application Layer)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#domain-services-no-simpy-dependencies">
+<span class="md-ellipsis">
+      
+        Domain Services (No SimPy Dependencies)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resource-managers-infrastructure-layer">
+<span class="md-ellipsis">
+      
+        Resource Managers (Infrastructure Layer)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-sequence">
+<span class="md-ellipsis">
+      
+        Workflow Sequence
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-coordinator-structure">
+<span class="md-ellipsis">
+      
+        Code Example: Coordinator Structure
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-level-2-railway-infrastructure-context">
+<span class="md-ellipsis">
+      
+        5.4 Level 2: Railway Infrastructure Context
+      
+    </span>
+</a>
+<nav aria-label="5.4 Level 2: Railway Infrastructure Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility_2">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_2">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#track-selection-strategies">
+<span class="md-ellipsis">
+      
+        Track Selection Strategies
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#55-level-2-external-trains-context">
+<span class="md-ellipsis">
+      
+        5.5 Level 2: External Trains Context
+      
+    </span>
+</a>
+<nav aria-label="5.5 Level 2: External Trains Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility_3">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_3">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example_1">
+<span class="md-ellipsis">
+      
+        Code Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#56-cross-cutting-concerns">
+<span class="md-ellipsis">
+      
+        5.6 Cross-Cutting Concerns
+      
+    </span>
+</a>
+<nav aria-label="5.6 Cross-Cutting Concerns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#event-bus">
+<span class="md-ellipsis">
+      
+        Event Bus
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#metrics-collection">
+<span class="md-ellipsis">
+      
+        Metrics Collection
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#time-conversion">
+<span class="md-ellipsis">
+      
+        Time Conversion
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#57-deployment-units">
+<span class="md-ellipsis">
+      
+        5.7 Deployment Units
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#51-level-1-system-context">
+<span class="md-ellipsis">
+      
+        5.1 Level 1: System Context
+      
+    </span>
+</a>
+<nav aria-label="5.1 Level 1: System Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contained-building-blocks">
+<span class="md-ellipsis">
+      
+        Contained Building Blocks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#key-interfaces">
+<span class="md-ellipsis">
+      
+        Key Interfaces
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#52-level-2-configuration-context">
+<span class="md-ellipsis">
+      
+        5.2 Level 2: Configuration Context
+      
+    </span>
+</a>
+<nav aria-label="5.2 Level 2: Configuration Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example">
+<span class="md-ellipsis">
+      
+        Code Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#53-level-2-retrofit-workflow-context">
+<span class="md-ellipsis">
+      
+        5.3 Level 2: Retrofit Workflow Context
+      
+    </span>
+</a>
+<nav aria-label="5.3 Level 2: Retrofit Workflow Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility_1">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_1">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+<nav aria-label="Components" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#coordinators-application-layer">
+<span class="md-ellipsis">
+      
+        Coordinators (Application Layer)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#domain-services-no-simpy-dependencies">
+<span class="md-ellipsis">
+      
+        Domain Services (No SimPy Dependencies)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resource-managers-infrastructure-layer">
+<span class="md-ellipsis">
+      
+        Resource Managers (Infrastructure Layer)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-sequence">
+<span class="md-ellipsis">
+      
+        Workflow Sequence
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example-coordinator-structure">
+<span class="md-ellipsis">
+      
+        Code Example: Coordinator Structure
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#54-level-2-railway-infrastructure-context">
+<span class="md-ellipsis">
+      
+        5.4 Level 2: Railway Infrastructure Context
+      
+    </span>
+</a>
+<nav aria-label="5.4 Level 2: Railway Infrastructure Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility_2">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_2">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#track-selection-strategies">
+<span class="md-ellipsis">
+      
+        Track Selection Strategies
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#55-level-2-external-trains-context">
+<span class="md-ellipsis">
+      
+        5.5 Level 2: External Trains Context
+      
+    </span>
+</a>
+<nav aria-label="5.5 Level 2: External Trains Context" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#responsibility_3">
+<span class="md-ellipsis">
+      
+        Responsibility
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_3">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example_1">
+<span class="md-ellipsis">
+      
+        Code Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#56-cross-cutting-concerns">
+<span class="md-ellipsis">
+      
+        5.6 Cross-Cutting Concerns
+      
+    </span>
+</a>
+<nav aria-label="5.6 Cross-Cutting Concerns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#event-bus">
+<span class="md-ellipsis">
+      
+        Event Bus
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#metrics-collection">
+<span class="md-ellipsis">
+      
+        Metrics Collection
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#time-conversion">
+<span class="md-ellipsis">
+      
+        Time Conversion
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#57-deployment-units">
+<span class="md-ellipsis">
+      
+        5.7 Deployment Units
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="5-building-block-view">5. Building Block View<a class="headerlink" href="#5-building-block-view" title="Permanent link">¶</a></h1>
+<h2 id="51-level-1-system-context">5.1 Level 1: System Context<a class="headerlink" href="#51-level-1-system-context" title="Permanent link">¶</a></h2>
+<p>PopUpSim consists of 4 bounded contexts following Domain-Driven Design principles.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "PopUpSim System"
+        CFG["Configuration Context&lt;br/&gt;File loading &amp; validation"]
+        RWF["Retrofit Workflow Context&lt;br/&gt;Core simulation logic"]
+        RLY["Railway Infrastructure Context&lt;br/&gt;Track management"]
+        EXT["External Trains Context&lt;br/&gt;Train arrivals"]
+    end
+
+    subgraph "External"
+        Files["Configuration Files&lt;br/&gt;JSON/CSV"]
+        Output["Results&lt;br/&gt;CSV/JSON"]
+    end
+
+    Files --&gt;|Load| CFG
+    CFG --&gt;|Scenario| RWF
+    CFG --&gt;|Scenario| RLY
+    CFG --&gt;|Scenario| EXT
+    RLY &lt;--&gt;|Track state| RWF
+    EXT --&gt;|Train arrivals| RWF
+    RWF --&gt;|Export| Output
+
+    classDef context fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class CFG,RWF,RLY,EXT context
+    class Files,Output external</code></pre>
+<h3 id="contained-building-blocks">Contained Building Blocks<a class="headerlink" href="#contained-building-blocks" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Responsibility</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration</strong></td>
+<td>Load and validate scenario files</td>
+<td>Pydantic, Pandas</td>
+</tr>
+<tr>
+<td><strong>Retrofit Workflow</strong></td>
+<td>Execute simulation, coordinate wagon flow</td>
+<td>SimPy, domain services</td>
+</tr>
+<tr>
+<td><strong>Railway Infrastructure</strong></td>
+<td>Manage track capacity and occupancy</td>
+<td>Domain aggregates</td>
+</tr>
+<tr>
+<td><strong>External Trains</strong></td>
+<td>Handle train arrivals and wagon creation</td>
+<td>Event publishing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-interfaces">Key Interfaces<a class="headerlink" href="#key-interfaces" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Source</th>
+<th>Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scenario</strong></td>
+<td>Configuration</td>
+<td>All contexts</td>
+<td>Validated configuration data</td>
+</tr>
+<tr>
+<td><strong>Track Operations</strong></td>
+<td>Railway Infrastructure</td>
+<td>Retrofit Workflow</td>
+<td>Track capacity queries and wagon placement</td>
+</tr>
+<tr>
+<td><strong>Train Arrivals</strong></td>
+<td>External Trains</td>
+<td>Retrofit Workflow</td>
+<td>TrainArrivedEvent with wagons</td>
+</tr>
+<tr>
+<td><strong>Event Bus</strong></td>
+<td>All contexts</td>
+<td>All contexts</td>
+<td>Domain event communication</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="52-level-2-configuration-context">5.2 Level 2: Configuration Context<a class="headerlink" href="#52-level-2-configuration-context" title="Permanent link">¶</a></h2>
+<h3 id="responsibility">Responsibility<a class="headerlink" href="#responsibility" title="Permanent link">¶</a></h3>
+<p>Load scenario configuration from files and validate using Pydantic models.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Configuration Context"
+        Builder["ConfigurationBuilder&lt;br/&gt;Entry point"]
+        Loader["FileLoader&lt;br/&gt;File parsing"]
+        Models["Domain Models&lt;br/&gt;Pydantic validation"]
+    end
+
+    Files["JSON/CSV Files"] --&gt; Builder
+    Builder --&gt; Loader
+    Loader --&gt; Models
+    Models --&gt; Scenario["Validated Scenario"]
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Builder,Loader,Models component
+    class Files,Scenario external</code></pre>
+<h3 id="components">Components<a class="headerlink" href="#components" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ConfigurationBuilder</strong></td>
+<td>Load scenario from file path</td>
+<td><code>configuration_builder.py</code></td>
+</tr>
+<tr>
+<td><strong>FileLoader</strong></td>
+<td>Parse JSON/CSV files, handle references</td>
+<td><code>file_loader.py</code></td>
+</tr>
+<tr>
+<td><strong>Scenario</strong></td>
+<td>Root configuration model with validation</td>
+<td><code>scenario.py</code></td>
+</tr>
+<tr>
+<td><strong>ProcessTimes</strong></td>
+<td>Timing configuration for operations</td>
+<td><code>process_times.py</code></td>
+</tr>
+<tr>
+<td><strong>DTOs</strong></td>
+<td>Input data transfer objects</td>
+<td><code>dtos/</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="code-example">Code Example<a class="headerlink" href="#code-example" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contexts.configuration.domain.configuration_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigurationBuilder</span>
+
+<span class="c1"># Load scenario</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">ConfigurationBuilder</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"scenario_dir"</span><span class="p">))</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+
+<span class="c1"># Access configuration</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Scenario: </span><span class="si">{</span><span class="n">scenario</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Workshops: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">workshops</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Trains: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">trains</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="53-level-2-retrofit-workflow-context">5.3 Level 2: Retrofit Workflow Context<a class="headerlink" href="#53-level-2-retrofit-workflow-context" title="Permanent link">¶</a></h2>
+<h3 id="responsibility_1">Responsibility<a class="headerlink" href="#responsibility_1" title="Permanent link">¶</a></h3>
+<p>Execute discrete event simulation coordinating wagon flow through the retrofit process.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Retrofit Workflow Context"
+        Context["RetrofitWorkflowContext&lt;br/&gt;Initialization &amp; orchestration"]
+        Arrival["ArrivalCoordinator&lt;br/&gt;Process train arrivals"]
+        Collection["CollectionCoordinator&lt;br/&gt;Move to retrofit track"]
+        Workshop["WorkshopCoordinator&lt;br/&gt;Retrofit operations"]
+        Parking["ParkingCoordinator&lt;br/&gt;Move to parking"]
+        Services["Domain Services&lt;br/&gt;Business logic"]
+        Resources["Resource Managers&lt;br/&gt;Locomotives, tracks, workshops"]
+    end
+
+    Context --&gt; Arrival
+    Context --&gt; Collection
+    Context --&gt; Workshop
+    Context --&gt; Parking
+    Arrival --&gt; Services
+    Collection --&gt; Services
+    Workshop --&gt; Services
+    Parking --&gt; Services
+    Services --&gt; Resources
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+
+    class Context,Arrival,Collection,Workshop,Parking,Services,Resources component</code></pre>
+<h3 id="components_1">Components<a class="headerlink" href="#components_1" title="Permanent link">¶</a></h3>
+<h4 id="coordinators-application-layer">Coordinators (Application Layer)<a class="headerlink" href="#coordinators-application-layer" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Coordinator</th>
+<th>Responsibility</th>
+<th>SimPy Process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ArrivalCoordinator</strong></td>
+<td>Receive trains, classify wagons, distribute to collection tracks</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>CollectionCoordinator</strong></td>
+<td>Form batches, allocate locomotive, transport to retrofit track</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>WorkshopCoordinator</strong></td>
+<td>Assign wagons to workshops, execute retrofit, return to retrofitted track</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>ParkingCoordinator</strong></td>
+<td>Transport completed wagons to parking tracks</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="domain-services-no-simpy-dependencies">Domain Services (No SimPy Dependencies)<a class="headerlink" href="#domain-services-no-simpy-dependencies" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BatchFormationService</strong></td>
+<td>Create wagon batches based on capacity constraints</td>
+</tr>
+<tr>
+<td><strong>RakeFormationService</strong></td>
+<td>Form and dissolve wagon rakes with coupling logic</td>
+</tr>
+<tr>
+<td><strong>TrainFormationService</strong></td>
+<td>Assemble trains (locomotive + rake) with preparation times</td>
+</tr>
+<tr>
+<td><strong>WorkshopSchedulingService</strong></td>
+<td>Schedule wagon batches to available workshops</td>
+</tr>
+<tr>
+<td><strong>CouplingService</strong></td>
+<td>Calculate coupling/decoupling times</td>
+</tr>
+<tr>
+<td><strong>RouteService</strong></td>
+<td>Provide route durations between tracks</td>
+</tr>
+</tbody>
+</table>
+<h4 id="resource-managers-infrastructure-layer">Resource Managers (Infrastructure Layer)<a class="headerlink" href="#resource-managers-infrastructure-layer" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Manager</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LocomotiveResourceManager</strong></td>
+<td>Allocate and release locomotives (SimPy Resource)</td>
+</tr>
+<tr>
+<td><strong>TrackCapacityManager</strong></td>
+<td>Manage track capacity and wagon placement</td>
+</tr>
+<tr>
+<td><strong>WorkshopResourceManager</strong></td>
+<td>Manage workshop station availability (SimPy Resource)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-sequence">Workflow Sequence<a class="headerlink" href="#workflow-sequence" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Train
+    participant Arrival
+    participant Collection
+    participant Workshop
+    participant Parking
+
+    Train-&gt;&gt;Arrival: TrainArrivedEvent
+    Arrival-&gt;&gt;Arrival: Classify wagons
+    Arrival-&gt;&gt;Collection: Add to collection queue
+    Collection-&gt;&gt;Collection: Form batch
+    Collection-&gt;&gt;Collection: Allocate locomotive
+    Collection-&gt;&gt;Workshop: Transport to retrofit track
+    Workshop-&gt;&gt;Workshop: Select workshop
+    Workshop-&gt;&gt;Workshop: Allocate stations
+    Workshop-&gt;&gt;Workshop: Execute retrofit
+    Workshop-&gt;&gt;Parking: Move to retrofitted track
+    Parking-&gt;&gt;Parking: Form batch
+    Parking-&gt;&gt;Parking: Transport to parking</code></pre>
+<h3 id="code-example-coordinator-structure">Code Example: Coordinator Structure<a class="headerlink" href="#code-example-coordinator-structure" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">CollectionCoordinator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Coordinates wagon movement from collection to retrofit track."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CollectionCoordinatorConfig</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Start coordinator process."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_collection_process</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_collection_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Main collection process loop."""</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># Wait for wagons</span>
+            <span class="n">wagon</span> <span class="o">=</span> <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">collection_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+            <span class="c1"># Collect batch</span>
+            <span class="n">wagons</span> <span class="o">=</span> <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_batch</span><span class="p">(</span><span class="n">wagon</span><span class="p">)</span>
+
+            <span class="c1"># Select retrofit track</span>
+            <span class="n">retrofit_track</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">track_selector</span><span class="o">.</span><span class="n">select_track_with_capacity</span><span class="p">(</span><span class="s1">'retrofit'</span><span class="p">)</span>
+
+            <span class="c1"># Transport batch</span>
+            <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transport_batch</span><span class="p">(</span><span class="n">wagons</span><span class="p">,</span> <span class="n">retrofit_track</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="54-level-2-railway-infrastructure-context">5.4 Level 2: Railway Infrastructure Context<a class="headerlink" href="#54-level-2-railway-infrastructure-context" title="Permanent link">¶</a></h2>
+<h3 id="responsibility_2">Responsibility<a class="headerlink" href="#responsibility_2" title="Permanent link">¶</a></h3>
+<p>Manage track capacity, occupancy, and wagon placement using domain aggregates.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "Railway Infrastructure Context"
+        Context["RailwayContext&lt;br/&gt;Track building &amp; services"]
+        TrackGroup["TrackGroup&lt;br/&gt;Group tracks by type"]
+        Track["Track&lt;br/&gt;Individual track entity"]
+        Occupancy["TrackOccupancy&lt;br/&gt;Wagon placement logic"]
+        Selector["TrackSelector&lt;br/&gt;Selection strategies"]
+    end
+
+    Context --&gt; TrackGroup
+    TrackGroup --&gt; Track
+    Track --&gt; Occupancy
+    Context --&gt; Selector
+    Selector --&gt; TrackGroup
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+
+    class Context,TrackGroup,Track,Occupancy,Selector component</code></pre>
+<h3 id="components_2">Components<a class="headerlink" href="#components_2" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RailwayContext</strong></td>
+<td>Build tracks from scenario, provide services</td>
+<td>Context</td>
+</tr>
+<tr>
+<td><strong>TrackGroup</strong></td>
+<td>Group tracks by type (collection, retrofit, parking, workshop)</td>
+<td>Aggregate</td>
+</tr>
+<tr>
+<td><strong>Track</strong></td>
+<td>Individual track with capacity and fill factor</td>
+<td>Entity</td>
+</tr>
+<tr>
+<td><strong>TrackOccupancy</strong></td>
+<td>Manage wagon placement and capacity</td>
+<td>Aggregate</td>
+</tr>
+<tr>
+<td><strong>TrackSelector</strong></td>
+<td>Select tracks using strategies (round-robin, least-occupied, etc.)</td>
+<td>Service</td>
+</tr>
+</tbody>
+</table>
+<h3 id="track-selection-strategies">Track Selection Strategies<a class="headerlink" href="#track-selection-strategies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>first_available</strong></td>
+<td>Select first track with available capacity</td>
+</tr>
+<tr>
+<td><strong>least_occupied</strong></td>
+<td>Select track with lowest utilization</td>
+</tr>
+<tr>
+<td><strong>round_robin</strong></td>
+<td>Rotate through tracks sequentially</td>
+</tr>
+<tr>
+<td><strong>best_fit</strong></td>
+<td>Select track that best fits wagon length</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="55-level-2-external-trains-context">5.5 Level 2: External Trains Context<a class="headerlink" href="#55-level-2-external-trains-context" title="Permanent link">¶</a></h2>
+<h3 id="responsibility_3">Responsibility<a class="headerlink" href="#responsibility_3" title="Permanent link">¶</a></h3>
+<p>Handle train arrivals and create wagon entities as single source of truth.</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "External Trains Context"
+        Context["ExternalTrainsContext&lt;br/&gt;Train arrival processing"]
+        Schedule["TrainSchedule&lt;br/&gt;Scheduled trains"]
+        Train["ExternalTrain&lt;br/&gt;Train entity"]
+        Wagon["Wagon&lt;br/&gt;Wagon entity"]
+    end
+
+    Scenario["Scenario.trains"] --&gt; Context
+    Context --&gt; Schedule
+    Schedule --&gt; Train
+    Train --&gt; Wagon
+    Wagon --&gt; Event["TrainArrivedEvent"]
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Context,Schedule,Train,Wagon component
+    class Scenario,Event external</code></pre>
+<h3 id="components_3">Components<a class="headerlink" href="#components_3" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ExternalTrainsContext</strong></td>
+<td>Process train arrivals, create wagons, publish events</td>
+</tr>
+<tr>
+<td><strong>TrainSchedule</strong></td>
+<td>Manage scheduled train arrivals</td>
+</tr>
+<tr>
+<td><strong>ExternalTrain</strong></td>
+<td>Train entity with arrival time and wagons</td>
+</tr>
+<tr>
+<td><strong>Wagon</strong></td>
+<td>Wagon entity (single source of truth)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="code-example_1">Code Example<a class="headerlink" href="#code-example_1" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExternalTrainsContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""External Trains Context managing train arrivals."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event_bus</span><span class="p">:</span> <span class="n">EventBus</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_bus</span> <span class="o">=</span> <span class="n">event_bus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wagons</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Wagon</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Single source of truth</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_processes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Start train arrival processes."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">infra</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">train</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">trains</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">infra</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">schedule_process</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_process_single_train_arrival</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_single_train_arrival</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Process a single train arrival."""</span>
+        <span class="c1"># Wait for arrival time</span>
+        <span class="n">arrival_delay</span> <span class="o">=</span> <span class="n">datetime_to_ticks</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">arrival_time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scenario</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">infra</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">arrival_delay</span><span class="p">)</span>
+
+        <span class="c1"># Create wagons</span>
+        <span class="n">train_wagons</span> <span class="o">=</span> <span class="p">[</span><span class="n">Wagon</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="k">for</span> <span class="n">wagon_dto</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">wagons</span><span class="p">]</span>
+
+        <span class="c1"># Store as single source of truth</span>
+        <span class="k">for</span> <span class="n">wagon</span> <span class="ow">in</span> <span class="n">train_wagons</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wagons</span><span class="p">[</span><span class="n">wagon</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">wagon</span>
+
+        <span class="c1"># Publish event</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">TrainArrivedEvent</span><span class="p">(</span>
+            <span class="n">train_id</span><span class="o">=</span><span class="n">train</span><span class="o">.</span><span class="n">train_id</span><span class="p">,</span>
+            <span class="n">wagons</span><span class="o">=</span><span class="n">train_wagons</span><span class="p">,</span>
+            <span class="n">arrival_track</span><span class="o">=</span><span class="s1">'collection'</span><span class="p">,</span>
+            <span class="n">event_timestamp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">infra</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">current_time</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="56-cross-cutting-concerns">5.6 Cross-Cutting Concerns<a class="headerlink" href="#56-cross-cutting-concerns" title="Permanent link">¶</a></h2>
+<h3 id="event-bus">Event Bus<a class="headerlink" href="#event-bus" title="Permanent link">¶</a></h3>
+<p>All contexts communicate via domain events published through the event bus.</p>
+<p><strong>Key Events:</strong>
+- <code>TrainArrivedEvent</code> - Train arrives with wagons
+- <code>WagonMovedEvent</code> - Wagon moves between tracks
+- <code>WagonRetrofitCompletedEvent</code> - Wagon completes retrofit
+- <code>SimulationStartedEvent</code> - Simulation begins
+- <code>SimulationEndedEvent</code> - Simulation completes</p>
+<h3 id="metrics-collection">Metrics Collection<a class="headerlink" href="#metrics-collection" title="Permanent link">¶</a></h3>
+<p>The Retrofit Workflow Context collects metrics during simulation:
+- Wagon journey events (arrived, classified, retrofit started/completed, parked)
+- Locomotive movements and allocations
+- Batch formation and transport events
+- Workshop utilization statistics</p>
+<h3 id="time-conversion">Time Conversion<a class="headerlink" href="#time-conversion" title="Permanent link">¶</a></h3>
+<p>Shared utilities convert between datetime and SimPy simulation ticks:
+- <code>datetime_to_ticks()</code> - Convert datetime to simulation time
+- <code>timedelta_to_sim_ticks()</code> - Convert timedelta to simulation duration</p>
+<hr/>
+<h2 id="57-deployment-units">5.7 Deployment Units<a class="headerlink" href="#57-deployment-units" title="Permanent link">¶</a></h2>
+<p>The system is deployed as a single Python application with CLI interface:</p>
+<div class="highlight"><pre><span></span><code>popupsim/
+├── backend/
+│   └── src/
+│       ├── main.py                    # CLI entry point
+│       ├── application/               # Application services
+│       ├── contexts/                  # Bounded contexts
+│       │   ├── configuration/
+│       │   ├── retrofit_workflow/
+│       │   ├── railway_infrastructure/
+│       │   └── external_trains/
+│       ├── shared/                    # Shared kernel
+│       └── infrastructure/            # Technical infrastructure
+</code></pre></div>
+<p><strong>Execution:</strong>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>src/main.py<span class="w"> </span>--scenario<span class="w"> </span>path/to/scenario<span class="w"> </span>--output<span class="w"> </span>path/to/output
+</code></pre></div></p>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

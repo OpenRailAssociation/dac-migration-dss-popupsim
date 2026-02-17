@@ -1,0 +1,1506 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>5a. Level 3 Implementation Details - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#5a-level-3-implementation-details">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              5a. Level 3 Implementation Details
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#overview">
+<span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a1-configuration-context-level-3">
+<span class="md-ellipsis">
+      
+        5a.1 Configuration Context - Level 3
+      
+    </span>
+</a>
+<nav aria-label="5a.1 Configuration Context - Level 3" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#component-diagram">
+<span class="md-ellipsis">
+      
+        Component Diagram
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-example">
+<span class="md-ellipsis">
+      
+        Code Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a2-retrofit-workflow-context-level-3">
+<span class="md-ellipsis">
+      
+        5a.2 Retrofit Workflow Context - Level 3
+      
+    </span>
+</a>
+<nav aria-label="5a.2 Retrofit Workflow Context - Level 3" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#component-diagram_1">
+<span class="md-ellipsis">
+      
+        Component Diagram
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#coordinators-application-layer">
+<span class="md-ellipsis">
+      
+        Coordinators (Application Layer)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#domain-services-no-simpy-dependencies">
+<span class="md-ellipsis">
+      
+        Domain Services (No SimPy Dependencies)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resource-managers-infrastructure-layer">
+<span class="md-ellipsis">
+      
+        Resource Managers (Infrastructure Layer)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-sequence">
+<span class="md-ellipsis">
+      
+        Workflow Sequence
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a3-railway-infrastructure-context-level-3">
+<span class="md-ellipsis">
+      
+        5a.3 Railway Infrastructure Context - Level 3
+      
+    </span>
+</a>
+<nav aria-label="5a.3 Railway Infrastructure Context - Level 3" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#component-diagram_2">
+<span class="md-ellipsis">
+      
+        Component Diagram
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_1">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#track-selection-strategies">
+<span class="md-ellipsis">
+      
+        Track Selection Strategies
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a4-external-trains-context-level-3">
+<span class="md-ellipsis">
+      
+        5a.4 External Trains Context - Level 3
+      
+    </span>
+</a>
+<nav aria-label="5a.4 External Trains Context - Level 3" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#component-diagram_3">
+<span class="md-ellipsis">
+      
+        Component Diagram
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#components_2">
+<span class="md-ellipsis">
+      
+        Components
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#train-arrival-flow">
+<span class="md-ellipsis">
+      
+        Train Arrival Flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a5-integration-patterns">
+<span class="md-ellipsis">
+      
+        5a.5 Integration Patterns
+      
+    </span>
+</a>
+<nav aria-label="5a.5 Integration Patterns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#event-bus-communication">
+<span class="md-ellipsis">
+      
+        Event Bus Communication
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#track-capacity-queries">
+<span class="md-ellipsis">
+      
+        Track Capacity Queries
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resource-allocation">
+<span class="md-ellipsis">
+      
+        Resource Allocation
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a6-file-organization">
+<span class="md-ellipsis">
+      
+        5a.6 File Organization
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a7-wagon-state-machine">
+<span class="md-ellipsis">
+      
+        5a.7 Wagon State Machine
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5a8-technology-integration">
+<span class="md-ellipsis">
+      
+        5a.8 Technology Integration
+      
+    </span>
+</a>
+<nav aria-label="5a.8 Technology Integration" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#simpy-integration">
+<span class="md-ellipsis">
+      
+        SimPy Integration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pydantic-integration">
+<span class="md-ellipsis">
+      
+        Pydantic Integration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#event-bus-integration">
+<span class="md-ellipsis">
+      
+        Event Bus Integration
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="5a-level-3-implementation-details">5a. Level 3 Implementation Details<a class="headerlink" href="#5a-level-3-implementation-details" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>This document provides Level 3 architectural details for the actual MVP implementation with 4 bounded contexts: Configuration, Retrofit Workflow, Railway Infrastructure, and External Trains.</p>
+<h2 id="5a1-configuration-context-level-3">5a.1 Configuration Context - Level 3<a class="headerlink" href="#5a1-configuration-context-level-3" title="Permanent link">¶</a></h2>
+<h3 id="component-diagram">Component Diagram<a class="headerlink" href="#component-diagram" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Configuration Context - Level 3"
+        Builder["ConfigurationBuilder&lt;br/&gt;Load from files"]
+        Loader["FileLoader&lt;br/&gt;Parse JSON/CSV"]
+
+        subgraph "Domain Models (Pydantic)"
+            Scenario[Scenario]
+            Train[Train]
+            Wagon[Wagon]
+            Track[Track]
+            Workshop[Workshop]
+            Locomotive[Locomotive]
+            Routes[Routes]
+            ProcessTimes[ProcessTimes]
+        end
+    end
+
+    Files[JSON/CSV Files] --&gt; Builder
+    Builder --&gt; Loader
+    Loader --&gt; Scenario
+    Loader --&gt; Train
+    Loader --&gt; Wagon
+    Loader --&gt; Track
+    Loader --&gt; Workshop
+    Loader --&gt; Locomotive
+    Loader --&gt; Routes
+    Loader --&gt; ProcessTimes
+
+    classDef builder fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef model fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
+
+    class Builder,Loader builder
+    class Scenario,Train,Wagon,Track,Workshop,Locomotive,Routes,ProcessTimes model</code></pre>
+<h3 id="components">Components<a class="headerlink" href="#components" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ConfigurationBuilder</strong></td>
+<td><code>configuration_builder.py</code></td>
+<td>Load scenario from file path</td>
+</tr>
+<tr>
+<td><strong>FileLoader</strong></td>
+<td><code>file_loader.py</code></td>
+<td>Parse JSON/CSV files, handle references</td>
+</tr>
+<tr>
+<td><strong>Scenario</strong></td>
+<td><code>scenario.py</code></td>
+<td>Root configuration model with validation</td>
+</tr>
+<tr>
+<td><strong>ProcessTimes</strong></td>
+<td><code>process_times.py</code></td>
+<td>Timing configuration for operations</td>
+</tr>
+<tr>
+<td><strong>DTOs</strong></td>
+<td><code>dtos/</code></td>
+<td>Input data transfer objects</td>
+</tr>
+</tbody>
+</table>
+<h3 id="code-example">Code Example<a class="headerlink" href="#code-example" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contexts.configuration.domain.configuration_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigurationBuilder</span>
+
+<span class="c1"># Load scenario</span>
+<span class="n">scenario</span> <span class="o">=</span> <span class="n">ConfigurationBuilder</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"scenario_dir"</span><span class="p">))</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+
+<span class="c1"># Access configuration</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Scenario: </span><span class="si">{</span><span class="n">scenario</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Workshops: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">workshops</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Trains: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">trains</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="5a2-retrofit-workflow-context-level-3">5a.2 Retrofit Workflow Context - Level 3<a class="headerlink" href="#5a2-retrofit-workflow-context-level-3" title="Permanent link">¶</a></h2>
+<h3 id="component-diagram_1">Component Diagram<a class="headerlink" href="#component-diagram_1" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Retrofit Workflow Context - Level 3"
+        Context["RetrofitWorkflowContext&lt;br/&gt;Initialization &amp; orchestration"]
+
+        subgraph "Coordinators (Application Layer)"
+            Arrival["ArrivalCoordinator&lt;br/&gt;Process train arrivals"]
+            Collection["CollectionCoordinator&lt;br/&gt;Move to retrofit track"]
+            Workshop["WorkshopCoordinator&lt;br/&gt;Retrofit operations"]
+            Parking["ParkingCoordinator&lt;br/&gt;Move to parking"]
+        end
+
+        subgraph "Domain Services (No SimPy)"
+            Batch["BatchFormationService"]
+            Rake["RakeFormationService"]
+            TrainForm["TrainFormationService"]
+            Schedule["WorkshopSchedulingService"]
+            Coupling["CouplingService"]
+            Route["RouteService"]
+        end
+
+        subgraph "Resource Managers (Infrastructure)"
+            LocoMgr["LocomotiveResourceManager"]
+            TrackMgr["TrackCapacityManager"]
+            WorkshopMgr["WorkshopResourceManager"]
+        end
+
+        subgraph "Metrics Collection"
+            Metrics["SimulationMetrics"]
+            WagonCol["WagonCollector"]
+            LocoCol["LocomotiveCollector"]
+            WorkshopCol["WorkshopCollector"]
+        end
+    end
+
+    Context --&gt; Arrival
+    Context --&gt; Collection
+    Context --&gt; Workshop
+    Context --&gt; Parking
+
+    Arrival --&gt; Batch
+    Collection --&gt; Rake
+    Workshop --&gt; Schedule
+    Parking --&gt; TrainForm
+
+    Arrival --&gt; LocoMgr
+    Collection --&gt; TrackMgr
+    Workshop --&gt; WorkshopMgr
+
+    Context --&gt; Metrics
+    Metrics --&gt; WagonCol
+    Metrics --&gt; LocoCol
+    Metrics --&gt; WorkshopCol
+
+    classDef coord fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef domain fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
+    classDef resource fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef metrics fill:#ffccbc,stroke:#bf360c,stroke-width:2px
+
+    class Context,Arrival,Collection,Workshop,Parking coord
+    class Batch,Rake,TrainForm,Schedule,Coupling,Route domain
+    class LocoMgr,TrackMgr,WorkshopMgr resource
+    class Metrics,WagonCol,LocoCol,WorkshopCol metrics</code></pre>
+<h3 id="coordinators-application-layer">Coordinators (Application Layer)<a class="headerlink" href="#coordinators-application-layer" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Coordinator</th>
+<th>Responsibility</th>
+<th>SimPy Process</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ArrivalCoordinator</strong></td>
+<td>Receive trains, classify wagons, distribute to collection tracks</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>CollectionCoordinator</strong></td>
+<td>Form batches, allocate locomotive, transport to retrofit track</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>WorkshopCoordinator</strong></td>
+<td>Assign wagons to workshops, execute retrofit, return to retrofitted track</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>ParkingCoordinator</strong></td>
+<td>Transport completed wagons to parking tracks</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="domain-services-no-simpy-dependencies">Domain Services (No SimPy Dependencies)<a class="headerlink" href="#domain-services-no-simpy-dependencies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BatchFormationService</strong></td>
+<td>Create wagon batches based on capacity constraints</td>
+</tr>
+<tr>
+<td><strong>RakeFormationService</strong></td>
+<td>Form and dissolve wagon rakes with coupling logic</td>
+</tr>
+<tr>
+<td><strong>TrainFormationService</strong></td>
+<td>Assemble trains (locomotive + rake) with preparation times</td>
+</tr>
+<tr>
+<td><strong>WorkshopSchedulingService</strong></td>
+<td>Schedule wagon batches to available workshops</td>
+</tr>
+<tr>
+<td><strong>CouplingService</strong></td>
+<td>Calculate coupling/decoupling times</td>
+</tr>
+<tr>
+<td><strong>RouteService</strong></td>
+<td>Provide route durations between tracks</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-managers-infrastructure-layer">Resource Managers (Infrastructure Layer)<a class="headerlink" href="#resource-managers-infrastructure-layer" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Manager</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LocomotiveResourceManager</strong></td>
+<td>Allocate and release locomotives (SimPy Resource)</td>
+</tr>
+<tr>
+<td><strong>TrackCapacityManager</strong></td>
+<td>Manage track capacity and wagon placement</td>
+</tr>
+<tr>
+<td><strong>WorkshopResourceManager</strong></td>
+<td>Manage workshop station availability (SimPy Resource)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="workflow-sequence">Workflow Sequence<a class="headerlink" href="#workflow-sequence" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Train
+    participant Arrival
+    participant Collection
+    participant Workshop
+    participant Parking
+
+    Train-&gt;&gt;Arrival: TrainArrivedEvent
+    Arrival-&gt;&gt;Arrival: Classify wagons
+    Arrival-&gt;&gt;Collection: Add to collection queue
+    Collection-&gt;&gt;Collection: Form batch
+    Collection-&gt;&gt;Collection: Allocate locomotive
+    Collection-&gt;&gt;Workshop: Transport to retrofit track
+    Workshop-&gt;&gt;Workshop: Select workshop
+    Workshop-&gt;&gt;Workshop: Allocate stations
+    Workshop-&gt;&gt;Workshop: Execute retrofit
+    Workshop-&gt;&gt;Parking: Move to retrofitted track
+    Parking-&gt;&gt;Parking: Form batch
+    Parking-&gt;&gt;Parking: Transport to parking</code></pre>
+<hr/>
+<h2 id="5a3-railway-infrastructure-context-level-3">5a.3 Railway Infrastructure Context - Level 3<a class="headerlink" href="#5a3-railway-infrastructure-context-level-3" title="Permanent link">¶</a></h2>
+<h3 id="component-diagram_2">Component Diagram<a class="headerlink" href="#component-diagram_2" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Railway Infrastructure Context - Level 3"
+        Context["RailwayContext&lt;br/&gt;Track building &amp; services"]
+
+        subgraph "Aggregates"
+            TrackGroup["TrackGroup&lt;br/&gt;Group tracks by type"]
+            Track["Track&lt;br/&gt;Individual track entity"]
+            Occupancy["TrackOccupancy&lt;br/&gt;Wagon placement logic"]
+        end
+
+        subgraph "Services"
+            Selector["TrackSelector&lt;br/&gt;Selection strategies"]
+            Capacity["CapacityService&lt;br/&gt;Capacity queries"]
+        end
+    end
+
+    Context --&gt; TrackGroup
+    TrackGroup --&gt; Track
+    Track --&gt; Occupancy
+    Context --&gt; Selector
+    Context --&gt; Capacity
+    Selector --&gt; TrackGroup
+    Capacity --&gt; Track
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+
+    class Context,TrackGroup,Track,Occupancy,Selector,Capacity component</code></pre>
+<h3 id="components_1">Components<a class="headerlink" href="#components_1" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RailwayContext</strong></td>
+<td>Build tracks from scenario, provide services</td>
+<td>Context</td>
+</tr>
+<tr>
+<td><strong>TrackGroup</strong></td>
+<td>Group tracks by type (collection, retrofit, parking, workshop)</td>
+<td>Aggregate</td>
+</tr>
+<tr>
+<td><strong>Track</strong></td>
+<td>Individual track with capacity and fill factor</td>
+<td>Entity</td>
+</tr>
+<tr>
+<td><strong>TrackOccupancy</strong></td>
+<td>Manage wagon placement and capacity</td>
+<td>Aggregate</td>
+</tr>
+<tr>
+<td><strong>TrackSelector</strong></td>
+<td>Select tracks based on strategies</td>
+<td>Service</td>
+</tr>
+<tr>
+<td><strong>CapacityService</strong></td>
+<td>Query track capacity and availability</td>
+<td>Service</td>
+</tr>
+</tbody>
+</table>
+<h3 id="track-selection-strategies">Track Selection Strategies<a class="headerlink" href="#track-selection-strategies" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>LEAST_OCCUPIED</strong>: Select track with lowest occupancy ratio</li>
+<li><strong>ROUND_ROBIN</strong>: Cycle through available tracks</li>
+<li><strong>FIRST_AVAILABLE</strong>: Select first track with capacity</li>
+<li><strong>RANDOM</strong>: Random selection from available tracks</li>
+</ul>
+<hr/>
+<h2 id="5a4-external-trains-context-level-3">5a.4 External Trains Context - Level 3<a class="headerlink" href="#5a4-external-trains-context-level-3" title="Permanent link">¶</a></h2>
+<h3 id="component-diagram_3">Component Diagram<a class="headerlink" href="#component-diagram_3" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "External Trains Context - Level 3"
+        Context["ExternalTrainsContext&lt;br/&gt;Train arrival management"]
+
+        subgraph "Components"
+            Publisher["EventPublisher&lt;br/&gt;Publish train arrivals"]
+            Factory["WagonFactory&lt;br/&gt;Create wagon entities"]
+        end
+
+        subgraph "Events"
+            TrainEvent["TrainArrivedEvent&lt;br/&gt;Train + wagons"]
+        end
+    end
+
+    Context --&gt; Publisher
+    Context --&gt; Factory
+    Publisher --&gt; TrainEvent
+    Factory --&gt; TrainEvent
+
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+
+    class Context,Publisher,Factory,TrainEvent component</code></pre>
+<h3 id="components_2">Components<a class="headerlink" href="#components_2" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ExternalTrainsContext</strong></td>
+<td>Initialize train arrivals from scenario</td>
+</tr>
+<tr>
+<td><strong>EventPublisher</strong></td>
+<td>Publish TrainArrivedEvent to event bus</td>
+</tr>
+<tr>
+<td><strong>WagonFactory</strong></td>
+<td>Create wagon entities from train data</td>
+</tr>
+</tbody>
+</table>
+<h3 id="train-arrival-flow">Train Arrival Flow<a class="headerlink" href="#train-arrival-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Scenario
+    participant ExternalTrains
+    participant EventBus
+    participant RetrofitWorkflow
+
+    Scenario-&gt;&gt;ExternalTrains: Initialize with trains
+    ExternalTrains-&gt;&gt;ExternalTrains: Schedule arrivals
+    loop For each train
+        ExternalTrains-&gt;&gt;EventBus: Publish TrainArrivedEvent
+        EventBus-&gt;&gt;RetrofitWorkflow: Deliver event
+        RetrofitWorkflow-&gt;&gt;RetrofitWorkflow: Process wagons
+    end</code></pre>
+<hr/>
+<h2 id="5a5-integration-patterns">5a.5 Integration Patterns<a class="headerlink" href="#5a5-integration-patterns" title="Permanent link">¶</a></h2>
+<h3 id="event-bus-communication">Event Bus Communication<a class="headerlink" href="#event-bus-communication" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">contexts.shared.domain.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventBus</span><span class="p">,</span> <span class="n">TrainArrivedEvent</span>
+
+<span class="c1"># External Trains publishes event</span>
+<span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">TrainArrivedEvent</span><span class="p">(</span>
+    <span class="n">train_id</span><span class="o">=</span><span class="s2">"T001"</span><span class="p">,</span>
+    <span class="n">wagons</span><span class="o">=</span><span class="p">[</span><span class="n">wagon1</span><span class="p">,</span> <span class="n">wagon2</span><span class="p">,</span> <span class="n">wagon3</span><span class="p">],</span>
+    <span class="n">arrival_time</span><span class="o">=</span><span class="mf">100.0</span>
+<span class="p">))</span>
+
+<span class="c1"># Retrofit Workflow subscribes</span>
+<span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">TrainArrivedEvent</span><span class="p">,</span> <span class="n">arrival_coordinator</span><span class="o">.</span><span class="n">handle_train_arrival</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="track-capacity-queries">Track Capacity Queries<a class="headerlink" href="#track-capacity-queries" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">contexts.railway_infrastructure.application.railway_context</span><span class="w"> </span><span class="kn">import</span> <span class="n">RailwayContext</span>
+
+<span class="c1"># Query track capacity</span>
+<span class="n">railway</span> <span class="o">=</span> <span class="n">RailwayContext</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+<span class="n">track</span> <span class="o">=</span> <span class="n">railway</span><span class="o">.</span><span class="n">track_selector</span><span class="o">.</span><span class="n">select_track_with_capacity</span><span class="p">(</span><span class="s1">'collection'</span><span class="p">,</span> <span class="n">required_length</span><span class="o">=</span><span class="mf">50.0</span><span class="p">)</span>
+
+<span class="c1"># Place wagons on track</span>
+<span class="n">railway</span><span class="o">.</span><span class="n">place_wagons_on_track</span><span class="p">(</span><span class="n">track</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">wagons</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="resource-allocation">Resource Allocation<a class="headerlink" href="#resource-allocation" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">contexts.retrofit_workflow.infrastructure.resource_managers</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocomotiveResourceManager</span>
+
+<span class="c1"># Allocate locomotive</span>
+<span class="n">loco_manager</span> <span class="o">=</span> <span class="n">LocomotiveResourceManager</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">locomotives</span><span class="p">)</span>
+<span class="n">locomotive</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">loco_manager</span><span class="o">.</span><span class="n">allocate</span><span class="p">()</span>
+
+<span class="c1"># Use locomotive</span>
+<span class="k">yield from</span> <span class="n">transport_wagons</span><span class="p">(</span><span class="n">locomotive</span><span class="p">,</span> <span class="n">wagons</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+
+<span class="c1"># Release locomotive</span>
+<span class="n">loco_manager</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="n">locomotive</span><span class="p">)</span>
+</code></pre></div>
+<hr/>
+<h2 id="5a6-file-organization">5a.6 File Organization<a class="headerlink" href="#5a6-file-organization" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code>popupsim/backend/src/
+├── main.py                                    # CLI entry point
+├── application/
+│   └── simulation_service.py                  # Orchestrates all contexts
+├── contexts/
+│   ├── configuration/                         # Configuration Context
+│   │   ├── domain/
+│   │   │   ├── configuration_builder.py       # Load from files
+│   │   │   └── models/
+│   │   │       ├── scenario.py
+│   │   │       ├── process_times.py
+│   │   │       └── ...
+│   │   └── infrastructure/
+│   │       └── file_loader.py                 # Parse JSON/CSV
+│   ├── retrofit_workflow/                     # Retrofit Workflow Context
+│   │   ├── application/
+│   │   │   ├── retrofit_workflow_context.py   # Main context
+│   │   │   └── coordinators/
+│   │   │       ├── arrival_coordinator.py
+│   │   │       ├── collection_coordinator.py
+│   │   │       ├── workshop_coordinator.py
+│   │   │       └── parking_coordinator.py
+│   │   ├── domain/
+│   │   │   └── services/
+│   │   │       ├── batch_formation_service.py
+│   │   │       ├── rake_formation_service.py
+│   │   │       ├── train_formation_service.py
+│   │   │       ├── workshop_scheduling_service.py
+│   │   │       ├── coupling_service.py
+│   │   │       └── route_service.py
+│   │   └── infrastructure/
+│   │       ├── resource_managers/
+│   │       │   ├── locomotive_resource_manager.py
+│   │       │   ├── track_capacity_manager.py
+│   │       │   └── workshop_resource_manager.py
+│   │       └── metrics/
+│   │           ├── simulation_metrics.py
+│   │           ├── wagon_collector.py
+│   │           ├── locomotive_collector.py
+│   │           └── workshop_collector.py
+│   ├── railway_infrastructure/                # Railway Infrastructure Context
+│   │   ├── application/
+│   │   │   └── railway_context.py             # Track building &amp; services
+│   │   ├── domain/
+│   │   │   ├── aggregates/
+│   │   │   │   ├── track_group.py
+│   │   │   │   ├── track.py
+│   │   │   │   └── track_occupancy.py
+│   │   │   └── services/
+│   │   │       ├── track_selector.py
+│   │   │       └── capacity_service.py
+│   │   └── infrastructure/
+│   │       └── track_repository.py
+│   ├── external_trains/                       # External Trains Context
+│   │   ├── application/
+│   │   │   └── external_trains_context.py     # Train arrival management
+│   │   ├── domain/
+│   │   │   ├── wagon_factory.py
+│   │   │   └── events/
+│   │   │       └── train_arrived_event.py
+│   │   └── infrastructure/
+│   │       └── event_publisher.py
+│   └── shared/                                # Shared Kernel
+│       ├── domain/
+│       │   ├── events/
+│       │   │   └── event_bus.py
+│       │   └── value_objects/
+│       └── infrastructure/
+│           └── simpy_adapter.py
+└── tests/
+    └── unit/
+        ├── configuration/
+        ├── retrofit_workflow/
+        ├── railway_infrastructure/
+        └── external_trains/
+</code></pre></div>
+<hr/>
+<h2 id="5a7-wagon-state-machine">5a.7 Wagon State Machine<a class="headerlink" href="#5a7-wagon-state-machine" title="Permanent link">¶</a></h2>
+<pre class="mermaid"><code>stateDiagram-v2
+    [*] --&gt; ARRIVING: Train arrives
+    ARRIVING --&gt; SELECTING: At hump
+    SELECTING --&gt; SELECTED: Needs retrofit + capacity available
+    SELECTING --&gt; REJECTED: No capacity
+    SELECTED --&gt; MOVING_TO_COLLECTION: Locomotive pickup
+    MOVING_TO_COLLECTION --&gt; ON_COLLECTION_TRACK: Delivered
+    ON_COLLECTION_TRACK --&gt; MOVING_TO_RETROFIT: Batch formed
+    MOVING_TO_RETROFIT --&gt; ON_RETROFIT_TRACK: At retrofit track
+    ON_RETROFIT_TRACK --&gt; MOVING_TO_WORKSHOP: Workshop ready
+    MOVING_TO_WORKSHOP --&gt; RETROFITTING: At station
+    RETROFITTING --&gt; RETROFITTED: Retrofit complete
+    RETROFITTED --&gt; MOVING_TO_RETROFITTED: Pickup batch
+    MOVING_TO_RETROFITTED --&gt; ON_RETROFITTED_TRACK: At retrofitted track
+    ON_RETROFITTED_TRACK --&gt; MOVING_TO_PARKING: To parking
+    MOVING_TO_PARKING --&gt; PARKING: At parking track
+    REJECTED --&gt; [*]
+    PARKING --&gt; [*]</code></pre>
+<hr/>
+<h2 id="5a8-technology-integration">5a.8 Technology Integration<a class="headerlink" href="#5a8-technology-integration" title="Permanent link">¶</a></h2>
+<h3 id="simpy-integration">SimPy Integration<a class="headerlink" href="#simpy-integration" title="Permanent link">¶</a></h3>
+<p><strong>SimPyAdapter</strong> provides abstraction:
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimPyAdapter</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_event</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">until</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div></p>
+<h3 id="pydantic-integration">Pydantic Integration<a class="headerlink" href="#pydantic-integration" title="Permanent link">¶</a></h3>
+<p>All domain models use Pydantic for:
+- Type safety
+- Automatic validation
+- JSON serialization
+- Field constraints
+- Custom validators</p>
+<h3 id="event-bus-integration">Event Bus Integration<a class="headerlink" href="#event-bus-integration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">contexts.shared.domain.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventBus</span>
+
+<span class="c1"># Initialize event bus</span>
+<span class="n">event_bus</span> <span class="o">=</span> <span class="n">EventBus</span><span class="p">()</span>
+
+<span class="c1"># Subscribe to events</span>
+<span class="n">event_bus</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">TrainArrivedEvent</span><span class="p">,</span> <span class="n">handler</span><span class="p">)</span>
+
+<span class="c1"># Publish events</span>
+<span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">TrainArrivedEvent</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+</code></pre></div>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

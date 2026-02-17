@@ -1,0 +1,1824 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../07-deployment/" rel="prev"/>
+<link href="../09-architecture-decisions/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Concepts - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#8-cross-cutting-concepts-mvp">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Concepts
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-layered-architecture">
+<span class="md-ellipsis">
+      
+        8.1 Layered Architecture
+      
+    </span>
+</a>
+<nav aria-label="8.1 Layered Architecture" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#layer-structure-applied-to-each-context">
+<span class="md-ellipsis">
+      
+        Layer Structure (Applied to Each Context)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-domain-model-with-standardized-field-names">
+<span class="md-ellipsis">
+      
+        8.2 Domain Model with Standardized Field Names
+      
+    </span>
+</a>
+<nav aria-label="8.2 Domain Model with Standardized Field Names" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-core-entities">
+<span class="md-ellipsis">
+      
+        MVP Core Entities
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-configuration-models">
+<span class="md-ellipsis">
+      
+        MVP Configuration Models
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-result-models">
+<span class="md-ellipsis">
+      
+        MVP Result Models
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#83-error-handling">
+<span class="md-ellipsis">
+      
+        8.3 Error Handling
+      
+    </span>
+</a>
+<nav aria-label="8.3 Error Handling" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-exception-hierarchy">
+<span class="md-ellipsis">
+      
+        MVP Exception Hierarchy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-error-handling-strategy">
+<span class="md-ellipsis">
+      
+        MVP Error Handling Strategy
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#84-logging-concept">
+<span class="md-ellipsis">
+      
+        8.4 Logging Concept
+      
+    </span>
+</a>
+<nav aria-label="8.4 Logging Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-logging-levels">
+<span class="md-ellipsis">
+      
+        MVP Logging Levels
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-log-format">
+<span class="md-ellipsis">
+      
+        MVP Log Format
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#85-configuration-management">
+<span class="md-ellipsis">
+      
+        8.5 Configuration Management
+      
+    </span>
+</a>
+<nav aria-label="8.5 Configuration Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-configuration-loading">
+<span class="md-ellipsis">
+      
+        MVP Configuration Loading
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-configuration-validation">
+<span class="md-ellipsis">
+      
+        MVP Configuration Validation
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#86-testing-concept">
+<span class="md-ellipsis">
+      
+        8.6 Testing Concept
+      
+    </span>
+</a>
+<nav aria-label="8.6 Testing Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-strategy">
+<span class="md-ellipsis">
+      
+        MVP Test Strategy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-examples">
+<span class="md-ellipsis">
+      
+        MVP Test Examples
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#87-performance-concept">
+<span class="md-ellipsis">
+      
+        8.7 Performance Concept
+      
+    </span>
+</a>
+<nav aria-label="8.7 Performance Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-performance-monitoring">
+<span class="md-ellipsis">
+      
+        MVP Performance Monitoring
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-memory-management">
+<span class="md-ellipsis">
+      
+        MVP Memory Management
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#88-4-layer-validation-framework">
+<span class="md-ellipsis">
+      
+        8.8 4-Layer Validation Framework
+      
+    </span>
+</a>
+<nav aria-label="8.8 4-Layer Validation Framework" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-layer-validation-architecture">
+<span class="md-ellipsis">
+      
+        4-Layer Validation Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-stacking-vs-fail-fast-comparison">
+<span class="md-ellipsis">
+      
+        Error Stacking vs Fail-Fast Comparison
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-layer-examples">
+<span class="md-ellipsis">
+      
+        Validation Layer Examples
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-result-output-example">
+<span class="md-ellipsis">
+      
+        Validation Result Output Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#89-security-concept">
+<span class="md-ellipsis">
+      
+        8.9 Security Concept
+      
+    </span>
+</a>
+<nav aria-label="8.9 Security Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-security-considerations">
+<span class="md-ellipsis">
+      
+        MVP Security Considerations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-file-security">
+<span class="md-ellipsis">
+      
+        MVP File Security
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#81-layered-architecture">
+<span class="md-ellipsis">
+      
+        8.1 Layered Architecture
+      
+    </span>
+</a>
+<nav aria-label="8.1 Layered Architecture" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#layer-structure-applied-to-each-context">
+<span class="md-ellipsis">
+      
+        Layer Structure (Applied to Each Context)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#82-domain-model-with-standardized-field-names">
+<span class="md-ellipsis">
+      
+        8.2 Domain Model with Standardized Field Names
+      
+    </span>
+</a>
+<nav aria-label="8.2 Domain Model with Standardized Field Names" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-core-entities">
+<span class="md-ellipsis">
+      
+        MVP Core Entities
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-configuration-models">
+<span class="md-ellipsis">
+      
+        MVP Configuration Models
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-result-models">
+<span class="md-ellipsis">
+      
+        MVP Result Models
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#83-error-handling">
+<span class="md-ellipsis">
+      
+        8.3 Error Handling
+      
+    </span>
+</a>
+<nav aria-label="8.3 Error Handling" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-exception-hierarchy">
+<span class="md-ellipsis">
+      
+        MVP Exception Hierarchy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-error-handling-strategy">
+<span class="md-ellipsis">
+      
+        MVP Error Handling Strategy
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#84-logging-concept">
+<span class="md-ellipsis">
+      
+        8.4 Logging Concept
+      
+    </span>
+</a>
+<nav aria-label="8.4 Logging Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-logging-levels">
+<span class="md-ellipsis">
+      
+        MVP Logging Levels
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-log-format">
+<span class="md-ellipsis">
+      
+        MVP Log Format
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#85-configuration-management">
+<span class="md-ellipsis">
+      
+        8.5 Configuration Management
+      
+    </span>
+</a>
+<nav aria-label="8.5 Configuration Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-configuration-loading">
+<span class="md-ellipsis">
+      
+        MVP Configuration Loading
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-configuration-validation">
+<span class="md-ellipsis">
+      
+        MVP Configuration Validation
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#86-testing-concept">
+<span class="md-ellipsis">
+      
+        8.6 Testing Concept
+      
+    </span>
+</a>
+<nav aria-label="8.6 Testing Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-strategy">
+<span class="md-ellipsis">
+      
+        MVP Test Strategy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-test-examples">
+<span class="md-ellipsis">
+      
+        MVP Test Examples
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#87-performance-concept">
+<span class="md-ellipsis">
+      
+        8.7 Performance Concept
+      
+    </span>
+</a>
+<nav aria-label="8.7 Performance Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-performance-monitoring">
+<span class="md-ellipsis">
+      
+        MVP Performance Monitoring
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-memory-management">
+<span class="md-ellipsis">
+      
+        MVP Memory Management
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#88-4-layer-validation-framework">
+<span class="md-ellipsis">
+      
+        8.8 4-Layer Validation Framework
+      
+    </span>
+</a>
+<nav aria-label="8.8 4-Layer Validation Framework" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-layer-validation-architecture">
+<span class="md-ellipsis">
+      
+        4-Layer Validation Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-stacking-vs-fail-fast-comparison">
+<span class="md-ellipsis">
+      
+        Error Stacking vs Fail-Fast Comparison
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-layer-examples">
+<span class="md-ellipsis">
+      
+        Validation Layer Examples
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validation-result-output-example">
+<span class="md-ellipsis">
+      
+        Validation Result Output Example
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#89-security-concept">
+<span class="md-ellipsis">
+      
+        8.9 Security Concept
+      
+    </span>
+</a>
+<nav aria-label="8.9 Security Concept" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-security-considerations">
+<span class="md-ellipsis">
+      
+        MVP Security Considerations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-file-security">
+<span class="md-ellipsis">
+      
+        MVP File Security
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="8-cross-cutting-concepts-mvp">8. Cross-Cutting Concepts (MVP)<a class="headerlink" href="#8-cross-cutting-concepts-mvp" title="Permanent link">¶</a></h1>
+<p>This section describes architectural concepts and patterns that apply across multiple building blocks. Code examples illustrate these concepts but are <strong>not production code</strong>.</p>
+<h2 id="81-layered-architecture">8.1 Layered Architecture<a class="headerlink" href="#81-layered-architecture" title="Permanent link">¶</a></h2>
+<p><strong>Note:</strong> Each bounded context follows a layered architecture pattern (<a href="../09-architecture-decisions/#adr-mvp-005-layered-architecture">ADR MVP-005</a>).</p>
+<h3 id="layer-structure-applied-to-each-context">Layer Structure (Applied to Each Context)<a class="headerlink" href="#layer-structure-applied-to-each-context" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Layers"
+        subgraph "Presentation"
+            CLI[CLI Interface]
+        end
+
+        subgraph "Business Logic"
+            ConfigService[Configuration Service]
+            DomainService[Workshop Operations Service]
+            SimulationService[Analysis &amp; Reporting Service]
+        end
+
+        subgraph "Data Access"
+            JSONReader[JSON Reader]
+            CSVWriter[CSV Writer]
+        end
+
+        subgraph "Infrastructure"
+            SimPy[SimPy Framework]
+            Matplotlib[Matplotlib]
+        end
+    end
+
+    CLI --&gt; ConfigService
+    CLI --&gt; SimulationService
+    ConfigService --&gt; JSONReader
+    DomainService --&gt; SimPy
+    SimulationService --&gt; CSVWriter
+    SimulationService --&gt; Matplotlib
+
+    classDef presentation fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#fff
+    classDef business fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
+    classDef data fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
+    classDef infrastructure fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#fff
+
+    class CLI presentation
+    class ConfigService,DomainService,SimulationService business
+    class JSONReader,CSVWriter data
+    class SimPy,Matplotlib infrastructure</code></pre>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Responsibility</th>
+<th>Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Application</strong></td>
+<td>Coordinators, context orchestration</td>
+<td>ArrivalCoordinator, CollectionCoordinator, WorkshopCoordinator, ParkingCoordinator</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>Business logic, domain services</td>
+<td>BatchFormationService, RakeFormationService, TrainFormationService, WorkshopSchedulingService</td>
+</tr>
+<tr>
+<td><strong>Infrastructure</strong></td>
+<td>External frameworks, resource management</td>
+<td>SimPy, LocomotiveResourceManager, TrackCapacityManager, WorkshopResourceManager</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale:</strong> Layered architecture provides clear separation of concerns within each bounded context, enabling rapid MVP development while maintaining code organization. See <a href="../04-solution-strategy/#43-technical-architecture-pattern">Section 4.3</a> for architectural pattern decision.</p>
+<hr/>
+<h2 id="82-domain-model-with-standardized-field-names">8.2 Domain Model with Standardized Field Names<a class="headerlink" href="#82-domain-model-with-standardized-field-names" title="Permanent link">¶</a></h2>
+<p><strong>Field Name Standardization:</strong> All entity IDs use consistent naming: <code>id</code> (not <code>prefix_id</code>) and <code>track</code> (not <code>track_id</code>) for track references.</p>
+<blockquote>
+<p><strong>WARNING:</strong> Code examples in this section are <strong>simplified illustrations for architecture documentation only</strong>. They are <strong>NOT production-ready</strong> and lack:
+- Complete validation logic
+- Full type hints and error handling
+- Business rules and edge cases
+- Comprehensive docstrings</p>
+<p><strong>DO NOT copy-paste these examples into production code.</strong></p>
+</blockquote>
+<h3 id="mvp-core-entities">MVP Core Entities<a class="headerlink" href="#mvp-core-entities" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>classDiagram
+    class Workshop {
+        +id: str
+        +track: str
+        +retrofit_stations: int
+        +get_available_capacity()
+        +calculate_throughput()
+    }
+
+    class Locomotive {
+        +id: str
+        +track: str
+        +status: LocomotiveStatus
+        +is_available()
+        +assign_to_job()
+    }
+
+    class Wagon {
+        +id: str
+        +track: str
+        +length: float
+        +needs_retrofit: bool
+        +status: WagonStatus
+    }
+
+    class Train {
+        +id: str
+        +locomotive_id: str
+        +route_id: str
+        +wagons: List[Wagon]
+        +arrival_time: datetime
+    }
+
+    Workshop --o Station
+    Station --o Worker
+    Station --o Wagon</code></pre>
+<h3 id="mvp-configuration-models">MVP Configuration Models<a class="headerlink" href="#mvp-configuration-models" title="Permanent link">¶</a></h3>
+<p><strong>Actual implementation:</strong> <code>popupsim/backend/src/configuration/model_*.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># SIMPLIFIED EXAMPLE - See actual files for complete implementation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ScenarioConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Configuration model for simulation scenarios."""</span>
+    <span class="n">scenario_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">'^[a-zA-Z0-9_-]+$'</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">start_date</span><span class="p">:</span> <span class="n">date</span>
+    <span class="n">end_date</span><span class="p">:</span> <span class="n">date</span>
+    <span class="n">workshop</span><span class="p">:</span> <span class="n">Workshop</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">train_schedule_file</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">routes_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">workshop_tracks_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># ... additional fields and validators in actual implementation</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Workshop</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Workshop models with available tracks."""</span>
+    <span class="n">tracks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WorkshopTrack</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># ... additional validators in actual implementation</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">WorkshopTrack</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Individual track within workshop."""</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">function</span><span class="p">:</span> <span class="n">TrackFunction</span>
+    <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">retrofit_time_min</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># ... additional fields in actual implementation</span>
+</code></pre></div>
+<h3 id="mvp-result-models">MVP Result Models<a class="headerlink" href="#mvp-result-models" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># SIMPLIFIED EXAMPLE - Actual structure to be defined during implementation</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationResults</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">total_wagons_processed</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">simulation_duration_hours</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">throughput_per_hour</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">average_waiting_time</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">station_utilization</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="c1"># ... additional KPIs to be determined</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">KPIData</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">throughput</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">utilization</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">queue_length</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">waiting_time</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="c1"># ... additional metrics to be determined</span>
+</code></pre></div>
+<h2 id="83-error-handling">8.3 Error Handling<a class="headerlink" href="#83-error-handling" title="Permanent link">¶</a></h2>
+<p>Error handling strategy supports the quality goals defined in <a href="../01-introduction-goals/#12-quality-goals">Section 1.2</a>, particularly <strong>Simulation Accuracy &amp; Reliability</strong> (Priority 2). See <a href="../06-runtime/">Section 6</a> for error scenarios in runtime view.</p>
+<h3 id="mvp-exception-hierarchy">MVP Exception Hierarchy<a class="headerlink" href="#mvp-exception-hierarchy" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLE - Illustrates exception hierarchy pattern</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PopUpSimError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Base exception for PopUpSim MVP"""</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationError</span><span class="p">(</span><span class="n">PopUpSimError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Configuration loading/validation errors"""</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationError</span><span class="p">(</span><span class="n">PopUpSimError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Simulation runtime errors"""</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">OutputError</span><span class="p">(</span><span class="n">PopUpSimError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Output generation errors"""</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h3 id="mvp-error-handling-strategy">MVP Error Handling Strategy<a class="headerlink" href="#mvp-error-handling-strategy" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Error Handling"
+        Try[Try Operation]
+        Catch[Catch Exception]
+        Log[Log Error]
+        Recover[Attempt Recovery]
+        Fail[Graceful Failure]
+    end
+
+    Try --&gt; Catch
+    Catch --&gt; Log
+    Log --&gt; Recover
+    Recover --&gt; Fail
+
+    classDef error fill:#ffebee,stroke:#d32f2f
+    classDef recovery fill:#e8f5e8,stroke:#388e3c
+
+    class Try,Catch,Log error
+    class Recover,Fail recovery</code></pre>
+<h2 id="84-logging-concept">8.4 Logging Concept<a class="headerlink" href="#84-logging-concept" title="Permanent link">¶</a></h2>
+<p>Logging configuration is defined in <a href="../07-deployment/#77-error-handling-logging">Section 7.7</a>.</p>
+<h3 id="mvp-logging-levels">MVP Logging Levels<a class="headerlink" href="#mvp-logging-levels" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>MVP Usage</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DEBUG</strong></td>
+<td>Detailed development info</td>
+<td>SimPy event details</td>
+</tr>
+<tr>
+<td><strong>INFO</strong></td>
+<td>Normal program execution</td>
+<td>"Simulation started"</td>
+</tr>
+<tr>
+<td><strong>WARNING</strong></td>
+<td>Potential problems</td>
+<td>"High queue length detected"</td>
+</tr>
+<tr>
+<td><strong>ERROR</strong></td>
+<td>Errors with recovery</td>
+<td>"Config file not found, using defaults"</td>
+</tr>
+<tr>
+<td><strong>CRITICAL</strong></td>
+<td>Severe errors</td>
+<td>"Simulation failed completely"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mvp-log-format">MVP Log Format<a class="headerlink" href="#mvp-log-format" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLE - Illustrates logging pattern</span>
+<span class="n">LOG_FORMAT</span> <span class="o">=</span> <span class="s1">'</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">'</span>
+
+<span class="c1"># Example log output:</span>
+<span class="c1"># 2025-10-15 10:00:00,123 - ConfigService - INFO - Loading scenario.json</span>
+<span class="c1"># 2025-10-15 10:00:01,456 - WorkshopService - INFO - Created 4 stations</span>
+<span class="c1"># 2025-10-15 10:00:02,789 - SimulationService - INFO - Starting simulation</span>
+<span class="c1"># 2025-10-15 10:05:30,012 - SimulationService - WARNING - Queue length: 25</span>
+<span class="c1"># 2025-10-15 10:10:45,345 - OutputService - INFO - Generated results.csv</span>
+</code></pre></div>
+<h2 id="85-configuration-management">8.5 Configuration Management<a class="headerlink" href="#85-configuration-management" title="Permanent link">¶</a></h2>
+<p>Configuration management supports <strong>Usability &amp; Accessibility</strong> (Priority 3) through file-based configuration. See <a href="../05-building-blocks/#52-level-2-configuration-context">Section 5.2</a> for Configuration Context details.</p>
+<h3 id="mvp-configuration-loading">MVP Configuration Loading<a class="headerlink" href="#mvp-configuration-loading" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Main as main.py
+    participant CS as ConfigService
+    participant Validator as Validator
+    participant Files as File System
+
+    Main-&gt;&gt;CS: load_configuration()
+    CS-&gt;&gt;Files: read scenario.json
+    Files-&gt;&gt;CS: json_data
+    CS-&gt;&gt;Files: read workshop_config.csv
+    Files-&gt;&gt;CS: csv_data
+    CS-&gt;&gt;Validator: validate_config(data)
+    Validator-&gt;&gt;CS: validation_result
+    CS-&gt;&gt;Main: merged_config</code></pre>
+<h3 id="mvp-configuration-validation">MVP Configuration Validation<a class="headerlink" href="#mvp-configuration-validation" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLE - Illustrates validation pattern</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_scenario_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""MVP Configuration Validation"""</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Basic validation rules</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'duration_hours'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Duration must be positive"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'stations'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"At least one station required"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'workers_per_station'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"At least one worker per station required"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">errors</span>
+</code></pre></div>
+<h2 id="86-testing-concept">8.6 Testing Concept<a class="headerlink" href="#86-testing-concept" title="Permanent link">¶</a></h2>
+<p>Testing strategy supports <strong>Testability</strong> (Priority 5) quality goal. See <a href="../07-deployment/#710-technology-stack-summary">Section 7.10</a> for testing tools (Pytest, MyPy, Ruff).</p>
+<h3 id="mvp-test-strategy">MVP Test Strategy<a class="headerlink" href="#mvp-test-strategy" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Testing Pyramid"
+        subgraph "Unit Tests"
+            ConfigTests[Configuration Tests]
+            ModelTests[Domain Model Tests]
+            ServiceTests[Service Logic Tests]
+        end
+
+        subgraph "Integration Tests"
+            FileTests[File I/O Tests]
+            SimPyTests[SimPy Integration Tests]
+        end
+
+        subgraph "System Tests"
+            E2ETests[End-to-End Simulation Tests]
+        end
+    end
+
+    ConfigTests --&gt; FileTests
+    ModelTests --&gt; SimPyTests
+    ServiceTests --&gt; E2ETests
+
+    classDef unit fill:#4caf50,stroke:#2e7d32
+    classDef integration fill:#ff9800,stroke:#e65100
+    classDef system fill:#2196f3,stroke:#1565c0
+
+    class ConfigTests,ModelTests,ServiceTests unit
+    class FileTests,SimPyTests integration
+    class E2ETests system</code></pre>
+<h3 id="mvp-test-examples">MVP Test Examples<a class="headerlink" href="#mvp-test-examples" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLES - Illustrate testing patterns</span>
+
+<span class="c1"># Unit Test Example</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_workshop_station_availability</span><span class="p">():</span>
+    <span class="n">station</span> <span class="o">=</span> <span class="n">Station</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"WS001"</span><span class="p">,</span> <span class="n">capacity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="p">[],</span> <span class="n">current_wagons</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">station</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span>
+
+    <span class="n">station</span><span class="o">.</span><span class="n">current_wagons</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">station</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="o">==</span> <span class="kc">False</span>
+
+<span class="c1"># Integration Test Example</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_configuration_loading</span><span class="p">():</span>
+    <span class="n">config_service</span> <span class="o">=</span> <span class="n">ConfigurationService</span><span class="p">()</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">config_service</span><span class="o">.</span><span class="n">load_scenario</span><span class="p">(</span><span class="s2">"test_data/"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">duration_hours</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">workshop</span><span class="o">.</span><span class="n">stations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</code></pre></div>
+<h2 id="87-performance-concept">8.7 Performance Concept<a class="headerlink" href="#87-performance-concept" title="Permanent link">¶</a></h2>
+<p>Performance monitoring will measure actual resource usage during MVP implementation. See <a href="../07-deployment/#78-performance-monitoring">Section 7.8</a> for performance metrics.</p>
+<h3 id="mvp-performance-monitoring">MVP Performance Monitoring<a class="headerlink" href="#mvp-performance-monitoring" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLE - Illustrates performance monitoring pattern</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'T'</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">measure_time</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""MVP Performance Decorator"""</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> took </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+<span class="c1"># Usage</span>
+<span class="nd">@measure_time</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_simulation</span><span class="p">(</span><span class="n">duration_hours</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Simulation logic</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h3 id="mvp-memory-management">MVP Memory Management<a class="headerlink" href="#mvp-memory-management" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLE - Illustrates memory monitoring pattern</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">log_memory_usage</span><span class="p">(</span><span class="n">phase</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""MVP Memory Monitoring"""</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+    <span class="n">memory_mb</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Memory usage in </span><span class="si">{</span><span class="n">phase</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">memory_mb</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MB"</span><span class="p">)</span>
+
+    <span class="c1"># Force garbage collection for MVP</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="88-4-layer-validation-framework">8.8 4-Layer Validation Framework<a class="headerlink" href="#88-4-layer-validation-framework" title="Permanent link">¶</a></h2>
+<p><strong>Enterprise-grade validation</strong> with comprehensive error stacking ensures <strong>Simulation Accuracy &amp; Reliability</strong> (Priority 2). See validation framework documentation in the codebase for complete details.</p>
+<h3 id="4-layer-validation-architecture">4-Layer Validation Architecture<a class="headerlink" href="#4-layer-validation-architecture" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Validation Pipeline"
+        Input["Scenario Data"]
+
+        subgraph "Layer 1: SYNTAX"
+            Syntax["Field format validation&lt;br/&gt;Type checking&lt;br/&gt;Required fields"]
+        end
+
+        subgraph "Layer 2: SEMANTIC"
+            Semantic["Business rules&lt;br/&gt;Date logic&lt;br/&gt;Strategy validation"]
+        end
+
+        subgraph "Layer 3: INTEGRITY"
+            Integrity["Cross-references&lt;br/&gt;Data consistency&lt;br/&gt;Duplicate detection"]
+        end
+
+        subgraph "Layer 4: FEASIBILITY"
+            Feasibility["Capacity constraints&lt;br/&gt;Resource allocation&lt;br/&gt;Simulation readiness"]
+        end
+
+        Result["ValidationResult&lt;br/&gt;All issues stacked"]
+    end
+
+    Input --&gt; Syntax
+    Syntax --&gt; Semantic
+    Semantic --&gt; Integrity
+    Integrity --&gt; Feasibility
+    Feasibility --&gt; Result
+
+    classDef layer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef validation fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+
+    class Syntax,Semantic,Integrity,Feasibility layer
+    class Result validation
+    class Input external</code></pre>
+<h3 id="error-stacking-vs-fail-fast-comparison">Error Stacking vs Fail-Fast Comparison<a class="headerlink" href="#error-stacking-vs-fail-fast-comparison" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>User Experience</th>
+<th>Development Efficiency</th>
+<th>Error Quality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fail-Fast (Traditional)</strong></td>
+<td>❌ Fix 1 error → Run again → Fix 1 error</td>
+<td>⭐⭐ Slow iteration</td>
+<td>⭐⭐ Limited context</td>
+</tr>
+<tr>
+<td><strong>Error Stacking (PopUpSim)</strong></td>
+<td>✅ See ALL issues at once → Fix all</td>
+<td>⭐⭐⭐⭐⭐ Fast iteration</td>
+<td>⭐⭐⭐⭐⭐ Complete context</td>
+</tr>
+</tbody>
+</table>
+<h3 id="validation-layer-examples">Validation Layer Examples<a class="headerlink" href="#validation-layer-examples" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ACTUAL IMPLEMENTATION - Layer 3: Integrity Validator</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntegrityValidator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Validates cross-references and data consistency."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="n">Scenario</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationResult</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ValidationResult</span><span class="p">(</span><span class="n">is_valid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Collect all available IDs</span>
+        <span class="n">locomotive_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">loco</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">loco</span> <span class="ow">in</span> <span class="n">scenario</span><span class="o">.</span><span class="n">locomotives</span> <span class="ow">or</span> <span class="p">[]}</span>
+        <span class="n">route_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">route</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">scenario</span><span class="o">.</span><span class="n">routes</span> <span class="ow">or</span> <span class="p">[]}</span>
+
+        <span class="c1"># Validate train references</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">train</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">trains</span> <span class="ow">or</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="n">train</span><span class="o">.</span><span class="n">locomotive_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">locomotive_ids</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"Train </span><span class="si">{</span><span class="n">train</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> references non-existent locomotive '</span><span class="si">{</span><span class="n">train</span><span class="o">.</span><span class="n">locomotive_id</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+                    <span class="n">field</span><span class="o">=</span><span class="sa">f</span><span class="s2">"trains[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">].locomotive_id"</span><span class="p">,</span>
+                    <span class="n">category</span><span class="o">=</span><span class="n">ValidationCategory</span><span class="o">.</span><span class="n">INTEGRITY</span><span class="p">,</span>
+                    <span class="n">suggestion</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Use one of: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">locomotive_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+<span class="c1"># ACTUAL IMPLEMENTATION - Validation Pipeline Usage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shared.validation.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationPipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">ValidationPipeline</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">is_valid</span><span class="p">:</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>  <span class="c1"># Shows categorized issues</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get_errors</span><span class="p">())</span><span class="si">}</span><span class="s2"> errors, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get_warnings</span><span class="p">())</span><span class="si">}</span><span class="s2"> warnings"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="validation-result-output-example">Validation Result Output Example<a class="headerlink" href="#validation-result-output-example" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>📋 Validation Summary: 5 errors, 2 warnings
+
+SYNTAX ERRORS:
+- Scenario ID too long (Field: id)
+  → Suggestion: Keep scenario ID under 50 characters
+
+INTEGRITY ERRORS:
+- Train T1 references non-existent locomotive 'L99' (Field: trains[0].locomotive_id)
+  → Suggestion: Use one of: L1, L2, L3
+- Route R1 references non-existent track 'T99' (Field: routes[0].track_sequence[2])
+  → Suggestion: Use existing track ID from: T1, T2, T3
+- No locomotives configured (Field: locomotives)
+  → Suggestion: Add at least one locomotive for wagon transport
+
+FEASIBILITY WARNINGS:
+- High wagon-to-station ratio (150.0:1) may cause bottlenecks (Field: workshops)
+  → Suggestion: Consider adding more retrofit stations
+- Long simulation duration (400 days) may impact performance (Field: end_date)
+  → Suggestion: Consider shorter simulation periods
+</code></pre></div>
+<h2 id="89-security-concept">8.9 Security Concept<a class="headerlink" href="#89-security-concept" title="Permanent link">¶</a></h2>
+<p>Security measures for MVP desktop application focus on input validation and safe file handling.</p>
+<h3 id="mvp-security-considerations">MVP Security Considerations<a class="headerlink" href="#mvp-security-considerations" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>MVP Measure</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Input Validation</strong></td>
+<td>Pydantic Models</td>
+<td>Prevents invalid data</td>
+</tr>
+<tr>
+<td><strong>File Access</strong></td>
+<td>Relative Paths Only</td>
+<td>Prevents directory traversal</td>
+</tr>
+<tr>
+<td><strong>Error Messages</strong></td>
+<td>No system paths</td>
+<td>Prevents information disclosure</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>No credentials</td>
+<td>Prevents credential leakage</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mvp-file-security">MVP File Security<a class="headerlink" href="#mvp-file-security" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CONCEPTUAL EXAMPLE - Illustrates path traversal prevention pattern</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">safe_file_path</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""MVP Safe File Path Resolution"""</span>
+    <span class="n">base_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="p">(</span><span class="n">base_path</span> <span class="o">/</span> <span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="c1"># Ensure file is within base directory</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_path</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid file path: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">file_path</span>
+</code></pre></div>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

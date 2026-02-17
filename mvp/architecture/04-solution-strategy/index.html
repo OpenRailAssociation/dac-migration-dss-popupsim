@@ -1,0 +1,1439 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../03-context/" rel="prev"/>
+<link href="../05-building-blocks/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Solution Strategy - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#4-solution-strategy">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Solution Strategy
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-top-level-decomposition">
+<span class="md-ellipsis">
+      
+        4.1 Top-Level Decomposition
+      
+    </span>
+</a>
+<nav aria-label="4.1 Top-Level Decomposition" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#context-responsibilities">
+<span class="md-ellipsis">
+      
+        Context Responsibilities
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-technology-decisions">
+<span class="md-ellipsis">
+      
+        4.2 Technology Decisions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-architectural-patterns">
+<span class="md-ellipsis">
+      
+        4.3 Architectural Patterns
+      
+    </span>
+</a>
+<nav aria-label="4.3 Architectural Patterns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#431-bounded-contexts-ddd">
+<span class="md-ellipsis">
+      
+        4.3.1 Bounded Contexts (DDD)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#432-layered-architecture">
+<span class="md-ellipsis">
+      
+        4.3.2 Layered Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#433-coordinator-pattern">
+<span class="md-ellipsis">
+      
+        4.3.3 Coordinator Pattern
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#434-domain-services-no-simpy-dependencies">
+<span class="md-ellipsis">
+      
+        4.3.4 Domain Services (No SimPy Dependencies)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#44-integration-strategy">
+<span class="md-ellipsis">
+      
+        4.4 Integration Strategy
+      
+    </span>
+</a>
+<nav aria-label="4.4 Integration Strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#441-event-driven-communication">
+<span class="md-ellipsis">
+      
+        4.4.1 Event-Driven Communication
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#442-direct-dependencies">
+<span class="md-ellipsis">
+      
+        4.4.2 Direct Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#443-single-source-of-truth">
+<span class="md-ellipsis">
+      
+        4.4.3 Single Source of Truth
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#45-simulation-execution-flow">
+<span class="md-ellipsis">
+      
+        4.5 Simulation Execution Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#46-key-design-decisions">
+<span class="md-ellipsis">
+      
+        4.6 Key Design Decisions
+      
+    </span>
+</a>
+<nav aria-label="4.6 Key Design Decisions" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#461-removed-legacy-code">
+<span class="md-ellipsis">
+      
+        4.6.1 Removed Legacy Code
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#462-coordinator-configuration-pattern">
+<span class="md-ellipsis">
+      
+        4.6.2 Coordinator Configuration Pattern
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#463-resource-management">
+<span class="md-ellipsis">
+      
+        4.6.3 Resource Management
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#464-metrics-collection">
+<span class="md-ellipsis">
+      
+        4.6.4 Metrics Collection
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#47-quality-attributes">
+<span class="md-ellipsis">
+      
+        4.7 Quality Attributes
+      
+    </span>
+</a>
+<nav aria-label="4.7 Quality Attributes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#471-maintainability">
+<span class="md-ellipsis">
+      
+        4.7.1 Maintainability
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#472-testability">
+<span class="md-ellipsis">
+      
+        4.7.2 Testability
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#473-performance">
+<span class="md-ellipsis">
+      
+        4.7.3 Performance
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#474-extensibility">
+<span class="md-ellipsis">
+      
+        4.7.4 Extensibility
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#48-technology-stack">
+<span class="md-ellipsis">
+      
+        4.8 Technology Stack
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#49-deployment-model">
+<span class="md-ellipsis">
+      
+        4.9 Deployment Model
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#410-future-enhancements">
+<span class="md-ellipsis">
+      
+        4.10 Future Enhancements
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#41-top-level-decomposition">
+<span class="md-ellipsis">
+      
+        4.1 Top-Level Decomposition
+      
+    </span>
+</a>
+<nav aria-label="4.1 Top-Level Decomposition" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#context-responsibilities">
+<span class="md-ellipsis">
+      
+        Context Responsibilities
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#42-technology-decisions">
+<span class="md-ellipsis">
+      
+        4.2 Technology Decisions
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#43-architectural-patterns">
+<span class="md-ellipsis">
+      
+        4.3 Architectural Patterns
+      
+    </span>
+</a>
+<nav aria-label="4.3 Architectural Patterns" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#431-bounded-contexts-ddd">
+<span class="md-ellipsis">
+      
+        4.3.1 Bounded Contexts (DDD)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#432-layered-architecture">
+<span class="md-ellipsis">
+      
+        4.3.2 Layered Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#433-coordinator-pattern">
+<span class="md-ellipsis">
+      
+        4.3.3 Coordinator Pattern
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#434-domain-services-no-simpy-dependencies">
+<span class="md-ellipsis">
+      
+        4.3.4 Domain Services (No SimPy Dependencies)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#44-integration-strategy">
+<span class="md-ellipsis">
+      
+        4.4 Integration Strategy
+      
+    </span>
+</a>
+<nav aria-label="4.4 Integration Strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#441-event-driven-communication">
+<span class="md-ellipsis">
+      
+        4.4.1 Event-Driven Communication
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#442-direct-dependencies">
+<span class="md-ellipsis">
+      
+        4.4.2 Direct Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#443-single-source-of-truth">
+<span class="md-ellipsis">
+      
+        4.4.3 Single Source of Truth
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#45-simulation-execution-flow">
+<span class="md-ellipsis">
+      
+        4.5 Simulation Execution Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#46-key-design-decisions">
+<span class="md-ellipsis">
+      
+        4.6 Key Design Decisions
+      
+    </span>
+</a>
+<nav aria-label="4.6 Key Design Decisions" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#461-removed-legacy-code">
+<span class="md-ellipsis">
+      
+        4.6.1 Removed Legacy Code
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#462-coordinator-configuration-pattern">
+<span class="md-ellipsis">
+      
+        4.6.2 Coordinator Configuration Pattern
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#463-resource-management">
+<span class="md-ellipsis">
+      
+        4.6.3 Resource Management
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#464-metrics-collection">
+<span class="md-ellipsis">
+      
+        4.6.4 Metrics Collection
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#47-quality-attributes">
+<span class="md-ellipsis">
+      
+        4.7 Quality Attributes
+      
+    </span>
+</a>
+<nav aria-label="4.7 Quality Attributes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#471-maintainability">
+<span class="md-ellipsis">
+      
+        4.7.1 Maintainability
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#472-testability">
+<span class="md-ellipsis">
+      
+        4.7.2 Testability
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#473-performance">
+<span class="md-ellipsis">
+      
+        4.7.3 Performance
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#474-extensibility">
+<span class="md-ellipsis">
+      
+        4.7.4 Extensibility
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#48-technology-stack">
+<span class="md-ellipsis">
+      
+        4.8 Technology Stack
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#49-deployment-model">
+<span class="md-ellipsis">
+      
+        4.9 Deployment Model
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#410-future-enhancements">
+<span class="md-ellipsis">
+      
+        4.10 Future Enhancements
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="4-solution-strategy">4. Solution Strategy<a class="headerlink" href="#4-solution-strategy" title="Permanent link">¶</a></h1>
+<h2 id="41-top-level-decomposition">4.1 Top-Level Decomposition<a class="headerlink" href="#41-top-level-decomposition" title="Permanent link">¶</a></h2>
+<p><strong>Primary Decomposition:</strong> Domain-Driven Design with 4 bounded contexts.</p>
+<p><strong>Rationale:</strong> Separating concerns by domain responsibility enables:
+- Clear ownership of functionality
+- Independent development and testing
+- Maintainable codebase with explicit boundaries
+- Scalable architecture for future enhancements</p>
+<pre class="mermaid"><code>graph TB
+    subgraph "PopUpSim - 4 Bounded Contexts"
+        CFG["Configuration Context&lt;br/&gt;File loading &amp; validation&lt;br/&gt;Pydantic models"]
+        RWF["Retrofit Workflow Context&lt;br/&gt;Core simulation logic&lt;br/&gt;SimPy coordinators"]
+        RLY["Railway Infrastructure Context&lt;br/&gt;Track management&lt;br/&gt;Domain aggregates"]
+        EXT["External Trains Context&lt;br/&gt;Train arrivals&lt;br/&gt;Event publishing"]
+    end
+
+    CFG --&gt;|Scenario| RWF
+    CFG --&gt;|Scenario| RLY
+    CFG --&gt;|Scenario| EXT
+    RLY &lt;--&gt;|Track state| RWF
+    EXT --&gt;|Events| RWF
+
+    classDef context fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    class CFG,RWF,RLY,EXT context</code></pre>
+<h3 id="context-responsibilities">Context Responsibilities<a class="headerlink" href="#context-responsibilities" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Core Responsibility</th>
+<th>Key Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration</strong></td>
+<td>Load and validate scenario files</td>
+<td>FileLoader, ConfigurationBuilder, Pydantic models</td>
+</tr>
+<tr>
+<td><strong>Retrofit Workflow</strong></td>
+<td>Execute simulation, coordinate wagon flow</td>
+<td>4 coordinators, domain services, resource managers</td>
+</tr>
+<tr>
+<td><strong>Railway Infrastructure</strong></td>
+<td>Manage track capacity and occupancy</td>
+<td>TrackGroup, Track, TrackOccupancy, TrackSelector</td>
+</tr>
+<tr>
+<td><strong>External Trains</strong></td>
+<td>Handle train arrivals, create wagons</td>
+<td>TrainSchedule, ExternalTrain, Wagon entities</td>
+</tr>
+</tbody>
+</table>
+<h2 id="42-technology-decisions">4.2 Technology Decisions<a class="headerlink" href="#42-technology-decisions" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Purpose</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SimPy</strong></td>
+<td>Discrete event simulation</td>
+<td>Deterministic, Python-native, proven in POC</td>
+</tr>
+<tr>
+<td><strong>Pydantic 2.0</strong></td>
+<td>Data validation</td>
+<td>Type safety, excellent validation, performance</td>
+</tr>
+<tr>
+<td><strong>Pandas</strong></td>
+<td>CSV processing</td>
+<td>Efficient data loading, train schedule parsing</td>
+</tr>
+<tr>
+<td><strong>Matplotlib</strong></td>
+<td>Visualization</td>
+<td>Simple charts, no web server required</td>
+</tr>
+<tr>
+<td><strong>Typer</strong></td>
+<td>CLI interface</td>
+<td>User-friendly command-line interface</td>
+</tr>
+<tr>
+<td><strong>uv</strong></td>
+<td>Package management</td>
+<td>Fast, reliable dependency management</td>
+</tr>
+</tbody>
+</table>
+<h2 id="43-architectural-patterns">4.3 Architectural Patterns<a class="headerlink" href="#43-architectural-patterns" title="Permanent link">¶</a></h2>
+<h3 id="431-bounded-contexts-ddd">4.3.1 Bounded Contexts (DDD)<a class="headerlink" href="#431-bounded-contexts-ddd" title="Permanent link">¶</a></h3>
+<p>Each context has clear boundaries and responsibilities:
+- <strong>Configuration</strong>: Input boundary - loads external data
+- <strong>Retrofit Workflow</strong>: Core domain - simulation execution
+- <strong>Railway Infrastructure</strong>: Supporting domain - track management
+- <strong>External Trains</strong>: Supporting domain - wagon lifecycle</p>
+<h3 id="432-layered-architecture">4.3.2 Layered Architecture<a class="headerlink" href="#432-layered-architecture" title="Permanent link">¶</a></h3>
+<p>Within each context:</p>
+<div class="highlight"><pre><span></span><code>Application Layer    → Coordinators, services, orchestration
+Domain Layer         → Entities, aggregates, domain services
+Infrastructure Layer → SimPy adapters, resource managers
+</code></pre></div>
+<h3 id="433-coordinator-pattern">4.3.3 Coordinator Pattern<a class="headerlink" href="#433-coordinator-pattern" title="Permanent link">¶</a></h3>
+<p>Retrofit Workflow uses 4 specialized coordinators:
+1. <strong>ArrivalCoordinator</strong> - Process train arrivals
+2. <strong>CollectionCoordinator</strong> - Move wagons to retrofit track
+3. <strong>WorkshopCoordinator</strong> - Execute retrofit operations
+4. <strong>ParkingCoordinator</strong> - Move completed wagons to parking</p>
+<p>Each coordinator runs as independent SimPy process.</p>
+<h3 id="434-domain-services-no-simpy-dependencies">4.3.4 Domain Services (No SimPy Dependencies)<a class="headerlink" href="#434-domain-services-no-simpy-dependencies" title="Permanent link">¶</a></h3>
+<p>Business logic isolated from simulation framework:
+- <strong>BatchFormationService</strong> - Create wagon batches
+- <strong>RakeFormationService</strong> - Form/dissolve wagon rakes
+- <strong>TrainFormationService</strong> - Assemble trains
+- <strong>WorkshopSchedulingService</strong> - Schedule workshops
+- <strong>CouplingService</strong> - Calculate coupling times</p>
+<p>Benefits:
+- Testable without SimPy
+- Reusable across contexts
+- Clear business logic</p>
+<h2 id="44-integration-strategy">4.4 Integration Strategy<a class="headerlink" href="#44-integration-strategy" title="Permanent link">¶</a></h2>
+<h3 id="441-event-driven-communication">4.4.1 Event-Driven Communication<a class="headerlink" href="#441-event-driven-communication" title="Permanent link">¶</a></h3>
+<p>Contexts communicate via domain events:
+- <strong>TrainArrivedEvent</strong> - External Trains → Retrofit Workflow
+- <strong>WagonMovedEvent</strong> - Retrofit Workflow → Railway Infrastructure
+- <strong>SimulationLifecycleEvents</strong> - Broadcast to all contexts</p>
+<h3 id="442-direct-dependencies">4.4.2 Direct Dependencies<a class="headerlink" href="#442-direct-dependencies" title="Permanent link">¶</a></h3>
+<p>Some contexts have direct dependencies:
+- Retrofit Workflow queries Railway Infrastructure for track capacity
+- All contexts receive Scenario from Configuration</p>
+<h3 id="443-single-source-of-truth">4.4.3 Single Source of Truth<a class="headerlink" href="#443-single-source-of-truth" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Wagons</strong>: External Trains Context owns wagon entities</li>
+<li><strong>Tracks</strong>: Railway Infrastructure Context owns track state</li>
+<li><strong>Simulation State</strong>: Retrofit Workflow Context coordinates execution</li>
+</ul>
+<h2 id="45-simulation-execution-flow">4.5 Simulation Execution Flow<a class="headerlink" href="#45-simulation-execution-flow" title="Permanent link">¶</a></h2>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Main
+    participant Config
+    participant ExtTrains
+    participant Railway
+    participant Retrofit
+
+    Main-&gt;&gt;Config: Load scenario
+    Config--&gt;&gt;Main: Validated scenario
+    Main-&gt;&gt;Railway: Initialize tracks
+    Main-&gt;&gt;ExtTrains: Set scenario
+    Main-&gt;&gt;Retrofit: Initialize context
+    Main-&gt;&gt;Retrofit: Start processes
+    Retrofit-&gt;&gt;Retrofit: Start coordinators
+    ExtTrains-&gt;&gt;Retrofit: TrainArrivedEvent
+    Retrofit-&gt;&gt;Railway: Query track capacity
+    Railway--&gt;&gt;Retrofit: Available capacity
+    Retrofit-&gt;&gt;Retrofit: Execute workflow
+    Retrofit--&gt;&gt;Main: Simulation complete
+    Main-&gt;&gt;Retrofit: Export results</code></pre>
+<h2 id="46-key-design-decisions">4.6 Key Design Decisions<a class="headerlink" href="#46-key-design-decisions" title="Permanent link">¶</a></h2>
+<h3 id="461-removed-legacy-code">4.6.1 Removed Legacy Code<a class="headerlink" href="#461-removed-legacy-code" title="Permanent link">¶</a></h3>
+<p>Cleaned up unused infrastructure:
+- Removed step-by-step configuration building (API-driven)
+- Removed legacy workflow strategies
+- Removed analytics context (metrics in Retrofit Workflow)
+- Simplified ConfigurationBuilder to file loading only</p>
+<h3 id="462-coordinator-configuration-pattern">4.6.2 Coordinator Configuration Pattern<a class="headerlink" href="#462-coordinator-configuration-pattern" title="Permanent link">¶</a></h3>
+<p>Coordinators use configuration objects:
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CollectionCoordinatorConfig</span><span class="p">:</span>
+    <span class="n">env</span><span class="p">:</span> <span class="n">Environment</span>
+    <span class="n">collection_queue</span><span class="p">:</span> <span class="n">Store</span>
+    <span class="n">retrofit_queue</span><span class="p">:</span> <span class="n">Store</span>
+    <span class="n">batch_service</span><span class="p">:</span> <span class="n">BatchFormationService</span>
+    <span class="n">track_selector</span><span class="p">:</span> <span class="n">TrackSelectionService</span>
+    <span class="n">locomotive_manager</span><span class="p">:</span> <span class="n">LocomotiveResourceManager</span>
+    <span class="c1"># ... event publishers, etc.</span>
+</code></pre></div></p>
+<p>Benefits:
+- Clear dependencies
+- Easy testing with mocks
+- Reduced constructor complexity</p>
+<h3 id="463-resource-management">4.6.3 Resource Management<a class="headerlink" href="#463-resource-management" title="Permanent link">¶</a></h3>
+<p>Three resource managers handle capacity:
+- <strong>LocomotiveResourceManager</strong> - SimPy Resource for locomotives
+- <strong>TrackCapacityManager</strong> - Track capacity and wagon placement
+- <strong>WorkshopResourceManager</strong> - SimPy Resource for workshop stations</p>
+<h3 id="464-metrics-collection">4.6.4 Metrics Collection<a class="headerlink" href="#464-metrics-collection" title="Permanent link">¶</a></h3>
+<p>Retrofit Workflow collects metrics during simulation:
+- Real-time event collection
+- Post-simulation aggregation
+- CSV export with summary statistics</p>
+<h2 id="47-quality-attributes">4.7 Quality Attributes<a class="headerlink" href="#47-quality-attributes" title="Permanent link">¶</a></h2>
+<h3 id="471-maintainability">4.7.1 Maintainability<a class="headerlink" href="#471-maintainability" title="Permanent link">¶</a></h3>
+<ul>
+<li>Clear context boundaries</li>
+<li>Domain services without framework dependencies</li>
+<li>Comprehensive type hints (MyPy strict mode)</li>
+<li>Consistent code formatting (Ruff)</li>
+</ul>
+<h3 id="472-testability">4.7.2 Testability<a class="headerlink" href="#472-testability" title="Permanent link">¶</a></h3>
+<ul>
+<li>Unit tests for domain services</li>
+<li>Integration tests for coordinators</li>
+<li>Validation tests for full scenarios</li>
+<li>Mock-friendly architecture</li>
+</ul>
+<h3 id="473-performance">4.7.3 Performance<a class="headerlink" href="#473-performance" title="Permanent link">¶</a></h3>
+<ul>
+<li>Deterministic simulation (reproducible results)</li>
+<li>Efficient track capacity queries</li>
+<li>Batch processing for locomotive utilization</li>
+<li>Minimal memory footprint</li>
+</ul>
+<h3 id="474-extensibility">4.7.4 Extensibility<a class="headerlink" href="#474-extensibility" title="Permanent link">¶</a></h3>
+<ul>
+<li>New coordinators can be added</li>
+<li>Track selection strategies pluggable</li>
+<li>Event-driven allows new subscribers</li>
+<li>Configuration supports new parameters</li>
+</ul>
+<h2 id="48-technology-stack">4.8 Technology Stack<a class="headerlink" href="#48-technology-stack" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code>Python 3.13+          → Latest stable Python
+SimPy                 → Discrete event simulation
+Pydantic 2.0+         → Data validation
+Pandas                → CSV processing
+Matplotlib            → Visualization
+Typer                 → CLI interface
+uv                    → Package management
+pytest                → Testing framework
+mypy                  → Static type checking
+ruff                  → Linting and formatting
+pylint                → Code quality analysis
+</code></pre></div>
+<h2 id="49-deployment-model">4.9 Deployment Model<a class="headerlink" href="#49-deployment-model" title="Permanent link">¶</a></h2>
+<p><strong>Single Application Deployment:</strong>
+- Desktop application with CLI
+- File-based input/output
+- No web server required
+- No database required
+- Runs on Windows/Linux/macOS</p>
+<p><strong>Execution:</strong>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>src/main.py<span class="w"> </span>--scenario<span class="w"> </span>path/to/scenario<span class="w"> </span>--output<span class="w"> </span>path/to/output
+</code></pre></div></p>
+<h2 id="410-future-enhancements">4.10 Future Enhancements<a class="headerlink" href="#410-future-enhancements" title="Permanent link">¶</a></h2>
+<p>Potential extensions (not in current scope):
+- Web interface for configuration and visualization
+- Real-time simulation monitoring
+- Database persistence for large scenarios
+- Distributed simulation for massive scale
+- API for integration with other systems
+- Advanced optimization algorithms</p>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

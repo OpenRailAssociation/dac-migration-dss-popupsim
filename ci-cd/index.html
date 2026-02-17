@@ -1,0 +1,1917 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../mvp/architecture/13-bibliography/" rel="prev"/>
+<link href="../tutorial/00-installation/" rel="next"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>CI/CD - PopUpSim Documentation</title>
+<link href="../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#cicd-pipeline-documentation">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href=".." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              CI/CD
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../mvp/architecture/">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="./">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href=".." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../mvp/architecture/13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#overview">
+<span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-structure">
+<span class="md-ellipsis">
+      
+        Workflow Structure
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backend-pipeline-jobs">
+<span class="md-ellipsis">
+      
+        Backend Pipeline Jobs
+      
+    </span>
+</a>
+<nav aria-label="Backend Pipeline Jobs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-format-job">
+<span class="md-ellipsis">
+      
+        1. Format Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-lint-jobs-parallel">
+<span class="md-ellipsis">
+      
+        2. Lint Jobs (Parallel)
+      
+    </span>
+</a>
+<nav aria-label="2. Lint Jobs (Parallel)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ruff-linting">
+<span class="md-ellipsis">
+      
+        Ruff Linting
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pylint">
+<span class="md-ellipsis">
+      
+        Pylint
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mypy-type-checking">
+<span class="md-ellipsis">
+      
+        MyPy Type Checking
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-security-scan-job">
+<span class="md-ellipsis">
+      
+        3. Security Scan Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-test-jobs-parallel">
+<span class="md-ellipsis">
+      
+        4. Test Jobs (Parallel)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#documentation-pipeline-jobs">
+<span class="md-ellipsis">
+      
+        Documentation Pipeline Jobs
+      
+    </span>
+</a>
+<nav aria-label="Documentation Pipeline Jobs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-build-job">
+<span class="md-ellipsis">
+      
+        1. Build Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-deploy-preview-job">
+<span class="md-ellipsis">
+      
+        2. Deploy Preview Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-deploy-production-job">
+<span class="md-ellipsis">
+      
+        3. Deploy Production Job
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scheduled-security-jobs">
+<span class="md-ellipsis">
+      
+        Scheduled Security Jobs
+      
+    </span>
+</a>
+<nav aria-label="Scheduled Security Jobs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openssf-scorecard-job">
+<span class="md-ellipsis">
+      
+        OpenSSF Scorecard Job
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#execution-flows">
+<span class="md-ellipsis">
+      
+        Execution Flows
+      
+    </span>
+</a>
+<nav aria-label="Execution Flows" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backend-pipeline-flow">
+<span class="md-ellipsis">
+      
+        Backend Pipeline Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#documentation-pipeline-flow">
+<span class="md-ellipsis">
+      
+        Documentation Pipeline Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scheduled-security-flow">
+<span class="md-ellipsis">
+      
+        Scheduled Security Flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-details">
+<span class="md-ellipsis">
+      
+        Configuration Details
+      
+    </span>
+</a>
+<nav aria-label="Configuration Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#triggers">
+<span class="md-ellipsis">
+      
+        Triggers
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#matrix-strategy">
+<span class="md-ellipsis">
+      
+        Matrix Strategy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependencies">
+<span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#caching">
+<span class="md-ellipsis">
+      
+        Caching
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#tools-configuration">
+<span class="md-ellipsis">
+      
+        Tools Configuration
+      
+    </span>
+</a>
+<nav aria-label="Tools Configuration" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ruff">
+<span class="md-ellipsis">
+      
+        Ruff
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pylint_1">
+<span class="md-ellipsis">
+      
+        Pylint
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mypy">
+<span class="md-ellipsis">
+      
+        MyPy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pytest">
+<span class="md-ellipsis">
+      
+        Pytest
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#failure-scenarios">
+<span class="md-ellipsis">
+      
+        Failure Scenarios
+      
+    </span>
+</a>
+<nav aria-label="Failure Scenarios" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#format-failures">
+<span class="md-ellipsis">
+      
+        Format Failures
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#lint-failures">
+<span class="md-ellipsis">
+      
+        Lint Failures
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-scan-failures">
+<span class="md-ellipsis">
+      
+        Security Scan Failures
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#test-failures">
+<span class="md-ellipsis">
+      
+        Test Failures
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#local-development">
+<span class="md-ellipsis">
+      
+        Local Development
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-optimization">
+<span class="md-ellipsis">
+      
+        Performance Optimization
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-scanning-details">
+<span class="md-ellipsis">
+      
+        Security Scanning Details
+      
+    </span>
+</a>
+<nav aria-label="Security Scanning Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#syft-sbom-generation">
+<span class="md-ellipsis">
+      
+        Syft (SBOM Generation)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#grype-vulnerability-scanning">
+<span class="md-ellipsis">
+      
+        Grype (Vulnerability Scanning)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-reports">
+<span class="md-ellipsis">
+      
+        Security Reports
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependency-management">
+<span class="md-ellipsis">
+      
+        Dependency Management
+      
+    </span>
+</a>
+<nav aria-label="Dependency Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependabot">
+<span class="md-ellipsis">
+      
+        Dependabot
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openssf-scorecard">
+<span class="md-ellipsis">
+      
+        OpenSSF Scorecard
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#monitoring">
+<span class="md-ellipsis">
+      
+        Monitoring
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#overview">
+<span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#workflow-structure">
+<span class="md-ellipsis">
+      
+        Workflow Structure
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backend-pipeline-jobs">
+<span class="md-ellipsis">
+      
+        Backend Pipeline Jobs
+      
+    </span>
+</a>
+<nav aria-label="Backend Pipeline Jobs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-format-job">
+<span class="md-ellipsis">
+      
+        1. Format Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-lint-jobs-parallel">
+<span class="md-ellipsis">
+      
+        2. Lint Jobs (Parallel)
+      
+    </span>
+</a>
+<nav aria-label="2. Lint Jobs (Parallel)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ruff-linting">
+<span class="md-ellipsis">
+      
+        Ruff Linting
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pylint">
+<span class="md-ellipsis">
+      
+        Pylint
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mypy-type-checking">
+<span class="md-ellipsis">
+      
+        MyPy Type Checking
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-security-scan-job">
+<span class="md-ellipsis">
+      
+        3. Security Scan Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-test-jobs-parallel">
+<span class="md-ellipsis">
+      
+        4. Test Jobs (Parallel)
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#documentation-pipeline-jobs">
+<span class="md-ellipsis">
+      
+        Documentation Pipeline Jobs
+      
+    </span>
+</a>
+<nav aria-label="Documentation Pipeline Jobs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-build-job">
+<span class="md-ellipsis">
+      
+        1. Build Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-deploy-preview-job">
+<span class="md-ellipsis">
+      
+        2. Deploy Preview Job
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-deploy-production-job">
+<span class="md-ellipsis">
+      
+        3. Deploy Production Job
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scheduled-security-jobs">
+<span class="md-ellipsis">
+      
+        Scheduled Security Jobs
+      
+    </span>
+</a>
+<nav aria-label="Scheduled Security Jobs" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openssf-scorecard-job">
+<span class="md-ellipsis">
+      
+        OpenSSF Scorecard Job
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#execution-flows">
+<span class="md-ellipsis">
+      
+        Execution Flows
+      
+    </span>
+</a>
+<nav aria-label="Execution Flows" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backend-pipeline-flow">
+<span class="md-ellipsis">
+      
+        Backend Pipeline Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#documentation-pipeline-flow">
+<span class="md-ellipsis">
+      
+        Documentation Pipeline Flow
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scheduled-security-flow">
+<span class="md-ellipsis">
+      
+        Scheduled Security Flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-details">
+<span class="md-ellipsis">
+      
+        Configuration Details
+      
+    </span>
+</a>
+<nav aria-label="Configuration Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#triggers">
+<span class="md-ellipsis">
+      
+        Triggers
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#matrix-strategy">
+<span class="md-ellipsis">
+      
+        Matrix Strategy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependencies">
+<span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#caching">
+<span class="md-ellipsis">
+      
+        Caching
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#tools-configuration">
+<span class="md-ellipsis">
+      
+        Tools Configuration
+      
+    </span>
+</a>
+<nav aria-label="Tools Configuration" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ruff">
+<span class="md-ellipsis">
+      
+        Ruff
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pylint_1">
+<span class="md-ellipsis">
+      
+        Pylint
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mypy">
+<span class="md-ellipsis">
+      
+        MyPy
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pytest">
+<span class="md-ellipsis">
+      
+        Pytest
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#failure-scenarios">
+<span class="md-ellipsis">
+      
+        Failure Scenarios
+      
+    </span>
+</a>
+<nav aria-label="Failure Scenarios" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#format-failures">
+<span class="md-ellipsis">
+      
+        Format Failures
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#lint-failures">
+<span class="md-ellipsis">
+      
+        Lint Failures
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-scan-failures">
+<span class="md-ellipsis">
+      
+        Security Scan Failures
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#test-failures">
+<span class="md-ellipsis">
+      
+        Test Failures
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#local-development">
+<span class="md-ellipsis">
+      
+        Local Development
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#performance-optimization">
+<span class="md-ellipsis">
+      
+        Performance Optimization
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-scanning-details">
+<span class="md-ellipsis">
+      
+        Security Scanning Details
+      
+    </span>
+</a>
+<nav aria-label="Security Scanning Details" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#syft-sbom-generation">
+<span class="md-ellipsis">
+      
+        Syft (SBOM Generation)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#grype-vulnerability-scanning">
+<span class="md-ellipsis">
+      
+        Grype (Vulnerability Scanning)
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#security-reports">
+<span class="md-ellipsis">
+      
+        Security Reports
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependency-management">
+<span class="md-ellipsis">
+      
+        Dependency Management
+      
+    </span>
+</a>
+<nav aria-label="Dependency Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependabot">
+<span class="md-ellipsis">
+      
+        Dependabot
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#openssf-scorecard">
+<span class="md-ellipsis">
+      
+        OpenSSF Scorecard
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#monitoring">
+<span class="md-ellipsis">
+      
+        Monitoring
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="cicd-pipeline-documentation">CI/CD Pipeline Documentation<a class="headerlink" href="#cicd-pipeline-documentation" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>The PopUp-Sim project uses GitHub Actions for continuous integration and deployment. The pipeline ensures code quality through automated formatting, linting, type checking, and testing.</p>
+<h2 id="workflow-structure">Workflow Structure<a class="headerlink" href="#workflow-structure" title="Permanent link">¶</a></h2>
+<pre class="mermaid"><code>graph TD
+    A[Pull Request/Push to main] --&gt; B{Change Type}
+    B --&gt;|Backend Changes| C[Format Job]
+    B --&gt;|Docs Changes| N[Build Docs]
+
+    C --&gt; D[Lint Jobs]
+    C --&gt; E[Security Scan]
+    C --&gt; F[Test Job]
+
+    D --&gt; G[Ruff Lint]
+    D --&gt; H[Pylint]
+    D --&gt; I[MyPy]
+
+    E --&gt; J[Syft SBOM]
+    J --&gt; K[Grype Scan]
+    K --&gt; L[Upload SARIF]
+
+    F --&gt; M[Pytest + Coverage]
+    M --&gt; O[Upload Coverage]
+
+    N --&gt; P{Event Type}
+    P --&gt;|PR| Q[Deploy Preview]
+    P --&gt;|Push to main| R[Deploy Production]
+
+    style C fill:#e1f5fe
+    style D fill:#f3e5f5
+    style E fill:#ffebee
+    style F fill:#e8f5e8
+    style O fill:#fff3e0
+    style N fill:#fff9c4
+    style Q fill:#e0f2f1
+    style R fill:#c8e6c9</code></pre>
+<h2 id="backend-pipeline-jobs">Backend Pipeline Jobs<a class="headerlink" href="#backend-pipeline-jobs" title="Permanent link">¶</a></h2>
+<h3 id="1-format-job">1. Format Job<a class="headerlink" href="#1-format-job" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Ensures code formatting consistency across the codebase.</p>
+<p><strong>Steps:</strong>
+- Checkout code
+- Setup uv with Python version
+- Install dependencies with <code>uv sync --locked --all-extras --dev</code>
+- Run <code>ruff format --check --diff .</code></p>
+<p><strong>Output:</strong> Shows formatting differences if any exist</p>
+<h3 id="2-lint-jobs-parallel">2. Lint Jobs (Parallel)<a class="headerlink" href="#2-lint-jobs-parallel" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Code quality analysis through multiple linters.</p>
+<p><strong>Matrix:</strong> 3 linters (ruff, pylint, mypy)</p>
+<p><strong>Dependencies:</strong> Requires format job to pass first</p>
+<h4 id="ruff-linting">Ruff Linting<a class="headerlink" href="#ruff-linting" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Command:</strong> <code>uv run ruff check --output-format=github .</code></li>
+<li><strong>Focus:</strong> Code quality, unused imports, simplifications</li>
+<li><strong>Output:</strong> GitHub annotations on PR lines</li>
+</ul>
+<h4 id="pylint">Pylint<a class="headerlink" href="#pylint" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Command:</strong> <code>uv run pylint backend/src/ --output-format=colorized</code></li>
+<li><strong>Focus:</strong> Additional code quality checks</li>
+<li><strong>Output:</strong> Colorized terminal output</li>
+</ul>
+<h4 id="mypy-type-checking">MyPy Type Checking<a class="headerlink" href="#mypy-type-checking" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Command:</strong> <code>uv run mypy backend/src/ --show-error-codes</code></li>
+<li><strong>Focus:</strong> Static type analysis</li>
+<li><strong>Output:</strong> Type errors with specific error codes</li>
+</ul>
+<h3 id="3-security-scan-job">3. Security Scan Job<a class="headerlink" href="#3-security-scan-job" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Software Bill of Materials (SBOM) generation and vulnerability scanning.</p>
+<p><strong>Dependencies:</strong> Requires format job to pass first</p>
+<p><strong>Tools:</strong>
+- <strong>Syft:</strong> Generates SBOM in SPDX-JSON format
+- <strong>Grype:</strong> Scans SBOM for known vulnerabilities</p>
+<p><strong>Steps:</strong>
+- Check if dependencies exist in <code>pyproject.toml</code>
+- Generate SBOM with Syft (if dependencies exist)
+- Scan vulnerabilities with Grype
+- Upload SARIF results to GitHub Security tab
+- Upload security reports as artifacts</p>
+<p><strong>Output:</strong>
+- SBOM file (<code>sbom.spdx.json</code>)
+- Vulnerability report (SARIF format)
+- GitHub Security alerts for found vulnerabilities</p>
+<p><strong>Note:</strong> Scan is skipped if no dependencies are present. Vulnerabilities do not fail the build (<code>fail-build: false</code>).</p>
+<h3 id="4-test-jobs-parallel">4. Test Jobs (Parallel)<a class="headerlink" href="#4-test-jobs-parallel" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Run test suite with coverage reporting.</p>
+<p><strong>Dependencies:</strong> Requires format job to pass first</p>
+<p><strong>Steps:</strong>
+- Run <code>uv run pytest --tb=short</code>
+- Upload coverage to Codecov</p>
+<h2 id="documentation-pipeline-jobs">Documentation Pipeline Jobs<a class="headerlink" href="#documentation-pipeline-jobs" title="Permanent link">¶</a></h2>
+<h3 id="1-build-job">1. Build Job<a class="headerlink" href="#1-build-job" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Build documentation site with MkDocs.</p>
+<p><strong>Triggers:</strong>
+- Changes to <code>docs/**</code>
+- Changes to <code>mkdocs.yml</code>
+- Changes to <code>.github/workflows/docs.yml</code></p>
+<p><strong>Steps:</strong>
+- Checkout code
+- Setup Python 3.13
+- Install uv
+- Install dependencies with <code>uv sync --group docs</code>
+- Build documentation with <code>uv run mkdocs build --strict</code>
+- Upload site artifact</p>
+<p><strong>Output:</strong> Built documentation site artifact</p>
+<h3 id="2-deploy-preview-job">2. Deploy Preview Job<a class="headerlink" href="#2-deploy-preview-job" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Deploy PR preview for documentation changes.</p>
+<p><strong>Triggers:</strong> Pull requests only</p>
+<p><strong>Dependencies:</strong> Requires build job to complete</p>
+<p><strong>Steps:</strong>
+- Download site artifact
+- Deploy to <code>gh-pages</code> branch under <code>pr-preview/pr-{number}/</code>
+- Create GitHub deployment with preview URL</p>
+<p><strong>Output:</strong> PR preview URL at <code>https://openrailassociation.github.io/dac-migration-dss-popupsim/pr-preview/pr-{number}/</code></p>
+<h3 id="3-deploy-production-job">3. Deploy Production Job<a class="headerlink" href="#3-deploy-production-job" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Deploy documentation to GitHub Pages.</p>
+<p><strong>Triggers:</strong> Push to main branch only</p>
+<p><strong>Dependencies:</strong> Requires build job to complete</p>
+<p><strong>Steps:</strong>
+- Download site artifact
+- Deploy to GitHub Pages with force orphan</p>
+<p><strong>Output:</strong> Production site at <code>https://openrailassociation.github.io/dac-migration-dss-popupsim/</code></p>
+<h2 id="scheduled-security-jobs">Scheduled Security Jobs<a class="headerlink" href="#scheduled-security-jobs" title="Permanent link">¶</a></h2>
+<h3 id="openssf-scorecard-job">OpenSSF Scorecard Job<a class="headerlink" href="#openssf-scorecard-job" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Security health metrics and best practices assessment.</p>
+<p><strong>Triggers:</strong>
+- Weekly on Sundays at 02:00
+- Push to main branch
+- Manual workflow dispatch</p>
+<p><strong>Steps:</strong>
+- Checkout code with harden-runner
+- Run OpenSSF Scorecard analysis
+- Upload SARIF results to GitHub Security tab
+- Publish results to OpenSSF REST API</p>
+<p><strong>Checks Performed:</strong>
+- Security policy presence
+- Dependency update tool usage
+- Branch protection configuration
+- Code review practices
+- CI/CD security practices
+- Pinned dependencies
+- Vulnerability disclosure</p>
+<p><strong>Output:</strong>
+- SARIF results in GitHub Security tab
+- Public scorecard on OpenSSF REST API
+- Security badge for README</p>
+<h2 id="execution-flows">Execution Flows<a class="headerlink" href="#execution-flows" title="Permanent link">¶</a></h2>
+<h3 id="backend-pipeline-flow">Backend Pipeline Flow<a class="headerlink" href="#backend-pipeline-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant CI as Backend Pipeline
+    participant CC as Codecov
+
+    Dev-&gt;&gt;GH: Push/PR to main (backend changes)
+    GH-&gt;&gt;CI: Trigger python-backend.yaml
+
+    CI-&gt;&gt;CI: Format check
+
+    par Parallel execution after format
+        CI-&gt;&gt;CI: Ruff lint
+    and
+        CI-&gt;&gt;CI: Pylint
+    and
+        CI-&gt;&gt;CI: MyPy
+    and
+        CI-&gt;&gt;CI: Pytest
+    end
+
+    CI-&gt;&gt;CC: Upload coverage
+    CI-&gt;&gt;GH: Report results + annotations
+    GH-&gt;&gt;Dev: Show status</code></pre>
+<h3 id="documentation-pipeline-flow">Documentation Pipeline Flow<a class="headerlink" href="#documentation-pipeline-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant CI as Docs Pipeline
+    participant Pages as GitHub Pages
+
+    Dev-&gt;&gt;GH: Push/PR to main (docs changes)
+    GH-&gt;&gt;CI: Trigger docs.yml
+
+    CI-&gt;&gt;CI: Build documentation
+
+    alt Pull Request
+        CI-&gt;&gt;Pages: Deploy to pr-preview/pr-N/
+        CI-&gt;&gt;GH: Create deployment + comment
+        GH-&gt;&gt;Dev: Show preview URL
+    else Push to main
+        CI-&gt;&gt;Pages: Deploy to production
+        Pages-&gt;&gt;Dev: Site updated
+    end</code></pre>
+<h3 id="scheduled-security-flow">Scheduled Security Flow<a class="headerlink" href="#scheduled-security-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Cron as GitHub Scheduler
+    participant CI as Scorecard Pipeline
+    participant OSSF as OpenSSF API
+    participant GH as GitHub Security
+
+    Cron-&gt;&gt;CI: Weekly trigger (Sunday 02:00)
+    CI-&gt;&gt;CI: Run Scorecard analysis
+    CI-&gt;&gt;GH: Upload SARIF results
+    CI-&gt;&gt;OSSF: Publish scorecard
+    OSSF-&gt;&gt;CI: Badge URL</code></pre>
+<h2 id="configuration-details">Configuration Details<a class="headerlink" href="#configuration-details" title="Permanent link">¶</a></h2>
+<h3 id="triggers">Triggers<a class="headerlink" href="#triggers" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Pull Requests:</strong> Any PR targeting <code>main</code> branch</li>
+<li><strong>Push Events:</strong> Direct pushes to <code>main</code> branch</li>
+</ul>
+<h3 id="matrix-strategy">Matrix Strategy<a class="headerlink" href="#matrix-strategy" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Backend Jobs:</strong> 5 (1 format + 3 lint + 1 test)</li>
+<li><strong>Documentation Jobs:</strong> 3 (1 build + 1 preview + 1 production)</li>
+<li><strong>Security Jobs:</strong> 1 (OpenSSF Scorecard, commented out: Syft/Grype)</li>
+</ul>
+<h3 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">¶</a></h3>
+<ul>
+<li>Uses <code>uv.lock</code> file for reproducible builds</li>
+<li>All jobs use <code>--locked</code> flag for consistent dependency versions</li>
+</ul>
+<h3 id="caching">Caching<a class="headerlink" href="#caching" title="Permanent link">¶</a></h3>
+<ul>
+<li>uv cache enabled for faster dependency installation</li>
+<li>Automatic caching of Python packages and uv metadata</li>
+</ul>
+<h2 id="tools-configuration">Tools Configuration<a class="headerlink" href="#tools-configuration" title="Permanent link">¶</a></h2>
+<h3 id="ruff">Ruff<a class="headerlink" href="#ruff" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Format:</strong> 120 char lines, single quotes, tabs</li>
+<li><strong>Lint:</strong> Focus on bugs, unused code, simplifications</li>
+<li><strong>Output:</strong> GitHub annotations for PR integration</li>
+</ul>
+<h3 id="pylint_1">Pylint<a class="headerlink" href="#pylint_1" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Config:</strong> Uses <code>pyproject.toml</code> configuration</li>
+<li><strong>Target:</strong> <code>backend/src/</code> directory only</li>
+<li><strong>Output:</strong> Colorized for better readability</li>
+</ul>
+<h3 id="mypy">MyPy<a class="headerlink" href="#mypy" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Config:</strong> Strict type checking enabled</li>
+<li><strong>Target:</strong> <code>backend/src/</code> and <code>backend/tests/</code></li>
+<li><strong>Output:</strong> Error codes for easier debugging</li>
+</ul>
+<h3 id="pytest">Pytest<a class="headerlink" href="#pytest" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Config:</strong> Coverage reporting with 90% threshold</li>
+<li><strong>Output:</strong> Terminal, HTML, and XML reports</li>
+<li><strong>Upload:</strong> Coverage data sent to Codecov</li>
+</ul>
+<h2 id="failure-scenarios">Failure Scenarios<a class="headerlink" href="#failure-scenarios" title="Permanent link">¶</a></h2>
+<h3 id="format-failures">Format Failures<a class="headerlink" href="#format-failures" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Cause:</strong> Code not properly formatted</li>
+<li><strong>Solution:</strong> Run <code>uv run ruff format .</code> locally</li>
+<li><strong>Impact:</strong> Blocks all other jobs</li>
+</ul>
+<h3 id="lint-failures">Lint Failures<a class="headerlink" href="#lint-failures" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Cause:</strong> Code quality issues, type errors</li>
+<li><strong>Solution:</strong> Fix issues shown in GitHub annotations</li>
+<li><strong>Impact:</strong> Independent failures, doesn't block tests</li>
+</ul>
+<h3 id="security-scan-failures">Security Scan Failures<a class="headerlink" href="#security-scan-failures" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Cause:</strong> Known vulnerabilities in dependencies</li>
+<li><strong>Solution:</strong> Update vulnerable dependencies or review risk</li>
+<li><strong>Impact:</strong> Does not fail build, creates GitHub Security alerts</li>
+</ul>
+<h3 id="test-failures">Test Failures<a class="headerlink" href="#test-failures" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Cause:</strong> Failing tests or coverage below threshold</li>
+<li><strong>Solution:</strong> Fix tests or improve coverage</li>
+<li><strong>Impact:</strong> Independent of linting and security jobs</li>
+</ul>
+<h2 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">¶</a></h2>
+<p>To run the same checks locally:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Format check</span>
+uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>format<span class="w"> </span>--check<span class="w"> </span>--diff<span class="w"> </span>.
+
+<span class="c1"># Linting</span>
+uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>.
+uv<span class="w"> </span>run<span class="w"> </span>pylint<span class="w"> </span>popupsim/backend/src/
+uv<span class="w"> </span>run<span class="w"> </span>mypy
+
+<span class="c1"># Testing</span>
+uv<span class="w"> </span>run<span class="w"> </span>pytest
+
+<span class="c1"># Documentation build</span>
+uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>build<span class="w"> </span>--strict
+uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve<span class="w">  </span><span class="c1"># Preview locally at http://127.0.0.1:8000</span>
+
+<span class="c1"># Security scanning (requires Syft and Grype installed)</span>
+syft<span class="w"> </span>popupsim/backend/src<span class="w"> </span>-o<span class="w"> </span>spdx-json<span class="o">=</span>sbom.spdx.json
+grype<span class="w"> </span>sbom:sbom.spdx.json
+</code></pre></div>
+<h2 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Parallel execution:</strong> Lint and test jobs run simultaneously</li>
+<li><strong>Matrix optimization:</strong> Each linter runs in separate job for better visibility</li>
+<li><strong>Caching:</strong> uv cache reduces dependency installation time</li>
+<li><strong>Locked dependencies:</strong> Faster installs, no resolution needed</li>
+</ul>
+<h2 id="security-scanning-details">Security Scanning Details<a class="headerlink" href="#security-scanning-details" title="Permanent link">¶</a></h2>
+<h3 id="syft-sbom-generation">Syft (SBOM Generation)<a class="headerlink" href="#syft-sbom-generation" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Purpose:</strong> Creates Software Bill of Materials</li>
+<li><strong>Format:</strong> SPDX-JSON (industry standard)</li>
+<li><strong>Scope:</strong> Scans <code>popupsim/backend/src</code> directory</li>
+<li><strong>Output:</strong> <code>sbom.spdx.json</code> artifact</li>
+</ul>
+<h3 id="grype-vulnerability-scanning">Grype (Vulnerability Scanning)<a class="headerlink" href="#grype-vulnerability-scanning" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Purpose:</strong> Identifies known vulnerabilities in dependencies</li>
+<li><strong>Input:</strong> SBOM from Syft</li>
+<li><strong>Database:</strong> CVE and security advisory databases</li>
+<li><strong>Output:</strong> SARIF format for GitHub Security integration</li>
+<li><strong>Behavior:</strong> Non-blocking (does not fail build)</li>
+</ul>
+<h3 id="security-reports">Security Reports<a class="headerlink" href="#security-reports" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>GitHub Security Tab:</strong> View vulnerability alerts</li>
+<li><strong>SARIF Upload:</strong> Integrates with GitHub Advanced Security</li>
+<li><strong>Artifacts:</strong> SBOM and vulnerability reports downloadable</li>
+</ul>
+<h2 id="dependency-management">Dependency Management<a class="headerlink" href="#dependency-management" title="Permanent link">¶</a></h2>
+<h3 id="dependabot">Dependabot<a class="headerlink" href="#dependabot" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Automated dependency updates for security and maintenance.</p>
+<p><strong>Configuration:</strong>
+- <strong>Python Dependencies (uv):</strong> Weekly updates on Mondays at 06:00
+- <strong>GitHub Actions:</strong> Weekly updates on Mondays at 06:00
+- <strong>PR Limit:</strong> 10 for Python, 5 for GitHub Actions
+- <strong>Auto-assign:</strong> jhw-db, 36b498c8
+- <strong>Labels:</strong> dependencies, python/github-actions</p>
+<p><strong>Commit Prefixes:</strong>
+- Python deps: <code>chore(backend): ⬆️ deps</code>
+- Dev deps: <code>chore(backend): ⬆️ dev deps</code>
+- GitHub Actions: <code>chore: 💚 ci</code></p>
+<h3 id="openssf-scorecard">OpenSSF Scorecard<a class="headerlink" href="#openssf-scorecard" title="Permanent link">¶</a></h3>
+<p><strong>Purpose:</strong> Security health metrics and best practices assessment.</p>
+<p><strong>Schedule:</strong>
+- Weekly on Sundays at 02:00
+- On push to main branch
+- Manual trigger available</p>
+<p><strong>Details:</strong> See "Scheduled Security Jobs" section above</p>
+<h2 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>GitHub Actions tab:</strong> View detailed logs and job status</li>
+<li><strong>PR annotations:</strong> Inline code quality feedback</li>
+<li><strong>GitHub Security tab:</strong> Vulnerability alerts, SBOM, and Scorecard results</li>
+<li><strong>Codecov dashboard:</strong> Coverage trends and reports</li>
+<li><strong>Status checks:</strong> Required checks before merge</li>
+<li><strong>OpenSSF Scorecard:</strong> Security posture metrics and recommendations <strong>OpenSSF Scorecard:</strong> Security posture metrics and recommendations</li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

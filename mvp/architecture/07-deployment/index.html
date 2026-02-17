@@ -1,0 +1,2399 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../06-runtime/" rel="prev"/>
+<link href="../08-concepts/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Deployment - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#7-deployment-view-mvp">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Deployment
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#71-deployment-overview">
+<span class="md-ellipsis">
+      
+        7.1 Deployment Overview
+      
+    </span>
+</a>
+<nav aria-label="7.1 Deployment Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#desktop-application-architecture">
+<span class="md-ellipsis">
+      
+        Desktop Application Architecture
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#72-installation">
+<span class="md-ellipsis">
+      
+        7.2 Installation
+      
+    </span>
+</a>
+<nav aria-label="7.2 Installation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-process">
+<span class="md-ellipsis">
+      
+        Setup Process
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependencies">
+<span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#73-directory-structure">
+<span class="md-ellipsis">
+      
+        7.3 Directory Structure
+      
+    </span>
+</a>
+<nav aria-label="7.3 Directory Structure" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-project-structure">
+<span class="md-ellipsis">
+      
+        Current Project Structure
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#building-block-to-deployment-mapping">
+<span class="md-ellipsis">
+      
+        Building Block to Deployment Mapping
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-implementation-status">
+<span class="md-ellipsis">
+      
+        Current Implementation Status
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#74-execution-environment">
+<span class="md-ellipsis">
+      
+        7.4 Execution Environment
+      
+    </span>
+</a>
+<nav aria-label="7.4 Execution Environment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-requirements">
+<span class="md-ellipsis">
+      
+        Runtime Requirements
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#command-line-interface">
+<span class="md-ellipsis">
+      
+        Command Line Interface
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#75-configuration-management">
+<span class="md-ellipsis">
+      
+        7.5 Configuration Management
+      
+    </span>
+</a>
+<nav aria-label="7.5 Configuration Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-file-locations">
+<span class="md-ellipsis">
+      
+        Configuration File Locations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-priority">
+<span class="md-ellipsis">
+      
+        Configuration Priority
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#76-output-management">
+<span class="md-ellipsis">
+      
+        7.6 Output Management
+      
+    </span>
+</a>
+<nav aria-label="7.6 Output Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#result-files">
+<span class="md-ellipsis">
+      
+        Result Files
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#77-error-handling-logging">
+<span class="md-ellipsis">
+      
+        7.7 Error Handling &amp; Logging
+      
+    </span>
+</a>
+<nav aria-label="7.7 Error Handling &amp; Logging" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#logging-configuration">
+<span class="md-ellipsis">
+      
+        Logging Configuration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-recovery-strategy">
+<span class="md-ellipsis">
+      
+        Error Recovery Strategy
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#78-performance-monitoring">
+<span class="md-ellipsis">
+      
+        7.8 Performance Monitoring
+      
+    </span>
+</a>
+<nav aria-label="7.8 Performance Monitoring" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resource-usage">
+<span class="md-ellipsis">
+      
+        Resource Usage
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#79-distribution-strategy">
+<span class="md-ellipsis">
+      
+        7.9 Distribution Strategy
+      
+    </span>
+</a>
+<nav aria-label="7.9 Distribution Strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#packaging-options">
+<span class="md-ellipsis">
+      
+        Packaging Options
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#distribution-flow">
+<span class="md-ellipsis">
+      
+        Distribution Flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#710-technology-stack-summary">
+<span class="md-ellipsis">
+      
+        7.10 Technology Stack Summary
+      
+    </span>
+</a>
+<nav aria-label="7.10 Technology Stack Summary" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#core-technologies">
+<span class="md-ellipsis">
+      
+        Core Technologies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-tools">
+<span class="md-ellipsis">
+      
+        Development Tools
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-model">
+<span class="md-ellipsis">
+      
+        Deployment Model
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#711-quality-goals-and-deployment">
+<span class="md-ellipsis">
+      
+        7.11 Quality Goals and Deployment
+      
+    </span>
+</a>
+<nav aria-label="7.11 Quality Goals and Deployment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-rationale">
+<span class="md-ellipsis">
+      
+        Deployment Rationale
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#712-deployment-scenarios">
+<span class="md-ellipsis">
+      
+        7.12 Deployment Scenarios
+      
+    </span>
+</a>
+<nav aria-label="7.12 Deployment Scenarios" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-1-developer-deployment">
+<span class="md-ellipsis">
+      
+        Scenario 1: Developer Deployment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-2-strategic-planner-deployment">
+<span class="md-ellipsis">
+      
+        Scenario 2: Strategic Planner Deployment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-3-company-planner-deployment">
+<span class="md-ellipsis">
+      
+        Scenario 3: Company Planner Deployment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-comparison">
+<span class="md-ellipsis">
+      
+        Deployment Comparison
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../11-risks-technical-debt/">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#71-deployment-overview">
+<span class="md-ellipsis">
+      
+        7.1 Deployment Overview
+      
+    </span>
+</a>
+<nav aria-label="7.1 Deployment Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#desktop-application-architecture">
+<span class="md-ellipsis">
+      
+        Desktop Application Architecture
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#72-installation">
+<span class="md-ellipsis">
+      
+        7.2 Installation
+      
+    </span>
+</a>
+<nav aria-label="7.2 Installation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-process">
+<span class="md-ellipsis">
+      
+        Setup Process
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#dependencies">
+<span class="md-ellipsis">
+      
+        Dependencies
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#73-directory-structure">
+<span class="md-ellipsis">
+      
+        7.3 Directory Structure
+      
+    </span>
+</a>
+<nav aria-label="7.3 Directory Structure" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-project-structure">
+<span class="md-ellipsis">
+      
+        Current Project Structure
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#building-block-to-deployment-mapping">
+<span class="md-ellipsis">
+      
+        Building Block to Deployment Mapping
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#current-implementation-status">
+<span class="md-ellipsis">
+      
+        Current Implementation Status
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#74-execution-environment">
+<span class="md-ellipsis">
+      
+        7.4 Execution Environment
+      
+    </span>
+</a>
+<nav aria-label="7.4 Execution Environment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#runtime-requirements">
+<span class="md-ellipsis">
+      
+        Runtime Requirements
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#command-line-interface">
+<span class="md-ellipsis">
+      
+        Command Line Interface
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#75-configuration-management">
+<span class="md-ellipsis">
+      
+        7.5 Configuration Management
+      
+    </span>
+</a>
+<nav aria-label="7.5 Configuration Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-file-locations">
+<span class="md-ellipsis">
+      
+        Configuration File Locations
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuration-priority">
+<span class="md-ellipsis">
+      
+        Configuration Priority
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#76-output-management">
+<span class="md-ellipsis">
+      
+        7.6 Output Management
+      
+    </span>
+</a>
+<nav aria-label="7.6 Output Management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#result-files">
+<span class="md-ellipsis">
+      
+        Result Files
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#77-error-handling-logging">
+<span class="md-ellipsis">
+      
+        7.7 Error Handling &amp; Logging
+      
+    </span>
+</a>
+<nav aria-label="7.7 Error Handling &amp; Logging" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#logging-configuration">
+<span class="md-ellipsis">
+      
+        Logging Configuration
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#error-recovery-strategy">
+<span class="md-ellipsis">
+      
+        Error Recovery Strategy
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#78-performance-monitoring">
+<span class="md-ellipsis">
+      
+        7.8 Performance Monitoring
+      
+    </span>
+</a>
+<nav aria-label="7.8 Performance Monitoring" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resource-usage">
+<span class="md-ellipsis">
+      
+        Resource Usage
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#79-distribution-strategy">
+<span class="md-ellipsis">
+      
+        7.9 Distribution Strategy
+      
+    </span>
+</a>
+<nav aria-label="7.9 Distribution Strategy" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#packaging-options">
+<span class="md-ellipsis">
+      
+        Packaging Options
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#distribution-flow">
+<span class="md-ellipsis">
+      
+        Distribution Flow
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#710-technology-stack-summary">
+<span class="md-ellipsis">
+      
+        7.10 Technology Stack Summary
+      
+    </span>
+</a>
+<nav aria-label="7.10 Technology Stack Summary" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#core-technologies">
+<span class="md-ellipsis">
+      
+        Core Technologies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#development-tools">
+<span class="md-ellipsis">
+      
+        Development Tools
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-model">
+<span class="md-ellipsis">
+      
+        Deployment Model
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#711-quality-goals-and-deployment">
+<span class="md-ellipsis">
+      
+        7.11 Quality Goals and Deployment
+      
+    </span>
+</a>
+<nav aria-label="7.11 Quality Goals and Deployment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-rationale">
+<span class="md-ellipsis">
+      
+        Deployment Rationale
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#712-deployment-scenarios">
+<span class="md-ellipsis">
+      
+        7.12 Deployment Scenarios
+      
+    </span>
+</a>
+<nav aria-label="7.12 Deployment Scenarios" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-1-developer-deployment">
+<span class="md-ellipsis">
+      
+        Scenario 1: Developer Deployment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-2-strategic-planner-deployment">
+<span class="md-ellipsis">
+      
+        Scenario 2: Strategic Planner Deployment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scenario-3-company-planner-deployment">
+<span class="md-ellipsis">
+      
+        Scenario 3: Company Planner Deployment
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deployment-comparison">
+<span class="md-ellipsis">
+      
+        Deployment Comparison
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="7-deployment-view-mvp">7. Deployment View (MVP)<a class="headerlink" href="#7-deployment-view-mvp" title="Permanent link">¶</a></h1>
+<h2 id="71-deployment-overview">7.1 Deployment Overview<a class="headerlink" href="#71-deployment-overview" title="Permanent link">¶</a></h2>
+<h3 id="desktop-application-architecture">Desktop Application Architecture<a class="headerlink" href="#desktop-application-architecture" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Developer Machine"
+        subgraph "PopUpSim MVP"
+            Python[Python 3.13+&lt;br/&gt;Runtime Environment]
+            App[PopUpSim Application&lt;br/&gt;main.py + src/]
+            Config[Configuration Files&lt;br/&gt;config/]
+            Output[Output Directory&lt;br/&gt;output/]
+        end
+
+        subgraph "Dependencies"
+            SimPy[SimPy Framework]
+            Matplotlib[Matplotlib]
+            Pandas[Pandas]
+            Pydantic[Pydantic]
+        end
+    end
+
+    App --&gt; Python
+    App --&gt; Config
+    App --&gt; Output
+    Python --&gt; SimPy
+    Python --&gt; Matplotlib
+    Python --&gt; Pandas
+    Python --&gt; Pydantic
+
+    classDef app fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#fff
+    classDef deps fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
+    classDef files fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#fff
+
+    class Python,App app
+    class SimPy,Matplotlib,Pandas,Pydantic deps
+    class Config,Output files</code></pre>
+<h2 id="72-installation">7.2 Installation<a class="headerlink" href="#72-installation" title="Permanent link">¶</a></h2>
+<h3 id="setup-process">Setup Process<a class="headerlink" href="#setup-process" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Python Setup</strong></td>
+<td><code>python --version</code></td>
+<td>Verify Python 3.13+ installed</td>
+</tr>
+<tr>
+<td><strong>2. uv Installation</strong></td>
+<td><code>pip install uv</code></td>
+<td>Install uv package manager</td>
+</tr>
+<tr>
+<td><strong>3. Dependencies</strong></td>
+<td><code>uv sync</code></td>
+<td>Install packages and create lock file</td>
+</tr>
+<tr>
+<td><strong>4. Test Run</strong></td>
+<td><code>uv run python main.py --help</code></td>
+<td>Verify installation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">¶</a></h3>
+<p><strong>Core dependencies</strong> are managed in <code>pyproject.toml</code>. Key requirements:</p>
+<ul>
+<li><strong>Python 3.13+</strong> - Latest stable Python version (October 2024), provides improved type system and performance</li>
+<li><strong>SimPy 4.0.1+</strong> - Discrete event simulation (<a href="../09-architecture-decisions/#adr-mvp-001-simpy-for-discrete-event-simulation">ADR MVP-001</a>)</li>
+<li><strong>Pydantic 2.0.0+</strong> - Data validation (<a href="../09-architecture-decisions/#adr-mvp-003-pydantic-for-data-validation">ADR MVP-003</a>)</li>
+<li><strong>Matplotlib 3.7.0+</strong> - Visualization (<a href="../09-architecture-decisions/#adr-mvp-004-matplotlib-for-visualization">ADR MVP-004</a>)</li>
+<li><strong>Pandas 2.0.0+</strong> - CSV processing</li>
+<li><strong>NumPy 1.24.0+</strong> - Numerical operations</li>
+</ul>
+<p><strong>Development tools:</strong>
+- Ruff (formatting &amp; linting)
+- MyPy (type checking with <code>disallow_untyped_defs = true</code>)
+- Pytest (unit testing)</p>
+<p><strong>Optional dependencies:</strong>
+- MkDocs toolchain (documentation generation)</p>
+<p>See <code>pyproject.toml</code> and <a href="#710-technology-stack-summary">Section 7.10</a> for complete dependency list.</p>
+<h2 id="73-directory-structure">7.3 Directory Structure<a class="headerlink" href="#73-directory-structure" title="Permanent link">¶</a></h2>
+<h3 id="current-project-structure">Current Project Structure<a class="headerlink" href="#current-project-structure" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code>dac-migration-dss-popupsim/
+├── popupsim/                   # Main Package
+│   ├── backend/               # Backend Application
+│   │   ├── src/               # Source Code
+│   │   │   ├── configuration/ # Configuration Context
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── service.py         # Configuration service
+│   │   │   │   ├── validation.py      # Pydantic validators
+│   │   │   │   ├── model_scenario.py  # Scenario model
+│   │   │   │   ├── model_workshop.py  # Workshop model
+│   │   │   │   ├── model_track.py     # Track model
+│   │   │   │   ├── model_route.py     # Route model
+│   │   │   │   ├── model_routes.py    # Routes collection
+│   │   │   │   ├── model_train.py     # Train model
+│   │   │   │   └── model_wagon.py     # Wagon model
+│   │   │   ├── simulation/        # Analysis &amp; Reporting Context
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── popupsim.py        # Main simulation orchestrator
+│   │   │   │   └── sim_adapter.py     # SimPy adapter
+│   │   │   ├── core/              # Core utilities
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── i18n/              # Internationalization
+│   │   │   ├── main.py            # Entry point
+│   │   │   └── __init__.py
+│   │   ├── tests/             # Unit Tests
+│   │   │   ├── unit/          # Unit test modules
+│   │   │   │   ├── test_model_*.py    # Model tests
+│   │   │   │   ├── test_service.py    # Service tests
+│   │   │   │   ├── test_validation.py # Validation tests
+│   │   │   │   └── test_sim_*.py      # Simulation tests
+│   │   │   ├── fixtures/      # Test fixtures
+│   │   │   │   └── config/        # Test configuration files
+│   │   │   └── conftest.py    # Pytest configuration
+│   │   └── README.md          # Backend documentation
+│   └── __init__.py
+├── Data/                       # Example Data
+│   ├── examples/              # Example scenarios
+│   │   ├── small_scenario/
+│   │   ├── medium_scenario/
+│   │   └── large_scenario/
+│   └── README.md
+├── docs/                       # Documentation
+│   ├── architecture/          # Full architecture docs
+│   ├── mvp/                   # MVP architecture docs
+│   │   ├── architecture/
+│   │   └── development/
+│   ├── requirements/          # Requirements &amp; use cases
+│   └── README.md
+├── .github/                    # GitHub Configuration
+│   ├── workflows/             # CI/CD workflows
+│   │   ├── python-backend.yaml    # Backend CI
+│   │   └── docs.yml               # Docs deployment
+│   └── actions/               # Custom actions
+├── setup/                      # Setup Scripts
+│   └── dev/
+│       └── set_commit_msg_hooks.py
+├── pyproject.toml              # Project configuration
+├── uv.lock                     # Dependency lock file
+├── mkdocs.yml                  # Documentation config
+├── README.md                   # Project README
+├── LICENSE                     # Apache 2.0 License
+└── CONTRIBUTING.md             # Contribution guidelines
+</code></pre></div>
+<h3 id="building-block-to-deployment-mapping">Building Block to Deployment Mapping<a class="headerlink" href="#building-block-to-deployment-mapping" title="Permanent link">¶</a></h3>
+<p>This table maps the bounded contexts from <a href="../05-building-blocks/">Section 5</a> to their deployment locations:</p>
+<table>
+<thead>
+<tr>
+<th>Building Block (Section 5)</th>
+<th>Deployed As</th>
+<th>Runtime Location</th>
+<th>Process</th>
+<th>Storage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration Context</strong></td>
+<td>Python module</td>
+<td><code>popupsim/backend/src/contexts/configuration/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ ConfigurationBuilder</td>
+<td>Python class</td>
+<td><code>configuration/domain/configuration_builder.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ FileLoader</td>
+<td>Python class</td>
+<td><code>configuration/infrastructure/file_loader.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Domain Models</td>
+<td>Pydantic classes</td>
+<td><code>configuration/domain/models/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Retrofit Workflow Context</strong></td>
+<td>Python module</td>
+<td><code>popupsim/backend/src/contexts/retrofit_workflow/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ RetrofitWorkflowContext</td>
+<td>Python class</td>
+<td><code>retrofit_workflow/application/retrofit_workflow_context.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Coordinators</td>
+<td>Python classes</td>
+<td><code>retrofit_workflow/application/coordinators/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Domain Services</td>
+<td>Python classes</td>
+<td><code>retrofit_workflow/domain/services/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Resource Managers</td>
+<td>Python classes</td>
+<td><code>retrofit_workflow/infrastructure/resource_managers/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Metrics Collection</td>
+<td>Python classes</td>
+<td><code>retrofit_workflow/infrastructure/metrics/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Railway Infrastructure Context</strong></td>
+<td>Python module</td>
+<td><code>popupsim/backend/src/contexts/railway_infrastructure/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ RailwayContext</td>
+<td>Python class</td>
+<td><code>railway_infrastructure/application/railway_context.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Track Aggregates</td>
+<td>Python classes</td>
+<td><code>railway_infrastructure/domain/aggregates/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Track Services</td>
+<td>Python classes</td>
+<td><code>railway_infrastructure/domain/services/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>External Trains Context</strong></td>
+<td>Python module</td>
+<td><code>popupsim/backend/src/contexts/external_trains/</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ ExternalTrainsContext</td>
+<td>Python class</td>
+<td><code>external_trains/application/external_trains_context.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ WagonFactory</td>
+<td>Python class</td>
+<td><code>external_trains/domain/wagon_factory.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ EventPublisher</td>
+<td>Python class</td>
+<td><code>external_trains/infrastructure/event_publisher.py</code></td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>External Dependencies</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>└─ SimPy Framework</td>
+<td>Python library</td>
+<td>Virtual environment</td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Pydantic</td>
+<td>Python library</td>
+<td>Virtual environment</td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>└─ Matplotlib</td>
+<td>Python library</td>
+<td>Virtual environment</td>
+<td>Main process memory</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td><strong>Data Artifacts</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>└─ Configuration Files</td>
+<td>JSON/CSV files</td>
+<td><code>Data/examples/</code> or custom path</td>
+<td>N/A</td>
+<td>File system</td>
+</tr>
+<tr>
+<td>└─ Result Files</td>
+<td>CSV/PNG/JSON</td>
+<td><code>output/</code> directory</td>
+<td>N/A</td>
+<td>File system</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Observations:</strong>
+- All bounded contexts run in <strong>single Python process</strong> (desktop application)
+- All components reside in <strong>process memory</strong> (no distributed deployment)
+- Only <strong>data artifacts</strong> (config files, results) use <strong>file system storage</strong>
+- <strong>No database</strong> - all state is transient or file-based
+- <strong>No network</strong> - all communication is in-process method calls or event bus</p>
+<h3 id="current-implementation-status">Current Implementation Status<a class="headerlink" href="#current-implementation-status" title="Permanent link">¶</a></h3>
+<p><strong>Implemented:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Status</th>
+<th>Directory</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration Context</strong></td>
+<td>✅ Implemented</td>
+<td><code>contexts/configuration/</code></td>
+<td>Load and validate scenarios</td>
+</tr>
+<tr>
+<td><strong>Retrofit Workflow Context</strong></td>
+<td>✅ Implemented</td>
+<td><code>contexts/retrofit_workflow/</code></td>
+<td>Core simulation logic</td>
+</tr>
+<tr>
+<td><strong>Railway Infrastructure Context</strong></td>
+<td>✅ Implemented</td>
+<td><code>contexts/railway_infrastructure/</code></td>
+<td>Track management</td>
+</tr>
+<tr>
+<td><strong>External Trains Context</strong></td>
+<td>✅ Implemented</td>
+<td><code>contexts/external_trains/</code></td>
+<td>Train arrivals</td>
+</tr>
+</tbody>
+</table>
+<h2 id="74-execution-environment">7.4 Execution Environment<a class="headerlink" href="#74-execution-environment" title="Permanent link">¶</a></h2>
+<h3 id="runtime-requirements">Runtime Requirements<a class="headerlink" href="#runtime-requirements" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Resource requirements will be measured during MVP implementation with realistic scenarios. The following are known requirements:</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Requirement</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>3.13+</td>
+<td>Latest stable version (October 2024)</td>
+</tr>
+<tr>
+<td><strong>OS</strong></td>
+<td>Windows 10+, macOS 10.15+, Ubuntu 20.04+</td>
+<td>Cross-platform support</td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td>To be measured</td>
+<td>Depends on scenario size (wagon count, simulation duration). Estimated minimum: 4GB</td>
+</tr>
+<tr>
+<td><strong>CPU</strong></td>
+<td>To be measured</td>
+<td>Single-threaded SimPy execution</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>To be measured</td>
+<td>Estimated: ~100 MB + results (dependencies ~50 MB, code ~10 MB, results vary by scenario)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="command-line-interface">Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Basic execution</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py
+
+<span class="c1"># With custom models</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>custom_config/
+
+<span class="c1"># With custom output directory</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py<span class="w"> </span>--output<span class="w"> </span>results/
+
+<span class="c1"># Import infrastructure data (US-003)</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py<span class="w"> </span>--import-infra<span class="w"> </span>topology.csv<span class="w"> </span>workshop.csv
+
+<span class="c1"># Debug mode</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py<span class="w"> </span>--debug<span class="w"> </span>--verbose
+
+<span class="c1"># Help</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py<span class="w"> </span>--help
+</code></pre></div>
+<h2 id="75-configuration-management">7.5 Configuration Management<a class="headerlink" href="#75-configuration-management" title="Permanent link">¶</a></h2>
+<h3 id="configuration-file-locations">Configuration File Locations<a class="headerlink" href="#configuration-file-locations" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Configuration Sources"
+        Default[Default Config&lt;br/&gt;Built-in Values]
+        Files[Config Files&lt;br/&gt;config/ directory]
+        CLI[Command Line&lt;br/&gt;Arguments]
+    end
+
+    subgraph "Configuration Merge"
+        Merger[Config Merger&lt;br/&gt;Priority Order]
+    end
+
+    subgraph "Final Config"
+        Runtime[Runtime Configuration&lt;br/&gt;Used by Simulation]
+    end
+
+    Default --&gt; Merger
+    Files --&gt; Merger
+    CLI --&gt; Merger
+    Merger --&gt; Runtime
+
+    classDef source fill:#e3f2fd
+    classDef process fill:#e8f5e8
+    classDef result fill:#fff3e0
+
+    class Default,Files,CLI source
+    class Merger process
+    class Runtime result</code></pre>
+<h3 id="configuration-priority">Configuration Priority<a class="headerlink" href="#configuration-priority" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Command Line Arguments</strong> (Highest Priority)</li>
+<li><strong>Config Files</strong> (config/ directory)</li>
+<li><strong>Default Values</strong> (Built-in)</li>
+</ol>
+<h2 id="76-output-management">7.6 Output Management<a class="headerlink" href="#76-output-management" title="Permanent link">¶</a></h2>
+<h3 id="result-files">Result Files<a class="headerlink" href="#result-files" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Output Generation"
+        Simulation[Simulation Results]
+
+        subgraph "Output Formats"
+            CSV[CSV Files&lt;br/&gt;Structured Data]
+            PNG[PNG Charts&lt;br/&gt;Matplotlib Plots]
+            JSON[JSON Logs&lt;br/&gt;Event Timeline]
+        end
+
+        subgraph "Output Locations"
+            OutputDir[output/&lt;br/&gt;Default Directory]
+            CustomDir[Custom Directory&lt;br/&gt;--output parameter]
+        end
+    end
+
+    Simulation --&gt; CSV
+    Simulation --&gt; PNG
+    Simulation --&gt; JSON
+
+    CSV --&gt; OutputDir
+    PNG --&gt; OutputDir
+    JSON --&gt; OutputDir
+
+    CSV -.-&gt; CustomDir
+    PNG -.-&gt; CustomDir
+    JSON -.-&gt; CustomDir
+
+    classDef simulation fill:#4caf50,stroke:#2e7d32
+    classDef format fill:#ff9800,stroke:#e65100
+    classDef location fill:#9e9e9e,stroke:#616161
+
+    class Simulation simulation
+    class CSV,PNG,JSON format
+    class OutputDir,CustomDir location</code></pre>
+<h2 id="77-error-handling-logging">7.7 Error Handling &amp; Logging<a class="headerlink" href="#77-error-handling-logging" title="Permanent link">¶</a></h2>
+<h3 id="logging-configuration">Logging Configuration<a class="headerlink" href="#logging-configuration" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Logging Setup</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoReturn</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s1">'</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">'</span><span class="p">,</span>
+    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s1">'output/simulation.log'</span><span class="p">),</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>  <span class="c1"># Console output</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="error-recovery-strategy">Error Recovery Strategy<a class="headerlink" href="#error-recovery-strategy" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Error Type</th>
+<th>MVP Behavior</th>
+<th>Recovery Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configuration Error</strong></td>
+<td>Exit with comprehensive error summary</td>
+<td>Fix all reported configuration issues</td>
+</tr>
+<tr>
+<td><strong>Simulation Error</strong></td>
+<td>Save partial results</td>
+<td>Check system resources, adjust configuration</td>
+</tr>
+<tr>
+<td><strong>Output Error</strong></td>
+<td>Continue without failed output</td>
+<td>Check file permissions</td>
+</tr>
+<tr>
+<td><strong>Dependency Error</strong></td>
+<td>Exit with installation instructions</td>
+<td>Install missing packages with <code>uv sync</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="78-performance-monitoring">7.8 Performance Monitoring<a class="headerlink" href="#78-performance-monitoring" title="Permanent link">¶</a></h2>
+<h3 id="resource-usage">Resource Usage<a class="headerlink" href="#resource-usage" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Actual resource usage will be measured during MVP implementation. The following aspects will be monitored:</p>
+</blockquote>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Performance Metrics"
+        subgraph "Memory Usage"
+            ConfigMem[Config Loading&lt;br/&gt;To be measured]
+            SimMem[Simulation Runtime&lt;br/&gt;To be measured]
+            OutputMem[Output Generation&lt;br/&gt;To be measured]
+        end
+
+        subgraph "CPU Usage"
+            SetupCPU[Setup Phase&lt;br/&gt;Low CPU]
+            SimCPU[Simulation Phase&lt;br/&gt;High CPU]
+            OutputCPU[Output Phase&lt;br/&gt;Medium CPU]
+        end
+
+        subgraph "Disk I/O"
+            ReadIO[Config Reading&lt;br/&gt;Sequential]
+            WriteIO[Result Writing&lt;br/&gt;Sequential]
+        end
+    end
+
+    classDef memory fill:#e3f2fd
+    classDef cpu fill:#e8f5e8
+    classDef disk fill:#fff3e0
+
+    class ConfigMem,SimMem,OutputMem memory
+    class SetupCPU,SimCPU,OutputCPU cpu
+    class ReadIO,WriteIO disk</code></pre>
+<h2 id="79-distribution-strategy">7.9 Distribution Strategy<a class="headerlink" href="#79-distribution-strategy" title="Permanent link">¶</a></h2>
+<h3 id="packaging-options">Packaging Options<a class="headerlink" href="#packaging-options" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Advantages</th>
+<th>Disadvantages</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Source Code</strong></td>
+<td>Simple development, full control</td>
+<td>Requires Python setup</td>
+<td>Development team</td>
+</tr>
+<tr>
+<td><strong>Zip Archive</strong></td>
+<td>Easy distribution</td>
+<td>Still requires Python</td>
+<td>Internal testing</td>
+</tr>
+<tr>
+<td><strong>PyInstaller</strong></td>
+<td>Single executable file</td>
+<td>Large file size</td>
+<td>End users (future)</td>
+</tr>
+<tr>
+<td><strong>Docker</strong></td>
+<td>Consistent environment</td>
+<td>Overhead</td>
+<td>Cloud deployment (future)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="distribution-flow">Distribution Flow<a class="headerlink" href="#distribution-flow" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph LR
+    A[Source Code&lt;br/&gt;Git Repository] --&gt; B[Zip Archive&lt;br/&gt;Release Package]
+    B --&gt; C[PyInstaller&lt;br/&gt;Executable]
+    C --&gt; D[Docker Image&lt;br/&gt;Container]
+
+    A -.-&gt;|MVP Current| B
+    B -.-&gt;|Future| C
+    C -.-&gt;|Future| D
+
+    classDef current fill:#4caf50,stroke:#2e7d32
+    classDef future fill:#ff9800,stroke:#e65100
+
+    class A,B current
+    class C,D future</code></pre>
+<hr/>
+<h2 id="710-technology-stack-summary">7.10 Technology Stack Summary<a class="headerlink" href="#710-technology-stack-summary" title="Permanent link">¶</a></h2>
+<h3 id="core-technologies">Core Technologies<a class="headerlink" href="#core-technologies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+<th>Decision Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>3.13+</td>
+<td>Runtime environment</td>
+<td>Latest stable version with improved type system</td>
+</tr>
+<tr>
+<td><strong>uv</strong></td>
+<td>Latest</td>
+<td>Package manager</td>
+<td>Fast, reliable dependency management</td>
+</tr>
+<tr>
+<td><strong>SimPy</strong></td>
+<td>4.0.1+</td>
+<td>Discrete event simulation</td>
+<td><a href="../09-architecture-decisions/#adr-mvp-001-simpy-for-discrete-event-simulation">ADR MVP-001</a></td>
+</tr>
+<tr>
+<td><strong>Pydantic</strong></td>
+<td>2.0.0+</td>
+<td>Data validation</td>
+<td><a href="../09-architecture-decisions/#adr-mvp-003-pydantic-for-data-validation">ADR MVP-003</a></td>
+</tr>
+<tr>
+<td><strong>Matplotlib</strong></td>
+<td>3.7.0+</td>
+<td>Visualization</td>
+<td><a href="../09-architecture-decisions/#adr-mvp-004-matplotlib-for-visualization">ADR MVP-004</a></td>
+</tr>
+<tr>
+<td><strong>Pandas</strong></td>
+<td>2.0.0+</td>
+<td>CSV processing</td>
+<td>Data manipulation</td>
+</tr>
+<tr>
+<td><strong>NumPy</strong></td>
+<td>1.24.0+</td>
+<td>Numerical operations</td>
+<td>KPI calculations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="development-tools">Development Tools<a class="headerlink" href="#development-tools" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+<th>Configuration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ruff</strong></td>
+<td>Formatting &amp; linting</td>
+<td><code>pyproject.toml</code></td>
+</tr>
+<tr>
+<td><strong>MyPy</strong></td>
+<td>Type checking</td>
+<td><code>disallow_untyped_defs = true</code></td>
+</tr>
+<tr>
+<td><strong>Pytest</strong></td>
+<td>Unit testing</td>
+<td><code>tests/</code> directory</td>
+</tr>
+<tr>
+<td><strong>MkDocs</strong></td>
+<td>Documentation</td>
+<td>Optional dependency group</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deployment-model">Deployment Model<a class="headerlink" href="#deployment-model" title="Permanent link">¶</a></h3>
+<p><strong>MVP:</strong> Desktop application (local execution)
+- File-based configuration (JSON/CSV)
+- File-based output (CSV/PNG/JSON)
+- No network dependencies
+- Single-user, single-threaded</p>
+<p><strong>Future:</strong> Web application (cloud-ready)
+- Web interface
+- Database storage
+- Multi-user support
+- Distributed execution</p>
+<hr/>
+<h2 id="711-quality-goals-and-deployment">7.11 Quality Goals and Deployment<a class="headerlink" href="#711-quality-goals-and-deployment" title="Permanent link">¶</a></h2>
+<p>The MVP deployment model directly supports the quality goals defined in <a href="../01-introduction-goals/#12-quality-goals">Section 1.2</a>:</p>
+<table>
+<thead>
+<tr>
+<th>Quality Goal</th>
+<th>Deployment Decision</th>
+<th>How It Supports</th>
+<th>Trade-offs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Rapid Development</strong> (Priority 1)</td>
+<td>Desktop application, no server setup, local execution</td>
+<td>Developers run simulations locally with immediate feedback, no deployment pipeline needed, fast iteration cycles</td>
+<td>Limited to single user, no real-time collaboration, no shared simulation state</td>
+</tr>
+<tr>
+<td><strong>Simulation Accuracy &amp; Reliability</strong> (Priority 2)</td>
+<td>Single-threaded SimPy execution, deterministic event processing</td>
+<td>Reproducible results, no race conditions, predictable behavior, easier debugging</td>
+<td>Cannot leverage multi-core CPUs for parallel execution, slower for large scenarios</td>
+</tr>
+<tr>
+<td><strong>Usability &amp; Accessibility</strong> (Priority 3)</td>
+<td>File-based configuration (JSON/CSV), command-line interface, example scenarios in <code>Data/</code></td>
+<td>Familiar file formats, easy to edit with any text editor, version control friendly, no GUI learning curve</td>
+<td>Requires text editor skills, no visual configuration, command-line knowledge needed</td>
+</tr>
+<tr>
+<td><strong>Simple Installation</strong> (Priority 4)</td>
+<td>uv package manager, Python 3.13+ (latest stable), no database, no web server</td>
+<td>One-command installation (<code>uv sync</code>), minimal dependencies, no infrastructure setup, works offline</td>
+<td>Requires Python 3.13+ (latest stable) installed, command-line familiarity, no installer wizard</td>
+</tr>
+<tr>
+<td><strong>Testability</strong> (Priority 5)</td>
+<td>Pytest in same environment, test fixtures in repository, CI/CD with GitHub Actions</td>
+<td>Tests run in identical setup as production, fast feedback, easy to reproduce issues, automated testing</td>
+<td>No separate test infrastructure, tests share same environment as development</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deployment-rationale">Deployment Rationale<a class="headerlink" href="#deployment-rationale" title="Permanent link">¶</a></h3>
+<p>The desktop deployment model was chosen to maximize <strong>rapid development</strong> (Priority 1) and <strong>simple installation</strong> (Priority 4) for the MVP phase:</p>
+<ul>
+<li><strong>No infrastructure complexity</strong> - Eliminates server setup, database configuration, and network dependencies</li>
+<li><strong>Fast feedback loops</strong> - Developers can test changes immediately without deployment</li>
+<li><strong>Minimal barriers</strong> - Strategic planners can run simulations with basic Python knowledge</li>
+<li><strong>Version control friendly</strong> - All configuration is text-based and can be tracked in Git</li>
+</ul>
+<p><strong>Future evolution:</strong> The full version will add web interface and database storage while maintaining the core simulation engine developed in the MVP.</p>
+<hr/>
+<h2 id="712-deployment-scenarios">7.12 Deployment Scenarios<a class="headerlink" href="#712-deployment-scenarios" title="Permanent link">¶</a></h2>
+<h3 id="scenario-1-developer-deployment">Scenario 1: Developer Deployment<a class="headerlink" href="#scenario-1-developer-deployment" title="Permanent link">¶</a></h3>
+<p><strong>User:</strong> Software developer working on PopUpSim MVP</p>
+<p><strong>Goal:</strong> Set up development environment for implementing new features</p>
+<p><strong>Prerequisites:</strong>
+- Git installed
+- Python 3.13+ installed
+- Text editor or IDE</p>
+<p><strong>Deployment Steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Clone repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/open-rail-association/dac-migration-dss-popupsim.git
+<span class="nb">cd</span><span class="w"> </span>dac-migration-dss-popupsim
+
+<span class="c1"># 2. Install uv package manager</span>
+pip<span class="w"> </span>install<span class="w"> </span>uv
+
+<span class="c1"># 3. Install dependencies</span>
+uv<span class="w"> </span>sync
+
+<span class="c1"># 4. Run tests to verify setup</span>
+uv<span class="w"> </span>run<span class="w"> </span>pytest
+
+<span class="c1"># 5. Run simulation with example data</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--config<span class="w"> </span>Data/examples/small_scenario/
+
+<span class="c1"># 6. Set up pre-commit hooks (optional)</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>setup/dev/set_commit_msg_hooks.py
+</code></pre></div>
+<p><strong>Environment:</strong>
+- Full source code access
+- Read/write permissions
+- Can modify code and run tests
+- CI/CD runs on push to GitHub</p>
+<p><strong>Typical Workflow:</strong>
+1. Create feature branch
+2. Implement changes with type hints
+3. Run <code>uv run ruff format .</code> and <code>uv run mypy backend/src/</code>
+4. Run <code>uv run pytest</code> to verify tests pass
+5. Commit and push for CI/CD validation</p>
+<hr/>
+<h3 id="scenario-2-strategic-planner-deployment">Scenario 2: Strategic Planner Deployment<a class="headerlink" href="#scenario-2-strategic-planner-deployment" title="Permanent link">¶</a></h3>
+<p><strong>User:</strong> Strategic Migration Planner testing standardized workshop designs (US-001, US-002)</p>
+<p><strong>Goal:</strong> Run simulations to compare different workshop configurations</p>
+<p><strong>Prerequisites:</strong>
+- Python 3.13+ installed
+- Basic command-line knowledge
+- Received PopUpSim release package (zip archive)</p>
+<p><strong>Deployment Steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Extract release package</span>
+unzip<span class="w"> </span>popupsim-mvp-v0.1.0.zip
+<span class="nb">cd</span><span class="w"> </span>popupsim-mvp-v0.1.0
+
+<span class="c1"># 2. Install uv package manager</span>
+pip<span class="w"> </span>install<span class="w"> </span>uv
+
+<span class="c1"># 3. Install dependencies</span>
+uv<span class="w"> </span>sync
+
+<span class="c1"># 4. Verify installation</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--help
+
+<span class="c1"># 5. Run simulation with example scenario</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--config<span class="w"> </span>Data/examples/medium_scenario/
+
+<span class="c1"># 6. Review results</span>
+ls<span class="w"> </span>output/
+<span class="c1"># simulation_results.csv, kpi_charts.png, simulation_log.json</span>
+</code></pre></div>
+<p><strong>Environment:</strong>
+- Read-only source code
+- Can create custom configuration files
+- Can run simulations with different parameters
+- Results saved to <code>output/</code> directory</p>
+<p><strong>Typical Workflow (US-001):</strong>
+1. Copy example scenario: <code>cp -r Data/examples/medium_scenario/ my_workshop_4stations/</code>
+2. Edit <code>my_workshop_4stations/scenario.json</code> (change station count to 4)
+3. Run simulation: <code>uv run python popupsim/backend/src/main.py --config my_workshop_4stations/</code>
+4. Repeat for 2 stations and 6 stations
+5. Compare results in <code>output/</code> directory
+6. Select optimal configuration</p>
+<hr/>
+<h3 id="scenario-3-company-planner-deployment">Scenario 3: Company Planner Deployment<a class="headerlink" href="#scenario-3-company-planner-deployment" title="Permanent link">¶</a></h3>
+<p><strong>User:</strong> Company Planner assessing capacity for planned workshop (US-003, US-004)</p>
+<p><strong>Goal:</strong> Import company infrastructure data and assess if workshop meets capacity targets</p>
+<p><strong>Prerequisites:</strong>
+- Python 3.13+ installed
+- Company infrastructure data (CSV files)
+- Received PopUpSim release package</p>
+<p><strong>Deployment Steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1-3. Same as Strategic Planner (extract, install uv, uv sync)</span>
+
+<span class="c1"># 4. Prepare company data</span>
+mkdir<span class="w"> </span>my_company_data
+cp<span class="w"> </span>company_track_topology.csv<span class="w"> </span>my_company_data/topology.csv
+cp<span class="w"> </span>company_workshop_layout.csv<span class="w"> </span>my_company_data/workshop.csv
+cp<span class="w"> </span>company_train_schedule.csv<span class="w"> </span>my_company_data/schedule.csv
+
+<span class="c1"># 5. Import infrastructure data (US-003)</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span>--import-infra<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>my_company_data/topology.csv<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>my_company_data/workshop.csv
+
+<span class="c1"># 6. Run capacity assessment (US-004)</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>popupsim/backend/src/main.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--config<span class="w"> </span>validated_scenario.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--schedule<span class="w"> </span>my_company_data/schedule.csv
+
+<span class="c1"># 7. Review capacity assessment</span>
+cat<span class="w"> </span>output/capacity_assessment.csv
+<span class="c1"># Check if actual throughput &gt;= target throughput</span>
+</code></pre></div>
+<p><strong>Environment:</strong>
+- Read-only source code
+- Company-specific data files
+- Can import and validate infrastructure
+- Results show pass/fail for capacity targets</p>
+<p><strong>Typical Workflow (US-004):</strong>
+1. Import company infrastructure (US-003)
+2. Set capacity target in scenario (e.g., 500 wagons/week)
+3. Run week-long simulation (168 hours)
+4. Review capacity assessment results
+5. If target not met, analyze bottlenecks
+6. Adjust workshop layout and re-run</p>
+<hr/>
+<h3 id="deployment-comparison">Deployment Comparison<a class="headerlink" href="#deployment-comparison" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Developer</th>
+<th>Strategic Planner</th>
+<th>Company Planner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Source Access</strong></td>
+<td>Full (read/write)</td>
+<td>Read-only</td>
+<td>Read-only</td>
+</tr>
+<tr>
+<td><strong>Installation</strong></td>
+<td>Git clone</td>
+<td>Zip archive</td>
+<td>Zip archive</td>
+</tr>
+<tr>
+<td><strong>Data</strong></td>
+<td>Example scenarios</td>
+<td>Example + custom configs</td>
+<td>Company infrastructure</td>
+</tr>
+<tr>
+<td><strong>Typical Use Cases</strong></td>
+<td>US-001, US-002, US-003, US-004</td>
+<td>US-001, US-002</td>
+<td>US-003, US-004</td>
+</tr>
+<tr>
+<td><strong>Output</strong></td>
+<td>Test results + simulation</td>
+<td>Simulation results</td>
+<td>Capacity assessment</td>
+</tr>
+<tr>
+<td><strong>Environment</strong></td>
+<td>Development</td>
+<td>Production-like</td>
+<td>Production-like</td>
+</tr>
+<tr>
+<td><strong>Updates</strong></td>
+<td>Git pull</td>
+<td>New zip release</td>
+<td>New zip release</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>

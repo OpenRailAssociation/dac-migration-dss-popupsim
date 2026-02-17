@@ -1,0 +1,1571 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit" name="description"/>
+<meta content="DB Cargo AG" name="author"/>
+<link href="../10-quality-requirements/" rel="prev"/>
+<link href="../12-glossary/" rel="next"/>
+<link href="../../../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.1" name="generator"/>
+<title>Risks &amp; Technical Debt - PopUpSim Documentation</title>
+<link href="../../../assets/stylesheets/main.484c7ddc.min.css" rel="stylesheet"/>
+<link href="../../../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="red" data-md-color-primary="red" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#11-risks-and-technical-debt-mvp">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="PopUpSim Documentation" class="md-header__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Risks &amp; Technical Debt
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../..">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../requirements/use-cases/">
+          
+  
+  
+  Requirements
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../ci-cd/">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../../tutorial/00-installation/">
+          
+  
+  
+  Tutorials
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="PopUpSim Documentation" class="md-nav__button md-logo" data-md-component="logo" href="../../.." title="PopUpSim Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    PopUpSim Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/use-cases/">
+<span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../requirements/250321_KonzeptPopUpSim_Entwurf/">
+<span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+<span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../01-introduction-goals/">
+<span class="md-ellipsis">
+    
+  
+    Introduction &amp; Goals
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../02-constraints/">
+<span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../03-context/">
+<span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../04-solution-strategy/">
+<span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../05-building-blocks/">
+<span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../06-runtime/">
+<span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../07-deployment/">
+<span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../08-concepts/">
+<span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../09-architecture-decisions/">
+<span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../10-quality-requirements/">
+<span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Risks &amp; Technical Debt
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#111-mvp-risk-overview">
+<span class="md-ellipsis">
+      
+        11.1 MVP Risk Overview
+      
+    </span>
+</a>
+<nav aria-label="11.1 MVP Risk Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-risk-matrix">
+<span class="md-ellipsis">
+      
+        MVP Risk Matrix
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#112-mvp-technical-risks">
+<span class="md-ellipsis">
+      
+        11.2 MVP Technical Risks
+      
+    </span>
+</a>
+<nav aria-label="11.2 MVP Technical Risks" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-1-simpy-integration-complexity">
+<span class="md-ellipsis">
+      
+        Risk 1: SimPy Integration Complexity
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-2-performance-issues-with-larger-scenarios">
+<span class="md-ellipsis">
+      
+        Risk 2: Performance Issues with Larger Scenarios
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-3-schedule-overrun">
+<span class="md-ellipsis">
+      
+        Risk 3: Schedule Overrun
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#113-mvp-technical-debt">
+<span class="md-ellipsis">
+      
+        11.3 MVP Technical Debt
+      
+    </span>
+</a>
+<nav aria-label="11.3 MVP Technical Debt" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-1-direct-framework-dependencies">
+<span class="md-ellipsis">
+      
+        Debt 1: Direct Framework Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-2-missing-event-architecture">
+<span class="md-ellipsis">
+      
+        Debt 2: Missing Event Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-3-file-based-persistence">
+<span class="md-ellipsis">
+      
+        Debt 3: File-Based Persistence
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#114-mvp-quality-risks">
+<span class="md-ellipsis">
+      
+        11.4 MVP Quality Risks
+      
+    </span>
+</a>
+<nav aria-label="11.4 MVP Quality Risks" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-quality-risks">
+<span class="md-ellipsis">
+      
+        Code Quality Risks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#quality-metrics-monitoring">
+<span class="md-ellipsis">
+      
+        Quality Metrics Monitoring
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#115-mvp-migration-risks">
+<span class="md-ellipsis">
+      
+        11.5 MVP Migration Risks
+      
+    </span>
+</a>
+<nav aria-label="11.5 MVP Migration Risks" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#migration-to-full-version">
+<span class="md-ellipsis">
+      
+        Migration to Full Version
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#migration-effort-estimation">
+<span class="md-ellipsis">
+      
+        Migration Effort Estimation
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#116-mvp-risk-mitigation">
+<span class="md-ellipsis">
+      
+        11.6 MVP Risk Mitigation
+      
+    </span>
+</a>
+<nav aria-label="11.6 MVP Risk Mitigation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-monitoring">
+<span class="md-ellipsis">
+      
+        Risk Monitoring
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-risk-assessment">
+<span class="md-ellipsis">
+      
+        Continuous Risk Assessment
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#117-mvp-debt-repayment">
+<span class="md-ellipsis">
+      
+        11.7 MVP Debt Repayment
+      
+    </span>
+</a>
+<nav aria-label="11.7 MVP Debt Repayment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-prioritization">
+<span class="md-ellipsis">
+      
+        Debt Prioritization
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-repayment-plan">
+<span class="md-ellipsis">
+      
+        Debt Repayment Plan
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../12-glossary/">
+<span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../13-bibliography/">
+<span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../ci-cd/">
+<span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/00-installation/">
+<span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/01-overview/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/02-scenario-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/03-topology-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/04-track-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/05-workshop-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/06-process-times-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/07-locomotive-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/08-routes-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/09-train-schedule-configuration/">
+<span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../../tutorial/10-running-simulation/">
+<span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#111-mvp-risk-overview">
+<span class="md-ellipsis">
+      
+        11.1 MVP Risk Overview
+      
+    </span>
+</a>
+<nav aria-label="11.1 MVP Risk Overview" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mvp-risk-matrix">
+<span class="md-ellipsis">
+      
+        MVP Risk Matrix
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#112-mvp-technical-risks">
+<span class="md-ellipsis">
+      
+        11.2 MVP Technical Risks
+      
+    </span>
+</a>
+<nav aria-label="11.2 MVP Technical Risks" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-1-simpy-integration-complexity">
+<span class="md-ellipsis">
+      
+        Risk 1: SimPy Integration Complexity
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-2-performance-issues-with-larger-scenarios">
+<span class="md-ellipsis">
+      
+        Risk 2: Performance Issues with Larger Scenarios
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-3-schedule-overrun">
+<span class="md-ellipsis">
+      
+        Risk 3: Schedule Overrun
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#113-mvp-technical-debt">
+<span class="md-ellipsis">
+      
+        11.3 MVP Technical Debt
+      
+    </span>
+</a>
+<nav aria-label="11.3 MVP Technical Debt" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-1-direct-framework-dependencies">
+<span class="md-ellipsis">
+      
+        Debt 1: Direct Framework Dependencies
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-2-missing-event-architecture">
+<span class="md-ellipsis">
+      
+        Debt 2: Missing Event Architecture
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-3-file-based-persistence">
+<span class="md-ellipsis">
+      
+        Debt 3: File-Based Persistence
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#114-mvp-quality-risks">
+<span class="md-ellipsis">
+      
+        11.4 MVP Quality Risks
+      
+    </span>
+</a>
+<nav aria-label="11.4 MVP Quality Risks" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#code-quality-risks">
+<span class="md-ellipsis">
+      
+        Code Quality Risks
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#quality-metrics-monitoring">
+<span class="md-ellipsis">
+      
+        Quality Metrics Monitoring
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#115-mvp-migration-risks">
+<span class="md-ellipsis">
+      
+        11.5 MVP Migration Risks
+      
+    </span>
+</a>
+<nav aria-label="11.5 MVP Migration Risks" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#migration-to-full-version">
+<span class="md-ellipsis">
+      
+        Migration to Full Version
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#migration-effort-estimation">
+<span class="md-ellipsis">
+      
+        Migration Effort Estimation
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#116-mvp-risk-mitigation">
+<span class="md-ellipsis">
+      
+        11.6 MVP Risk Mitigation
+      
+    </span>
+</a>
+<nav aria-label="11.6 MVP Risk Mitigation" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#risk-monitoring">
+<span class="md-ellipsis">
+      
+        Risk Monitoring
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#continuous-risk-assessment">
+<span class="md-ellipsis">
+      
+        Continuous Risk Assessment
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#117-mvp-debt-repayment">
+<span class="md-ellipsis">
+      
+        11.7 MVP Debt Repayment
+      
+    </span>
+</a>
+<nav aria-label="11.7 MVP Debt Repayment" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-prioritization">
+<span class="md-ellipsis">
+      
+        Debt Prioritization
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#debt-repayment-plan">
+<span class="md-ellipsis">
+      
+        Debt Repayment Plan
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="11-risks-and-technical-debt-mvp">11. Risks and Technical Debt (MVP)<a class="headerlink" href="#11-risks-and-technical-debt-mvp" title="Permanent link">¶</a></h1>
+<h2 id="111-mvp-risk-overview">11.1 MVP Risk Overview<a class="headerlink" href="#111-mvp-risk-overview" title="Permanent link">¶</a></h2>
+<h3 id="mvp-risk-matrix">MVP Risk Matrix<a class="headerlink" href="#mvp-risk-matrix" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Risk Assessment"
+        subgraph "High Impact"
+            HH[High Probability&lt;br/&gt;High Impact]
+            LH[Low Probability&lt;br/&gt;High Impact]
+        end
+
+        subgraph "Low Impact"
+            HL[High Probability&lt;br/&gt;Low Impact]
+            LL[Low Probability&lt;br/&gt;Low Impact]
+        end
+    end
+
+    HH --&gt; |Critical| R1[SimPy integration fails]
+    LH --&gt; |Major| R2[Performance bottlenecks]
+    HL --&gt; |Minor| R3[Platform compatibility]
+    LL --&gt; |Negligible| R4[Output format issues]
+
+    classDef critical fill:#d32f2f,stroke:#b71c1c,color:#fff
+    classDef major fill:#ff9800,stroke:#e65100,color:#fff
+    classDef minor fill:#ffc107,stroke:#ff8f00,color:#000
+    classDef negligible fill:#4caf50,stroke:#2e7d32,color:#fff
+
+    class R1 critical
+    class R2 major
+    class R3 minor
+    class R4 negligible</code></pre>
+<h2 id="112-mvp-technical-risks">11.2 MVP Technical Risks<a class="headerlink" href="#112-mvp-technical-risks" title="Permanent link">¶</a></h2>
+<h3 id="risk-1-simpy-integration-complexity">Risk 1: SimPy Integration Complexity<a class="headerlink" href="#risk-1-simpy-integration-complexity" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Description</strong></td>
+<td>Direct SimPy integration could become too complex</td>
+</tr>
+<tr>
+<td><strong>Probability</strong></td>
+<td>Medium (40%)</td>
+</tr>
+<tr>
+<td><strong>Impact</strong></td>
+<td>High - Simulation doesn't work</td>
+</tr>
+<tr>
+<td><strong>Symptoms</strong></td>
+<td>Unexpected SimPy behavior, hard-to-debug processes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mitigation:</strong>
+- ✅ <strong>Simple SimPy processes</strong>: Use only basic events
+- ✅ <strong>Early prototyping</strong>: Implement SimPy integration first (validated in 3-Länderhack POC)
+- ✅ <strong>Documentation</strong>: Document SimPy patterns
+- ✅ <strong>Team expertise</strong>: Leverage POC experience from hackathon</p>
+<h3 id="risk-2-performance-issues-with-larger-scenarios">Risk 2: Performance Issues with Larger Scenarios<a class="headerlink" href="#risk-2-performance-issues-with-larger-scenarios" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Description</strong></td>
+<td>MVP could become too slow with &gt; 1000 wagons</td>
+</tr>
+<tr>
+<td><strong>Probability</strong></td>
+<td>Medium (30%)</td>
+</tr>
+<tr>
+<td><strong>Impact</strong></td>
+<td>Medium - Limited scenario size</td>
+</tr>
+<tr>
+<td><strong>Symptoms</strong></td>
+<td>Long execution times, high memory usage</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mitigation:</strong>
+- ✅ <strong>Profiling</strong>: Early performance measurements
+- ✅ <strong>Optimization</strong>: Algorithm improvements
+- ✅ <strong>Limits</strong>: Define accepted scenario sizes
+- ✅ <strong>Monitoring</strong>: Memory/CPU monitoring</p>
+<h3 id="risk-3-schedule-overrun">Risk 3: Schedule Overrun<a class="headerlink" href="#risk-3-schedule-overrun" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Description</strong></td>
+<td>5-week development time might not be sufficient</td>
+</tr>
+<tr>
+<td><strong>Probability</strong></td>
+<td>High (60%)</td>
+</tr>
+<tr>
+<td><strong>Impact</strong></td>
+<td>High - MVP goals not achieved</td>
+</tr>
+<tr>
+<td><strong>Symptoms</strong></td>
+<td>Milestone delays, unfinished features</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mitigation:</strong>
+- ✅ <strong>Scope reduction</strong>: Cut additional features if necessary
+- ✅ <strong>Parallel development</strong>: Optimize team coordination
+- ✅ <strong>Weekly reviews</strong>: Early risk detection
+- ✅ <strong>Minimum MVP</strong>: Define absolutely minimal functionality</p>
+<h2 id="113-mvp-technical-debt">11.3 MVP Technical Debt<a class="headerlink" href="#113-mvp-technical-debt" title="Permanent link">¶</a></h2>
+<h3 id="debt-1-direct-framework-dependencies">Debt 1: Direct Framework Dependencies<a class="headerlink" href="#debt-1-direct-framework-dependencies" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># MVP: Direct SimPy usage (Technical Debt)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">simpy</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">WorkshopService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">simpy</span><span class="o">.</span><span class="n">Environment</span><span class="p">()</span>  <span class="c1"># Direct dependency</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">retrofit_process</span><span class="p">())</span>  <span class="c1"># Tight coupling</span>
+
+<span class="c1"># Future: Abstracted interface</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WorkshopService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation_engine</span><span class="p">:</span> <span class="n">SimulationEnginePort</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sim_engine</span> <span class="o">=</span> <span class="n">simulation_engine</span>  <span class="c1"># Dependency injection</span>
+</code></pre></div>
+<p><strong>Debt Details:</strong>
+- <strong>Type</strong>: Architecture debt
+- <strong>Priority</strong>: High
+- <strong>Effort</strong>: Estimated 2-3 days refactoring (to be validated)
+- <strong>Created by</strong>: <a href="../09-architecture-decisions/#adr-mvp-001-simpy-for-discrete-event-simulation">ADR MVP-001</a> (SimPy decision)
+- <strong>Full version solution</strong>: Hexagonal architecture with ports</p>
+<h3 id="debt-2-missing-event-architecture">Debt 2: Missing Event Architecture<a class="headerlink" href="#debt-2-missing-event-architecture" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># MVP: Direct service calls (Technical Debt)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_service</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>  <span class="c1"># Direct call</span>
+        <span class="n">workshop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshop_service</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>  <span class="c1"># Direct call</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workshop_service</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">workshop</span><span class="p">)</span>  <span class="c1"># Direct call</span>
+
+<span class="c1"># Future: Event-driven</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">ConfigurationRequested</span><span class="p">())</span>
+        <span class="c1"># Asynchronous event handling</span>
+</code></pre></div>
+<p><strong>Debt Details:</strong>
+- <strong>Type</strong>: Integration debt
+- <strong>Priority</strong>: Medium
+- <strong>Effort</strong>: Estimated 1-2 weeks refactoring (to be validated)
+- <strong>Created by</strong>: <a href="../09-architecture-decisions/#adr-mvp-007-direct-method-calls-between-contexts">ADR MVP-007</a> (Direct calls decision)
+- <strong>Full version solution</strong>: Event-driven architecture</p>
+<h3 id="debt-3-file-based-persistence">Debt 3: File-Based Persistence<a class="headerlink" href="#debt-3-file-based-persistence" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># MVP: File-based storage (Technical Debt)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_scenario</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/scenario.json"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>  <span class="c1"># Direct file access</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># Future: Repository pattern</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfigurationService</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">:</span> <span class="n">ConfigurationRepository</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repo</span> <span class="o">=</span> <span class="n">repo</span>  <span class="c1"># Abstracted storage</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_scenario</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repo</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>  <span class="c1"># Storage-agnostic</span>
+</code></pre></div>
+<p><strong>Debt Details:</strong>
+- <strong>Type</strong>: Persistence debt
+- <strong>Priority</strong>: Low
+- <strong>Effort</strong>: Estimated 3-5 days refactoring (to be validated)
+- <strong>Created by</strong>: <a href="../09-architecture-decisions/#adr-mvp-002-file-based-data-storage">ADR MVP-002</a> (File storage decision)
+- <strong>Full version solution</strong>: Database + Repository pattern</p>
+<h2 id="114-mvp-quality-risks">11.4 MVP Quality Risks<a class="headerlink" href="#114-mvp-quality-risks" title="Permanent link">¶</a></h2>
+<h3 id="code-quality-risks">Code Quality Risks<a class="headerlink" href="#code-quality-risks" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "MVP Quality Risks"
+        subgraph "Code Quality"
+            Complexity[High complexity&lt;br/&gt;Monolithic functions]
+            Coverage[Low test coverage&lt;br/&gt;&lt; 70% coverage]
+            Documentation[Missing documentation&lt;br/&gt;Undocumented APIs]
+        end
+
+        subgraph "Architecture Quality"
+            Coupling[High coupling&lt;br/&gt;Direct dependencies]
+            Cohesion[Low cohesion&lt;br/&gt;Mixed responsibilities]
+            Flexibility[Low flexibility&lt;br/&gt;Hard to extend]
+        end
+
+        subgraph "Maintainability"
+            Understanding[Hard to understand&lt;br/&gt;Complex business logic]
+            Changes[Hard to change&lt;br/&gt;Ripple effects]
+            Testing[Hard to test&lt;br/&gt;Integrated components]
+        end
+    end
+
+    classDef quality fill:#ff9800,stroke:#e65100
+    classDef architecture fill:#2196f3,stroke:#1565c0
+    classDef maintainability fill:#9c27b0,stroke:#6a1b9a
+
+    class Complexity,Coverage,Documentation quality
+    class Coupling,Cohesion,Flexibility architecture
+    class Understanding,Changes,Testing maintainability</code></pre>
+<h3 id="quality-metrics-monitoring">Quality Metrics Monitoring<a class="headerlink" href="#quality-metrics-monitoring" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>MVP Goal</th>
+<th>Current Status</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cyclomatic complexity</strong></td>
+<td>&lt; 10</td>
+<td>TBD</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>Test coverage</strong></td>
+<td>&gt; 70%</td>
+<td>TBD</td>
+<td>High</td>
+</tr>
+<tr>
+<td><strong>Documentation coverage</strong></td>
+<td>&gt; 80%</td>
+<td>TBD</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>Number of dependencies</strong></td>
+<td>&lt; 10</td>
+<td>7</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<h2 id="115-mvp-migration-risks">11.5 MVP Migration Risks<a class="headerlink" href="#115-mvp-migration-risks" title="Permanent link">¶</a></h2>
+<h3 id="migration-to-full-version">Migration to Full Version<a class="headerlink" href="#migration-to-full-version" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Migration Risks"
+        subgraph "Architecture Migration"
+            LayerToHex[Layered → Hexagonal&lt;br/&gt;Major refactoring]
+            DirectToEvent[Direct calls → Events&lt;br/&gt;Integration changes]
+            FileToDb[Files → Database&lt;br/&gt;Data migration]
+        end
+
+        subgraph "Technology Migration"
+            MatplotlibToWeb[Matplotlib → Web UI&lt;br/&gt;Complete rewrite]
+            MonolithToServices[Monolith → Services&lt;br/&gt;Deployment changes]
+        end
+
+        subgraph "Team Migration"
+            SkillGap[Skill gaps&lt;br/&gt;New technologies]
+            TimeEstimation[Time estimation&lt;br/&gt;Unknown complexity]
+        end
+    end
+
+    classDef architecture fill:#e3f2fd
+    classDef technology fill:#e8f5e8
+    classDef team fill:#fff3e0
+
+    class LayerToHex,DirectToEvent,FileToDb architecture
+    class MatplotlibToWeb,MonolithToServices technology
+    class SkillGap,TimeEstimation team</code></pre>
+<h3 id="migration-effort-estimation">Migration Effort Estimation<a class="headerlink" href="#migration-effort-estimation" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Effort estimates are preliminary and will be refined during MVP implementation based on actual complexity.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>Estimated Effort</th>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Layered → Hexagonal</strong></td>
+<td>2-3 weeks</td>
+<td>High</td>
+<td>Interface preparation</td>
+</tr>
+<tr>
+<td><strong>Direct → Event-driven</strong></td>
+<td>1-2 weeks</td>
+<td>Medium</td>
+<td>Define event interfaces</td>
+</tr>
+<tr>
+<td><strong>Files → Database</strong></td>
+<td>3-5 days</td>
+<td>Low</td>
+<td>Repository pattern</td>
+</tr>
+<tr>
+<td><strong>Matplotlib → Web</strong></td>
+<td>4-6 weeks</td>
+<td>High</td>
+<td>Prepare JSON API</td>
+</tr>
+</tbody>
+</table>
+<h2 id="116-mvp-risk-mitigation">11.6 MVP Risk Mitigation<a class="headerlink" href="#116-mvp-risk-mitigation" title="Permanent link">¶</a></h2>
+<h3 id="risk-monitoring">Risk Monitoring<a class="headerlink" href="#risk-monitoring" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># MVP Risk Monitoring</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RiskMonitor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_performance_risk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">execution_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">execution_time</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>  <span class="c1"># seconds</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Performance risk: </span><span class="si">{</span><span class="n">execution_time</span><span class="si">}</span><span class="s2">s execution"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_memory_risk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memory_mb</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">memory_mb</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>  <span class="c1"># MB</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Memory risk: </span><span class="si">{</span><span class="n">memory_mb</span><span class="si">}</span><span class="s2">MB usage"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_complexity_risk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">function_lines</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Complexity risk: </span><span class="si">{</span><span class="n">function_lines</span><span class="si">}</span><span class="s2"> lines"</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="continuous-risk-assessment">Continuous Risk Assessment<a class="headerlink" href="#continuous-risk-assessment" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Risk Review</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Week 1</strong></td>
+<td>SimPy integration</td>
+<td>Create prototype</td>
+</tr>
+<tr>
+<td><strong>Week 2</strong></td>
+<td>Performance tests</td>
+<td>Initial benchmarks</td>
+</tr>
+<tr>
+<td><strong>Week 3</strong></td>
+<td>Code quality</td>
+<td>Refactoring if needed</td>
+</tr>
+<tr>
+<td><strong>Week 4</strong></td>
+<td>Migration preparation</td>
+<td>Interface preparation</td>
+</tr>
+<tr>
+<td><strong>Week 5</strong></td>
+<td>Final review</td>
+<td>Document debt</td>
+</tr>
+</tbody>
+</table>
+<h2 id="117-mvp-debt-repayment">11.7 MVP Debt Repayment<a class="headerlink" href="#117-mvp-debt-repayment" title="Permanent link">¶</a></h2>
+<h3 id="debt-prioritization">Debt Prioritization<a class="headerlink" href="#debt-prioritization" title="Permanent link">¶</a></h3>
+<pre class="mermaid"><code>graph TB
+    subgraph "Technical Debt Prioritization"
+        subgraph "High Priority"
+            HP1[SimPy abstraction&lt;br/&gt;Blocks hexagonal migration]
+            HP2[Service interfaces&lt;br/&gt;Blocks event architecture]
+        end
+
+        subgraph "Medium Priority"
+            MP1[Repository pattern&lt;br/&gt;Blocks database migration]
+            MP2[Error handling&lt;br/&gt;Blocks production use]
+        end
+
+        subgraph "Low Priority"
+            LP1[Code documentation&lt;br/&gt;Maintainability]
+            LP2[Test coverage&lt;br/&gt;Quality assurance]
+        end
+    end
+
+    classDef high fill:#d32f2f,stroke:#b71c1c,color:#fff
+    classDef medium fill:#ff9800,stroke:#e65100,color:#fff
+    classDef low fill:#4caf50,stroke:#2e7d32,color:#fff
+
+    class HP1,HP2 high
+    class MP1,MP2 medium
+    class LP1,LP2 low</code></pre>
+<h3 id="debt-repayment-plan">Debt Repayment Plan<a class="headerlink" href="#debt-repayment-plan" title="Permanent link">¶</a></h3>
+<blockquote>
+<p><strong>Note:</strong> Effort estimates are preliminary and will be refined after MVP completion based on actual codebase complexity.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Debt</th>
+<th>Estimated Effort</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Post-MVP</strong></td>
+<td>SimPy abstraction</td>
+<td>~3 days</td>
+<td>Hexagonal architecture possible</td>
+</tr>
+<tr>
+<td><strong>Pre-Full</strong></td>
+<td>Service interfaces</td>
+<td>~5 days</td>
+<td>Event-driven architecture possible</td>
+</tr>
+<tr>
+<td><strong>Full-Dev</strong></td>
+<td>Repository pattern</td>
+<td>~3 days</td>
+<td>Database integration possible</td>
+</tr>
+<tr>
+<td><strong>Production</strong></td>
+<td>Error handling</td>
+<td>~2 days</td>
+<td>Production readiness</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+</body>
+</html>
