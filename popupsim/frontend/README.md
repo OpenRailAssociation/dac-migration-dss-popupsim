@@ -1,30 +1,9 @@
-# PopUpSim Dashboard V2
+# PopUpSim Dashboard
 
 ## Overview
 
-Dashboard V2 is a clean, modular rewrite of the PopUpSim visualization dashboard with enhanced scenario configuration analysis and bottleneck identification.
-
-## Architecture
-
-The dashboard follows SOLID principles with a modular component-based architecture:
-
-```
-dashboard_v2.py                 # Main application entry point
-dashboard_v2_components/
-├── __init__.py                 # Package initialization
-├── data_loader.py              # Data loading (SRP)
-├── scenario_analyzer.py        # Scenario analysis logic (SRP)
-├── scenario_tab.py             # Scenario configuration visualization
-├── overview_tab.py             # Simulation results overview
-└── bottleneck_tab.py           # Bottleneck analysis
-```
-
-### Design Principles
-
-- **Single Responsibility Principle (SRP)**: Each module has one clear purpose
-- **Separation of Concerns**: Data loading, analysis, and visualization are separate
-- **Modularity**: Easy to add new tabs or analysis components
-- **Clean Code**: Type hints, docstrings, minimal complexity
+PopUpSim Dashboard is a visualization dashboard showing the scenario
+configuration analysis, resource utilizations and bottleneck identification.
 
 ## Features
 
@@ -60,12 +39,12 @@ Timeline-based bottleneck identification:
 
 ### Option 1: Batch File (Windows)
 ```bash
-run_dashboard_v2.bat
+run_dashboard.bat
 ```
 
 ### Option 2: Command Line
 ```bash
-streamlit run popupsim/frontend/dashboard_v2.py
+streamlit run popupsim/frontend/dashboard.py
 ```
 
 ### Option 3: Python
@@ -73,7 +52,7 @@ streamlit run popupsim/frontend/dashboard_v2.py
 import streamlit.web.cli as stcli
 import sys
 
-sys.argv = ["streamlit", "run", "popupsim/frontend/dashboard_v2.py"]
+sys.argv = ["streamlit", "run", "popupsim/frontend/dashboard.py"]
 sys.exit(stcli.main())
 ```
 
@@ -111,7 +90,7 @@ output/
 
 ### Adding a New Tab
 
-1. Create new tab module in `dashboard_v2_components/`:
+1. Create new tab module in `dashboard_components/`:
 ```python
 # my_new_tab.py
 def render_my_new_tab(data: dict) -> None:
@@ -145,34 +124,6 @@ analyzer = ScenarioAnalyzer(config)
 results = analyzer.get_my_analysis()
 # Visualize results
 ```
-
-## Comparison with Dashboard V1
-
-| Feature | V1 | V2 |
-|---------|----|----|
-| Architecture | Monolithic | Modular (SOLID) |
-| Scenario Config | ❌ | ✅ |
-| Bottleneck Analysis | Limited | Enhanced |
-| Code Organization | Single file | Component-based |
-| Extensibility | Difficult | Easy |
-| Type Hints | Partial | Complete |
-
-## Future Enhancements
-
-- [ ] Wagon flow Gantt charts
-- [ ] Workshop utilization heatmap
-- [ ] Locomotive movement timeline
-- [ ] Scenario comparison (side-by-side)
-- [ ] PDF export functionality
-- [ ] Interactive track diagram (clickable)
-- [ ] Real-time simulation monitoring
-
-## Dependencies
-
-- streamlit
-- pandas
-- matplotlib
-- (all standard PopUpSim dependencies)
 
 ## License
 
