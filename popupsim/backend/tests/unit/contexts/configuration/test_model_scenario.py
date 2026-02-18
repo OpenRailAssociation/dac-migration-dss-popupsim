@@ -13,7 +13,6 @@ import tempfile
 from typing import Any
 
 from contexts.configuration.domain.models.scenario import Scenario
-from contexts.configuration.domain.models.scenario import TrackSelectionStrategy
 from pydantic import ValidationError
 import pytest
 

@@ -8,7 +8,6 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Col
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
-import simpy
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +83,12 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         if not self.track_manager:
             logger.error('Track manager not initialized')
             return
-            
+
         track = self.track_manager.get_track(track_id)
         if not track:
             logger.error('Track %s not found', track_id)
             return
-        
+
         queue = track.queue
 
         while True:
@@ -101,17 +100,14 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
                 logger.error('No retrofit tracks configured')
                 continue
 
-            yield from self._process_wagon_batch(first_wagon, retrofit_track, track_id, queue)
+            yield from self._process_wagon_batch(first_wagon, retrofit_track, queue)
 
-    def _process_wagon_batch(
-        self, first_wagon: Wagon, retrofit_track: Any, source_track_id: str, queue: Any
-    ) -> Generator[Any, Any]:
+    def _process_wagon_batch(self, first_wagon: Wagon, retrofit_track: Any, queue: Any) -> Generator[Any, Any]:
         """Process a batch of wagons from the same collection track.
 
         Args:
             first_wagon: First wagon in batch
             retrofit_track: Target retrofit track
-            source_track_id: Collection track ID to process from
             queue: Queue for this specific track
         """
         wagons = yield from self._collect_wagons_simple(first_wagon, queue)

@@ -88,7 +88,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             return
         retrofit_track = retrofit_tracks[0]
         retrofit_queue = retrofit_track.queue
-        
+
         while True:
             wagon = yield retrofit_queue.get()
             logger.info('t=%.1f: WAGON[%s] → Retrieved from retrofit track queue', self.env.now, wagon.id)
@@ -475,8 +475,12 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             for wagon in wagons:
                 wagon.move_to(retrofitted_track.track_id)
                 retrofitted_track.queue.put(wagon)  # Add to workflow queue
-                logger.info('t=%.1f: WAGON[%s] → Added to retrofitted track %s', 
-                           self.env.now, wagon.id, retrofitted_track.track_id)
+                logger.info(
+                    't=%.1f: WAGON[%s] → Added to retrofitted track %s',
+                    self.env.now,
+                    wagon.id,
+                    retrofitted_track.track_id,
+                )
 
         EventPublisherHelper.publish_loco_moving(
             self.loco_event_publisher, self.env.now, loco.id, 'retrofitted', 'loco_parking'

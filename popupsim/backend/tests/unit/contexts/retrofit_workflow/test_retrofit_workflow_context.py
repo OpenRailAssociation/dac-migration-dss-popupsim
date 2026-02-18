@@ -60,6 +60,7 @@ class MockScenario:
         self.loco_priority_strategy = Mock(value='workshop_priority')
         self.collection_track_strategy = Mock(value='round_robin')
         self.retrofit_selection_strategy = Mock(value='least_busy')
+        self.retrofitted_selection_strategy = Mock(value='least_busy')
         self.parking_selection_strategy = Mock(value='least_busy')
         self.parking_strategy = Mock(value='batch_completion')
         self.parking_normal_threshold = 0.8
@@ -217,6 +218,7 @@ class TestRetrofitWorkshopContext:
         minimal_scenario.process_times = Mock(wagon_retrofit_time=timedelta(minutes=10))
         minimal_scenario.collection_track_strategy = Mock(value='round_robin')
         minimal_scenario.retrofit_selection_strategy = Mock(value='least_busy')
+        minimal_scenario.retrofitted_selection_strategy = Mock(value='least_busy')
         minimal_scenario.parking_selection_strategy = Mock(value='least_busy')
         minimal_scenario.parking_strategy = Mock(value='batch_completion')
         minimal_scenario.parking_normal_threshold = 0.8

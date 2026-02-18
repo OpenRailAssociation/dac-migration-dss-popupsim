@@ -54,7 +54,7 @@ class TrackCapacityManager(ResourcePort):
 
         # Track wagons on this track (for domain logic)
         self.wagons: list[Wagon] = []
-        
+
         # Workflow queue for coordinator processing
         self.queue: simpy.Store = simpy.Store(env)
 
@@ -271,7 +271,7 @@ class TrackCapacityManager(ResourcePort):
             Number of wagons waiting in queue
         """
         return len(self.queue.items)
-    
+
     def is_queue_empty(self) -> bool:
         """Check if workflow queue is empty.
 

@@ -15,21 +15,13 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 from shared.value_objects.timezone_utils import ensure_utc
 from shared.value_objects.timezone_utils import validate_timezone_aware
 
 from .process_times import ProcessTimes
 
 logger = logging.getLogger(__name__)
-
-
-class TrackSelectionStrategy(StrEnum):
-    """Strategy for selecting tracks."""
-
-    ROUND_ROBIN = 'round_robin'
-    LEAST_OCCUPIED = 'least_occupied'
-    FIRST_AVAILABLE = 'first_available'
-    RANDOM = 'random'
 
 
 class LocoDeliveryStrategy(StrEnum):
@@ -70,12 +62,12 @@ class Scenario(BaseModel):
     start_date: datetime
     end_date: datetime
     workflow_mode: WorkflowMode = WorkflowMode.LEGACY
-    collection_track_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
-
-    retrofit_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
-    workshop_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.ROUND_ROBIN
-    parking_selection_strategy: TrackSelectionStrategy = Field(
-        default=TrackSelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting parking tracks'
+    collection_track_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
+    retrofit_selection_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
+    retrofitted_selection_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
+    workshop_selection_strategy: SelectionStrategy = SelectionStrategy.ROUND_ROBIN
+    parking_selection_strategy: SelectionStrategy = Field(
+        default=SelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting parking tracks'
     )
 
     @field_validator('parking_selection_strategy', mode='before')

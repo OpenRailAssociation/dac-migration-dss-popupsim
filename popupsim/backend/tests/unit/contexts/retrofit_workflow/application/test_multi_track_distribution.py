@@ -13,7 +13,7 @@ from contexts.retrofit_workflow.domain.services.batch_formation_service import B
 from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 from contexts.retrofit_workflow.domain.services.resource_selection_service import SelectionStrategy
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
-from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
+from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionFacade
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 from contexts.retrofit_workflow.infrastructure.resources.track_capacity_manager import TrackResourceManager
@@ -50,7 +50,7 @@ class TestMultiTrackDistribution:
         return TrackResourceManager(env, track_capacities)
 
     @pytest.fixture
-    def track_selector(self, track_manager: TrackResourceManager) -> TrackSelectionService:
+    def track_selector(self, track_manager: TrackResourceManager) -> TrackSelectionFacade:
         """Create track selector with round-robin strategy."""
         tracks_by_type = {
             'collection': [
@@ -59,11 +59,11 @@ class TestMultiTrackDistribution:
             ],
             'retrofit': [track_manager.get_track('retrofit_1')],
         }
-        return TrackSelectionService(tracks_by_type, default_strategy=SelectionStrategy.ROUND_ROBIN)
+        return TrackSelectionFacade(tracks_by_type, default_strategy=SelectionStrategy.ROUND_ROBIN)
 
     @pytest.fixture
     def arrival_coordinator(
-        self, env: simpy.Environment, collection_queue: simpy.FilterStore, track_selector: TrackSelectionService
+        self, env: simpy.Environment, collection_queue: simpy.FilterStore, track_selector: TrackSelectionFacade
     ) -> ArrivalCoordinator:
         """Create arrival coordinator."""
         collection_coordinator = Mock()
@@ -85,7 +85,7 @@ class TestMultiTrackDistribution:
         env: simpy.Environment,
         collection_queue: simpy.FilterStore,
         retrofit_queue: simpy.FilterStore,
-        track_selector: TrackSelectionService,
+        track_selector: TrackSelectionFacade,
     ) -> CollectionCoordinator:
         """Create collection coordinator."""
         # Mock dependencies
