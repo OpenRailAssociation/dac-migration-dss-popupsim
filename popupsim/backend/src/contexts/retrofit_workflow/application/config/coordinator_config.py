@@ -17,7 +17,7 @@ from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
 from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
-from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
+from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionFacade
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 import simpy
@@ -65,7 +65,7 @@ class ArrivalCoordinatorConfig:
 
     env: simpy.Environment
     collection_queue: simpy.FilterStore
-    track_selector: TrackSelectionService
+    track_selector: TrackSelectionFacade
     collection_coordinator: Any  # Reference to CollectionCoordinator for adding wagons
     track_manager: Any | None = None  # TrackResourceManager for capacity management
     event_publisher: Callable[[WagonJourneyEvent], None] | None = None
@@ -89,7 +89,7 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     collection_queue: simpy.FilterStore
     retrofit_queue: simpy.FilterStore
     locomotive_manager: LocomotiveResourceManager
-    track_selector: TrackSelectionService
+    track_selector: TrackSelectionFacade
     batch_service: BatchFormationService
     route_service: RouteService
     train_service: TrainFormationService
@@ -128,7 +128,7 @@ class ParkingCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     env: simpy.Environment
     retrofitted_queue: simpy.FilterStore
     locomotive_manager: LocomotiveResourceManager
-    track_selector: TrackSelectionService
+    track_selector: TrackSelectionFacade
     batch_service: BatchFormationService
     route_service: RouteService
     train_service: TrainFormationService

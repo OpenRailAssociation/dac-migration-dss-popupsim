@@ -8,7 +8,7 @@ It ensures efficient workshop utilization in the DAC migration process.
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.entities.workshop import Workshop
 from contexts.retrofit_workflow.domain.services.resource_selection_service import ResourceSelectionService
-from contexts.retrofit_workflow.domain.services.resource_selection_service import SelectionStrategy
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 
 
 class WorkshopAssignmentService:

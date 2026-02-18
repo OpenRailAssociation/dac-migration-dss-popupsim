@@ -8,7 +8,6 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Col
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
-import simpy
 
 logger = logging.getLogger(__name__)
 
@@ -34,23 +33,17 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         self.config = config
         self.coordination = coordination
         self.batch_counter = 0
-        self.track_queues: dict[str, Any] = {}  # One queue per collection track
-        self.pending_length: dict[str, float] = {}  # Track pending wagon length per track
-        self.track_manager = config.track_manager  # Add track manager for capacity management
+        self.track_manager = config.track_manager
 
     def start(self) -> None:
         """Start coordinator processes - one per collection track."""
-        # Get all collection tracks
         collection_tracks = self.config.track_selector.get_tracks_of_type('collection')
 
         if not collection_tracks:
             logger.error('No collection tracks configured')
             return
 
-        # Create one queue per collection track
         for track in collection_tracks:
-            self.track_queues[track.track_id] = simpy.Store(self.config.env)
-            self.pending_length[track.track_id] = 0.0
             self.config.env.process(self._collection_process(track.track_id))
 
     def add_wagon(self, wagon: Wagon) -> None:
@@ -60,9 +53,10 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             wagon: Wagon to add to queue
         """
         track_id = wagon.current_track_id
-        if track_id in self.track_queues:
-            self.track_queues[track_id].put(wagon)
-            self.pending_length[track_id] += wagon.length
+        if self.track_manager:
+            track = self.track_manager.get_track(track_id)
+            if track:
+                track.queue.put(wagon)
 
     def get_pending_length(self, track_id: str) -> float:
         """Get pending wagon length for a track.
@@ -74,7 +68,11 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         -------
             Pending wagon length in meters
         """
-        return self.pending_length.get(track_id, 0.0)
+        if self.track_manager:
+            track = self.track_manager.get_track(track_id)
+            if track:
+                return sum(w.length for w in track.queue.items)
+        return 0.0
 
     def _collection_process(self, track_id: str) -> Generator[Any, Any]:
         """Run collection process for a specific collection track.
@@ -82,10 +80,18 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         Args:
             track_id: ID of the collection track to monitor
         """
-        queue = self.track_queues[track_id]
+        if not self.track_manager:
+            logger.error('Track manager not initialized')
+            return
+
+        track = self.track_manager.get_track(track_id)
+        if not track:
+            logger.error('Track %s not found', track_id)
+            return
+
+        queue = track.queue
 
         while True:
-            # Get next wagon from this track's queue (FIFO guaranteed)
             first_wagon: Wagon = yield queue.get()
 
             retrofit_tracks = self.config.track_selector.get_tracks_of_type('retrofit')
@@ -94,29 +100,20 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
                 logger.error('No retrofit tracks configured')
                 continue
 
-            yield from self._process_wagon_batch(first_wagon, retrofit_track, track_id, queue)
+            yield from self._process_wagon_batch(first_wagon, retrofit_track, queue)
 
-    def _process_wagon_batch(
-        self, first_wagon: Wagon, retrofit_track: Any, source_track_id: str, queue: Any
-    ) -> Generator[Any, Any]:
+    def _process_wagon_batch(self, first_wagon: Wagon, retrofit_track: Any, queue: Any) -> Generator[Any, Any]:
         """Process a batch of wagons from the same collection track.
 
         Args:
             first_wagon: First wagon in batch
             retrofit_track: Target retrofit track
-            source_track_id: Collection track ID to process from
             queue: Queue for this specific track
         """
-        # Collect wagons
         wagons = yield from self._collect_wagons_simple(first_wagon, queue)
         if not wagons:
             return
 
-        # Update pending length
-        total_length = sum(w.length for w in wagons)
-        self.pending_length[source_track_id] -= total_length
-
-        # Create batch aggregate directly
         batch_aggregate = self.config.batch_service.create_batch_aggregate(wagons, 'retrofit')
         yield from self._transport_batch_aggregate(batch_aggregate, retrofit_track)
 
@@ -197,10 +194,10 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         )
 
     def _deliver_wagons(self, wagons: list[Wagon], retrofit_track: Any) -> Generator[Any, Any]:
-        """Deliver wagons to retrofit queue."""
+        """Deliver wagons to retrofit track queue."""
         for wagon in wagons:
             wagon.prepare_for_retrofit()
-            self.config.retrofit_queue.put(wagon)
+            retrofit_track.queue.put(wagon)
 
             EventPublisherHelper.publish_wagon_event(
                 self.config.wagon_event_publisher,
@@ -315,10 +312,10 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             len(wagons),
         )
 
-        # Deliver wagons to retrofit queue IMMEDIATELY (before train dissolution)
+        # Deliver wagons to retrofit track queue IMMEDIATELY (before train dissolution)
         for wagon in wagons:
             wagon.prepare_for_retrofit()
-            self.config.retrofit_queue.put(wagon)
+            retrofit_track.queue.put(wagon)
             EventPublisherHelper.publish_wagon_event(
                 self.config.wagon_event_publisher,
                 self.config.env.now,

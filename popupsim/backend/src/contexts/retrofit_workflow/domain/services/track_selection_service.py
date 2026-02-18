@@ -1,22 +1,22 @@
-"""Track selection service for railway infrastructure resource allocation.
+"""Track selection facade for railway infrastructure resource allocation.
 
-This module provides specialized services for selecting tracks from grouped
-collections based on track type and capacity requirements. It leverages the
-generic resource selection service for consistent allocation strategies.
+This module provides a domain-specific facade over the generic ResourceSelectionService,
+offering track-type grouping, per-type strategies, and convenience methods for track
+selection in the DAC migration workflow.
 """
 
 from contexts.retrofit_workflow.domain.services.resource_selection_service import ResourceSelectionService
-from contexts.retrofit_workflow.domain.services.resource_selection_service import SelectionStrategy
 from contexts.retrofit_workflow.infrastructure.resources.track_capacity_manager import TrackCapacityManager
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 
 
-class TrackSelectionService:
-    """Service for selecting tracks from grouped collections by track type.
+class TrackSelectionFacade:
+    """Facade for selecting tracks from grouped collections by track type.
 
-    This service handles scenarios with multiple tracks of the same operational
-    type, providing intelligent selection based on capacity, utilization, and
-    operational requirements. It supports various track types used in the
-    DAC migration process.
+    This facade provides a domain-specific API over ResourceSelectionService,
+    handling track-type grouping, per-type selection strategies, and convenience
+    methods. It simplifies track selection for coordinators while maintaining
+    flexibility through the underlying generic resource selector.
 
     Track Types Supported
     ---------------------
@@ -42,8 +42,8 @@ class TrackSelectionService:
     Examples
     --------
     >>> tracks = {'collection': [track1, track2], 'retrofit': [track3, track4]}
-    >>> service = TrackSelectionService(tracks)
-    >>> selected_track = service.select_track_with_capacity('collection')
+    >>> facade = TrackSelectionFacade(tracks)
+    >>> selected_track = facade.select_track_with_capacity('collection')
     """
 
     def __init__(
@@ -132,8 +132,8 @@ class TrackSelectionService:
 
         Examples
         --------
-        >>> service = TrackSelectionService(tracks_by_type)
-        >>> total_capacity = service.get_total_available_capacity('parking')
+        >>> facade = TrackSelectionFacade(tracks_by_type)
+        >>> total_capacity = facade.get_total_available_capacity('parking')
         >>> print(f'Total parking capacity: {total_capacity}m')
         """
         tracks = self.tracks_by_type.get(track_type, [])
@@ -166,8 +166,8 @@ class TrackSelectionService:
 
         Examples
         --------
-        >>> service = TrackSelectionService(tracks_by_type)
-        >>> collection_tracks = service.get_tracks_of_type('collection')
+        >>> facade = TrackSelectionFacade(tracks_by_type)
+        >>> collection_tracks = facade.get_tracks_of_type('collection')
         >>> for track in collection_tracks:
         ...     print(f'Track {track.track_id}: {track.get_available_capacity()}m')
         """

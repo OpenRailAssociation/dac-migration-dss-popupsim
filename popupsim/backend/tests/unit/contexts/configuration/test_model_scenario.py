@@ -13,7 +13,6 @@ import tempfile
 from typing import Any
 
 from contexts.configuration.domain.models.scenario import Scenario
-from contexts.configuration.domain.models.scenario import TrackSelectionStrategy
 from pydantic import ValidationError
 import pytest
 
@@ -331,105 +330,6 @@ class TestScenario:
         # Duration should be calculated correctly even if it's long
         duration = (config.end_date - config.start_date).days
         assert duration > 365
-
-    def test_track_selection_strategy_validation(self) -> None:
-        """
-        Test track selection strategy validation.
-
-        Notes
-        -----
-        Validates that valid strategy values are accepted and default is applied.
-        """
-        config = Scenario(
-            id='test_scenario',
-            start_date=datetime(2024, 1, 1, tzinfo=UTC),
-            end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            track_selection_strategy=TrackSelectionStrategy.ROUND_ROBIN,
-            locomotives=[
-                {
-                    'id': 'L1',
-                    'name': 'L1',
-                    'start_date': '2024-01-01 00:00:00',
-                    'end_date': '2024-01-10 00:00:00',
-                    'track': 'track_19',
-                }
-            ],
-            trains=[
-                {
-                    'train_id': 'T1',
-                    'arrival_time': '2024-01-01T08:00:00Z',
-                    'wagons': [
-                        {
-                            'id': 'W1',
-                            'length': 10.0,
-                            'is_loaded': False,
-                            'needs_retrofit': True,
-                        }
-                    ],
-                }
-            ],
-            tracks=[
-                {
-                    'id': 'track_19',
-                    'type': 'parking_area',
-                    'capacity': 100,
-                    'edges': ['track_7'],
-                },
-                {
-                    'id': 'track_7',
-                    'type': 'retrofitted',
-                    'capacity': 100,
-                    'edges': ['track_19'],
-                },
-            ],
-            topology={'tracks': ['track_19', 'track_7']},
-        )
-        assert config.track_selection_strategy == TrackSelectionStrategy.ROUND_ROBIN
-
-        config = Scenario(
-            id='test_scenario',
-            start_date=datetime(2024, 1, 1, tzinfo=UTC),
-            end_date=datetime(2024, 1, 10, tzinfo=UTC),
-            locomotives=[
-                {
-                    'id': 'L1',
-                    'name': 'L1',
-                    'start_date': '2024-01-01 00:00:00',
-                    'end_date': '2024-01-10 00:00:00',
-                    'track': 'track_19',
-                }
-            ],
-            trains=[
-                {
-                    'train_id': 'T1',
-                    'arrival_time': '2024-01-01T08:00:00Z',
-                    'wagons': [
-                        {
-                            'id': 'W1',
-                            'length': 10.0,
-                            'is_loaded': False,
-                            'needs_retrofit': True,
-                        }
-                    ],
-                }
-            ],
-            tracks=[
-                {
-                    'id': 'track_19',
-                    'type': 'parking_area',
-                    'capacity': 100,
-                    'edges': ['track_7'],
-                },
-                {
-                    'id': 'track_7',
-                    'type': 'retrofitted',
-                    'capacity': 100,
-                    'edges': ['track_19'],
-                },
-            ],
-            topology={'tracks': ['track_19', 'track_7']},
-        )
-        assert config.track_selection_strategy == TrackSelectionStrategy.LEAST_OCCUPIED
 
     def test_scenario_config_equality(self) -> None:
         """

@@ -24,9 +24,8 @@ from contexts.retrofit_workflow.domain.services.batch_formation_service import B
 from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 from contexts.retrofit_workflow.domain.services.coupling_validation_service import CouplingValidationService
 from contexts.retrofit_workflow.domain.services.rake_formation_service import RakeFormationService
-from contexts.retrofit_workflow.domain.services.resource_selection_service import SelectionStrategy
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
-from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
+from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionFacade
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.domain.services.workshop_assignment_service import WorkshopAssignmentService
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
@@ -34,6 +33,7 @@ from contexts.retrofit_workflow.infrastructure.resources.track_capacity_manager 
 from contexts.retrofit_workflow.infrastructure.resources.workshop_resource_manager import WorkshopResourceManager
 from infrastructure.logging import get_process_logger
 from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 import simpy
 
 
@@ -87,7 +87,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         self.coupling_service = CouplingService(self.scenario.process_times)
         self.train_formation_service = TrainFormationService(self.coupling_service)
         self.route_service: RouteService | None = None
-        self.track_selector: TrackSelectionService | None = None
+        self.track_selector: TrackSelectionFacade | None = None
         self.workshop_assignment_service: WorkshopAssignmentService | None = None
 
         # Event collection
@@ -247,33 +247,18 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
                 if track:
                     tracks_by_type[track_type].append(track)
 
-        # Map scenario strategies to SelectionStrategy enum
-        strategy_map = {
-            'round_robin': SelectionStrategy.ROUND_ROBIN,
-            'least_occupied': SelectionStrategy.MOST_AVAILABLE,
-            'first_available': SelectionStrategy.FIRST_AVAILABLE,
-            'best_fit': SelectionStrategy.BEST_FIT,
-        }
-
-        # Build strategy map per track type from scenario configuration
-        # Note: scenario strategies are already enums, use .value to get string
-        print(f'DEBUG: Scenario ID: {self.scenario.id}')
-        print(f'DEBUG: parking_selection_strategy from scenario: {self.scenario.parking_selection_strategy}')
-        print(f'DEBUG: parking_selection_strategy.value: {self.scenario.parking_selection_strategy.value}')
+        # Map scenario strategies to internal SelectionStrategy enum
+        # Scenario strategies are already SelectionStrategy enums, use directly
         strategies_by_type = {
-            'collection': strategy_map.get(
-                self.scenario.collection_track_strategy.value, SelectionStrategy.MOST_AVAILABLE
-            ),
-            'retrofit': strategy_map.get(
-                self.scenario.retrofit_selection_strategy.value, SelectionStrategy.MOST_AVAILABLE
-            ),
-            'parking': strategy_map.get(self.scenario.parking_selection_strategy.value, SelectionStrategy.BEST_FIT),
+            'collection': self.scenario.collection_track_strategy,
+            'retrofit': self.scenario.retrofit_selection_strategy,
+            'retrofitted': self.scenario.retrofitted_selection_strategy,
+            'parking': self.scenario.parking_selection_strategy,
         }
-        print(f'DEBUG: Mapped parking strategy: {strategies_by_type["parking"]}')
 
         # Create track selector with per-type strategies
-        self.track_selector = TrackSelectionService(
-            tracks_by_type, strategies_by_type=strategies_by_type, default_strategy=SelectionStrategy.BEST_FIT
+        self.track_selector = TrackSelectionFacade(
+            tracks_by_type, strategies_by_type=strategies_by_type, default_strategy=SelectionStrategy.LEAST_OCCUPIED
         )
         self.workshop_assignment_service = WorkshopAssignmentService(dict(self.workshops))
 

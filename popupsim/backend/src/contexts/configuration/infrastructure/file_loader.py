@@ -13,10 +13,10 @@ from contexts.configuration.application.dtos.workshop_input_dto import WorkshopI
 from contexts.configuration.domain.models.process_times import ProcessTimes
 from contexts.configuration.domain.models.scenario import LocoDeliveryStrategy
 from contexts.configuration.domain.models.scenario import Scenario
-from contexts.configuration.domain.models.scenario import TrackSelectionStrategy
 from contexts.configuration.domain.models.scenario import WorkflowMode
 from contexts.configuration.domain.models.topology import Topology
 import pandas as pd
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 
 
 class FileLoader:  # pylint: disable=too-few-public-methods
@@ -38,12 +38,12 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             start_date=data['start_date'],
             end_date=data['end_date'],
             workflow_mode=data.get('workflow_mode') or WorkflowMode.LEGACY,
-            track_selection_strategy=data.get('track_selection_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
-            collection_track_strategy=data.get('collection_track_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
-            retrofit_selection_strategy=data.get('retrofit_selection_strategy')
-            or TrackSelectionStrategy.LEAST_OCCUPIED,
-            workshop_selection_strategy=data.get('workshop_selection_strategy') or TrackSelectionStrategy.ROUND_ROBIN,
-            parking_selection_strategy=data.get('parking_selection_strategy') or TrackSelectionStrategy.LEAST_OCCUPIED,
+            collection_track_strategy=data.get('collection_track_strategy') or SelectionStrategy.LEAST_OCCUPIED,
+            retrofit_selection_strategy=data.get('retrofit_selection_strategy') or SelectionStrategy.LEAST_OCCUPIED,
+            retrofitted_selection_strategy=data.get('retrofitted_selection_strategy')
+            or SelectionStrategy.LEAST_OCCUPIED,
+            workshop_selection_strategy=data.get('workshop_selection_strategy') or SelectionStrategy.ROUND_ROBIN,
+            parking_selection_strategy=data.get('parking_selection_strategy') or SelectionStrategy.LEAST_OCCUPIED,
             parking_strategy=data.get('parking_strategy', 'opportunistic'),
             parking_normal_threshold=data.get('parking_normal_threshold', 0.3),
             parking_critical_threshold=data.get('parking_critical_threshold', 0.8),

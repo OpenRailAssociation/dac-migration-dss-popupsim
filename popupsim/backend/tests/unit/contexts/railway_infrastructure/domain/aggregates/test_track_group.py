@@ -7,8 +7,10 @@ from contexts.railway_infrastructure.domain.entities.track import Track
 from contexts.railway_infrastructure.domain.entities.track import TrackType
 from contexts.railway_infrastructure.domain.repositories.track_occupancy_repository import TrackOccupancyRepository
 from contexts.railway_infrastructure.domain.services.track_group_service import TrackGroupService
-from contexts.railway_infrastructure.domain.value_objects.track_selection_strategy import TrackSelectionStrategy
 import pytest
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
+
+pytestmark = [pytest.mark.filterwarnings('ignore::DeprecationWarning')]
 
 
 @pytest.fixture
@@ -77,8 +79,8 @@ def test_add_track_type_mismatch(collection_tracks: list[Track]) -> None:
 
 def test_set_selection_strategy(track_group: TrackGroup) -> None:
     """Test changing selection strategy."""
-    track_group.set_selection_strategy(TrackSelectionStrategy.RANDOM)
-    assert track_group.selection_strategy == TrackSelectionStrategy.RANDOM
+    track_group.set_selection_strategy(SelectionStrategy.RANDOM)
+    assert track_group.selection_strategy == SelectionStrategy.RANDOM
 
 
 def test_get_track(track_group: TrackGroup, collection_tracks: list[Track]) -> None:
@@ -253,7 +255,7 @@ def test_least_occupied_strategy(
     track_group: TrackGroup, collection_tracks: list[Track], service: TrackGroupService
 ) -> None:
     """Test least occupied selection strategy."""
-    track_group.set_selection_strategy(TrackSelectionStrategy.LEAST_OCCUPIED)
+    track_group.set_selection_strategy(SelectionStrategy.LEAST_OCCUPIED)
 
     # Add different amounts to tracks
     service.try_add_wagon(track_group, 'W1', 50.0, 1.0)
@@ -267,6 +269,6 @@ def test_first_available_strategy(
     track_group: TrackGroup, collection_tracks: list[Track], service: TrackGroupService
 ) -> None:
     """Test first available selection strategy."""
-    track_group.set_selection_strategy(TrackSelectionStrategy.FIRST_AVAILABLE)
+    track_group.set_selection_strategy(SelectionStrategy.FIRST_AVAILABLE)
     selected = service.select_track_for_wagon(track_group, 20.0)
     assert selected == collection_tracks[0]

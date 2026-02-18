@@ -6,25 +6,11 @@ patterns used throughout the DAC migration simulation system.
 """
 
 from collections.abc import Callable
-from enum import Enum
+import random
 from typing import TypeVar
 
 from contexts.retrofit_workflow.domain.ports.resource_port import ResourcePort
-
-
-class SelectionStrategy(Enum):
-    """Enumeration of available resource selection strategies.
-
-    Each strategy implements a different approach to resource allocation
-    based on operational requirements and optimization goals.
-    """
-
-    ROUND_ROBIN = 'ROUND_ROBIN'
-    FIRST_AVAILABLE = 'FIRST_AVAILABLE'
-    MOST_AVAILABLE = 'MOST_AVAILABLE'  # Select track with most free space
-    SHORTEST_QUEUE = 'SHORTEST_QUEUE'
-    BEST_FIT = 'BEST_FIT'  # Fill tracks completely before moving to next
-
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 
 TResource = TypeVar('TResource', bound=ResourcePort)  # pylint: disable=invalid-name
 
@@ -83,6 +69,17 @@ class ResourceSelectionService[TResource: ResourcePort]:  # pylint: disable=inva
         self.strategy = strategy
         self._round_robin_counter = 0
 
+        # Strategy dispatch mapping
+        self._strategy_map: dict[SelectionStrategy, Callable] = {
+            SelectionStrategy.ROUND_ROBIN: self._select_round_robin,
+            SelectionStrategy.FIRST_AVAILABLE: self._select_first_available,
+            SelectionStrategy.MOST_AVAILABLE: self._select_most_available,
+            SelectionStrategy.LEAST_OCCUPIED: self._select_most_available,  # Alias
+            SelectionStrategy.SHORTEST_QUEUE: self._select_shortest_queue,
+            SelectionStrategy.BEST_FIT: self._select_best_fit,
+            SelectionStrategy.RANDOM: self._select_random,
+        }
+
     def select(
         self,
         can_use: Callable[[str, TResource], bool] | None = None,
@@ -115,18 +112,8 @@ class ResourceSelectionService[TResource: ResourcePort]:  # pylint: disable=inva
         >>> # Select resource with specific capacity requirement
         >>> resource_id = service.select(lambda id, resource: resource.available_capacity >= 10)
         """
-        if self.strategy == SelectionStrategy.ROUND_ROBIN:
-            return self._select_round_robin(can_use)
-        if self.strategy == SelectionStrategy.FIRST_AVAILABLE:
-            return self._select_first_available(can_use)
-        if self.strategy == SelectionStrategy.MOST_AVAILABLE:
-            return self._select_most_available(can_use)
-        if self.strategy == SelectionStrategy.SHORTEST_QUEUE:
-            return self._select_shortest_queue(can_use)
-        if self.strategy == SelectionStrategy.BEST_FIT:
-            return self._select_best_fit(can_use)
-
-        return None
+        strategy_func = self._strategy_map.get(self.strategy)
+        return strategy_func(can_use) if strategy_func else None
 
     def _can_use_resource(
         self,
@@ -302,3 +289,29 @@ class ResourceSelectionService[TResource: ResourcePort]:  # pylint: disable=inva
                 best_resource = resource_id
 
         return best_resource
+
+    def _select_random(
+        self,
+        can_use: Callable[[str, TResource], bool] | None,
+    ) -> str | None:
+        """Select random resource from available options.
+
+        Random selection strategy for testing and load distribution scenarios.
+
+        Parameters
+        ----------
+        can_use : Callable[[str, TResource], bool] | None
+            Optional predicate to filter usable resources
+
+        Returns
+        -------
+        str | None
+            Selected resource ID or None if no usable resources
+        """
+        available = [
+            resource_id
+            for resource_id, resource in self.resources.items()
+            if self._can_use_resource(resource_id, resource, can_use) and resource.get_available_capacity() > 0
+        ]
+
+        return random.choice(available) if available else None  # noqa: S311
