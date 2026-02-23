@@ -82,7 +82,7 @@ After installation, run simulations with:
 
 ```bash
 # Navigate to project directory (if not already there)
-cd dac-migration-dss-popupsim
+cd dac-migration-dss-popupsim-main
 
 # Run with example scenario
 uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
