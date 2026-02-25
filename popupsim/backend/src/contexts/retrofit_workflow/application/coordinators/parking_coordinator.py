@@ -4,6 +4,8 @@ from collections.abc import Generator
 import logging
 from typing import Any
 
+import simpy
+
 from contexts.retrofit_workflow.application.config.coordinator_config import ParkingCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
@@ -65,8 +67,6 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         """
         try:
             # Create combined queue from all retrofitted tracks using SimPy FilterStore
-            import simpy
-
             combined_queue = simpy.FilterStore(self.config.env)
 
             # Monitor all track queues and forward to combined queue
@@ -106,7 +106,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 # Transport batch
                 yield from self._process_wagon_batch_with_wagons(wagons, parking_track, retrofitted_track_id)
         except GeneratorExit:
-            return
+            pass
 
     def _forward_queue(self, track: Any, combined_queue: Any) -> Generator[Any, Any]:
         """Forward wagons from track queue to combined queue with track ID."""
@@ -115,7 +115,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 wagon = yield track.queue.get()
                 combined_queue.put((wagon, track.track_id))
         except GeneratorExit:
-            return
+            pass
 
     def _parking_process(self, retrofitted_track_id: str) -> Generator[Any, Any]:
         """Run main parking process for a specific retrofitted track.
@@ -129,7 +129,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             else:
                 yield from self._parking_process_opportunistic(retrofitted_track_id)
         except GeneratorExit:
-            return  # Simulation ended, exit cleanly
+            pass
 
     def _parking_process_opportunistic(self, retrofitted_track_id: str) -> Generator[Any, Any]:
         """Opportunistic strategy: grab and go immediately.
@@ -359,7 +359,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, parking_track_id)
             yield from self._transport_batch_aggregate(batch_aggregate, parking_track_id, retrofitted_track_id)
         except GeneratorExit:
-            return
+            pass
 
     def _process_wagon_batch(
         self, first_wagon: Wagon, parking_track: Any, retrofitted_track_id: str, queue: Any
@@ -388,7 +388,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             batch_aggregate = self.config.batch_service.create_batch_aggregate(batch_wagons, parking_track_id)
             yield from self._transport_batch_aggregate(batch_aggregate, parking_track_id, retrofitted_track_id)
         except GeneratorExit:
-            return
+            pass
 
     def _collect_wagons(self, first_wagon: Wagon, parking_track: Any, queue: Any) -> Generator[Any, Any, list[Wagon]]:
         """Collect wagons that fit in available parking capacity.
@@ -448,7 +448,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
 
             yield self.config.env.timeout(0)
         except GeneratorExit:
-            return
+            pass
 
     def _return_locomotive(self, loco: Any, parking_track_id: str) -> Generator[Any, Any]:
         """Return locomotive to home track."""
@@ -460,9 +460,9 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             return_time = self.config.route_service.get_duration(parking_track_id, loco.home_track)
             yield self.config.env.timeout(return_time)
         except GeneratorExit:
-            return
+            pass
 
-    def _transport_to_parking_with_batch(
+    def _transport_to_parking_with_batch(  # pylint: disable=too-many-locals
         self, loco: Any, batch_aggregate: Any, parking_track_id: str, retrofitted_track_id: str
     ) -> Generator[Any, Any]:
         """Transport batch aggregate to parking area with proper train formation.
@@ -550,7 +550,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 len(wagons),
             )
         except GeneratorExit:
-            return
+            pass
 
     def _transport_batch_aggregate(
         self, batch_aggregate: Any, parking_track_id: str, retrofitted_track_id: str
@@ -602,4 +602,4 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 yield from self.config.locomotive_manager.release(loco)
                 logger.info('t=%.1f: LOCO[%s] → Released', self.config.env.now, loco.id)
         except GeneratorExit:
-            return  # Simulation ended, exit cleanly
+            pass

@@ -218,7 +218,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             self.config.loco_event_publisher, self.config.env.now, loco.id, loco.home_track
         )
 
-    def _transport_to_retrofit_with_batch(  # noqa: PLR0915
+    def _transport_to_retrofit_with_batch(  # noqa: PLR0915  # pylint: disable=too-many-locals,too-many-statements
         self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str
     ) -> Generator[Any, Any]:
         """Transport batch aggregate to retrofit track with train formation."""
