@@ -52,7 +52,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run example simulation
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 ```
 
 #### Option 2: Download ZIP Archive
@@ -73,7 +73,7 @@ If you don't have git installed:
    uv sync
 
    # Run example simulation
-   uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+   uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
    ```
 
 ### Running PopUpSim
@@ -124,12 +124,12 @@ The dashboard will open in your browser at http://localhost:8501
 
 Seven ready-to-use scenarios are included (10 trains, 224 wagons over 2 days):
 
-- **[Baseline](Data/examples/ten_trains_two_days_baseline/)** - 2 locomotives, 2 collection tracks, 2 workshops (2 bays each), 1 retrofit track, 1 retrofitted track
+- **[Baseline](Data/examples/ten_trains_two_days_baseline/)** - 1 locomotives, 2 collection tracks, 2 workshops (2 bays each), 1 retrofit track, 1 retrofitted track
 - **[Variant 1](Data/examples/ten_trains_two_days_var1/)** - 1 locomotive (bottleneck), 3 collection tracks, 2 workshops (2 bays each)
 - **[Variant 2](Data/examples/ten_trains_two_days_var2/)** - 1 locomotive, 3 collection tracks, 2 workshops (2 bays each), 2 retrofit tracks
 - **[Variant 3](Data/examples/ten_trains_two_days_var3/)** - 2 locomotives, 3 collection tracks, 2 workshops (2 bays each)
-- **[Variant 4](Data/examples/ten_trains_two_days_var4/)** - 2 locomotives, 3 collection tracks, 2 workshops (4 bays each - increased capacity)
-- **[Variant 5](Data/examples/ten_trains_two_days_var5/)** - 2 locomotives, 3 collection tracks, 2 workshops (4 bays each), 2 retrofitted tracks
+- **[Variant 4](Data/examples/ten_trains_two_days_var4/)** - 2 locomotives, 3 collection tracks, 2 workshops (2 bays each - increased capacity)
+- **[Variant 5](Data/examples/ten_trains_two_days_var5/)** - 4 locomotives, 3 collection tracks, 3 workshops (2 bays each), 2 retrofitted tracks
 - **[Variant 6](Data/examples/ten_trains_two_days_var6/)** - Same as Variant 5 but with opportunistic parking strategy
 
 **Known Limitations:**

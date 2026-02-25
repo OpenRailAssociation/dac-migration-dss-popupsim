@@ -174,11 +174,10 @@ def _render_comparison_view(base_path: Path, selected_scenarios: list[str]) -> N
             {
                 'Scenario': scenario_name,
                 'Trains': metrics.get('trains_arrived', 0),
-                'Wagons': metrics.get('wagons_arrived', 0),
+                'Total Wagons': metrics.get('total_wagons', 0),
                 'Rejected': metrics.get('wagons_rejected', 0),
-                'Rejection %': f'{(metrics.get("wagons_rejected", 0) / metrics.get("wagons_arrived", 1) * 100):.1f}',
+                'Rejection %': f'{(metrics.get("wagons_rejected", 0) / metrics.get("total_wagons", 1) * 100):.1f}',
                 'Retrofits': metrics.get('retrofits_completed', 0),
-                'Avg Cycle Time (min)': f'{avg_cycle_time:.1f}',
             }
         )
 
@@ -190,7 +189,7 @@ def _render_comparison_view(base_path: Path, selected_scenarios: list[str]) -> N
         baseline = comparison_df.iloc[0]
         compare = comparison_df.iloc[1]
 
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         with col1:
             delta_retrofits = compare['Retrofits'] - baseline['Retrofits']
             delta_pct = (delta_retrofits / baseline['Retrofits'] * 100) if baseline['Retrofits'] > 0 else 0
@@ -205,12 +204,6 @@ def _render_comparison_view(base_path: Path, selected_scenarios: list[str]) -> N
             compare_rej_rate = float(compare['Rejection %'])
             delta_rej_rate = compare_rej_rate - baseline_rej_rate
             st.metric('Rejection Rate', f'{compare_rej_rate:.1f}%', f'{delta_rej_rate:+.1f}%', delta_color='inverse')
-
-        with col4:
-            baseline_cycle = float(baseline['Avg Cycle Time (min)'])
-            compare_cycle = float(compare['Avg Cycle Time (min)'])
-            delta_cycle = compare_cycle - baseline_cycle
-            st.metric('Avg Cycle Time', f'{compare_cycle:.1f} min', f'{delta_cycle:+.1f} min', delta_color='inverse')
 
     st.dataframe(comparison_df, use_container_width=True, hide_index=True)
 
@@ -266,55 +259,6 @@ def _render_comparison_view(base_path: Path, selected_scenarios: list[str]) -> N
             config={
                 'displayModeBar': True,
                 'toImageButtonOptions': {'format': 'png', 'filename': 'comparison_rejections'},
-            },
-        )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        rejection_rates = [float(x) for x in comparison_df['Rejection %']]
-        colors = ['#e74c3c' if x > 10 else '#f39c12' if x > 5 else '#2ecc71' for x in rejection_rates]
-        fig = go.Figure(
-            data=[
-                go.Bar(
-                    x=comparison_df['Scenario'],
-                    y=rejection_rates,
-                    marker_color=colors,
-                    text=[f'{x:.1f}%' for x in rejection_rates],
-                    textposition='auto',
-                )
-            ]
-        )
-        fig.update_layout(title='Rejection Rate %', xaxis_title='Scenario', yaxis_title='Percentage', height=300)
-        st.plotly_chart(
-            fig,
-            use_container_width=True,
-            config={
-                'displayModeBar': True,
-                'toImageButtonOptions': {'format': 'png', 'filename': 'comparison_rejection_rate'},
-            },
-        )
-
-    with col2:
-        cycle_times = [float(x) for x in comparison_df['Avg Cycle Time (min)']]
-        fig = go.Figure(
-            data=[
-                go.Bar(
-                    x=comparison_df['Scenario'],
-                    y=cycle_times,
-                    marker_color='#9b59b6',
-                    text=[f'{x:.1f}' for x in cycle_times],
-                    textposition='auto',
-                )
-            ]
-        )
-        fig.update_layout(title='Average Cycle Time', xaxis_title='Scenario', yaxis_title='Minutes', height=300)
-        st.plotly_chart(
-            fig,
-            use_container_width=True,
-            config={
-                'displayModeBar': True,
-                'toImageButtonOptions': {'format': 'png', 'filename': 'comparison_cycle_time'},
             },
         )
 
