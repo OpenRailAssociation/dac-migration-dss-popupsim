@@ -115,18 +115,24 @@ class EventPublisherHelper:
         event_type: str,
         location: str,
         status: str,
+        route_path: list[str] | None = None,
+        coupler_type: str | None = None,
     ) -> None:
         """Publish wagon journey event."""
         if publisher:
-            publisher(
-                WagonJourneyEvent(
-                    timestamp=timestamp,
-                    wagon_id=wagon_id,
-                    event_type=event_type,
-                    location=location,
-                    status=status,
-                )
+            event = WagonJourneyEvent(
+                timestamp=timestamp,
+                wagon_id=wagon_id,
+                event_type=event_type,
+                location=location,
+                status=status,
             )
+            # Store route_path and coupler_type as custom attributes for dual-stream adapter
+            if route_path:
+                event.route_path = route_path  # type: ignore
+            if coupler_type:
+                event.coupler_type = coupler_type  # type: ignore
+            publisher(event)
 
     @staticmethod
     def publish_batch_formed(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments

@@ -77,21 +77,28 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
 
     def start(self) -> None:
         """Start coordinator processes."""
-        self.env.process(self._assignment_process())
-
-    def _assignment_process(self) -> Generator[Any, Any]:
-        """Single process that assigns wagons from retrofit track queue to workshops."""
-        # Get retrofit track and its queue
+        # Start one assignment process per retrofit track to monitor all queues
         retrofit_tracks = self._get_tracks_by_type('retrofit')
         if not retrofit_tracks:
             logger.error('No retrofit tracks configured')
             return
-        retrofit_track = retrofit_tracks[0]
+
+        for retrofit_track in retrofit_tracks:
+            self.env.process(self._assignment_process(retrofit_track))
+            logger.info('Started workshop assignment process for %s', retrofit_track.track_id)
+
+    def _assignment_process(self, retrofit_track: Any) -> Generator[Any, Any]:
+        """Single process that assigns wagons from a specific retrofit track queue to workshops.
+
+        Args:
+            retrofit_track: The retrofit track to monitor
+        """
         retrofit_queue = retrofit_track.queue
+        retrofit_track_id = retrofit_track.track_id
 
         while True:
             wagon = yield retrofit_queue.get()
-            logger.info('t=%.1f: WAGON[%s] → Retrieved from retrofit track queue', self.env.now, wagon.id)
+            logger.info('t=%.1f: WAGON[%s] → Retrieved from %s queue', self.env.now, wagon.id, retrofit_track_id)
 
             available_workshop = self._find_available_workshop()
             if not available_workshop:
@@ -105,6 +112,9 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                     raise RuntimeError(f'Workshop should be available after event at t={self.env.now}')
 
             logger.info('t=%.1f: WORKSHOP[%s] → Selected for batch', self.env.now, available_workshop)
+
+            # Mark workshop as busy IMMEDIATELY to prevent race condition
+            self.workshop_busy[available_workshop] = True
 
             workshop = self.workshops[available_workshop]
             available_bays = workshop.available_capacity
@@ -128,24 +138,21 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 available_workshop,
             )
 
-            # Remove wagons from retrofit track to free capacity
+            # Remove wagons from THIS retrofit track to free capacity
             if not self.track_manager:
                 raise RuntimeError('track_manager not initialized - cannot manage retrofit track capacity')
-            retrofit_tracks = self._get_tracks_by_type('retrofit')
-            if not retrofit_tracks:
-                raise RuntimeError('No retrofit tracks found in track_manager')
-            retrofit_track = retrofit_tracks[0]
 
             try:
                 yield from retrofit_track.remove_wagons(batch_wagons)
                 logger.info(
-                    't=%.1f: TRACK[retrofit] → Removed %d wagons (%.1fm freed)',
+                    't=%.1f: TRACK[%s] → Removed %d wagons (%.1fm freed)',
                     self.env.now,
+                    retrofit_track_id,
                     len(batch_wagons),
                     sum(w.length for w in batch_wagons),
                 )
             except Exception as e:
-                print(f'[t={self.env.now}] WS: ERROR removing wagons from retrofit track: {e}')
+                print(f'[t={self.env.now}] WS: ERROR removing wagons from {retrofit_track_id}: {e}')
                 print(f'[t={self.env.now}] WS: Wagons to remove: {[w.id for w in batch_wagons]}')
                 print(
                     f'[t={self.env.now}] WS: Track capacity: '
@@ -154,13 +161,11 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 print(f'[t={self.env.now}] WS: Wagons on track: {[w.id for w in retrofit_track.wagons]}')
                 raise
 
-            # Allocate locomotive BEFORE marking workshop as busy
-            # This prevents race conditions where workshop is marked busy but locomotive isn't available
+            # Allocate locomotive (workshop already marked as busy above)
             loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
 
-            # NOW mark workshop as busy (locomotive is allocated)
-            self.workshop_busy[available_workshop] = True
-            self.env.process(self._process_and_release(available_workshop, batch_wagons, loco))
+            # Start workshop process
+            self.env.process(self._process_and_release(available_workshop, batch_wagons, loco, retrofit_track.track_id))
 
     def _find_available_workshop(self) -> str | None:
         """Find first available workshop (not busy)."""
@@ -169,10 +174,19 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 return workshop_id  # type: ignore[no-any-return]
         return None
 
-    def _process_and_release(self, workshop_id: str, wagons: list[Wagon], loco: Any) -> Generator[Any, Any]:
-        """Process batch and release workshop."""
+    def _process_and_release(  # noqa: C901
+        self, workshop_id: str, wagons: list[Wagon], loco: Any, retrofit_track_id: str
+    ) -> Generator[Any, Any]:
+        """Process batch and release workshop.
+
+        Args:
+            workshop_id: Workshop ID
+            wagons: List of wagons to process
+            loco: Locomotive
+            retrofit_track_id: ID of the retrofit track where wagons came from
+        """
         try:
-            yield from self._process_workshop_batch(workshop_id, wagons, loco)
+            yield from self._process_workshop_batch(workshop_id, wagons, loco, retrofit_track_id)
 
             # Allocate pickup locomotive and transport wagons away
             coupling_time = self._get_coupling_time(wagons)
@@ -193,8 +207,16 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
 
             # Transport wagons away from workshop
             try:
-                _ = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
+                retrofitted_tracks = self._get_tracks_by_type('retrofitted')
+                if not retrofitted_tracks:
+                    raise RuntimeError('No retrofitted tracks configured')
+                # Select retrofitted track with most available capacity (load balancing)
+                retrofitted_track = max(retrofitted_tracks, key=lambda t: t.get_available_capacity())
+                retrofitted_track_id = retrofitted_track.track_id
+                _ = self.batch_service.create_batch_aggregate(wagons, retrofitted_track_id)
                 yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
+            except GeneratorExit:
+                raise
             except Exception:  # pylint: disable=broad-exception-caught
                 yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
             finally:
@@ -208,21 +230,40 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 len(self._waiting_processes),
             )
             self.workshop_busy[workshop_id] = False
-            for event in self._waiting_processes:
+            # Only trigger ONE waiting process to prevent race condition
+            if self._waiting_processes:
+                event = self._waiting_processes.pop(0)
                 if not event.triggered:
                     event.succeed()
-            self._waiting_processes.clear()
+        except GeneratorExit:
+            # Simulation ended - clean up and re-raise
+            self.workshop_busy[workshop_id] = False
+            if self._waiting_processes:
+                event = self._waiting_processes.pop(0)
+                if not event.triggered:
+                    event.succeed()
+            raise
         except Exception as e:
             print(f'[t={self.env.now}] WS: ERROR in process_and_release: {e}')
             self.workshop_busy[workshop_id] = False
-            for event in self._waiting_processes:
+            # Only trigger ONE waiting process to prevent race condition
+            if self._waiting_processes:
+                event = self._waiting_processes.pop(0)
                 if not event.triggered:
                     event.succeed()
-            self._waiting_processes.clear()
             raise
 
-    def _process_workshop_batch(self, workshop_id: str, wagons: list[Wagon], loco: Any) -> Generator[Any, Any]:
-        """Process a batch of wagons in workshop."""
+    def _process_workshop_batch(  # pylint: disable=too-many-locals
+        self, workshop_id: str, wagons: list[Wagon], loco: Any, retrofit_track_id: str
+    ) -> Generator[Any, Any]:
+        """Process a batch of wagons in workshop.
+
+        Args:
+            workshop_id: Workshop ID
+            wagons: List of wagons to process
+            loco: Locomotive
+            retrofit_track_id: ID of the retrofit track where wagons came from
+        """
         # MVP: Couple wagons on retrofit track for workshop batch
         coupling_time = self._get_coupling_time(wagons)
         wagon_ids = ','.join(w.id for w in wagons)
@@ -239,10 +280,12 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         try:
             _ = self.batch_service.create_batch_aggregate(wagons, workshop_id)
             # Batch aggregate created successfully - rake is valid
-            yield from self._transport_to_workshop(loco, workshop_id)
+            yield from self._transport_to_workshop(loco, workshop_id, wagons, retrofit_track_id)
+        except GeneratorExit:
+            raise
         except Exception:  # pylint: disable=broad-exception-caught
             # Fallback to old method
-            yield from self._transport_to_workshop(loco, workshop_id)
+            yield from self._transport_to_workshop(loco, workshop_id, wagons, retrofit_track_id)
 
         # Decouple rake at workshop arrival (wagons go to bays)
         decoupling_time = self._get_decoupling_time(wagons)
@@ -271,14 +314,23 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         # Complete retrofit and publish events
         yield from self._complete_retrofit_events(workshop_id, wagons)
 
-    def _transport_to_workshop(self, loco: Any, workshop_id: str) -> Generator[Any, Any]:
-        """Transport locomotive to workshop with train formation."""
-        # Transport: loco_parking -> retrofit (no prep, loco is already there)
+    def _transport_to_workshop(
+        self, loco: Any, workshop_id: str, wagons: list[Wagon], retrofit_track_id: str
+    ) -> Generator[Any, Any]:
+        """Transport locomotive to workshop with train formation.
+
+        Args:
+            loco: Locomotive
+            workshop_id: Target workshop ID
+            wagons: List of wagons to transport
+            retrofit_track_id: ID of the retrofit track where wagons are located
+        """
+        # Transport: loco home track -> retrofit (no prep, loco is already there)
         EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'loco_parking', 'retrofit'
+            self.loco_event_publisher, self.env.now, loco.id, loco.home_track, retrofit_track_id
         )
 
-        transport_time = self.route_service.get_duration('loco_parking', 'retrofit')
+        transport_time = self.route_service.get_duration(loco.home_track, retrofit_track_id)
         yield self.env.timeout(transport_time)
 
         # Prepare train at retrofit (loco coupling + prep time)
@@ -287,14 +339,16 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         loco_coupling_time = timedelta_to_sim_ticks(self.scenario.process_times.screw_coupling_time)
         prep_time_ticks = timedelta_to_sim_ticks(self.scenario.process_times.shunting_preparation_time)
 
-        logger.info('t=%.1f: LOCO[%s] → COUPLING at retrofit (%.1f min)', self.env.now, loco.id, loco_coupling_time)
+        logger.info(
+            't=%.1f: LOCO[%s] → COUPLING at %s (%.1f min)', self.env.now, loco.id, retrofit_track_id, loco_coupling_time
+        )
         if self.coupling_event_publisher:
             self.coupling_event_publisher(
                 CouplingEvent(
                     timestamp=self.env.now,
                     locomotive_id=loco.id,
                     event_type='COUPLING_STARTED',
-                    location='retrofit',
+                    location=retrofit_track_id,
                     coupler_type='SCREW',
                     wagon_count=0,
                     duration=loco_coupling_time,
@@ -307,7 +361,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                     timestamp=self.env.now,
                     locomotive_id=loco.id,
                     event_type='COUPLING_COMPLETED',
-                    location='retrofit',
+                    location=retrofit_track_id,
                     coupler_type='SCREW',
                     wagon_count=0,
                     duration=loco_coupling_time,
@@ -316,7 +370,11 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
 
         if prep_time_ticks > 0:
             logger.info(
-                't=%.1f: LOCO[%s] → SHUNTING_PREP at retrofit (%.1f min)', self.env.now, loco.id, prep_time_ticks
+                't=%.1f: LOCO[%s] → SHUNTING_PREP at %s (%.1f min)',
+                self.env.now,
+                loco.id,
+                retrofit_track_id,
+                prep_time_ticks,
             )
             if self.coupling_event_publisher:
                 self.coupling_event_publisher(
@@ -324,7 +382,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                         timestamp=self.env.now,
                         locomotive_id=loco.id,
                         event_type='SHUNTING_PREPARATION',
-                        location='retrofit',
+                        location=retrofit_track_id,
                         coupler_type='',
                         wagon_count=0,
                         duration=prep_time_ticks,
@@ -332,13 +390,39 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 )
         yield self.env.timeout(prep_time_ticks)
 
-        # Transport: retrofit -> workshop
+        # Transport: retrofit -> workshop - NOW wagons start moving
         EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'retrofit', workshop_id
+            self.loco_event_publisher, self.env.now, loco.id, retrofit_track_id, workshop_id
         )
 
-        transport_time = self.route_service.get_duration('retrofit', workshop_id)
+        # Get route path for MOVING state visualization
+        route_path = self.route_service.get_route_path(retrofit_track_id, workshop_id)
+
+        # Publish MOVING state for all wagons
+        for wagon in wagons:
+            EventPublisherHelper.publish_wagon_event(
+                self.wagon_event_publisher,
+                self.env.now,
+                wagon.id,
+                'MOVING',
+                retrofit_track_id,
+                'MOVING',
+                route_path=route_path,
+            )
+
+        transport_time = self.route_service.get_duration(retrofit_track_id, workshop_id)
         yield self.env.timeout(transport_time)
+
+        # Wagons arrived at workshop - publish arrival state immediately (end of MOVING)
+        for wagon in wagons:
+            EventPublisherHelper.publish_wagon_event(
+                self.wagon_event_publisher,
+                self.env.now,
+                wagon.id,
+                'AT_WORKSHOP',
+                workshop_id,
+                'ARRIVED',
+            )
 
         # Decouple locomotive from rake at workshop
         # Use loco_coupling_time from process_times (not rake coupling time)
@@ -411,83 +495,151 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
     def _return_locomotive(self, loco: Any, workshop_id: str) -> Generator[Any, Any]:
         """Return locomotive to parking."""
         EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, workshop_id, 'loco_parking'
+            self.loco_event_publisher, self.env.now, loco.id, workshop_id, loco.home_track
         )
 
-        return_time = self.route_service.get_duration(workshop_id, 'loco_parking')
+        return_time = self.route_service.get_duration(workshop_id, loco.home_track)
         yield self.env.timeout(return_time)
         yield from self.locomotive_manager.release(loco)
 
-    def _transport_from_workshop(self, loco: Any, workshop_id: str, wagons: list[Wagon]) -> Generator[Any, Any]:
+    def _transport_from_workshop(  # pylint: disable=too-many-locals
+        self, loco: Any, workshop_id: str, wagons: list[Wagon]
+    ) -> Generator[Any, Any]:
         """Transport wagons from workshop to retrofitted track with train formation."""
-        # Move locomotive from loco_parking to workshop
+        # Get retrofitted tracks and select one with most available capacity
+        retrofitted_tracks = self._get_tracks_by_type('retrofitted')
+        if not retrofitted_tracks:
+            raise RuntimeError('No retrofitted tracks configured')
+        retrofitted_track = max(retrofitted_tracks, key=lambda t: t.get_available_capacity())
+        retrofitted_track_id = retrofitted_track.track_id
+
+        # Move locomotive from home track to workshop
         EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'loco_parking', workshop_id
+            self.loco_event_publisher, self.env.now, loco.id, loco.home_track, workshop_id
         )
 
-        transport_time = self.route_service.get_duration('loco_parking', workshop_id)
+        transport_time = self.route_service.get_duration(loco.home_track, workshop_id)
         yield self.env.timeout(transport_time)
 
         # Get route type
-        route_type = self.route_service.get_route_type(workshop_id, 'retrofitted')
+        route_type = self.route_service.get_route_type(workshop_id, retrofitted_track_id)
 
         # Create batch for train formation
-        batch = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
+        batch = self.batch_service.create_batch_aggregate(wagons, retrofitted_track_id)
 
         # Form train at workshop
         train = self.train_service.form_train(
-            locomotive=loco, batch=batch, origin=workshop_id, destination='retrofitted', route_type=route_type
+            locomotive=loco, batch=batch, origin=workshop_id, destination=retrofitted_track_id, route_type=route_type
         )
 
-        # Prepare train (adds loco coupling + prep time)
-        prep_time = self.train_service.prepare_train(
+        # Prepare train (adds loco coupling + prep time) - wagons wait at workshop
+        prep_start_time = self.env.now
+        prep_operations = self.train_service.prepare_train(
             train,
             self.scenario.process_times,
-            self.env.now,
+            prep_start_time,
             coupling_event_publisher=self.coupling_event_publisher,
         )
+
+        # Publish RAKE_COUPLING_STARTED for wagons if rake coupling happens
+        if prep_operations['rake_coupling']:
+            rake_op = prep_operations['rake_coupling']
+            for wagon in wagons:
+                EventPublisherHelper.publish_wagon_event(
+                    self.wagon_event_publisher,
+                    self.env.now,
+                    wagon.id,
+                    'RAKE_COUPLING_STARTED',
+                    workshop_id,
+                    'COUPLING',
+                    coupler_type=rake_op['coupler_type'],
+                )
+
+        # Wait for ALL preparation
+        yield self.env.timeout(prep_operations['total_time'])
+
+        # Publish RAKE_COUPLING_COMPLETED for wagons if rake coupling happened
+        if prep_operations['rake_coupling']:
+            rake_op = prep_operations['rake_coupling']
+            for wagon in wagons:
+                EventPublisherHelper.publish_wagon_event(
+                    self.wagon_event_publisher,
+                    self.env.now,
+                    wagon.id,
+                    'RAKE_COUPLING_COMPLETED',
+                    workshop_id,
+                    'WAITING',
+                    coupler_type=rake_op['coupler_type'],
+                )
+
         logger.info(
-            't=%.1f: LOCO[%s] → TRAIN_PREP at %s (coupling + prep, %.1f min)',
+            't=%.1f: LOCO[%s] → TRAIN_PREP completed at %s (%.1f min)',
             self.env.now,
             loco.id,
             workshop_id,
-            prep_time,
+            prep_operations['total_time'],
         )
-        yield self.env.timeout(prep_time)
 
-        # Depart from workshop
+        # Depart from workshop - NOW after coupling is complete
         train.depart(self.env.now)
         EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, workshop_id, 'retrofitted'
+            self.loco_event_publisher, self.env.now, loco.id, workshop_id, retrofitted_track_id
         )
 
-        # Transport to retrofitted
-        transport_time = self.route_service.get_duration(workshop_id, 'retrofitted')
+        # Get route path for MOVING state visualization
+        route_path = self.route_service.get_route_path(workshop_id, retrofitted_track_id)
+
+        # Publish MOVING state for all wagons - location stays at origin during movement
+        for wagon in wagons:
+            EventPublisherHelper.publish_wagon_event(
+                self.wagon_event_publisher,
+                self.env.now,
+                wagon.id,
+                'MOVING',
+                workshop_id,
+                'MOVING',
+                route_path=route_path,
+            )
+
+        # Transport to retrofitted (pure transport time)
+        transport_time = self.route_service.get_duration(workshop_id, retrofitted_track_id)
         yield self.env.timeout(transport_time)
         train.arrive(self.env.now)
 
-        # Put wagons on retrofitted track capacity AND queue
-        logger.info('t=%.1f: BATCH → Putting %d wagons on retrofitted track', self.env.now, len(wagons))
-        retrofitted_tracks = self._get_tracks_by_type('retrofitted')
-        if retrofitted_tracks:
-            retrofitted_track = retrofitted_tracks[0]
-            yield from retrofitted_track.add_wagons(wagons)
-            for wagon in wagons:
-                wagon.move_to(retrofitted_track.track_id)
-                retrofitted_track.queue.put(wagon)  # Add to workflow queue
-                logger.info(
-                    't=%.1f: WAGON[%s] → Added to retrofitted track %s',
-                    self.env.now,
-                    wagon.id,
-                    retrofitted_track.track_id,
-                )
+        # Wagons arrived at retrofitted track - add to queue immediately, capacity managed by track
+        logger.info(
+            't=%.1f: BATCH → Putting %d wagons on retrofitted track %s', self.env.now, len(wagons), retrofitted_track_id
+        )
+
+        # Add wagons to track capacity (may block if full)
+        yield from retrofitted_track.add_wagons(wagons)
+
+        # Update wagon locations and add to workflow queue
+        for wagon in wagons:
+            wagon.move_to(retrofitted_track.track_id)
+            retrofitted_track.queue.put(wagon)  # Add to workflow queue
+            # Publish arrival event on retrofitted track
+            EventPublisherHelper.publish_wagon_event(
+                self.wagon_event_publisher,
+                self.env.now,
+                wagon.id,
+                'ON_RETROFITTED_TRACK',
+                retrofitted_track.track_id,
+                'WAITING',
+            )
+            logger.info(
+                't=%.1f: WAGON[%s] → Added to retrofitted track %s',
+                self.env.now,
+                wagon.id,
+                retrofitted_track.track_id,
+            )
 
         EventPublisherHelper.publish_loco_moving(
-            self.loco_event_publisher, self.env.now, loco.id, 'retrofitted', 'loco_parking'
+            self.loco_event_publisher, self.env.now, loco.id, retrofitted_track_id, loco.home_track
         )
 
         # Return locomotive
-        return_time = self.route_service.get_duration('retrofitted', 'loco_parking')
+        return_time = self.route_service.get_duration(retrofitted_track_id, loco.home_track)
         yield self.env.timeout(return_time)
 
         train.dissolve()
@@ -506,28 +658,6 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             time_per_coupling = timedelta_to_sim_ticks(self.scenario.process_times.dac_decoupling_time)
 
         total_time = (len(wagons) - 1) * time_per_coupling
-
-        # Publish wagon decoupling events
-        if self.wagon_event_publisher:
-            for wagon in wagons:
-                EventPublisherHelper.publish_wagon_event(
-                    self.wagon_event_publisher,
-                    self.env.now,
-                    wagon.id,
-                    'DECOUPLING_STARTED',
-                    wagon.current_track_id or 'unknown',
-                    'DECOUPLING',
-                )
-            for wagon in wagons:
-                EventPublisherHelper.publish_wagon_event(
-                    self.wagon_event_publisher,
-                    self.env.now + total_time,
-                    wagon.id,
-                    'DECOUPLING_COMPLETED',
-                    wagon.current_track_id or 'unknown',
-                    'DECOUPLED',
-                )
-
         return total_time
 
     def _get_coupling_time(self, wagons: list[Wagon]) -> float:
@@ -543,28 +673,6 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             time_per_coupling = timedelta_to_sim_ticks(self.scenario.process_times.dac_coupling_time)
 
         total_time = (len(wagons) - 1) * time_per_coupling
-
-        # Publish wagon coupling events
-        if self.wagon_event_publisher:
-            for wagon in wagons:
-                EventPublisherHelper.publish_wagon_event(
-                    self.wagon_event_publisher,
-                    self.env.now,
-                    wagon.id,
-                    'COUPLING_STARTED',
-                    wagon.current_track_id or 'unknown',
-                    'COUPLING',
-                )
-            for wagon in wagons:
-                EventPublisherHelper.publish_wagon_event(
-                    self.wagon_event_publisher,
-                    self.env.now + total_time,
-                    wagon.id,
-                    'COUPLING_COMPLETED',
-                    wagon.current_track_id or 'unknown',
-                    'COUPLED',
-                )
-
         return total_time
 
     def _complete_retrofit_events(self, workshop_id: str, wagons: list[Wagon]) -> Generator[Any, Any]:
@@ -618,6 +726,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         try:
             _ = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
+        except GeneratorExit:
+            raise
         except Exception:  # pylint: disable=broad-exception-caught
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
         finally:

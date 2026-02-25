@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from contexts.retrofit_workflow.application.services.dual_stream_adapter import _record_loco_dual_stream
+from contexts.retrofit_workflow.application.services.dual_stream_adapter import _record_wagon_dual_stream
+from contexts.retrofit_workflow.application.services.dual_stream_collector import DualStreamEventCollector
 from contexts.retrofit_workflow.application.services.event_collection_service import EventCollectionService
 from contexts.retrofit_workflow.application.services.metrics_aggregator import MetricsAggregator
 from contexts.retrofit_workflow.domain.events import CouplingEvent
@@ -14,6 +17,12 @@ from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAt
 from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
 from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 from contexts.retrofit_workflow.infrastructure.exporters.csv_event_exporter import CsvEventExporter
+from contexts.retrofit_workflow.infrastructure.exporters.dual_stream_csv_exporter import DualStreamCsvExporter
+from shared.domain.events.dual_stream_events import LocationChangeEvent
+from shared.domain.events.dual_stream_events import ProcessEvent
+from shared.domain.events.dual_stream_events import ProcessState
+from shared.domain.events.dual_stream_events import ResourceState
+from shared.domain.events.dual_stream_events import StateChangeEvent
 from shared.infrastructure.simpy_time_converters import sim_ticks_to_datetime
 
 if TYPE_CHECKING:
@@ -30,6 +39,8 @@ class EventCollector:  # pylint: disable=too-many-public-methods
         """Initialize event collector facade."""
         self._collection_service = EventCollectionService(process_logger)
         self._csv_exporter = CsvEventExporter(start_datetime)
+        self._dual_stream_collector = DualStreamEventCollector(process_logger)
+        self._dual_stream_exporter = DualStreamCsvExporter(start_datetime)
         self._metrics = MetricsAggregator()
         self.start_datetime = start_datetime
 
@@ -61,10 +72,16 @@ class EventCollector:  # pylint: disable=too-many-public-methods
     def add_wagon_event(self, event: WagonJourneyEvent) -> None:
         """Add wagon event."""
         self._collection_service.add_wagon_event(event)
+        # Also record in dual-stream
+
+        _record_wagon_dual_stream(event, self)
 
     def add_locomotive_event(self, event: LocomotiveMovementEvent) -> None:
         """Add locomotive event."""
         self._collection_service.add_locomotive_event(event)
+        # Also record in dual-stream
+
+        _record_loco_dual_stream(event, self)
 
     def add_resource_event(self, event: ResourceStateChangeEvent) -> None:
         """Add resource event."""
@@ -77,6 +94,75 @@ class EventCollector:  # pylint: disable=too-many-public-methods
     def add_coupling_event(self, event: CouplingEvent) -> None:
         """Add coupling event."""
         self._collection_service.add_coupling_event(event)
+
+    # Dual-stream event recording
+    def record_state_change(  # pylint: disable=too-many-positional-arguments,too-many-arguments  # noqa: PLR0913
+        self,
+        timestamp: float,
+        resource_id: str,
+        resource_type: str,
+        state: str,
+        train_id: str | None = None,
+        batch_id: str | None = None,
+        rejection_reason: str | None = None,
+    ) -> None:
+        """Record state change in dual-stream system."""
+        event = StateChangeEvent(
+            timestamp=timestamp,
+            resource_id=resource_id,
+            resource_type=resource_type,
+            state=ResourceState(state),
+            train_id=train_id,
+            batch_id=batch_id,
+            rejection_reason=rejection_reason,
+        )
+        self._dual_stream_collector.record_state_change(event)
+
+    def record_location_change(  # pylint: disable=too-many-positional-arguments,too-many-arguments  # noqa: PLR0913
+        self,
+        timestamp: float,
+        resource_id: str,
+        resource_type: str,
+        location: str,
+        previous_location: str | None = None,
+        route_path: list[str] | None = None,
+    ) -> None:
+        """Record location change in dual-stream system."""
+        event = LocationChangeEvent(
+            timestamp=timestamp,
+            resource_id=resource_id,
+            resource_type=resource_type,
+            location=location,
+            previous_location=previous_location,
+            route_path=route_path,
+        )
+        self._dual_stream_collector.record_location_change(event)
+
+    def record_process_event(  # pylint: disable=too-many-positional-arguments,too-many-arguments  # noqa: PLR0913
+        self,
+        timestamp: float,
+        resource_id: str,
+        resource_type: str,
+        process_state: str,
+        location: str,
+        coupler_type: str | None = None,
+        batch_id: str | None = None,
+        rake_id: str | None = None,
+        locomotive_id: str | None = None,
+    ) -> None:
+        """Record process event in dual-stream system."""
+        event = ProcessEvent(
+            timestamp=timestamp,
+            resource_id=resource_id,
+            resource_type=resource_type,
+            process_state=ProcessState(process_state),
+            location=location,
+            coupler_type=coupler_type,
+            batch_id=batch_id,
+            rake_id=rake_id,
+            locomotive_id=locomotive_id,
+        )
+        self._dual_stream_collector.record_process_event(event)
 
     def _sim_time_to_datetime(self, sim_time: float) -> str:
         """Convert simulation time to datetime (delegates to shared converter)."""
@@ -180,3 +266,11 @@ class EventCollector:  # pylint: disable=too-many-public-methods
         self.export_events_csv(str(output_path / 'events.csv'))
         self.export_timeline(str(output_path / 'timeline.csv'))
         self.export_workshop_metrics(str(output_path / 'workshop_metrics.csv'))
+
+        # Export dual-stream events
+        self._dual_stream_exporter.export_all(
+            self._dual_stream_collector.state_events,
+            self._dual_stream_collector.location_events,
+            self._dual_stream_collector.process_events,
+            output_dir,
+        )

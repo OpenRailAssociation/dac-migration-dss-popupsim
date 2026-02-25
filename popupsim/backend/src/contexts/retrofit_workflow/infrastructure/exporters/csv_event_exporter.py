@@ -540,11 +540,20 @@ class CsvEventExporter:
         self, wagon_events: list[WagonJourneyEvent], resource_events: list[ResourceStateChangeEvent]
     ) -> tuple[set[str], set[str]]:
         """Discover all tracks and workshops from events."""
-        tracks = {
+        # Get tracks from wagon events
+        tracks_from_wagons = {
             e.location
             for e in wagon_events
             if e.location and e.location not in ['REJECTED'] and not e.location.startswith('parking')
         }
+        # Get tracks from resource events (includes retrofitted tracks that wagons pass through)
+        tracks_from_resources = {
+            e.resource_id
+            for e in resource_events
+            if e.resource_type == 'track' and not e.resource_id.startswith('parking')
+        }
+        # Combine both sources
+        tracks = tracks_from_wagons | tracks_from_resources
         workshops = {e.resource_id for e in resource_events if e.resource_type == 'workshop'}
         return tracks, workshops
 
@@ -559,6 +568,9 @@ class CsvEventExporter:
         tracks, workshops = resources
         wagon_locations = self._replay_wagon_locations(wagon_events, current_time)
         track_counts = self._count_wagons_per_track(wagon_locations, tracks)
+        # Override track counts with resource event data for tracks that have capacity tracking
+        track_counts_from_resources = self._get_track_counts_from_resources(resource_events, current_time, tracks)
+        track_counts.update(track_counts_from_resources)
         workshop_bays = self._get_workshop_state(resource_events, current_time, workshops)
         loco_busy = self._get_locomotive_state(resource_events, current_time)
 
@@ -619,6 +631,20 @@ class CsvEventExporter:
                 break
             loco_busy = e.busy_count_after if hasattr(e, 'busy_count_after') else 0
         return loco_busy
+
+    def _get_track_counts_from_resources(
+        self, resource_events: list[ResourceStateChangeEvent], current_time: float, tracks: set[str]
+    ) -> dict[str, int]:
+        """Get wagon counts per track from resource capacity events."""
+        track_counts: dict[str, int] = {}
+        track_events = [e for e in resource_events if e.resource_type == 'track']
+        for e in sorted(track_events, key=lambda x: x.timestamp):
+            if e.timestamp > current_time:
+                break
+            if e.resource_id in tracks and hasattr(e, 'used_after'):
+                # Convert meters to approximate wagon count (assuming 15m per wagon)
+                track_counts[e.resource_id] = int(e.used_after / 15.0) if e.used_after > 0 else 0
+        return track_counts
 
     def export_workshop_metrics(self, wagon_events: list[WagonJourneyEvent], filepath: str) -> None:
         """Export workshop performance metrics."""

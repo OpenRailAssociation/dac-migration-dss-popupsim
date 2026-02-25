@@ -139,7 +139,7 @@ class FileLoader:  # pylint: disable=too-few-public-methods
                         id=r.get('id') or r.get('route_id'),
                         description=r.get('description'),
                         duration=r['duration'],
-                        track_sequence=r['path'],
+                        path=r['path'],
                     )
                 )
             scenario.routes = routes
