@@ -130,7 +130,7 @@ cd dac-migration-dss-popupsim
 
 ### Option B: Download ZIP (No Git Required)
 
-1. Visit: https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/archive/refs/heads/main.zipp
+1. Visit: https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/archive/refs/heads/main.zip
 2. Extract the ZIP file to your desired location
 3. Open terminal and navigate to the extracted folder:
 
@@ -159,7 +159,7 @@ This command:
 Run a test simulation:
 
 ```bash
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/test/
+uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/test
 ```
 
 If the simulation runs successfully, you're all set!
@@ -292,7 +292,7 @@ cd C:\Users\YourName\Documents\PopUpSim
 uv sync
 
 # Run test
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+uv run python popupsim/backend/src/main.py --scenario data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
 ```
 
 ### Scenario 2: Linux Server (No Root Access)
@@ -313,7 +313,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run test
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
 ```
 
 ### Scenario 3: Shared Computer (Multiple Users)
@@ -333,7 +333,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run simulations
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
 ```
 
 ### Scenario 4: Air-Gapped System (No Internet)
