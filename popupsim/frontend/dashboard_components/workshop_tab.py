@@ -132,7 +132,7 @@ def _render_utilization_timeline(util_df: pd.DataFrame) -> None:
         hovermode='x unified',
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key='workshop_utilization_timeline')
     st.caption('🟢 <70% = Underutilized | 🟡 70-85% = Optimal | 🔴 ≥85% = High Load')
 
 
@@ -252,7 +252,7 @@ def _render_bay_occupancy(  # pylint: disable=too-many-locals
         showlegend=True,
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key='workshop_bay_occupancy')
     st.caption(
         'Wagon IDs shown inside bars (max 5 per segment). '
         'Hover for full details including all wagons in that time period.'
@@ -279,7 +279,7 @@ def _render_workshop_comparison(metrics_df: pd.DataFrame) -> None:
         fig.update_layout(
             title='Completed Retrofits', xaxis_title='Workshop', yaxis_title='Count', height=300, showlegend=False
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key='workshop_comparison_retrofits')
 
         # Throughput
         fig = go.Figure(
@@ -300,7 +300,7 @@ def _render_workshop_comparison(metrics_df: pd.DataFrame) -> None:
             height=300,
             showlegend=False,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key='workshop_comparison_throughput')
 
     with col2:
         # Utilization with color coding
@@ -324,7 +324,7 @@ def _render_workshop_comparison(metrics_df: pd.DataFrame) -> None:
         fig.update_layout(
             title='Utilization (%)', xaxis_title='Workshop', yaxis_title='Utilization (%)', height=300, showlegend=False
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key='workshop_comparison_utilization')
 
         # Processing vs Waiting Time
         fig = go.Figure(
@@ -350,7 +350,7 @@ def _render_workshop_comparison(metrics_df: pd.DataFrame) -> None:
             height=300,
             barmode='group',
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key='workshop_comparison_times')
 
 
 def _render_efficiency_analysis(metrics_df: pd.DataFrame) -> None:
@@ -382,7 +382,7 @@ def _render_efficiency_analysis(metrics_df: pd.DataFrame) -> None:
                 ]
             )
             fig.update_layout(height=300, showlegend=True, margin={'t': 20, 'b': 20, 'l': 20, 'r': 20})
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key=f'workshop_efficiency_{ws_id}')
 
             # Metrics
             efficiency = (retrofit_time / total_time * 100) if total_time > 0 else 0
@@ -446,5 +446,5 @@ def _render_capacity_heatmap(util_df: pd.DataFrame) -> None:
         height=max(300, len(workshops) * 100),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key='workshop_capacity_heatmap')
     st.caption('🟢 Green = Low utilization | 🟡 Yellow = Moderate | 🔴 Red = High utilization')

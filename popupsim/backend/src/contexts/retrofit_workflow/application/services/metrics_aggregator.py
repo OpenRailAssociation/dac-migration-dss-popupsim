@@ -29,38 +29,70 @@ class MetricsAggregator:
             'event_counts': event_type_counts,
         }
 
-    def get_wagon_metrics(self, wagon_events: list[WagonJourneyEvent]) -> dict[str, int | float]:
-        """Get wagon-related metrics."""
+    def get_wagon_metrics(self, wagon_events: list[WagonJourneyEvent]) -> dict[str, int | float]:  # pylint: disable=too-many-locals
+        """Get wagon-related metrics.
+
+        Note: Multiple local variables needed for comprehensive wagon metrics calculation.
+        """
         arrived = [e for e in wagon_events if e.event_type == 'ARRIVED']
         parked = [e for e in wagon_events if e.event_type == 'PARKED']
         rejected = [e for e in wagon_events if e.event_type == 'REJECTED']
         retrofitted = [e for e in wagon_events if e.event_type == 'RETROFIT_COMPLETED']
         distributed = [e for e in wagon_events if e.event_type == 'DISTRIBUTED']
 
-        # Count unique wagons (some may have multiple events)
-        unique_wagons = {e.wagon_id for e in wagon_events}
-        unique_arrived_wagons = {e.wagon_id for e in arrived}
-        total_in_simulation = len(unique_wagons)
-        completed_wagons = len(parked)
+        # Total wagons = all unique wagons that entered simulation (arrived OR rejected)
+        unique_arrived = {e.wagon_id for e in arrived}
+        unique_rejected = {e.wagon_id for e in rejected}
+        total_wagons = len(unique_arrived | unique_rejected)  # Union of both sets
+
+        wagons_arrived = len(unique_arrived)
+        wagons_parked = len(parked)
+        wagons_rejected = len(rejected)
+
+        # Count rejections by reason (match actual rejection_reason values from code)
+        rejected_no_retrofit = len([e for e in rejected if e.rejection_reason and 'No Retrofit' in e.rejection_reason])
+        rejected_loaded = len([e for e in rejected if e.rejection_reason and 'Loaded' in e.rejection_reason])
+        rejected_track_full = len([e for e in rejected if e.rejection_reason and 'TRACK' in e.rejection_reason.upper()])
+        rejected_other = wagons_rejected - rejected_no_retrofit - rejected_loaded - rejected_track_full
+
+        # Wagons eligible for retrofit = total - no_retrofit_needed
+        wagons_eligible = total_wagons - rejected_no_retrofit
+
+        # Wagons that could be processed = eligible - loaded
+        wagons_processable = wagons_eligible - rejected_loaded
+
+        # Wagons in process = arrived but not yet parked
+        wagons_in_process = wagons_arrived - wagons_parked
 
         all_timestamps = [e.timestamp for e in wagon_events]
         sim_duration = max(all_timestamps) if all_timestamps else 1
 
         return {
             'trains_arrived': len({e.train_id for e in arrived if e.train_id}),
-            'wagons_arrived': len(unique_arrived_wagons),
-            'wagons_parked': completed_wagons,
+            'total_wagons': total_wagons,
+            'wagons_eligible': wagons_eligible,
+            'wagons_processable': wagons_processable,
+            'wagons_arrived': wagons_arrived,
+            'wagons_parked': wagons_parked,
             'retrofits_completed': len(retrofitted),
-            'wagons_rejected': len(rejected),
+            'wagons_rejected': wagons_rejected,
+            'rejected_no_retrofit': rejected_no_retrofit,
+            'rejected_loaded': rejected_loaded,
+            'rejected_track_full': rejected_track_full,
+            'rejected_other': rejected_other,
             'wagons_distributed': len(distributed),
-            'completion_rate': completed_wagons / total_in_simulation if total_in_simulation > 0 else 0,
-            'throughput_rate_per_hour': (completed_wagons / sim_duration * 60) if sim_duration > 0 else 0,
+            'wagons_in_process': wagons_in_process,
+            'completion_rate': wagons_parked / wagons_processable if wagons_processable > 0 else 0,
+            'throughput_rate_per_hour': (wagons_parked / sim_duration * 60) if sim_duration > 0 else 0,
         }
 
-    def get_workshop_metrics(
+    def get_workshop_metrics(  # pylint: disable=too-many-locals
         self, wagon_events: list[WagonJourneyEvent], resource_events: list[ResourceStateChangeEvent]
     ) -> dict[str, dict[str, int | float]]:
-        """Get workshop metrics."""
+        """Get workshop metrics.
+
+        Note: Multiple local variables needed for workshop statistics calculation.
+        """
         workshop_stats: dict[str, dict[str, int]] = {}
         for e in wagon_events:
             if e.event_type == 'RETROFIT_STARTED' and e.location:
@@ -68,10 +100,7 @@ class MetricsAggregator:
                 if ws_id not in workshop_stats:
                     workshop_stats[ws_id] = {'wagons_processed': 0, 'retrofits_started': 0}
                 workshop_stats[ws_id]['retrofits_started'] += 1
-            elif e.event_type == 'RETROFIT_COMPLETED' and e.location:
-                ws_id = e.location
-                if ws_id not in workshop_stats:
-                    workshop_stats[ws_id] = {'wagons_processed': 0, 'retrofits_started': 0}
+                # Count as processed when retrofit starts (completed will be at different location)
                 workshop_stats[ws_id]['wagons_processed'] += 1
 
         all_timestamps = [e.timestamp for e in wagon_events]
@@ -150,13 +179,16 @@ class MetricsAggregator:
         all_timestamps = [e.timestamp for e in wagon_events + locomotive_events + resource_events]
         return max(all_timestamps) if all_timestamps else 0
 
-    def calculate_workshop_utilization(
+    def calculate_workshop_utilization(  # pylint: disable=too-many-locals
         self,
         resource_events: list[ResourceStateChangeEvent],
         workshop_stats: dict[str, dict[str, int]],
         sim_duration: float,
     ) -> float:
-        """Calculate average workshop utilization."""
+        """Calculate average workshop utilization.
+
+        Note: Multiple local variables needed for time-based utilization calculation.
+        """
         if not workshop_stats:
             return 0.0
 
@@ -200,7 +232,7 @@ class MetricsAggregator:
     ) -> dict[str, dict[str, float]]:
         """Calculate per-locomotive time breakdown.
 
-        Note: Multiple local variables needed for time breakdown calculation.
+        Note: Multiple local variables and branches needed for comprehensive time breakdown.
         """
         loco_breakdown: dict[str, dict[str, float]] = {}
 

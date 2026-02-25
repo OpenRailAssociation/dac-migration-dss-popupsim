@@ -78,27 +78,42 @@ class TrackSelectionFacade:
             strategy = self.strategies_by_type.get(track_type, default_strategy)
             self.selectors[track_type] = ResourceSelectionService(track_dict, strategy)
 
-    def select_track_with_capacity(self, track_type: str) -> TrackCapacityManager | None:
-        """Select a track of the specified type with available capacity."""
+    def select_track_with_capacity(
+        self, track_type: str, required_capacity: float = 0.0
+    ) -> TrackCapacityManager | None:
+        """Select a track of the specified type with available capacity.
+
+        Parameters
+        ----------
+        track_type : str
+            Type of track to select
+        required_capacity : float, default=0.0
+            Minimum required capacity in meters
+
+        Returns
+        -------
+        TrackCapacityManager | None
+            Selected track or None if no suitable track found
+        """
         tracks = self.tracks_by_type.get(track_type, [])
         if not tracks:
             return None
 
-        # Single track - return it if it has capacity
+        # Single track - return it if it has sufficient capacity
         if len(tracks) == 1:
-            return tracks[0] if tracks[0].get_available_capacity() > 0 else None
+            return tracks[0] if tracks[0].get_available_capacity() >= required_capacity else None
 
         # Multiple tracks - use selector with capacity filter
         selector = self.selectors.get(track_type)
         if not selector:
-            # Fallback: return first track with capacity
+            # Fallback: return first track with sufficient capacity
             for track in tracks:
-                if track.get_available_capacity() > 0:
+                if track.get_available_capacity() >= required_capacity:
                     return track
             return None
 
         # Use selector with capacity filter
-        selected_id = selector.select(lambda _tid, t: t.get_available_capacity() > 0)
+        selected_id = selector.select(lambda _tid, t: t.get_available_capacity() >= required_capacity)
 
         if selected_id:
             # Get track directly from selector's resources dict

@@ -14,7 +14,11 @@ The process_times.json file defines the duration of various operations in the si
   "screw_coupling_time": 3.0,
   "screw_decoupling_time": 5.0,
   "dac_coupling_time": 0.5,
-  "dac_decoupling_time": 0.5
+  "dac_decoupling_time": 0.5,
+  "brake_continuity_check_time": 0.5,
+  "full_brake_test_time": 4.0,
+  "technical_inspection_time": 2.0,
+  "shunting_preparation_time": 1.0
 }
 ```
 
@@ -56,7 +60,7 @@ wagons_per_station_per_day = (24 × 60) / wagon_retrofit_time
 - Standard retrofit: 60-90 minutes
 - Complex retrofit: 120-180 minutes
 
-### train_to_hump_delay
+### train_to_hump_delay (CNot fully implemented yet)
 
 Delay before train wagons can be distributed:
 
@@ -79,7 +83,7 @@ Delay before train wagons can be distributed:
 
 **Current Setting:** 0.0 (no delay) for simplified simulation
 
-### wagon_hump_interval
+### wagon_hump_interval (Currently not fully implemented yet)
 
 Time interval between distributing individual wagons:
 
@@ -202,6 +206,105 @@ Time to decouple wagons using Digital Automatic Couplers:
 
 **Realistic Values:** 0.5-1.0 minutes (automatic operation)
 
+### brake_continuity_check_time
+
+Time for brake continuity check after coupling rake:
+
+```json
+"brake_continuity_check_time": 0.5
+```
+
+**Purpose:** Safety check to ensure brake system is connected through all wagons
+
+| Value | Description |
+|-------|-------------|
+| 0.5 | Quick check (30 seconds) |
+| 1.0 | Standard check (1 minute) |
+| 2.0 | Thorough check (2 minutes) |
+
+**When Used:**
+- After coupling wagons into a rake
+- Before train movement
+- Safety validation
+
+**Realistic Values:** 0.5-2.0 minutes
+
+### full_brake_test_time
+
+Time for full brake test on completed train:
+
+```json
+"full_brake_test_time": 4.0
+```
+
+**Purpose:** Complete brake system test before mainline movement
+
+| Value | Description |
+|-------|-------------|
+| 3.0 | Quick test |
+| 4.0 | Standard test (current) |
+| 6.0 | Thorough test |
+
+**When Used:**
+- Before mainline transport (collection → retrofit)
+- Before parking transport (retrofitted → parking)
+- Required for MAINLINE route type
+
+**Note:** More comprehensive than brake continuity check
+
+**Realistic Values:** 3-6 minutes
+
+### technical_inspection_time
+
+Time for technical inspection of assembled train:
+
+```json
+"technical_inspection_time": 2.0
+```
+
+**Purpose:** Visual and technical inspection before departure
+
+| Value | Description |
+|-------|-------------|
+| 1.0 | Quick inspection |
+| 2.0 | Standard inspection (current) |
+| 5.0 | Detailed inspection |
+
+**When Used:**
+- Before mainline transport
+- After train assembly
+- Safety validation
+
+**Realistic Values:** 1-5 minutes
+
+### shunting_preparation_time
+
+Time for shunting preparation (safety checks, communication):
+
+```json
+"shunting_preparation_time": 1.0
+```
+
+**Purpose:** Preparation time before locomotive movement
+
+| Value | Description |
+|-------|-------------|
+| 0.5 | Minimal preparation |
+| 1.0 | Standard preparation (current) |
+| 2.0 | Careful preparation |
+
+**When Used:**
+- Before every locomotive movement
+- Safety communication
+- Route clearance
+
+**Includes:**
+- Radio communication
+- Route verification
+- Safety checks
+
+**Realistic Values:** 0.5-2.0 minutes
+
 ## Coupling/Decoupling Comparison
 
 | Operation | Screw Coupler | DAC | Time Savings |
@@ -220,9 +323,12 @@ Simulate improved workshop efficiency:
 
 ```json
 {
-  "wagon_retrofit_time": 45.0,  // Was 60.0
-  "screw_coupling_time": 2.5,   // Was 3.0
-  "screw_decoupling_time": 4.0  // Was 5.0
+  "wagon_retrofit_time": 45.0,
+  "screw_coupling_time": 2.5,
+  "screw_decoupling_time": 4.0,
+  "brake_continuity_check_time": 0.5,
+  "technical_inspection_time": 1.5,
+  "shunting_preparation_time": 0.5
 }
 ```
 
@@ -237,8 +343,12 @@ Add delays for safety and inspection:
 
 ```json
 {
-  "train_to_hump_delay": 10.0,    // Was 0.0
-  "wagon_hump_interval": 1.5      // Was 0.0
+  "train_to_hump_delay": 10.0,
+  "wagon_hump_interval": 1.5,
+  "brake_continuity_check_time": 1.0,
+  "full_brake_test_time": 5.0,
+  "technical_inspection_time": 3.0,
+  "shunting_preparation_time": 1.5
 }
 ```
 
@@ -318,7 +428,11 @@ Movement time = travel_time + coupling_time + decoupling_time
   "screw_coupling_time": 2.0,
   "screw_decoupling_time": 3.0,
   "dac_coupling_time": 0.5,
-  "dac_decoupling_time": 0.5
+  "dac_decoupling_time": 0.5,
+  "brake_continuity_check_time": 0.5,
+  "full_brake_test_time": 3.0,
+  "technical_inspection_time": 1.0,
+  "shunting_preparation_time": 0.5
 }
 ```
 
@@ -332,7 +446,11 @@ Movement time = travel_time + coupling_time + decoupling_time
   "screw_coupling_time": 4.0,
   "screw_decoupling_time": 6.0,
   "dac_coupling_time": 1.0,
-  "dac_decoupling_time": 1.0
+  "dac_decoupling_time": 1.0,
+  "brake_continuity_check_time": 1.0,
+  "full_brake_test_time": 5.0,
+  "technical_inspection_time": 3.0,
+  "shunting_preparation_time": 1.5
 }
 ```
 
@@ -346,7 +464,11 @@ Movement time = travel_time + coupling_time + decoupling_time
   "screw_coupling_time": 5.0,
   "screw_decoupling_time": 7.0,
   "dac_coupling_time": 1.5,
-  "dac_decoupling_time": 1.5
+  "dac_decoupling_time": 1.5,
+  "brake_continuity_check_time": 1.5,
+  "full_brake_test_time": 6.0,
+  "technical_inspection_time": 5.0,
+  "shunting_preparation_time": 2.0
 }
 ```
 

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import logging
+from pathlib import Path
 from typing import Any
 
 from application.context_registry import ContextRegistry
@@ -9,6 +10,7 @@ from contexts.configuration.domain.models.scenario import Scenario
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.railway_infrastructure.infrastructure.di_container import create_railway_context
 from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkshopContext
+from infrastructure.tracking.process_export import export_process_tracking_data
 from shared.domain.events.simulation_lifecycle_events import SimulationEndedEvent
 from shared.domain.events.simulation_lifecycle_events import SimulationFailedEvent
 from shared.domain.events.simulation_lifecycle_events import SimulationStartedEvent
@@ -30,8 +32,9 @@ class SimulationResult:
 class SimulationApplicationService:
     """Application service managing simulation lifecycle."""
 
-    def __init__(self, scenario: Scenario) -> None:
+    def __init__(self, scenario: Scenario, output_dir: Path | None = None) -> None:
         self.scenario = scenario
+        self.output_dir = output_dir
         self.engine = SimPyEngineAdapter.create()
 
         # Extract workshop IDs for infrastructure
@@ -86,6 +89,10 @@ class SimulationApplicationService:
 
             # Collect results
             result = self._collect_results(self.engine.current_time() - start_time)
+
+            # Export process tracking data if output directory is available
+            if self.output_dir:
+                export_process_tracking_data(self.output_dir)
 
             # Publish simulation ended event
             ended_event = SimulationEndedEvent.create(

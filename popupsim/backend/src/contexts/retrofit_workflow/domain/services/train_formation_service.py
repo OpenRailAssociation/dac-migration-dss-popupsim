@@ -70,17 +70,14 @@ class TrainFormationService:
             destination=destination,
         )
 
-    def prepare_train(
+    def prepare_train(  # noqa: C901
         self,
         train: TrainMovement,
         process_times: Any,
         current_time: float,
         coupling_event_publisher: Callable[[CouplingEvent], None] | None = None,
-    ) -> float:
-        """Prepare train for departure and return preparation time.
-
-        For mainline trains: couples loco, performs brake test and inspection
-        For shunting: couples loco only
+    ) -> dict[str, Any]:
+        """Prepare train for departure and return operation details.
 
         Args:
             train: TrainMovement to prepare
@@ -90,54 +87,141 @@ class TrainFormationService:
 
         Returns
         -------
-            Preparation time in simulation ticks
+            Dict with operation details: {
+                'total_time': float,
+                'rake_coupling': {'time': float, 'coupler_type': str} or None,
+                'loco_coupling': {'time': float, 'coupler_type': str},
+                'shunting_prep': float or None,
+                'brake_test': float or None,
+                'inspection': float or None
+            }
         """
-        # Emit loco coupling event
-        coupling_time = 0.0
-        if coupling_event_publisher and train.batch.wagons:
+        time_offset = 0.0
+        operations = {
+            'total_time': 0.0,
+            'rake_coupling': None,
+            'loco_coupling': None,
+            'shunting_prep': None,
+            'brake_test': None,
+            'inspection': None,
+        }
+
+        # Step 1: Rake coupling (wagon-to-wagon)
+        rake_coupling_time = 0.0
+        if train.batch.wagons and len(train.batch.wagons) > 1:
             coupler_type = train.batch.wagons[0].coupler_a.type.value
-            coupling_time = self.coupling_service.get_loco_coupling_time(train.batch.wagons)
+            rake_coupling_time = self.coupling_service.get_rake_coupling_time(train.batch.wagons)
 
-            coupling_event_publisher(
-                CouplingEvent(
-                    timestamp=current_time,
-                    locomotive_id=train.locomotive.id,
-                    event_type='COUPLING_STARTED',
-                    location=train.origin,
-                    coupler_type=coupler_type,
-                    wagon_count=len(train.batch.wagons),
-                    duration=coupling_time,
-                    operation_id=train.id,
+            operations['rake_coupling'] = {
+                'time': rake_coupling_time,
+                'coupler_type': coupler_type,
+                'location': train.origin,
+                'wagon_count': len(train.batch.wagons),
+            }
+
+            # Publish coupling events
+            if coupling_event_publisher:
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time,
+                        locomotive_id=train.locomotive.id,
+                        event_type='RAKE_COUPLING_STARTED',
+                        location=train.origin,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=rake_coupling_time,
+                        operation_id=train.id,
+                    )
                 )
-            )
 
-            coupling_event_publisher(
-                CouplingEvent(
-                    timestamp=current_time + coupling_time,
-                    locomotive_id=train.locomotive.id,
-                    event_type='COUPLING_COMPLETED',
-                    location=train.origin,
-                    coupler_type=coupler_type,
-                    wagon_count=len(train.batch.wagons),
-                    duration=coupling_time,
-                    operation_id=train.id,
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time + rake_coupling_time,
+                        locomotive_id=train.locomotive.id,
+                        event_type='RAKE_COUPLING_COMPLETED',
+                        location=train.origin,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=rake_coupling_time,
+                        operation_id=train.id,
+                    )
                 )
-            )
 
+            time_offset += rake_coupling_time
+
+        # Step 2: Locomotive coupling
+        loco_coupling_time = 0.0
+        if train.batch.wagons:
+            coupler_type = train.batch.wagons[0].coupler_a.type.value
+            loco_coupling_time = self.coupling_service.get_loco_coupling_time(train.batch.wagons)
+
+            operations['loco_coupling'] = {
+                'time': loco_coupling_time,
+                'coupler_type': coupler_type,
+            }
+
+            if coupling_event_publisher:
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time + time_offset,
+                        locomotive_id=train.locomotive.id,
+                        event_type='LOCO_COUPLING_STARTED',
+                        location=train.origin,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=loco_coupling_time,
+                        operation_id=train.id,
+                    )
+                )
+
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time + time_offset + loco_coupling_time,
+                        locomotive_id=train.locomotive.id,
+                        event_type='LOCO_COUPLING_COMPLETED',
+                        location=train.origin,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=loco_coupling_time,
+                        operation_id=train.id,
+                    )
+                )
+            time_offset += loco_coupling_time
+
+        # Step 3: Shunting preparation (shunting only)
+        if train.is_shunting:
+            shunting_prep_time = timedelta_to_sim_ticks(process_times.shunting_preparation_time)
+            if shunting_prep_time > 0:
+                operations['shunting_prep'] = shunting_prep_time
+                if coupling_event_publisher and train.batch.wagons:
+                    coupling_event_publisher(
+                        CouplingEvent(
+                            timestamp=current_time + time_offset,
+                            locomotive_id=train.locomotive.id,
+                            event_type='SHUNTING_PREPARATION',
+                            location=train.origin,
+                            coupler_type='',
+                            wagon_count=len(train.batch.wagons),
+                            duration=shunting_prep_time,
+                            operation_id=train.id,
+                        )
+                    )
+                time_offset += shunting_prep_time
+
+        # Step 4: Brake test and inspection (mainline only)
         if train.is_mainline:
-            # Mainline: complete brake test and inspection
             train.complete_brake_test()
             train.complete_inspection()
 
-            # Emit separate brake test and inspection events
-            if coupling_event_publisher and train.batch.wagons:
-                brake_time = timedelta_to_sim_ticks(process_times.full_brake_test_time)
-                inspection_time = timedelta_to_sim_ticks(process_times.technical_inspection_time)
+            brake_time = timedelta_to_sim_ticks(process_times.full_brake_test_time)
+            inspection_time = timedelta_to_sim_ticks(process_times.technical_inspection_time)
 
-                if brake_time > 0:
+            if brake_time > 0:
+                operations['brake_test'] = brake_time
+                if coupling_event_publisher and train.batch.wagons:
                     coupling_event_publisher(
                         CouplingEvent(
-                            timestamp=current_time + coupling_time,
+                            timestamp=current_time + time_offset,
                             locomotive_id=train.locomotive.id,
                             event_type='BRAKE_TEST',
                             location=train.origin,
@@ -147,11 +231,14 @@ class TrainFormationService:
                             operation_id=train.id,
                         )
                     )
+                time_offset += brake_time
 
-                if inspection_time > 0:
+            if inspection_time > 0:
+                operations['inspection'] = inspection_time
+                if coupling_event_publisher and train.batch.wagons:
                     coupling_event_publisher(
                         CouplingEvent(
-                            timestamp=current_time + coupling_time + brake_time,
+                            timestamp=current_time + time_offset,
                             locomotive_id=train.locomotive.id,
                             event_type='INSPECTION',
                             location=train.origin,
@@ -161,20 +248,21 @@ class TrainFormationService:
                             operation_id=train.id,
                         )
                     )
+                time_offset += inspection_time
 
         # Mark ready (will validate requirements)
         train.mark_ready_for_departure(current_time)
 
-        total_prep_time = train.get_preparation_time(process_times, self.coupling_service)
-        return total_prep_time
+        operations['total_time'] = time_offset
+        return operations
 
-    def dissolve_train(
+    def dissolve_train(  # pylint: disable=too-many-positional-arguments
         self,
         train: TrainMovement,
         current_time: float,
         coupling_event_publisher: Callable[[CouplingEvent], None] | None = None,
-    ) -> float:
-        """Dissolve train and return loco decoupling time.
+    ) -> dict[str, Any]:
+        """Dissolve train and return operation details.
 
         Args:
             train: TrainMovement to dissolve
@@ -183,41 +271,103 @@ class TrainFormationService:
 
         Returns
         -------
-            Loco decoupling time in simulation ticks
+            Dict with operation details: {
+                'total_time': float,
+                'loco_decoupling': {'time': float, 'coupler_type': str},
+                'rake_decoupling': {'time': float, 'coupler_type': str} or None
+            }
         """
-        decoupling_time = self.coupling_service.get_loco_decoupling_time(train.batch.wagons)
+        time_offset = 0.0
+        operations = {
+            'total_time': 0.0,
+            'loco_decoupling': None,
+            'rake_decoupling': None,
+        }
 
-        # Emit loco decoupling event
-        if coupling_event_publisher and train.batch.wagons:
+        # Step 1: Locomotive decoupling
+        loco_decoupling_time = self.coupling_service.get_loco_decoupling_time(train.batch.wagons)
+
+        if train.batch.wagons:
             coupler_type = train.batch.wagons[0].coupler_a.type.value
 
-            coupling_event_publisher(
-                CouplingEvent(
-                    timestamp=current_time,
-                    locomotive_id=train.locomotive.id,
-                    event_type='DECOUPLING_STARTED',
-                    location=train.destination,
-                    coupler_type=coupler_type,
-                    wagon_count=len(train.batch.wagons),
-                    duration=decoupling_time,
-                    operation_id=train.id,
-                )
-            )
+            operations['loco_decoupling'] = {
+                'time': loco_decoupling_time,
+                'coupler_type': coupler_type,
+                'location': train.destination,
+            }
 
-            coupling_event_publisher(
-                CouplingEvent(
-                    timestamp=current_time + decoupling_time,
-                    locomotive_id=train.locomotive.id,
-                    event_type='DECOUPLING_COMPLETED',
-                    location=train.destination,
-                    coupler_type=coupler_type,
-                    wagon_count=len(train.batch.wagons),
-                    duration=decoupling_time,
-                    operation_id=train.id,
+            if coupling_event_publisher:
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time,
+                        locomotive_id=train.locomotive.id,
+                        event_type='LOCO_DECOUPLING_STARTED',
+                        location=train.destination,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=loco_decoupling_time,
+                        operation_id=train.id,
+                    )
                 )
-            )
 
-        return decoupling_time
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time + loco_decoupling_time,
+                        locomotive_id=train.locomotive.id,
+                        event_type='LOCO_DECOUPLING_COMPLETED',
+                        location=train.destination,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=loco_decoupling_time,
+                        operation_id=train.id,
+                    )
+                )
+            time_offset += loco_decoupling_time
+
+        # Step 2: Rake decoupling (wagon-to-wagon)
+        rake_decoupling_time = 0.0
+        if train.batch.wagons and len(train.batch.wagons) > 1:
+            coupler_type = train.batch.wagons[0].coupler_a.type.value
+            rake_decoupling_time = self.coupling_service.get_rake_decoupling_time(train.batch.wagons)
+
+            operations['rake_decoupling'] = {
+                'time': rake_decoupling_time,
+                'coupler_type': coupler_type,
+                'location': train.destination,
+                'wagon_count': len(train.batch.wagons),
+            }
+
+            if coupling_event_publisher:
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time + time_offset,
+                        locomotive_id=train.locomotive.id,
+                        event_type='RAKE_DECOUPLING_STARTED',
+                        location=train.destination,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=rake_decoupling_time,
+                        operation_id=train.id,
+                    )
+                )
+
+                coupling_event_publisher(
+                    CouplingEvent(
+                        timestamp=current_time + time_offset + rake_decoupling_time,
+                        locomotive_id=train.locomotive.id,
+                        event_type='RAKE_DECOUPLING_COMPLETED',
+                        location=train.destination,
+                        coupler_type=coupler_type,
+                        wagon_count=len(train.batch.wagons),
+                        duration=rake_decoupling_time,
+                        operation_id=train.id,
+                    )
+                )
+
+            time_offset += rake_decoupling_time
+
+        operations['total_time'] = time_offset
+        return operations
 
     def can_form_train(self, locomotive: Locomotive, batch: BatchAggregate) -> tuple[bool, str | None]:
         """Validate if train can be formed.

@@ -128,10 +128,12 @@ retrofit_workflow/
 **File:** `contexts/retrofit_workflow/application/retrofit_workflow_context.py`
 
 ```python
-from typing import Generator, Any
+from typing import Any
+from pathlib import Path
 from contexts.configuration.domain.models.scenario import Scenario
 from contexts.railway_infrastructure.application.railway_context import RailwayContext
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
+from contexts.retrofit_workflow.application.event_collector import EventCollector
 
 class RetrofitWorkflowContext:
     """Main retrofit workflow simulation context."""
@@ -148,32 +150,30 @@ class RetrofitWorkflowContext:
         self.railway = railway
         self.external_trains = external_trains
         
-        # Initialize coordinators
-        self.arrival_coordinator = ArrivalCoordinator(...)
+        # Initialize event collector
+        self.event_collector = EventCollector(start_datetime=scenario.start_date)
+        
+        # Initialize coordinators with event publishers
+        self.arrival_coordinator = ArrivalCoordinator(
+            config=ArrivalCoordinatorConfig(
+                wagon_event_publisher=self.event_collector.add_wagon_event,
+                # ... other config
+            )
+        )
         self.collection_coordinator = CollectionCoordinator(...)
         self.workshop_coordinator = WorkshopCoordinator(...)
         self.parking_coordinator = ParkingCoordinator(...)
-        
-        # Initialize metrics
-        self.metrics = SimulationMetrics()
     
-    def run(self) -> None:
+    def start_processes(self) -> None:
         """Start all coordinators."""
         self.arrival_coordinator.start()
         self.collection_coordinator.start()
         self.workshop_coordinator.start()
         self.parking_coordinator.start()
-        
-        # Run simulation
-        self.env.run()
-    
-    def get_metrics(self) -> dict[str, Any]:
-        """Get collected metrics."""
-        return self.metrics.get_all()
     
     def export_events(self, output_path: Path) -> None:
         """Export simulation events."""
-        self.metrics.export_to_csv(output_path)
+        self.event_collector.export_all(output_path)
 ```
 
 ### Implementation: Coordinator Example
@@ -182,6 +182,24 @@ class RetrofitWorkflowContext:
 
 ```python
 from typing import Generator, Any
+from dataclasses import dataclass
+from collections.abc import Callable
+
+@dataclass
+class CollectionCoordinatorConfig:
+    """Configuration for CollectionCoordinator."""
+    env: Any
+    collection_queue: Any
+    retrofit_queue: Any
+    track_capacity_manager: TrackCapacityManager
+    locomotive_manager: LocomotiveResourceManager
+    batch_formation_service: BatchFormationService
+    rake_formation_service: RakeFormationService
+    train_formation_service: TrainFormationService
+    route_service: RouteService
+    wagon_event_publisher: Callable[[WagonLifecycleEvent], None]
+    locomotive_event_publisher: Callable[[LocomotiveEvent], None]
+    scenario: Scenario
 
 class CollectionCoordinator:
     """Coordinates wagon movement from collection to retrofit track."""
@@ -200,14 +218,20 @@ class CollectionCoordinator:
             # Wait for wagons
             wagon = yield self.config.collection_queue.get()
             
-            # Collect batch
+            # Collect batch using domain service
             wagons = yield from self._collect_batch(wagon)
             
-            # Select retrofit track
-            retrofit_track = self.config.track_selector.select_track_with_capacity('retrofit')
+            # Publish event
+            self.config.wagon_event_publisher(
+                WagonLifecycleEvent(
+                    wagon_id=wagon.id,
+                    event_type="batch_formed",
+                    sim_time=self.config.env.now
+                )
+            )
             
             # Transport batch
-            yield from self._transport_batch(wagons, retrofit_track)
+            yield from self._transport_batch(wagons)
 ```
 
 ### Implementation: Domain Service Example
@@ -377,67 +401,73 @@ class ExternalTrainsContext:
 
 ### Main Orchestration
 
-**File:** `popupsim/backend/src/application/simulation_service.py`
+**File:** `popupsim/backend/src/main.py`
 
 ```python
 from pathlib import Path
-from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
+from contexts.configuration.infrastructure.file_loader import FileLoader
 from contexts.railway_infrastructure.application.railway_context import RailwayContext
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkflowContext
-from contexts.shared.domain.events.event_bus import EventBus
-from contexts.shared.infrastructure.simpy_adapter import SimPyAdapter
+import simpy
 
-class SimulationService:
-    """Orchestrates all contexts for simulation execution."""
+def run_simulation(scenario_path: Path, output_path: Path) -> None:
+    """Run complete simulation pipeline."""
     
-    def run_simulation(self, scenario_path: Path, output_path: Path) -> None:
-        """Run complete simulation pipeline."""
-        
-        # 1. Configuration Context - Load scenario
-        config_builder = ConfigurationBuilder(scenario_path)
-        scenario = config_builder.build()
-        
-        # 2. Initialize SimPy environment
-        env = SimPyAdapter.create_environment()
-        event_bus = EventBus()
-        
-        # 3. Railway Infrastructure Context - Build tracks
-        railway = RailwayContext(scenario)
-        
-        # 4. External Trains Context - Schedule arrivals
-        external_trains = ExternalTrainsContext(env, scenario, event_bus)
-        external_trains.initialize_arrivals()
-        
-        # 5. Retrofit Workflow Context - Main simulation
-        retrofit_workflow = RetrofitWorkflowContext(
-            env, scenario, railway, external_trains
-        )
-        retrofit_workflow.run()
-        
-        # 6. Export results
-        retrofit_workflow.export_events(output_path)
-        metrics = retrofit_workflow.get_metrics()
-        
-        # Generate reports
-        self._generate_reports(metrics, output_path)
+    # 1. Configuration Context - Load scenario
+    loader = FileLoader()
+    scenario = loader.load_scenario(scenario_path)
+    
+    # 2. Initialize SimPy environment
+    env = simpy.Environment()
+    
+    # 3. Railway Infrastructure Context - Build tracks
+    railway = RailwayContext(scenario)
+    
+    # 4. External Trains Context - Schedule arrivals
+    external_trains = ExternalTrainsContext(env, scenario)
+    
+    # 5. Retrofit Workflow Context - Main simulation
+    retrofit_workflow = RetrofitWorkflowContext(
+        env, scenario, railway, external_trains
+    )
+    
+    # 6. Initialize and start
+    retrofit_workflow.initialize()
+    external_trains.start_processes()
+    retrofit_workflow.start_processes()
+    
+    # 7. Run simulation
+    env.run()
+    
+    # 8. Export results
+    retrofit_workflow.export_events(output_path)
 ```
 
-### Event Bus Communication
+### Event Collection Pattern
 
 ```python
-from contexts.shared.domain.events.event_bus import EventBus
-from contexts.external_trains.domain.events.train_arrived_event import TrainArrivedEvent
+# EventCollector is initialized in RetrofitWorkflowContext
+event_collector = EventCollector(start_datetime=scenario.start_date)
 
-# External Trains publishes event
-event_bus.publish(TrainArrivedEvent(
-    train_id="T001",
-    wagons=[wagon1, wagon2, wagon3],
-    arrival_time=100.0
-))
+# Event publishers are passed to coordinators via config
+coordinator_config = CollectionCoordinatorConfig(
+    wagon_event_publisher=event_collector.add_wagon_event,
+    locomotive_event_publisher=event_collector.add_locomotive_event,
+    # ... other config
+)
 
-# Retrofit Workflow subscribes
-event_bus.subscribe(TrainArrivedEvent, arrival_coordinator.handle_train_arrival)
+# Coordinators publish events
+self.config.wagon_event_publisher(
+    WagonLifecycleEvent(
+        wagon_id=wagon.id,
+        event_type="batch_formed",
+        sim_time=self.config.env.now
+    )
+)
+
+# Export at end of simulation
+event_collector.export_all(output_path)
 ```
 
 ---
@@ -450,9 +480,9 @@ event_bus.subscribe(TrainArrivedEvent, arrival_coordinator.handle_train_arrival)
 | Retrofit Workflow Context | ✅ Implemented | `contexts/retrofit_workflow/` |
 | Railway Infrastructure Context | ✅ Implemented | `contexts/railway_infrastructure/` |
 | External Trains Context | ✅ Implemented | `contexts/external_trains/` |
-| Event Bus | ✅ Implemented | `contexts/shared/domain/events/` |
-| SimPy Adapter | ✅ Implemented | `contexts/shared/infrastructure/` |
-| Testing | ✅ Complete | 374 tests passing |
+| Event Collection | ✅ Implemented | `contexts/retrofit_workflow/application/event_collector.py` |
+| SimPy Integration | ✅ Implemented | `shared/infrastructure/simulation/` |
+| Testing | ✅ Complete | 378 tests passing, 54% coverage |
 
 ---
 

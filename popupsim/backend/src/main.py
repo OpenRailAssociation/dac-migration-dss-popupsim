@@ -88,13 +88,23 @@ def _print_retrofit_statistics(output_path: Path) -> None:
         metrics = json.load(f)
 
     typer.echo('\nRETROFIT WORKFLOW METRICS:')
-    typer.echo(f'  Total wagons arrived:       {metrics.get("wagons_arrived", 0)}')
-    typer.echo(f'  Total wagons rejected:      {metrics.get("wagons_rejected", 0)}')
-    typer.echo(f'  Total wagons completed:     {metrics.get("wagons_parked", 0)}')
+    typer.echo(f'  Total wagons in timetable:  {metrics.get("total_wagons", 0)}')
+    typer.echo(f'  Wagons eligible for retrofit: {metrics.get("wagons_eligible", 0)}')
+    typer.echo(f'  Wagons processable:         {metrics.get("wagons_processable", 0)}')
+    typer.echo(f'  Wagons arrived at facility: {metrics.get("wagons_arrived", 0)}')
+    typer.echo(f'  Wagons completed (parked):  {metrics.get("wagons_parked", 0)}')
     wagons_in_process = metrics.get('wagons_in_process', 0)
     if wagons_in_process > 0:
-        typer.echo(f'  Total wagons in process:    {wagons_in_process}')
-    typer.echo(f'  Completion rate:            {metrics.get("completion_rate", 0) * 100:.1f}%')
+        typer.echo(f'  Wagons in process:          {wagons_in_process}')
+    typer.echo('\n  REJECTIONS:')
+    typer.echo(f'    No retrofit needed:       {metrics.get("rejected_no_retrofit", 0)}')
+    typer.echo(f'    Wagon loaded:             {metrics.get("rejected_loaded", 0)}')
+    typer.echo(f'    Track full:               {metrics.get("rejected_track_full", 0)}')
+    rejected_other = metrics.get('rejected_other', 0)
+    if rejected_other > 0:
+        typer.echo(f'    Other reasons:            {rejected_other}')
+    typer.echo(f'    Total rejected:           {metrics.get("wagons_rejected", 0)}')
+    typer.echo(f'\n  Completion rate:            {metrics.get("completion_rate", 0) * 100:.1f}%')
     typer.echo(f'  Throughput (wagons/hour):   {metrics.get("throughput_rate_per_hour", 0):.2f}')
 
     ws_stats = metrics.get('workshop_statistics', {})
@@ -139,6 +149,10 @@ def output_visualization(output_path: Path, service: Any) -> None:
         typer.echo('  - rejected_wagons.csv')
         typer.echo('  - locomotive_movements.csv')
         typer.echo('  - summary_metrics.json')
+        typer.echo('\nDual-stream event files (new):')
+        typer.echo('  - resource_states.csv (state changes)')
+        typer.echo('  - resource_locations.csv (location tracking)')
+        typer.echo('  - resource_processes.csv (process events)')
     else:
         typer.echo('\nRetrofit workflow output generation not available')
 
@@ -163,7 +177,7 @@ def run(
     typer.echo(f'  Trains: {len(scenario.trains or [])}')
     typer.echo(f'  Total wagons: {sum(len(t.wagons) for t in (scenario.trains or []))}')
 
-    service = SimulationApplicationService(scenario)
+    service = SimulationApplicationService(scenario, output_path)
     until = timedelta_to_sim_ticks(scenario.end_date - scenario.start_date)
     typer.echo('Running simulation...\n')
     result = service.execute(until)

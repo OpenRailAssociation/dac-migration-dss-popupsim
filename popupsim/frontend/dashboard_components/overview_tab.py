@@ -12,7 +12,7 @@ def _render_kpi_cards(metrics: dict) -> None:
 
     with col1:
         trains = metrics.get('trains_arrived', 0)
-        wagons = metrics.get('wagons_arrived', 0)
+        wagons = metrics.get('total_wagons', 0)  # Use total_wagons instead of wagons_arrived
         st.metric('Trains / Wagons', f'{trains} / {wagons}')
 
     with col2:
@@ -20,10 +20,8 @@ def _render_kpi_cards(metrics: dict) -> None:
         st.metric('Rejected', rejected)
 
     with col3:
-        wagons = metrics.get('wagons_arrived', 0)
-        rejected = metrics.get('wagons_rejected', 0)
-        in_simulation = wagons - rejected
-        st.metric('In Simulation', in_simulation)
+        in_process = metrics.get('wagons_in_process', 0)
+        st.metric('In Process', in_process)
 
     with col4:
         retrofitted = metrics.get('retrofits_completed', 0)

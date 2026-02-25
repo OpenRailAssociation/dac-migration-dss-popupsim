@@ -281,61 +281,42 @@ def run_layered_test(
     events = []
     parked_wagons = set()
 
+    def capture_wagon_event(event) -> None:
+        events.append((env.now, event))
+        if hasattr(event, 'event_type') and event.event_type == 'PARKED':
+            parked_wagons.add(event.wagon_id)
+
+    def capture_loco_event(event) -> None:
+        events.append((env.now, event))
+
+    def capture_batch_event(event) -> None:
+        events.append((env.now, event))
+
+    # Initialize context first
     context.initialize()
 
-    # Hook event collector BEFORE starting processes
+    # Hook event collector AFTER initialization and re-wire coordinators
     if context.event_collector:
-        original_wagon_event = context.event_collector.add_wagon_event
-        original_loco_event = context.event_collector.add_locomotive_event
-
-        def capture_wagon_event(event) -> None:
-            events.append((env.now, event))
-            if hasattr(event, 'event_type') and event.event_type == 'PARKED':
-                parked_wagons.add(event.wagon_id)
-            # Print wagon events for timeline debugging
-            if hasattr(event, 'wagon_id') and hasattr(event, 'event_type') and hasattr(event, 'location'):
-                print(f't={env.now}: wagon[{event.wagon_id}] {event.event_type} {event.location}')
-            original_wagon_event(event)
-
-        def capture_loco_event(event) -> None:
-            events.append((env.now, event))
-            # Print locomotive events for timeline debugging
-            if hasattr(event, 'locomotive_id'):
-                event_type = getattr(event, 'event_type', type(event).__name__)
-                from_loc = getattr(event, 'from_location', '')
-                to_loc = getattr(event, 'to_location', '')
-                if from_loc and to_loc:
-                    print(f't={env.now}: locomotive[{event.locomotive_id}] {event_type} {from_loc}->{to_loc}')
-                else:
-                    print(f't={env.now}: locomotive[{event.locomotive_id}] {event_type}')
-            original_loco_event(event)
-
         context.event_collector.add_wagon_event = capture_wagon_event
         context.event_collector.add_locomotive_event = capture_loco_event
+        context.event_collector.add_batch_event = capture_batch_event
 
-        # Re-wire coordinators BEFORE starting processes
-        if context.collection_coordinator and hasattr(context.collection_coordinator, 'config'):
+        # Re-wire coordinators
+        if context.collection_coordinator:
             context.collection_coordinator.config.wagon_event_publisher = capture_wagon_event
             context.collection_coordinator.config.loco_event_publisher = capture_loco_event
+            context.collection_coordinator.config.batch_event_publisher = capture_batch_event
+
         if context.workshop_coordinator:
-            if hasattr(context.workshop_coordinator, 'config'):
-                context.workshop_coordinator.config.wagon_event_publisher = capture_wagon_event
-                context.workshop_coordinator.config.loco_event_publisher = capture_loco_event
-            else:
-                context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
-                context.workshop_coordinator.loco_event_publisher = capture_loco_event
+            context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+            context.workshop_coordinator.loco_event_publisher = capture_loco_event
+
         if context.parking_coordinator:
-            if hasattr(context.parking_coordinator, 'config'):
-                context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
-                context.parking_coordinator.config.loco_event_publisher = capture_loco_event
-                context.parking_coordinator.config.batch_event_publisher = lambda e: events.append((env.now, e))
-            else:
-                context.parking_coordinator.wagon_event_publisher = capture_wagon_event
-                context.parking_coordinator.loco_event_publisher = capture_loco_event
+            context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
+            context.parking_coordinator.config.loco_event_publisher = capture_loco_event
+            context.parking_coordinator.config.batch_event_publisher = capture_batch_event
 
-    context.start_processes()
-
-    # Add wagons to collection queue
+    # Add wagons to queue BEFORE starting processes
     from contexts.retrofit_workflow.domain.entities.wagon import Wagon
     from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
     from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
@@ -349,18 +330,20 @@ def run_layered_test(
         )
         wagon.classify()
         wagon.move_to('collection')
-        wagon.current_track_id = 'collection'  # Set physical track ID
+        wagon.current_track_id = 'collection'
 
         arrival_event = WagonJourneyEvent(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
         events.append((0.0, arrival_event))
 
-        # Add wagon via collection coordinator
-        if context.collection_coordinator:
-            context.collection_coordinator.add_wagon(wagon)
-        else:
-            context.collection_queue.put(wagon)
+        # Add wagon to track queue
+        if context.track_manager:
+            track = context.track_manager.get_track('collection')
+            if track:
+                track.queue.put(wagon)
+
+    context.start_processes()
 
     # Termination process
     def termination_process():
@@ -467,17 +450,20 @@ def test_scenario2_layer1_two_wagons_one_bay_pure_travel() -> None:
 def test_scenario2_layer3_two_wagons_one_bay_with_loco_ops() -> None:
     """Scenario 2, Layer 3: Two wagons, one bay, with locomotive operations.
 
+    With 2 wagons, rake coupling is required (1 min for 1 coupling between wagons).
+    Prep time: 1 rake + 1 loco + 1 shunting = 3 min
+
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
-    t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=4: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=12: wagon[W01] RETROFIT_STARTED WS1
-    t=22: wagon[W01] RETROFIT_COMPLETED WS1
-    t=30.5: wagon[W01] PARKED parking_area
-    t=36.5: wagon[W02] RETROFIT_STARTED WS1
-    t=46.5: wagon[W02] RETROFIT_COMPLETED WS1
-    t=55: wagon[W02] PARKED parking_area
+    t=5: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=5: wagon[W02] ON_RETROFIT_TRACK retrofit
+    t=14: wagon[W01] RETROFIT_STARTED WS1
+    t=24: wagon[W01] RETROFIT_COMPLETED WS1
+    t=32.5: wagon[W01] PARKED parking_area
+    t=38.5: wagon[W02] RETROFIT_STARTED WS1
+    t=48.5: wagon[W02] RETROFIT_COMPLETED WS1
+    t=57: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         2, 1, 10.0, 80.0, workshop_bays=[1], loco_coupling_time=1.0, loco_prep_time=1.0
@@ -531,17 +517,22 @@ def test_scenario3_layer1_two_wagons_two_bays_pure_travel() -> None:
 def test_scenario3_layer3_two_wagons_two_bays_with_loco_ops() -> None:
     """Scenario 3, Layer 3: Two wagons, two bays, with locomotive operations.
 
+    With 2 wagons, rake coupling is required (1 min for 1 coupling between wagons).
+    Prep time: 1 rake + 1 loco + 1 shunting = 3 min
+    Loco decoupling at workshop: 1 min
+    Note: Wagons keep SCREW couplers throughout (DAC conversion not implemented in test)
+
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
-    t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=4: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=14: wagon[W01] RETROFIT_STARTED WS1
-    t=14: wagon[W02] RETROFIT_STARTED WS1
-    t=24: wagon[W01] RETROFIT_COMPLETED WS1
-    t=24: wagon[W02] RETROFIT_COMPLETED WS1
-    t=33.5: wagon[W01] PARKED parking_area
-    t=33.5: wagon[W02] PARKED parking_area
+    t=5: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=5: wagon[W02] ON_RETROFIT_TRACK retrofit
+    t=16: wagon[W01] RETROFIT_STARTED WS1
+    t=16: wagon[W02] RETROFIT_STARTED WS1
+    t=26: wagon[W01] RETROFIT_COMPLETED WS1
+    t=26: wagon[W02] RETROFIT_COMPLETED WS1
+    t=37: wagon[W01] PARKED parking_area
+    t=37: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         2, 1, 10.0, 50.0, workshop_bays=[2], loco_coupling_time=1.0, loco_prep_time=1.0

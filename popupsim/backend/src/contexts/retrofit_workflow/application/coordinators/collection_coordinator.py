@@ -94,8 +94,10 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         while True:
             first_wagon: Wagon = yield queue.get()
 
-            retrofit_tracks = self.config.track_selector.get_tracks_of_type('retrofit')
-            retrofit_track = retrofit_tracks[0] if retrofit_tracks else None
+            # Select best retrofit track using configured strategy (least_occupied, round_robin, etc.)
+            # Strategy will pick track with most available capacity, but we don't pre-filter by required capacity
+            # SimPy's Container.put() in add_wagons() will handle blocking if selected track is full
+            retrofit_track = self.config.track_selector.select_track_with_capacity('retrofit', 0.0)
             if not retrofit_track:
                 logger.error('No retrofit tracks configured')
                 continue
@@ -110,38 +112,25 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             retrofit_track: Target retrofit track
             queue: Queue for this specific track
         """
-        wagons = yield from self._collect_wagons_simple(first_wagon, queue)
+        wagons = yield from self._collect_wagons_simple(first_wagon, queue, retrofit_track)
         if not wagons:
             return
 
         batch_aggregate = self.config.batch_service.create_batch_aggregate(wagons, 'retrofit')
         yield from self._transport_batch_aggregate(batch_aggregate, retrofit_track)
 
-    def _collect_wagons_simple(self, first_wagon: Wagon, queue: Any) -> Generator[Any, Any, list[Wagon]]:
+    def _collect_wagons_simple(
+        self, first_wagon: Wagon, queue: Any, retrofit_track: Any
+    ) -> Generator[Any, Any, list[Wagon]]:
         """Collect wagons from track queue that fit in available retrofit track capacity.
 
-        CRITICAL: Only form batches that will fit on the retrofit track to prevent deadlock.
-        If retrofit track is full, this will block until capacity becomes available.
+        Args:
+            first_wagon: First wagon to collect
+            queue: Collection track queue
+            retrofit_track: Selected retrofit track (already chosen by strategy)
         """
-        retrofit_tracks = self.config.track_selector.get_tracks_of_type('retrofit')
-        retrofit_track = retrofit_tracks[0] if retrofit_tracks else None
-        if not retrofit_track:
-            return [first_wagon]
-
-        # Get CURRENT available capacity on retrofit track
+        # Get CURRENT available capacity on the selected retrofit track
         retrofit_capacity = retrofit_track.get_available_capacity()
-
-        # If first wagon doesn't fit, wait for capacity to be freed
-        while first_wagon.length > retrofit_capacity:
-            logger.warning(
-                't=%s: Retrofit track full (%s: m available, need %s: m). Waiting for capacity...',
-                self.config.env.now,
-                retrofit_capacity,
-                first_wagon.length,
-            )
-            # Wait a bit and check again (SimPy will handle blocking in add_wagons)
-            yield self.config.env.timeout(1)
-            retrofit_capacity = retrofit_track.get_available_capacity()
 
         wagons = [first_wagon]
         total_length = first_wagon.length
@@ -157,7 +146,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             else:
                 # Stop collecting - batch is full based on retrofit track capacity
                 logger.info(
-                    't=%f: Batch size limited by retrofit capacity: %d wagons %1fm) fits, but %d wagons still waiting',
+                    't=%.1f: Batch size limited by retrofit capacity: %d wagons (%.1fm) fits, %d waiting',
                     self.config.env.now,
                     len(wagons),
                     total_length,
@@ -211,20 +200,25 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         # Yield to make this a generator
         yield self.config.env.timeout(0)
 
-    def _return_locomotive(self, loco: Any) -> Generator[Any, Any]:
-        """Return locomotive to home track."""
+    def _return_locomotive(self, loco: Any, from_track_id: str) -> Generator[Any, Any]:
+        """Return locomotive to home track.
+
+        Args:
+            loco: Locomotive to return
+            from_track_id: Track ID where locomotive currently is
+        """
         EventPublisherHelper.publish_loco_moving(
-            self.config.loco_event_publisher, self.config.env.now, loco.id, 'retrofit', loco.home_track
+            self.config.loco_event_publisher, self.config.env.now, loco.id, from_track_id, loco.home_track
         )
 
-        return_time = self.config.route_service.get_duration('retrofit', 'loco_parking')
+        return_time = self.config.route_service.get_duration(from_track_id, loco.home_track)
         yield self.config.env.timeout(return_time)
 
         EventPublisherHelper.publish_loco_parking(
             self.config.loco_event_publisher, self.config.env.now, loco.id, loco.home_track
         )
 
-    def _transport_to_retrofit_with_batch(
+    def _transport_to_retrofit_with_batch(  # noqa: PLR0915  # pylint: disable=too-many-locals,too-many-statements
         self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str
     ) -> Generator[Any, Any]:
         """Transport batch aggregate to retrofit track with train formation."""
@@ -240,12 +234,15 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         # Allocate locomotive and move to collection
         loco = yield from self.config.locomotive_manager.allocate(purpose='collection_pickup')
 
+        # Get collection track ID from first wagon
+        collection_track_id = wagons[0].current_track_id
+
         # Publish movement immediately
         EventPublisherHelper.publish_loco_moving(
-            self.config.loco_event_publisher, self.config.env.now, loco.id, 'loco_parking', 'collection'
+            self.config.loco_event_publisher, self.config.env.now, loco.id, loco.home_track, collection_track_id
         )
 
-        move_time = self.config.route_service.get_duration('loco_parking', 'collection')
+        move_time = self.config.route_service.get_duration(loco.home_track, collection_track_id)
         yield self.config.env.timeout(move_time)
 
         # NOW publish batch formation (after locomotive arrives)
@@ -257,31 +254,75 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         )
 
         # Get route type for train formation
-        route_type = self.config.route_service.get_route_type('collection', 'retrofit')
+        route_type = self.config.route_service.get_route_type(collection_track_id, retrofit_track.track_id)
 
         # Form train (locomotive + rake)
         train = self.config.train_service.form_train(
             locomotive=loco,
             batch=batch_aggregate,
-            origin='collection',
-            destination='retrofit',
+            origin=collection_track_id,
+            destination=retrofit_track.track_id,
             route_type=route_type,
         )
 
         # Prepare train (loco coupling + brake test + inspection for MAINLINE)
-        prep_time = self.config.train_service.prepare_train(
+        prep_start_time = self.config.env.now
+        prep_operations = self.config.train_service.prepare_train(
             train,
             self.config.scenario.process_times,
-            self.config.env.now,
+            prep_start_time,
             coupling_event_publisher=self.config.coupling_event_publisher,
         )
+        prep_time = prep_operations['total_time'] if isinstance(prep_operations, dict) else prep_operations
+
+        # Publish RAKE_COUPLING_STARTED for wagons if rake coupling happens
+        if isinstance(prep_operations, dict) and prep_operations.get('rake_coupling'):
+            rake_op = prep_operations['rake_coupling']
+            for wagon in wagons:
+                EventPublisherHelper.publish_wagon_event(
+                    self.config.wagon_event_publisher,
+                    prep_start_time,
+                    wagon.id,
+                    'RAKE_COUPLING_STARTED',
+                    collection_track_id,
+                    'COUPLING',
+                    coupler_type=rake_op.get('coupler_type', 'SCREW'),
+                )
+
         logger.info(
             't=%.1f: LOCO[%s] → TRAIN_PREP at collection (coupling + prep, %.1f min)',
             self.config.env.now,
             loco.id,
             prep_time,
         )
-        yield self.config.env.timeout(prep_time)
+
+        # Wait for rake coupling duration only
+        if isinstance(prep_operations, dict) and prep_operations.get('rake_coupling'):
+            rake_coupling_time = prep_operations['rake_coupling'].get('duration', 0)
+            if rake_coupling_time > 0:
+                yield self.config.env.timeout(rake_coupling_time)
+                # Publish RAKE_COUPLING_COMPLETED after rake coupling time
+                rake_op = prep_operations['rake_coupling']
+                for wagon in wagons:
+                    EventPublisherHelper.publish_wagon_event(
+                        self.config.wagon_event_publisher,
+                        self.config.env.now,
+                        wagon.id,
+                        'RAKE_COUPLING_COMPLETED',
+                        collection_track_id,
+                        'WAITING',
+                        coupler_type=rake_op.get('coupler_type', 'SCREW'),
+                    )
+                # Wait for remaining prep time (loco coupling + brake test + inspection)
+                remaining_time = prep_time - rake_coupling_time
+                if remaining_time > 0:
+                    yield self.config.env.timeout(remaining_time)
+            else:
+                # No rake coupling, just wait full prep time
+                yield self.config.env.timeout(prep_time)
+        else:
+            # No rake coupling info, wait full prep time
+            yield self.config.env.timeout(prep_time)
 
         EventPublisherHelper.publish_batch_transport_started(
             self.config.batch_event_publisher,
@@ -295,11 +336,26 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         # Depart
         train.depart(self.config.env.now)
         EventPublisherHelper.publish_loco_moving(
-            self.config.loco_event_publisher, self.config.env.now, loco.id, 'collection', 'retrofit'
+            self.config.loco_event_publisher, self.config.env.now, loco.id, collection_track_id, retrofit_track.track_id
         )
 
+        # Get route path for MOVING state visualization
+        route_path = self.config.route_service.get_route_path(collection_track_id, retrofit_track.track_id)
+
+        # Publish MOVING state for all wagons
+        for wagon in wagons:
+            EventPublisherHelper.publish_wagon_event(
+                self.config.wagon_event_publisher,
+                self.config.env.now,
+                wagon.id,
+                'MOVING',
+                collection_track_id,
+                'MOVING',
+                route_path=route_path,
+            )
+
         # Transport
-        base_transport_time = self.config.route_service.get_duration('collection', 'retrofit')
+        base_transport_time = self.config.route_service.get_duration(collection_track_id, retrofit_track.track_id)
         yield self.config.env.timeout(base_transport_time)
 
         # Arrive and publish batch arrived event
@@ -326,11 +382,12 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             )
 
         # Dissolve train: loco decoupling + rake decoupling
-        loco_decouple_time = self.config.train_service.dissolve_train(
+        dissolve_result = self.config.train_service.dissolve_train(
             train,
             self.config.env.now,
             coupling_event_publisher=self.config.coupling_event_publisher,
         )
+        loco_decouple_time = dissolve_result['total_time'] if isinstance(dissolve_result, dict) else dissolve_result
         logger.info(
             't=%.1f: LOCO[%s] → DECOUPLING at retrofit (%.1f min)', self.config.env.now, loco.id, loco_decouple_time
         )
@@ -351,5 +408,5 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         _, _ = train.dissolve()
 
         # Return locomotive
-        yield from self._return_locomotive(loco)
+        yield from self._return_locomotive(loco, retrofit_track.track_id)
         yield from self.config.locomotive_manager.release(loco)

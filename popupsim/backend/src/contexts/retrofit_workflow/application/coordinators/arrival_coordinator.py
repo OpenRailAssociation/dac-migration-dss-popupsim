@@ -209,18 +209,19 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
             return
 
         for wagon in train.wagons:
-            # Use actual track ID if assigned, otherwise 'collection'
-            location = wagon.current_track_id if wagon.current_track_id else 'collection'
-            self._event_publisher(
-                WagonJourneyEvent(
-                    timestamp=self.env.now,
-                    wagon_id=wagon.id,
-                    event_type='ARRIVED',
-                    location=location,
-                    status='ARRIVED',
-                    train_id=train.id,
+            # Only publish ARRIVED event if wagon was successfully assigned to a track
+            # Rejected wagons already have REJECTED event published
+            if wagon.current_track_id:
+                self._event_publisher(
+                    WagonJourneyEvent(
+                        timestamp=self.env.now,
+                        wagon_id=wagon.id,
+                        event_type='ARRIVED',
+                        location=wagon.current_track_id,
+                        status='ARRIVED',
+                        train_id=train.id,
+                    )
                 )
-            )
 
     def _distribute_wagons_to_collection(self, wagons: list[Wagon]) -> None:
         """Distribute wagons to collection tracks with capacity management.
@@ -251,27 +252,17 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
             SimPy events for capacity reservation
         """
         for wagon in wagons:
-            # Select collection track
-            collection_track = self._track_selector.select_track_with_capacity('collection')
+            # Select collection track with required capacity for this wagon
+            collection_track = self._track_selector.select_track_with_capacity('collection', wagon.length)
             if not collection_track:
-                # No collection track available - reject wagon
+                # All collection tracks full - reject wagon
                 self._reject_wagon_no_track(wagon)
                 continue
-
-            # Check if wagon fits on collection track
-            if self._track_manager:
-                track = self._track_manager.get_track(collection_track.track_id)
-                if track:
-                    available_capacity = track.get_available_capacity()
-                    if wagon.length > available_capacity:
-                        # Collection track full - reject wagon with detailed message
-                        self._reject_wagon_track_full(wagon, collection_track.track_id, available_capacity)
-                        continue
 
             # Assign wagon to track
             wagon.current_track_id = collection_track.track_id
 
-            # Reserve capacity on collection track (should not block since we checked capacity)
+            # Reserve capacity on collection track (blocks if full - SimPy handles waiting)
             if self._track_manager:
                 track = self._track_manager.get_track(collection_track.track_id)
                 if track:

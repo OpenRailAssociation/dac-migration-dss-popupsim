@@ -233,8 +233,9 @@ def test_train_formation_service_shunting(
     assert train.destination == 'workshop_1'
 
     # Prepare train
-    prep_time = service.prepare_train(train, process_times, 0.0)
-    assert prep_time == 2.0  # SCREW coupling + preparation
+    prep_operations = service.prepare_train(train, process_times, 0.0)
+    # Should be 4.0 minutes (2 rake coupling for 3 wagons + 1 loco coupling + 1 shunting prep)
+    assert prep_operations['total_time'] == 4.0
     assert train.status == TrainMovementStatus.READY
 
 
@@ -258,6 +259,7 @@ def test_train_formation_service_mainline(
     assert train.destination == 'retrofit'
 
     # Prepare train
-    prep_time = service.prepare_train(train, process_times, 0.0)
-    assert prep_time == 8.0  # SCREW coupling + brake test + inspection
+    prep_operations = service.prepare_train(train, process_times, 0.0)
+    # Should be 10.0 minutes (2 rake coupling + 1 loco coupling + 5 brake test + 2 inspection)
+    assert prep_operations['total_time'] == 10.0
     assert train.status == TrainMovementStatus.READY

@@ -34,6 +34,11 @@ class DataLoader:  # pylint: disable=too-few-public-methods
         data['timeline'] = self._load_csv('timeline.csv')
         data['workshop_metrics'] = self._load_csv('workshop_metrics.csv')
 
+        # Load dual-stream event files
+        data['resource_states'] = self._load_csv('resource_states.csv')
+        data['resource_locations'] = self._load_csv('resource_locations.csv')
+        data['resource_processes'] = self._load_csv('resource_processes.csv')
+
         # Load scenario configuration
         data['scenario_config'] = self._load_scenario_config()
 
@@ -51,7 +56,10 @@ class DataLoader:  # pylint: disable=too-few-public-methods
         """Load CSV file from output directory."""
         filepath = self.output_dir / filename
         if filepath.exists():
-            return pd.read_csv(filepath)
+            try:
+                return pd.read_csv(filepath)
+            except pd.errors.EmptyDataError:
+                return pd.DataFrame()  # Return empty DataFrame for empty files
         return None
 
     def _load_scenario_config(self) -> dict[str, Any]:

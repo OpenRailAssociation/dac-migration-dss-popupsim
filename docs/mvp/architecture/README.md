@@ -1,4 +1,4 @@
-# PopUpSim MVP - arc42 Architecture Documentation
+# PopUpSim MVP - Architecture Documentation
 
 ## Overview
 

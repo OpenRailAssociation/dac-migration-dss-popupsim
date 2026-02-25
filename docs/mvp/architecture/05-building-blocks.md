@@ -148,21 +148,86 @@ graph TB
 | **ParkingCoordinator** | Transport completed wagons to parking tracks | Yes |
 
 #### Domain Services (No SimPy Dependencies)
+
+**Core Formation Services:**
 | Service | Responsibility |
 |---------|----------------|
 | **BatchFormationService** | Create wagon batches based on capacity constraints |
 | **RakeFormationService** | Form and dissolve wagon rakes with coupling logic |
 | **TrainFormationService** | Assemble trains (locomotive + rake) with preparation times |
+
+**Scheduling & Assignment:**
+| Service | Responsibility |
+|---------|----------------|
 | **WorkshopSchedulingService** | Schedule wagon batches to available workshops |
-| **CouplingService** | Calculate coupling/decoupling times |
+| **WorkshopAssignmentService** | Assign wagons to workshop bays |
+| **WorkshopAssignmentStrategies** | Workshop assignment strategy implementations |
+
+**Transport & Routing:**
+| Service | Responsibility |
+|---------|----------------|
+| **TransportPlanningService** | Plan transport operations between tracks |
 | **RouteService** | Provide route durations between tracks |
+
+**Selection Services:**
+| Service | Responsibility |
+|---------|----------------|
+| **ResourceSelectionService** | Select resources using strategies (first_available, least_occupied, round_robin) |
+| **TrackSelectionService** | Select tracks with capacity constraints |
+| **ParkingTrackSelectionService** | Select parking tracks for completed wagons |
+
+**Coupling & Assembly:**
+| Service | Responsibility |
+|---------|----------------|
+| **CouplingService** | Calculate coupling/decoupling times based on coupler types |
+| **CouplingValidationService** | Validate coupling compatibility between wagons |
+| **TrainAssemblyService** | Assemble locomotives to wagon rakes |
+
+**Lifecycle Management:**
+| Service | Responsibility |
+|---------|----------------|
+| **RakeLifecycleManager** | Manage complete rake lifecycle (form, transport, dissolve) |
+| **WagonFactoryService** | Create wagon entities from configuration |
+| **WagonEligibilityService** | Check wagon eligibility for operations |
+| **WagonAccumulationService** | Accumulate wagons for batch formation |
+
+**Event Generation:**
+| Service | Responsibility |
+|---------|----------------|
+| **RejectionEventFactory** | Create rejection events for wagons that cannot be processed |
+
+**Key Principle:** All domain services are pure business logic with no SimPy dependencies.
+
+#### Application Services (Orchestration Layer)
+
+**Operation Services:**
+| Service | Responsibility |
+|---------|----------------|
+| **RakeOperationsService** | Orchestrate rake formation, transport, and dissolution operations |
+| **WorkshopOperationsService** | Orchestrate workshop assignment and processing operations |
+| **ParkingTransportService** | Orchestrate transport to parking tracks |
+| **RailwayOperationsService** | Orchestrate railway infrastructure operations |
+
+**Coordination Services:**
+| Service | Responsibility |
+|---------|----------------|
+| **CoordinationService** | Coordinate between multiple coordinators |
+| **LocomotiveCoordinationService** | Coordinate locomotive allocation across operations |
+
+**Metrics & Collection:**
+| Service | Responsibility |
+|---------|----------------|
+| **MetricsAggregator** | Aggregate simulation metrics from all coordinators |
+| **EventCollectionService** | Collect and export simulation events |
+| **DualStreamCollector** | Collect dual-stream events (state + location) |
+| **DualStreamAdapter** | Adapt events to dual-stream format |
 
 #### Resource Managers (Infrastructure Layer)
 | Manager | Responsibility |
 |---------|----------------|
-| **LocomotiveResourceManager** | Allocate and release locomotives (SimPy Resource) |
-| **TrackCapacityManager** | Manage track capacity and wagon placement |
-| **WorkshopResourceManager** | Manage workshop station availability (SimPy Resource) |
+| **LocomotiveResourceManager** | Allocate and release locomotives using SimPy Resource |
+| **TrackCapacityManager** | Manage track capacity and wagon placement using SimPy Container |
+| **WorkshopResourceManager** | Manage workshop bay availability using SimPy Resource |
 
 ### Workflow Sequence
 
@@ -188,6 +253,35 @@ sequenceDiagram
     Parking->>Parking: Transport to parking
 ```
 
+### Coordinator Configuration Pattern
+
+Each coordinator receives a configuration dataclass with all dependencies:
+
+```python
+@dataclass
+class CollectionCoordinatorConfig:
+    """Configuration for CollectionCoordinator."""
+    env: Any
+    collection_queue: Any
+    retrofit_queue: Any
+    track_capacity_manager: TrackCapacityManager
+    locomotive_manager: LocomotiveResourceManager
+    batch_formation_service: BatchFormationService
+    rake_formation_service: RakeFormationService
+    train_formation_service: TrainFormationService
+    route_service: RouteService
+    wagon_event_publisher: Callable[[WagonLifecycleEvent], None]
+    locomotive_event_publisher: Callable[[LocomotiveEvent], None]
+    resource_event_publisher: Callable[[ResourceEvent], None]
+    scenario: Scenario
+```
+
+**Benefits:**
+- Explicit dependencies
+- Easy testing (inject mocks)
+- Type-safe configuration
+- Clear coordinator requirements
+
 ### Code Example: Coordinator Structure
 
 ```python
@@ -208,14 +302,23 @@ class CollectionCoordinator:
             # Wait for wagons
             wagon = yield self.config.collection_queue.get()
             
-            # Collect batch
+            # Collect batch using domain service
             wagons = yield from self._collect_batch(wagon)
             
-            # Select retrofit track
-            retrofit_track = self.config.track_selector.select_track_with_capacity('retrofit')
+            # Select retrofit track using domain service
+            retrofit_track = self.config.track_capacity_manager.select_track('retrofit')
             
             # Transport batch
             yield from self._transport_batch(wagons, retrofit_track)
+            
+            # Publish event
+            self.config.wagon_event_publisher(
+                WagonLifecycleEvent(
+                    wagon_id=wagon.id,
+                    event_type="batch_transported",
+                    sim_time=self.config.env.now
+                )
+            )
 ```
 
 ---
@@ -349,22 +452,68 @@ class ExternalTrainsContext:
 
 ## 5.6 Cross-Cutting Concerns
 
-### Event Bus
-All contexts communicate via domain events published through the event bus.
+### Event Collection System
+
+The system uses an **EventCollector** for centralized event management and metrics collection.
+
+**Implementation:** `contexts/retrofit_workflow/application/event_collector.py`
+
+```python
+class EventCollector:
+    """Centralized event collection for simulation metrics."""
+    
+    def __init__(self, start_datetime: datetime | None = None):
+        self._wagon_events: list[WagonLifecycleEvent] = []
+        self._locomotive_events: list[LocomotiveEvent] = []
+        self._resource_events: list[ResourceEvent] = []
+        self._batch_events: list[BatchEvent] = []
+    
+    def add_wagon_event(self, event: WagonLifecycleEvent) -> None:
+        """Add wagon lifecycle event."""
+        self._wagon_events.append(event)
+    
+    def export_wagon_journey(self, output_path: Path) -> None:
+        """Export wagon events to CSV."""
+        # CSV export implementation
+```
+
+**Dual-Stream Events:**
+- **State Events**: Lifecycle state changes (arrived, classified, retrofit_started, completed, parked)
+- **Location Events**: Physical movement between tracks
+
+**Event Publisher Pattern:**
+Coordinators receive event publisher functions via configuration:
+
+```python
+self.config.wagon_event_publisher(
+    WagonLifecycleEvent(
+        wagon_id=wagon.id,
+        event_type="batch_formed",
+        sim_time=self.config.env.now
+    )
+)
+```
 
 **Key Events:**
-- `TrainArrivedEvent` - Train arrives with wagons
-- `WagonMovedEvent` - Wagon moves between tracks
-- `WagonRetrofitCompletedEvent` - Wagon completes retrofit
-- `SimulationStartedEvent` - Simulation begins
-- `SimulationEndedEvent` - Simulation completes
+- `WagonLifecycleEvent` - Wagon state changes (arrived, classified, retrofit_started, completed, parked)
+- `LocomotiveEvent` - Locomotive allocation and release
+- `ResourceEvent` - Resource utilization events
+- `BatchEvent` - Batch formation and transport events
 
 ### Metrics Collection
-The Retrofit Workflow Context collects metrics during simulation:
-- Wagon journey events (arrived, classified, retrofit started/completed, parked)
-- Locomotive movements and allocations
-- Batch formation and transport events
-- Workshop utilization statistics
+
+The EventCollector aggregates metrics during simulation:
+- **Wagon Journey**: Complete lifecycle from arrival to parking
+- **Locomotive Operations**: Allocation, release, utilization
+- **Batch Operations**: Formation, transport, dissolution
+- **Workshop Utilization**: Bay occupancy, processing times
+- **Track Occupancy**: Capacity usage over time
+
+**Export Formats:**
+- `wagon_journey.csv` - Complete wagon lifecycle events
+- `locomotive_movements.csv` - Locomotive allocation history
+- `rejected_wagons.csv` - Wagons that could not be processed
+- `summary_metrics.json` - Aggregated KPIs
 
 ### Time Conversion
 Shared utilities convert between datetime and SimPy simulation ticks:

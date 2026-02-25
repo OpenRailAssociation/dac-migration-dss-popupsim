@@ -212,6 +212,7 @@ def create_test_scenario(
     mock_scenario.retrofit_selection_strategy = Mock(value='first_available')
     mock_scenario.parking_selection_strategy = Mock(value='best_fit')
     mock_scenario.id = 'test_scenario'
+    mock_scenario.process_logger = None  # No process logging in tests
 
     return mock_scenario
 
@@ -234,125 +235,103 @@ def run_timeline_test(  # noqa: PLR0912
     # Create context
     context = RetrofitWorkshopContext(env, scenario)
 
-    # Hook into the event collector BEFORE initialization
+    # Initialize context first
+    context.initialize()
+
+    # Hook into the event collector AFTER initialization
     events = []
     parked_wagons = set()  # Track parked wagons for termination
 
-    if hasattr(context, 'event_collector') and context.event_collector is None:
-        # Event collector will be created during initialization
-        pass
+    # Hook event collector methods to capture events
+    def capture_wagon_event(event) -> None:
+        events.append((env.now, event))
+        # Track parked wagons for termination
+        if hasattr(event, 'event_type') and event.event_type == 'PARKED':
+            parked_wagons.add(event.wagon_id)
+            print(f'Wagon {event.wagon_id} parked. Total parked: {len(parked_wagons)}/{num_wagons}')
 
-    context.initialize()
+    def capture_loco_event(event) -> None:
+        events.append((env.now, event))
 
-    # Now hook into the initialized event collector
+    def capture_batch_event(event) -> None:
+        print(f'Capturing batch event: {type(event).__name__} at t={env.now}')
+        events.append((env.now, event))
+
+    # Hook the event collector that was created during initialization
     if context.event_collector:
-        original_wagon_event = context.event_collector.add_wagon_event
-        original_loco_event = context.event_collector.add_locomotive_event
-        original_batch_event = context.event_collector.add_batch_event
-
-        def capture_wagon_event(event) -> None:
-            events.append((env.now, event))
-            # Track parked wagons for termination
-            if hasattr(event, 'event_type') and event.event_type == 'PARKED':
-                parked_wagons.add(event.wagon_id)
-                print(f'Wagon {event.wagon_id} parked. Total parked: {len(parked_wagons)}/{num_wagons}')
-            original_wagon_event(event)
-
-        def capture_loco_event(event) -> None:
-            events.append((env.now, event))
-            original_loco_event(event)
-
-        def capture_batch_event(event) -> None:
-            print(f'Capturing batch event: {type(event).__name__} at t={env.now}')
-            events.append((env.now, event))
-            original_batch_event(event)
-
         context.event_collector.add_wagon_event = capture_wagon_event
         context.event_collector.add_locomotive_event = capture_loco_event
         context.event_collector.add_batch_event = capture_batch_event
 
-        # IMPORTANT: Re-wire the coordinators to use the new event publishers
+        # CRITICAL: Re-wire coordinators to use hooked event methods
+        # Coordinators got references to the original methods during initialization
         if context.collection_coordinator:
-            # CollectionCoordinator uses config pattern
-            if hasattr(context.collection_coordinator, 'config'):
-                context.collection_coordinator.config.batch_event_publisher = capture_batch_event
-                context.collection_coordinator.config.loco_event_publisher = capture_loco_event
-                context.collection_coordinator.config.wagon_event_publisher = capture_wagon_event
-            else:
-                context.collection_coordinator.batch_event_publisher = capture_batch_event
-                context.collection_coordinator.loco_event_publisher = capture_loco_event
-                context.collection_coordinator.wagon_event_publisher = capture_wagon_event
+            context.collection_coordinator.config.wagon_event_publisher = capture_wagon_event
+            context.collection_coordinator.config.loco_event_publisher = capture_loco_event
+            context.collection_coordinator.config.batch_event_publisher = capture_batch_event
 
         if context.workshop_coordinator:
-            # WorkshopCoordinator not yet refactored to config pattern
-            if hasattr(context.workshop_coordinator, 'config'):
-                context.workshop_coordinator.config.loco_event_publisher = capture_loco_event
-                context.workshop_coordinator.config.wagon_event_publisher = capture_wagon_event
-            else:
-                # Direct assignment for SOLIDWorkshopCoordinator
-                context.workshop_coordinator._event_publisher = capture_wagon_event
-                if hasattr(context.workshop_coordinator, 'loco_event_publisher'):
-                    context.workshop_coordinator.loco_event_publisher = capture_loco_event
-                if hasattr(context.workshop_coordinator, 'wagon_event_publisher'):
-                    context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+            # WorkshopCoordinator unpacks config, so set attributes directly
+            context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+            context.workshop_coordinator.loco_event_publisher = capture_loco_event
 
         if context.parking_coordinator:
-            # ParkingCoordinator not yet refactored to config pattern
-            if hasattr(context.parking_coordinator, 'config'):
-                context.parking_coordinator.config.batch_event_publisher = capture_batch_event
-                context.parking_coordinator.config.loco_event_publisher = capture_loco_event
-                context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
-            else:
-                context.parking_coordinator.batch_event_publisher = capture_batch_event
-                context.parking_coordinator.loco_event_publisher = capture_loco_event
-                context.parking_coordinator.wagon_event_publisher = capture_wagon_event
+            context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
+            context.parking_coordinator.config.loco_event_publisher = capture_loco_event
+            context.parking_coordinator.config.batch_event_publisher = capture_batch_event
 
-    # Start processes
-    context.start_processes()
-    print(
-        f'Started coordinators: collection={context.collection_coordinator is not None}, workshop={context.workshop_coordinator is not None}, parking={context.parking_coordinator is not None}'
-    )
-
-    # Add train arrival event
+    # Add wagons to queue BEFORE starting coordinator processes
+    # This ensures wagons are available when coordinators start
     from contexts.external_trains.domain.events.train_events import TrainArrivedEvent
     from contexts.external_trains.domain.value_objects.arrival_metrics import ArrivalMetrics
     from contexts.external_trains.domain.value_objects.train_id import TrainId
+    from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+    from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
+    from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
 
     train_arrival_event = TrainArrivedEvent(
         train_id=TrainId('T1'),
-        wagons=[],  # Empty for now, wagons are added separately
+        wagons=[],
         arrival_metrics=ArrivalMetrics(scheduled_time=0.0, actual_time=0.0, wagon_count=num_wagons),
         timestamp=0.0,
     )
     events.append((0.0, train_arrival_event))
 
-    # Simulate train arrival by adding wagons to collection queue
+    # Add wagons to collection track queue
     for i in range(num_wagons):
-        from contexts.retrofit_workflow.domain.entities.wagon import Wagon
-        from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
-        from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
-
         wagon = Wagon(
             id=f'W{i + 1:02d}',
             length=15.0,
             coupler_a=Coupler(CouplerType.SCREW, 'A'),
             coupler_b=Coupler(CouplerType.SCREW, 'B'),
         )
-
-        # Set wagon to classified status so it can be processed
         wagon.classify()
         wagon.move_to('collection')
-        wagon.current_track_id = 'collection'  # Set physical track ID for coordinator
+        wagon.current_track_id = 'collection'
 
-        # Add wagon arrival event manually
         arrival_event = WagonJourneyEvent(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
         events.append((0.0, arrival_event))
 
-        # Add wagon via collection coordinator
-        context.collection_coordinator.add_wagon(wagon)
-        print(f'Added wagon {wagon.id} to collection coordinator')
+        # Put wagon directly in track queue
+        if context.track_manager:
+            track = context.track_manager.get_track('collection')
+            if track:
+                track.queue.put(wagon)
+                print(f'Added wagon {wagon.id} to collection queue')
+
+    # NOW start coordinator processes - they will find wagons waiting
+    context.start_processes()
+
+    # Debug: Check if collection tracks exist
+    if context.track_selector:
+        collection_tracks = context.track_selector.get_tracks_of_type('collection')
+        print(f'Collection tracks found: {[t.track_id for t in collection_tracks]}')
+
+    print(
+        f'Started coordinators: collection={context.collection_coordinator is not None}, workshop={context.workshop_coordinator is not None}, parking={context.parking_coordinator is not None}'
+    )
 
     # Create termination process
     def termination_process():
