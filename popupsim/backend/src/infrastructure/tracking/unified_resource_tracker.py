@@ -207,7 +207,7 @@ class UnifiedResourceTracker:
         """Export all process data to JSON file."""
         completed_processes_list: list[dict[str, Any]] = []
         active_processes_list: list[dict[str, Any]] = []
-        
+
         data: dict[str, Any] = {
             'completed_processes': completed_processes_list,
             'active_processes': active_processes_list,
