@@ -426,6 +426,9 @@ def _render_wagon_gantt_dual_stream(  # noqa: C901, PLR0912, PLR0915  # pylint: 
                     orientation='h',
                     name=activity.capitalize(),
                     marker_color=color,
+                    text=['❌ REJECTED' if activity == 'rejected' else '' for _ in range(len(activity_data))],
+                    textposition='inside',
+                    textfont={'size': 12, 'color': 'white'},
                     hovertemplate=(
                         '<b>%{y}</b><br>'
                         'Activity: %{customdata[0]}<br>'

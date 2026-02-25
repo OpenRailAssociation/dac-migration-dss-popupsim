@@ -4,12 +4,11 @@ from collections.abc import Generator
 import logging
 from typing import Any
 
-import simpy
-
 from contexts.retrofit_workflow.application.config.coordinator_config import ParkingCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+import simpy
 
 logger = logging.getLogger(__name__)
 
