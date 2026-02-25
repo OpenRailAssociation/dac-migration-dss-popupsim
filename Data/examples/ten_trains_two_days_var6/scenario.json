@@ -1,0 +1,22 @@
+{
+  "id": "test_scenario_01",
+  "description": "DAC restrofit simualation with 2 locos, 3 collections tracks, 2 workshops with 4 bays, 2 retrofitted tracks",
+  "version": "1.0.0",
+  "start_date": "2025-12-01T00:00:00+00:00",
+  "end_date": "2025-12-11T00:00:00+00:00",
+  "collection_track_strategy": "first_available",
+  "retrofit_selection_strategy": "least_occupied",
+  "retrofitted_selection_strategy": "least_occupied",
+  "workshop_selection_strategy": "least_occupied",
+  "parking_selection_strategy": "least_occupied",
+  "parking_strategy": "opportunistic",
+  "references": {
+    "locomotives": "locomotive.json",
+    "process_times": "process_times.json",
+    "routes": "routes.json",
+    "trains": "train_schedule.csv",
+    "topology": "topology.json",
+    "tracks": "tracks.json",
+    "workshops": "workshops.json"
+  }
+}

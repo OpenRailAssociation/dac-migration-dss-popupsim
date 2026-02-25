@@ -19,11 +19,7 @@ This folder contains **developer-focused documentation** for implementing the Po
 10. **[Migration Path](10-mvp-migration-path.md)** - Path from MVP to full version
 11. **[Domain Processes](11-mvp-domain-processes.md)** - Process flows, state machines, business rules (TEMPLATE)
 
-### Reference Documents
-- **[Business Rules](business-rules.md)** - Consolidated business rules
-- **[Configuration Validation](configuration-validation.md)** - Pydantic validation patterns
-- **[Domain Models](domain-models.md)** - Detailed domain model reference
-- **[Examples](examples.md)** - Real example scenarios
+
 
 ## Main Architecture Documentation
 
@@ -67,7 +63,6 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 | Document | Status | Notes |
 |----------|--------|-------|
 | Core Documents (1-11) | ✅ Complete | Updated for 4 contexts |
-| Reference Documents | ✅ Complete | Updated for 4 contexts |
 | Code Examples | ✅ Actual implementation | Real code from codebase |
 
 ## Implementation Status
@@ -78,11 +73,11 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 | Retrofit Workflow Context | ✅ Implemented | `contexts/retrofit_workflow/` |
 | Railway Infrastructure Context | ✅ Implemented | `contexts/railway_infrastructure/` |
 | External Trains Context | ✅ Implemented | `contexts/external_trains/` |
-| SimPy Integration | ✅ Implemented | `contexts/shared/infrastructure/simpy_adapter.py` |
-| Resource Management | ✅ Implemented | `contexts/retrofit_workflow/infrastructure/resource_managers/` |
-| Metrics Collection | ✅ Implemented | `contexts/retrofit_workflow/infrastructure/metrics/` |
+| SimPy Integration | ✅ Implemented | `shared/infrastructure/simulation/` |
+| Resource Management | ✅ Implemented | `contexts/retrofit_workflow/infrastructure/resources/` |
+| Event Collection | ✅ Implemented | `contexts/retrofit_workflow/application/event_collector.py` |
 | 4 Process Coordinators | ✅ Implemented | `contexts/retrofit_workflow/application/coordinators/` |
-| Testing | ✅ Complete | `popupsim/backend/tests/` (374 tests passing) |
+| Testing | ✅ Complete | `popupsim/backend/tests/` (378 tests, 54% coverage) |
 
 ## Contributing
 

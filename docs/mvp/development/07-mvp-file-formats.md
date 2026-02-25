@@ -96,15 +96,10 @@ T002,120.0,W003,18.0,true
 
 ## Validation
 
-All files are validated by Pydantic models. See [configuration-validation.md](configuration-validation.md) for details.
+All files are validated by Pydantic models in the Configuration Context.
 
 ## Examples
 
-Real examples available in:
-- `Data/examples/two_trains/` - JSON format
-- `Data/examples/medium_scenario/` - JSON + CSV
-- `Data/examples/csv_scenario/` - CSV format
-
-See [examples.md](examples.md) for complete list.
+Real examples available in `Data/examples/` directory.
 
 ---

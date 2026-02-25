@@ -13,9 +13,11 @@ The scenario.json file is the entry point for your simulation. It defines metada
   "version": "1.0.0",
   "start_date": "2025-12-01T00:00:00+00:00",
   "end_date": "2025-12-20T00:00:00+00:00",
-  "track_selection_strategy": "least_occupied",
+  "collection_track_strategy": "first_available",
+  "retrofit_selection_strategy": "best_fit",
+  "retrofitted_selection_strategy": "first_available",
   "workshop_selection_strategy": "least_occupied",
-  "parking_selection_strategy": "least_occupied",
+  "parking_selection_strategy": "first_available",
   "references": {
     "locomotives": "locomotive.json",
     "process_times": "process_times.json",
@@ -52,23 +54,35 @@ The scenario.json file is the entry point for your simulation. It defines metada
 
 ### Selection Strategies
 
-These strategies determine how the simulation selects resources when multiple options are available:
+These strategies determine how the simulation selects resources when multiple options are available. Each track type and resource can have its own strategy.
 
 | Parameter | Type | Available Values | Description |
 |-----------|------|------------------|-------------|
-| `track_selection_strategy` | string | `"least_occupied"`, `"first_available"` | How to select parking tracks for wagons |
-| `workshop_selection_strategy` | string | `"least_occupied"`, `"first_available"` | How to select workshops for retrofit operations |
-| `parking_selection_strategy` | string | `"least_occupied"`, `"first_available"` | How to select parking locations for completed wagons |
+| `collection_track_strategy` | string | See strategies below | How to select collection tracks for arriving trains |
+| `retrofit_selection_strategy` | string | See strategies below | How to select retrofit tracks for wagon staging |
+| `retrofitted_selection_strategy` | string | See strategies below | How to select retrofitted tracks for completed wagons |
+| `workshop_selection_strategy` | string | See strategies below | How to select workshops for retrofit operations |
+| `parking_selection_strategy` | string | See strategies below | How to select parking tracks for final storage |
 
-**Strategy Descriptions:**
+**Available Strategies:**
 
-- **least_occupied** - Selects the resource with the most available capacity (balances load)
-- **first_available** - Selects the first resource with any available capacity (simpler, may create bottlenecks)
+| Strategy | Description | Best For |
+|----------|-------------|----------|
+| `least_occupied` | Selects resource with most available capacity | Load balancing, even utilization |
+| `most_available` | Same as `least_occupied` (alias) | Load balancing |
+| `first_available` | Selects first resource with any capacity | Simple scenarios, predictable behavior |
+| `best_fit` | Selects resource with least available capacity that fits | Space optimization, filling tracks completely |
+| `round_robin` | Cycles through resources in order | Fair distribution |
+| `shortest_queue` | Selects resource with shortest waiting queue | Minimizing wait times |
+| `random` | Random selection from available resources | Testing, load distribution |
 
-**Effect on Simulation:**
-- `least_occupied` typically results in better resource utilization and throughput
-- `first_available` may be faster to compute but can lead to uneven resource usage
-- For realistic scenarios, `least_occupied` is recommended
+**Recommended Configurations:**
+
+- **Collection tracks**: `first_available` - Simple, predictable train arrival handling
+- **Retrofit tracks**: `best_fit` - Optimizes space usage, fills tracks efficiently
+- **Retrofitted tracks**: `first_available` - Simple staging before parking
+- **Workshops**: `least_occupied` - Balances workload across workshops
+- **Parking tracks**: `first_available` - Simple final storage allocation
 
 ### References
 
@@ -99,17 +113,25 @@ To simulate a longer period:
 }
 ```
 
-### Changing Selection Strategy
+### Changing Selection Strategies
 
 To test different resource allocation approaches:
 
 ```json
 {
-  "track_selection_strategy": "first_available",
-  "workshop_selection_strategy": "least_occupied",
-  "parking_selection_strategy": "least_occupied"
+  "collection_track_strategy": "round_robin",
+  "retrofit_selection_strategy": "least_occupied",
+  "retrofitted_selection_strategy": "first_available",
+  "workshop_selection_strategy": "shortest_queue",
+  "parking_selection_strategy": "best_fit"
 }
 ```
+
+**Strategy Impact Examples:**
+
+- Using `best_fit` for retrofit tracks fills each track completely before using the next, maximizing space efficiency
+- Using `least_occupied` for workshops distributes work evenly, preventing bottlenecks
+- Using `shortest_queue` for workshops minimizes wagon waiting times
 
 ## Validation Rules
 
