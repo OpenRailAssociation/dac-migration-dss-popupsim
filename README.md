@@ -82,7 +82,7 @@ After installation, run simulations with:
 
 ```bash
 # Navigate to project directory (if not already there)
-cd dac-migration-dss-popupsim
+cd dac-migration-dss-popupsim-main
 
 # Run with baseline scenario
 uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
