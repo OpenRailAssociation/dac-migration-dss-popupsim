@@ -62,7 +62,7 @@ jobs:
         run: uv run ruff check --output-format=sarif --exit-zero -o ruff-results.sarif .
         if: always()
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
+        uses: github/codeql-action/upload-sarif@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
         with:
           sarif_file: ruff-results.sarif
         if: always()
