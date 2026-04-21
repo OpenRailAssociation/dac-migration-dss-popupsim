@@ -1,0 +1,2226 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Freight rail transport simulation tool for Digital Automatic Coupler retrofit">
+      
+      
+        <meta name="author" content="DB Cargo AG">
+      
+      
+      
+        <link rel="prev" href="../../ci-cd/">
+      
+      
+        <link rel="next" href="../01-overview/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Installation - PopUpSim Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#installation-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PopUpSim Documentation" class="md-header__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PopUpSim Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Installation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../requirements/use-cases/" class="md-tabs__link">
+          
+  
+  
+  Requirements
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../mvp/architecture/" class="md-tabs__link">
+          
+  
+  
+  MVP Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../ci-cd/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI/CD
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PopUpSim Documentation" class="md-nav__button md-logo" aria-label="PopUpSim Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PopUpSim Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenRailAssociation/dac-migration-dss-popupsim" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Requirements
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Requirements
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../requirements/250321_KonzeptPopUpSim_Entwurf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Konzept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MVP Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MVP Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/01-introduction-goals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction & Goals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/02-constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/03-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/04-solution-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/05-building-blocks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Blocks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/06-runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/07-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/08-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/09-architecture-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/10-quality-requirements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quality Requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/11-risks-technical-debt/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risks & Technical Debt
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/12-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mvp/architecture/13-bibliography/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bibliography
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ci-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-install-uv-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install uv Package Manager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Install uv Package Manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-powershell-windows-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: PowerShell (Windows - Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-using-pipx-cross-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Using pipx (Cross-Platform)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-using-pip-cross-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: Using pip (Cross-Platform)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-4-standalone-installer-linuxmacos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 4: Standalone Installer (Linux/macOS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-5-manual-download-windows-no-admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 5: Manual Download (Windows - No Admin)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-uv-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify uv Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-get-popupsim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Get PopUpSim
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Get PopUpSim">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-using-git-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Using Git (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-download-zip-no-git-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Download ZIP (No Git Required)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-install-popupsim-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Install PopUpSim Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Verify Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-start-the-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: Start the Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "uv: command not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version-too-old-or-no-python-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Python version too old" or "No Python found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-scenario-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenario configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-topology-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Topology configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-track-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Track configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-workshop-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workshop configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-process-times-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Process times configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-locomotive-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Locomotive configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-routes-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routes configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-train-schedule-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Train schedule configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-running-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running the simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-install-uv-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install uv Package Manager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Install uv Package Manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-powershell-windows-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: PowerShell (Windows - Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-using-pipx-cross-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Using pipx (Cross-Platform)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-using-pip-cross-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: Using pip (Cross-Platform)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-4-standalone-installer-linuxmacos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 4: Standalone Installer (Linux/macOS)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-5-manual-download-windows-no-admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 5: Manual Download (Windows - No Admin)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-uv-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify uv Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-get-popupsim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Get PopUpSim
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Get PopUpSim">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-using-git-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Using Git (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-download-zip-no-git-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Download ZIP (No Git Required)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-install-popupsim-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Install PopUpSim Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Verify Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-start-the-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: Start the Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uv-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "uv: command not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version-too-old-or-no-python-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Python version too old" or "No Python found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="installation-guide">Installation Guide<a class="headerlink" href="#installation-guide" title="Permanent link">&para;</a></h1>
+<p>This guide covers different ways to install PopUpSim and its dependencies, including scenarios where you don't have administrative rights.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p><strong>Good news:</strong> You only need to install <strong>uv</strong> - it will automatically manage Python for you!</p>
+<p>uv is a fast Python package manager that can:
+- Install and manage Python versions automatically
+- Create isolated virtual environments
+- Install project dependencies
+- Run Python scripts</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>uv package manager</strong> - Installation methods covered below</li>
+<li><strong>Python 3.13+</strong> - uv will install this automatically if needed</li>
+</ul>
+<h2 id="step-1-install-uv-package-manager">Step 1: Install uv Package Manager<a class="headerlink" href="#step-1-install-uv-package-manager" title="Permanent link">&para;</a></h2>
+<p>uv is a fast Python package manager. Choose the installation method that works for your system.</p>
+<h3 id="option-1-powershell-windows-recommended">Option 1: PowerShell (Windows - Recommended)<a class="headerlink" href="#option-1-powershell-windows-recommended" title="Permanent link">&para;</a></h3>
+<p>If donwload of uv fails it selbst to deactivate your VPN connection (if you use one).</p>
+<p>Open the commandline or a powershel:
+<code>powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code>
+to install uv. If you run in administrative mode the installation of uv is done
+system-wide. Otherwise uv will be installed in your user directory (<code>%USERPROFILE%\.cargo\bin\</code>).</p>
+<p><strong>Add to PATH (if needed):</strong></p>
+<p>In most cases this is not necessary since uv will automatically adjust the PATH variable.</p>
+<p>If <code>uv</code> command is not found after installation:</p>
+<ol>
+<li>Open System Properties → Environment Variables</li>
+<li>Under "User variables", find or create <code>Path</code></li>
+<li>Add: <code>%USERPROFILE%\.cargo\bin</code></li>
+<li>Restart your terminal</li>
+</ol>
+<h3 id="option-2-using-pipx-cross-platform">Option 2: Using pipx (Cross-Platform)<a class="headerlink" href="#option-2-using-pipx-cross-platform" title="Permanent link">&para;</a></h3>
+<p><strong>Recommended for users without admin rights.</strong></p>
+<p>First, install pipx if you don't have it:</p>
+<p><code>bash
+python -m pip install --user pipx
+python -m pipx ensurepath</code></p>
+<p>Then install uv:</p>
+<p><code>bash
+pipx install uv</code></p>
+<p><strong>Advantages:</strong>
+- No admin rights required
+- Installs in user directory
+- Isolated from system Python
+- Works on Windows, Linux, and macOS</p>
+<h3 id="option-3-using-pip-cross-platform">Option 3: Using pip (Cross-Platform)<a class="headerlink" href="#option-3-using-pip-cross-platform" title="Permanent link">&para;</a></h3>
+<p><strong>Simple but less isolated:</strong></p>
+<p><code>bash
+pip install --user uv</code></p>
+<p><strong>Note:</strong> This installs uv in your user Python packages directory.</p>
+<h3 id="option-4-standalone-installer-linuxmacos">Option 4: Standalone Installer (Linux/macOS)<a class="headerlink" href="#option-4-standalone-installer-linuxmacos" title="Permanent link">&para;</a></h3>
+<p><code>bash
+curl -LsSf https://astral.sh/uv/install.sh | sh</code></p>
+<p>This installs uv in <code>~/.cargo/bin/</code>.</p>
+<p><strong>Add to PATH (if needed):</strong></p>
+<p>Add to your <code>~/.bashrc</code> or <code>~/.zshrc</code>:</p>
+<p><code>bash
+export PATH="$HOME/.cargo/bin:$PATH"</code></p>
+<p>Then reload:</p>
+<p><code>bash
+source ~/.bashrc  # or source ~/.zshrc</code></p>
+<h3 id="option-5-manual-download-windows-no-admin">Option 5: Manual Download (Windows - No Admin)<a class="headerlink" href="#option-5-manual-download-windows-no-admin" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Download uv from <a href="https://github.com/astral-sh/uv/releases">GitHub releases</a></li>
+<li>Extract to a folder in your user directory (e.g., <code>C:\Users\YourName\uv\</code>)</li>
+<li>Add that folder to your user PATH:</li>
+<li>Search for "Environment Variables" in Windows</li>
+<li>Edit "Path" under "User variables"</li>
+<li>Add your uv folder path</li>
+<li>Restart terminal</li>
+</ol>
+<h3 id="verify-uv-installation">Verify uv Installation<a class="headerlink" href="#verify-uv-installation" title="Permanent link">&para;</a></h3>
+<p>After installation, verify uv is working:</p>
+<p><code>bash
+uv --version</code></p>
+<p>You should see something like <code>uv 0.x.x</code>.</p>
+<h2 id="step-2-get-popupsim">Step 2: Get PopUpSim<a class="headerlink" href="#step-2-get-popupsim" title="Permanent link">&para;</a></h2>
+<h3 id="option-a-using-git-recommended">Option A: Using Git (Recommended)<a class="headerlink" href="#option-a-using-git-recommended" title="Permanent link">&para;</a></h3>
+<p>If you have git installed:</p>
+<p><code>bash
+git clone https://github.com/open-rail-association/dac-migration-dss-popupsim.git
+cd dac-migration-dss-popupsim</code></p>
+<h3 id="option-b-download-zip-no-git-required">Option B: Download ZIP (No Git Required)<a class="headerlink" href="#option-b-download-zip-no-git-required" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Visit: https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/archive/refs/heads/main.zip</li>
+<li>Extract the ZIP file to your desired location</li>
+<li>Open terminal and navigate to the extracted folder:</li>
+</ol>
+<p><code>bash
+cd dac-migration-dss-popupsim-main</code></p>
+<h2 id="step-3-install-popupsim-dependencies">Step 3: Install PopUpSim Dependencies<a class="headerlink" href="#step-3-install-popupsim-dependencies" title="Permanent link">&para;</a></h2>
+<p>Navigate to the PopUpSim directory and run:</p>
+<p><code>bash
+uv sync</code></p>
+<p>This command:
+- <strong>Automatically installs Python 3.13+ if not present</strong> (no manual Python installation needed!)
+- Creates a virtual environment
+- Installs all required dependencies
+- Sets up the project for use</p>
+<p><strong>Note:</strong> This does NOT require administrative rights - everything is installed in the project directory.</p>
+<h2 id="step-4-verify-installation">Step 4: Verify Installation<a class="headerlink" href="#step-4-verify-installation" title="Permanent link">&para;</a></h2>
+<p>Run a test simulation:</p>
+<p><code>bash
+uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/test</code></p>
+<p>If the simulation runs successfully, you're all set!</p>
+<h3 id="optional-start-the-dashboard">Optional: Start the Dashboard<a class="headerlink" href="#optional-start-the-dashboard" title="Permanent link">&para;</a></h3>
+<p>View results in the web-based dashboard (run in a separate terminal):</p>
+<p><strong>Windows:</strong>
+<code>bash
+run_dashboard.bat</code></p>
+<p><strong>Linux/macOS:</strong>
+<code>bash
+uv run streamlit run popupsim/frontend/streamlit_dashboard.py</code></p>
+<p>On the first run it will ask you to enter your E-Mail. Leave empty and just press return/enter.</p>
+<p>A browser window (of your default browser) will open and pointing at the adress:
+ http://localhost:8501</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="uv-command-not-found">"uv: command not found"<a class="headerlink" href="#uv-command-not-found" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> uv is not in your PATH.</p>
+<p><strong>Solution:</strong></p>
+<p><strong>Windows:</strong>
+1. Find where uv was installed (usually <code>%USERPROFILE%\.cargo\bin\</code>)
+2. Add to user PATH environment variable
+3. Restart terminal</p>
+<p><strong>Linux/macOS:</strong>
+<code>bash
+export PATH="$HOME/.cargo/bin:$PATH"
+source ~/.bashrc  # or ~/.zshrc</code></p>
+<h3 id="python-version-too-old-or-no-python-found">"Python version too old" or "No Python found"<a class="headerlink" href="#python-version-too-old-or-no-python-found" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> uv needs to install Python but can't.</p>
+<p><strong>Solution:</strong></p>
+<p>uv will automatically download and install Python 3.13+ when you run <code>uv sync</code>. If this fails:</p>
+<p>```bash</p>
+<h1 id="explicitly-tell-uv-to-install-python-313">Explicitly tell uv to install Python 3.13<a class="headerlink" href="#explicitly-tell-uv-to-install-python-313" title="Permanent link">&para;</a></h1>
+<p>uv python install 3.13</p>
+<h1 id="then-run-sync">Then run sync<a class="headerlink" href="#then-run-sync" title="Permanent link">&para;</a></h1>
+<p>uv sync
+```</p>
+<p><strong>Alternative:</strong> If you already have Python installed but it's too old:
+```bash</p>
+<h1 id="use-uvs-managed-python">Use uv's managed Python<a class="headerlink" href="#use-uvs-managed-python" title="Permanent link">&para;</a></h1>
+<p>uv sync --python 3.13
+```</p>
+<h3 id="permission-denied-during-installation">"Permission denied" during installation<a class="headerlink" href="#permission-denied-during-installation" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> Trying to install in system directories without admin rights.</p>
+<p><strong>Solution:</strong>
+- Use <code>--user</code> flag with pip: <code>pip install --user uv</code>
+- Or use pipx (recommended): <code>pipx install uv</code>
+- Or use PowerShell method (installs in user directory)</p>
+<h3 id="ssl-certificate-error">"SSL Certificate Error"<a class="headerlink" href="#ssl-certificate-error" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> Corporate firewall or proxy blocking downloads.</p>
+<p><strong>Solution:</strong>
+1. Contact your IT department for proxy settings
+2. Or download files manually and install offline
+3. Or use <code>--trusted-host</code> flag (not recommended for security)</p>
+<h3 id="uv-sync-fails-with-no-python-interpreter-found">uv sync fails with "No Python interpreter found"<a class="headerlink" href="#uv-sync-fails-with-no-python-interpreter-found" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> uv can't find or install Python.</p>
+<p><strong>Solution:</strong></p>
+<p>```bash</p>
+<h1 id="let-uv-install-python-313-automatically">Let uv install Python 3.13 automatically<a class="headerlink" href="#let-uv-install-python-313-automatically" title="Permanent link">&para;</a></h1>
+<p>uv python install 3.13</p>
+<h1 id="then-sync">Then sync<a class="headerlink" href="#then-sync" title="Permanent link">&para;</a></h1>
+<p>uv sync
+```</p>
+<p><strong>If you have Python installed manually:</strong>
+```bash</p>
+<h1 id="point-uv-to-your-python-installation">Point uv to your Python installation<a class="headerlink" href="#point-uv-to-your-python-installation" title="Permanent link">&para;</a></h1>
+<p>uv sync --python python3.13</p>
+<h1 id="or-specify-full-path">Or specify full path<a class="headerlink" href="#or-specify-full-path" title="Permanent link">&para;</a></h1>
+<p>uv sync --python C:\Users\YourName\AppData\Local\Programs\Python\Python313\python.exe
+```</p>
+<h3 id="virtual-environment-issues">Virtual environment issues<a class="headerlink" href="#virtual-environment-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Problem:</strong> Conflicts with existing virtual environments.</p>
+<p><strong>Solution:</strong>
+1. Delete <code>.venv</code> folder in project directory
+2. Run <code>uv sync</code> again</p>
+<h2 id="installation-for-different-scenarios">Installation for Different Scenarios<a class="headerlink" href="#installation-for-different-scenarios" title="Permanent link">&para;</a></h2>
+<h3 id="scenario-1-corporate-windows-pc-no-admin-rights">Scenario 1: Corporate Windows PC (No Admin Rights)<a class="headerlink" href="#scenario-1-corporate-windows-pc-no-admin-rights" title="Permanent link">&para;</a></h3>
+<p>```powershell</p>
+<h1 id="install-uv-using-powershell-user-install">Install uv using PowerShell (user install)<a class="headerlink" href="#install-uv-using-powershell-user-install" title="Permanent link">&para;</a></h1>
+<p>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</p>
+<h1 id="add-to-path-if-needed">Add to PATH if needed<a class="headerlink" href="#add-to-path-if-needed" title="Permanent link">&para;</a></h1>
+<p>$env:Path += ";$env:USERPROFILE.cargo\bin"</p>
+<h1 id="download-popupsim-zip">Download PopUpSim ZIP<a class="headerlink" href="#download-popupsim-zip" title="Permanent link">&para;</a></h1>
+<h1 id="extract-to-cusersyournamedocumentspopupsim">Extract to C:\Users\YourName\Documents\PopUpSim<a class="headerlink" href="#extract-to-cusersyournamedocumentspopupsim" title="Permanent link">&para;</a></h1>
+<h1 id="navigate-and-install">Navigate and install<a class="headerlink" href="#navigate-and-install" title="Permanent link">&para;</a></h1>
+<p>cd C:\Users\YourName\Documents\PopUpSim
+uv sync</p>
+<h1 id="run-test">Run test<a class="headerlink" href="#run-test" title="Permanent link">&para;</a></h1>
+<p>uv run python popupsim/backend/src/main.py --scenario data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
+```</p>
+<h3 id="scenario-2-linux-server-no-root-access">Scenario 2: Linux Server (No Root Access)<a class="headerlink" href="#scenario-2-linux-server-no-root-access" title="Permanent link">&para;</a></h3>
+<p>```bash</p>
+<h1 id="install-uv-in-user-directory">Install uv in user directory<a class="headerlink" href="#install-uv-in-user-directory" title="Permanent link">&para;</a></h1>
+<p>curl -LsSf https://astral.sh/uv/install.sh | sh</p>
+<h1 id="add-to-path">Add to PATH<a class="headerlink" href="#add-to-path" title="Permanent link">&para;</a></h1>
+<p>echo 'export PATH="$HOME/.cargo/bin:$PATH"' &gt;&gt; ~/.bashrc
+source ~/.bashrc</p>
+<h1 id="clone-popupsim">Clone PopUpSim<a class="headerlink" href="#clone-popupsim" title="Permanent link">&para;</a></h1>
+<p>git clone https://github.com/open-rail-association/dac-migration-dss-popupsim.git
+cd dac-migration-dss-popupsim</p>
+<h1 id="install-dependencies">Install dependencies<a class="headerlink" href="#install-dependencies" title="Permanent link">&para;</a></h1>
+<p>uv sync</p>
+<h1 id="run-test_1">Run test<a class="headerlink" href="#run-test_1" title="Permanent link">&para;</a></h1>
+<p>uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
+```</p>
+<h3 id="scenario-3-shared-computer-multiple-users">Scenario 3: Shared Computer (Multiple Users)<a class="headerlink" href="#scenario-3-shared-computer-multiple-users" title="Permanent link">&para;</a></h3>
+<p>Each user should:</p>
+<p>```bash</p>
+<h1 id="install-uv-in-their-own-user-directory">Install uv in their own user directory<a class="headerlink" href="#install-uv-in-their-own-user-directory" title="Permanent link">&para;</a></h1>
+<p>pipx install uv</p>
+<h1 id="clone-popupsim-to-their-home-directory">Clone PopUpSim to their home directory<a class="headerlink" href="#clone-popupsim-to-their-home-directory" title="Permanent link">&para;</a></h1>
+<p>cd ~
+git clone https://github.com/open-rail-association/dac-migration-dss-popupsim.git
+cd dac-migration-dss-popupsim</p>
+<h1 id="install-dependencies-creates-venv-in-project-folder">Install dependencies (creates .venv in project folder)<a class="headerlink" href="#install-dependencies-creates-venv-in-project-folder" title="Permanent link">&para;</a></h1>
+<p>uv sync</p>
+<h1 id="run-simulations">Run simulations<a class="headerlink" href="#run-simulations" title="Permanent link">&para;</a></h1>
+<p>uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
+```</p>
+<h3 id="scenario-4-air-gapped-system-no-internet">Scenario 4: Air-Gapped System (No Internet)<a class="headerlink" href="#scenario-4-air-gapped-system-no-internet" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>On a connected computer:</strong></li>
+<li>Download uv installer for your OS from <a href="https://github.com/astral-sh/uv/releases">GitHub releases</a></li>
+<li>Download PopUpSim ZIP from GitHub</li>
+<li>
+<p>Download Python 3.13+ standalone installer from <a href="https://www.python.org/downloads/">python.org</a> (optional - uv can use it)</p>
+</li>
+<li>
+<p><strong>Transfer files to air-gapped system</strong></p>
+</li>
+<li>
+<p><strong>On air-gapped system:</strong></p>
+</li>
+<li>Install uv manually</li>
+<li>Extract PopUpSim</li>
+<li>If you have Python installer, install it first</li>
+<li>Run <code>uv sync</code> (uv will use installed Python or you may need to cache dependencies)</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>After successful installation:</p>
+<ol>
+<li><strong>Run example scenarios</strong> - See <a href="../../">Getting Started</a> for commands</li>
+<li><strong>Follow the tutorial</strong> - Start with <a href="../">Tutorial Overview</a></li>
+<li><strong>Create your own scenarios</strong> - Modify example configurations</li>
+</ol>
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<p>If you encounter issues:</p>
+<ol>
+<li>Check <a href="https://github.com/open-rail-association/dac-migration-dss-popupsim/issues">GitHub Issues</a></li>
+<li>Review <a href="https://docs.astral.sh/uv/">uv documentation</a></li>
+<li>Ask in project discussions</li>
+</ol>
+<h2 id="summary-of-installation-methods">Summary of Installation Methods<a class="headerlink" href="#summary-of-installation-methods" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Admin Required</th>
+<th>Best For</th>
+<th>Difficulty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PowerShell (Windows)</td>
+<td>No</td>
+<td>Windows users</td>
+<td>Easy</td>
+</tr>
+<tr>
+<td>pipx</td>
+<td>No</td>
+<td>All platforms, no admin</td>
+<td>Easy</td>
+</tr>
+<tr>
+<td>pip --user</td>
+<td>No</td>
+<td>Simple install</td>
+<td>Easy</td>
+</tr>
+<tr>
+<td>Standalone installer</td>
+<td>No</td>
+<td>Linux/macOS</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Manual download</td>
+<td>No</td>
+<td>Restricted environments</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommendation:</strong> Use pipx for maximum compatibility and isolation, especially if you don't have admin rights.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "search.suggest", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
