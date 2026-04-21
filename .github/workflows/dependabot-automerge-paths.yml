@@ -1,17 +1,22 @@
-name: "Automerge Dependabot PRs"
+name: "Dependabot Auto-merge"
 
-on:
+on: 
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, reopened, synchronize]
+  # Allows you to manually trigger this from the "Actions" tab if needed
+  workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  automerge:
+  dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    # ✅ FIX: Check if the PR *Owner* is Dependabot, not the person running the workflow.
+    # This allows YOU to click "Re-run" on a Dependabot PR and have it succeed.
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -19,8 +24,8 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Enable auto-merge for Dependabot PRs
-        # Only merge if it is a PATCH update
+      - name: Enable auto-merge for Patch releases
+        # Only merge if it is a Patch release
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
