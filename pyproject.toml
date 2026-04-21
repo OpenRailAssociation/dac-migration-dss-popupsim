@@ -19,16 +19,16 @@ classifiers = [
 ]
 dependencies = [
     "babel>=2.17.0",
-    "matplotlib>=3.10.7",
-    "pandas>=2.3.3",
-    "pydantic>=2.12.3",
+    "pandas>=3.0.2",
+    "plotly>=6.7.0",
+    "pydantic>=2.13.3",
     "simpy>=4.1.1",
     "streamlit>=1.52.1",
     "typer>=0.20.0",
 ]
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=82.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -182,7 +182,7 @@ plugins = ['pydantic.mypy']
 
 # Third-party libraries without stubs
 [[tool.mypy.overrides]]
-module = ["typer.*", "simpy.*", "matplotlib.*", "pytest.*", "pytest_mock.*", "numpy.*"]
+module = ["typer.*", "simpy.*", "pytest.*", "pytest_mock.*", "numpy.*"]
 ignore_missing_imports = true
 disallow_untyped_defs = false
 
@@ -270,19 +270,22 @@ show_missing = true
 
 [dependency-groups]
 dev = [
-    "mypy>=1.18.2",
+    "mypy>=1.20.1",
     "pre-commit>=4.3.0",
     "pre-commit-hooks>=6.0.0",
     "pylint>=3.3.8",
     "pylint-pydantic>=0.3.2",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
     "pytest-mock>=3.15.1",
-    "ruff>=0.14.1",
+    "ruff>=0.15.11",
     "pandas-stubs>=2.3.2.240528",
 ]
 docs = [
     "mkdocs>=1.6.0",
     "mkdocs-material>=9.5.0",
     "mkdocs-mermaid2-plugin>=1.1.0",
+    "mkdocs-to-pdf>=0.10.1",
+    "pango>=0.0.1",
+    "weasyprint>=62.3",
 ]

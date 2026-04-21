@@ -2,208 +2,133 @@
 
 ## Overview
 
-This document describes the core domain processes and workflows in the MVP simulation.
+This document describes the main process flows in the Retrofit Workflow Context.
 
-**Note:** See [Domain Model](03-mvp-domain-model.md) for entity definitions.
+## Wagon Flow Process
 
----
+```
+Train Arrival
+    ↓
+Arrival Coordinator (classify wagons)
+    ↓
+Collection Coordinator (form batches)
+    ↓
+Workshop Coordinator (retrofit)
+    ↓
+Parking Coordinator (to parking)
+    ↓
+Complete
+```
 
-## 11.1 Wagon Lifecycle
+## Detailed Process Flows
+
+### 1. Train Arrival Process
+
+**Coordinator:** ArrivalCoordinator
+
+**Steps:**
+1. Receive TrainArrivedEvent from External Trains
+2. Classify wagons (needs retrofit vs. doesn't need)
+3. Select collection track using TrackSelector
+4. Place wagons on collection track
+5. Add wagons to collection queue
+
+**Domain Services Used:**
+- WagonSelector (classify)
+- WagonStateManager (update status)
+
+### 2. Collection Process
+
+**Coordinator:** CollectionCoordinator
+
+**Steps:**
+1. Wait for wagons in collection queue
+2. Collect batch (up to batch_size)
+3. Allocate locomotive
+4. Form rake (couple wagons)
+5. Form train (locomotive + rake)
+6. Transport to retrofit track
+7. Decouple wagons
+8. Release locomotive
+
+**Domain Services Used:**
+- BatchFormationService
+- RakeFormationService
+- TrainFormationService
+- RouteService
+
+### 3. Workshop Process
+
+**Coordinator:** WorkshopCoordinator
+
+**Steps:**
+1. Wait for batch on retrofit track
+2. Select workshop with capacity
+3. Allocate locomotive
+4. Transport batch to workshop track
+5. Decouple wagons sequentially
+6. Assign each wagon to retrofit station
+7. Execute retrofit (parallel)
+8. Couple completed wagons
+9. Transport to retrofitted track
+10. Release locomotive
+
+**Domain Services Used:**
+- WorkshopSchedulingService
+- CouplingService
+- RouteService
+
+### 4. Parking Process
+
+**Coordinator:** ParkingCoordinator
+
+**Steps:**
+1. Wait for wagons on retrofitted track
+2. Form batch
+3. Allocate locomotive
+4. Transport to parking track
+5. Place wagons
+6. Release locomotive
+
+**Domain Services Used:**
+- BatchFormationService
+- RouteService
+
+## State Machines
 
 ### Wagon State Machine
 
-```mermaid
-stateDiagram-v2
-    [*] --> Arriving: Train arrives
-    Arriving --> Waiting: TODO: Add condition
-    Waiting --> Retrofitting: TODO: Add condition
-    Retrofitting --> Completed: TODO: Add condition
-    Completed --> [*]
-    
-    note right of Arriving
-        TODO: Describe state
-    end note
-    
-    note right of Waiting
-        TODO: Describe state
-    end note
-    
-    note right of Retrofitting
-        TODO: Describe state
-    end note
+```
+ARRIVING → SELECTING → SELECTED → MOVING → 
+ON_COLLECTION_TRACK → MOVING → ON_RETROFIT_TRACK → 
+MOVING → RETROFITTING → RETROFITTED → MOVING → 
+ON_RETROFITTED_TRACK → MOVING → PARKING
 ```
 
-### State Descriptions
+### Locomotive State Machine
 
-| State | Description | Entry Condition | Exit Condition |
-|-------|-------------|-----------------|----------------|
-| **Arriving** | TODO | TODO | TODO |
-| **Waiting** | TODO | TODO | TODO |
-| **Retrofitting** | TODO | TODO | TODO |
-| **Completed** | TODO | TODO | TODO |
-
----
-
-## 11.2 Wagon Retrofit Process
-
-### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Wagon
-    participant TrackAllocator
-    participant WorkshopTrack
-    participant SimPyEnv
-    
-    Note over Wagon: TODO: Add sequence steps
-    
-    Wagon->>TrackAllocator: TODO: request_track()
-    TrackAllocator->>WorkshopTrack: TODO: check_availability()
-    WorkshopTrack-->>TrackAllocator: TODO: available
-    TrackAllocator-->>Wagon: TODO: track_assigned
-    
-    Wagon->>WorkshopTrack: TODO: start_retrofit()
-    WorkshopTrack->>SimPyEnv: TODO: timeout(retrofit_time)
-    SimPyEnv-->>WorkshopTrack: TODO: time_elapsed
-    WorkshopTrack-->>Wagon: TODO: retrofit_complete
+```
+AVAILABLE → ALLOCATED → IN_USE → RETURNING → AVAILABLE
 ```
 
-### Process Steps
+## Timing
 
-1. **TODO: Step 1**
-   - Input: TODO
-   - Action: TODO
-   - Output: TODO
+All timing parameters defined in ProcessTimes:
+- coupling_time
+- decoupling_time
+- retrofit_time_per_wagon
+- train_preparation_time
 
-2. **TODO: Step 2**
-   - Input: TODO
-   - Action: TODO
-   - Output: TODO
+## Resource Constraints
 
-3. **TODO: Step 3**
-   - Input: TODO
-   - Action: TODO
-   - Output: TODO
+- **Locomotives:** Limited pool, allocated on demand
+- **Tracks:** Capacity based on length and fill factor
+- **Workshops:** Limited retrofit stations
 
----
+## Error Handling
 
-## 11.3 Train Arrival Process
-
-### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Schedule
-    participant Train
-    participant Wagon
-    participant Workshop
-    
-    Note over Schedule,Workshop: TODO: Add train arrival flow
-    
-    Schedule->>Train: TODO: trigger_arrival()
-    Train->>Wagon: TODO: uncouple_wagons()
-    Wagon->>Workshop: TODO: enter_workshop()
-```
-
-### Process Steps
-
-TODO: Describe train arrival process
+- **Insufficient capacity:** Wagon waits in queue
+- **No locomotive available:** Process blocks until available
+- **Invalid route:** Simulation error
 
 ---
-
-## 11.4 Track Allocation Process
-
-### Decision Flow
-
-```mermaid
-graph TD
-    Start[Wagon needs retrofit] --> CheckTracks{Available tracks?}
-    CheckTracks -->|Yes| SelectTrack[TODO: Select track logic]
-    CheckTracks -->|No| Queue[TODO: Queue wagon]
-    
-    SelectTrack --> Allocate[TODO: Allocate wagon to track]
-    Queue --> Wait[TODO: Wait for availability]
-    Wait --> CheckTracks
-    
-    Allocate --> End[Track allocated]
-```
-
-### Allocation Rules
-
-TODO: Describe track allocation rules:
-- Priority rules
-- Capacity checks
-- Selection criteria
-
----
-
-## 11.5 Workshop Capacity Management
-
-### Capacity Check Process
-
-TODO: Describe how workshop capacity is managed
-
-### Overflow Handling
-
-TODO: Describe what happens when workshop is at capacity
-
----
-
-## 11.6 Error Scenarios
-
-### Scenario 1: Workshop at Capacity
-
-**Trigger:** TODO
-
-**Process:**
-1. TODO: Step 1
-2. TODO: Step 2
-3. TODO: Step 3
-
-**Recovery:** TODO
-
-### Scenario 2: Invalid Track Assignment
-
-**Trigger:** TODO
-
-**Process:**
-1. TODO: Step 1
-2. TODO: Step 2
-
-**Recovery:** TODO
-
-### Scenario 3: Retrofit Timeout
-
-**Trigger:** TODO
-
-**Process:**
-1. TODO: Step 1
-2. TODO: Step 2
-
-**Recovery:** TODO
-
----
-
-## 11.7 Performance Complexity
-
-### Algorithmic Complexity
-
-| Operation | Complexity | Notes |
-|-----------|------------|-------|
-| **Configuration Loading** | O(n) | n = number of tracks |
-| **Simulation Execution** | O(w × t) | w = wagons, t = time steps |
-| **Track Allocation** | O(k) | k = number of tracks |
-| **KPI Calculation** | O(w) | w = wagons processed |
-
-### Scalability Considerations
-
-TODO: Describe scalability limits and bottlenecks
-
----
-
-## See Also
-
-- **[Business Rules](business-rules.md)** - Consolidated business rules (FOR REVIEW)
-- **[Examples](examples.md)** - Synthetic workshop scenarios and test data
-- **[Domain Model](03-mvp-domain-model.md)** - Entity definitions
-

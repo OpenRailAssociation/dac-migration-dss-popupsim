@@ -9,14 +9,14 @@
 | **ADR-001** | [Hexagonal Pipeline Architecture](decisions/ADR-001-hexagonal-pipeline-architecture.md) | ✅ Accepted | Clean separation of concerns |
 | **ADR-002** | [4-Layer Validation Framework](decisions/ADR-002-4-layer-validation-framework.md) | ✅ Accepted | Comprehensive input validation |
 | **ADR-003** | [Field Name Standardization](decisions/ADR-003-field-name-standardization.md) | ✅ Accepted | Consistent naming conventions |
-| **ADR-004** | [3 Bounded Context Architecture](decisions/ADR-004-3-bounded-context-architecture.md) | ✅ Accepted | Domain separation |
+| **ADR-004** | [4 Bounded Context Architecture](decisions/ADR-004-3-bounded-context-architecture.md) | ✅ Accepted | Domain separation (updated to 4 contexts) |
 | **ADR-005** | [Type Hints Mandatory](decisions/ADR-005-type-hints-mandatory.md) | ✅ Accepted | Code quality and safety |
 | **ADR-006** | [SimPy for Discrete Event Simulation](decisions/ADR-006-simpy-discrete-event-simulation.md) | ✅ Accepted | Proven simulation framework |
 | **ADR-007** | [File-Based Data Storage](decisions/ADR-007-file-based-data-storage.md) | ✅ Accepted | Simple deployment |
 | **ADR-008** | [Pydantic for Data Validation](decisions/ADR-008-pydantic-data-validation.md) | ✅ Accepted | Type safety and validation |
 | **ADR-009** | [Matplotlib for Visualization](decisions/ADR-009-matplotlib-visualization.md) | ✅ Accepted | Simple offline charts |
 | **ADR-010** | [Layered Architecture](decisions/ADR-010-layered-architecture.md) | ✅ Accepted | Rapid development |
-| **ADR-011** | [3 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md) | ✅ Accepted | Minimal viable domain decomposition |
+| **ADR-011** | [4 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md) | ✅ Accepted | Minimal viable domain decomposition (updated to 4 contexts) |
 | **ADR-012** | [Direct Method Calls](decisions/ADR-012-direct-method-calls.md) | ✅ Accepted | Simple integration |
 | **ADR-013** | [Hexagonal Architecture for Data Sources](decisions/ADR-013-hexagonal-data-sources.md) | ✅ Accepted | Multi-format input support |
 | **ADR-014** | [Wagon Tracking and Queue Management](decisions/ADR-014-wagon-tracking-queue-management.md) | ✅ Implemented | Resolved wagon tracking issues |
@@ -31,9 +31,9 @@ All MVP architectural decisions are documented as separate ADR files in the [dec
 
 ### Architecture Pattern Decisions
 - **[ADR-001: Hexagonal Pipeline Architecture](decisions/ADR-001-hexagonal-pipeline-architecture.md)** - Clean separation of concerns
-- **[ADR-004: 3 Bounded Context Architecture](decisions/ADR-004-3-bounded-context-architecture.md)** - Domain separation
+- **[ADR-004: 4 Bounded Context Architecture](decisions/ADR-004-3-bounded-context-architecture.md)** - Domain separation (Configuration, Retrofit Workflow, Railway Infrastructure, External Trains)
 - **[ADR-010: Layered Architecture](decisions/ADR-010-layered-architecture.md)** - Simple architecture for rapid development
-- **[ADR-011: 3 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md)** - Minimal viable domain decomposition
+- **[ADR-011: 4 Bounded Contexts](decisions/ADR-011-3-bounded-contexts.md)** - Minimal viable domain decomposition
 - **[ADR-012: Direct Method Calls](decisions/ADR-012-direct-method-calls.md)** - Simple integration between contexts
 
 ### Technology Decisions
@@ -133,10 +133,10 @@ scenario = csv_adapter.load_scenario('csv_directory')
 | Aspect | MVP (Current) | Transition (Prepared) | Full Version (Future) |
 |--------|---------------|----------------------|----------------------|
 | **Architecture** | Layered within contexts | Interface preparation | Hexagonal architecture |
-| **Integration** | Direct method calls | Repository pattern | Event-driven |
+| **Integration** | Direct method calls + Event bus | Repository pattern | Event-driven |
 | **Storage** | File-based (JSON/CSV) | Repository abstraction | Database + Event Store |
 | **Visualization** | Matplotlib (PNG) | JSON data export | Web frontend (interactive) |
-| **Contexts** | 3 bounded contexts | Interface boundaries | Multiple contexts (TBD) |
+| **Contexts** | 4 bounded contexts | Interface boundaries | Multiple contexts (TBD) |
 | **Deployment** | Desktop application | Containerization prep | Cloud-ready web app |
 
 **Migration Strategy:**

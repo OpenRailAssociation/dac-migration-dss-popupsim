@@ -50,7 +50,7 @@ def create_layered_scenario(
         Mock(id='collection', type='collection', length=100.0, fillfactor=0.8),
         Mock(id='retrofit', type='retrofit', length=retrofit_track_length, fillfactor=0.9),
         Mock(id='retrofitted', type='retrofitted', length=120.0, fillfactor=0.8),
-        Mock(id='parking_area', type='parking_area', length=200.0, fillfactor=0.7),
+        Mock(id='parking_area', type='parking', length=200.0, fillfactor=0.7),
         Mock(id='loco_parking', type='loco_parking', length=50.0, fillfactor=0.5),
     ]
     for i in range(num_workshops):
@@ -223,11 +223,33 @@ def create_layered_scenario(
             return timedelta(minutes=coupling_time * 0.5)
         return timedelta(minutes=coupling_time)
 
+    def get_coupling_ticks(coupler_type: str) -> float:
+        """Get coupling time in SimPy ticks."""
+        from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+        return timedelta_to_sim_ticks(get_coupling_time(coupler_type))
+
+    def get_decoupling_ticks(coupler_type: str) -> float:
+        """Get decoupling time in SimPy ticks."""
+        from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+        return timedelta_to_sim_ticks(get_decoupling_time(coupler_type))
+
     process_times_mock.get_coupling_time = get_coupling_time
     process_times_mock.get_decoupling_time = get_decoupling_time
+    process_times_mock.get_coupling_ticks = get_coupling_ticks
+    process_times_mock.get_decoupling_ticks = get_decoupling_ticks
     mock_scenario.process_times = process_times_mock
 
     mock_scenario.loco_priority_strategy = Mock(value='batch_completion')
+    mock_scenario.collection_track_strategy = Mock(value='round_robin')
+    mock_scenario.retrofit_selection_strategy = Mock(value='least_busy')
+    mock_scenario.parking_selection_strategy = Mock(value='least_busy')
+    mock_scenario.parking_strategy = Mock(value='batch_completion')
+    mock_scenario.parking_normal_threshold = 0.8
+    mock_scenario.parking_critical_threshold = 0.95
+    mock_scenario.parking_idle_check_interval = 5.0
+    mock_scenario.process_logger = None  # No process logging in tests
 
     return mock_scenario
 
@@ -259,55 +281,42 @@ def run_layered_test(
     events = []
     parked_wagons = set()
 
+    def capture_wagon_event(event) -> None:
+        events.append((env.now, event))
+        if hasattr(event, 'event_type') and event.event_type == 'PARKED':
+            parked_wagons.add(event.wagon_id)
+
+    def capture_loco_event(event) -> None:
+        events.append((env.now, event))
+
+    def capture_batch_event(event) -> None:
+        events.append((env.now, event))
+
+    # Initialize context first
     context.initialize()
 
-    # Hook event collector
+    # Hook event collector AFTER initialization and re-wire coordinators
     if context.event_collector:
-        original_wagon_event = context.event_collector.add_wagon_event
-        original_loco_event = context.event_collector.add_locomotive_event
-
-        def capture_wagon_event(event) -> None:
-            events.append((env.now, event))
-            if hasattr(event, 'event_type') and event.event_type == 'PARKED':
-                parked_wagons.add(event.wagon_id)
-            # Print wagon events for timeline debugging
-            if hasattr(event, 'wagon_id') and hasattr(event, 'event_type') and hasattr(event, 'location'):
-                print(f't={env.now}: wagon[{event.wagon_id}] {event.event_type} {event.location}')
-            original_wagon_event(event)
-
-        def capture_loco_event(event) -> None:
-            events.append((env.now, event))
-            # Print locomotive events for timeline debugging
-            if hasattr(event, 'locomotive_id'):
-                event_type = getattr(event, 'event_type', type(event).__name__)
-                from_loc = getattr(event, 'from_location', '')
-                to_loc = getattr(event, 'to_location', '')
-                if from_loc and to_loc:
-                    print(f't={env.now}: locomotive[{event.locomotive_id}] {event_type} {from_loc}->{to_loc}')
-                else:
-                    print(f't={env.now}: locomotive[{event.locomotive_id}] {event_type}')
-            original_loco_event(event)
-
         context.event_collector.add_wagon_event = capture_wagon_event
         context.event_collector.add_locomotive_event = capture_loco_event
+        context.event_collector.add_batch_event = capture_batch_event
 
         # Re-wire coordinators
-        if context.collection_coordinator and hasattr(context.collection_coordinator, 'config'):
+        if context.collection_coordinator:
             context.collection_coordinator.config.wagon_event_publisher = capture_wagon_event
+            context.collection_coordinator.config.loco_event_publisher = capture_loco_event
+            context.collection_coordinator.config.batch_event_publisher = capture_batch_event
+
         if context.workshop_coordinator:
-            if hasattr(context.workshop_coordinator, 'config'):
-                context.workshop_coordinator.config.wagon_event_publisher = capture_wagon_event
-            else:
-                context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+            context.workshop_coordinator.wagon_event_publisher = capture_wagon_event
+            context.workshop_coordinator.loco_event_publisher = capture_loco_event
+
         if context.parking_coordinator:
-            if hasattr(context.parking_coordinator, 'config'):
-                context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
-            else:
-                context.parking_coordinator.wagon_event_publisher = capture_wagon_event
+            context.parking_coordinator.config.wagon_event_publisher = capture_wagon_event
+            context.parking_coordinator.config.loco_event_publisher = capture_loco_event
+            context.parking_coordinator.config.batch_event_publisher = capture_batch_event
 
-    context.start_processes()
-
-    # Add wagons to collection queue
+    # Add wagons to queue BEFORE starting processes
     from contexts.retrofit_workflow.domain.entities.wagon import Wagon
     from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
     from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
@@ -321,12 +330,20 @@ def run_layered_test(
         )
         wagon.classify()
         wagon.move_to('collection')
+        wagon.current_track_id = 'collection'
 
         arrival_event = WagonJourneyEvent(
             timestamp=0.0, wagon_id=wagon.id, event_type='ARRIVED', location='collection', status='ARRIVED'
         )
         events.append((0.0, arrival_event))
-        context.collection_queue.put(wagon)
+
+        # Add wagon to track queue
+        if context.track_manager:
+            track = context.track_manager.get_track('collection')
+            if track:
+                track.queue.put(wagon)
+
+    context.start_processes()
 
     # Termination process
     def termination_process():
@@ -388,9 +405,9 @@ def test_scenario1_layer3_single_wagon_with_loco_ops() -> None:
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=9: wagon[W01] RETROFIT_STARTED WS1
-    t=19: wagon[W01] RETROFIT_COMPLETED WS1
-    t=26.5: wagon[W01] PARKED parking_area
+    t=11: wagon[W01] RETROFIT_STARTED WS1
+    t=21: wagon[W01] RETROFIT_COMPLETED WS1
+    t=29.5: wagon[W01] PARKED parking_area
     """
     events, analytics = run_layered_test(
         1, 1, 10.0, 50.0, workshop_bays=[1], loco_coupling_time=1.0, loco_prep_time=1.0
@@ -417,10 +434,10 @@ def test_scenario2_layer1_two_wagons_one_bay_pure_travel() -> None:
     t=2: wagon[W02] ON_RETROFIT_TRACK retrofit
     t=5: wagon[W01] RETROFIT_STARTED WS1
     t=15: wagon[W01] RETROFIT_COMPLETED WS1
-    t=19: wagon[W01] PARKED parking_area
-    t=22: wagon[W02] RETROFIT_STARTED WS1
-    t=32: wagon[W02] RETROFIT_COMPLETED WS1
-    t=36: wagon[W02] PARKED parking_area
+    t=20: wagon[W01] PARKED parking_area
+    t=23: wagon[W02] RETROFIT_STARTED WS1
+    t=33: wagon[W02] RETROFIT_COMPLETED WS1
+    t=38: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(2, 1, 10.0, 50.0, workshop_bays=[1])
 
@@ -433,17 +450,20 @@ def test_scenario2_layer1_two_wagons_one_bay_pure_travel() -> None:
 def test_scenario2_layer3_two_wagons_one_bay_with_loco_ops() -> None:
     """Scenario 2, Layer 3: Two wagons, one bay, with locomotive operations.
 
+    With 2 wagons, rake coupling is required (1 min for 1 coupling between wagons).
+    Prep time: 1 rake + 1 loco + 1 shunting = 3 min
+
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
-    t=4: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=4: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=9: wagon[W01] RETROFIT_STARTED WS1
-    t=19: wagon[W01] RETROFIT_COMPLETED WS1
-    t=26.5: wagon[W01] PARKED parking_area
-    t=32.5: wagon[W02] RETROFIT_STARTED WS1
-    t=42.5: wagon[W02] RETROFIT_COMPLETED WS1
-    t=50: wagon[W02] PARKED parking_area
+    t=5: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=5: wagon[W02] ON_RETROFIT_TRACK retrofit
+    t=14: wagon[W01] RETROFIT_STARTED WS1
+    t=24: wagon[W01] RETROFIT_COMPLETED WS1
+    t=32.5: wagon[W01] PARKED parking_area
+    t=38.5: wagon[W02] RETROFIT_STARTED WS1
+    t=48.5: wagon[W02] RETROFIT_COMPLETED WS1
+    t=57: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         2, 1, 10.0, 80.0, workshop_bays=[1], loco_coupling_time=1.0, loco_prep_time=1.0
@@ -497,17 +517,22 @@ def test_scenario3_layer1_two_wagons_two_bays_pure_travel() -> None:
 def test_scenario3_layer3_two_wagons_two_bays_with_loco_ops() -> None:
     """Scenario 3, Layer 3: Two wagons, two bays, with locomotive operations.
 
+    With 2 wagons, rake coupling is required (1 min for 1 coupling between wagons).
+    Prep time: 1 rake + 1 loco + 1 shunting = 3 min
+    Loco decoupling at workshop: 1 min
+    Note: Wagons keep SCREW couplers throughout (DAC conversion not implemented in test)
+
     TIMELINE:
     t=0: wagon[W01] ARRIVED collection
     t=0: wagon[W02] ARRIVED collection
-    t=6: wagon[W01] ON_RETROFIT_TRACK retrofit
-    t=6: wagon[W02] ON_RETROFIT_TRACK retrofit
-    t=10: wagon[W01] RETROFIT_STARTED WS1
-    t=10: wagon[W02] RETROFIT_STARTED WS1
-    t=20: wagon[W01] RETROFIT_COMPLETED WS1
-    t=20: wagon[W02] RETROFIT_COMPLETED WS1
-    t=29: wagon[W01] PARKED parking_area
-    t=29: wagon[W02] PARKED parking_area
+    t=5: wagon[W01] ON_RETROFIT_TRACK retrofit
+    t=5: wagon[W02] ON_RETROFIT_TRACK retrofit
+    t=16: wagon[W01] RETROFIT_STARTED WS1
+    t=16: wagon[W02] RETROFIT_STARTED WS1
+    t=26: wagon[W01] RETROFIT_COMPLETED WS1
+    t=26: wagon[W02] RETROFIT_COMPLETED WS1
+    t=37: wagon[W01] PARKED parking_area
+    t=37: wagon[W02] PARKED parking_area
     """
     events, analytics = run_layered_test(
         2, 1, 10.0, 50.0, workshop_bays=[2], loco_coupling_time=1.0, loco_prep_time=1.0

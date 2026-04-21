@@ -62,9 +62,10 @@ graph TB
 graph TB
     subgraph "PopUpSim MVP - Desktop Application"
         subgraph "Python Application"
-            Setup[Configuration Context<br/>JSON/CSV Reader<br/>CONTAINER]
-            Core[Workshop Operations Context<br/>SimPy Integration<br/>CONTAINER]
-            Control[Analysis & Reporting Context<br/>KPI Calculation<br/>CONTAINER]
+            CFG[Configuration Context<br/>File loading & validation<br/>CONTAINER]
+            RWF[Retrofit Workflow Context<br/>Core simulation logic<br/>CONTAINER]
+            RLY[Railway Infrastructure Context<br/>Track management<br/>CONTAINER]
+            EXT[External Trains Context<br/>Train arrivals<br/>CONTAINER]
         end
 
         subgraph "Data (File System)"
@@ -84,26 +85,27 @@ graph TB
     end
 
     Developer -->|Creates Config| ConfigFiles
-    Developer -->|Starts| Setup
+    Developer -->|Starts| CFG
     Developer -->|Analyzes| ResultFiles
 
-    Setup -->|Reads| ConfigFiles
-    Setup -->|Validates| Pydantic
-    Setup -->|Passes Config| Core
+    CFG -->|Reads| ConfigFiles
+    CFG -->|Validates| Pydantic
+    CFG -->|Scenario| RWF
+    CFG -->|Scenario| RLY
+    CFG -->|Scenario| EXT
 
-    Core -->|Uses| SimPy
-    Core -->|Delivers Events| Control
-
-    Control -->|Calculates KPIs| Control
-    Control -->|Uses| Matplotlib
-    Control -->|Writes| ResultFiles
+    RLY <-->|Track state| RWF
+    EXT -->|Train arrivals| RWF
+    RWF -->|Uses| SimPy
+    RWF -->|Uses| Matplotlib
+    RWF -->|Writes| ResultFiles
 
     classDef container fill:#1168bd,stroke:#0b4884,stroke-width:2px,color:#fff
     classDef data fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
     classDef external fill:#999999,stroke:#6b6b6b,stroke-width:2px,color:#fff
     classDef person fill:#08427b,stroke:#052e56,stroke-width:2px,color:#fff
 
-    class Setup,Core,Control,Output container
+    class CFG,RWF,RLY,EXT container
     class ConfigFiles,ResultFiles data
     class SimPy,Matplotlib,Pydantic external
     class Developer person

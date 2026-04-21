@@ -146,21 +146,24 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 
 | Building Block (Section 5) | Deployed As | Runtime Location | Process | Storage |
 |----------------------------|-------------|------------------|---------|----------|
-| **Configuration Context** | Python module | `popupsim/backend/src/configuration/` | Main process memory | N/A |
-| └─ File Reader | Python class | `configuration/service.py` | Main process memory | N/A |
-| └─ Data Parser | Python class | `configuration/service.py` | Main process memory | N/A |
-| └─ Configuration Validator | Pydantic models | `configuration/validation.py` | Main process memory | N/A |
-| └─ Domain Models | Pydantic classes | `configuration/model_*.py` | Main process memory | N/A |
-| **Workshop Operations Context** | Python module | `popupsim/backend/src/domain/` (planned) | Main process memory | N/A |
-| └─ Simulation Engine | Python class | `domain/service.py` (planned) | Main process memory | N/A |
-| └─ Analysis Engine | Python class | `domain/analysis/` (planned) | Main process memory | N/A |
-| └─ Domain Logic | Python classes | `domain/processes/` (planned) | Main process memory | N/A |
-| └─ Domain Entities | Python classes | `domain/entities/` (planned) | Main process memory | N/A |
-| **Analysis & Reporting Context** | Python module | `popupsim/backend/src/simulation/` | Main process memory | N/A |
-| └─ Simulation Orchestrator | Python class | `simulation/popupsim.py` | Main process memory | N/A |
-| └─ KPI Aggregator | Python class | `simulation/popupsim.py` | Main process memory | N/A |
-| └─ Output Formatter | Python class | `simulation/output/` (planned) | Main process memory | N/A |
-| └─ Chart Generator | Python class | `simulation/output/` (planned) | Main process memory | N/A |
+| **Configuration Context** | Python module | `popupsim/backend/src/contexts/configuration/` | Main process memory | N/A |
+| └─ ConfigurationBuilder | Python class | `configuration/domain/configuration_builder.py` | Main process memory | N/A |
+| └─ FileLoader | Python class | `configuration/infrastructure/file_loader.py` | Main process memory | N/A |
+| └─ Domain Models | Pydantic classes | `configuration/domain/models/` | Main process memory | N/A |
+| **Retrofit Workflow Context** | Python module | `popupsim/backend/src/contexts/retrofit_workflow/` | Main process memory | N/A |
+| └─ RetrofitWorkflowContext | Python class | `retrofit_workflow/application/retrofit_workflow_context.py` | Main process memory | N/A |
+| └─ Coordinators | Python classes | `retrofit_workflow/application/coordinators/` | Main process memory | N/A |
+| └─ Domain Services | Python classes | `retrofit_workflow/domain/services/` | Main process memory | N/A |
+| └─ Resource Managers | Python classes | `retrofit_workflow/infrastructure/resource_managers/` | Main process memory | N/A |
+| └─ Metrics Collection | Python classes | `retrofit_workflow/infrastructure/metrics/` | Main process memory | N/A |
+| **Railway Infrastructure Context** | Python module | `popupsim/backend/src/contexts/railway_infrastructure/` | Main process memory | N/A |
+| └─ RailwayContext | Python class | `railway_infrastructure/application/railway_context.py` | Main process memory | N/A |
+| └─ Track Aggregates | Python classes | `railway_infrastructure/domain/aggregates/` | Main process memory | N/A |
+| └─ Track Services | Python classes | `railway_infrastructure/domain/services/` | Main process memory | N/A |
+| **External Trains Context** | Python module | `popupsim/backend/src/contexts/external_trains/` | Main process memory | N/A |
+| └─ ExternalTrainsContext | Python class | `external_trains/application/external_trains_context.py` | Main process memory | N/A |
+| └─ WagonFactory | Python class | `external_trains/domain/wagon_factory.py` | Main process memory | N/A |
+| └─ EventPublisher | Python class | `external_trains/infrastructure/event_publisher.py` | Main process memory | N/A |
 | **External Dependencies** | | | | |
 | └─ SimPy Framework | Python library | Virtual environment | Main process memory | N/A |
 | └─ Pydantic | Python library | Virtual environment | Main process memory | N/A |
@@ -174,24 +177,18 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 - All components reside in **process memory** (no distributed deployment)
 - Only **data artifacts** (config files, results) use **file system storage**
 - **No database** - all state is transient or file-based
-- **No network** - all communication is in-process method calls
+- **No network** - all communication is in-process method calls or event bus
 
-### Planned Implementation
+### Current Implementation Status
 
-**To be implemented during MVP development:**
+**Implemented:**
 
 | Component | Status | Directory | Purpose |
 |-----------|--------|-----------|----------|
-| **Workshop Operations Context** | Planned | `popupsim/backend/src/domain/` | Core simulation logic |
-| └─ Domain Entities | Planned | `domain/entities/` | Wagon, Track, Workshop, Route models |
-| └─ SimPy Processes | Planned | `domain/processes/` | Discrete event simulation processes |
-| └─ Analysis Engine | Planned | `domain/analysis/` | Real-time KPI calculation |
-| └─ Domain Service | Planned | `domain/service.py` | Domain orchestration |
-| **Output Generation** | Planned | `popupsim/backend/src/simulation/output/` | Result formatting |
-| └─ CSV Exporter | Planned | `simulation/output/csv_exporter.py` | Export KPI data to CSV |
-| └─ Chart Generator | Planned | `simulation/output/chart_generator.py` | Generate Matplotlib charts |
-| └─ JSON Logger | Planned | `simulation/output/json_logger.py` | Export event timeline |
-| **Output Directory** | Planned | `output/` (gitignored) | Generated simulation results |
+| **Configuration Context** | ✅ Implemented | `contexts/configuration/` | Load and validate scenarios |
+| **Retrofit Workflow Context** | ✅ Implemented | `contexts/retrofit_workflow/` | Core simulation logic |
+| **Railway Infrastructure Context** | ✅ Implemented | `contexts/railway_infrastructure/` | Track management |
+| **External Trains Context** | ✅ Implemented | `contexts/external_trains/` | Train arrivals |
 
 ## 7.4 Execution Environment
 

@@ -2,6 +2,7 @@
 
 from datetime import UTC
 from datetime import datetime
+from datetime import timedelta
 
 from contexts.configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from contexts.configuration.application.dtos.route_input_dto import RouteInputDTO
@@ -53,42 +54,46 @@ def create_minimal_scenario(
     for i in range(num_workshops):
         tracks.append(TrackInputDTO(id=f'WS{i + 1}', edges=[f'WS{i + 1}'], type='workshop', length=100.0))
 
-    # Create routes with path arrays and durations
+    # Create routes with path arrays and durations as timedelta
     routes = [
-        RouteInputDTO(id='locoparking_collection', path=['locoparking', 'collection'], duration=1.0),
-        RouteInputDTO(id='collection_retrofit', path=['collection', 'retrofit'], duration=1.0),
-        RouteInputDTO(id='retrofit_locoparking', path=['retrofit', 'locoparking'], duration=1.0),
-        RouteInputDTO(id='locoparking_retrofit', path=['locoparking', 'retrofit'], duration=1.0),
-        RouteInputDTO(id='locoparking_retrofitted', path=['locoparking', 'retrofitted'], duration=1.0),
-        RouteInputDTO(id='retrofitted_locoparking', path=['retrofitted', 'locoparking'], duration=1.0),
-        RouteInputDTO(id='retrofitted_parking', path=['retrofitted', 'parking'], duration=1.0),
+        RouteInputDTO(id='locoparking_collection', path=['locoparking', 'collection'], duration=timedelta(minutes=1.0)),
+        RouteInputDTO(id='collection_retrofit', path=['collection', 'retrofit'], duration=timedelta(minutes=1.0)),
+        RouteInputDTO(id='retrofit_locoparking', path=['retrofit', 'locoparking'], duration=timedelta(minutes=1.0)),
+        RouteInputDTO(id='locoparking_retrofit', path=['locoparking', 'retrofit'], duration=timedelta(minutes=1.0)),
+        RouteInputDTO(
+            id='locoparking_retrofitted', path=['locoparking', 'retrofitted'], duration=timedelta(minutes=1.0)
+        ),
+        RouteInputDTO(
+            id='retrofitted_locoparking', path=['retrofitted', 'locoparking'], duration=timedelta(minutes=1.0)
+        ),
+        RouteInputDTO(id='retrofitted_parking', path=['retrofitted', 'parking'], duration=timedelta(minutes=1.0)),
     ]
 
     for i in range(num_workshops):
         ws_id = f'WS{i + 1}'
         routes.extend(
             [
-                RouteInputDTO(id=f'retrofit_{ws_id}', path=['retrofit', ws_id], duration=1.0),
-                RouteInputDTO(id=f'{ws_id}_locoparking', path=[ws_id, 'locoparking'], duration=1.0),
-                RouteInputDTO(id=f'{ws_id}_retrofitted', path=[ws_id, 'retrofitted'], duration=1.0),
-                RouteInputDTO(id=f'locoparking_{ws_id}', path=['locoparking', ws_id], duration=1.0),
+                RouteInputDTO(id=f'retrofit_{ws_id}', path=['retrofit', ws_id], duration=timedelta(minutes=1.0)),
+                RouteInputDTO(id=f'{ws_id}_locoparking', path=[ws_id, 'locoparking'], duration=timedelta(minutes=1.0)),
+                RouteInputDTO(id=f'{ws_id}_retrofitted', path=[ws_id, 'retrofitted'], duration=timedelta(minutes=1.0)),
+                RouteInputDTO(id=f'locoparking_{ws_id}', path=['locoparking', ws_id], duration=timedelta(minutes=1.0)),
             ]
         )
 
     locomotives = [LocomotiveInputDTO(id='L1', track='locoparking')]
     process_times = ProcessTimes(
-        wagon_retrofit_time=retrofit_time,
-        train_to_hump_delay=0.0,
-        wagon_hump_interval=0.0,
-        screw_coupling_time=0.0,
-        screw_decoupling_time=0.0,
-        dac_coupling_time=0.0,
-        dac_decoupling_time=0.0,
-        wagon_move_to_next_station=0.0,
-        wagon_coupling_time=0.0,
-        wagon_decoupling_time=0.0,
-        wagon_coupling_retrofitted_time=0.0,
-        loco_parking_delay=0.0,
+        wagon_retrofit_time=timedelta(minutes=retrofit_time),
+        train_to_hump_delay=timedelta(minutes=0.0),
+        wagon_hump_interval=timedelta(minutes=0.0),
+        screw_coupling_time=timedelta(minutes=0.0),
+        screw_decoupling_time=timedelta(minutes=0.0),
+        dac_coupling_time=timedelta(minutes=0.0),
+        dac_decoupling_time=timedelta(minutes=0.0),
+        wagon_move_to_next_station=timedelta(minutes=0.0),
+        wagon_coupling_time=timedelta(minutes=0.0),
+        wagon_decoupling_time=timedelta(minutes=0.0),
+        wagon_coupling_retrofitted_time=timedelta(minutes=0.0),
+        loco_parking_delay=timedelta(minutes=0.0),
     )
 
     # Create train with wagons

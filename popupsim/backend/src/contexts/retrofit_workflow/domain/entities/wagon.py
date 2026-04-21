@@ -56,6 +56,9 @@ class Wagon:  # pylint: disable=too-many-instance-attributes
     rake_id: str | None = field(default=None, init=False)
     batch_id: str | None = field(default=None, init=False)
 
+    # Track assignment (which physical collection track wagon is on)
+    current_track_id: str | None = field(default=None, init=False)
+
     @property
     def status(self) -> WagonStatus:
         """Get wagon status."""

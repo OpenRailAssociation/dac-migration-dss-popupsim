@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "description": "locomotive configurations for DAC retrofit operations",
+    "version": "1.0.0",
+    "created": "2024-01-15"
+  },
+  "locomotives": [
+    {
+      "id": "LOCO_01",
+      "name": "Shunting loco",
+      "home track": "track_19"
+    },
+      {
+      "id": "LOCO_02",
+      "name": "Shunting loco",
+      "home track": "track_19"
+    }
+  ,
+      {
+      "id": "LOCO_03",
+      "name": "Shunting loco",
+      "home track": "track_19"
+    }  ,
+      {
+      "id": "LOCO_04",
+      "name": "Shunting loco",
+      "home track": "track_19"
+    }]
+}

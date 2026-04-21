@@ -6,7 +6,7 @@ from uuid import UUID
 
 from contexts.railway_infrastructure.domain.entities.track import Track
 from contexts.railway_infrastructure.domain.entities.track import TrackType
-from contexts.railway_infrastructure.domain.value_objects.track_selection_strategy import TrackSelectionStrategy
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 
 
 @dataclass
@@ -16,7 +16,7 @@ class TrackGroup:
     group_id: str
     track_type: TrackType
     tracks: dict[UUID | str, Track] = field(default_factory=dict)
-    selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
+    selection_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
 
     def add_track(self, track: Track) -> None:
         """Add track to group."""
@@ -36,7 +36,7 @@ class TrackGroup:
         """Get total capacity of all tracks."""
         return sum(track.capacity for track in self.tracks.values())
 
-    def set_selection_strategy(self, strategy: TrackSelectionStrategy) -> None:
+    def set_selection_strategy(self, strategy: SelectionStrategy) -> None:
         """Set track selection strategy."""
         self.selection_strategy = strategy
 

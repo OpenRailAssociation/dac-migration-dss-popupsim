@@ -29,8 +29,12 @@ class ContextRegistry:
         self.contexts[name] = context
         self._initialization_order.append(name)
 
-    def initialize_all(self, infrastructure: Any, scenario: Any) -> None:
-        """Initialize all registered contexts in order."""
+    def initialize_all(self, infrastructure: Any) -> None:
+        """Initialize all registered contexts in order.
+
+        Args:
+            infrastructure: Simulation infrastructure
+        """
         logger.info(' Initializing %d contexts', len(self.contexts))
 
         for name in self._initialization_order:
@@ -38,7 +42,7 @@ class ContextRegistry:
             current_time = self.engine.current_time()
 
             logger.info(' Initializing context: %s', name)
-            context.initialize(infrastructure, scenario)
+            context.initialize(infrastructure)
 
             # Publish context initialized event
             event = ContextInitializedEvent.create(

@@ -11,6 +11,7 @@ from contexts.retrofit_workflow.domain.aggregates.train_movement_aggregate impor
 from contexts.retrofit_workflow.domain.aggregates.train_movement_aggregate import TrainType
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.domain.value_objects.coupler import Coupler
 from contexts.retrofit_workflow.domain.value_objects.coupler import CouplerType
@@ -216,7 +217,8 @@ def test_train_formation_service_shunting(
     mock_locomotive: Locomotive, mock_batch: BatchAggregate, process_times: ProcessTimes
 ) -> None:
     """Test TrainFormationService for shunting operations."""
-    service = TrainFormationService()
+    coupling_service = CouplingService(process_times)
+    service = TrainFormationService(coupling_service)
 
     train = service.form_train(
         locomotive=mock_locomotive,
@@ -231,8 +233,9 @@ def test_train_formation_service_shunting(
     assert train.destination == 'workshop_1'
 
     # Prepare train
-    prep_time = service.prepare_train(train, process_times, 0.0)
-    assert prep_time == 2.0  # SCREW coupling + preparation
+    prep_operations = service.prepare_train(train, process_times, 0.0)
+    # Should be 4.0 minutes (2 rake coupling for 3 wagons + 1 loco coupling + 1 shunting prep)
+    assert prep_operations['total_time'] == 4.0
     assert train.status == TrainMovementStatus.READY
 
 
@@ -240,7 +243,8 @@ def test_train_formation_service_mainline(
     mock_locomotive: Locomotive, mock_batch: BatchAggregate, process_times: ProcessTimes
 ) -> None:
     """Test TrainFormationService for mainline operations."""
-    service = TrainFormationService()
+    coupling_service = CouplingService(process_times)
+    service = TrainFormationService(coupling_service)
 
     train = service.form_train(
         locomotive=mock_locomotive,
@@ -255,6 +259,7 @@ def test_train_formation_service_mainline(
     assert train.destination == 'retrofit'
 
     # Prepare train
-    prep_time = service.prepare_train(train, process_times, 0.0)
-    assert prep_time == 8.0  # SCREW coupling + brake test + inspection
+    prep_operations = service.prepare_train(train, process_times, 0.0)
+    # Should be 10.0 minutes (2 rake coupling + 1 loco coupling + 5 brake test + 2 inspection)
+    assert prep_operations['total_time'] == 10.0
     assert train.status == TrainMovementStatus.READY

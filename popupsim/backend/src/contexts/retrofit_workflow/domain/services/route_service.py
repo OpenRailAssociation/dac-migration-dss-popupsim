@@ -72,19 +72,19 @@ class RouteService:
         self.route_durations: dict[tuple[str, str], float] = {}
         # Build lookup dict: (from, to) -> route_type
         self.route_types: dict[tuple[str, str], RouteType] = {}
+        # Build lookup dict: (from, to) -> path
+        self.route_paths: dict[tuple[str, str], list[str]] = {}
 
         for route in routes:
             if len(route.path) >= 2:
                 from_location = route.path[0]
                 to_location = route.path[-1]
-                duration = route.duration
-                # Convert timedelta to SimPy ticks (minutes by default)
-                if hasattr(duration, 'total_seconds'):
-                    duration = timedelta_to_sim_ticks(duration)
-                self.route_durations[(from_location, to_location)] = float(duration)
+                duration_ticks = timedelta_to_sim_ticks(route.duration)
+                self.route_durations[(from_location, to_location)] = duration_ticks
+                self.route_paths[(from_location, to_location)] = route.path
 
                 # Store route type (default to SHUNTING for backward compatibility)
-                route_type_str = getattr(route, 'route_type', 'SHUNTING')
+                route_type_str = route.route_type
                 try:
                     route_type = RouteType[route_type_str.upper()]
                 except (KeyError, AttributeError):
@@ -94,8 +94,8 @@ class RouteService:
     def get_duration(self, from_location: str, to_location: str) -> float:
         """Get transport duration between two specified locations.
 
-        Looks up the configured transport time between the specified locations,
-        providing a default value if the route is not explicitly configured.
+        Looks up the configured transport time between the specified locations.
+        Raises KeyError if route not found.
 
         Parameters
         ----------
@@ -109,21 +109,20 @@ class RouteService:
         float
             Transport duration in simulation time units (minutes)
 
-        Notes
-        -----
-        Returns 1.0 minute as default if route not found, ensuring system
-        resilience and preventing simulation failures due to missing routes.
+        Raises
+        ------
+        KeyError
+            If route from_location->to_location is not configured
 
         Examples
         --------
         >>> service = RouteService(routes)
         >>> duration = service.get_duration('TRACK_A', 'WORKSHOP_01')
         >>> print(f'Transport time: {duration} minutes')
-        >>> # Unknown route gets default duration
-        >>> unknown_duration = service.get_duration('UNKNOWN_A', 'UNKNOWN_B')
-        >>> assert unknown_duration == 1.0
         """
-        return self.route_durations.get((from_location, to_location), 1.0)
+        if (from_location, to_location) not in self.route_durations:
+            raise KeyError(f'Route {from_location}->{to_location} not found in routes configuration')
+        return self.route_durations[(from_location, to_location)]
 
     def get_collection_to_retrofit_time(self) -> float:
         """Get standardized transport time from collection to retrofit track.
@@ -245,6 +244,7 @@ class RouteService:
         -------
         RouteType
             Route type (MAINLINE or SHUNTING), defaults to SHUNTING if not found
+            Exception: collection→retrofit defaults to MAINLINE (requires brake test)
 
         Examples
         --------
@@ -253,4 +253,69 @@ class RouteService:
         >>> if route_type == RouteType.MAINLINE:
         ...     print('Full brake test required')
         """
-        return self.route_types.get((from_location, to_location), RouteType.SHUNTING)
+        # Check if route type is explicitly configured
+        if (from_location, to_location) in self.route_types:
+            return self.route_types[(from_location, to_location)]
+
+        # Default: collection→retrofit is MAINLINE (requires brake test + inspection)
+        if from_location == 'collection' and to_location == 'retrofit':
+            return RouteType.MAINLINE
+
+        # All other routes default to SHUNTING
+        return RouteType.SHUNTING
+
+    def get_route_location(self, from_location: str, to_location: str) -> str:
+        """Get location to use during MOVING state for a route.
+
+        Returns the intermediate location from the route path (e.g., 'Mainline')
+        or 'en_route' for direct point-to-point routes.
+
+        Parameters
+        ----------
+        from_location : str
+            Starting location identifier
+        to_location : str
+            Destination location identifier
+
+        Returns
+        -------
+        str
+            Location identifier for MOVING state (e.g., 'Mainline' or 'en_route')
+
+        Examples
+        --------
+        >>> service = RouteService(routes)
+        >>> location = service.get_route_location('collection1', 'retrofit')
+        >>> print(location)  # 'Mainline'
+        >>> location = service.get_route_location('retrofitted', 'parking1')
+        >>> print(location)  # 'en_route'
+        """
+        path = self.route_paths.get((from_location, to_location), [])
+        # If path has intermediate locations, use the first one (typically 'Mainline')
+        if len(path) > 2:
+            return path[1]
+        # For direct routes, use generic 'en_route'
+        return 'en_route'
+
+    def get_route_path(self, from_location: str, to_location: str) -> list[str]:
+        """Get full route path for visualization.
+
+        Parameters
+        ----------
+        from_location : str
+            Starting location identifier
+        to_location : str
+            Destination location identifier
+
+        Returns
+        -------
+        list[str]
+            Full route path including start, intermediate waypoints, and destination
+
+        Examples
+        --------
+        >>> service = RouteService(routes)
+        >>> path = service.get_route_path('collection1', 'retrofit')
+        >>> print(path)  # ['collection1', 'Mainline', 'retrofit']
+        """
+        return self.route_paths.get((from_location, to_location), [from_location, to_location])

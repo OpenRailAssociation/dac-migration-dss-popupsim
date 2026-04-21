@@ -73,7 +73,7 @@ class TrainMovement:  # pylint: disable=too-many-instance-attributes
     @property
     def total_length(self) -> float:
         """Get total length of train (locomotive + wagons)."""
-        loco_length = self.locomotive.length if hasattr(self.locomotive, 'length') else 20.0
+        loco_length = self.locomotive.length
         return loco_length + self.batch.total_length
 
     @property
@@ -200,18 +200,22 @@ class TrainMovement:  # pylint: disable=too-many-instance-attributes
         # Mainline requires brake test and inspection
         return self._brake_test_completed and self._inspection_completed
 
-    def get_preparation_time(self, process_times: Any) -> float:
+    def get_preparation_time(self, process_times: Any, coupling_service: Any = None) -> float:
         """Calculate total preparation time based on train type.
 
         Args:
             process_times: Process times configuration
+            coupling_service: Optional coupling service for calculating loco coupling time
 
         Returns
         -------
             Total preparation time in simulation ticks
         """
-        # Get loco coupling time based on wagon coupler types
-        loco_coupling = self._get_loco_coupling_time(process_times)
+        # Get loco coupling time
+        if coupling_service:
+            loco_coupling = coupling_service.get_loco_coupling_time(self.batch.wagons)
+        else:
+            loco_coupling = self._get_loco_coupling_time(process_times)
 
         if self.is_mainline:
             # Mainline: loco coupling + brake test + inspection

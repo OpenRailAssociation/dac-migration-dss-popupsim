@@ -22,9 +22,18 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
 
     Attributes
     ----------
-        id: Unique locomotive identifier
-        home_track: Home parking track
-        max_capacity: Maximum number of wagons
+        id: str
+            Unique locomotive identifier
+        home_track: str
+            Home parking track
+        coupler_front : Coupler
+            Coupling system used at the front (screw, dac, hybrid)
+        coupler_back : Coupler
+            Coupling system used at the back (screw, dac, hybrid)
+        max_capacity: int
+            Maximum number of wagons
+        length: float
+            Length of the locomotive
     """
 
     id: str
@@ -32,6 +41,7 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
     coupler_front: Coupler  # Front coupler
     coupler_back: Coupler  # Back coupler
     max_capacity: int = 100
+    length: float = 20.0
 
     # Private state
     _current_track: str = field(default='', init=False)
@@ -72,8 +82,10 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
     def assemble_rake(self, rake_id: str) -> None:
         """Assemble rake to locomotive.
 
-        Args:
-            rake_id: Rake to assemble
+        Parameters
+        ----------
+        rake_id: str
+            Rake to assemble
 
         Raises
         ------
@@ -87,8 +99,10 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
     def disassemble_rake(self, rake_id: str) -> None:
         """Disassemble rake from locomotive.
 
-        Args:
-            rake_id: Rake to disassemble
+        Parameters
+        ----------
+        rake_id: str
+            Rake to disassemble
 
         Raises
         ------
@@ -126,8 +140,10 @@ class Locomotive:  # pylint: disable=too-many-instance-attributes
     def arrive_at(self, track: str) -> None:
         """Arrive at track.
 
-        Args:
-            track: Track where locomotive arrived
+        Parameters
+        ----------
+        track: str
+            Track where locomotive arrived
         """
         self._current_track = track
         self._status = LocomotiveStatus.PARKING

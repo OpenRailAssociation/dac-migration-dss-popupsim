@@ -1,11 +1,13 @@
 """Domain service for track group operations."""
 
+import random
+
 from contexts.railway_infrastructure.domain.aggregates.track_group import TrackGroup
 from contexts.railway_infrastructure.domain.entities.track import Track
 from contexts.railway_infrastructure.domain.repositories.track_occupancy_repository import TrackOccupancyRepository
-from contexts.railway_infrastructure.domain.services.track_selector import TrackSelector
 from contexts.railway_infrastructure.domain.value_objects.track_occupant import OccupantType
 from contexts.railway_infrastructure.domain.value_objects.track_occupant import TrackOccupant
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 
 
 class TrackGroupService:
@@ -14,11 +16,39 @@ class TrackGroupService:
     def __init__(self, occupancy_repository: TrackOccupancyRepository) -> None:
         """Initialize with repository."""
         self._repository = occupancy_repository
+        self._round_robin_index = 0
 
     def select_track_for_wagon(self, track_group: TrackGroup, wagon_length: float) -> Track | None:
         """Select best track for wagon using group's strategy."""
-        selector = TrackSelector(track_group.selection_strategy, self._repository)
-        return selector.select_track(track_group.get_all_tracks(), wagon_length)
+        available = self._get_available_tracks(track_group, wagon_length)
+        if not available:
+            return None
+
+        strategy = track_group.selection_strategy
+        if strategy == SelectionStrategy.LEAST_OCCUPIED:
+            return min(available, key=lambda t: self._repository.get_or_create(t).get_utilization_percentage())
+        if strategy == SelectionStrategy.FIRST_AVAILABLE:
+            return available[0]
+        if strategy == SelectionStrategy.ROUND_ROBIN:
+            track = available[self._round_robin_index % len(available)]
+            self._round_robin_index += 1
+            return track
+        if strategy == SelectionStrategy.RANDOM:
+            return random.choice(available)  # noqa: S311
+        return available[0]  # Default to first available
+
+    def _get_available_tracks(self, track_group: TrackGroup, wagon_length: float) -> list[Track]:
+        """Get tracks that can accommodate the wagon."""
+        available = []
+        for track in track_group.get_all_tracks():
+            occupancy = self._repository.get_or_create(track)
+            if (
+                occupancy.can_accommodate_length(wagon_length)
+                and occupancy.can_accommodate_wagon_count()
+                and occupancy.find_optimal_position(wagon_length) is not None
+            ):
+                available.append(track)
+        return available
 
     def try_add_wagon(
         self, track_group: TrackGroup, wagon_id: str, wagon_length: float, timestamp: float

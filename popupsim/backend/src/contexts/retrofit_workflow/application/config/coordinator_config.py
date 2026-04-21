@@ -9,6 +9,7 @@ from contexts.retrofit_workflow.application.config.queue_config import QueueConf
 from contexts.retrofit_workflow.application.config.service_config import ServiceConfig
 from contexts.retrofit_workflow.application.interfaces.resource_interfaces import TrackSelector
 from contexts.retrofit_workflow.application.interfaces.transport_interfaces import LocomotiveManager
+from contexts.retrofit_workflow.domain.events import CouplingEvent
 from contexts.retrofit_workflow.domain.events import LocomotiveMovementEvent
 from contexts.retrofit_workflow.domain.events import WagonJourneyEvent
 from contexts.retrofit_workflow.domain.events.batch_events import BatchArrivedAtDestination
@@ -16,7 +17,7 @@ from contexts.retrofit_workflow.domain.events.batch_events import BatchFormed
 from contexts.retrofit_workflow.domain.events.batch_events import BatchTransportStarted
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
 from contexts.retrofit_workflow.domain.services.route_service import RouteService
-from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionService
+from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionFacade
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 import simpy
@@ -64,6 +65,9 @@ class ArrivalCoordinatorConfig:
 
     env: simpy.Environment
     collection_queue: simpy.FilterStore
+    track_selector: TrackSelectionFacade
+    collection_coordinator: Any  # Reference to CollectionCoordinator for adding wagons
+    track_manager: Any | None = None  # TrackResourceManager for capacity management
     event_publisher: Callable[[WagonJourneyEvent], None] | None = None
 
 
@@ -74,6 +78,7 @@ class TransportCoordinatorConfig:
     env: simpy.Environment
     move_time: float = 1.0
     coupling_time: float = 0.5
+    event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
 
 
 @dataclass
@@ -84,16 +89,18 @@ class CollectionCoordinatorConfig:  # pylint: disable=too-many-instance-attribut
     collection_queue: simpy.FilterStore
     retrofit_queue: simpy.FilterStore
     locomotive_manager: LocomotiveResourceManager
-    track_selector: TrackSelectionService
+    track_selector: TrackSelectionFacade
     batch_service: BatchFormationService
     route_service: RouteService
     train_service: TrainFormationService
     scenario: Any
+    track_manager: Any | None = None  # TrackResourceManager for capacity management
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
         None
     )
+    coupling_event_publisher: Callable[[CouplingEvent], None] | None = None
 
 
 @dataclass
@@ -111,6 +118,7 @@ class WorkshopCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     scenario: Any
     wagon_event_publisher: Callable[[WagonJourneyEvent], None] | None = None
     loco_event_publisher: Callable[[LocomotiveMovementEvent], None] | None = None
+    coupling_event_publisher: Callable[[CouplingEvent], None] | None = None
 
 
 @dataclass
@@ -120,7 +128,7 @@ class ParkingCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     env: simpy.Environment
     retrofitted_queue: simpy.FilterStore
     locomotive_manager: LocomotiveResourceManager
-    track_selector: TrackSelectionService
+    track_selector: TrackSelectionFacade
     batch_service: BatchFormationService
     route_service: RouteService
     train_service: TrainFormationService
@@ -130,6 +138,7 @@ class ParkingCoordinatorConfig:  # pylint: disable=too-many-instance-attributes
     batch_event_publisher: Callable[[BatchFormed | BatchTransportStarted | BatchArrivedAtDestination], None] | None = (
         None
     )
+    coupling_event_publisher: Callable[[CouplingEvent], None] | None = None
     # Strategy configuration
     strategy: str = 'opportunistic'  # 'opportunistic' or 'smart_accumulation'
     normal_threshold: float = 0.3  # 30% of retrofitted track capacity for smart_accumulation

@@ -103,6 +103,31 @@ def get_simulation_time_unit_name() -> str:
     return SIMULATION_TIME_UNIT.value
 
 
+def sim_ticks_to_datetime(sim_time: float, start_datetime: str | datetime) -> str:
+    """Convert simulation time (ticks) to ISO datetime string.
+
+    Parameters
+    ----------
+    sim_time : float
+        Simulation time in ticks
+    start_datetime : str | datetime
+        Simulation start datetime (ISO string or datetime object)
+
+    Returns
+    -------
+    str
+        ISO format datetime string
+    """
+    if isinstance(start_datetime, datetime):
+        start_dt = start_datetime
+    else:
+        start_dt = datetime.fromisoformat(start_datetime.replace('Z', '+00:00'))
+
+    duration = sim_ticks_to_timedelta(sim_time)
+    event_dt = start_dt + duration
+    return event_dt.isoformat()
+
+
 # Backward compatibility aliases
 def timedelta_to_simpy_minutes(td: timedelta) -> float:
     """Convert timedelta to SimPy minutes (deprecated, use timedelta_to_sim_ticks)."""

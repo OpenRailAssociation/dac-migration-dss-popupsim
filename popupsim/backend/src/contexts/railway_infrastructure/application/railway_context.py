@@ -165,8 +165,12 @@ class RailwayInfrastructureContext:
     def cleanup(self) -> None:
         """Cleanup context resources."""
 
-    def initialize(self, infrastructure: Any, _scenario: Any) -> None:  # pylint: disable=unused-argument
-        """Initialize with infrastructure and scenario."""
+    def initialize(self, infrastructure: Any) -> None:
+        """Initialize with infrastructure.
+
+        Args:
+            infrastructure: Simulation infrastructure
+        """
         self._infra = infrastructure
 
         # Set up track occupancy event handler

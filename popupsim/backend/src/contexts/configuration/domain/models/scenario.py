@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from datetime import datetime
 from datetime import timedelta
-from enum import Enum
+from enum import StrEnum
 import logging
 from typing import Any
 
@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import field_validator
 from pydantic import model_validator
+from shared.domain.value_objects.selection_strategy import SelectionStrategy
 from shared.value_objects.timezone_utils import ensure_utc
 from shared.value_objects.timezone_utils import validate_timezone_aware
 
@@ -23,27 +24,35 @@ from .process_times import ProcessTimes
 logger = logging.getLogger(__name__)
 
 
-class TrackSelectionStrategy(str, Enum):
-    """Strategy for selecting tracks."""
-
-    ROUND_ROBIN = 'round_robin'
-    LEAST_OCCUPIED = 'least_occupied'
-    FIRST_AVAILABLE = 'first_available'
-    RANDOM = 'random'
-
-
-class LocoDeliveryStrategy(str, Enum):
+class LocoDeliveryStrategy(StrEnum):
     """Strategy for locomotive delivery."""
 
     RETURN_TO_PARKING = 'return_to_parking'
     DIRECT_DELIVERY = 'direct_delivery'
 
 
-class LocoPriorityStrategy(str, Enum):
+class LocoPriorityStrategy(StrEnum):
     """Strategy for locomotive task prioritization."""
 
     WORKSHOP_PRIORITY = 'workshop_priority'  # Park wagons immediately when loco available
     BATCH_COMPLETION = 'batch_completion'  # Complete workshop pickups before parking
+
+
+class WorkflowMode(StrEnum):
+    """Workflow execution mode."""
+
+    LEGACY = 'legacy'
+    RETROFIT_WORKFLOW = 'retrofit_workflow'
+
+    @classmethod
+    def _missing_(cls, value: object) -> 'WorkflowMode':
+        """Handle missing values by returning default."""
+        if isinstance(value, str):
+            # Try case-insensitive match
+            for member in cls:
+                if member.value.lower() == value.lower():
+                    return member
+        return cls.LEGACY
 
 
 class Scenario(BaseModel):
@@ -52,10 +61,26 @@ class Scenario(BaseModel):
     id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
     start_date: datetime
     end_date: datetime
-    track_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
-    retrofit_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
-    workshop_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.ROUND_ROBIN
-    parking_selection_strategy: TrackSelectionStrategy = TrackSelectionStrategy.LEAST_OCCUPIED
+    workflow_mode: WorkflowMode = WorkflowMode.LEGACY
+    collection_track_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
+    retrofit_selection_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
+    retrofitted_selection_strategy: SelectionStrategy = SelectionStrategy.LEAST_OCCUPIED
+    workshop_selection_strategy: SelectionStrategy = SelectionStrategy.ROUND_ROBIN
+    parking_selection_strategy: SelectionStrategy = Field(
+        default=SelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting parking tracks'
+    )
+
+    @field_validator('parking_selection_strategy', mode='before')
+    @classmethod
+    def debug_parking_strategy(cls, v: Any) -> Any:
+        """Debug parking selection strategy."""
+        print(f'DEBUG VALIDATOR: parking_selection_strategy raw value: {v}, type: {type(v)}')
+        return v
+
+    parking_strategy: str = 'opportunistic'
+    parking_normal_threshold: float = 0.3
+    parking_critical_threshold: float = 0.8
+    parking_idle_check_interval: float = 1.0
     loco_delivery_strategy: LocoDeliveryStrategy = LocoDeliveryStrategy.RETURN_TO_PARKING
     loco_priority_strategy: LocoPriorityStrategy = LocoPriorityStrategy.WORKSHOP_PRIORITY
     locomotives: list[LocomotiveInputDTO] | None = None

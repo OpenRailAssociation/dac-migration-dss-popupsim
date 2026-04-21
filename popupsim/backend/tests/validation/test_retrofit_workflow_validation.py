@@ -1,5 +1,7 @@
 """Validation tests for retrofit workflow context."""
 
+import tempfile
+
 from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkshopContext
 import simpy
 
@@ -80,8 +82,6 @@ def test_context_metrics_collection() -> None:
 
 def test_context_event_export() -> None:
     """Test that retrofit workflow context can export events."""
-    import tempfile
-
     env = simpy.Environment()
     scenario = create_minimal_scenario(num_wagons=1, num_stations=1)
 

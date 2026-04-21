@@ -49,7 +49,6 @@ class RakeRegistry:
 
     def update_rake_track(self, rake_id: str, new_track: str) -> None:
         """Update rake track location."""
-        print('UPDATE RAKE TRACK')
         rake = self._rakes.get(rake_id)
         if not rake:
             return

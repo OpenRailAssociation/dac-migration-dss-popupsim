@@ -8,7 +8,7 @@ PopUpSim MVP is a **proof-of-concept desktop tool** for simulating Pop-Up worksh
 
 **MVP Business Logic:**
 1. **Developers configure scenarios** using JSON/CSV files
-2. **MVP simulates workshop operations** using SimPy discrete event simulation
+2. **MVP simulates retrofit workflow** using SimPy discrete event simulation
 3. **Results exported to CSV/PNG** for manual analysis
 4. **Validates simulation approach** for full version development
 

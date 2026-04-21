@@ -54,6 +54,60 @@ class EventPublisherHelper:
             )
 
     @staticmethod
+    def publish_loco_parking(
+        publisher: Callable[[LocomotiveMovementEvent], None] | None,
+        timestamp: float,
+        loco_id: str,
+        location: str,
+    ) -> None:
+        """Publish locomotive parking event."""
+        if publisher:
+            publisher(
+                LocomotiveMovementEvent(
+                    timestamp=timestamp,
+                    locomotive_id=loco_id,
+                    event_type='PARKING',
+                    current_location=location,
+                )
+            )
+
+    @staticmethod
+    def publish_loco_coupling(
+        publisher: Callable[[LocomotiveMovementEvent], None] | None,
+        timestamp: float,
+        loco_id: str,
+        location: str,
+    ) -> None:
+        """Publish locomotive coupling event."""
+        if publisher:
+            publisher(
+                LocomotiveMovementEvent(
+                    timestamp=timestamp,
+                    locomotive_id=loco_id,
+                    event_type='COUPLING',
+                    current_location=location,
+                )
+            )
+
+    @staticmethod
+    def publish_loco_decoupling(
+        publisher: Callable[[LocomotiveMovementEvent], None] | None,
+        timestamp: float,
+        loco_id: str,
+        location: str,
+    ) -> None:
+        """Publish locomotive decoupling event."""
+        if publisher:
+            publisher(
+                LocomotiveMovementEvent(
+                    timestamp=timestamp,
+                    locomotive_id=loco_id,
+                    event_type='DECOUPLING',
+                    current_location=location,
+                )
+            )
+
+    @staticmethod
     def publish_wagon_event(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments
         publisher: Callable[[WagonJourneyEvent], None] | None,
         timestamp: float,
@@ -61,18 +115,24 @@ class EventPublisherHelper:
         event_type: str,
         location: str,
         status: str,
+        route_path: list[str] | None = None,
+        coupler_type: str | None = None,
     ) -> None:
         """Publish wagon journey event."""
         if publisher:
-            publisher(
-                WagonJourneyEvent(
-                    timestamp=timestamp,
-                    wagon_id=wagon_id,
-                    event_type=event_type,
-                    location=location,
-                    status=status,
-                )
+            event = WagonJourneyEvent(
+                timestamp=timestamp,
+                wagon_id=wagon_id,
+                event_type=event_type,
+                location=location,
+                status=status,
             )
+            # Store route_path and coupler_type as custom attributes for dual-stream adapter
+            if route_path:
+                event.route_path = route_path  # type: ignore
+            if coupler_type:
+                event.coupler_type = coupler_type  # type: ignore
+            publisher(event)
 
     @staticmethod
     def publish_batch_formed(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments
