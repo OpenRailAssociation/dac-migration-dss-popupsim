@@ -24,7 +24,7 @@ dependencies = [
     "pydantic>=2.13.3",
     "simpy>=4.1.1",
     "streamlit>=1.52.1",
-    "typer>=0.20.0",
+    "typer>=0.25.0",
 ]
 
 [build-system]
