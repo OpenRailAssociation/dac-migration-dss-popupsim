@@ -833,7 +833,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-to-pdf"
-version = "0.10.1"
+version = "0.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -842,9 +842,9 @@ dependencies = [
     { name = "pydyf" },
     { name = "weasyprint" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/20/72/11a3b3d251be913152c931a75c05b22cfe35e821e6080965bc5bf57e4459/mkdocs_to_pdf-0.10.1.tar.gz", hash = "sha256:deb49e3305b0740fd8e157ad04c1e18bfbb18a602e9ce528316931acd953fc22", size = 31852, upload-time = "2025-05-08T22:15:36.158Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/47/c8ab531ae43bd010edc5602e0d56d3a2a7dfa3e3d1e7ee65bc1935c39d31/mkdocs_to_pdf-0.11.2.tar.gz", hash = "sha256:098d6aa7448ee406702eb3d684004fb08f9668014cd19bb9ac4d19d2911a08b4", size = 29565, upload-time = "2026-04-28T20:43:36.601Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e4/41/e139ab0ccd645770cec9a9d95889b8cebb1080e5bd409d34358aea5d92c9/mkdocs_to_pdf-0.10.1-py3-none-any.whl", hash = "sha256:14e7f7e2696de024e8da328f32158abf8d7f6abe9ea65dac45d821d899615d9c", size = 43654, upload-time = "2025-05-08T22:15:34.383Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/c8/85f6d2624dfaa3eede41c255f13f67e3b7bed2035ab287aa94ff1c1186ed/mkdocs_to_pdf-0.11.2-py3-none-any.whl", hash = "sha256:4ac7f1cd2bde4f3b6d55670fc91e07a729f1d7e0e5479e561aafbd6e2842326c", size = 43843, upload-time = "2026-04-28T20:43:35.308Z" },
 ]
 
 [[package]]
@@ -1202,7 +1202,7 @@ docs = [
     { name = "mkdocs", specifier = ">=1.6.0" },
     { name = "mkdocs-material", specifier = ">=9.5.0" },
     { name = "mkdocs-mermaid2-plugin", specifier = ">=1.1.0" },
-    { name = "mkdocs-to-pdf", specifier = ">=0.10.1" },
+    { name = "mkdocs-to-pdf", specifier = ">=0.11.2" },
     { name = "pango", specifier = ">=0.0.1" },
     { name = "weasyprint", specifier = ">=62.3" },
 ]
