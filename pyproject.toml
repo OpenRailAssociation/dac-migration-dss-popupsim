@@ -23,7 +23,7 @@ dependencies = [
     "plotly>=6.7.0",
     "pydantic>=2.13.3",
     "simpy>=4.1.1",
-    "streamlit>=1.52.1",
+    "streamlit>=1.57.0",
     "typer>=0.20.0",
 ]
 
