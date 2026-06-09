@@ -259,5 +259,6 @@ class FileLoader:  # pylint: disable=too-few-public-methods
                 base_priority=config.get('base_priority', 3),
                 rules=rules,
                 hold_until=hold_until,
+                max_hold_time=config.get('max_hold_time'),
             )
         return result

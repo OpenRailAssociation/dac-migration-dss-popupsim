@@ -136,11 +136,17 @@ class TaskPriorityConfig:
     hold_until : HoldCondition | None
         If set, the task is not submitted to the dispatcher until this
         condition is satisfied. Prevents wasteful small-batch trips.
+    max_hold_time : float | None
+        Maximum time (in minutes) a task can be held before the hold_until
+        condition is overridden. Prevents operational stalls when hold
+        conditions are misconfigured or system state doesn't change.
+        None means no limit (hold indefinitely).
     """
 
     base_priority: int = 3
     rules: list[PriorityRule] = field(default_factory=list)
     hold_until: HoldCondition | None = None
+    max_hold_time: float | None = None
 
     def evaluate(self, source_fill: float, target_fill: float, target_idle: bool = False) -> int:
         """Evaluate effective priority given current system state.

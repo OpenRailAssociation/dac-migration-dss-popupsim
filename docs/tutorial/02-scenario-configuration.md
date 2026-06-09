@@ -228,6 +228,19 @@ The `hold_until` field prevents a task from being submitted until a condition is
 
 **Example:** `"hold_until": {"condition": "target_fill_below", "threshold": 0.6}` means "don't move wagons until the target track is below 60% full." While held, wagons accumulate at the source, naturally forming larger batches.
 
+**Max Hold Time (Escape Hatch):**
+
+The `max_hold_time` field (in minutes) prevents operational stalls when hold conditions are too aggressive or fill levels don't change. If a task has been waiting longer than this, the hold condition is overridden and the task becomes eligible.
+
+```json
+"collection_to_retrofit": {
+  "hold_until": {"condition": "target_fill_below", "threshold": 0.7},
+  "max_hold_time": 30.0
+}
+```
+
+This means: "Hold until retrofit is below 70% full, but if we've been waiting 30+ minutes, do it anyway." Without `max_hold_time`, tasks are held indefinitely until the condition is met.
+
 **Available Conditions (for both rules and hold_until):**
 
 | Condition | Description |

@@ -25,3 +25,4 @@ class TaskPriorityInputDTO(BaseModel):
     base_priority: int = 3
     rules: list[PriorityRuleInputDTO] = Field(default_factory=list)
     hold_until: HoldConditionInputDTO | None = None
+    max_hold_time: float | None = None

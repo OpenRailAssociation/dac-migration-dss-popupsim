@@ -234,6 +234,11 @@ class LocomotiveDispatcher:  # pylint: disable=too-many-instance-attributes
     def _is_task_eligible(self, task: TaskRequest) -> bool:
         """Check if a task's hold_until condition allows it to proceed.
 
+        A task is eligible if:
+        - It has no hold_until condition, OR
+        - Its hold_until condition is satisfied, OR
+        - It has exceeded its max_hold_time (escape hatch)
+
         Parameters
         ----------
         task : TaskRequest
@@ -247,6 +252,19 @@ class LocomotiveDispatcher:  # pylint: disable=too-many-instance-attributes
         config = self.priority_configs.get(task.task_type)
         if config is None or config.hold_until is None:
             return True
+
+        # Escape hatch: override hold if task has waited too long
+        if config.max_hold_time is not None:
+            wait_time = self.env.now - task.submitted_at
+            if wait_time >= config.max_hold_time:
+                logger.info(
+                    't=%.1f: DISPATCHER → Hold override for %s (waited %.1f min >= max %.1f min)',
+                    self.env.now,
+                    task.task_type.value,
+                    wait_time,
+                    config.max_hold_time,
+                )
+                return True
 
         source_fill, target_fill, target_idle = self._get_fill_levels(task.task_type)
         return config.hold_until.is_satisfied(source_fill, target_fill, target_idle)
