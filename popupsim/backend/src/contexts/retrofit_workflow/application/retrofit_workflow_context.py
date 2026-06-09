@@ -310,6 +310,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
                 base_priority=dto.base_priority,
                 rules=rules,
                 hold_until=hold_until,
+                max_hold_time=dto.max_hold_time,
             )
 
         if not priority_configs:

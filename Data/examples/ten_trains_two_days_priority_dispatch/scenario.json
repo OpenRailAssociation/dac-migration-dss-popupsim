@@ -14,6 +14,7 @@
     "collection_to_retrofit": {
       "base_priority": 2,
       "hold_until": {"condition": "target_fill_below", "threshold": 0.85},
+      "max_hold_time": 30.0,
       "rules": [
         {"condition": "source_fill_above", "threshold": 0.5, "priority": 1},
         {"condition": "source_fill_above", "threshold": 0.8, "priority": 0}
@@ -33,6 +34,7 @@
     "retrofitted_to_parking": {
       "base_priority": 3,
       "hold_until": {"condition": "source_fill_above", "threshold": 0.15},
+      "max_hold_time": 45.0,
       "rules": [
         {"condition": "source_fill_above", "threshold": 0.6, "priority": 1},
         {"condition": "source_fill_above", "threshold": 0.85, "priority": 0}
