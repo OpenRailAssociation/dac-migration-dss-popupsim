@@ -119,6 +119,9 @@ class LocomotiveDispatcher:  # pylint: disable=too-many-instance-attributes
         self._tasks_dispatched: int = 0
         self._total_wait_time: float = 0.0
 
+        # Event to wake eligibility polling when new tasks arrive
+        self._eligibility_wake: simpy.Event | None = None
+
         # Start dispatch loop
         self.env.process(self._dispatch_loop())
 
@@ -145,11 +148,15 @@ class LocomotiveDispatcher:  # pylint: disable=too-many-instance-attributes
         if not self._task_available.triggered:
             self._task_available.succeed()
 
+        # Wake eligibility polling if waiting (new task might be eligible)
+        if self._eligibility_wake and not self._eligibility_wake.triggered:
+            self._eligibility_wake.succeed()
+
     def _dispatch_loop(self) -> Generator[Any, Any]:
         """Dispatch locomotives to highest-priority tasks in a loop.
 
-        Continuously waits for tasks, allocates a locomotive, evaluates
-        priorities, and assigns the loco to the winning task.
+        Continuously waits for eligible tasks, then allocates a locomotive
+        and assigns it to the highest-priority eligible task.
         """
         while True:
             # Wait for tasks to be available
@@ -161,17 +168,18 @@ class LocomotiveDispatcher:  # pylint: disable=too-many-instance-attributes
             if not self._pending:
                 continue
 
-            # Allocate a locomotive (blocks until one is free)
+            # Wait until at least one task is eligible before allocating a loco
+            yield from self._wait_for_eligible_task()
+
+            # Now we know there's an eligible task — allocate a locomotive
             loco = yield self.env.process(self.locomotive_manager.allocate(purpose='dispatcher'))
 
-            # Re-evaluate priorities now that we have a loco
+            # Select best eligible task (re-evaluate after loco wait)
             best_task = self._select_best_task()
 
             if best_task is None:
-                # All tasks are held or cancelled — release loco and wait briefly
+                # Edge case: task became ineligible while waiting for loco
                 yield self.env.process(self.locomotive_manager.release(loco, purpose='dispatcher'))
-                # Wait before re-checking (avoids busy loop when all tasks are held)
-                yield self.env.timeout(1.0)
                 continue
 
             # Assign locomotive to the winning task
@@ -194,6 +202,30 @@ class LocomotiveDispatcher:  # pylint: disable=too-many-instance-attributes
             # If more tasks pending, re-trigger the loop immediately
             if self._pending and not self._task_available.triggered:
                 self._task_available.succeed()
+
+    def _wait_for_eligible_task(self) -> Generator[Any, Any]:
+        """Wait until at least one pending task passes its hold_until check.
+
+        Uses a polling interval to periodically re-check hold conditions,
+        since fill levels change as other operations complete. Also wakes
+        up when new tasks are submitted (they might be immediately eligible).
+        """
+        poll_interval = 5.0  # Re-check every 5 sim minutes
+
+        while True:
+            # Check if any pending task is eligible right now
+            for task in self._pending:
+                if self._is_task_eligible(task):
+                    return
+
+            # None eligible — wait for either a new task or the poll interval
+            new_task_event = self.env.event()
+            self._eligibility_wake = new_task_event
+            timeout_event = self.env.timeout(poll_interval)
+
+            # Yield on whichever fires first
+            yield new_task_event | timeout_event
+            self._eligibility_wake = None
 
     def _select_best_task(self) -> TaskRequest | None:
         """Select the highest-priority pending task that is eligible to run.
