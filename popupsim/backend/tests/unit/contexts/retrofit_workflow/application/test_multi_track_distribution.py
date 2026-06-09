@@ -8,7 +8,6 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Col
 # from contexts.retrofit_workflow.application.coordinators.archive.arrival_coordinator import ArrivalCoordinator  # type: ignore[import-not-found]
 from contexts.retrofit_workflow.application.coordinators.arrival_coordinator import ArrivalCoordinator
 from contexts.retrofit_workflow.application.coordinators.collection_coordinator import CollectionCoordinator
-from contexts.retrofit_workflow.application.services.coordination_service import CoordinationService
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
 from contexts.retrofit_workflow.domain.services.coupling_service import CouplingService
 from contexts.retrofit_workflow.domain.services.resource_selection_service import SelectionStrategy
@@ -126,7 +125,7 @@ class TestMultiTrackDistribution:
             train_service=train_service,
             scenario=scenario,
         )
-        return CollectionCoordinator(config, CoordinationService())
+        return CollectionCoordinator(config)
 
     def test_round_robin_distributes_wagons_across_tracks(
         self,

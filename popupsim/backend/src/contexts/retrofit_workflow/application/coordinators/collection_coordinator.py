@@ -6,7 +6,6 @@ from typing import Any
 
 from contexts.retrofit_workflow.application.config.coordinator_config import CollectionCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
-from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.application.services.locomotive_dispatcher import TaskRequest
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
@@ -25,15 +24,13 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
     5. Release locomotive
     """
 
-    def __init__(self, config: CollectionCoordinatorConfig, coordination: CoordinationService):
+    def __init__(self, config: CollectionCoordinatorConfig):
         """Initialize coordinator.
 
         Args:
             config: Coordinator configuration
-            coordination: Coordination service
         """
         self.config = config
-        self.coordination = coordination
         self.batch_counter = 0
         self.track_manager = config.track_manager
         self.locomotive_dispatcher = None  # Set by context if task_priorities configured

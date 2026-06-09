@@ -6,7 +6,6 @@ from typing import Any
 
 from contexts.retrofit_workflow.application.config.coordinator_config import ParkingCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
-from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
 from contexts.retrofit_workflow.application.services.locomotive_dispatcher import TaskRequest
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
@@ -26,10 +25,9 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
     5. Release locomotive
     """
 
-    def __init__(self, config: ParkingCoordinatorConfig, coordination: CoordinationService):
+    def __init__(self, config: ParkingCoordinatorConfig):
         """Initialize coordinator."""
         self.config = config
-        self.coordination = coordination
         self.batch_counter = 0
         self.track_manager = None
         self.track_selector = None  # Will be set by context
