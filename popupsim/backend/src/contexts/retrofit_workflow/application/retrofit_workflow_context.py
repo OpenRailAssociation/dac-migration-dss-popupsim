@@ -17,7 +17,6 @@ from contexts.retrofit_workflow.application.coordinators.parking_coordinator imp
 from contexts.retrofit_workflow.application.coordinators.workshop_coordinator import WorkshopCoordinator
 from contexts.retrofit_workflow.application.coordinators.workshop_coordinator import WorkshopCoordinatorConfig
 from contexts.retrofit_workflow.application.event_collector import EventCollector
-from contexts.retrofit_workflow.application.services.coordination_service import CoordinationService
 from contexts.retrofit_workflow.application.services.locomotive_dispatcher import LocomotiveDispatcher
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
 from contexts.retrofit_workflow.domain.entities.workshop import Workshop
@@ -325,13 +324,11 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
 
     def _build_coordinators(self) -> None:
         """Build all coordinators."""
-        coordination_service = CoordinationService()
-
         # Build collection coordinator first (needed by arrival coordinator)
-        self._build_collection_coordinator(coordination_service)
+        self._build_collection_coordinator()
         self._build_arrival_coordinator()
         self._build_workshop_coordinator()
-        self._build_parking_coordinator(coordination_service)
+        self._build_parking_coordinator()
 
     def _build_arrival_coordinator(self) -> None:
         """Build arrival coordinator."""
@@ -345,7 +342,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         )
         self.arrival_coordinator = ArrivalCoordinator(arrival_config)
 
-    def _build_collection_coordinator(self, coordination_service: CoordinationService) -> None:
+    def _build_collection_coordinator(self) -> None:
         """Build collection coordinator."""
         if not self.locomotive_manager:
             raise RuntimeError('Locomotive manager not initialized')
@@ -369,7 +366,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             coupling_event_publisher=self.event_collector.add_coupling_event,
         )
         # Use original working collection coordinator with proper interface
-        self.collection_coordinator = CollectionCoordinator(collection_config, coordination_service)
+        self.collection_coordinator = CollectionCoordinator(collection_config)
 
         # Wire dispatcher if configured
         if self.locomotive_dispatcher:
@@ -417,7 +414,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         if self.locomotive_dispatcher:
             self.workshop_coordinator.locomotive_dispatcher = self.locomotive_dispatcher
 
-    def _build_parking_coordinator(self, coordination_service: CoordinationService) -> None:
+    def _build_parking_coordinator(self) -> None:
         """Build parking coordinator."""
         if not self.locomotive_manager or not self.event_collector:
             raise RuntimeError('Required managers not initialized')
@@ -449,7 +446,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             idle_check_interval=self.scenario.parking_idle_check_interval,
             retrofitted_track_capacity=retrofitted_track_capacity,
         )
-        self.parking_coordinator = ParkingCoordinator(parking_config, coordination_service)
+        self.parking_coordinator = ParkingCoordinator(parking_config)
 
         # Set track manager for retrofitted and parking track capacity management
         self.parking_coordinator.track_manager = self.track_manager
