@@ -6,10 +6,12 @@ import logging
 from typing import Any
 
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
+from contexts.retrofit_workflow.application.services.locomotive_dispatcher import TaskRequest
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
 from contexts.retrofit_workflow.domain.events import CouplingEvent
 from contexts.retrofit_workflow.domain.events import ResourceStateChangeEvent
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
+from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
 from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 logger = logging.getLogger(__name__)
@@ -68,12 +70,48 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         self.track_manager = None
         self._waiting_processes: list[Any] = []
         self.track_selector: Any = None  # Will be set by context
+        self.locomotive_dispatcher = None  # Set by context if task_priorities configured
 
     def _get_tracks_by_type(self, track_type: str) -> list[Any]:
         """Get tracks by type using track_selector if available, otherwise empty list."""
         if self.track_selector:
             return self.track_selector.get_tracks_of_type(track_type)
         return []
+
+    def _allocate_locomotive(
+        self, wagons: list[Wagon], source_track_id: str, task_type: TaskType
+    ) -> Generator[Any, Any, Any]:
+        """Allocate a locomotive via dispatcher or direct FIFO.
+
+        Parameters
+        ----------
+        wagons : list[Wagon]
+            Wagons that need transport.
+        source_track_id : str
+            Source track ID for the task.
+        task_type : TaskType
+            Type of task for dispatcher priority evaluation.
+
+        Returns
+        -------
+        Locomotive
+            Allocated locomotive.
+        """
+        if self.locomotive_dispatcher:
+            event = self.env.event()
+            task = TaskRequest(
+                task_type=task_type,
+                wagons=wagons,
+                source_track_id=source_track_id,
+                callback=event,
+                submitted_at=self.env.now,
+            )
+            self.locomotive_dispatcher.submit_task(task)
+            loco = yield event
+            return loco
+
+        loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
+        return loco
 
     def start(self) -> None:
         """Start coordinator processes."""
@@ -162,7 +200,9 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 raise
 
             # Allocate locomotive (workshop already marked as busy above)
-            loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
+            loco = yield from self._allocate_locomotive(
+                batch_wagons, retrofit_track.track_id, TaskType.RETROFIT_TO_WORKSHOP
+            )
 
             # Start workshop process
             self.env.process(self._process_and_release(available_workshop, batch_wagons, loco, retrofit_track.track_id))
@@ -202,7 +242,9 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             yield self.env.timeout(coupling_time)
 
             logger.info('t=%.1f: LOCO → Allocating for pickup from %s', self.env.now, workshop_id)
-            pickup_loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
+            pickup_loco = yield from self._allocate_locomotive(
+                wagons, workshop_id, TaskType.WORKSHOP_TO_RETROFITTED
+            )
             logger.info('t=%.1f: LOCO[%s] → Allocated for pickup', self.env.now, pickup_loco.id)
 
             # Transport wagons away from workshop

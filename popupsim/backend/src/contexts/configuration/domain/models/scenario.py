@@ -9,6 +9,7 @@ from typing import Any
 
 from contexts.configuration.application.dtos import LocomotiveInputDTO
 from contexts.configuration.application.dtos import RouteInputDTO
+from contexts.configuration.application.dtos import TaskPriorityInputDTO
 from contexts.configuration.application.dtos import TrackInputDTO
 from contexts.configuration.application.dtos import WorkshopInputDTO
 from pydantic import BaseModel
@@ -88,6 +89,12 @@ class Scenario(BaseModel):
     parking_idle_check_interval: float = 1.0
     loco_delivery_strategy: LocoDeliveryStrategy = LocoDeliveryStrategy.RETURN_TO_PARKING
     loco_priority_strategy: LocoPriorityStrategy = LocoPriorityStrategy.WORKSHOP_PRIORITY
+    task_priorities: dict[str, TaskPriorityInputDTO] = Field(
+        default_factory=dict,
+        description='Priority configuration per task type with fill-level-dependent rules. '
+        'Keys are task types (e.g. "collection_to_retrofit", "retrofitted_to_parking"). '
+        'Values define base_priority and rules for dynamic escalation.',
+    )
     locomotives: list[LocomotiveInputDTO] | None = None
     process_times: ProcessTimes | None = None
     routes: list[RouteInputDTO] | None = None

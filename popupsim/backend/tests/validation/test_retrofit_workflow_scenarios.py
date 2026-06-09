@@ -200,6 +200,7 @@ def create_test_scenario(
 
     # Locomotive priority strategy for coordination
     mock_scenario.loco_priority_strategy = Mock(value='batch_completion')
+    mock_scenario.task_priorities = {}
 
     # Parking strategy configuration
     mock_scenario.parking_strategy = 'opportunistic'  # Use opportunistic for tests

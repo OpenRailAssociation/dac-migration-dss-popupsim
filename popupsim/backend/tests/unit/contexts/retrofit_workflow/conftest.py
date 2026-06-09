@@ -120,5 +120,6 @@ def mock_scenario():
 
     # Priority strategy
     scenario.loco_priority_strategy = Mock(value='workshop_priority')
+    scenario.task_priorities = {}
 
     return scenario

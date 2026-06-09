@@ -69,6 +69,7 @@ def create_test_scenario(num_wagons: int = 2, num_workshops: int = 1) -> Mock:
     # Process times
     mock_scenario.process_times = Mock(wagon_retrofit_time=timedelta(minutes=10))
     mock_scenario.loco_priority_strategy = Mock(value='workshop_priority')
+    mock_scenario.task_priorities = {}
 
     return mock_scenario
 

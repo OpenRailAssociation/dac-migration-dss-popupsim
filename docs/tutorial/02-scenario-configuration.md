@@ -165,6 +165,94 @@ To define how much of each track type's physical length should be usable, use `t
 - Set collection tracks to 80% to account for coupling distances
 - Set workshop tracks to 100% since wagons are precisely positioned
 
+### Locomotive Task Priorities
+
+To control which operations a locomotive serves first, configure `task_priorities`. Priorities are dynamic — they change based on track fill levels, so the system reacts to pressure automatically.
+
+```json
+{
+  "task_priorities": {
+    "collection_to_retrofit": {
+      "base_priority": 2,
+      "hold_until": {"condition": "target_fill_below", "threshold": 0.6},
+      "rules": [
+        {"condition": "source_fill_above", "threshold": 0.7, "priority": 1},
+        {"condition": "source_fill_above", "threshold": 0.9, "priority": 0}
+      ]
+    },
+    "retrofit_to_workshop": {
+      "base_priority": 3,
+      "rules": [
+        {"condition": "target_idle", "threshold": 0.0, "priority": 1},
+        {"condition": "source_fill_below", "threshold": 0.2, "priority": 5}
+      ]
+    },
+    "workshop_to_retrofitted": {
+      "base_priority": 2,
+      "rules": []
+    },
+    "retrofitted_to_parking": {
+      "base_priority": 3,
+      "hold_until": {"condition": "source_fill_above", "threshold": 0.3},
+      "rules": [
+        {"condition": "source_fill_above", "threshold": 0.8, "priority": 1},
+        {"condition": "source_fill_above", "threshold": 0.95, "priority": 0}
+      ]
+    }
+  }
+}
+```
+
+**Task Types:**
+
+| Task Type | Movement |
+|-----------|----------|
+| `collection_to_retrofit` | Collection track → Retrofit staging |
+| `retrofit_to_workshop` | Retrofit staging → Workshop |
+| `workshop_to_retrofitted` | Workshop → Retrofitted staging |
+| `retrofitted_to_parking` | Retrofitted staging → Parking |
+
+**Priority Values:**
+- Lower number = higher priority (0 is most urgent)
+- `base_priority` applies when no rules match
+- Rules are evaluated top-to-bottom, last matching rule wins
+
+**Hold Until (Task Eligibility Gate):**
+
+The `hold_until` field prevents a task from being submitted until a condition is met. This avoids wasteful small-batch trips — wagons accumulate until there's enough room at the target for a meaningful batch.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `condition` | string | Condition that must be TRUE for the task to proceed |
+| `threshold` | float | Threshold value (0.0–1.0) |
+
+**Example:** `"hold_until": {"condition": "target_fill_below", "threshold": 0.6}` means "don't move wagons until the target track is below 60% full." While held, wagons accumulate at the source, naturally forming larger batches.
+
+**Available Conditions (for both rules and hold_until):**
+
+| Condition | Description |
+|-----------|-------------|
+| `source_fill_above` | Source track type fill level exceeds threshold |
+| `source_fill_below` | Source track type fill level is below threshold |
+| `target_fill_above` | Target track type fill level exceeds threshold |
+| `target_fill_below` | Target track type fill level is below threshold |
+| `target_idle` | Target resource (workshop) is idle |
+
+**How It Works:**
+1. Coordinator detects wagons ready to move
+2. If `hold_until` condition is NOT met → task is held (not submitted)
+3. Once condition is met → task is submitted to the dispatcher
+4. Dispatcher evaluates priority of all eligible pending tasks
+5. Highest-priority task (lowest number) gets the next free locomotive
+6. Ties are broken by submission time (first-come-first-served)
+
+**Optimization Use Cases:**
+- Hold collection→retrofit until retrofit is below 60% (accumulate proper batches)
+- Hold parking until retrofitted track is above 30% (don't waste trips for 1-2 wagons)
+- Clear collection tracks urgently when trains are arriving (prevent blocking)
+- Feed idle workshops immediately (maximize throughput)
+- Escalate parking when retrofitted track fills up (prevent workshop stalling)
+
 ## Validation Rules
 
 - `id` must be unique across scenarios

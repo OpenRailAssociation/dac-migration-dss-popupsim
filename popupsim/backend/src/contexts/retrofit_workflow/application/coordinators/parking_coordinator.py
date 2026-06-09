@@ -7,7 +7,9 @@ from typing import Any
 from contexts.retrofit_workflow.application.config.coordinator_config import ParkingCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
+from contexts.retrofit_workflow.application.services.locomotive_dispatcher import TaskRequest
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
 import simpy
 
 logger = logging.getLogger(__name__)
@@ -31,6 +33,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         self.batch_counter = 0
         self.track_manager = None
         self.track_selector = None  # Will be set by context
+        self.locomotive_dispatcher = None  # Set by context if task_priorities configured
 
     def _get_tracks_by_type(self, track_type: str) -> list[Any]:
         """Get tracks by type using track_selector if available, otherwise empty list."""
@@ -551,6 +554,37 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
         except GeneratorExit:
             pass
 
+    def _allocate_locomotive(self, wagons: list[Wagon], source_track_id: str) -> Generator[Any, Any, Any]:
+        """Allocate a locomotive via dispatcher or direct FIFO.
+
+        Parameters
+        ----------
+        wagons : list[Wagon]
+            Wagons that need transport.
+        source_track_id : str
+            Source track ID for the task.
+
+        Returns
+        -------
+        Locomotive
+            Allocated locomotive.
+        """
+        if self.locomotive_dispatcher:
+            event = self.config.env.event()
+            task = TaskRequest(
+                task_type=TaskType.RETROFITTED_TO_PARKING,
+                wagons=wagons,
+                source_track_id=source_track_id,
+                callback=event,
+                submitted_at=self.config.env.now,
+            )
+            self.locomotive_dispatcher.submit_task(task)
+            loco = yield event
+            return loco
+
+        loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
+        return loco
+
     def _transport_batch_aggregate(
         self, batch_aggregate: Any, parking_track_id: str, retrofitted_track_id: str
     ) -> Generator[Any, Any]:
@@ -567,7 +601,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
             self._publish_batch_events(batch_aggregate, parking_track_id)
 
             logger.info('t=%.1f: LOCO → Allocating for parking transport', self.config.env.now)
-            loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
+            loco = yield from self._allocate_locomotive(wagons, retrofitted_track_id)
             logger.info('t=%.1f: LOCO[%s] → Allocated for parking transport', self.config.env.now, loco.id)
             EventPublisherHelper.publish_loco_allocated(
                 self.config.loco_event_publisher, self.config.env.now, loco.id, 'batch_transport'
