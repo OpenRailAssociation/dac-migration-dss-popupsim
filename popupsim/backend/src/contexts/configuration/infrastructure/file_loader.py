@@ -44,6 +44,7 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             or SelectionStrategy.LEAST_OCCUPIED,
             workshop_selection_strategy=data.get('workshop_selection_strategy') or SelectionStrategy.ROUND_ROBIN,
             parking_selection_strategy=data.get('parking_selection_strategy') or SelectionStrategy.LEAST_OCCUPIED,
+            track_type_fill_factors=data.get('track_type_fill_factors', {}),
             parking_strategy=data.get('parking_strategy', 'opportunistic'),
             parking_normal_threshold=data.get('parking_normal_threshold', 0.3),
             parking_critical_threshold=data.get('parking_critical_threshold', 0.8),
@@ -91,12 +92,14 @@ class FileLoader:  # pylint: disable=too-few-public-methods
                 track_length = t.get(
                     'capacity', t.get('length', sum(edge_lengths.get(edge, 0.0) for edge in t.get('edges', [])))
                 )
+                track_type = t.get('type', 'standard')
+                default_fill = scenario.track_type_fill_factors.get(track_type, 0.75)
                 tracks.append(
                     TrackInputDTO(
                         id=t['id'],
-                        type=t.get('type', 'standard'),
+                        type=track_type,
                         length=track_length,
-                        fillfactor=t.get('fillfactor', 0.75),
+                        fillfactor=t.get('fillfactor', default_fill),
                     )
                 )
             scenario.tracks = tracks
@@ -106,12 +109,14 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             tracks = []
             for t in track_data['tracks']:
                 track_length = t.get('length', sum(edge_lengths.get(edge, 0.0) for edge in t.get('edges', [])))
+                track_type = t.get('type', 'standard')
+                default_fill = scenario.track_type_fill_factors.get(track_type, 0.75)
                 tracks.append(
                     TrackInputDTO(
                         id=t['id'],
-                        type=t.get('type', 'standard'),
+                        type=track_type,
                         length=track_length,
-                        fillfactor=t.get('fillfactor', 0.75),
+                        fillfactor=t.get('fillfactor', default_fill),
                     )
                 )
             scenario.tracks = tracks

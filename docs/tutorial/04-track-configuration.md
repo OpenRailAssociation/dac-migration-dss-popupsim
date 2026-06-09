@@ -28,6 +28,15 @@ Each track definition contains:
 | `name` | string | No | Human-readable track name |
 | `edges` | array[string] | Yes | List of edge IDs from topology.json |
 | `type` | string | Yes | Track type (determines function) |
+| `fillfactor` | float | No | Usable fraction of track length (0.0–1.0). Overrides the type-level default from scenario.json. If not set, uses the value from `track_type_fill_factors` in scenario.json, or 0.75 as final fallback. |
+
+### Per-Track Fill Factor Example
+
+```json
+{"id": "parking1", "edges": ["parking1"], "type": "parking", "fillfactor": 0.5}
+```
+
+This track would only use 50% of its physical length, regardless of the type-level setting in `scenario.json`.
 
 ## Track Types
 
