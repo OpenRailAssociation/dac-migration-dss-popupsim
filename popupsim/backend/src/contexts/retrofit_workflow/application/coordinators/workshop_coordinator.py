@@ -242,9 +242,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             yield self.env.timeout(coupling_time)
 
             logger.info('t=%.1f: LOCO → Allocating for pickup from %s', self.env.now, workshop_id)
-            pickup_loco = yield from self._allocate_locomotive(
-                wagons, workshop_id, TaskType.WORKSHOP_TO_RETROFITTED
-            )
+            pickup_loco = yield from self._allocate_locomotive(wagons, workshop_id, TaskType.WORKSHOP_TO_RETROFITTED)
             logger.info('t=%.1f: LOCO[%s] → Allocated for pickup', self.env.now, pickup_loco.id)
 
             # Transport wagons away from workshop
