@@ -18,6 +18,7 @@ from contexts.retrofit_workflow.application.coordinators.workshop_coordinator im
 from contexts.retrofit_workflow.application.coordinators.workshop_coordinator import WorkshopCoordinatorConfig
 from contexts.retrofit_workflow.application.event_collector import EventCollector
 from contexts.retrofit_workflow.application.services.coordination_service import CoordinationService
+from contexts.retrofit_workflow.application.services.locomotive_dispatcher import LocomotiveDispatcher
 from contexts.retrofit_workflow.domain.entities.locomotive import Locomotive
 from contexts.retrofit_workflow.domain.entities.workshop import Workshop
 from contexts.retrofit_workflow.domain.services.batch_formation_service import BatchFormationService
@@ -28,6 +29,11 @@ from contexts.retrofit_workflow.domain.services.route_service import RouteServic
 from contexts.retrofit_workflow.domain.services.track_selection_service import TrackSelectionFacade
 from contexts.retrofit_workflow.domain.services.train_formation_service import TrainFormationService
 from contexts.retrofit_workflow.domain.services.workshop_assignment_service import WorkshopAssignmentService
+from contexts.retrofit_workflow.domain.value_objects.task_priority import HoldCondition
+from contexts.retrofit_workflow.domain.value_objects.task_priority import PriorityConditionType
+from contexts.retrofit_workflow.domain.value_objects.task_priority import PriorityRule
+from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskPriorityConfig
+from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
 from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import LocomotiveResourceManager
 from contexts.retrofit_workflow.infrastructure.resources.track_capacity_manager import TrackResourceManager
 from contexts.retrofit_workflow.infrastructure.resources.workshop_resource_manager import WorkshopResourceManager
@@ -102,6 +108,9 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         # Coordination state for priority management (parking has priority over workshop)
         self.parking_in_progress: bool = False
         self.retrofitted_accumulator: list[Any] = []  # Wagons waiting to be parked
+
+        # Locomotive dispatcher (priority-based task assignment)
+        self.locomotive_dispatcher: LocomotiveDispatcher | None = None
 
     def initialize(self) -> None:
         """Initialize context from scenario using builder pattern."""
@@ -183,6 +192,10 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         if self.track_manager:
             metrics['tracks'] = self.track_manager.get_all_metrics()
 
+        # Dispatcher metrics
+        if self.locomotive_dispatcher:
+            metrics['dispatcher'] = self.locomotive_dispatcher.get_metrics()
+
         return metrics
 
     def export_events(self, output_dir: str) -> None:
@@ -218,6 +231,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
     def _build_remaining_components(self) -> None:
         """Build remaining components (simplified for now)."""
         self._build_track_and_route_services()
+        self._build_locomotive_dispatcher()
         self._build_coordinators()
 
     def _build_track_and_route_services(self) -> None:
@@ -261,6 +275,53 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
             tracks_by_type, strategies_by_type=strategies_by_type, default_strategy=SelectionStrategy.LEAST_OCCUPIED
         )
         self.workshop_assignment_service = WorkshopAssignmentService(dict(self.workshops))
+
+    def _build_locomotive_dispatcher(self) -> None:
+        """Build locomotive dispatcher with priority-based task assignment.
+
+        Creates the dispatcher only if task_priorities are configured in the scenario.
+        Otherwise coordinators continue using direct locomotive allocation (FIFO).
+        """
+        if not self.scenario.task_priorities or not self.locomotive_manager:
+            return
+
+        # Convert DTO configs to domain TaskPriorityConfig objects
+        priority_configs: dict[TaskType, TaskPriorityConfig] = {}
+        for task_type_str, dto in self.scenario.task_priorities.items():
+            try:
+                task_type = TaskType(task_type_str)
+            except ValueError:
+                continue  # Skip unknown task types
+
+            rules = [
+                PriorityRule(
+                    condition=PriorityConditionType(r.condition),
+                    threshold=r.threshold,
+                    priority=r.priority,
+                )
+                for r in dto.rules
+            ]
+            hold_until = None
+            if dto.hold_until:
+                hold_until = HoldCondition(
+                    condition=PriorityConditionType(dto.hold_until.condition),
+                    threshold=dto.hold_until.threshold,
+                )
+            priority_configs[task_type] = TaskPriorityConfig(
+                base_priority=dto.base_priority,
+                rules=rules,
+                hold_until=hold_until,
+            )
+
+        if not priority_configs:
+            return
+
+        self.locomotive_dispatcher = LocomotiveDispatcher(
+            env=self.env,
+            locomotive_manager=self.locomotive_manager,
+            track_selector=self.track_selector,
+            priority_configs=priority_configs,
+        )
 
     def _build_coordinators(self) -> None:
         """Build all coordinators."""
@@ -310,6 +371,10 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         # Use original working collection coordinator with proper interface
         self.collection_coordinator = CollectionCoordinator(collection_config, coordination_service)
 
+        # Wire dispatcher if configured
+        if self.locomotive_dispatcher:
+            self.collection_coordinator.locomotive_dispatcher = self.locomotive_dispatcher
+
         # Add compatibility wrapper for tests
         if not hasattr(self.collection_coordinator, 'add_wagon'):
 
@@ -348,6 +413,10 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         self.workshop_coordinator.track_manager = self.track_manager
         self.workshop_coordinator.track_selector = self.track_selector
 
+        # Wire dispatcher if configured
+        if self.locomotive_dispatcher:
+            self.workshop_coordinator.locomotive_dispatcher = self.locomotive_dispatcher
+
     def _build_parking_coordinator(self, coordination_service: CoordinationService) -> None:
         """Build parking coordinator."""
         if not self.locomotive_manager or not self.event_collector:
@@ -385,3 +454,7 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         # Set track manager for retrofitted and parking track capacity management
         self.parking_coordinator.track_manager = self.track_manager
         self.parking_coordinator.track_selector = self.track_selector
+
+        # Wire dispatcher if configured
+        if self.locomotive_dispatcher:
+            self.parking_coordinator.locomotive_dispatcher = self.locomotive_dispatcher

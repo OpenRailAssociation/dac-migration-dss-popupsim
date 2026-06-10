@@ -242,6 +242,7 @@ def create_layered_scenario(
     mock_scenario.process_times = process_times_mock
 
     mock_scenario.loco_priority_strategy = Mock(value='batch_completion')
+    mock_scenario.task_priorities = {}
     mock_scenario.collection_track_strategy = Mock(value='round_robin')
     mock_scenario.retrofit_selection_strategy = Mock(value='least_busy')
     mock_scenario.parking_selection_strategy = Mock(value='least_busy')

@@ -6,6 +6,9 @@ from pathlib import Path
 
 from contexts.configuration.application.dtos.locomotive_input_dto import LocomotiveInputDTO
 from contexts.configuration.application.dtos.route_input_dto import RouteInputDTO
+from contexts.configuration.application.dtos.task_priority_input_dto import HoldConditionInputDTO
+from contexts.configuration.application.dtos.task_priority_input_dto import PriorityRuleInputDTO
+from contexts.configuration.application.dtos.task_priority_input_dto import TaskPriorityInputDTO
 from contexts.configuration.application.dtos.track_input_dto import TrackInputDTO
 from contexts.configuration.application.dtos.train_input_dto import TrainInputDTO
 from contexts.configuration.application.dtos.wagon_input_dto import WagonInputDTO
@@ -50,6 +53,7 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             parking_critical_threshold=data.get('parking_critical_threshold', 0.8),
             parking_idle_check_interval=data.get('parking_idle_check_interval', 1.0),
             loco_delivery_strategy=data.get('loco_delivery_strategy') or LocoDeliveryStrategy.RETURN_TO_PARKING,
+            task_priorities=self._parse_task_priorities(data.get('task_priorities', {})),
         )
 
         # Load locomotives (inline or from file)
@@ -219,3 +223,41 @@ class FileLoader:  # pylint: disable=too-few-public-methods
             scenario.process_times = ProcessTimes(**data['process_times'])
 
         return scenario
+
+    @staticmethod
+    def _parse_task_priorities(raw: dict) -> dict[str, TaskPriorityInputDTO]:
+        """Parse task_priorities from JSON into DTOs.
+
+        Parameters
+        ----------
+        raw : dict
+            Raw JSON dict, e.g. {"collection_to_retrofit": {"base_priority": 2, "rules": [...]}}
+
+        Returns
+        -------
+        dict[str, TaskPriorityInputDTO]
+            Parsed task priority configurations keyed by task type.
+        """
+        result: dict[str, TaskPriorityInputDTO] = {}
+        for task_type, config in raw.items():
+            rules = [
+                PriorityRuleInputDTO(
+                    condition=r['condition'],
+                    threshold=r.get('threshold', 0.0),
+                    priority=r['priority'],
+                )
+                for r in config.get('rules', [])
+            ]
+            hold_until = None
+            if 'hold_until' in config:
+                h = config['hold_until']
+                hold_until = HoldConditionInputDTO(
+                    condition=h['condition'],
+                    threshold=h.get('threshold', 0.0),
+                )
+            result[task_type] = TaskPriorityInputDTO(
+                base_priority=config.get('base_priority', 3),
+                rules=rules,
+                hold_until=hold_until,
+            )
+        return result

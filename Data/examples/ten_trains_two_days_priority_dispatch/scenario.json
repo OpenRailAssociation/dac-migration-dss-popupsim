@@ -1,9 +1,10 @@
 {
-  "id": "test_scenario_01",
-  "description": "DAC restrofit simualation with 1 loco, 3 collections tracks, 2 workshops with 2 bays",
+  "id": "priority_dispatch_scenario",
+  "description": "DAC retrofit simulation with priority-based locomotive dispatch. Same infrastructure as baseline but with fill-level-dependent task prioritization and hold conditions.",
   "version": "1.0.0",
   "start_date": "2025-12-01T00:00:00+00:00",
   "end_date": "2025-12-11T00:00:00+00:00",
+  "workflow_mode": "retrofit_workflow",
   "collection_track_strategy": "first_available",
   "retrofit_selection_strategy": "least_occupied",
   "retrofitted_selection_strategy": "least_occupied",
@@ -12,29 +13,29 @@
   "task_priorities": {
     "collection_to_retrofit": {
       "base_priority": 2,
-      "hold_until": {"condition": "target_fill_below", "threshold": 0.6},
+      "hold_until": {"condition": "target_fill_below", "threshold": 0.85},
       "rules": [
-        {"condition": "source_fill_above", "threshold": 0.7, "priority": 1},
-        {"condition": "source_fill_above", "threshold": 0.9, "priority": 0}
+        {"condition": "source_fill_above", "threshold": 0.5, "priority": 1},
+        {"condition": "source_fill_above", "threshold": 0.8, "priority": 0}
       ]
     },
     "retrofit_to_workshop": {
       "base_priority": 3,
       "rules": [
-        {"condition": "target_idle", "threshold": 0.0, "priority": 1},
-        {"condition": "source_fill_below", "threshold": 0.2, "priority": 5}
+        {"condition": "target_idle", "threshold": 0.0, "priority": 0},
+        {"condition": "source_fill_below", "threshold": 0.1, "priority": 5}
       ]
     },
     "workshop_to_retrofitted": {
-      "base_priority": 2,
+      "base_priority": 1,
       "rules": []
     },
     "retrofitted_to_parking": {
       "base_priority": 3,
-      "hold_until": {"condition": "source_fill_above", "threshold": 0.3},
+      "hold_until": {"condition": "source_fill_above", "threshold": 0.15},
       "rules": [
-        {"condition": "source_fill_above", "threshold": 0.8, "priority": 1},
-        {"condition": "source_fill_above", "threshold": 0.95, "priority": 0}
+        {"condition": "source_fill_above", "threshold": 0.6, "priority": 1},
+        {"condition": "source_fill_above", "threshold": 0.85, "priority": 0}
       ]
     }
   },

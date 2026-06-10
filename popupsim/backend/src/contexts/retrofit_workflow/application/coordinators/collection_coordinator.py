@@ -7,7 +7,9 @@ from typing import Any
 from contexts.retrofit_workflow.application.config.coordinator_config import CollectionCoordinatorConfig
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.interfaces.coordination_interfaces import CoordinationService
+from contexts.retrofit_workflow.application.services.locomotive_dispatcher import TaskRequest
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +20,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
     Flow:
     1. Wait for wagons on collection track
     2. Form batch (fits retrofit track capacity)
-    3. Request locomotive
+    3. Request locomotive (via dispatcher if configured, else direct FIFO)
     4. Transport to retrofit track
     5. Release locomotive
     """
@@ -34,6 +36,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         self.coordination = coordination
         self.batch_counter = 0
         self.track_manager = config.track_manager
+        self.locomotive_dispatcher = None  # Set by context if task_priorities configured
 
     def start(self) -> None:
         """Start coordinator processes - one per collection track."""
@@ -218,6 +221,35 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             self.config.loco_event_publisher, self.config.env.now, loco.id, loco.home_track
         )
 
+    def _allocate_locomotive(self, wagons: list[Wagon]) -> Generator[Any, Any, Any]:
+        """Allocate a locomotive via dispatcher or direct FIFO.
+
+        Parameters
+        ----------
+        wagons : list[Wagon]
+            Wagons that need transport (for task metadata).
+
+        Returns
+        -------
+        Locomotive
+            Allocated locomotive.
+        """
+        if self.locomotive_dispatcher:
+            event = self.config.env.event()
+            task = TaskRequest(
+                task_type=TaskType.COLLECTION_TO_RETROFIT,
+                wagons=wagons,
+                source_track_id=wagons[0].current_track_id if wagons else '',
+                callback=event,
+                submitted_at=self.config.env.now,
+            )
+            self.locomotive_dispatcher.submit_task(task)
+            loco = yield event
+            return loco
+
+        loco = yield from self.config.locomotive_manager.allocate(purpose='collection_pickup')
+        return loco
+
     def _transport_to_retrofit_with_batch(  # noqa: PLR0915  # pylint: disable=too-many-locals,too-many-statements
         self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str
     ) -> Generator[Any, Any]:
@@ -232,7 +264,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         logger.info('t=%.1f: COLLECTION → Capacity reserved, allocating locomotive', self.config.env.now)
 
         # Allocate locomotive and move to collection
-        loco = yield from self.config.locomotive_manager.allocate(purpose='collection_pickup')
+        loco = yield from self._allocate_locomotive(wagons)
 
         # Get collection track ID from first wagon
         collection_track_id = wagons[0].current_track_id
