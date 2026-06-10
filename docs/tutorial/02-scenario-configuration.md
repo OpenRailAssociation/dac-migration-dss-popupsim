@@ -133,6 +133,38 @@ To test different resource allocation approaches:
 - Using `least_occupied` for workshops distributes work evenly, preventing bottlenecks
 - Using `shortest_queue` for workshops minimizes wagon waiting times
 
+### Setting Maximum Fill Levels Per Track Type
+
+To define how much of each track type's physical length should be usable, use `track_type_fill_factors`. This sets a default fill factor for all tracks of a given type:
+
+```json
+{
+  "track_type_fill_factors": {
+    "parking": 0.6,
+    "collection": 0.8,
+    "retrofit": 0.9,
+    "retrofitted": 0.85,
+    "workshop": 1.0
+  }
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `track_type_fill_factors` | object | Maps track type names to fill factor values (0.0 – 1.0) |
+
+**Fill Factor Values:**
+- `1.0` = 100% of physical track length is usable
+- `0.75` = 75% of physical track length is usable (default when not specified)
+- `0.5` = 50% of physical track length is usable
+
+**Precedence:** If an individual track in `tracks.json` specifies its own `fillfactor`, that value takes priority over the type-level default defined here.
+
+**Use Cases:**
+- Set parking tracks to 60% to leave safety margins for shunting operations
+- Set collection tracks to 80% to account for coupling distances
+- Set workshop tracks to 100% since wagons are precisely positioned
+
 ## Validation Rules
 
 - `id` must be unique across scenarios

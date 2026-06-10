@@ -77,6 +77,11 @@ class Scenario(BaseModel):
         print(f'DEBUG VALIDATOR: parking_selection_strategy raw value: {v}, type: {type(v)}')
         return v
 
+    track_type_fill_factors: dict[str, float] = Field(
+        default_factory=dict,
+        description='Maximum fill factor per track type (e.g. {"parking": 0.6, "collection": 0.8}). '
+        'Individual track fillfactor values override these defaults.',
+    )
     parking_strategy: str = 'opportunistic'
     parking_normal_threshold: float = 0.3
     parking_critical_threshold: float = 0.8
