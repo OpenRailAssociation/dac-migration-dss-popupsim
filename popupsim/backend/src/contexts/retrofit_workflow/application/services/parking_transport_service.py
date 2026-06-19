@@ -35,14 +35,19 @@ class ParkingTransportService:
         loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
         EventPublisherHelper.publish_loco_allocated(self.config.loco_event_publisher, self.config.env.now, loco.id)
 
+        transport_completed = False
         try:
             # Execute transport workflow
             yield from self._execute_transport_workflow(loco, batch_aggregate, batch_id, parking_track_id)
             yield from self._park_wagons(wagons, parking_track_id)
             yield from self._return_locomotive(loco, parking_track_id)
+            transport_completed = True
         finally:
-            # Always release locomotive
-            yield from self.config.locomotive_manager.release(loco)
+            # Release locomotive - use sync version if generator is being closed
+            if transport_completed:
+                yield from self.config.locomotive_manager.release(loco)
+            else:
+                self.config.locomotive_manager.force_release(loco)
 
     def transport_batch_old_method(
         self, wagons: list[Wagon], batch_id: str, parking_track_id: str
@@ -61,12 +66,17 @@ class ParkingTransportService:
         loco = yield from self.config.locomotive_manager.allocate(purpose='batch_transport')
         EventPublisherHelper.publish_loco_allocated(self.config.loco_event_publisher, self.config.env.now, loco.id)
 
+        transport_completed = False
         try:
             yield from self._transport_to_parking_simple(loco, wagons, batch_id, parking_track_id)
             yield from self._park_wagons(wagons, parking_track_id)
             yield from self._return_locomotive(loco, parking_track_id)
+            transport_completed = True
         finally:
-            yield from self.config.locomotive_manager.release(loco)
+            if transport_completed:
+                yield from self.config.locomotive_manager.release(loco)
+            else:
+                self.config.locomotive_manager.force_release(loco)
 
     def _publish_batch_events(self, batch_aggregate: Any, parking_track_id: str) -> None:
         """Publish batch formation events."""

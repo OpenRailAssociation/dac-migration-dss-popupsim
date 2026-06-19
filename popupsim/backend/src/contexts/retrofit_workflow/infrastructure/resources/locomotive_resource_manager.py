@@ -177,3 +177,19 @@ class LocomotiveResourceManager:
             'allocated': self.get_allocated_count(),
             'utilization_percent': self.get_utilization(),
         }
+
+    def force_release(self, loco: Locomotive) -> None:
+        """Release locomotive back to pool without yielding.
+
+        Used when a generator is being closed (GeneratorExit) and cannot yield.
+        This avoids the RuntimeError caused by yielding in a finally block
+        during generator cleanup.
+
+        Args:
+            loco: Locomotive to release
+        """
+        if loco.id in self._allocated:
+            self._allocated.remove(loco.id)
+
+        # Put directly into store without yielding
+        self.store.put(loco)

@@ -330,6 +330,7 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 self.config.loco_event_publisher, self.config.env.now, loco.id, 'batch_transport'
             )
 
+            transport_completed = False
             try:
                 EventPublisherHelper.publish_loco_moving(
                     self.config.loco_event_publisher,
@@ -353,9 +354,15 @@ class ParkingCoordinator:  # pylint: disable=too-many-instance-attributes,too-fe
                 )
                 yield from self._park_wagons(wagons, parking_track_id)
                 yield from self._return_locomotive(loco, parking_track_id)
+                transport_completed = True
             finally:
-                logger.info('t=%.1f: LOCO[%s] → Releasing', self.config.env.now, loco.id)
-                yield from self.config.locomotive_manager.release(loco)
-                logger.info('t=%.1f: LOCO[%s] → Released', self.config.env.now, loco.id)
+                if transport_completed:
+                    logger.info('t=%.1f: LOCO[%s] → Releasing', self.config.env.now, loco.id)
+                    yield from self.config.locomotive_manager.release(loco)
+                    logger.info('t=%.1f: LOCO[%s] → Released', self.config.env.now, loco.id)
+                else:
+                    # Simulation ended or generator closed - release synchronously if possible
+                    logger.info('t=%.1f: LOCO[%s] → Force releasing (simulation ending)', self.config.env.now, loco.id)
+                    self.config.locomotive_manager.force_release(loco)
         except GeneratorExit:
             pass
