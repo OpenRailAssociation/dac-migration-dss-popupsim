@@ -7,6 +7,76 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
+def _render_track_configuration(scenario_config: dict[str, Any], track_capacity: pd.DataFrame) -> None:  # pylint: disable=too-many-locals
+    """Render track configuration showing full length, fill factor, and effective capacity."""
+    tracks_config = scenario_config.get('tracks', {})
+    topology_config = scenario_config.get('topology', {})
+    scenario_data = scenario_config.get('scenario', {})
+
+    if not tracks_config or not topology_config:
+        return
+
+    tracks_list = tracks_config.get('tracks', [])
+    edges = topology_config.get('edges', {})
+    track_type_fill_factors = scenario_data.get('track_type_fill_factors', {})
+
+    if not tracks_list:
+        return
+
+    st.subheader('Track Configuration')
+    st.caption(
+        '**Effective capacity** = Full length x Fill factor. '
+        'Utilization percentages in all charts below are relative to the effective capacity, not the full length.'
+    )
+
+    # Build configuration table
+    config_rows = []
+    # Get tracks that appear in the simulation output
+    active_track_ids = set(track_capacity['track_id'].unique()) if track_capacity is not None else set()
+
+    for track in tracks_list:
+        track_id = track.get('id', '')
+        track_type = track.get('type', 'standard')
+        track_edges = track.get('edges', [])
+
+        # Calculate full length from topology edges
+        full_length = track.get('length', sum(edges.get(edge, {}).get('length', 0.0) for edge in track_edges))
+
+        # Determine fill factor (per-track override > per-type override > default 0.75)
+        default_fill = track_type_fill_factors.get(track_type, 0.75)
+        fill_factor = track.get('fillfactor', default_fill)
+
+        effective_capacity = full_length * fill_factor
+
+        config_rows.append(
+            {
+                'Track ID': track_id,
+                'Type': track_type,
+                'Full Length (m)': round(full_length, 1),
+                'Fill Factor': fill_factor,
+                'Effective Capacity (m)': round(effective_capacity, 1),
+                'Active': '✅' if track_id in active_track_ids else '—',
+            }
+        )
+
+    config_df = pd.DataFrame(config_rows)
+
+    # Show summary metrics
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        total_full = config_df['Full Length (m)'].sum()
+        st.metric('Total Full Length', f'{total_full:,.0f} m')
+    with col2:
+        total_effective = config_df['Effective Capacity (m)'].sum()
+        st.metric('Total Effective Capacity', f'{total_effective:,.0f} m')
+    with col3:
+        avg_fill = config_df['Fill Factor'].mean()
+        st.metric('Avg Fill Factor', f'{avg_fill:.2f}')
+
+    # Show table
+    st.dataframe(config_df, use_container_width=True, hide_index=True, height=min(400, 35 * len(config_rows) + 38))
+
+
 def render_track_capacity_tab(data: dict[str, Any]) -> None:
     """Render track capacity analysis tab."""
     st.header('🛤️ Track Capacity')
@@ -16,6 +86,12 @@ def render_track_capacity_tab(data: dict[str, Any]) -> None:
     if track_capacity is None or track_capacity.empty:
         st.warning('⚠️ No track capacity data available')
         return
+
+    # Section 0: Track Configuration Info (full length, fill factor, effective capacity)
+    scenario_config = data.get('scenario_config', {})
+    _render_track_configuration(scenario_config, track_capacity)
+
+    st.markdown('---')
 
     # Get latest capacity state for each track
     latest_capacity = track_capacity.groupby('track_id').last().reset_index()
