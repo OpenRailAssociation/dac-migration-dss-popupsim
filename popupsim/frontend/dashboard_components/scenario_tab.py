@@ -219,7 +219,7 @@ def _render_schedule_section(analyzer: ScenarioAnalyzer) -> None:
         return
 
     # Create hourly bins
-    train_arrivals['hour'] = train_arrivals['arrival_time'].dt.floor('H')
+    train_arrivals['hour'] = train_arrivals['arrival_time'].dt.floor('h')
     hourly_wagons = train_arrivals.groupby('hour')['wagon_count'].sum()
 
     # Create plotly bar chart
