@@ -1,9 +1,8 @@
 name: "Dependabot Auto-merge"
 
-on: 
+on:
   pull_request:
     types: [opened, reopened, synchronize]
-  # Allows you to manually trigger this from the "Actions" tab if needed
   workflow_dispatch:
 
 permissions:
@@ -13,10 +12,8 @@ permissions:
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    # ✅ FIX: Check if the PR *Owner* is Dependabot, not the person running the workflow.
-    # This allows YOU to click "Re-run" on a Dependabot PR and have it succeed.
     if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
-    
+
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -24,10 +21,16 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Enable auto-merge for Patch releases
-        # Only merge if it is a Patch release
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
+      - name: Approve PR for Patch and Minor releases
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for Patch and Minor releases
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
