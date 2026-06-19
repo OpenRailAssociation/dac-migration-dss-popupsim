@@ -74,7 +74,8 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
         wagons = self._create_wagons_from_configs(wagon_configs, train_id, arrival_time)
 
         if not wagons:
-            raise ValueError(f'Train {train_id} must have at least one wagon')
+            # All wagons were filtered out (e.g., already retrofitted or loaded) - nothing to process
+            return
 
         # Create train aggregate
         train = Train(

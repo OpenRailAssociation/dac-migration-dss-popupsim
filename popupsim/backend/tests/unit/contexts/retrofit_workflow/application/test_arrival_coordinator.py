@@ -206,7 +206,9 @@ class TestArrivalCoordinator:
     def test_empty_wagon_configs(
         self, env: simpy.Environment, coordinator: ArrivalCoordinator, collection_queue: simpy.FilterStore
     ) -> None:
-        """Test train with no wagons raises error."""
-        with pytest.raises(ValueError, match='Train train_1 must have at least one wagon'):
-            coordinator.schedule_train(train_id='train_1', arrival_time=0.0, wagon_configs=[])
-            env.run(until=1.0)
+        """Test train with no eligible wagons is silently skipped."""
+        coordinator.schedule_train(train_id='train_1', arrival_time=0.0, wagon_configs=[])
+        env.run(until=1.0)
+
+        # Train should not be scheduled - nothing to process
+        assert len(coordinator.get_trains()) == 0
