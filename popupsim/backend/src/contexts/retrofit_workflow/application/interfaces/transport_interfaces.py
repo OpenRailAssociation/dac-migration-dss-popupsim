@@ -49,6 +49,9 @@ class LocomotiveManager(Protocol):
     def release(self, locomotive: Locomotive) -> Generator[Any, Any]:
         """Release locomotive back to pool."""
 
+    def force_release(self, locomotive: Locomotive) -> None:
+        """Release locomotive synchronously (for use during generator shutdown)."""
+
     def get_available_count(self) -> int:
         """Get number of available locomotives."""
 

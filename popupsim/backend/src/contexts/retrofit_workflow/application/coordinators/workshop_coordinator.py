@@ -214,7 +214,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 return workshop_id  # type: ignore[no-any-return]
         return None
 
-    def _process_and_release(  # noqa: C901
+    def _process_and_release(  # noqa: C901, PLR0912, PLR0915  # pylint: disable=too-many-statements,too-many-branches
         self, workshop_id: str, wagons: list[Wagon], loco: Any, retrofit_track_id: str
     ) -> Generator[Any, Any]:
         """Process batch and release workshop.
@@ -246,6 +246,7 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             logger.info('t=%.1f: LOCO[%s] → Allocated for pickup', self.env.now, pickup_loco.id)
 
             # Transport wagons away from workshop
+            transport_completed = False
             try:
                 retrofitted_tracks = self._get_tracks_by_type('retrofitted')
                 if not retrofitted_tracks:
@@ -255,12 +256,17 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 retrofitted_track_id = retrofitted_track.track_id
                 _ = self.batch_service.create_batch_aggregate(wagons, retrofitted_track_id)
                 yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
+                transport_completed = True
             except GeneratorExit:
                 pass
             except Exception:  # pylint: disable=broad-exception-caught
                 yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
+                transport_completed = True
             finally:
-                yield from self.locomotive_manager.release(pickup_loco)
+                if transport_completed:
+                    yield from self.locomotive_manager.release(pickup_loco)
+                else:
+                    self.locomotive_manager.force_release(pickup_loco)
 
             # NOW release workshop (wagons are gone)
             logger.info(
@@ -763,12 +769,18 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         pickup_loco = yield from self.locomotive_manager.allocate(purpose='batch_transport')
         print(f'[t={self.env.now}] WS: Got locomotive {pickup_loco.id} for pickup')
 
+        transport_completed = False
         try:
             _ = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
+            transport_completed = True
         except GeneratorExit:
             pass
         except Exception:  # pylint: disable=broad-exception-caught
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
+            transport_completed = True
         finally:
-            yield from self.locomotive_manager.release(pickup_loco)
+            if transport_completed:
+                yield from self.locomotive_manager.release(pickup_loco)
+            else:
+                self.locomotive_manager.force_release(pickup_loco)
