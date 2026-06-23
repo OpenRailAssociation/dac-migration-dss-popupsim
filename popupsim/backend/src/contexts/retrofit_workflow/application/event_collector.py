@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from collections.abc import Callable
+
 from contexts.retrofit_workflow.application.services.dual_stream_adapter import _record_loco_dual_stream
 from contexts.retrofit_workflow.application.services.dual_stream_adapter import _record_wagon_dual_stream
 from contexts.retrofit_workflow.application.services.dual_stream_collector import DualStreamEventCollector
