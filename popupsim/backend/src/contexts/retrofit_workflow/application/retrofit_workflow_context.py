@@ -343,6 +343,10 @@ class RetrofitWorkshopContext:  # pylint: disable=too-many-instance-attributes
         )
         self.arrival_coordinator = ArrivalCoordinator(arrival_config)
 
+        # Wire up retrofit completion notification so already-retrofitted wagons are rejected on re-arrival
+        if self.event_collector and self.arrival_coordinator:
+            self.event_collector.on_retrofit_completed = self.arrival_coordinator.mark_wagon_retrofitted
+
     def _build_collection_coordinator(self) -> None:
         """Build collection coordinator."""
         if not self.locomotive_manager:

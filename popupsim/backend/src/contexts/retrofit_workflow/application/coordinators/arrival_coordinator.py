@@ -56,6 +56,8 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
         self._eligibility_service = WagonEligibilityService()
         self._rejection_factory = RejectionEventFactory()
         self._trains: list[Train] = []
+        self._retrofitted_wagon_ids: set[str] = set()
+        self._accepted_wagon_ids: set[str] = set()
 
     def schedule_train(
         self,
@@ -105,6 +107,14 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
         """
         return self._trains.copy()
 
+    def mark_wagon_retrofitted(self, wagon_id: str) -> None:
+        """Mark a wagon as already retrofitted so it won't be processed again.
+
+        Args:
+            wagon_id: ID of the retrofitted wagon
+        """
+        self._retrofitted_wagon_ids.add(wagon_id)
+
     def _create_wagons_from_configs(
         self, wagon_configs: list[dict[str, Any]], train_id: str, arrival_time: float
     ) -> list[Wagon]:
@@ -122,6 +132,10 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
         eligible_wagons = []
 
         for config in wagon_configs:
+            # Check if wagon was already retrofitted or is currently being processed
+            if config['id'] in self._retrofitted_wagon_ids or config['id'] in self._accepted_wagon_ids:
+                config = {**config, 'needs_retrofit': False}
+
             # Check eligibility using domain service
             eligibility_result = self._eligibility_service.is_eligible_for_retrofit(config)
 
@@ -139,6 +153,9 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
 
             # Set train_id for rejection tracking
             wagon.train_id = train_id
+
+            # Track accepted wagon to prevent duplicate processing
+            self._accepted_wagon_ids.add(config['id'])
 
             eligible_wagons.append(wagon)
 

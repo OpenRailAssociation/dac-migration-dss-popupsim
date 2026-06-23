@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from collections.abc import Callable
+
 from contexts.retrofit_workflow.application.services.dual_stream_adapter import _record_loco_dual_stream
 from contexts.retrofit_workflow.application.services.dual_stream_adapter import _record_wagon_dual_stream
 from contexts.retrofit_workflow.application.services.dual_stream_collector import DualStreamEventCollector
@@ -43,6 +45,7 @@ class EventCollector:  # pylint: disable=too-many-public-methods
         self._dual_stream_exporter = DualStreamCsvExporter(start_datetime)
         self._metrics = MetricsAggregator()
         self.start_datetime = start_datetime
+        self.on_retrofit_completed: Callable[[str], None] | None = None
 
     @property
     def wagon_events(self) -> list[WagonJourneyEvent]:
@@ -75,6 +78,10 @@ class EventCollector:  # pylint: disable=too-many-public-methods
         # Also record in dual-stream
 
         _record_wagon_dual_stream(event, self)
+
+        # Notify arrival coordinator when a wagon completes retrofit
+        if event.event_type == 'RETROFIT_COMPLETED' and self.on_retrofit_completed is not None:
+            self.on_retrofit_completed(event.wagon_id)  # pylint: disable=not-callable
 
     def add_locomotive_event(self, event: LocomotiveMovementEvent) -> None:
         """Add locomotive event."""
@@ -216,7 +223,9 @@ class EventCollector:  # pylint: disable=too-many-public-methods
             **self._metrics.get_wagon_metrics(self.wagon_events),
             **self._metrics.get_workshop_metrics(self.wagon_events, self.resource_events),
             **self._metrics.get_locomotive_metrics(self.locomotive_events, self.resource_events),
-            **self._metrics.get_static_metrics(),
+            'locomotive_time_breakdown': self._metrics.get_locomotive_time_breakdown(
+                self.locomotive_events, self.coupling_events, duration
+            ),
             'simulation_duration_minutes': duration,
         }
 
