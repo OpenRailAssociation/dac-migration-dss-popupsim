@@ -4,13 +4,20 @@ from dataclasses import dataclass
 import json
 import logging
 from logging import StreamHandler
+import os
 from pathlib import Path
 import shutil
 from typing import Annotated
 from typing import Any
 
+from application.optimizer import AdaptiveOptimizer
+from application.optimizer import OptimizationObjective
+from application.optimizer import TrialResult
+from application.optimizer import _read_summary_metrics
+from application.optimizer import _suppress_logging
 from application.simulation_service import SimulationApplicationService
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
+from contexts.configuration.domain.models.scenario import Scenario
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from infrastructure.logging import init_process_logger
 from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
@@ -202,6 +209,252 @@ def run(
 
     typer.echo(f'\nSIMULATION TIME:            {result.duration:.1f} minutes')
     typer.echo('=' * 60)
+
+@app.command()
+def optimize(
+    scenario_folder_path: Annotated[Path, typer.Option('--scenario', help='Path to scenario directory')],
+    seed: Annotated[int, typer.Option('--seed', help='Random seed')] = 42,
+    n_random: Annotated[int, typer.Option('--n-random', help='Number of random samples')] = 500,
+    n_workers: Annotated[int, typer.Option('--n-workers', help='Number of parallel workers')] = 10,
+    k_starts: Annotated[int, typer.Option('--k-starts', help='Number of top elites to start Phase 2 descent from')] = 5,
+    max_rounds: Annotated[int, typer.Option('--max-rounds', help='Maximum rounds of coordinate descent')] = 5,
+    weight_completion: Annotated[float, typer.Option('--weight-completion', help='Weight for completion rate in score calculation')] = 0.9,
+    weight_loco: Annotated[float, typer.Option('--weight-loco', help='Weight for locomotive utilization in score calculation')] = -0.1,
+    results_json: Annotated[Path, typer.Option('--results-json', help='Path to output JSON file')] = Path('optimization_results.json'),
+) -> None:
+    """Load and optimize a scenario using a two-phase adaptive coordinate search."""
+    import random
+    import copy
+    import json
+    from tqdm import trange
+    from optimizer.harness import run_simulation, run_parallel
+    from optimizer.problem_space import parameter_config
+    from optimizer.util import score, convert, get_neighbors
+    
+    scenario = Scenario.model_validate_json((scenario_folder_path / "scenario.json").read_text(encoding='utf-8'))
+    initial_result = run_simulation(scenario_folder_path, weight_completion=weight_completion, weight_loco=weight_loco)
+    initial_summary = initial_result[0]
+    initial_score = initial_result[1]
+
+    # Helper function to canonicalize parameter dicts for caching seen configurations
+    def dict_to_key(d: dict) -> str:
+        def _serialize_enums(obj):
+            if isinstance(obj, dict):
+                return {k: _serialize_enums(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [_serialize_enums(x) for x in obj]
+            elif hasattr(obj, "value"):
+                return obj.value
+            return obj
+        return json.dumps(_serialize_enums(d), sort_keys=True)
+
+    # Initialize seen evaluations to avoid duplicates and store initial config
+    seen = {}
+    initial_params = {
+        "task_priorities": {
+            k: (v.model_dump() if v is not None else None)
+            for k, v in scenario.task_priorities.items()
+        }
+    }
+    initial_key = dict_to_key(initial_params)
+    seen[initial_key] = {
+        "score": initial_score,
+        "completion_rate_pct": initial_summary.completion_rate_pct,
+        "loco_utilization_pct": initial_summary.loco_utilization_pct,
+        "params": initial_params,
+    }
+
+    print(parameter_config.size())
+
+    # 1. Phase: Randomly generate parameters.
+    rng = random.Random(seed)
+    samples = []
+    elite_scenarios = []
+    attempts = 0
+    while len(samples) < n_random and attempts < n_random * 10:
+        attempts += 1
+        test = parameter_config.sample_value(rng)
+        if test is None:
+            raise RuntimeError("Failed to sample parameters. Top-Level Parameters should not contain Optionals.")
+        key = dict_to_key(test)
+        if key in seen or any(dict_to_key(s) == key for s in samples):
+            continue
+        new_scenario = convert(test, scenario)
+        samples.append(test)
+        elite_scenarios.append(new_scenario)
+
+    typer.echo("Evaluating initial random sample pool in parallel...")
+    results = run_parallel(scenario_folder_path, elite_scenarios, weight_completion=weight_completion, weight_loco=weight_loco)
+    
+    rated_runs = []
+    for param_dict, res in zip(samples, results):
+        if res is not None:
+            summary, sc, scen = res
+            rated_runs.append((sc, param_dict, res))
+            
+    rated_runs.sort(key=lambda x: x[0], reverse=True)
+
+    # Print top 5 elites
+    for i in range(min(5, len(rated_runs))):
+        sc, param_dict, res = rated_runs[i]
+        result = res[0]
+        typer.echo(f"Top {i+1} Elite: Score = {sc:.4f}, Completion Rate = {result.completion_rate_pct:.1f}%, Loco Utilization = {result.loco_utilization_pct:.1f}%")
+
+    # Cache Phase 1 evaluations
+    for sc, param_dict, res in rated_runs:
+        summary = res[0]
+        seen[dict_to_key(param_dict)] = {
+            "score": sc,
+            "completion_rate_pct": summary.completion_rate_pct,
+            "loco_utilization_pct": summary.loco_utilization_pct,
+            "params": param_dict,
+        }
+
+    # 2. Phase: Coordinate descent search along elites.
+    starts = rated_runs[:k_starts]
+    _TASK_NAMES = (
+        "collection_to_retrofit",
+        "retrofit_to_workshop",
+        "workshop_to_retrofitted",
+        "retrofitted_to_parking",
+    )
+
+    typer.echo(f"\nPhase 2 — coordinate descent from {len(starts)} starting point(s)")
+
+    for start_idx, (start_score, start_params, start_res) in enumerate(starts):
+        current_params = start_params
+        current_score = start_score
+        typer.echo(f"\n  Start {start_idx + 1}/{len(starts)}  (initial score={current_score:.4f})")
+
+        for round_idx in range(max_rounds):
+            improved = False
+
+            for task_name in _TASK_NAMES:
+                task_param = parameter_config.params["task_priorities"].params[task_name]
+                task_val = current_params["task_priorities"][task_name]
+                
+                neighbors_task_val = get_neighbors(task_param, task_val)
+                
+                neighbor_params = []
+                neighbor_scenarios = []
+                
+                for task_neighbor in neighbors_task_val:
+                    n_params = copy.deepcopy(current_params)
+                    n_params["task_priorities"][task_name] = task_neighbor
+                    
+                    key = dict_to_key(n_params)
+                    if key not in seen:
+                        neighbor_params.append(n_params)
+                        neighbor_scenarios.append(convert(n_params, scenario))
+
+                if neighbor_scenarios:
+                    # Run neighbor batch in parallel
+                    batch_results = run_parallel(scenario_folder_path, neighbor_scenarios, weight_completion=weight_completion, weight_loco=weight_loco)
+                    for n_p, res in zip(neighbor_params, batch_results):
+                        if res is not None:
+                            summary, sc, scen = res
+                            seen[dict_to_key(n_p)] = {
+                                "score": sc,
+                                "completion_rate_pct": summary.completion_rate_pct,
+                                "loco_utilization_pct": summary.loco_utilization_pct,
+                                "params": n_p,
+                            }
+
+                # Find the best neighbor (including previously evaluated configurations)
+                best_neighbor = None
+                best_neighbor_score = current_score
+                
+                for task_neighbor in neighbors_task_val:
+                    n_params = copy.deepcopy(current_params)
+                    n_params["task_priorities"][task_name] = task_neighbor
+                    key = dict_to_key(n_params)
+                    s = seen.get(key, {}).get("score", float("-inf"))
+                    if s > best_neighbor_score:
+                        best_neighbor_score = s
+                        best_neighbor = n_params
+
+                if best_neighbor is not None:
+                    typer.echo(
+                        f"    [{task_name[:3]}] improved: "
+                        f"{current_score:.4f} → {best_neighbor_score:.4f}"
+                    )
+                    current_params = best_neighbor
+                    current_score = best_neighbor_score
+                    improved = True
+
+            if not improved:
+                typer.echo(f"  Converged after round {round_idx + 1}")
+                break
+        else:
+            typer.echo(f"  Reached max_rounds={max_rounds}")
+
+        typer.echo(f"  Final score for start {start_idx + 1}: {current_score:.4f}")
+
+    # Output overall results
+    sorted_seen = sorted(seen.values(), key=lambda x: x["score"], reverse=True)
+
+    def serialize_params(obj):
+        if isinstance(obj, dict):
+            return {k: serialize_params(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [serialize_params(x) for x in obj]
+        elif hasattr(obj, "value"):
+            return obj.value
+        return obj
+
+    results_list = [
+        {
+            "parameters": serialize_params(r["params"]),
+            "completion": r["completion_rate_pct"],
+            "loco_utilization": r["loco_utilization_pct"],
+            "score": r["score"],
+        }
+        for r in sorted_seen
+    ]
+
+    results_json.parent.mkdir(parents=True, exist_ok=True)
+    with open(results_json, "w", encoding="utf-8") as f:
+        json.dump(results_list, f, indent=2)
+
+    typer.echo("\n" + "=" * 60)
+    typer.echo(f"OPTIMIZATION COMPLETE (Total unique configurations evaluated: {len(seen)})")
+    typer.echo("=" * 60)
+
+    # Helper function to format the difference compared to initial
+    def format_diff(val: float, initial_val: float, is_pct: bool = False) -> str:
+        diff = val - initial_val
+        if abs(diff) < 1e-9:
+            diff = 0.0
+        sign = "+" if diff >= 0 else ""
+        pct_sign = "%" if is_pct else ""
+        if is_pct:
+            return f" ({sign}{diff:.2f}{pct_sign})"
+        else:
+            return f" ({sign}{diff:.4f})"
+
+    typer.echo("\nInitial Configuration:")
+    typer.echo(
+        f"  Score = {initial_score:.4f} | "
+        f"Completion Rate = {initial_summary.completion_rate_pct:.2f}% | "
+        f"Loco Utilization = {initial_summary.loco_utilization_pct:.2f}%"
+    )
+
+    typer.echo("\nTop 5 Overall Optimized Configurations:")
+    for i in range(min(5, len(sorted_seen))):
+        r = sorted_seen[i]
+        sc = r["score"]
+        comp = r["completion_rate_pct"]
+        loco = r["loco_utilization_pct"]
+        
+        score_diff = format_diff(sc, initial_score, is_pct=False)
+        comp_diff = format_diff(comp, initial_summary.completion_rate_pct, is_pct=True)
+        loco_diff = format_diff(loco, initial_summary.loco_utilization_pct, is_pct=True)
+        
+        typer.echo(
+            f"  Rank {i+1}: Score = {sc:.4f}{score_diff} | "
+            f"Completion Rate = {comp:.2f}%{comp_diff} | "
+            f"Loco Utilization = {loco:.2f}%{loco_diff}"
+        )
 
 
 if __name__ == '__main__':

@@ -71,13 +71,6 @@ class Scenario(BaseModel):
         default=SelectionStrategy.LEAST_OCCUPIED, description='Strategy for selecting parking tracks'
     )
 
-    @field_validator('parking_selection_strategy', mode='before')
-    @classmethod
-    def debug_parking_strategy(cls, v: Any) -> Any:
-        """Debug parking selection strategy."""
-        print(f'DEBUG VALIDATOR: parking_selection_strategy raw value: {v}, type: {type(v)}')
-        return v
-
     track_type_fill_factors: dict[str, float] = Field(
         default_factory=dict,
         description='Maximum fill factor per track type (e.g. {"parking": 0.6, "collection": 0.8}). '
@@ -102,6 +95,7 @@ class Scenario(BaseModel):
     trains: Any | None = None
     tracks: Sequence[TrackInputDTO] = []
     workshops: list[WorkshopInputDTO] | None = None
+    references: dict[str, str] | None = None
 
     @field_validator('start_date', 'end_date', mode='before')
     @classmethod
@@ -157,4 +151,15 @@ class Scenario(BaseModel):
 
         return self
 
+    def model_dump(self, **kwargs) -> dict[str, Any]:
+        """Override model_dump to exclude None values by default."""
+        kwargs.setdefault('exclude_none', True)
+        return super().model_dump(**kwargs)
+
+    def model_dump_json(self, **kwargs) -> str:
+        """Override model_dump_json to exclude None values by default."""
+        kwargs.setdefault('exclude_none', True)
+        return super().model_dump_json(**kwargs)
+
     model_config = {'arbitrary_types_allowed': True}
+
