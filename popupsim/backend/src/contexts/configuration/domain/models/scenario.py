@@ -151,15 +151,4 @@ class Scenario(BaseModel):
 
         return self
 
-    def model_dump(self, **kwargs) -> dict[str, Any]:
-        """Override model_dump to exclude None values by default."""
-        kwargs.setdefault('exclude_none', True)
-        return super().model_dump(**kwargs)
-
-    def model_dump_json(self, **kwargs) -> str:
-        """Override model_dump_json to exclude None values by default."""
-        kwargs.setdefault('exclude_none', True)
-        return super().model_dump_json(**kwargs)
-
     model_config = {'arbitrary_types_allowed': True}
-

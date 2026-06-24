@@ -10,11 +10,6 @@ import shutil
 from typing import Annotated
 from typing import Any
 
-from application.optimizer import AdaptiveOptimizer
-from application.optimizer import OptimizationObjective
-from application.optimizer import TrialResult
-from application.optimizer import _read_summary_metrics
-from application.optimizer import _suppress_logging
 from application.simulation_service import SimulationApplicationService
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
 from contexts.configuration.domain.models.scenario import Scenario
