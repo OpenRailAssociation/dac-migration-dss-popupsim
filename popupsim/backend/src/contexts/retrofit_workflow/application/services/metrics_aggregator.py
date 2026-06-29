@@ -40,26 +40,36 @@ class MetricsAggregator:
         retrofitted = [e for e in wagon_events if e.event_type == 'RETROFIT_COMPLETED']
         distributed = [e for e in wagon_events if e.event_type == 'DISTRIBUTED']
 
-        # Total wagons = all unique wagons that entered simulation (arrived OR rejected)
+        # Use unique wagon IDs consistently to avoid double-counting from re-arrivals
         unique_arrived = {e.wagon_id for e in arrived}
         unique_rejected = {e.wagon_id for e in rejected}
+        unique_retrofitted = {e.wagon_id for e in retrofitted}
+        unique_parked = {e.wagon_id for e in parked}
         total_wagons = len(unique_arrived | unique_rejected)  # Union of both sets
 
         wagons_arrived = len(unique_arrived)
-        wagons_parked = len(parked)
+        wagons_parked = len(unique_parked)
         wagons_rejected = len(rejected)
 
-        # Count rejections by reason (match actual rejection_reason values from code)
+        # Count rejections by reason using unique wagon IDs
+        # A wagon that was retrofitted on first visit and rejected on second visit
+        # should not reduce the processable count
+        unique_rejected_no_retrofit = {
+            e.wagon_id for e in rejected if e.rejection_reason and 'No Retrofit' in e.rejection_reason
+        } - unique_retrofitted  # Exclude wagons that were actually retrofitted
+        unique_rejected_loaded = {e.wagon_id for e in rejected if e.rejection_reason and 'Loaded' in e.rejection_reason}
+
+        # Event counts for display (may include duplicates from re-arrivals)
         rejected_no_retrofit = len([e for e in rejected if e.rejection_reason and 'No Retrofit' in e.rejection_reason])
         rejected_loaded = len([e for e in rejected if e.rejection_reason and 'Loaded' in e.rejection_reason])
         rejected_track_full = len([e for e in rejected if e.rejection_reason and 'TRACK' in e.rejection_reason.upper()])
         rejected_other = wagons_rejected - rejected_no_retrofit - rejected_loaded - rejected_track_full
 
-        # Wagons eligible for retrofit = total - no_retrofit_needed
-        wagons_eligible = total_wagons - rejected_no_retrofit
+        # Wagons eligible for retrofit = total unique - unique wagons that genuinely don't need retrofit
+        wagons_eligible = total_wagons - len(unique_rejected_no_retrofit)
 
-        # Wagons that could be processed = eligible - loaded
-        wagons_processable = wagons_eligible - rejected_loaded
+        # Wagons that could be processed = eligible - unique loaded
+        wagons_processable = wagons_eligible - len(unique_rejected_loaded)
 
         # Wagons in process = arrived but not yet parked
         wagons_in_process = wagons_arrived - wagons_parked
@@ -74,7 +84,7 @@ class MetricsAggregator:
             'wagons_processable': wagons_processable,
             'wagons_arrived': wagons_arrived,
             'wagons_parked': wagons_parked,
-            'retrofits_completed': len(retrofitted),
+            'retrofits_completed': len(unique_retrofitted),
             'wagons_rejected': wagons_rejected,
             'rejected_no_retrofit': rejected_no_retrofit,
             'rejected_loaded': rejected_loaded,
@@ -82,7 +92,7 @@ class MetricsAggregator:
             'rejected_other': rejected_other,
             'wagons_distributed': len(distributed),
             'wagons_in_process': wagons_in_process,
-            'completion_rate': wagons_parked / wagons_processable if wagons_processable > 0 else 0,
+            'completion_rate': len(unique_retrofitted) / wagons_processable if wagons_processable > 0 else 0,
             'throughput_rate_per_hour': (wagons_parked / sim_duration * 60) if sim_duration > 0 else 0,
         }
 
@@ -125,48 +135,19 @@ class MetricsAggregator:
         loco_released = len([e for e in locomotive_events if e.event_type == 'RELEASED'])
         loco_movements = len([e for e in locomotive_events if e.event_type == 'MOVING'])
 
-        loco_util_pct = 0.0
+        # Fallback: if no RELEASED movement events, count from resource state changes
+        # (locomotive_manager always publishes ResourceStateChangeEvent on release)
         loco_resource_events = [e for e in resource_events if e.resource_type == 'locomotive']
-        if loco_resource_events:
-            last_event = max(loco_resource_events, key=lambda e: e.timestamp)
-            if (
-                hasattr(last_event, 'busy_count_after')
-                and hasattr(last_event, 'total_count')
-                and last_event.total_count
-                and last_event.total_count > 0
-            ):
-                loco_util_pct = (last_event.busy_count_after / last_event.total_count) * 100
+        if loco_released == 0 and loco_resource_events:
+            loco_released = len([e for e in loco_resource_events if e.change_type == 'released'])
 
         return {
             'locomotive_statistics': {
-                'utilization_percent': loco_util_pct,
                 'allocations': loco_allocated,
                 'releases': loco_released,
                 'movements': loco_movements,
                 'total_operations': loco_allocated + loco_released + loco_movements,
             }
-        }
-
-    def get_static_metrics(self) -> dict[str, dict[str, int | float] | int]:
-        """Get static/placeholder metrics."""
-        return {
-            'wagons_classified': 0,
-            'shunting_statistics': {
-                'total_operations': 0,
-                'successful_operations': 0,
-                'success_rate': 0.0,
-            },
-            'yard_statistics': {
-                'wagons_classified': 0,
-                'wagons_distributed': 0,
-                'wagons_parked': 0,
-            },
-            'capacity_statistics': {
-                'total_wagon_movements': 0,
-                'active_operations': 0,
-                'events_per_hour': 0,
-            },
-            'current_state': {},
         }
 
     def get_sim_duration(
@@ -281,10 +262,6 @@ class MetricsAggregator:
                 'idle_time': idle_time,
                 'coupling_time': coupling_time,
                 'decoupling_time': decoupling_time,
-                'coupling_screw': coupling_time_by_type.get('screw', 0),
-                'coupling_automatic': coupling_time_by_type.get('automatic', 0),
-                'decoupling_screw': decoupling_time_by_type.get('screw', 0),
-                'decoupling_automatic': decoupling_time_by_type.get('automatic', 0),
             }
 
         return loco_breakdown
