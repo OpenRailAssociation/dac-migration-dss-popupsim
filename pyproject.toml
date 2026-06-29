@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "babel>=2.17.0",
-    "pandas>=3.0.3",
+    "pandas>=3.0.4",
     "plotly>=6.8.0",
     "pydantic>=2.13.4",
     "simpy>=4.1.2",
