@@ -6,6 +6,9 @@
 
 PopUpSim is a microscopic simulation system for optimizing Pop-Up retrofitting sites during the European freight rail industry's transition to Digital Automatic Couplers (DAC). The tool simulates the complex logistics of retrofitting approximately 500,000 freight wagons during the critical 3-week "Big Bang" migration period (2029-2034).
 
+> [!NOTE]  
+> Currently the dependency to Pandas library is fixed to 3.0.3. 3.0.4 segfaults on Windows.
+
 ## Overview
 
 PopUpSim helps railway operators:
@@ -102,7 +105,7 @@ run_dashboard.bat
 
 **Linux/macOS:**
 ```bash
-uv run streamlit run popupsim/frontend/streamlit_dashboard.py
+uv run streamlit run popupsim/frontend/dashboard.py
 ```
 
 The dashboard will open in your browser at http://localhost:8501
