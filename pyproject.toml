@@ -24,7 +24,7 @@ dependencies = [
     "pydantic>=2.13.4",
     "simpy>=4.1.2",
     "streamlit>=1.58.0",
-    "typer>=0.26.7",
+    "typer>=0.26.8",
 ]
 
 [build-system]
@@ -275,10 +275,10 @@ dev = [
     "pre-commit-hooks>=6.0.0",
     "pylint>=4.0.6",
     "pylint-pydantic>=0.3.2",
-    "pytest>=9.1.0",
+    "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pytest-mock>=3.15.1",
-    "ruff>=0.15.17",
+    "ruff>=0.15.20",
     "pandas-stubs>=3.0.3.260530",
 ]
 docs = [
