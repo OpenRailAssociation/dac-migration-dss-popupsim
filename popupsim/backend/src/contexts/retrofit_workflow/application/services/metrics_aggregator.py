@@ -57,7 +57,9 @@ class MetricsAggregator:
         unique_rejected_no_retrofit = {
             e.wagon_id for e in rejected if e.rejection_reason and 'No Retrofit' in e.rejection_reason
         } - unique_retrofitted  # Exclude wagons that were actually retrofitted
-        unique_rejected_loaded = {e.wagon_id for e in rejected if e.rejection_reason and 'Loaded' in e.rejection_reason}
+        unique_rejected_loaded = {
+            e.wagon_id for e in rejected if e.rejection_reason and 'Loaded' in e.rejection_reason
+        }
 
         # Event counts for display (may include duplicates from re-arrivals)
         rejected_no_retrofit = len([e for e in rejected if e.rejection_reason and 'No Retrofit' in e.rejection_reason])
