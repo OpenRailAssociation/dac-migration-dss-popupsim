@@ -93,6 +93,9 @@ ignore = [
 "ANN401", # dynamically typed expressions (pandas/Any types)
 "FIX002", # TODO/FIXME without issue reference
 "G004",   # logging format string should use lazy % formatting
+# TODO: fix too-many-positional-arguments and re-enable. Temporarily ignored
+# after the ruff 0.16.5 bump enabled PLR0917 across the codebase (23 hits).
+"PLR0917", # too-many-positional-arguments
 ]
 
 [tool.ruff.lint.pydocstyle]

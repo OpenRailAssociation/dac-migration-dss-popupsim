@@ -158,6 +158,22 @@ class ConfigurationService:
 - **Created by**: [ADR MVP-002](09-architecture-decisions.md#adr-mvp-002-file-based-data-storage) (File storage decision)
 - **Full version solution**: Database + Repository pattern
 
+### Debt 4: `PLR0917` (too-many-positional-arguments) temporarily ignored
+
+The ruff 0.16.5 bump enabled the `PLR0917` rule, which flagged 23 functions
+across the backend, tests and frontend that take too many positional arguments.
+To unblock the dependency bump, the rule is currently ignored in
+`pyproject.toml` (`[tool.ruff.lint] ignore`).
+
+**Debt Details:**
+- **Type**: Code quality / linting debt
+- **Priority**: Low
+- **Effort**: Refactor the flagged signatures (keyword-only args or small
+  parameter objects), then remove `PLR0917` from the ruff ignore list.
+- **Affected areas**: `infrastructure/tracking/*`, `retrofit_workflow` event
+  helpers, `main.py`, animation frontend, and several validation tests.
+- **Full version solution**: Reduce positional-argument counts and re-enable the rule.
+
 ## 11.4 MVP Quality Risks
 
 ### Code Quality Risks
