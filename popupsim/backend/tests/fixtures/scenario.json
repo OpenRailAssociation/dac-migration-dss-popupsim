@@ -13,8 +13,6 @@
     "topology": "topology.json",
     "tracks": "tracks.json",
     "workshops": "workshops.json",
-    "yards": {
-      "test": "yard.json"
-    }
+    "yards": "yard.json"
   }
 }

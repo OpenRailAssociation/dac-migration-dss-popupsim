@@ -1,4 +1,7 @@
-from pydantic import BaseModel, Field
+"""Typed models for the summary_metrics.json produced by the simulation."""
+
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class WorkshopStats(BaseModel):
@@ -74,12 +77,12 @@ class SummaryMetrics(BaseModel):
 
     @property
     def completion_rate_pct(self) -> float:
-        """Percentage of processable wagons that were fully retrofitted and parked (0–100)."""
+        """Percentage of processable wagons that were fully retrofitted and parked (0-100)."""
         return self.completion_rate * 100.0
 
     @property
     def loco_utilization_pct(self) -> float:
-        """Average locomotive utilisation as a percentage of total available time (0–100).
+        """Average locomotive utilisation as a percentage of total available time (0-100).
 
         Active time per loco = moving_time + coupling_time + decoupling_time (excludes idle).
         Each locomotive is weighted equally.
@@ -87,8 +90,5 @@ class SummaryMetrics(BaseModel):
         n_locos = len(self.locomotive_time_breakdown)
         if n_locos == 0 or self.simulation_duration_minutes == 0:
             return 0.0
-        total_active = sum(
-            locomotive.moving_time
-            for locomotive in self.locomotive_time_breakdown.values()
-        )
+        total_active = sum(locomotive.moving_time for locomotive in self.locomotive_time_breakdown.values())
         return (total_active / n_locos) / self.simulation_duration_minutes * 100.0
