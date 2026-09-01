@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from dashboard_components.animation_tab import render_animation_tab
 from dashboard_components.bottleneck_tab import render_bottleneck_tab
 from dashboard_components.data_loader import DataLoader
 from dashboard_components.locomotive_tab import render_locomotive_tab
@@ -111,6 +112,7 @@ def main() -> None:
             '🏭 Workshops',
             '🛤️ Track Capacity',
             '🚧 Bottleneck Analysis',
+            '🎬 Animation',
         ]
     )
     with tabs[0]:
@@ -133,6 +135,9 @@ def main() -> None:
 
     with tabs[6]:
         render_bottleneck_tab(data)
+
+    with tabs[7]:
+        render_animation_tab(data)
 
     # Footer
     st.sidebar.markdown('---')
