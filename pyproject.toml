@@ -177,7 +177,7 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 files = ["popupsim/backend/src", "popupsim/backend/tests"]
-mypy_path = "popupsim/backend/src"
+mypy_path = "popupsim/backend/src:popupsim/frontend"
 namespace_packages = true
 explicit_package_bases = true
 show_column_numbers = true
@@ -211,11 +211,11 @@ disallow_incomplete_defs = false
 check_untyped_defs = true
 warn_return_any = false
 disable_error_code = [
-    "var-annotated", 
-    "call-arg", 
-    "union-attr", 
-    "assignment", 
-    "import-untyped", 
+    "var-annotated",
+    "call-arg",
+    "union-attr",
+    "assignment",
+    "import-untyped",
     "no-untyped-def",
     "misc",
     "func-returns-value",

@@ -432,9 +432,15 @@ class TestConsists:
         timelines = self._coupled()
         legs = ad.assign_positions(layout, timelines)
         # At arrival the loco sits on the throat side (smaller x) of both wagons.
-        loco_x = ad.position_at(timelines['L'], layout, timelines, 200.0, legs)[0]
-        w1_x = ad.position_at(timelines['W1'], layout, timelines, 200.0, legs)[0]
-        w2_x = ad.position_at(timelines['W2'], layout, timelines, 200.0, legs)[0]
+        loco_pos = ad.position_at(timelines['L'], layout, timelines, 200.0, legs)
+        w1_pos = ad.position_at(timelines['W1'], layout, timelines, 200.0, legs)
+        w2_pos = ad.position_at(timelines['W2'], layout, timelines, 200.0, legs)
+        assert loco_pos is not None
+        assert w1_pos is not None
+        assert w2_pos is not None
+        loco_x = loco_pos[0]
+        w1_x = w1_pos[0]
+        w2_x = w2_pos[0]
         assert loco_x < w1_x
         assert loco_x < w2_x
         assert abs(w1_x - w2_x) > 1e-6  # the two wagons do not coincide

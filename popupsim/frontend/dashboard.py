@@ -56,7 +56,7 @@ def main() -> None:
     base_path = Path(base_dir)
 
     if not base_path.exists():
-        st.error(f'❌ Base directory not found: {base_dir}'/home/felix/git/duplicate/team-max/scenario-h4r-2-track-fix-base)
+        st.error(f'❌ Base directory not found: {base_dir}')
         st.stop()
 
     # Scan for scenario folders (folders containing a 'scenario' subdirectory)
