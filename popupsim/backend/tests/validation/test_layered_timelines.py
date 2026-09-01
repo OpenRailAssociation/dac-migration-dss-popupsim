@@ -219,7 +219,7 @@ def create_layered_scenario(
 
 
 # pylint: disable=too-many-branches
-def run_layered_test(  # noqa: PLR0912
+def run_layered_test(
     num_wagons: int,
     num_workshops: int,
     retrofit_time: float,

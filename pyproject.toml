@@ -105,16 +105,20 @@ max-complexity = 10
 # Tests
 "popupsim/backend/tests/**/*.py" = [
     "S101",    # Allow use of assert in tests
+    "S311",    # Allow non-crypto random in tests (seeded, reproducible)
     "PLR2004", # Allow magic values in tests (common in assertions)
     "ANN201",  # Missing return type annotation for test methods (always None)
     "ANN202",  # Missing return type annotation for private functions in tests
+    "ARG001",  # Unused function arguments (pytest fixtures used for side effects)
     "ARG002",  # Unused method arguments in test fixtures
+    "D104",    # Missing docstring in test packages
     "PT012",   # pytest.raises() block complexity in tests
     "PT017",   # Found assertion on exception in except block
     "RUF043",  # Pattern metacharacters in pytest match
     "RUF059",  # Unpacked variables in tests
     "B007",    # Loop control variables in tests
     "C901",    # Complex functions in validation tests
+    "PLR0912", # Too many branches in test oracles
     "PLR0913", # Too many arguments in test functions
     "PLR0915", # Too many statements in test functions
     "E501",    # Line too long in tests
@@ -183,7 +187,7 @@ plugins = ['pydantic.mypy']
 
 # Third-party libraries without stubs
 [[tool.mypy.overrides]]
-module = ["typer.*", "simpy.*", "pytest.*", "pytest_mock.*", "numpy.*"]
+module = ["typer.*", "simpy.*", "pytest.*", "pytest_mock.*", "numpy.*", "tqdm.*"]
 ignore_missing_imports = true
 disallow_untyped_defs = false
 

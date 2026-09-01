@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_test_scenario(
-    num_wagons: int,  # noqa: ARG001
+    num_wagons: int,
     num_workshops: int = 1,
     retrofit_time: float = 10.0,
     workshop_bays: list[int] | None = None,
@@ -218,7 +218,7 @@ def create_test_scenario(
     return mock_scenario
 
 
-def run_timeline_test(  # noqa: PLR0912
+def run_timeline_test(
     num_wagons: int,
     num_workshops: int,
     retrofit_time: float,

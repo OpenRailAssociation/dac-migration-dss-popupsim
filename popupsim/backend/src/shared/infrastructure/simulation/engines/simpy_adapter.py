@@ -68,7 +68,9 @@ class SimPyEngineAdapter(SimulationEnginePort):
         try:
             if inspect.isgenerator(process):
                 logger.debug('SIMPY: Scheduling generator %s at t=%.1f', process, self._env.now)
-                return self._env.process(process)
+                # SimPy expects Generator[Event, Any, Any]; our public API accepts the
+                # broader Generator[Any], which mypy cannot narrow here.
+                return self._env.process(process)  # type: ignore[arg-type]
 
             if inspect.isgeneratorfunction(process):
                 logger.debug(

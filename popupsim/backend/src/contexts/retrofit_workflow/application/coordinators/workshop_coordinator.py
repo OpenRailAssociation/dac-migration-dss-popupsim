@@ -257,7 +257,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
                 _ = self.batch_service.create_batch_aggregate(wagons, retrofitted_track_id)
                 yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
                 transport_completed = True
-            except GeneratorExit:
+            # Re-raise GeneratorExit so it is not swallowed by the broad fallback below.
+            except GeneratorExit:  # pylint: disable=try-except-raise
                 raise
             except Exception:  # pylint: disable=broad-exception-caught
                 yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
@@ -327,7 +328,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             _ = self.batch_service.create_batch_aggregate(wagons, workshop_id)
             # Batch aggregate created successfully - rake is valid
             yield from self._transport_to_workshop(loco, workshop_id, wagons, retrofit_track_id)
-        except GeneratorExit:
+        # Re-raise GeneratorExit so it is not swallowed by the broad fallback below.
+        except GeneratorExit:  # pylint: disable=try-except-raise
             raise
         except Exception:  # pylint: disable=broad-exception-caught
             # Fallback to old method
@@ -774,7 +776,8 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
             _ = self.batch_service.create_batch_aggregate(wagons, 'retrofitted')
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
             transport_completed = True
-        except GeneratorExit:
+        # Re-raise GeneratorExit so it is not swallowed by the broad fallback below.
+        except GeneratorExit:  # pylint: disable=try-except-raise
             raise
         except Exception:  # pylint: disable=broad-exception-caught
             yield from self._transport_from_workshop(pickup_loco, workshop_id, wagons)
