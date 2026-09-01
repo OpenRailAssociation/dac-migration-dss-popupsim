@@ -35,6 +35,33 @@ Timeline-based bottleneck identification:
 - Locomotive usage
 - Interactive timeline visualization
 
+### 4. Animation Tab 🎬
+
+Animated playback of a simulation run on a schematic yard:
+
+- Wagons and locomotives move along their recorded routes over time
+- Wagons are **blue** until retrofitted, then turn **green** (color-blind-safe Okabe-Ito palette);
+  locomotives are distinct dark squares
+- **Coupled consists**: locomotives are matched to the wagons they haul and the consist travels as
+  one rigid, spaced train, with the locomotive always on the throat side (so it pulls on the way
+  out and pushes on the way in, never overlapping its wagons)
+- Three-zone layout (local yard · Mainline corridor · remote storage) when routes span the Mainline
+- Wagons pack flush to the far end (away from the throat) as a **stack (LIFO)**, re-compacted every
+  frame so there are never holes (a departing wagon makes the rest slide); adjacent wagons alternate
+  fill shade plus a border so they stay countable
+- Workshops drawn as labeled buildings showing their bay count; wagons always render inside the box
+- **Live statistics** that update as the clock advances (above the layout):
+  - wagons still to retrofit currently in the system
+  - wagons retrofitted currently in the system, and the cumulative retrofitted total
+  - cumulative rejected wagons
+  - per-track capacity usage (Σ real wagon lengths ÷ real track length, Mainline excluded)
+- Native Plotly play/pause + time slider (client-side, smooth scrubbing), with **⏮ / ⏭ buttons**
+  underneath that step a single frame at a time — fully in-browser, staying in sync with play and
+  the slider (the figure is embedded as HTML and loads Plotly from a CDN, so first paint needs
+  internet)
+- User-selectable resolution on a quadratic scale (**200 up to 10,000 frames**), animation length,
+  and playback speed
+
 ## Running the Dashboard
 
 ### Option 1: Batch File (Windows)

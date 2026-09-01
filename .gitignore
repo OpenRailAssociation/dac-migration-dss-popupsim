@@ -65,9 +65,10 @@ htmlcov/
 ehthumbs.db
 Thumbs.db
 
-# Logs
+# Output files
 *.log
 logs/
+output/
 
 # Security
 *.pem

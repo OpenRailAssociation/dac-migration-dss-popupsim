@@ -242,7 +242,7 @@ testpaths = ["popupsim/backend/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-pythonpath = ["popupsim/backend/src"]
+pythonpath = ["popupsim/backend/src", "popupsim/frontend"]
 addopts = [
     "--strict-markers",
     "--strict-config",
