@@ -122,8 +122,10 @@ classDiagram
 from datetime import date
 from pydantic import BaseModel, Field
 
+
 class ScenarioConfig(BaseModel):
     """Configuration model for simulation scenarios."""
+
     scenario_id: str = Field(pattern=r'^[a-zA-Z0-9_-]+$', min_length=1, max_length=50)
     start_date: date
     end_date: date
@@ -133,13 +135,17 @@ class ScenarioConfig(BaseModel):
     workshop_tracks_file: str | None = None
     # ... additional fields and validators in actual implementation
 
+
 class Workshop(BaseModel):
     """Workshop models with available tracks."""
+
     tracks: list[WorkshopTrack] = Field(min_length=1)
     # ... additional validators in actual implementation
 
+
 class WorkshopTrack(BaseModel):
     """Individual track within workshop."""
+
     id: str
     function: TrackFunction
     capacity: int = Field(ge=1)
@@ -158,6 +164,7 @@ class SimulationResults(BaseModel):
     average_waiting_time: float
     station_utilization: float
     # ... additional KPIs to be determined
+
 
 class KPIData(BaseModel):
     timestamp: str
@@ -178,18 +185,25 @@ Error handling strategy supports the quality goals defined in [Section 1.2](01-i
 # CONCEPTUAL EXAMPLE - Illustrates exception hierarchy pattern
 class PopUpSimError(Exception):
     """Base exception for PopUpSim MVP"""
+
     pass
+
 
 class ConfigurationError(PopUpSimError):
     """Configuration loading/validation errors"""
+
     pass
+
 
 class SimulationError(PopUpSimError):
     """Simulation runtime errors"""
+
     pass
+
 
 class OutputError(PopUpSimError):
     """Output generation errors"""
+
     pass
 ```
 
@@ -278,13 +292,13 @@ def validate_scenario_config(config: dict) -> List[str]:
 
     # Basic validation rules
     if config.get('duration_hours', 0) <= 0:
-        errors.append("Duration must be positive")
+        errors.append('Duration must be positive')
 
     if config.get('stations', 0) < 1:
-        errors.append("At least one station required")
+        errors.append('At least one station required')
 
     if config.get('workers_per_station', 0) < 1:
-        errors.append("At least one worker per station required")
+        errors.append('At least one worker per station required')
 
     return errors
 ```
@@ -334,16 +348,17 @@ graph TB
 
 # Unit Test Example
 def test_workshop_station_availability():
-    station = Station(id="WS001", capacity=2, workers=[], current_wagons=1)
+    station = Station(id='WS001', capacity=2, workers=[], current_wagons=1)
     assert station.is_available() == True
 
     station.current_wagons = 2
     assert station.is_available() == False
 
+
 # Integration Test Example
 def test_configuration_loading():
     config_service = ConfigurationService()
-    config = config_service.load_scenario("test_data/")
+    config = config_service.load_scenario('test_data/')
     assert config.duration_hours > 0
     assert len(config.workshop.stations) > 0
 ```
@@ -362,8 +377,10 @@ from typing import Any, Callable, TypeVar
 
 T = TypeVar('T')
 
+
 def measure_time(func: Callable[..., T]) -> Callable[..., T]:
     """MVP Performance Decorator"""
+
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> T:
         start_time = time.time()
@@ -371,10 +388,12 @@ def measure_time(func: Callable[..., T]) -> Callable[..., T]:
         end_time = time.time()
 
         duration = end_time - start_time
-        logging.info(f"{func.__name__} took {duration:.2f} seconds")
+        logging.info(f'{func.__name__} took {duration:.2f} seconds')
 
         return result
+
     return wrapper
+
 
 # Usage
 @measure_time
@@ -391,12 +410,13 @@ import gc
 import psutil
 import os
 
+
 def log_memory_usage(phase: str) -> None:
     """MVP Memory Monitoring"""
     process = psutil.Process(os.getpid())
     memory_mb = process.memory_info().rss / 1024 / 1024
 
-    logging.info(f"Memory usage in {phase}: {memory_mb:.1f} MB")
+    logging.info(f'Memory usage in {phase}: {memory_mb:.1f} MB')
 
     # Force garbage collection for MVP
     gc.collect()
@@ -473,12 +493,13 @@ class IntegrityValidator:
             if train.locomotive_id not in locomotive_ids:
                 result.add_error(
                     f"Train {train.id} references non-existent locomotive '{train.locomotive_id}'",
-                    field=f"trains[{i}].locomotive_id",
+                    field=f'trains[{i}].locomotive_id',
                     category=ValidationCategory.INTEGRITY,
-                    suggestion=f"Use one of: {', '.join(locomotive_ids)}"
+                    suggestion=f'Use one of: {", ".join(locomotive_ids)}',
                 )
 
         return result
+
 
 # ACTUAL IMPLEMENTATION - Validation Pipeline Usage
 from shared.validation.pipeline import ValidationPipeline
@@ -488,7 +509,7 @@ result = pipeline.validate(scenario)
 
 if not result.is_valid:
     result.print_summary()  # Shows categorized issues
-    print(f"Found {len(result.get_errors())} errors, {len(result.get_warnings())} warnings")
+    print(f'Found {len(result.get_errors())} errors, {len(result.get_warnings())} warnings')
 ```
 
 ### Validation Result Output Example
@@ -535,6 +556,7 @@ Security measures for MVP desktop application focus on input validation and safe
 import os
 from pathlib import Path
 
+
 def safe_file_path(base_dir: str, filename: str) -> Path:
     """MVP Safe File Path Resolution"""
     base_path = Path(base_dir).resolve()
@@ -542,7 +564,7 @@ def safe_file_path(base_dir: str, filename: str) -> Path:
 
     # Ensure file is within base directory
     if not str(file_path).startswith(str(base_path)):
-        raise ValueError(f"Invalid file path: {filename}")
+        raise ValueError(f'Invalid file path: {filename}')
 
     return file_path
 ```

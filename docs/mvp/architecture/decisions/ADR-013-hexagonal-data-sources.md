@@ -43,15 +43,18 @@ class DataSourcePort(ABC):
     @abstractmethod
     def load_scenario(self, source: Path) -> ScenarioInputDTO: ...
 
+
 # configuration/infrastructure/adapters/
 class JsonDataSourceAdapter(DataSourcePort):
     def load_scenario(self, path: Path) -> ScenarioInputDTO:
         with open(path) as f:
             return ScenarioInputDTO.model_validate(json.load(f))
 
+
 class CsvDataSourceAdapter(DataSourcePort):
     def load_scenario(self, directory: Path) -> ScenarioInputDTO:
         return self._load_from_csv_directory(directory)
+
 
 # configuration/application/services/scenario_service.py
 class ScenarioService:
@@ -69,7 +72,7 @@ class DataSourceFactory:
         elif source.is_dir():
             return CsvDataSourceAdapter()
         else:
-            raise UnsupportedDataSourceError(f"Unsupported source: {source}")
+            raise UnsupportedDataSourceError(f'Unsupported source: {source}')
 ```
 
 ## Consequences

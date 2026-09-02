@@ -35,11 +35,10 @@ Use **Matplotlib** for generating static charts (PNG files).
 class Visualizer:
     def create_throughput_chart(self, kpis: ThroughputKPI) -> Path:
         fig, ax = plt.subplots(figsize=(10, 6))
-        ax.bar(['Wagons/Hour', 'Total Processed'], 
-               [kpis.wagons_per_hour, kpis.total_wagons])
+        ax.bar(['Wagons/Hour', 'Total Processed'], [kpis.wagons_per_hour, kpis.total_wagons])
         plt.savefig('throughput_chart.png')
         return Path('throughput_chart.png')
-    
+
     def create_gantt_chart(self, events: list[Event]) -> Path:
         # Generate Gantt chart for locomotive and wagon activities
         return self._create_gantt_visualization(events)

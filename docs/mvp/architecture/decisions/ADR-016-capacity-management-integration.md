@@ -14,8 +14,8 @@ This created potential inconsistencies where SimPy stores could accept wagons th
 ### Current Implementation
 ```python
 # Physical capacity (correct)
-if track_capacity.can_add_wagon("retrofitted", wagon.length):
-    track_capacity.add_wagon("retrofitted", wagon.length)
+if track_capacity.can_add_wagon('retrofitted', wagon.length):
+    track_capacity.add_wagon('retrofitted', wagon.length)
 
 # Workflow coordination (separate)
 yield retrofitted_wagons_ready.put(wagon)
@@ -91,13 +91,13 @@ class LengthAwareStore:
         self._store = sim.create_store()
         self._capacity = track_capacity
         self._track_id = track_id
-    
+
     def put(self, wagon: Wagon) -> Generator:
         if not self._capacity.can_add_wagon(self._track_id, wagon.length):
-            raise CapacityExceededError(f"Track {self._track_id} full")
+            raise CapacityExceededError(f'Track {self._track_id} full')
         self._capacity.add_wagon(self._track_id, wagon.length)
         return self._store.put(wagon)
-    
+
     def get(self) -> Generator:
         wagon = yield self._store.get()
         self._capacity.remove_wagon(self._track_id, wagon.length)

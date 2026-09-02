@@ -89,12 +89,14 @@ graph TB
 # MVP: Direct SimPy usage (Technical Debt)
 import simpy
 
+
 class WorkshopService:
     def __init__(self):
         self.env = simpy.Environment()  # Direct dependency
 
     def run_process(self):
         self.env.process(self.retrofit_process())  # Tight coupling
+
 
 # Future: Abstracted interface
 class WorkshopService:
@@ -119,6 +121,7 @@ class SimulationService:
         workshop = self.workshop_service.setup(config)  # Direct call
         results = self.workshop_service.run(workshop)  # Direct call
 
+
 # Future: Event-driven
 class SimulationService:
     def run(self):
@@ -139,8 +142,9 @@ class SimulationService:
 # MVP: File-based storage (Technical Debt)
 class ConfigurationService:
     def load_scenario(self, path: str):
-        with open(f"{path}/scenario.json") as f:  # Direct file access
+        with open(f'{path}/scenario.json') as f:  # Direct file access
             return json.load(f)
+
 
 # Future: Repository pattern
 class ConfigurationService:
@@ -271,15 +275,15 @@ graph TB
 class RiskMonitor:
     def check_performance_risk(self, execution_time: float):
         if execution_time > 60:  # seconds
-            logging.warning(f"Performance risk: {execution_time}s execution")
+            logging.warning(f'Performance risk: {execution_time}s execution')
 
     def check_memory_risk(self, memory_mb: float):
         if memory_mb > 100:  # MB
-            logging.warning(f"Memory risk: {memory_mb}MB usage")
+            logging.warning(f'Memory risk: {memory_mb}MB usage')
 
     def check_complexity_risk(self, function_lines: int):
         if function_lines > 50:
-            logging.warning(f"Complexity risk: {function_lines} lines")
+            logging.warning(f'Complexity risk: {function_lines} lines')
 ```
 
 ### Continuous Risk Assessment

@@ -54,6 +54,7 @@ class JsonDataSourceAdapter:
         with open(path) as f:
             return ScenarioInputDTO.model_validate(json.load(f))
 
+
 class CsvDataSourceAdapter:
     def load_scenario(self, directory: Path) -> ScenarioInputDTO:
         # Load from multiple CSV files

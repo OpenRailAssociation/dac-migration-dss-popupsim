@@ -95,12 +95,12 @@ from pathlib import Path
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
 
 # Load scenario
-scenario = ConfigurationBuilder(Path("scenario_dir")).build()
+scenario = ConfigurationBuilder(Path('scenario_dir')).build()
 
 # Access configuration
-print(f"Scenario: {scenario.id}")
-print(f"Workshops: {len(scenario.workshops)}")
-print(f"Trains: {len(scenario.trains)}")
+print(f'Scenario: {scenario.id}')
+print(f'Workshops: {len(scenario.workshops)}')
+print(f'Trains: {len(scenario.trains)}')
 ```
 
 ---
@@ -261,6 +261,7 @@ Each coordinator receives a configuration dataclass with all dependencies:
 @dataclass
 class CollectionCoordinatorConfig:
     """Configuration for CollectionCoordinator."""
+
     env: Any
     collection_queue: Any
     retrofit_queue: Any
@@ -287,37 +288,33 @@ class CollectionCoordinatorConfig:
 ```python
 class CollectionCoordinator:
     """Coordinates wagon movement from collection to retrofit track."""
-    
+
     def __init__(self, config: CollectionCoordinatorConfig):
         self.config = config
         self.batch_counter = 0
-    
+
     def start(self) -> None:
         """Start coordinator process."""
         self.config.env.process(self._collection_process())
-    
+
     def _collection_process(self) -> Generator[Any, Any, None]:
         """Main collection process loop."""
         while True:
             # Wait for wagons
             wagon = yield self.config.collection_queue.get()
-            
+
             # Collect batch using domain service
             wagons = yield from self._collect_batch(wagon)
-            
+
             # Select retrofit track using domain service
             retrofit_track = self.config.track_capacity_manager.select_track('retrofit')
-            
+
             # Transport batch
             yield from self._transport_batch(wagons, retrofit_track)
-            
+
             # Publish event
             self.config.wagon_event_publisher(
-                WagonLifecycleEvent(
-                    wagon_id=wagon.id,
-                    event_type="batch_transported",
-                    sim_time=self.config.env.now
-                )
+                WagonLifecycleEvent(wagon_id=wagon.id, event_type='batch_transported', sim_time=self.config.env.now)
             )
 ```
 
@@ -411,39 +408,37 @@ graph TB
 ```python
 class ExternalTrainsContext:
     """External Trains Context managing train arrivals."""
-    
+
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
         self.scenario: Scenario | None = None
         self._wagons: dict[str, Wagon] = {}  # Single source of truth
-    
+
     def start_processes(self) -> None:
         """Start train arrival processes."""
         if self.infra and self.scenario:
             for train in self.scenario.trains:
-                self.infra.engine.schedule_process(
-                    self._process_single_train_arrival(train)
-                )
-    
+                self.infra.engine.schedule_process(self._process_single_train_arrival(train))
+
     def _process_single_train_arrival(self, train: Any) -> Any:
         """Process a single train arrival."""
         # Wait for arrival time
         arrival_delay = datetime_to_ticks(train.arrival_time, self.scenario.start_date)
         yield from self.infra.engine.delay(arrival_delay)
-        
+
         # Create wagons
         train_wagons = [Wagon(...) for wagon_dto in train.wagons]
-        
+
         # Store as single source of truth
         for wagon in train_wagons:
             self._wagons[wagon.id] = wagon
-        
+
         # Publish event
         event = TrainArrivedEvent(
             train_id=train.train_id,
             wagons=train_wagons,
             arrival_track='collection',
-            event_timestamp=self.infra.engine.current_time()
+            event_timestamp=self.infra.engine.current_time(),
         )
         self.event_bus.publish(event)
 ```
@@ -486,11 +481,7 @@ Coordinators receive event publisher functions via configuration:
 
 ```python
 self.config.wagon_event_publisher(
-    WagonLifecycleEvent(
-        wagon_id=wagon.id,
-        event_type="batch_formed",
-        sim_time=self.config.env.now
-    )
+    WagonLifecycleEvent(wagon_id=wagon.id, event_type='batch_formed', sim_time=self.config.env.now)
 )
 ```
 

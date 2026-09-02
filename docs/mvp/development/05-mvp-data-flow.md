@@ -50,7 +50,7 @@ scenario_dir/
 ```python
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
 
-builder = ConfigurationBuilder(Path("scenario_dir"))
+builder = ConfigurationBuilder(Path('scenario_dir'))
 scenario = builder.build()
 ```
 
@@ -58,14 +58,14 @@ scenario = builder.build()
 
 ```python
 Scenario(
-    id="demo",
+    id='demo',
     start_date=datetime(2025, 1, 1),
     end_date=datetime(2025, 1, 2),
     trains=[...],
     tracks=[...],
     workshops=[...],
     locomotives=[...],
-    routes=[...]
+    routes=[...],
 )
 ```
 
@@ -89,10 +89,10 @@ RailwayContext(
     track_groups={
         'collection': TrackGroup([Track(...), Track(...)]),
         'retrofit': TrackGroup([Track(...)]),
-        'parking': TrackGroup([Track(...)])
+        'parking': TrackGroup([Track(...)]),
     },
     track_selector=TrackSelector(...),
-    capacity_service=CapacityService(...)
+    capacity_service=CapacityService(...),
 )
 ```
 
@@ -146,11 +146,7 @@ Metrics Collection
 ### Output
 
 ```python
-{
-    'wagon_events': [...],
-    'locomotive_events': [...],
-    'workshop_events': [...]
-}
+{'wagon_events': [...], 'locomotive_events': [...], 'workshop_events': [...]}
 ```
 
 ## Phase 5: Results Export
@@ -215,14 +211,14 @@ try:
     # Load configuration
     scenario = builder.build()
 except ValidationError as e:
-    logger.error(f"Configuration error: {e}")
+    logger.error(f'Configuration error: {e}')
     sys.exit(1)
 
 try:
     # Run simulation
     workflow.run()
 except SimulationError as e:
-    logger.error(f"Simulation error: {e}")
+    logger.error(f'Simulation error: {e}')
     # Export partial results
     workflow.export_events(output_path)
     sys.exit(2)

@@ -103,18 +103,18 @@ class ValidationResult:
 class IntegrityValidator:
     def validate(self, scenario: Scenario) -> ValidationResult:
         result = ValidationResult(is_valid=True)
-        
+
         # Validate cross-references
         locomotive_ids = {loco.id for loco in scenario.locomotives or []}
         for train in scenario.trains or []:
             if train.locomotive_id not in locomotive_ids:
                 result.add_error(
                     f"Train {train.id} references non-existent locomotive '{train.locomotive_id}'",
-                    field=f"trains[{train.id}].locomotive_id",
+                    field=f'trains[{train.id}].locomotive_id',
                     category=ValidationCategory.INTEGRITY,
-                    suggestion=f"Use one of: {', '.join(locomotive_ids)}"
+                    suggestion=f'Use one of: {", ".join(locomotive_ids)}',
                 )
-        
+
         return result
 ```
 

@@ -67,12 +67,13 @@ from pathlib import Path
 from contexts.configuration.infrastructure.file_loader import FileLoader
 from contexts.configuration.domain.models.scenario import Scenario
 
+
 class ConfigurationBuilder:
     """Load scenario from file path."""
-    
+
     def __init__(self, path: Path):
         self.path = path
-    
+
     def build(self) -> Scenario:
         """Load and validate scenario."""
         loader = FileLoader()
@@ -135,9 +136,10 @@ from contexts.railway_infrastructure.application.railway_context import RailwayC
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 from contexts.retrofit_workflow.application.event_collector import EventCollector
 
+
 class RetrofitWorkflowContext:
     """Main retrofit workflow simulation context."""
-    
+
     def __init__(
         self,
         env: Any,
@@ -149,10 +151,10 @@ class RetrofitWorkflowContext:
         self.scenario = scenario
         self.railway = railway
         self.external_trains = external_trains
-        
+
         # Initialize event collector
         self.event_collector = EventCollector(start_datetime=scenario.start_date)
-        
+
         # Initialize coordinators with event publishers
         self.arrival_coordinator = ArrivalCoordinator(
             config=ArrivalCoordinatorConfig(
@@ -163,14 +165,14 @@ class RetrofitWorkflowContext:
         self.collection_coordinator = CollectionCoordinator(...)
         self.workshop_coordinator = WorkshopCoordinator(...)
         self.parking_coordinator = ParkingCoordinator(...)
-    
+
     def start_processes(self) -> None:
         """Start all coordinators."""
         self.arrival_coordinator.start()
         self.collection_coordinator.start()
         self.workshop_coordinator.start()
         self.parking_coordinator.start()
-    
+
     def export_events(self, output_path: Path) -> None:
         """Export simulation events."""
         self.event_collector.export_all(output_path)
@@ -185,9 +187,11 @@ from typing import Generator, Any
 from dataclasses import dataclass
 from collections.abc import Callable
 
+
 @dataclass
 class CollectionCoordinatorConfig:
     """Configuration for CollectionCoordinator."""
+
     env: Any
     collection_queue: Any
     retrofit_queue: Any
@@ -201,35 +205,32 @@ class CollectionCoordinatorConfig:
     locomotive_event_publisher: Callable[[LocomotiveEvent], None]
     scenario: Scenario
 
+
 class CollectionCoordinator:
     """Coordinates wagon movement from collection to retrofit track."""
-    
+
     def __init__(self, config: CollectionCoordinatorConfig):
         self.config = config
         self.batch_counter = 0
-    
+
     def start(self) -> None:
         """Start coordinator process."""
         self.config.env.process(self._collection_process())
-    
+
     def _collection_process(self) -> Generator[Any, Any, None]:
         """Main collection process loop."""
         while True:
             # Wait for wagons
             wagon = yield self.config.collection_queue.get()
-            
+
             # Collect batch using domain service
             wagons = yield from self._collect_batch(wagon)
-            
+
             # Publish event
             self.config.wagon_event_publisher(
-                WagonLifecycleEvent(
-                    wagon_id=wagon.id,
-                    event_type="batch_formed",
-                    sim_time=self.config.env.now
-                )
+                WagonLifecycleEvent(wagon_id=wagon.id, event_type='batch_formed', sim_time=self.config.env.now)
             )
-            
+
             # Transport batch
             yield from self._transport_batch(wagons)
 ```
@@ -299,19 +300,20 @@ from contexts.configuration.domain.models.scenario import Scenario
 from contexts.railway_infrastructure.domain.aggregates.track_group import TrackGroup
 from contexts.railway_infrastructure.domain.services.track_selector import TrackSelector
 
+
 class RailwayContext:
     """Railway infrastructure management context."""
-    
+
     def __init__(self, scenario: Scenario):
         self.scenario = scenario
-        
+
         # Build track groups
         self.track_groups = self._build_track_groups(scenario.tracks)
-        
+
         # Initialize services
         self.track_selector = TrackSelector(self.track_groups)
         self.capacity_service = CapacityService(self.track_groups)
-    
+
     def _build_track_groups(self, tracks: list[Track]) -> dict[str, TrackGroup]:
         """Group tracks by type."""
         groups = {}
@@ -320,12 +322,12 @@ class RailwayContext:
                 groups[track.track_type] = TrackGroup(track.track_type)
             groups[track.track_type].add_track(track)
         return groups
-    
+
     def place_wagons_on_track(self, track_id: str, wagons: list[Wagon]) -> None:
         """Place wagons on specified track."""
         track = self._find_track(track_id)
         track.occupancy.add_wagons(wagons)
-    
+
     def remove_wagons_from_track(self, track_id: str, wagons: list[Wagon]) -> None:
         """Remove wagons from specified track."""
         track = self._find_track(track_id)
@@ -366,31 +368,32 @@ from contexts.configuration.domain.models.scenario import Scenario
 from contexts.shared.domain.events.event_bus import EventBus
 from contexts.external_trains.domain.events.train_arrived_event import TrainArrivedEvent
 
+
 class ExternalTrainsContext:
     """External train arrival management."""
-    
+
     def __init__(self, env: Any, scenario: Scenario, event_bus: EventBus):
         self.env = env
         self.scenario = scenario
         self.event_bus = event_bus
-    
+
     def initialize_arrivals(self) -> None:
         """Schedule all train arrivals."""
         for train in self.scenario.trains or []:
             arrival_time = self._calculate_arrival_time(train)
             self.env.process(self._arrival_process(train, arrival_time))
-    
+
     def _arrival_process(self, train: Train, arrival_time: float) -> Generator[Any, Any, None]:
         """Process single train arrival."""
         yield self.env.timeout(arrival_time)
-        
+
         # Create event
         event = TrainArrivedEvent(
             train_id=train.id,
             wagons=train.wagons,
             arrival_time=self.env.now,
         )
-        
+
         # Publish to event bus
         self.event_bus.publish(event)
 ```
@@ -411,35 +414,34 @@ from contexts.external_trains.application.external_trains_context import Externa
 from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkflowContext
 import simpy
 
+
 def run_simulation(scenario_path: Path, output_path: Path) -> None:
     """Run complete simulation pipeline."""
-    
+
     # 1. Configuration Context - Load scenario
     loader = FileLoader()
     scenario = loader.load_scenario(scenario_path)
-    
+
     # 2. Initialize SimPy environment
     env = simpy.Environment()
-    
+
     # 3. Railway Infrastructure Context - Build tracks
     railway = RailwayContext(scenario)
-    
+
     # 4. External Trains Context - Schedule arrivals
     external_trains = ExternalTrainsContext(env, scenario)
-    
+
     # 5. Retrofit Workflow Context - Main simulation
-    retrofit_workflow = RetrofitWorkflowContext(
-        env, scenario, railway, external_trains
-    )
-    
+    retrofit_workflow = RetrofitWorkflowContext(env, scenario, railway, external_trains)
+
     # 6. Initialize and start
     retrofit_workflow.initialize()
     external_trains.start_processes()
     retrofit_workflow.start_processes()
-    
+
     # 7. Run simulation
     env.run()
-    
+
     # 8. Export results
     retrofit_workflow.export_events(output_path)
 ```
@@ -459,11 +461,7 @@ coordinator_config = CollectionCoordinatorConfig(
 
 # Coordinators publish events
 self.config.wagon_event_publisher(
-    WagonLifecycleEvent(
-        wagon_id=wagon.id,
-        event_type="batch_formed",
-        sim_time=self.config.env.now
-    )
+    WagonLifecycleEvent(wagon_id=wagon.id, event_type='batch_formed', sim_time=self.config.env.now)
 )
 
 # Export at end of simulation

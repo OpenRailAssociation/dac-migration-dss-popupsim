@@ -322,8 +322,8 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('output/simulation.log'),
-        logging.StreamHandler()  # Console output
-    ]
+        logging.StreamHandler(),  # Console output
+    ],
 )
 ```
 

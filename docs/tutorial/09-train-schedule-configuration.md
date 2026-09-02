@@ -390,20 +390,22 @@ from datetime import datetime, timedelta
 with open('train_schedule.csv', 'w', newline='') as f:
     writer = csv.writer(f, delimiter=';')
     writer.writerow(['train_id', 'wagon_id', 'arrival_time', 'length', 'is_loaded', 'needs_retrofit', 'Track'])
-    
+
     wagon_id = 1
     for train in range(1, 11):
         arrival = datetime(2025, 12, 1, 6, 0) + timedelta(hours=4.8 * (train - 1))
         for wagon in range(20):
-            writer.writerow([
-                f'T{train}',
-                f'W{wagon_id:04d}',
-                arrival.strftime('%Y-%m-%dT%H:%M:%S+00:00'),
-                round(15 + random.random() * 10, 1),
-                'False',
-                'True',
-                'collection'
-            ])
+            writer.writerow(
+                [
+                    f'T{train}',
+                    f'W{wagon_id:04d}',
+                    arrival.strftime('%Y-%m-%dT%H:%M:%S+00:00'),
+                    round(15 + random.random() * 10, 1),
+                    'False',
+                    'True',
+                    'collection',
+                ]
+            )
             wagon_id += 1
 ```
 

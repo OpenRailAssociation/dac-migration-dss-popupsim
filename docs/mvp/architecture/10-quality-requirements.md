@@ -158,11 +158,11 @@ graph TB
 ```python
 # MVP Code Quality Standards
 class CodeQualityMetrics:
-    MAX_FUNCTION_LENGTH = 50      # Lines per function
-    MAX_CLASS_LENGTH = 200        # Lines per class
-    MAX_COMPLEXITY = 10           # Cyclomatic complexity
-    MIN_TEST_COVERAGE = 90        # Percent
-    MAX_DEPENDENCIES = 5          # Per module
+    MAX_FUNCTION_LENGTH = 50  # Lines per function
+    MAX_CLASS_LENGTH = 200  # Lines per class
+    MAX_COMPLEXITY = 10  # Cyclomatic complexity
+    MIN_TEST_COVERAGE = 90  # Percent
+    MAX_DEPENDENCIES = 5  # Per module
 ```
 
 ### MVP Maintainability Metrics

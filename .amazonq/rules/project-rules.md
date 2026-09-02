@@ -27,19 +27,23 @@ All code MUST include explicit type annotations:
 from typing import Optional, Dict, Any, Generator
 from pathlib import Path
 
+
 def validate_path(path: Optional[Path]) -> Path | None:
     """Validate file path."""
     return path if path and path.exists() else None
 
+
 def test_validation() -> None:
     """Test path validation."""
     assert validate_path(None) is None
+
 
 @pytest.fixture
 def temp_file() -> Generator[Path, None, None]:
     """Create temporary file."""
     with tempfile.NamedTemporaryFile() as f:
         yield Path(f.name)
+
 
 def __init__(self, config: Dict[str, Any]) -> None:
     """Initialize with models."""

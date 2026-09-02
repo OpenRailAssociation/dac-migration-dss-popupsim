@@ -32,8 +32,8 @@ Simulation continues running - this is just a warning for capacity planning.
 ```python
 coordinator = ParkingCoordinator(
     env=env,
-    max_retry_attempts=3,    # When to start warning
-    retry_delay=5.0,         # Wait time between checks (minutes)
+    max_retry_attempts=3,  # When to start warning
+    retry_delay=5.0,  # Wait time between checks (minutes)
 )
 ```
 
@@ -42,15 +42,15 @@ coordinator = ParkingCoordinator(
 ```python
 while not resource:
     resource = self.try_get_resource()
-    
+
     if not resource:
         retry_count += 1
-        
+
         if retry_count == 1:
-            logger.info(f"Resource full, waiting {self.retry_delay} min")
+            logger.info(f'Resource full, waiting {self.retry_delay} min')
         elif retry_count >= self.max_retry_attempts:
-            logger.warning(f"Resource still full after {retry_count * self.retry_delay} minutes")
-        
+            logger.warning(f'Resource still full after {retry_count * self.retry_delay} minutes')
+
         yield self.env.timeout(self.retry_delay)
 ```
 

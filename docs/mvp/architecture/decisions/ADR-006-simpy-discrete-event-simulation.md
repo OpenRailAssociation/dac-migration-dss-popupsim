@@ -34,12 +34,13 @@ Use **SimPy** as the simulation engine.
 class SimulationAdapter:
     def __init__(self):
         self.env = simpy.Environment()
-    
+
     def create_resource(self, capacity: int) -> simpy.Resource:
         return simpy.Resource(self.env, capacity)
-    
+
     def create_store(self, capacity: int = float('inf')) -> simpy.Store:
         return simpy.Store(self.env, capacity)
+
 
 # workshop_operations/application/orchestrator.py
 class WorkshopOrchestrator:

@@ -20,13 +20,15 @@ PopUpSim codebase had inconsistent field naming patterns that created confusion 
 class Scenario:
     scenario_id: str  # prefix_id pattern
 
+
 class Wagon:
-    wagon_id: str     # prefix_id pattern
-    track_id: str     # reference with _id suffix
+    wagon_id: str  # prefix_id pattern
+    track_id: str  # reference with _id suffix
+
 
 class Workshop:
     workshop_id: str  # prefix_id pattern
-    track_id: str     # reference with _id suffix
+    track_id: str  # reference with _id suffix
 ```
 
 ## Decision
@@ -43,15 +45,17 @@ Implement **systematic field name standardization** across the entire codebase:
 ```python
 # After - Consistent patterns
 class Scenario:
-    id: str           # standardized
+    id: str  # standardized
+
 
 class Wagon:
-    id: str           # standardized
-    track: str        # reference without _id suffix
+    id: str  # standardized
+    track: str  # reference without _id suffix
+
 
 class Workshop:
-    id: str           # standardized
-    track: str        # reference without _id suffix
+    id: str  # standardized
+    track: str  # reference without _id suffix
 ```
 
 ## Alternatives Considered
@@ -86,20 +90,23 @@ class Workshop:
 class Scenario(BaseModel):
     id: str  # was: scenario_id
 
+
 class Locomotive(BaseModel):
-    id: str    # was: locomotive_id
-    track: str # was: track_id
+    id: str  # was: locomotive_id
+    track: str  # was: track_id
+
 
 # DTOs
 class WagonInputDTO(BaseModel):
-    id: str    # was: wagon_id
-    track: str # was: track_id
+    id: str  # was: wagon_id
+    track: str  # was: track_id
+
 
 # Analytics
 class WorkshopCollector:
-    idle_time: float        # was: workshop_idle_time
-    active_time: float      # was: workshop_active_time
-    station_usage: dict     # was: workshop_station_usage
+    idle_time: float  # was: workshop_idle_time
+    active_time: float  # was: workshop_active_time
+    station_usage: dict  # was: workshop_station_usage
 ```
 
 ### Validation Updates
