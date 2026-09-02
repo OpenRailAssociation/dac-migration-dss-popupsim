@@ -61,12 +61,12 @@ from pathlib import Path
 from contexts.configuration.domain.configuration_builder import ConfigurationBuilder
 
 # Load scenario
-scenario = ConfigurationBuilder(Path("scenario_dir")).build()
+scenario = ConfigurationBuilder(Path('scenario_dir')).build()
 
 # Access configuration
-print(f"Scenario: {scenario.id}")
-print(f"Workshops: {len(scenario.workshops)}")
-print(f"Trains: {len(scenario.trains)}")
+print(f'Scenario: {scenario.id}')
+print(f'Workshops: {len(scenario.workshops)}')
+print(f'Trains: {len(scenario.trains)}')
 ```
 
 ---
@@ -313,11 +313,7 @@ sequenceDiagram
 from contexts.shared.domain.events import EventBus, TrainArrivedEvent
 
 # External Trains publishes event
-event_bus.publish(TrainArrivedEvent(
-    train_id="T001",
-    wagons=[wagon1, wagon2, wagon3],
-    arrival_time=100.0
-))
+event_bus.publish(TrainArrivedEvent(train_id='T001', wagons=[wagon1, wagon2, wagon3], arrival_time=100.0))
 
 # Retrofit Workflow subscribes
 event_bus.subscribe(TrainArrivedEvent, arrival_coordinator.handle_train_arrival)

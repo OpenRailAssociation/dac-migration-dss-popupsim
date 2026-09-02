@@ -89,12 +89,14 @@ graph TB
 # MVP: Direct SimPy usage (Technical Debt)
 import simpy
 
+
 class WorkshopService:
     def __init__(self):
         self.env = simpy.Environment()  # Direct dependency
 
     def run_process(self):
         self.env.process(self.retrofit_process())  # Tight coupling
+
 
 # Future: Abstracted interface
 class WorkshopService:
@@ -119,6 +121,7 @@ class SimulationService:
         workshop = self.workshop_service.setup(config)  # Direct call
         results = self.workshop_service.run(workshop)  # Direct call
 
+
 # Future: Event-driven
 class SimulationService:
     def run(self):
@@ -139,8 +142,9 @@ class SimulationService:
 # MVP: File-based storage (Technical Debt)
 class ConfigurationService:
     def load_scenario(self, path: str):
-        with open(f"{path}/scenario.json") as f:  # Direct file access
+        with open(f'{path}/scenario.json') as f:  # Direct file access
             return json.load(f)
+
 
 # Future: Repository pattern
 class ConfigurationService:
@@ -157,6 +161,22 @@ class ConfigurationService:
 - **Effort**: Estimated 3-5 days refactoring (to be validated)
 - **Created by**: [ADR MVP-002](09-architecture-decisions.md#adr-mvp-002-file-based-data-storage) (File storage decision)
 - **Full version solution**: Database + Repository pattern
+
+### Debt 4: `PLR0917` (too-many-positional-arguments) temporarily ignored
+
+The ruff 0.16.5 bump enabled the `PLR0917` rule, which flagged 23 functions
+across the backend, tests and frontend that take too many positional arguments.
+To unblock the dependency bump, the rule is currently ignored in
+`pyproject.toml` (`[tool.ruff.lint] ignore`).
+
+**Debt Details:**
+- **Type**: Code quality / linting debt
+- **Priority**: Low
+- **Effort**: Refactor the flagged signatures (keyword-only args or small
+  parameter objects), then remove `PLR0917` from the ruff ignore list.
+- **Affected areas**: `infrastructure/tracking/*`, `retrofit_workflow` event
+  helpers, `main.py`, animation frontend, and several validation tests.
+- **Full version solution**: Reduce positional-argument counts and re-enable the rule.
 
 ## 11.4 MVP Quality Risks
 
@@ -255,15 +275,15 @@ graph TB
 class RiskMonitor:
     def check_performance_risk(self, execution_time: float):
         if execution_time > 60:  # seconds
-            logging.warning(f"Performance risk: {execution_time}s execution")
+            logging.warning(f'Performance risk: {execution_time}s execution')
 
     def check_memory_risk(self, memory_mb: float):
         if memory_mb > 100:  # MB
-            logging.warning(f"Memory risk: {memory_mb}MB usage")
+            logging.warning(f'Memory risk: {memory_mb}MB usage')
 
     def check_complexity_risk(self, function_lines: int):
         if function_lines > 50:
-            logging.warning(f"Complexity risk: {function_lines} lines")
+            logging.warning(f'Complexity risk: {function_lines} lines')
 ```
 
 ### Continuous Risk Assessment

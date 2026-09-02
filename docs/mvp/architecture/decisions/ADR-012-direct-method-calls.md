@@ -52,6 +52,7 @@ class ScenarioServiceInterface(ABC):
     @abstractmethod
     def load_and_validate_scenario(self, source: Path) -> Scenario: ...
 
+
 class KPICalculatorInterface(ABC):
     @abstractmethod
     def calculate_all_kpis(self, metrics: SimulationMetrics) -> AllKPIs: ...

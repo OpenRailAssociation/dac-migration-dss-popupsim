@@ -38,12 +38,13 @@ class Scenario(BaseModel):
     end_date: datetime
     trains: list[Train] | None = None
     wagons: list[Wagon] | None = None
-    
+
     @field_validator('end_date')
     def end_after_start(cls, v, info):
         if 'start_date' in info.data and v <= info.data['start_date']:
             raise ValueError('end_date must be after start_date')
         return v
+
 
 # workshop_operations/domain/entities/wagon.py
 class Wagon(BaseModel):

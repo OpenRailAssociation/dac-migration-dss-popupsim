@@ -79,7 +79,7 @@ streamlit run popupsim/frontend/dashboard.py
 import streamlit.web.cli as stcli
 import sys
 
-sys.argv = ["streamlit", "run", "popupsim/frontend/dashboard.py"]
+sys.argv = ['streamlit', 'run', 'popupsim/frontend/dashboard.py']
 sys.exit(stcli.main())
 ```
 

@@ -57,8 +57,10 @@ classDiagram
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class Scenario(BaseModel):
     """Root configuration model."""
+
     id: str
     start_date: datetime
     end_date: datetime
@@ -75,6 +77,7 @@ class Scenario(BaseModel):
 ```python
 class Workshop(BaseModel):
     """Workshop configuration."""
+
     workshop_id: str
     track_id: str
     retrofit_stations: int
@@ -124,9 +127,11 @@ class WorkshopSchedulingService:
 ```python
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class ValidationResult:
     """Result of validation"""
+
     is_valid: bool
     errors: list[str]
     warnings: list[str]
@@ -134,9 +139,11 @@ class ValidationResult:
     def has_errors(self) -> bool:
         return len(self.errors) > 0
 
+
 @dataclass(frozen=True)
 class SimulationResult:
     """Result of simulation"""
+
     scenario_id: str
     duration_hours: int
     total_trains_processed: int
@@ -151,43 +158,32 @@ class SimulationResult:
 class ThroughputCalculationService:
     """Service for throughput calculations"""
 
-    def calculate_theoretical_throughput(
-        self,
-        workshop: Workshop
-    ) -> float:
+    def calculate_theoretical_throughput(self, workshop: Workshop) -> float:
         """Calculates theoretical workshop throughput"""
         total_capacity = sum(t.capacity for t in workshop.tracks)
-        avg_processing_time = sum(
-            t.retrofit_time_min for t in workshop.tracks
-        ) / len(workshop.tracks)
+        avg_processing_time = sum(t.retrofit_time_min for t in workshop.tracks) / len(workshop.tracks)
 
         wagons_per_hour = (total_capacity * 60) / avg_processing_time
         return wagons_per_hour
 
+
 class ValidationService:
     """Service for data validation"""
 
-    def validate_scenario(
-        self,
-        config: ScenarioConfig
-    ) -> ValidationResult:
+    def validate_scenario(self, config: ScenarioConfig) -> ValidationResult:
         """Validates scenario models"""
         errors = []
         warnings = []
 
         # Date validation
         if config.end_date <= config.start_date:
-            errors.append("end_date must be after start_date")
+            errors.append('end_date must be after start_date')
 
         # Workshop validation
         if config.workshop and not config.workshop.tracks:
-            errors.append("Workshop must have at least one track")
+            errors.append('Workshop must have at least one track')
 
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
-        )
+        return ValidationResult(is_valid=len(errors) == 0, errors=errors, warnings=warnings)
 ```
 
 ## 3.6 Exceptions
@@ -195,18 +191,25 @@ class ValidationService:
 ```python
 class PopUpSimDomainError(Exception):
     """Base for domain-specific errors"""
+
     pass
+
 
 class ValidationError(PopUpSimDomainError):
     """Configuration validation error"""
+
     pass
+
 
 class SimulationRuntimeError(PopUpSimDomainError):
     """Error during simulation"""
+
     pass
+
 
 class InsufficientCapacityError(PopUpSimDomainError):
     """Insufficient track/workshop capacity"""
+
     pass
 ```
 
@@ -217,20 +220,17 @@ All code must include explicit type annotations per project rules:
 ```python
 from typing import Optional
 
-def process_wagon(
-    wagon: Wagon,
-    track: WorkshopTrack
-) -> Optional[float]:
+
+def process_wagon(wagon: Wagon, track: WorkshopTrack) -> Optional[float]:
     """Process wagon on track, returns completion time"""
     if not track.capacity > 0:
-        raise InsufficientCapacityError(f"Track {track.id} is full")
+        raise InsufficientCapacityError(f'Track {track.id} is full')
 
     completion_time = track.retrofit_time_min
     return completion_time
 
-def validate_configuration(
-    config: ScenarioConfig
-) -> ValidationResult:
+
+def validate_configuration(config: ScenarioConfig) -> ValidationResult:
     """Validate scenario models"""
     # Implementation
     pass

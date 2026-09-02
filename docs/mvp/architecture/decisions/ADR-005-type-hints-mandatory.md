@@ -83,10 +83,8 @@ def validate_scenario(scenario: Scenario) -> ValidationResult:
     """Validate scenario with explicit types."""
     return ValidationResult(is_valid=True)
 
-def calculate_throughput(
-    wagons: list[Wagon],
-    duration: float
-) -> ThroughputKPI:
+
+def calculate_throughput(wagons: list[Wagon], duration: float) -> ThroughputKPI:
     """Calculate throughput metrics."""
     return ThroughputKPI(wagons_per_hour=len(wagons) / duration)
 ```
@@ -96,15 +94,15 @@ def calculate_throughput(
 from typing import Dict, List, Optional, Union, Generator
 from pathlib import Path
 
-def load_scenario_data(
-    source: Path | str
-) -> dict[str, list[dict[str, Any]]]:
+
+def load_scenario_data(source: Path | str) -> dict[str, list[dict[str, Any]]]:
     """Load scenario data with complex return type."""
     return {}
 
+
 def process_wagons() -> Generator[Wagon, None, None]:
     """Generator with explicit type parameters."""
-    yield Wagon(id="W1", track="T1")
+    yield Wagon(id='W1', track='T1')
 ```
 
 #### Class Definitions
@@ -126,8 +124,10 @@ class ValidationPipeline:
 from pydantic import BaseModel, Field
 from typing import Optional
 
+
 class Wagon(BaseModel):
     """Wagon entity with type-safe fields."""
+
     id: str = Field(min_length=1, max_length=50)
     track: str
     length: float = Field(gt=0)
@@ -198,7 +198,8 @@ uv run pytest                          # Run tests
 ```python
 # Type error caught by MyPy
 def process_wagon(wagon: Wagon) -> None:
-    wagon.update_status("COMPLETED")  # Error: expected WagonStatus, got str
+    wagon.update_status('COMPLETED')  # Error: expected WagonStatus, got str
+
 
 # Correct usage
 def process_wagon(wagon: Wagon) -> None:

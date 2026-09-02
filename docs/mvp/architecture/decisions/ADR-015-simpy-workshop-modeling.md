@@ -28,7 +28,8 @@ with workshop_resource.request() as station_req:
 # W07 problem: No SimPy Store for retrofitted wagons
 # move_to_parking searches wagons_queue instead of using SimPy coordination
 wagons_on_retrofitted = [
-    w for w in popupsim.wagons_queue  # Manual search + polling
+    w
+    for w in popupsim.wagons_queue  # Manual search + polling
     if w.track == retrofitted_track.id and w.status == WagonStatus.RETROFITTED
 ]
 
@@ -56,9 +57,10 @@ class WorkshopOrchestrator:
         self.retrofitted_wagons_ready = sim.create_store()  # ✅ Added missing store
         self.wagons_ready_for_stations = {track_id: sim.create_store() for track_id in workshops}
         self.wagons_completed = {track_id: sim.create_store() for track_id in workshops}
-        
+
         # SimPy Resources for workshop stations
         self.workshop_capacity = WorkshopCapacityManager(sim, workshops)
+
 
 def move_to_parking(popupsim):
     while True:
@@ -81,12 +83,14 @@ class WorkshopOrchestrator:
         # Add missing store for retrofitted wagons
         self.retrofitted_wagons_ready = sim.create_store(capacity=1000)
 
+
 # In _pickup_track_batches - after moving to retrofitted track:
 for wagon in batch:
     popupsim.track_capacity.add_wagon(retrofitted_track.id, wagon.length)
     popupsim.wagon_state.complete_arrival(wagon, retrofitted_track.id, WagonStatus.RETROFITTED)
     # ✅ Add to SimPy store for move_to_parking
     yield popupsim.retrofitted_wagons_ready.put(wagon)
+
 
 # In move_to_parking - use SimPy store instead of searching wagons_queue:
 def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
@@ -122,8 +126,9 @@ class SimPyWorkshopFlow:
         self.retrofitted_ready = sim.create_store(capacity=100)  # Solves W07
         self.parking_ready = sim.create_store(capacity=100)
 
+
 # Natural workflow chain:
-# Train → collection_ready → retrofit_ready → workshop_input → 
+# Train → collection_ready → retrofit_ready → workshop_input →
 # workshop_output → retrofitted_ready → parking_ready
 ```
 
@@ -146,34 +151,36 @@ class SimPyWorkshopFlow:
 ```python
 class SimPyWorkshop:
     """Model entire workshop workflow with SimPy primitives"""
+
     def __init__(self, sim, workshop_config):
         # Input queue (wagons waiting for retrofit)
         self.input_queue = sim.create_store(capacity=workshop_config.max_input)
-        
+
         # Processing stations (SimPy Resources)
         self.stations = sim.create_resource(capacity=workshop_config.retrofit_stations)
-        
+
         # Output queue (retrofitted wagons ready for pickup)
         self.output_queue = sim.create_store(capacity=workshop_config.max_output)
-        
+
         # Start continuous workshop process
         sim.run_process(self._workshop_process)
-    
+
     def _workshop_process(self) -> Generator:
         """Continuous workshop processing"""
         while True:
             # Get wagon from input
             wagon = yield self.input_queue.get()
-            
+
             # Request station
             with self.stations.request() as station:
                 yield station
                 # Process wagon
                 yield self.sim.delay(self.retrofit_time)
                 wagon.status = WagonStatus.RETROFITTED
-                
+
             # Send to output
             yield self.output_queue.put(wagon)
+
 
 # Usage:
 workshop = SimPyWorkshop(sim, workshop_config)

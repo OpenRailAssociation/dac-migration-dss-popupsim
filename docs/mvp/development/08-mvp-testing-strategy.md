@@ -48,10 +48,10 @@ Test context interactions:
 ```python
 def test_configuration_loading() -> None:
     """Test file loading."""
-    builder = ConfigurationBuilder(Path("test_scenario"))
+    builder = ConfigurationBuilder(Path('test_scenario'))
     scenario = builder.build()
-    
-    assert scenario.id == "test"
+
+    assert scenario.id == 'test'
     assert len(scenario.workshops) > 0
 ```
 

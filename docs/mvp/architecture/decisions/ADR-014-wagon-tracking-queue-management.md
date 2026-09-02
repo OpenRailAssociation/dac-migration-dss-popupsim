@@ -20,7 +20,8 @@ self.wagons_queue: list[Wagon] = []  # Both processing queue AND global registry
 
 # Broken lookup in move_to_parking
 wagons_on_retrofitted = [
-    w for w in popupsim.wagons_queue  # ❌ Wagons not in queue anymore!
+    w
+    for w in popupsim.wagons_queue  # ❌ Wagons not in queue anymore!
     if w.track == retrofitted_track.id and w.status == WagonStatus.RETROFITTED
 ]
 ```
@@ -67,14 +68,17 @@ class WorkshopOrchestrator:
 ```python
 class WagonTracker:
     """Single responsibility: Track all wagons in system"""
+
     def __init__(self):
         self.registry: dict[str, Wagon] = {}  # Never remove wagons
-    
+
     def get_wagons_by_track(self, track_id: str) -> list[Wagon]: ...
     def get_wagons_by_status(self, status: WagonStatus) -> list[Wagon]: ...
 
+
 class WorkflowQueues:
     """Single responsibility: Manage processing workflows"""
+
     def __init__(self, sim):
         self.collection_queue: list[Wagon] = []
         self.retrofit_queue: list[Wagon] = []
@@ -129,10 +133,9 @@ class WagonEventManager:
 class WagonRegistry:
     def __init__(self):
         self.all_wagons: dict[str, Wagon] = {}
-    
+
     def get_wagons_by_status_and_track(self, status: WagonStatus, track_id: str) -> list[Wagon]:
-        return [w for w in self.all_wagons.values() 
-                if w.status == status and w.track == track_id]
+        return [w for w in self.all_wagons.values() if w.status == status and w.track == track_id]
 ```
 
 **Pros:**
@@ -152,13 +155,8 @@ class WagonRegistry:
 ```python
 class TrackBasedWagonManager:
     def __init__(self):
-        self.track_wagons: dict[str, list[Wagon]] = {
-            "collection": [],
-            "retrofit": [],
-            "retrofitted": [],
-            "parking": []
-        }
-    
+        self.track_wagons: dict[str, list[Wagon]] = {'collection': [], 'retrofit': [], 'retrofitted': [], 'parking': []}
+
     def move_wagon(self, wagon: Wagon, from_track: str, to_track: str): ...
 ```
 
@@ -179,19 +177,25 @@ class TrackBasedWagonManager:
 ```python
 class WagonStateMachine:
     states = [
-        'ARRIVING', 'SELECTING', 'ON_COLLECTION', 'MOVING_TO_RETROFIT',
-        'ON_RETROFIT', 'RETROFITTING', 'RETROFITTED', 'MOVING_TO_PARKING', 'PARKING'
+        'ARRIVING',
+        'SELECTING',
+        'ON_COLLECTION',
+        'MOVING_TO_RETROFIT',
+        'ON_RETROFIT',
+        'RETROFITTING',
+        'RETROFITTED',
+        'MOVING_TO_PARKING',
+        'PARKING',
     ]
-    
+
     def on_enter_RETROFITTED(self, wagon: Wagon):
         # Automatic queue management
         self.orchestrator.parking_queue.put(wagon)
         # Automatic event firing
         self.metrics.record_event(WagonRetrofittedEvent.create(wagon_id=wagon.id))
-    
+
     def can_move_to_retrofit(self, wagon: Wagon) -> bool:
-        return (self.workshop_capacity.has_available_stations() and
-                self.track_capacity.can_add_wagon(wagon.length))
+        return self.workshop_capacity.has_available_stations() and self.track_capacity.can_add_wagon(wagon.length)
 ```
 
 **Pros:**
@@ -213,11 +217,11 @@ All options must support analytics requirements:
 
 ```python
 # Analytics needs access to:
-wagon.retrofit_start_time    # When did retrofit begin?
-wagon.retrofit_end_time      # When did it complete?  
-wagon.waiting_time          # How long did wagon wait?
-wagon.track                 # Where is wagon now?
-wagon.status               # What state is it in?
+wagon.retrofit_start_time  # When did retrofit begin?
+wagon.retrofit_end_time  # When did it complete?
+wagon.waiting_time  # How long did wagon wait?
+wagon.track  # Where is wagon now?
+wagon.status  # What state is it in?
 ```
 
 **Analytics Compatibility:**

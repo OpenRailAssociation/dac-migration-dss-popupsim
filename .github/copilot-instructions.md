@@ -57,10 +57,12 @@ def validate_path(path: Optional[Path]) -> Path | None:
     """Validate file path."""
     return path if path and path.exists() else None
 
+
 # Test method (always -> None)
 def test_validation() -> None:
     """Test path validation."""
     assert validate_path(None) is None
+
 
 # Fixture with proper return type
 @pytest.fixture
@@ -68,6 +70,7 @@ def temp_file() -> Generator[Path, None, None]:
     """Create temporary file."""
     with tempfile.NamedTemporaryFile() as f:
         yield Path(f.name)
+
 
 # Class method with type hints
 def __init__(self, config: Dict[str, Any]) -> None:

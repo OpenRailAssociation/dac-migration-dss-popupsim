@@ -38,29 +38,30 @@ SimPy provides discrete event simulation for the Retrofit Workflow Context. Inte
 import simpy
 from typing import Any, Callable, Generator
 
+
 class SimPyAdapter:
     """Thin adapter for SimPy environment."""
-    
+
     def __init__(self, env: simpy.Environment):
         self.env = env
-    
+
     @property
     def now(self) -> float:
         """Current simulation time."""
         return self.env.now
-    
+
     def timeout(self, delay: float) -> Any:
         """Wait for delay time units."""
         return self.env.timeout(delay)
-    
+
     def process(self, generator: Generator) -> Any:
         """Register a process."""
         return self.env.process(generator)
-    
+
     def run(self, until: float | None = None) -> None:
         """Run simulation."""
         self.env.run(until=until)
-    
+
     @staticmethod
     def create_environment() -> simpy.Environment:
         """Create SimPy environment."""
@@ -76,22 +77,23 @@ Coordinators use SimPy generators for discrete event simulation:
 ```python
 from typing import Generator, Any
 
+
 class CollectionCoordinator:
     """Coordinates wagon collection."""
-    
+
     def start(self) -> None:
         """Start coordinator process."""
         self.config.env.process(self._collection_process())
-    
+
     def _collection_process(self) -> Generator[Any, Any, None]:
         """Main collection loop."""
         while True:
             # Wait for wagon
             wagon = yield self.config.collection_queue.get()
-            
+
             # Collect batch
             wagons = yield from self._collect_batch(wagon)
-            
+
             # Transport
             yield from self._transport_batch(wagons)
 ```
@@ -106,18 +108,19 @@ SimPy Resources manage limited capacity:
 import simpy
 from typing import Any
 
+
 class LocomotiveResourceManager:
     """Manages locomotive resources."""
-    
+
     def __init__(self, env: simpy.Environment, locomotives: list[Locomotive]):
         self.env = env
         self.resource = simpy.Resource(env, capacity=len(locomotives))
         self.locomotives = {loco.locomotive_id: loco for loco in locomotives}
-    
+
     def allocate(self) -> Any:
         """Allocate locomotive (blocks until available)."""
         return self.resource.request()
-    
+
     def release(self, request: Any) -> None:
         """Release locomotive."""
         self.resource.release(request)
@@ -133,13 +136,9 @@ External Trains Context publishes events via SimPy:
 def _arrival_process(self, train: Train, arrival_time: float) -> Generator[Any, Any, None]:
     """Process single train arrival."""
     yield self.env.timeout(arrival_time)
-    
+
     # Publish event
-    event = TrainArrivedEvent(
-        train_id=train.id,
-        wagons=train.wagons,
-        arrival_time=self.env.now
-    )
+    event = TrainArrivedEvent(train_id=train.id, wagons=train.wagons, arrival_time=self.env.now)
     self.event_bus.publish(event)
 ```
 
