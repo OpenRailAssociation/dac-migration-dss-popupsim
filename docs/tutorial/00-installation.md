@@ -159,7 +159,7 @@ This command:
 Run a test simulation:
 
 ```bash
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/test
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/test
 ```
 
 If the simulation runs successfully, you're all set!
@@ -175,7 +175,7 @@ run_dashboard.bat
 
 **Linux/macOS:**
 ```bash
-uv run streamlit run popupsim/frontend/streamlit_dashboard.py
+uv run streamlit run popupsim/frontend/dashboard.py
 ```
 
 On the first run it will ask you to enter your E-Mail. Leave empty and just press return/enter.
@@ -292,7 +292,7 @@ cd C:\Users\YourName\Documents\PopUpSim
 uv sync
 
 # Run test
-uv run python popupsim/backend/src/main.py --scenario data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
 ```
 
 ### Scenario 2: Linux Server (No Root Access)
@@ -313,7 +313,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run test
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
 ```
 
 ### Scenario 3: Shared Computer (Multiple Users)
@@ -333,7 +333,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run simulations
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/ten_trains_two_days_baseline
 ```
 
 ### Scenario 4: Air-Gapped System (No Internet)

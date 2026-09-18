@@ -1,7 +1,22 @@
 # ADR-004: 3-Bounded Context Architecture
 
 ## Status
-**ACCEPTED** - Implemented January 2025
+**SUPERSEDED** - Originally accepted January 2025; superseded by the current 4-bounded-context design.
+
+> [!IMPORTANT]
+> This ADR describes the original 3-context split (Configuration, Workshop Operations,
+> Analysis & Reporting) with `workshop_operations/` and `analytics/` packages. **The code
+> no longer implements this design.** The system now has **4 bounded contexts** and the
+> reporting/analytics concern was folded into the Retrofit Workflow context.
+>
+> Current contexts (see [`../05-building-blocks.md`](../05-building-blocks.md)):
+> 1. **Configuration** (`contexts/configuration/`)
+> 2. **External Trains** (`contexts/external_trains/`)
+> 3. **Railway Infrastructure** (`contexts/railway_infrastructure/`)
+> 4. **Retrofit Workflow** (`contexts/retrofit_workflow/`) — includes simulation execution and reporting/export
+>
+> The content below is retained for historical context only. Package paths such as
+> `workshop_operations/` and `analytics/` do not exist in the current codebase.
 
 ## Context
 
@@ -137,33 +152,32 @@ Configuration → Validation → Workshop Simulation → Analytics → Export
 - **Initial Complexity**: More complex than monolithic approach
 - **Integration Testing**: Need to test context interactions
 
-### Context Quality Assessment
+### Context Characteristics
 
-#### Configuration Context: 9.5/10
-- Excellent hexagonal architecture
-- 4-layer validation framework
-- Clean DTO → Domain transformation
+#### Configuration Context
+- Hexagonal architecture with a 4-layer validation framework
+- DTO → domain transformation
 - Pluggable data source adapters
 
-#### Workshop Operations Context: 9.0/10
-- Rich domain model with aggregates
-- 5 specialized process coordinators
+#### Workshop Operations Context
+- Domain model with aggregates
+- Multiple process coordinators
 - Resource management abstraction
-- Clean SimPy integration
+- SimPy integration
 
-#### Analytics Context: 9.0/10
-- Event-driven architecture
+#### Analytics Context
+- Event-driven design
 - Observer pattern for metrics
-- Specification pattern for bottlenecks
+- Specification pattern for bottleneck detection
 - Multiple export formats
 
 ## Validation
 
-### Architecture Metrics
-- **Maintainability**: 9.5/10 - Clear separation, consistent patterns
-- **Testability**: 9.0/10 - Independent context testing
-- **Extensibility**: 9.5/10 - Easy to add features within contexts
-- **Performance**: 8.5/10 - Good for MVP, optimization opportunities
+### Architecture Characteristics
+- **Maintainability**: Clear separation, consistent patterns
+- **Testability**: Contexts can be tested independently
+- **Extensibility**: Features can be added within a context
+- **Performance**: Adequate for the MVP; optimization opportunities remain
 
 ### Context Cohesion
 - **Configuration**: High cohesion around scenario management
@@ -191,4 +205,4 @@ This decision supports:
 
 **Decision Date**: January 2025  
 **Decision Makers**: Architecture Team  
-**Implementation Status**: ✅ Complete
+**Implementation Status**: Complete

@@ -34,24 +34,24 @@ graph TB
 
     subgraph "External Systems"
         Files[Configuration Files<br/>JSON, CSV]
-        ExtSys[External Systems<br/>Infrastructure Data]
-        Results[Result Export<br/>CSV, PNG]
+        Results[Result Export<br/>CSV, JSON]
+        Dashboard[Streamlit Dashboard<br/>Visualization]
     end
 
     Planner -->|Creates Templates| PopUpSim
     DetailPlanner -->|Configures Scenarios| PopUpSim
 
     PopUpSim -->|Loads Configuration| Files
-    PopUpSim -->|Imports Infrastructure| ExtSys
     PopUpSim -->|Exports Results| Results
+    Results -->|Read by| Dashboard
 
     classDef system fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef user fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
 
     class PopUpSim system
-    class Planer,Detailplaner user
-    class Files,ExtSys,Results external
+    class Planner,DetailPlanner user
+    class Files,Results,Dashboard external
 ```
 
 ## 1.3 Container Architecture (C4 Level 2)
@@ -70,13 +70,13 @@ graph TB
 
         subgraph "Data (File System)"
             ConfigFiles[Input Files<br/>JSON/CSV<br/>DATA]
-            ResultFiles[Output Files<br/>CSV/PNG<br/>DATA]
+            ResultFiles[Output Files<br/>CSV/JSON<br/>DATA]
         end
 
         subgraph "External Libraries"
             SimPy[SimPy Framework<br/>EXTERNAL]
-            Matplotlib[Matplotlib<br/>EXTERNAL]
             Pydantic[Pydantic<br/>EXTERNAL]
+            Typer[Typer CLI<br/>EXTERNAL]
         end
     end
 
@@ -97,7 +97,6 @@ graph TB
     RLY <-->|Track state| RWF
     EXT -->|Train arrivals| RWF
     RWF -->|Uses| SimPy
-    RWF -->|Uses| Matplotlib
     RWF -->|Writes| ResultFiles
 
     classDef container fill:#1168bd,stroke:#0b4884,stroke-width:2px,color:#fff
@@ -107,7 +106,7 @@ graph TB
 
     class CFG,RWF,RLY,EXT container
     class ConfigFiles,ResultFiles data
-    class SimPy,Matplotlib,Pydantic external
+    class SimPy,Pydantic,Typer external
     class Developer person
 ```
 
@@ -119,7 +118,8 @@ graph TB
 - **Python 3.13+**: Main language
 - **SimPy**: Discrete event simulation
 - **Pydantic 2.0+**: Data validation
-- **Matplotlib**: Visualization (charts)
+- **Typer**: CLI (`run` / `optimize` commands)
+- **Streamlit + Plotly**: Dashboard and interactive visualization
 - **Pandas**: Data processing (CSV)
 
 ### Development
@@ -130,9 +130,9 @@ graph TB
 - **Pylint**: Static analysis
 
 ### Not in MVP
-- ❌ **Web Frontend**: CLI/Desktop only
-- ❌ **REST API**: Direct Python calls
-- ❌ **Database**: File-based only
+- **REST API**: Not included (CLI + local dashboard)
+- **Database**: Not included (file-based only)
+- **Authentication / multi-user**: Not included (local single-user)
 
 ## 1.5 Deployment Architecture
 
@@ -141,28 +141,29 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Developer Laptop"
-        subgraph "PopUpSim MVP"
-            Python[Python 3.13+<br/>SimPy + Matplotlib]
+        subgraph "PopUpSim"
+            Python[Python 3.13+<br/>SimPy + Typer]
+            Dash[Streamlit + Plotly<br/>Dashboard]
         end
 
         subgraph "File System"
-            Input[config/<br/>scenario.json<br/>train_schedule.csv]
-            Output[results/<br/>*.csv<br/>charts/*.png]
+            Input[scenario dir/<br/>scenario.json<br/>train_schedule.csv]
+            Output[output/<br/>*.csv + summary_metrics.json]
         end
 
-        CLI[Terminal/IDE<br/>python main.py]
+        CLI[Terminal/IDE<br/>main.py run --scenario ...]
     end
 
     CLI -->|Starts| Python
     Python -->|Reads| Input
     Python -->|Writes| Output
-    CLI -->|Opens| Output
+    Dash -->|Reads| Output
 
     classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef files fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef user fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
 
-    class Python process
+    class Python,Dash process
     class Input,Output files
     class CLI user
 ```
@@ -180,7 +181,7 @@ graph TB
 ### Performance Goals
 - **Startup Time**: To be measured
 - **Simulation Speed**: To be measured
-- **Chart Generation**: To be measured
+- **Dashboard Load Time**: To be measured
 - **Memory Usage**: To be measured
 
 ### Functional Goals
@@ -227,14 +228,14 @@ graph TB
 |------|-------------|--------|------------|
 | **Performance with large scenarios** | Medium | High | Early benchmarking |
 | **SimPy learning curve** | High | Medium | Prototyping and documentation |
-| **Matplotlib limitations** | Low | Low | Simple 2D charts sufficient |
+| **Dashboard/visualization gaps** | Low | Low | Plotly charts in the Streamlit dashboard |
 
 ### Business Risks
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
 | **Incomplete domain model** | Medium | High | Close alignment with domain experts |
 | **Unrealistic results** | Medium | High | Validation with real data |
-| **User acceptance** | Low | High | Focus on visualization |
+| **User acceptance** | Low | High | Clear dashboard visualization |
 
 ## 1.9 Success Criteria
 
@@ -247,14 +248,14 @@ graph TB
 ### Functional Metrics
 - **Functionality:** Basic retrofitting simulation works
 - **Output:** KPIs are correctly calculated and exported
-- **Visualization:** Matplotlib charts display simulation results
+- **Visualization:** The Streamlit dashboard displays simulation results
 - **Extensibility:** Architecture foundation for full version established
 
 ### Acceptance Criteria
-- ✅ **Template Creation**: Standardized workshop templates can be created
-- ✅ **Throughput Estimation**: Plausible throughput calculations
-- ✅ **Data Import**: CSV/JSON import works without errors
-- ✅ **Capacity Analysis**: Capacity bottlenecks are identified
-- ✅ **Stability**: Multiple simulations run consecutively without crashes
-- ✅ **Usability**: Developer creates scenario quickly
-- ✅ **Expert Validation**: Positive evaluation by domain experts
+- **Template Creation**: Standardized workshop templates can be created
+- **Throughput Estimation**: Plausible throughput calculations
+- **Data Import**: CSV/JSON import works without errors
+- **Capacity Analysis**: Capacity bottlenecks are identified
+- **Stability**: Multiple simulations run consecutively without crashes
+- **Usability**: Developer creates scenario quickly
+- **Expert Validation**: Positive evaluation by domain experts

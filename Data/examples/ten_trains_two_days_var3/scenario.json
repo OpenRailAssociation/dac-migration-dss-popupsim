@@ -1,6 +1,6 @@
 {
   "id": "test_scenario_01",
-  "description": "DAC restrofit simualation with 2 locos, 3 collections tracks, 2 workshops with 2 bays",
+  "description": "DAC retrofit simulation with 2 locomotives, 3 collection tracks, 2 retrofit tracks, 1 retrofitted track, 2 workshops with 2 bays each",
   "version": "1.0.0",
   "start_date": "2025-12-01T00:00:00+00:00",
   "end_date": "2025-12-11T00:00:00+00:00",

@@ -28,14 +28,17 @@ Complete
 
 **Steps:**
 1. Receive TrainArrivedEvent from External Trains
-2. Classify wagons (needs retrofit vs. doesn't need)
-3. Select collection track using TrackSelector
-4. Place wagons on collection track
-5. Add wagons to collection queue
+2. Classify each wagon on intake — **the eligibility gate**: loaded wagons and wagons that don't need a retrofit (e.g. already-DAC) are rejected here (`REJECTED_LOADED` / `REJECTED_NO_RETROFIT_NEEDED`) and never become wagon entities
+3. For eligible wagons, select a collection track (via the Railway Infrastructure track-selection service)
+4. Place wagons on the collection track — if no track has room, the wagon is rejected on **capacity** (`NO_COLLECTION_TRACK` / `COLLECTION_TRACK_FULL`)
+5. Hand placed wagons to the collection queue
+
+> Note: the eligibility rejection (loaded / no-retrofit) happens at classification (step 2),
+> *before* track placement. The only rejection at placement (step 4) is capacity (track-full).
 
 **Domain Services Used:**
-- WagonSelector (classify)
-- WagonStateManager (update status)
+- Wagon eligibility / classification (`WagonEligibilityService`) — the accept/reject gate at arrival
+- Track selection (`TrackSelectionService`)
 
 ### 2. Collection Process
 
@@ -98,26 +101,25 @@ Complete
 
 ### Wagon State Machine
 
-```
-ARRIVING → SELECTING → SELECTED → MOVING → 
-ON_COLLECTION_TRACK → MOVING → ON_RETROFIT_TRACK → 
-MOVING → RETROFITTING → RETROFITTED → MOVING → 
-ON_RETROFITTED_TRACK → MOVING → PARKING
-```
-
-### Locomotive State Machine
+The `WagonStatus` enum (`contexts/retrofit_workflow/domain/entities/wagon.py`) defines the
+states:
 
 ```
-AVAILABLE → ALLOCATED → IN_USE → RETURNING → AVAILABLE
+ARRIVED → CLASSIFIED → READY_FOR_RETROFIT → RETROFITTING → RETROFITTED → PARKED
 ```
+
+Wagons that are loaded or do not need a retrofit are rejected during classification
+(recorded as a `REJECTED` event in the wagon journey).
 
 ## Timing
 
-All timing parameters defined in ProcessTimes:
-- coupling_time
-- decoupling_time
-- retrofit_time_per_wagon
-- train_preparation_time
+Timing parameters are defined in `ProcessTimes`
+(`contexts/configuration/domain/models/process_times.py`):
+
+- `wagon_retrofit_time`
+- `screw_coupling_time` / `screw_decoupling_time`
+- `dac_coupling_time` / `dac_decoupling_time`
+- `train_to_hump_delay`, `wagon_hump_interval`
 
 ## Resource Constraints
 

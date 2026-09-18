@@ -29,7 +29,7 @@ Implement **hexagonal architecture** specifically for the Configuration Context 
 
 ## Alternatives Considered
 
-- **Hexagonal Architecture** ✅ Chosen
+- **Hexagonal Architecture** — Chosen
 - **Direct CSV parsing**: Tight coupling, hard to test
 - **Single JSON format**: Doesn't meet CSV requirement
 - **Full hexagonal everywhere**: Too complex for MVP timeline
@@ -78,12 +78,12 @@ class DataSourceFactory:
 ## Consequences
 
 ### Achieved
-- ✅ **Multi-Format Support**: JSON and CSV scenarios supported
-- ✅ **Future-Ready**: Easy to add REST API, database adapters
-- ✅ **Testable**: Mock adapters for unit testing
-- ✅ **Maintainable**: Clear separation between data access and business logic
-- ✅ **Type Safety**: Consistent DTOs across all adapters
-- ✅ **Auto-Detection**: Automatic format detection based on file/directory
+- **Multi-Format Support**: JSON and CSV scenarios supported
+- **Future-Ready**: Easy to add REST API, database adapters
+- **Testable**: Mock adapters for unit testing
+- **Maintainable**: Clear separation between data access and business logic
+- **Type Safety**: Consistent DTOs across all adapters
+- **Auto-Detection**: Automatic format detection based on file/directory
 
 ### Files Implementing This Decision
 - `configuration/domain/ports/data_source_port.py` - Port interface

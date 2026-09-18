@@ -11,32 +11,36 @@ The routes.json file defines movement paths between tracks. Routes specify which
   "routes": [
     {
       "id": "track_19_collection1",
-      "duration": 1.0,
+      "duration": 60.0,
       "path": ["track_19", "Mainline", "collection1"]
     },
     {
       "id": "collection1_retrofit",
-      "duration": 1.0,
+      "duration": 60.0,
       "path": ["collection1", "Mainline", "retrofit"]
     },
     {
-      "id": "retrofit_WS1",
-      "duration": 1.0,
-      "path": ["retrofit", "Mainline", "WS1"]
+      "id": "retrofit_WS_01",
+      "duration": 5.0,
+      "path": ["retrofit", "WS_01"]
     },
     {
-      "id": "WS1_retrofitted",
-      "duration": 1.0,
-      "path": ["WS1", "Mainline", "retrofitted"]
+      "id": "WS_01_retrofitted",
+      "duration": 5.0,
+      "path": ["WS_01", "retrofitted"]
     },
     {
-      "id": "retrofitted_parking1",
-      "duration": 1.0,
-      "path": ["retrofitted", "parking1"]
+      "id": "retrofitted_track_19",
+      "duration": 5.0,
+      "path": ["retrofitted", "track_19"]
     }
   ]
 }
 ```
+
+In the baseline scenario, routes that traverse the Mainline use `duration: 60.0` (minutes)
+and short local moves use `duration: 5.0`. Workshop ids in route names are `WS_01` / `WS_02`
+(matching `workshops.json`).
 
 ## Route Structure
 
@@ -88,7 +92,7 @@ Travel time for the route in minutes:
 - Track complexity
 - Switch operations
 
-**Current Scenario:** All routes use 1.0 minute (simplified)
+**Baseline scenario:** Mainline routes use `60.0` minutes; short local moves use `5.0`.
 
 ### path
 
@@ -117,7 +121,7 @@ No intermediate tracks:
 ```json
 {
   "id": "retrofitted_parking1",
-  "duration": 1.0,
+  "duration": 5.0,
   "path": ["retrofitted", "parking1"]
 }
 ```
@@ -131,7 +135,7 @@ Routes through main circulation path:
 ```json
 {
   "id": "track_19_collection1",
-  "duration": 1.0,
+  "duration": 60.0,
   "path": ["track_19", "Mainline", "collection1"]
 }
 ```
@@ -159,12 +163,12 @@ Multiple intermediate tracks:
 Locomotive starts at track_19, needs routes to all areas:
 
 ```json
-{"id": "track_19_collection1", "duration": 1.0, "path": ["track_19", "Mainline", "collection1"]},
-{"id": "track_19_collection2", "duration": 1.0, "path": ["track_19", "Mainline", "collection2"]},
-{"id": "track_19_retrofit", "duration": 1.0, "path": ["track_19", "Mainline", "retrofit"]},
-{"id": "track_19_WS1", "duration": 1.0, "path": ["track_19", "Mainline", "WS1"]},
-{"id": "track_19_WS2", "duration": 1.0, "path": ["track_19", "Mainline", "WS2"]},
-{"id": "track_19_retrofitted", "duration": 1.0, "path": ["track_19", "Mainline", "retrofitted"]}
+{"id": "track_19_collection1", "duration": 60.0, "path": ["track_19", "Mainline", "collection1"]},
+{"id": "track_19_collection2", "duration": 60.0, "path": ["track_19", "Mainline", "collection2"]},
+{"id": "track_19_retrofit", "duration": 5.0, "path": ["track_19", "retrofit"]},
+{"id": "track_19_WS_01", "duration": 5.0, "path": ["track_19", "WS_01"]},
+{"id": "track_19_WS_02", "duration": 5.0, "path": ["track_19", "WS_02"]},
+{"id": "track_19_retrofitted", "duration": 5.0, "path": ["track_19", "retrofitted"]}
 ```
 
 ### Return Routes to Locomotive Home
@@ -172,12 +176,12 @@ Locomotive starts at track_19, needs routes to all areas:
 Locomotive returns from operational tracks:
 
 ```json
-{"id": "collection1_track_19", "duration": 1.0, "path": ["collection1", "Mainline", "track_19"]},
-{"id": "collection2_track_19", "duration": 1.0, "path": ["collection2", "Mainline", "track_19"]},
-{"id": "retrofit_track_19", "duration": 1.0, "path": ["retrofit", "Mainline", "track_19"]},
-{"id": "WS1_track_19", "duration": 1.0, "path": ["WS1", "Mainline", "track_19"]},
-{"id": "WS2_track_19", "duration": 1.0, "path": ["WS2", "Mainline", "track_19"]},
-{"id": "retrofitted_track_19", "duration": 1.0, "path": ["retrofitted", "Mainline", "track_19"]}
+{"id": "collection1_track_19", "duration": 60.0, "path": ["collection1", "Mainline", "track_19"]},
+{"id": "collection2_track_19", "duration": 60.0, "path": ["collection2", "Mainline", "track_19"]},
+{"id": "retrofit_track_19", "duration": 5.0, "path": ["retrofit", "Mainline", "track_19"]},
+{"id": "WS_01_track_19", "duration": 5.0, "path": ["WS_01", "track_19"]},
+{"id": "WS_02_track_19", "duration": 5.0, "path": ["WS_02", "track_19"]},
+{"id": "retrofitted_track_19", "duration": 5.0, "path": ["retrofitted", "track_19"]}
 ```
 
 ### Operational Flow Routes
@@ -185,12 +189,12 @@ Locomotive returns from operational tracks:
 Wagon movement through retrofit process:
 
 ```json
-{"id": "collection1_retrofit", "duration": 1.0, "path": ["collection1", "Mainline", "retrofit"]},
-{"id": "collection2_retrofit", "duration": 1.0, "path": ["collection2", "Mainline", "retrofit"]},
-{"id": "retrofit_WS1", "duration": 1.0, "path": ["retrofit", "Mainline", "WS1"]},
-{"id": "retrofit_WS2", "duration": 1.0, "path": ["retrofit", "Mainline", "WS2"]},
-{"id": "WS1_retrofitted", "duration": 1.0, "path": ["WS1", "Mainline", "retrofitted"]},
-{"id": "WS2_retrofitted", "duration": 1.0, "path": ["WS2", "Mainline", "retrofitted"]}
+{"id": "collection1_retrofit", "duration": 60.0, "path": ["collection1", "Mainline", "retrofit"]},
+{"id": "collection2_retrofit", "duration": 60.0, "path": ["collection2", "Mainline", "retrofit"]},
+{"id": "retrofit_WS_01", "duration": 5.0, "path": ["retrofit", "WS_01"]},
+{"id": "retrofit_WS_02", "duration": 5.0, "path": ["retrofit", "WS_02"]},
+{"id": "WS_01_retrofitted", "duration": 5.0, "path": ["WS_01", "retrofitted"]},
+{"id": "WS_02_retrofitted", "duration": 5.0, "path": ["WS_02", "retrofitted"]}
 ```
 
 ### Parking Distribution Routes
@@ -198,14 +202,14 @@ Wagon movement through retrofit process:
 From retrofitted track to parking:
 
 ```json
-{"id": "retrofitted_parking1", "duration": 1.0, "path": ["retrofitted", "parking1"]},
-{"id": "retrofitted_parking2", "duration": 1.0, "path": ["retrofitted", "parking2"]},
-{"id": "retrofitted_parking3", "duration": 1.0, "path": ["retrofitted", "parking3"]},
+{"id": "retrofitted_parking1", "duration": 5.0, "path": ["retrofitted", "parking1"]},
+{"id": "retrofitted_parking2", "duration": 5.0, "path": ["retrofitted", "parking2"]},
+{"id": "retrofitted_parking3", "duration": 5.0, "path": ["retrofitted", "parking3"]},
 ...
-{"id": "retrofitted_parking16", "duration": 1.0, "path": ["retrofitted", "Mainline", "parking16"]}
+{"id": "retrofitted_parking16", "duration": 5.0, "path": ["retrofitted", "parking16"]}
 ```
 
-**Note:** Some parking tracks have direct routes, others via mainline
+**Note:** parking4 is skipped in the baseline (parking1–3, 5–16).
 
 ## Route Completeness
 
@@ -326,10 +330,10 @@ Missing routes cause:
 
 ### Route Count
 
-**ten_trains_two_days has 33 routes:**
-- Locomotive home: 12 routes (6 out, 6 back)
-- Operational flow: 6 routes
-- Parking distribution: 15 routes
+**The baseline scenario defines 49 routes**, covering:
+- Locomotive home (`track_19`) ↔ operational tracks (collection, retrofit, workshops, retrofitted)
+- Operational flow (collection → retrofit → workshop → retrofitted)
+- Parking distribution (retrofitted → 15 parking tracks)
 
 **Scaling:**
 - More tracks = more routes needed

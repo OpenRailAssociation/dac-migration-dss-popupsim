@@ -1,6 +1,17 @@
 # ADR-011: 3 Bounded Contexts
 
-**Status:** IMPLEMENTED - 2025-01-15
+**Status:** SUPERSEDED - Originally implemented 2025-01-15; superseded by the current 4-bounded-context design.
+
+> [!IMPORTANT]
+> This ADR proposed 3 contexts (Configuration, Workshop Operations, Analysis & Reporting).
+> **The code no longer matches this.** The system now uses **4 bounded contexts**:
+> Configuration, External Trains, Railway Infrastructure, and Retrofit Workflow. The
+> "Analysis & Reporting" concern was merged into the Retrofit Workflow context, and the
+> `workshop_operations/` and `analytics/` packages referenced below no longer exist.
+>
+> See [`../05-building-blocks.md`](../05-building-blocks.md) and
+> [ADR-004](ADR-004-3-bounded-context-architecture.md) for the current, accurate model.
+> The content below is retained for historical context only.
 
 ## Context
 
@@ -22,7 +33,7 @@ Use **3 bounded contexts**:
 
 ## Alternatives Considered
 
-- **3 contexts** ✅ Chosen
+- **3 contexts** — Chosen
 - **1 monolith**: No domain separation
 - **More specialized contexts**: Too complex for MVP timeline
 - **2 contexts**: Insufficient separation
@@ -65,11 +76,11 @@ def main():
 ## Consequences
 
 ### Achieved
-- ✅ **Clear Responsibilities**: Each context owns distinct domain area
-- ✅ **Independent Development**: 3 developers worked on separate contexts
-- ✅ **Clean Interfaces**: Simple data transfer between contexts
-- ✅ **Testable**: Each context tested independently
-- ✅ **Extensible**: Foundation for full version context splitting
+- **Clear Responsibilities**: Each context owns distinct domain area
+- **Independent Development**: 3 developers worked on separate contexts
+- **Clean Interfaces**: Simple data transfer between contexts
+- **Testable**: Each context tested independently
+- **Extensible**: Foundation for full version context splitting
 
 ### Files Implementing This Decision
 - `configuration/` - Complete input processing context

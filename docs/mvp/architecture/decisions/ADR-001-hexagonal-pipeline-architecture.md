@@ -17,55 +17,49 @@ The PopUpSim configuration system needed to support multiple data sources (JSON 
 ### Evaluated Alternatives
 
 #### 1. Pure Domain-Driven Design (DDD)
-- **Extensibility**: ★★☆☆☆☆ (2/6) - Domain services hard to extend for new sources
-- **Testability**: ★★★☆☆☆ (3/6) - Domain logic testable, but infrastructure coupling
-- **Validation**: ★★★★☆☆ (4/6) - Rich domain validation, but scattered across aggregates
-- **Error Handling**: ★★★☆☆☆ (3/6) - Domain exceptions, but inconsistent error formats
-- **Consistency**: ★★★☆☆☆ (3/6) - Domain consistency, but infrastructure varies
-- **Async Support**: ★★☆☆☆☆ (2/6) - Domain events possible, but complex setup
+- **Extensibility**: Domain services are hard to extend for new sources.
+- **Testability**: Domain logic is testable, but coupled to infrastructure.
+- **Validation**: Validation lives in the domain but is scattered across aggregates.
+- **Error Handling**: Domain exceptions, but inconsistent error formats.
+- **Consistency**: Domain is consistent, but infrastructure handling varies.
 
 #### 2. Enhanced ScenarioBuilder Pattern
-- **Extensibility**: ★★☆☆☆☆ (2/6) - Builder methods for new sources, but monolithic
-- **Testability**: ★★☆☆☆☆ (2/6) - Builder testable, but complex mocking required
-- **Validation**: ★★★☆☆☆ (3/6) - Centralized in builder, but tightly coupled
-- **Error Handling**: ★★☆☆☆☆ (2/6) - Builder exceptions, but limited error context
-- **Consistency**: ★★★★☆☆ (4/6) - Single builder ensures consistency
-- **Async Support**: ★☆☆☆☆☆ (1/6) - Builder pattern not async-friendly
+- **Extensibility**: New sources are added via builder methods, but the builder stays monolithic.
+- **Testability**: The builder is testable, but requires complex mocking.
+- **Validation**: Centralized in the builder, but tightly coupled to it.
+- **Error Handling**: Builder exceptions carry limited error context.
+- **Consistency**: A single builder keeps processing consistent.
 
 #### 3. Pure Hexagonal Architecture
-- **Extensibility**: ★★★☆☆☆ (3/6) - Easy to add adapters, but inconsistent validation
-- **Testability**: ★★★☆☆☆ (3/6) - Adapters testable, but validation scattered
-- **Validation**: ★★☆☆☆☆ (2/6) - Each adapter handles own validation differently
-- **Error Handling**: ★★☆☆☆☆ (2/6) - Inconsistent error formats across adapters
-- **Consistency**: ★★☆☆☆☆ (2/6) - Different processing flows per adapter
-- **Async Support**: ★★★☆☆☆ (3/6) - Possible but requires adapter-level implementation
+- **Extensibility**: Easy to add adapters, but validation is inconsistent between them.
+- **Testability**: Adapters are testable, but validation is scattered.
+- **Validation**: Each adapter validates differently.
+- **Error Handling**: Error formats differ across adapters.
+- **Consistency**: Processing flows differ per adapter.
 
 #### 4. Pure Pipeline Architecture
-- **Extensibility**: ★★★★☆☆ (4/6) - Easy to add stages, harder to add sources
-- **Testability**: ★★★★☆☆ (4/6) - Each stage independently testable
-- **Validation**: ★★★★★☆ (5/6) - Consistent validation across all sources
-- **Error Handling**: ★★★★★☆ (5/6) - Structured error collection and reporting
-- **Consistency**: ★★★★★★ (6/6) - Uniform processing flow
-- **Async Support**: ★★★★☆☆ (4/6) - Pipeline stages can be async
+- **Extensibility**: Easy to add stages; harder to add new data sources.
+- **Testability**: Each stage is independently testable.
+- **Validation**: Consistent validation across all sources.
+- **Error Handling**: Structured error collection and reporting.
+- **Consistency**: Uniform processing flow.
 
 #### 5. Mixed Approach (Hexagonal + Pipeline)
-- **Extensibility**: ★★★★★★ (6/6) - Easy to add both adapters and processing stages
-- **Testability**: ★★★★★★ (6/6) - Both adapters and pipeline stages testable
-- **Validation**: ★★★★★★ (6/6) - Consistent validation through pipeline
-- **Error Handling**: ★★★★★★ (6/6) - Structured error collection with adapter flexibility
-- **Consistency**: ★★★★★★ (6/6) - Uniform processing with adapter modularity
-- **Async Support**: ★★★★★★ (6/6) - Both pipeline and adapters can be async
+- **Extensibility**: New data sources (adapters) and new processing stages can both be added.
+- **Testability**: Both adapters and pipeline stages are independently testable.
+- **Validation**: Consistent validation runs through the pipeline.
+- **Error Handling**: Structured error collection, with adapters handling source-specific parsing.
+- **Consistency**: Uniform processing with modular adapters.
 
 ## Decision
-We chose the **Mixed Approach (Hexagonal + Pipeline)** over all alternatives including the original ScenarioBuilder pattern for the following reasons:
+We chose the **Mixed Approach (Hexagonal + Pipeline)** over the alternatives, including the original ScenarioBuilder pattern.
 
-### Comparison Summary
-- **Original ScenarioBuilder**: 14/36 points - Monolithic, hard to extend
-- **Pure DDD**: 17/36 points - Good domain logic, poor infrastructure flexibility
-- **Enhanced ScenarioBuilder**: 14/36 points - Still monolithic despite improvements
-- **Pure Hexagonal**: 17/36 points - Good modularity, poor consistency
-- **Pure Pipeline**: 28/36 points - Good consistency, limited extensibility
-- **Mixed Approach**: 36/36 points - Best of all patterns
+### Rationale Summary
+- **Original / Enhanced ScenarioBuilder**: Monolithic and hard to extend for new sources.
+- **Pure DDD**: Strong domain logic, but limited infrastructure flexibility.
+- **Pure Hexagonal**: Good modularity, but inconsistent validation across adapters.
+- **Pure Pipeline**: Consistent processing, but harder to add new data sources.
+- **Mixed Approach (chosen)**: Combines adapter modularity with a consistent validation pipeline.
 
 ### Technical Benefits
 1. **Modularity**: Hexagonal ports/adapters for data source flexibility
@@ -122,4 +116,4 @@ New Implementation:
 - **Service**: Hexagonal service using pipeline for processing
 - **Validation**: Structured results with error aggregation
 
-This architecture provides the best balance of modularity, consistency, and extensibility for PopUpSim's evolving requirements.
+This architecture balances modularity (adapters), consistency (pipeline), and extensibility for PopUpSim's evolving data-source requirements.

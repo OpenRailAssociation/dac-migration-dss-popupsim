@@ -104,7 +104,7 @@ graph TB
 | **Installation** | Simple setup | Documented steps |
 | **Configuration** | Example files available | Template files in `Data/examples/` |
 | **Execution** | One command starts simulation | `uv run python main.py` |
-| **Error messages** | Understandable descriptions | Pydantic comprehensive error summary |
+| **Error messages** | Understandable descriptions | Pydantic error summary listing all issues |
 | **Help** | Integrated documentation | `--help` parameter |
 
 ## 10.4 MVP Reliability Requirements
@@ -210,9 +210,9 @@ graph TB
 
 | Platform | Test Status | Critical Features |
 |----------|-------------|-------------------|
-| **Windows 10+** | ✅ Primary | File paths, CSV encoding |
-| **macOS 10.15+** | ✅ Primary | Path separators, matplotlib |
-| **Ubuntu 20.04+** | ✅ Primary | Dependencies, file permissions |
+| **Windows 10+** | Primary | File paths, CSV encoding |
+| **macOS 10.15+** | Primary | Path separators, matplotlib |
+| **Ubuntu 20.04+** | Primary | Dependencies, file permissions |
 
 ## 10.7 MVP Security Requirements
 
@@ -297,10 +297,10 @@ graph TB
 
 | Test Type | MVP Goal | Automation |
 |-----------|----------|------------|
-| **Unit tests** | > 80% coverage | ✅ pytest |
-| **Integration tests** | All main paths | ✅ pytest |
-| **Performance tests** | Benchmark scenarios | ⚠️ Manual |
-| **Platform tests** | Windows + Linux + macOS | ⚠️ Manual (can be automated via GitHub Actions matrix) |
+| **Unit tests** | > 80% coverage | pytest |
+| **Integration tests** | All main paths | pytest |
+| **Performance tests** | Benchmark scenarios | Manual |
+| **Platform tests** | Windows + Linux + macOS | Manual (can be automated via GitHub Actions matrix) |
 
 ---
 

@@ -29,7 +29,7 @@ DB Cargo AG
    - 4.1 [User-Stories aus verschiedenen Phasen der Migration](#41-user-stories-aus-verschiedenen-phasen-der-migration)
    - 4.2 [Ablauf der Anwendung](#42-ablauf-der-anwendung)
 5. [MVP: Geschäftslogik zuerst](#5-mvp-geschaftslogik-zuerst)
-6. [Ausblick: Mit fachlich relevanten Ergebnissen nächste Schritte anstoßen](#6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstossen)
+6. [Ausblick: Mit fachlich relevanten Ergebnissen nächste Schritte anstoßen](#6-ausblick-mit-fachlich-relevanten-ergebnissen-nachste-schritte-anstoen)
 
 ## Abbildungsverzeichnis
 
@@ -86,13 +86,13 @@ Das DAC Migration DSS ist als Open-Source-Software (Apache 2.0 Lizenz) konzipier
 
 Das DAC Migration DSS ist ein von der Open-Rail-Association angenommenes Projekt, ein Repository auf Git-Hub wurde bereits eingerichtet.
 
-**🔗 Repository:** https://github.com/OpenRailAssociation/dac-migration-dss
+**Repository:** https://github.com/OpenRailAssociation/dac-migration-dss
 
 ### 3.3 PopUp Sim: Erste Demo für Big-Bang-Simulation vorhanden
 
 Im Rahmen des gemeinsamen Hackatons von DB, SBB und ÖBB „3-Länderhack" wurde 2024 unter dem Namen „PopUpSim" ein funktionsfähiger aber vom Umfang her sehr stark reduzierter Prototyp für eine Big-Bang-Simulation entwickelt.
 
-**🔗 Demo:** https://openrail-playground.github.io/PopupSim/ („Statische Daten Laden" klicken)
+**Demo:** https://openrail-playground.github.io/PopupSim/ („Statische Daten Laden" klicken)
 
 ---
 

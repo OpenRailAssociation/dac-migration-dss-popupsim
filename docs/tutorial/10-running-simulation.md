@@ -9,14 +9,14 @@ Now that you understand all configuration files, let's run the simulation and an
 ### Command Syntax
 
 ```bash
-uv run python popupsim/backend/src/main.py --scenario <scenario_path> --output <output_path>
+uv run python popupsim/backend/src/main.py run --scenario <scenario_path> --output <output_path>
 ```
 
-### Running ten_trains_two_days
+### Running ten_trains_two_days_baseline
 
 ```bash
 cd dac-migration-dss-popupsim
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days/ --output output/tutorial/
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/tutorial/
 ```
 
 **Parameters:**
@@ -38,50 +38,44 @@ run_dashboard.bat
 
 **Linux/macOS:**
 ```bash
-uv run streamlit run popupsim/frontend/streamlit_dashboard.py
+uv run streamlit run popupsim/frontend/dashboard.py
 ```
 
 The dashboard opens at http://localhost:8501
 
 **Dashboard Tabs:**
 
-1. **📊 Overview** - High-level KPIs and operational dashboard
+1. **📊 Overview** - High-level KPIs and operational summary
    - Total wagons, retrofitted count, completion rate
-   - Wagon flow visualization
-   - Locomotive activity breakdown
-   - Workshop bay utilization
+   - Per-workshop performance breakdown
+   - Locomotive activity and workshop utilization
 
-2. **🚃 Wagon Flow** - Detailed wagon journey analysis
-   - Gantt charts showing wagon movements over time
-   - Status distribution (retrofitted, parked, rejected)
-   - Track occupancy visualization
-   - Individual wagon journey timelines
+2. **⚙️ Scenario Config** - The input configuration for the loaded run
+   - Trains, workshops, tracks, locomotives, and process times
+   - Capacity vs. demand overview
 
-3. **🏭 Workshop Performance** - Workshop efficiency metrics
-   - Utilization percentages per workshop
-   - Throughput (wagons/hour)
-   - Workshop comparison table
+3. **🚃 Wagons** - Wagon flow analysis
+   - Final wagon status distribution (retrofitted, parked, rejected)
+   - Location changes over the run
+   - Individual wagon journeys
 
-4. **🚂 Locomotive Operations** - Shunting resource analysis
+4. **🚂 Locomotives** - Shunting resource analysis
    - Activity breakdown (moving, parking, coupling, decoupling)
-   - Utilization percentages
-   - Time distribution charts
+   - Utilization percentages and activity timeline
 
-5. **🛤️ Track Capacity** - Track usage analysis
-   - Utilization per track (color-coded: green < 70%, yellow 70-85%, red > 85%)
+5. **🏭 Workshops** - Workshop performance analysis
+   - Utilization per workshop
+   - Throughput and utilization over time
+
+6. **🛤️ Track Capacity** - Track usage analysis
+   - Track configuration and utilization per track
    - Capacity charts
 
-6. **❌ Rejected Wagons** - Analysis of wagons that couldn't be processed
-   - Rejection reasons (loaded, no retrofit needed, track full)
-   - Detailed rejection list
+7. **🚧 Bottleneck Analysis** - Where the process is constrained
+   - Process flow heatmap
+   - Resource utilization overview
 
-7. **🔍 Event Log** - Searchable simulation event viewer
-   - Filter by event type
-   - Search functionality
-
-8. **📋 Process Log** - Detailed process execution log
-   - Filter by process type
-   - Search functionality
+8. **🎬 Animation** - Animated playback of the run on a schematic yard
 
 **Important:** Run the dashboard in a separate terminal window so you can continue running simulations while viewing results.
 
@@ -96,7 +90,7 @@ Alternatively, analyze results directly from the output files.
 PopUpSim loads and validates all configuration files:
 
 ```
-Loading scenario: Data/examples/ten_trains_two_days/
+Loading scenario: Data/examples/ten_trains_two_days_baseline/
 ├─ Reading scenario.json
 ├─ Loading topology.json
 ├─ Loading tracks.json
@@ -124,7 +118,7 @@ Initializing simulation...
 ├─ Setting up 2 workshops (4 retrofit stations)
 ├─ Configuring 15 parking tracks
 ├─ Initializing 1 locomotive
-└─ Building route network (33 routes)
+└─ Building route network (49 routes)
 ```
 
 ### 3. Simulation Execution
@@ -148,102 +142,118 @@ Simulation time: 2025-12-01 00:00:00 to 2025-12-20 00:00:00
 
 ### 4. Results Generation
 
-Creates output files and visualizations:
+Writes CSV/JSON output files (visualization happens later, in the dashboard):
 
 ```
-Generating results...
-├─ Writing CSV reports
-├─ Creating visualizations
-└─ Saving summary statistics
+Generating outputs...
+├─ Writing event and journey CSVs
+├─ Writing resource/state CSVs
+└─ Writing summary_metrics.json
 ```
 
 ## Output Files
+
+All output is written directly into the `--output` directory as CSV and JSON files
+(there are no `metrics/` or `visualizations/` subfolders, and no PNG charts — charts are
+rendered on demand by the dashboard). The input scenario is also copied into a `scenario/`
+subfolder for reference.
 
 ### Directory Structure
 
 ```
 output/tutorial/
-├── metrics/
-│   ├── wagon_metrics.csv
-│   ├── workshop_metrics.csv
-│   └── locomotive_metrics.csv
-├── visualizations/
-│   ├── throughput_over_time.png
-│   ├── workshop_utilization.png
-│   └── wagon_flow.png
-└── summary.json
+├── scenario/                     # Copy of the input scenario files
+├── summary_metrics.json          # Aggregated KPIs (see below)
+├── wagon_journey.csv             # Per-wagon lifecycle events
+├── rejected_wagons.csv           # Wagons that could not be processed
+├── locomotive_movements.csv      # Locomotive movement events
+├── locomotive_journey.csv        # Detailed locomotive activity (incl. coupling)
+├── locomotive_time_breakdown.csv # Per-locomotive time split by activity
+├── locomotive_utilization.csv    # Locomotive busy/available over time
+├── workshop_metrics.csv          # Per-workshop retrofit summary
+├── workshop_utilization.csv      # Workshop bay utilization over time
+├── track_capacity.csv            # Track capacity/occupancy changes over time
+├── timeline.csv                  # Per-minute snapshot (tracks, workshops, locos)
+├── events.csv                    # All events in chronological order
+├── resource_states.csv           # Dual-stream: resource state changes
+├── resource_locations.csv        # Dual-stream: resource location changes
+├── resource_processes.csv        # Dual-stream: process events
+├── events.log                    # Human-readable event log
+└── process.log                   # Detailed process execution log
 ```
 
-### Wagon Metrics (wagon_metrics.csv)
+> **Note:** Exact columns are defined by the exporter in
+> `contexts/retrofit_workflow/infrastructure/exporters/`. The most useful files for manual
+> analysis are described below.
 
-Detailed information for each wagon:
+### Wagon journey (wagon_journey.csv)
+
+One row per wagon lifecycle event (arrival, on retrofit track, retrofit start/complete,
+parked, rejected):
 
 | Column | Description |
 |--------|-------------|
-| wagon_id | Unique wagon identifier |
-| arrival_time | When wagon arrived |
-| retrofit_start | When retrofit began |
-| retrofit_end | When retrofit completed |
-| departure_time | When wagon left system |
-| total_time | Total time in system |
-| waiting_time | Time spent waiting |
-| retrofit_time | Time spent in retrofit |
+| timestamp | Simulation time (minutes from start) |
+| datetime | Wall-clock timestamp derived from the scenario start date |
+| wagon_id | Wagon identifier |
+| train_id | Arriving train identifier |
+| event | Event type (`ARRIVED`, `ON_RETROFIT_TRACK`, `RETROFIT_STARTED`, `RETROFIT_COMPLETED`, `PARKED`, `REJECTED`) |
+| track_id | Location at the time of the event |
+| status | Wagon status |
+| rejection_reason / rejection_description | Populated only for `REJECTED` events |
 
-**Use for:**
-- Individual wagon analysis
-- Identifying delays
-- Calculating statistics
+### Rejected wagons (rejected_wagons.csv)
 
-### Workshop Metrics (workshop_metrics.csv)
+Rows for wagons that could not be processed:
 
-Workshop performance data:
+| Column | Description |
+|--------|-------------|
+| timestamp / datetime | When the wagon was rejected |
+| wagon_id / train_id | Identifiers |
+| rejection_type | `WAGON_LOADED`, `NO_RETROFIT_NEEDED`, or `TRACK_FULL` |
+| detailed_reason | Longer explanation |
+| track_id | Track involved, if applicable |
+
+### Workshop metrics (workshop_metrics.csv)
+
+Per-workshop summary:
 
 | Column | Description |
 |--------|-------------|
 | workshop_id | Workshop identifier |
-| total_wagons | Wagons processed |
-| utilization | Percentage of time busy |
-| avg_queue_length | Average wagons waiting |
-| max_queue_length | Maximum wagons waiting |
+| completed_retrofits | Wagons retrofitted |
+| total_retrofit_time | Total time spent retrofitting (minutes) |
+| total_waiting_time | Total wagon waiting time (minutes) |
+| throughput_per_hour | Retrofits per hour |
+| utilization_percent | Percentage of time bays were busy |
 
-**Use for:**
-- Capacity analysis
-- Bottleneck identification
-- Utilization optimization
+### Summary metrics (summary_metrics.json)
 
-### Locomotive Metrics (locomotive_metrics.csv)
-
-Locomotive performance data:
-
-| Column | Description |
-|--------|-------------|
-| locomotive_id | Locomotive identifier |
-| total_movements | Number of wagon movements |
-| utilization | Percentage of time busy |
-| total_distance | Total distance traveled |
-| idle_time | Time spent idle |
-
-**Use for:**
-- Resource planning
-- Utilization analysis
-- Capacity requirements
-
-### Summary Statistics (summary.json)
-
-High-level simulation results:
+Aggregated KPIs for the run. Example (values from the baseline scenario):
 
 ```json
 {
-  "scenario_id": "test_scenario_01",
-  "simulation_duration": "19 days",
+  "trains_arrived": 10,
   "total_wagons": 224,
-  "wagons_retrofitted": 220,
-  "avg_throughput": 11.6,
-  "avg_wagon_time": 1234.5,
-  "workshop_utilization": 0.78,
-  "locomotive_utilization": 0.65
+  "wagons_eligible": 220,
+  "wagons_processable": 209,
+  "wagons_arrived": 70,
+  "wagons_parked": 70,
+  "retrofits_completed": 70,
+  "wagons_rejected": 154,
+  "rejected_no_retrofit": 4,
+  "rejected_loaded": 11,
+  "rejected_track_full": 139,
+  "completion_rate": 0.33,
+  "throughput_rate_per_hour": 0.38,
+  "workshop_utilization": 10.14,
+  "simulation_duration_minutes": 14400.0
 }
 ```
+
+The file also contains nested `workshop_statistics`, `locomotive_statistics`, and
+`locomotive_time_breakdown` objects, plus `event_counts`. The `run` command prints a
+summary of these values to the console when the simulation finishes.
 
 ## Analyzing Results
 
@@ -256,9 +266,13 @@ High-level simulation results:
 throughput = wagons_retrofitted / simulation_days
 ```
 
-**Target:** Depends on scenario requirements
+**Target:** Depends on scenario requirements.
 
-**ten_trains_two_days expected:** ~110 wagons/day (220 wagons / 2 days)
+Note the difference between *demand* and *capacity*: the baseline receives 220 retrofit-eligible
+wagons, but with 4 stations at 60 min each the workshops can only process ~4 wagons/hour. In the
+baseline run the workshops are the bottleneck, so completed wagons are well below the arriving
+demand — inspect `summary_metrics.json` (`completion_rate`, `throughput_rate_per_hour`) for the
+actual figures.
 
 #### Workshop Utilization
 
@@ -327,7 +341,7 @@ utilization = (movement_time + coupling_time) / total_time
 1. Optimize route durations (routes.json)
 2. Reduce coupling/decoupling times (process_times.json)
 3. Improve locomotive placement
-4. **⚠️ Add more locomotives (locomotive.json) - EXPERIMENTAL, not fully tested**
+4. **Add more locomotives (locomotive.json) - experimental, not fully tested**
 
 #### Track Capacity Bottleneck
 
@@ -349,7 +363,7 @@ utilization = (movement_time + coupling_time) / total_time
 Run with default configuration:
 
 ```bash
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days/ --output output/baseline/
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/baseline/
 ```
 
 **Analyze:**
@@ -380,7 +394,7 @@ Modify configuration based on bottlenecks:
 Run with modifications:
 
 ```bash
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days/ --output output/improved/
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/improved/
 ```
 
 **Compare:**
@@ -511,7 +525,7 @@ Repeat until targets met:
 
 ### Further Learning
 
-- Explore other example scenarios (demo, ten_trains_two_days)
+- Explore other example scenarios in `Data/examples/` (baseline plus variants var1–var6 and priority_dispatch)
 - Read [Architecture Documentation](../mvp/architecture/README.md)
 - Review [Development Guide](../mvp/development/README.md)
 

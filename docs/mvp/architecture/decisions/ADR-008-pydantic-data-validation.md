@@ -4,7 +4,7 @@
 
 ## Context
 
-Need robust input validation for JSON/CSV configuration files with clear error messages.
+Need reliable input validation for JSON/CSV configuration files with clear error messages.
 
 ## Decision
 
@@ -12,7 +12,7 @@ Use **Pydantic** for data validation and parsing.
 
 ## Rationale
 
-- **Type safety**: Excellent integration with Python type hints (matches project rules)
+- **Type safety**: Integrates with Python type hints (matches project rules)
 - **Validation**: Automatic validation with clear error messages
 - **Performance**: Fast (Rust-based core in Pydantic v2)
 - **JSON Schema**: Can generate schemas for documentation
@@ -21,7 +21,7 @@ Use **Pydantic** for data validation and parsing.
 
 ## Alternatives Considered
 
-- **Pydantic** ✅ Chosen
+- **Pydantic** — Chosen
 - **dataclasses**: No validation capabilities
 - **attrs**: Less popular, fewer features
 - **marshmallow**: Older, slower, less type-safe
@@ -71,14 +71,14 @@ class SyntaxValidator:
 ## Consequences
 
 ### Achieved
-- ✅ **Type Safety**: Automatic validation with Python type hints
-- ✅ **Clear Error Messages**: Detailed validation errors with field paths
-- ✅ **JSON Schema**: Auto-generated schemas for documentation
-- ✅ **IDE Support**: Excellent autocomplete and type checking
-- ✅ **Performance**: Fast validation with Rust-based core
-- ✅ **Integration**: Seamless integration with 4-layer validation framework
+- **Type Safety**: Automatic validation with Python type hints
+- **Clear Error Messages**: Detailed validation errors with field paths
+- **JSON Schema**: Auto-generated schemas for documentation
+- **IDE Support**: Autocomplete and type checking from model definitions
+- **Performance**: Fast validation with Rust-based core
+- **Integration**: Works with the 4-layer validation framework
 
 ### Files Implementing This Decision
-- `configuration/domain/models/` - All domain models use Pydantic
-- `workshop_operations/domain/entities/` - Entity models with validation
-- `shared/validation/validators/syntax_validator.py` - Pydantic integration
+- `contexts/configuration/domain/models/` - Configuration domain models use Pydantic
+- `contexts/configuration/application/dtos/` - Input DTOs with Pydantic validation
+- `contexts/retrofit_workflow/domain/` - Retrofit workflow entities and value objects

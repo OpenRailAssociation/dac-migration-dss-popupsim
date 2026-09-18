@@ -2,9 +2,11 @@
 
 ## Overview
 
-**Location:** `popupsim/backend/src/contexts/shared/infrastructure/simpy_adapter.py`
+**Location:** `popupsim/backend/src/shared/infrastructure/simulation/engines/simpy_adapter.py`
 
-SimPy provides discrete event simulation for the Retrofit Workflow Context. Integration follows a thin adapter pattern to isolate SimPy dependencies.
+SimPy provides discrete event simulation for the Retrofit Workflow Context. Integration
+follows a port/adapter pattern (`SimulationEnginePort` + `SimPyEngineAdapter`) to isolate
+SimPy dependencies.
 
 ## Architecture
 
@@ -30,42 +32,46 @@ SimPy provides discrete event simulation for the Retrofit Workflow Context. Inte
 └─────────────────────────────────────────┘
 ```
 
-## SimPy Adapter
+## SimPy Engine Adapter
 
-**File:** `contexts/shared/infrastructure/simpy_adapter.py`
+**File:** `shared/infrastructure/simulation/engines/simpy_adapter.py`
+
+`SimPyEngineAdapter` implements `SimulationEnginePort` and wraps a `simpy.Environment`:
 
 ```python
 import simpy
-from typing import Any, Callable, Generator
+from collections.abc import Callable, Generator
+from datetime import timedelta
+from typing import Any
 
 
-class SimPyAdapter:
-    """Thin adapter for SimPy environment."""
+class SimPyEngineAdapter(SimulationEnginePort):
+    """Adapter for the SimPy simulation environment."""
 
-    def __init__(self, env: simpy.Environment):
-        self.env = env
+    @classmethod
+    def create(cls) -> 'SimPyEngineAdapter':
+        """Create an adapter with a fresh SimPy environment."""
+        return cls(simpy.Environment())
 
-    @property
-    def now(self) -> float:
+    def current_time(self) -> float:
         """Current simulation time."""
-        return self.env.now
+        ...
 
-    def timeout(self, delay: float) -> Any:
-        """Wait for delay time units."""
-        return self.env.timeout(delay)
+    def delay(self, duration: float | timedelta) -> Generator[Any]:
+        """Wait for the given duration (env.timeout)."""
+        ...
 
-    def process(self, generator: Generator) -> Any:
-        """Register a process."""
-        return self.env.process(generator)
+    def schedule_process(self, process: Generator[Any] | Callable) -> Any:
+        """Register a process (env.process)."""
+        ...
+
+    def create_resource(self, capacity: int, name: str | None = None) -> simpy.Resource: ...
+    def create_store(self, capacity: int | None = None, name: str | None = None) -> Any: ...
+    def create_event(self) -> Any: ...
 
     def run(self, until: float | None = None) -> None:
-        """Run simulation."""
-        self.env.run(until=until)
-
-    @staticmethod
-    def create_environment() -> simpy.Environment:
-        """Create SimPy environment."""
-        return simpy.Environment()
+        """Run the simulation (env.run)."""
+        ...
 ```
 
 ## Coordinator Pattern
@@ -102,29 +108,11 @@ class CollectionCoordinator:
 
 SimPy Resources manage limited capacity:
 
-**File:** `contexts/retrofit_workflow/infrastructure/resource_managers/locomotive_resource_manager.py`
+**File:** `contexts/retrofit_workflow/infrastructure/resources/locomotive_resource_manager.py`
 
-```python
-import simpy
-from typing import Any
-
-
-class LocomotiveResourceManager:
-    """Manages locomotive resources."""
-
-    def __init__(self, env: simpy.Environment, locomotives: list[Locomotive]):
-        self.env = env
-        self.resource = simpy.Resource(env, capacity=len(locomotives))
-        self.locomotives = {loco.locomotive_id: loco for loco in locomotives}
-
-    def allocate(self) -> Any:
-        """Allocate locomotive (blocks until available)."""
-        return self.resource.request()
-
-    def release(self, request: Any) -> None:
-        """Release locomotive."""
-        self.resource.release(request)
-```
+The `LocomotiveResourceManager` uses SimPy to model the limited locomotive pool and hands out
+locomotives to the coordinators. Locomotives are keyed by their `id`. See the file for the
+exact API.
 
 ## Event Bus Integration
 
@@ -132,13 +120,18 @@ External Trains Context publishes events via SimPy:
 
 **File:** `contexts/external_trains/application/external_trains_context.py`
 
-```python
-def _arrival_process(self, train: Train, arrival_time: float) -> Generator[Any, Any, None]:
-    """Process single train arrival."""
-    yield self.env.timeout(arrival_time)
+`start_processes()` schedules one SimPy process per train (via
+`infra.engine.schedule_process(...)`). Each process waits until the train's arrival time,
+creates the wagon entities, and publishes a `TrainArrivedEvent` onto the event bus:
 
-    # Publish event
-    event = TrainArrivedEvent(train_id=train.id, wagons=train.wagons, arrival_time=self.env.now)
+```python
+def _process_single_train_arrival(self, train: Any) -> Any:
+    """Process a single train arrival."""
+    arrival_delay = datetime_to_ticks(train.arrival_time, self.scenario.start_date)
+    yield from self.infra.engine.delay(arrival_delay)
+
+    # ... create wagons ...
+    event = TrainArrivedEvent(train_id=train.train_id, wagons=train_wagons, ...)
     self.event_bus.publish(event)
 ```
 
@@ -146,18 +139,20 @@ def _arrival_process(self, train: Train, arrival_time: float) -> Generator[Any, 
 
 ### Unit Tests (No SimPy)
 
-Domain services don't depend on SimPy:
+Domain services don't depend on SimPy, so they can be tested with plain objects:
 
 ```python
 def test_batch_formation() -> None:
-    """Test without SimPy."""
+    """Test a domain service without SimPy."""
     service = BatchFormationService()
     wagons = [Wagon(...) for _ in range(5)]
-    
-    assert service.can_form_batch(wagons, min_size=1, max_size=10)
-    batch = service.form_batch(wagons, batch_size=5)
-    assert len(batch) == 5
+
+    batch = service.form_batch_for_workshop(wagons, ...)
+    assert len(batch.wagon_ids) == 5
 ```
+
+See `popupsim/backend/tests/unit/contexts/retrofit_workflow/domain/` for the real tests and
+exact service signatures.
 
 ### Integration Tests (With SimPy)
 
@@ -182,13 +177,13 @@ def test_collection_coordinator() -> None:
 
 ## Best Practices
 
-### ✅ Do's
+### Do's
 - Keep domain logic SimPy-free
 - Use generators for coordinators
 - Isolate SimPy in infrastructure layer
 - Test domain logic without SimPy
 
-### ❌ Don'ts
+### Don'ts
 - Don't import SimPy in domain services
 - Don't put business logic in generators
 - Don't use global SimPy resources

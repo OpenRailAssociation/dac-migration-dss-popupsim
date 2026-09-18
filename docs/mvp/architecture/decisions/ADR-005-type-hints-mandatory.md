@@ -71,7 +71,7 @@ strict = true
 ### Alternative 4: No Type Hints (Dynamic Python)
 - **Pros**: Faster initial development
 - **Cons**: Poor maintainability, runtime errors, unclear interfaces
-- **Rejected**: Unacceptable for enterprise-grade simulation system
+- **Rejected**: Unacceptable for a maintainable, type-checked codebase
 
 ## Implementation
 
@@ -162,7 +162,7 @@ uv run pytest                          # Run tests
 
 ### Positive
 - **Type Safety**: Catch type errors at development time
-- **Better IDE Support**: Excellent autocomplete, refactoring, navigation
+- **Better IDE Support**: Enables autocomplete, refactoring, and navigation
 - **Self-Documenting Code**: Function signatures clearly show expected types
 - **Reduced Bugs**: Many runtime errors prevented by type checking
 - **Better Refactoring**: Safe refactoring with type-aware tools
@@ -189,7 +189,7 @@ uv run pytest                          # Run tests
 - **MyPy Score**: 100% pass rate with strict mode
 
 ### Quality Improvements
-- **IDE Experience**: Excellent autocomplete and error detection
+- **IDE Experience**: Autocomplete and error detection from type information
 - **Code Reviews**: Type information makes reviews more effective
 - **Debugging**: Type errors caught before runtime
 - **Documentation**: Self-documenting function signatures
@@ -203,7 +203,7 @@ def process_wagon(wagon: Wagon) -> None:
 
 # Correct usage
 def process_wagon(wagon: Wagon) -> None:
-    wagon.update_status(WagonStatus.COMPLETED)  # ✅ Type safe
+    wagon.update_status(WagonStatus.COMPLETED)  # Type safe
 ```
 
 ## Compliance
@@ -224,4 +224,4 @@ This decision supports:
 
 **Decision Date**: January 2025
 **Decision Makers**: Architecture Team
-**Implementation Status**: ✅ Complete
+**Implementation Status**: Complete

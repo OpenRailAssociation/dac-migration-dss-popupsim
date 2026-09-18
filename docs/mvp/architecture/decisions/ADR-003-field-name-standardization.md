@@ -72,8 +72,8 @@ class Workshop:
 
 ### Alternative 3: Use Full Reference Names
 - **Pros**: Very explicit (`locomotive_id`, `route_id`)
-- **Cons**: Verbose, inconsistent with modern naming conventions
-- **Rejected**: Modern frameworks favor concise, context-aware naming
+- **Cons**: Verbose; redundant prefixes (e.g. `track_id` on a `Track`)
+- **Rejected**: Concise, context-aware names are preferred in this codebase
 
 ## Implementation
 
@@ -121,7 +121,7 @@ class WorkshopCollector:
 - **Reduced Confusion**: Developers know which pattern to use
 - **Cleaner Code**: More concise, readable field names
 - **Better Maintainability**: Consistent patterns easier to maintain
-- **Professional Appearance**: Modern, clean naming conventions
+- **Consistent Naming**: Uniform field-naming conventions across the codebase
 
 ### Negative
 - **Breaking Changes**: Existing configurations need field name updates
@@ -190,4 +190,4 @@ This decision supports:
 
 **Decision Date**: January 2025  
 **Decision Makers**: Architecture Team  
-**Implementation Status**: ✅ Complete
+**Implementation Status**: Complete

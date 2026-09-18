@@ -9,7 +9,7 @@ PopUpSim had a hybrid approach to SimPy usage - some components used SimPy resou
 
 ### Current SimPy Usage Analysis
 
-**✅ Already Using SimPy Well:**
+**Already using SimPy well:**
 ```python
 # Workshop stations as SimPy Resources
 self.resources[track_id] = sim.create_resource(capacity=workshop.retrofit_stations)
@@ -23,7 +23,7 @@ with workshop_resource.request() as station_req:
     yield station_req  # Blocks until station available
 ```
 
-**❌ Missing SimPy Opportunities:**
+**Missing SimPy opportunities:**
 ```python
 # W07 problem: No SimPy Store for retrofitted wagons
 # move_to_parking searches wagons_queue instead of using SimPy coordination
@@ -54,7 +54,7 @@ The MVP implements complete SimPy workflow coordination:
 class WorkshopOrchestrator:
     def __init__(self, sim, scenario):
         # Complete SimPy store workflow (no polling)
-        self.retrofitted_wagons_ready = sim.create_store()  # ✅ Added missing store
+        self.retrofitted_wagons_ready = sim.create_store()  # Added missing store
         self.wagons_ready_for_stations = {track_id: sim.create_store() for track_id in workshops}
         self.wagons_completed = {track_id: sim.create_store() for track_id in workshops}
 
@@ -64,7 +64,7 @@ class WorkshopOrchestrator:
 
 def move_to_parking(popupsim):
     while True:
-        # ✅ Event-driven coordination (no polling)
+        # Event-driven coordination (no polling)
         wagon = yield from popupsim.get_wagon_from_retrofitted()
         # Process wagon...
 ```
@@ -88,14 +88,14 @@ class WorkshopOrchestrator:
 for wagon in batch:
     popupsim.track_capacity.add_wagon(retrofitted_track.id, wagon.length)
     popupsim.wagon_state.complete_arrival(wagon, retrofitted_track.id, WagonStatus.RETROFITTED)
-    # ✅ Add to SimPy store for move_to_parking
+    # Add to SimPy store for move_to_parking
     yield popupsim.retrofitted_wagons_ready.put(wagon)
 
 
 # In move_to_parking - use SimPy store instead of searching wagons_queue:
 def move_to_parking(popupsim: WorkshopOrchestrator) -> Generator[Any]:
     while True:
-        # ✅ Block until wagons available (no polling!)
+        # Block until wagons available (no polling!)
         wagon = yield popupsim.retrofitted_wagons_ready.get()
         # Process wagon for parking...
 ```
@@ -232,15 +232,15 @@ wagon_registry: dict[str, Wagon] = {}  # Simple lookup
 ## Current SimPy Infrastructure Assessment
 
 **Existing SimPy Components:**
-- ✅ `SimulationAdapter` - Good abstraction over SimPy
-- ✅ `ResourcePool` - Uses SimPy Store for locomotive management
-- ✅ `WorkshopCapacityManager` - Uses SimPy Resources for stations
-- ✅ Workflow stores - `wagons_ready_for_stations`, `wagons_completed`
+- `SimulationAdapter` - Good abstraction over SimPy
+- `ResourcePool` - Uses SimPy Store for locomotive management
+- `WorkshopCapacityManager` - Uses SimPy Resources for stations
+- Workflow stores - `wagons_ready_for_stations`, `wagons_completed`
 
 **Missing SimPy Components:**
-- ❌ Store for retrofitted wagons (causes W07 problem)
-- ❌ Consistent store-based workflow throughout
-- ❌ SimPy-based track capacity coordination
+- Store for retrofitted wagons (causes W07 problem)
+- Consistent store-based workflow throughout
+- SimPy-based track capacity coordination
 
 ## Performance Considerations
 
@@ -305,16 +305,16 @@ popupsim.metrics.record_event(event)
 ## Implementation Results
 
 ### Achieved in MVP
-- ✅ **Complete SimPy Integration**: All workflow stages use SimPy stores
-- ✅ **No Polling**: Event-driven coordination throughout the system
-- ✅ **W07 Problem Solved**: `retrofitted_wagons_ready` store added for complete workflow
-- ✅ **Resource Management**: SimPy Resources for workshop stations with proper blocking
-- ✅ **Performance**: Eliminated 1-second polling delays, immediate event response
+- **Complete SimPy Integration**: All workflow stages use SimPy stores
+- **No Polling**: Event-driven coordination throughout the system
+- **W07 Problem Solved**: `retrofitted_wagons_ready` store added for complete workflow
+- **Resource Management**: SimPy Resources for workshop stations with proper blocking
+- **Performance**: Eliminated 1-second polling delays, immediate event response
 
 ### Files Implementing This Decision
-- `workshop_operations/application/orchestrator.py` - Complete SimPy store workflow
-- `workshop_operations/infrastructure/resources/workshop_capacity_manager.py` - SimPy Resources
-- `workshop_operations/infrastructure/simulation/simpy_adapter.py` - SimPy abstraction layer
+- `contexts/retrofit_workflow/application/retrofit_workflow_context.py` - SimPy process orchestration
+- `contexts/retrofit_workflow/infrastructure/resources/workshop_resource_manager.py` - SimPy Resources for workshop bays
+- `shared/infrastructure/simulation/engines/simpy_adapter.py` - SimPy abstraction layer (engine port/adapter)
 
 ## References
 

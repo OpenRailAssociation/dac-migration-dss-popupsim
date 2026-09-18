@@ -4,7 +4,7 @@
 
 The locomotive.json file defines shunting locomotives used to move wagons between tracks. Locomotives are critical resources that can become bottlenecks if insufficient capacity is provided.
 
-**⚠️ IMPORTANT LIMITATION:** The current implementation is only tested and validated for **single locomotive operation**. While the configuration supports multiple locomotives, using more than one locomotive may cause issues because:
+**Important limitation:** The current implementation is only tested and validated for **single locomotive operation**. While the configuration supports multiple locomotives, using more than one locomotive may cause issues because:
 - The simulation has no real track network model
 - Track sharing between locomotives on the same route is not prevented
 - Only job-level conflicts are prevented (same job not executed twice, no simultaneous movements on same route)
@@ -134,7 +134,7 @@ With multiple locomotives:
 
 ### Adding More Locomotives
 
-**⚠️ WARNING:** Multi-locomotive operation is not fully tested. Use at your own risk.
+**Warning:** Multi-locomotive operation is not fully tested. Use at your own risk.
 
 Increase shunting capacity:
 
@@ -173,7 +173,7 @@ Increase shunting capacity:
 
 ### Distributed Locomotive Placement
 
-**⚠️ WARNING:** Multi-locomotive operation is not fully tested. Use at your own risk.
+**Warning:** Multi-locomotive operation is not fully tested. Use at your own risk.
 
 Place locomotives in different yard areas:
 
@@ -295,7 +295,7 @@ Signs that locomotives are a bottleneck:
 
 ### Multiple Locomotives (Experimental - Not Recommended)
 
-**⚠️ WARNING:** Not fully tested. May cause simulation errors or unrealistic behavior.
+**Warning:** Not fully tested. May cause simulation errors or unrealistic behavior.
 
 **Intended Advantages:**
 - Parallel operations

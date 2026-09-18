@@ -10,7 +10,7 @@ PopUpSim had a fundamental issue with wagon tracking and queue management that c
 ### Problem (Resolved)
 - **W07 stuck on retrofit track**: Wagons moved to retrofitted track were not added back to `wagons_queue`, making them invisible to `move_to_parking` process
 - **Dual-purpose queue**: `popupsim.wagons_queue` used for both processing workflow and wagon tracking
-- **Broken workflow chain**: Train → Collection → Retrofit → Workshop → Retrofitted → ❌ LOST → Parking
+- **Broken workflow chain**: Train → Collection → Retrofit → Workshop → Retrofitted → [LOST] → Parking
 - **Data inconsistency**: Wagons removed from queue during processing but needed for later stages
 
 ### Current Architecture Issues
@@ -21,7 +21,7 @@ self.wagons_queue: list[Wagon] = []  # Both processing queue AND global registry
 # Broken lookup in move_to_parking
 wagons_on_retrofitted = [
     w
-    for w in popupsim.wagons_queue  # ❌ Wagons not in queue anymore!
+    for w in popupsim.wagons_queue  # BUG: wagons not in queue anymore!
     if w.track == retrofitted_track.id and w.status == WagonStatus.RETROFITTED
 ]
 ```
@@ -203,7 +203,7 @@ class WagonStateMachine:
 - Automatic queue coordination
 - Built-in validation with guards
 - Natural event integration
-- Excellent debugging capabilities
+- Explicit, inspectable state transitions aid debugging
 - Prevents invalid state transitions
 
 **Cons:**
@@ -225,11 +225,11 @@ wagon.status  # What state is it in?
 ```
 
 **Analytics Compatibility:**
-- **Option 1**: ✅ Complete state in registry
-- **Option 2**: ⚠️ Needs separate state storage
-- **Option 3**: ✅ Direct state access
-- **Option 4**: ✅ State distributed across tracks
-- **Option 5**: ✅ State in machines + automatic events
+- **Option 1**: Complete state in registry
+- **Option 2**: Needs separate state storage
+- **Option 3**: Direct state access
+- **Option 4**: State distributed across tracks
+- **Option 5**: State in machines + automatic events
 
 ## Implementation Phases
 
@@ -243,8 +243,8 @@ wagon.status  # What state is it in?
 - **Recommended**: Hybrid of Option 1 + Option 2 (Registry + Events)
 - **Add**: Enhanced event projections, real-time analytics
 
-### Full Version (Enterprise)
-**Goal**: Scalable, enterprise-grade architecture
+### Full Version (Scalable)
+**Goal**: Scalable architecture for larger deployments
 - **Recommended**: Event Sourcing + CQRS + State Machines
 - **Features**: Time-travel debugging, what-if analysis, microservices ready
 
@@ -254,7 +254,7 @@ wagon.status  # What state is it in?
 Phase 1: MVP → Registry + Queues (solve W07)
 Phase 2: Enhanced → Add event projections  
 Phase 3: Full → Event sourcing + CQRS
-Phase 4: Enterprise → Microservices + real-time analytics
+Phase 4: Scalable → Microservices + real-time analytics
 ```
 
 ## Open Questions
@@ -268,16 +268,16 @@ Phase 4: Enterprise → Microservices + real-time analytics
 ## Implementation Results
 
 ### Achieved in MVP
-- ✅ **W07 Problem Solved**: Wagons no longer get lost during workflow
-- ✅ **Separation of Concerns**: WagonStateManager handles state, SimPy stores handle workflow
-- ✅ **No Dual-Purpose Queue**: Clear separation between tracking and coordination
-- ✅ **Complete Analytics**: All wagon states tracked for metrics and visualization
-- ✅ **Event-Driven Architecture**: SimPy stores eliminate polling and manual searches
+- **W07 Problem Solved**: Wagons no longer get lost during workflow
+- **Separation of Concerns**: WagonStateManager handles state, SimPy stores handle workflow
+- **No Dual-Purpose Queue**: Clear separation between tracking and coordination
+- **Complete Analytics**: All wagon states tracked for metrics and visualization
+- **Event-Driven Architecture**: SimPy stores eliminate polling and manual searches
 
 ### Files Implementing This Decision
-- `workshop_operations/application/orchestrator.py` - Workflow coordination with separate stores
-- `workshop_operations/domain/services/wagon_operations.py` - WagonStateManager and WagonSelector
-- `analytics/domain/collectors/wagon_collector.py` - Wagon state tracking for analytics
+- `contexts/retrofit_workflow/application/retrofit_workflow_context.py` - Workflow coordination with SimPy stores/queues
+- `contexts/retrofit_workflow/application/event_collector.py` - Wagon lifecycle event collection
+- `infrastructure/tracking/wagon_process_tracker.py` - Wagon state tracking for metrics/visualization
 
 ## References
 

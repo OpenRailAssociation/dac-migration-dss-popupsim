@@ -42,8 +42,8 @@ graph TB
 
 | Technology | Purpose | Rationale |
 |------------|---------|-----------|
-| **SimPy** | Discrete event simulation | Deterministic, Python-native, proven in POC |
-| **Pydantic 2.0** | Data validation | Type safety, excellent validation, performance |
+| **SimPy** | Discrete event simulation | Deterministic, Python-native, used in the prototype |
+| **Pydantic 2.0** | Data validation | Type safety, validation, performance |
 | **Pandas** | CSV processing | Efficient data loading, train schedule parsing |
 | **Matplotlib** | Visualization | Simple charts, no web server required |
 | **Typer** | CLI interface | User-friendly command-line interface |

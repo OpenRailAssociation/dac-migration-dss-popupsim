@@ -15,7 +15,7 @@ Path from MVP (4 contexts, desktop) to full version (web-based, distributed).
 
 Integration: Direct calls + Event bus
 Storage: File-based (JSON/CSV)
-UI: CLI + Matplotlib
+UI: CLI (Typer) + Streamlit/Plotly dashboard
 Deployment: Desktop
 ```
 
@@ -67,13 +67,13 @@ Deployment: Cloud-ready
 
 ### Phase 3: Web Interface
 
-**Current:** CLI + Matplotlib charts
+**Current:** CLI + local Streamlit/Plotly dashboard (reads exported files)
 
-**Target:** Web UI with interactive visualization
+**Target:** Hosted web UI with interactive visualization
 
 **Changes:**
 - Add REST API layer
-- Implement web frontend
+- Host the frontend (beyond local Streamlit)
 - Real-time simulation updates
 
 **Effort:** 4-6 weeks
@@ -96,8 +96,8 @@ Deployment: Cloud-ready
 ### High Priority
 
 1. **SimPy Abstraction**
-   - Current: Direct SimPy usage in coordinators
-   - Target: Full abstraction layer
+   - Current: Engine port/adapter exists (`SimulationEnginePort` / `SimPyEngineAdapter`), but coordinators still use SimPy primitives directly in places
+   - Target: Route all simulation primitives through the port
    - Effort: 3 days
 
 2. **Service Interfaces**

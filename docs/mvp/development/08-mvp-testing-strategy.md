@@ -4,22 +4,24 @@
 
 **Location:** `popupsim/backend/tests/`
 
-**Status:** 378 tests passing, 54% coverage
+**Status:** run `uv run pytest` for the current test count and `uv run pytest --cov=popupsim/backend/src/`
+for coverage. A minimum of 40% coverage is enforced.
 
 ## Test Organization
 
 ```
-tests/
-├── unit/                       # 318 unit tests
+popupsim/backend/tests/
+├── conftest.py
+├── fixtures/                   # JSON/CSV test fixtures
+├── unit/
 │   ├── contexts/
 │   │   ├── configuration/      # Config loading & validation
-│   │   ├── retrofit_workflow/
-│   │   │   ├── application/    # Coordinators, services
-│   │   │   ├── domain/         # Domain services, aggregates
-│   │   │   └── infrastructure/ # Resource managers
-│   │   └── railway_infrastructure/
+│   │   ├── retrofit_workflow/  # application/, domain/, infrastructure/
+│   │   ├── railway_infrastructure/
+│   │   └── optimizer_search/
+│   ├── frontend/               # Dashboard component tests
 │   └── shared/                 # Shared utilities
-└── validation/                 # 60 validation tests
+└── validation/                 # Scenario/timeline validation tests
     ├── test_retrofit_workflow_scenarios.py
     ├── test_layered_scenarios.py
     ├── test_layered_timelines.py
@@ -37,8 +39,9 @@ def test_batch_formation() -> None:
     """Test domain service."""
     service = BatchFormationService()
     wagons = [Wagon(...) for _ in range(5)]
-    
-    assert service.can_form_batch(wagons, min_size=1, max_size=10)
+
+    batch = service.form_batch_for_workshop(wagons, ...)
+    assert len(batch.wagon_ids) == 5
 ```
 
 ### Integration Tests
@@ -78,7 +81,7 @@ def test_collection_coordinator() -> None:
 uv run pytest
 
 # Specific context
-uv run pytest popupsim/backend/tests/unit/configuration/
+uv run pytest popupsim/backend/tests/unit/contexts/configuration/
 
 # With coverage
 uv run pytest --cov=popupsim/backend/src/
@@ -113,13 +116,17 @@ def sample_scenario() -> Scenario:
 
 ## Coverage Goals
 
-**Current Coverage:** 54.34% (exceeds 40% requirement)
+A minimum of **40% overall coverage** is enforced (the build fails below it). Check the
+current number with:
 
-**Target Coverage by Component:**
-- **Domain services:** > 90% (currently 85-98%)
-- **Coordinators:** > 80% (currently 70-88%)
-- **Infrastructure:** > 70% (currently 57-98%)
-- **Overall:** > 40% ✅ (currently 54%)
+```bash
+uv run pytest --cov=popupsim/backend/src/
+```
+
+**Target coverage by component (aspirational):**
+- **Domain services:** highest priority — pure logic, easy to test
+- **Coordinators / application services:** medium
+- **Infrastructure:** lower (harder to unit-test in isolation)
 
 ## Quality Standards
 
@@ -138,7 +145,7 @@ uv run mypy popupsim/backend/src/
 # Static analysis
 uv run pylint popupsim/backend/src/
 
-# All tests (378/378 passing required)
+# All tests (must pass)
 uv run pytest
 
 # Run all checks
@@ -149,12 +156,14 @@ uv run ruff format . && uv run ruff check . && uv run mypy popupsim/backend/src/
 ```toml
 [tool.mypy]
 disallow_untyped_defs = true  # All functions must have type hints
-strict = true
 ```
+
+(Some third-party/legacy modules relax `disallow_untyped_defs` via per-module overrides — see
+`pyproject.toml`.)
 
 ## Best Practices
 
-### ✅ Do's
+### Do's
 - Test domain logic without SimPy
 - Use fixtures for common test data
 - Test error cases
@@ -162,7 +171,7 @@ strict = true
 - Include type hints in all test functions
 - Use descriptive test names
 
-### ❌ Don'ts
+### Don'ts
 - Don't test external libraries
 - Don't use real file I/O in unit tests
 - Don't create complex test scenarios
