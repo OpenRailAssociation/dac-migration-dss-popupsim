@@ -56,7 +56,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run example simulation
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+uv run popupsim run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 ```
 
 #### Option 2: Download ZIP Archive
@@ -77,23 +77,34 @@ If you don't have git installed:
    uv sync
 
    # Run example simulation
-   uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+   uv run popupsim run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
    ```
 
 ### Running PopUpSim
 
-After installation, run simulations with:
+After installation, the `popupsim` command is available via `uv run`. It exposes two
+subcommands: `run` (execute a single simulation) and `optimize` (search task priorities).
 
 ```bash
 # Navigate to project directory (if not already there)
 cd dac-migration-dss-popupsim
 
+# Show available commands and options
+uv run popupsim --help
+
 # Run with baseline scenario
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
+uv run popupsim run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 
 # Or run a variant scenario
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_var1/ --output output/var1/
+uv run popupsim run --scenario Data/examples/ten_trains_two_days_var1/ --output output/var1/
+
+# Optimize task priorities for a scenario
+uv run popupsim optimize --scenario Data/examples/ten_trains_two_days_var1/
 ```
+
+> [!NOTE]
+> The equivalent long form still works if you prefer it:
+> `uv run python popupsim/backend/src/main.py run --scenario ... --output ...`
 
 ### Viewing Results with Dashboard
 
