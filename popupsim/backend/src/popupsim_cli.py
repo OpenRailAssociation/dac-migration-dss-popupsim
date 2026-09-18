@@ -17,7 +17,9 @@ def main() -> None:
     if src_str not in sys.path:
         sys.path.insert(0, src_str)
 
-    from main import app  # imported after sys.path setup
+    # Imported here (not at module top) because it must run after the sys.path
+    # insertion above so that main.py's top-level imports resolve.
+    from main import app  # pylint: disable=import-outside-toplevel
 
     app()
 
