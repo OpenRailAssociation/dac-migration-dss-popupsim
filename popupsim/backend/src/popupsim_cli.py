@@ -17,7 +17,7 @@ def main() -> None:
     if src_str not in sys.path:
         sys.path.insert(0, src_str)
 
-    from main import app  # noqa: PLC0415  # imported after sys.path setup
+    from main import app  # imported after sys.path setup
 
     app()
 
