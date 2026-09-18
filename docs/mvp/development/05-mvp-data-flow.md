@@ -126,7 +126,7 @@ SimPy processes. Execution is driven by the application service:
 from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
 
 until = timedelta_to_sim_ticks(scenario.end_date - scenario.start_date)
-result = service.execute(until)   # runs the SimPy engine until `until`
+result = service.execute(until)  # runs the SimPy engine until `until`
 ```
 
 ### Data Flow Within Workflow
