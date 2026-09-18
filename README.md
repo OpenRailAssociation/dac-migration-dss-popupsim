@@ -56,7 +56,7 @@ cd dac-migration-dss-popupsim
 uv sync
 
 # Run example simulation
-uv run python popupsim/backend/src/main.py --scenario Data/examples/demo/ --output output/
+uv run popupsim --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 ```
 
 #### Option 2: Download ZIP Archive
@@ -89,10 +89,10 @@ After installation, run simulations with:
 cd dac-migration-dss-popupsim
 
 # Run with baseline scenario
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
+uv run popupsim --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 
 # Or run a variant scenario
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days_var1/ --output output/var1/
+uv run popupsim --scenario Data/examples/ten_trains_two_days_var1/ --output output/var1/
 ```
 
 ### Viewing Results with Dashboard
