@@ -28,6 +28,9 @@ dependencies = [
     "typer>=0.26.8",
 ]
 
+[project.scripts]
+popupsim = "popupsim_cli:main"
+
 [build-system]
 requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -38,6 +41,10 @@ include = ["*"]
 
 [tool.setuptools.package-dir]
 "" = "popupsim/backend/src"
+
+# Top-level console-script shim (adds src/ to sys.path, then runs main:app).
+[tool.setuptools]
+py-modules = ["popupsim_cli"]
 
 # Preserving all tool configurations
 [tool.ruff]
