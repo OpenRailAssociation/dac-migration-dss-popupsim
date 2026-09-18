@@ -1,6 +1,6 @@
 # PopUpSim Configuration Tutorial
 
-This tutorial guides you through installing and configuring PopUpSim using the `ten_trains_two_days` example scenario. You'll learn about each configuration file, available parameters, and how they affect the simulation.
+This tutorial guides you through installing and configuring PopUpSim using the `ten_trains_two_days_baseline` example scenario. You'll learn about each configuration file, available parameters, and how they affect the simulation.
 
 ## Tutorial Contents
 
@@ -15,6 +15,7 @@ This tutorial guides you through installing and configuring PopUpSim using the `
 8. [Routes Configuration](08-routes-configuration.md) - Movement paths between tracks
 9. [Train Schedule Configuration](09-train-schedule-configuration.md) - Wagon arrivals and properties
 10. [Running Your Simulation](10-running-simulation.md) - Executing and analyzing results
+11. [Optimizing Scenarios](11-optimizing-scenarios.md) - Automatically searching for better task priorities
 
 ## Quick Start
 
@@ -24,20 +25,20 @@ To run the example scenario used in this tutorial:
 
 ```bash
 cd dac-migration-dss-popupsim
-uv run python popupsim/backend/src/main.py --scenario Data/examples/ten_trains_two_days/ --output output/tutorial/
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/tutorial/
 ```
 
 ## Scenario Overview
 
-The `ten_trains_two_days` scenario simulates:
-- **10 trains** arriving over 2 days
+The `ten_trains_two_days_baseline` scenario simulates:
+- **10 trains** arriving over ~2 days (Dec 1–3), within a 10-day simulation window
 - **224 wagons** requiring DAC retrofit
 - **2 workshops** with 2 retrofit stations each
 - **15 parking tracks** for wagon storage
 - **2 collection tracks** for incoming trains
 - **1 shunting locomotive** for wagon movements
 
-This medium-complexity scenario demonstrates realistic workshop operations and helps you understand how to configure your own scenarios.
+This medium-complexity scenario demonstrates workshop operations and helps you understand how to configure your own scenarios.
 
 ## Learning Path
 

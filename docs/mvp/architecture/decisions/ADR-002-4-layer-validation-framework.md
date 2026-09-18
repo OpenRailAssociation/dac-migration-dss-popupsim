@@ -5,7 +5,7 @@
 
 ## Context
 
-PopUpSim requires comprehensive validation of complex scenario configurations with multiple interdependent entities (trains, wagons, workshops, locomotives, routes, tracks). Traditional fail-fast validation approaches create poor user experience by requiring multiple validation cycles to identify all issues.
+PopUpSim needs to validate complex scenario configurations with multiple interdependent entities (trains, wagons, workshops, locomotives, routes, tracks). Traditional fail-fast validation approaches require multiple validation cycles to identify all issues.
 
 ### Problems with Traditional Validation
 - **Poor UX**: Users must fix one error at a time, run validation again, discover next error
@@ -15,14 +15,14 @@ PopUpSim requires comprehensive validation of complex scenario configurations wi
 
 ### Requirements
 - Validate complex cross-references between entities
-- Provide comprehensive error reporting in single validation run
+- Report all errors in a single validation run
 - Categorize validation issues by type and severity
-- Support enterprise-grade error messages with actionable suggestions
+- Provide clear error messages with actionable suggestions
 - Enable extensible validation framework for future requirements
 
 ## Decision
 
-Implement a **4-Layer Validation Pipeline** with comprehensive **Error Stacking** instead of traditional fail-fast validation.
+Implement a **4-Layer Validation Pipeline** with **Error Stacking** (collect all issues, then report) instead of traditional fail-fast validation.
 
 ### Architecture Decision
 
@@ -44,7 +44,7 @@ Layer 4: FEASIBILITY → Operational constraints, simulation readiness
 - **Collect ALL Issues**: Run all validation layers regardless of errors found
 - **Categorize by Layer**: Group issues by validation layer for clarity
 - **Actionable Suggestions**: Each error includes specific fix recommendation
-- **Professional Reporting**: Enterprise-grade error summaries with issue counts
+- **Clear Reporting**: Error summaries with issue counts grouped by layer
 
 ## Alternatives Considered
 
@@ -121,9 +121,9 @@ class IntegrityValidator:
 ## Consequences
 
 ### Positive
-- **Superior User Experience**: Users see ALL validation issues at once
+- **Fewer iterations**: Users see all validation issues at once
 - **Development Efficiency**: Single validation cycle to identify all problems
-- **Professional Error Reporting**: Enterprise-grade validation summaries
+- **Clear Error Reporting**: Validation summaries grouped by issue type
 - **Extensible Framework**: Easy to add new validation layers or rules
 - **Clear Categorization**: Issues grouped by validation concern
 - **Actionable Feedback**: Each error includes specific fix suggestions
@@ -137,21 +137,21 @@ class IntegrityValidator:
 - **Risk**: Performance degradation with large scenarios
   - **Mitigation**: Validation typically completes in <100ms, acceptable for user experience
 - **Risk**: Complex error messages overwhelming users
-  - **Mitigation**: Clear categorization and professional formatting make errors manageable
+  - **Mitigation**: Clear categorization and consistent formatting make errors manageable
 
 ## Validation Results
 
 ### Before (Fail-Fast)
 ```
-❌ "Invalid scenario ID" → Fix → Run again
-❌ "Missing locomotives" → Fix → Run again  
-❌ "Invalid track reference" → Fix → Run again
+- "Invalid scenario ID" → Fix → Run again
+- "Missing locomotives" → Fix → Run again  
+- "Invalid track reference" → Fix → Run again
 ```
 **Result**: 3+ validation cycles required
 
 ### After (Error Stacking)
 ```
-📋 Validation Summary: 3 errors, 1 warning
+Validation Summary: 3 errors, 1 warning
 
 SYNTAX ERRORS:
 - Invalid scenario ID format (Field: id)
@@ -168,17 +168,17 @@ WARNINGS:
 ## Compliance
 
 This decision supports the following quality goals:
-- **Usability & Accessibility** (Priority 3): Professional validation UX
-- **Simulation Accuracy & Reliability** (Priority 2): Comprehensive validation prevents invalid configurations
+- **Usability & Accessibility** (Priority 3): Clear, actionable validation errors
+- **Simulation Accuracy & Reliability** (Priority 2): Multi-layer validation prevents invalid configurations
 - **Testability** (Priority 5): Layer-specific validation enables focused testing
 
 ## References
 
-- [Building Blocks Documentation](../05-building-blocks.md#level-3-4-layer-validation-pipeline)
-- [Cross-Cutting Concepts](../08-concepts.md#88-4-layer-validation-framework)
+- [Building Blocks Documentation](../05-building-blocks.md)
+- [Cross-Cutting Concepts: 4-Layer Validation Framework](../08-concepts.md#88-4-layer-validation-framework)
 
 ---
 
 **Decision Date**: January 2025  
 **Decision Makers**: Architecture Team  
-**Implementation Status**: ✅ Complete
+**Implementation Status**: Complete

@@ -2,10 +2,10 @@
 
 ## Scenario Structure
 
-A PopUpSim scenario consists of multiple configuration files that work together to define the simulation. The `ten_trains_two_days` scenario contains 8 files:
+A PopUpSim scenario consists of multiple configuration files that work together to define the simulation. The `ten_trains_two_days_baseline` scenario contains 8 files:
 
 ```
-ten_trains_two_days/
+ten_trains_two_days_baseline/
 ├── scenario.json           # Main configuration and file references
 ├── topology.json           # Network structure (e.g. track length)
 ├── tracks.json            # Track definitions and types
@@ -18,7 +18,7 @@ ten_trains_two_days/
 
 ## File Relationships
 
-The files are interconnected, wehere the sceario.json links all of them togeher.
+The files are interconnected, where scenario.json links all of them together.
 
 1. **scenario.json** - Entry point that references all other files
 2. **topology.json** - Defines edges (track segments) used by tracks.json

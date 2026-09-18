@@ -131,7 +131,7 @@ This track would only use 50% of its physical length, regardless of the type-lev
 - Referenced in locomotive.json as "home track"
 - Typically one per locomotive
 
-**In ten_trains_two_days:** 2 resource parking tracks
+**In ten_trains_two_days_baseline:** 1 resource parking track (`track_19`)
 
 ### mainline
 

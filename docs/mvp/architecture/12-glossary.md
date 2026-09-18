@@ -41,17 +41,18 @@
 | **Presentation Layer** | CLI and file output | Top layer |
 | **Business Logic Layer** | Domain services and business logic | Core layer |
 | **Data Access Layer** | File I/O (JSON/CSV) | Data layer |
-| **Infrastructure Layer** | SimPy, Matplotlib, file system | Bottom layer |
-| **Service** | Business logic component | `ConfigurationService`, `WorkshopOperationsService` |
-| **Model** | Data model/entity | `Workshop`, `Station`, `Wagon` |
+| **Infrastructure Layer** | SimPy, event bus, file system | Bottom layer |
+| **Service** | Business logic component | `ConfigurationBuilder`, `RakeOperationsService` |
+| **Model** | Data model/entity | `Workshop`, `Wagon`, `Locomotive` |
 
 ### Bounded Context (MVP)
 
 | Term | MVP Definition | Responsibility |
 |---------|----------------|---------------|
 | **Configuration Context** | JSON/CSV import and validation | Scenario setup |
-| **Workshop Operations Context** | DAC retrofit and SimPy integration | Core business logic |
-| **Analysis & Reporting Context** | Orchestration and output generation | Overall control |
+| **External Trains Context** | Train arrivals and wagon creation | Simulation input events |
+| **Railway Infrastructure Context** | Track capacity and occupancy management | Infrastructure state |
+| **Retrofit Workflow Context** | DAC retrofit, SimPy integration, and reporting | Core business logic |
 | **Context** | Domain section with clear boundaries | Bounded context per DDD |
 | **Domain Model** | Domain data model of a context | Entities, value objects |
 
@@ -72,7 +73,7 @@
 | Term | MVP Definition | Usage |
 |---------|----------------|------------|
 | **Pydantic** | Python library for data validation | Configuration models |
-| **Matplotlib** | Python library for charts | Chart generation |
+| **Streamlit + Plotly** | Python libraries for the dashboard | Interactive visualization |
 | **Pandas** | Python library for data processing | CSV processing (optional) |
 | **Type Hints** | Python typing | Code documentation and IDE support |
 | **Dataclass** | Python decorator for data classes | Domain models |
@@ -93,9 +94,8 @@
 
 | Term | MVP Definition | Structure |
 |---------|----------------|----------|
-| **JSON** | JavaScript Object Notation | Configuration files |
-| **CSV** | Comma-Separated Values | Tabular data |
-| **PNG** | Portable Network Graphics | Matplotlib charts |
+| **JSON** | JavaScript Object Notation | Configuration files and metrics output (`summary_metrics.json`) |
+| **CSV** | Comma-Separated Values | Tabular configuration and result data |
 | **uv.lock** | Python uv lockfile | Dependency lockfile |
 
 ## 12.4 MVP Quality Terms
@@ -158,9 +158,10 @@
 
 | Term | MVP Definition | Format |
 |---------|----------------|--------|
-| **CSV Export** | Structured KPI data | `simulation_results.csv` |
-| **Chart** | Visualized KPI data | `kpi_charts.png` |
-| **Log** | Event timeline | `simulation_log.json` |
+| **CSV Export** | Structured event/KPI data | `wagon_journey.csv`, `locomotive_movements.csv` |
+| **Metrics** | Aggregated KPIs | `summary_metrics.json` |
+| **Log** | Event timeline | `events.log` |
+| **Dashboard** | Interactive visualization | Streamlit + Plotly (reads output files) |
 | **Summary** | Results summary | Console output |
 
 ## 12.7 MVP Error Terms

@@ -13,35 +13,44 @@ graph TB
     subgraph "Configuration Context - Level 3"
         Builder["ConfigurationBuilder<br/>Load from files"]
         Loader["FileLoader<br/>Parse JSON/CSV"]
-        
-        subgraph "Domain Models (Pydantic)"
+
+        subgraph "Input DTOs (Pydantic, application/dtos)"
+            TrainDTO[TrainInputDTO]
+            WagonDTO[WagonInputDTO]
+            TrackDTO[TrackInputDTO]
+            WorkshopDTO[WorkshopInputDTO]
+            LocoDTO[LocomotiveInputDTO]
+            RouteDTO[RouteInputDTO]
+            TopologyDTO[TopologyInputDTO]
+        end
+
+        subgraph "Domain Models (domain/models)"
             Scenario[Scenario]
-            Train[Train]
-            Wagon[Wagon]
-            Track[Track]
-            Workshop[Workshop]
-            Locomotive[Locomotive]
-            Routes[Routes]
             ProcessTimes[ProcessTimes]
+            Topology[Topology]
         end
     end
     
     Files[JSON/CSV Files] --> Builder
     Builder --> Loader
+    Loader --> TrainDTO
+    Loader --> WagonDTO
+    Loader --> TrackDTO
+    Loader --> WorkshopDTO
+    Loader --> LocoDTO
+    Loader --> RouteDTO
+    Loader --> TopologyDTO
     Loader --> Scenario
-    Loader --> Train
-    Loader --> Wagon
-    Loader --> Track
-    Loader --> Workshop
-    Loader --> Locomotive
-    Loader --> Routes
     Loader --> ProcessTimes
+    Loader --> Topology
 
     classDef builder fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef dto fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     classDef model fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
     
     class Builder,Loader builder
-    class Scenario,Train,Wagon,Track,Workshop,Locomotive,Routes,ProcessTimes model
+    class TrainDTO,WagonDTO,TrackDTO,WorkshopDTO,LocoDTO,RouteDTO,TopologyDTO dto
+    class Scenario,ProcessTimes,Topology model
 ```
 
 ### Components
@@ -102,11 +111,10 @@ graph TB
             WorkshopMgr["WorkshopResourceManager"]
         end
         
-        subgraph "Metrics Collection"
-            Metrics["SimulationMetrics"]
-            WagonCol["WagonCollector"]
-            LocoCol["LocomotiveCollector"]
-            WorkshopCol["WorkshopCollector"]
+        subgraph "Metrics & Export (Application/Infrastructure)"
+            Collector["EventCollector"]
+            Aggregator["MetricsAggregator"]
+            Exporter["CsvEventExporter"]
         end
     end
     
@@ -124,10 +132,9 @@ graph TB
     Collection --> TrackMgr
     Workshop --> WorkshopMgr
     
-    Context --> Metrics
-    Metrics --> WagonCol
-    Metrics --> LocoCol
-    Metrics --> WorkshopCol
+    Context --> Collector
+    Collector --> Aggregator
+    Collector --> Exporter
     
     classDef coord fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef domain fill:#c5e1a5,stroke:#558b2f,stroke-width:2px
@@ -137,7 +144,7 @@ graph TB
     class Context,Arrival,Collection,Workshop,Parking coord
     class Batch,Rake,TrainForm,Schedule,Coupling,Route domain
     class LocoMgr,TrackMgr,WorkshopMgr resource
-    class Metrics,WagonCol,LocoCol,WorkshopCol metrics
+    class Collector,Aggregator,Exporter metrics
 ```
 
 ### Coordinators (Application Layer)
@@ -201,49 +208,69 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "Railway Infrastructure Context - Level 3"
-        Context["RailwayContext<br/>Track building & services"]
+        Context["RailwayInfrastructureContext<br/>Track building & services"]
         
         subgraph "Aggregates"
+            Yard["RailwayYard<br/>Yard-level aggregate"]
             TrackGroup["TrackGroup<br/>Group tracks by type"]
-            Track["Track<br/>Individual track entity"]
             Occupancy["TrackOccupancy<br/>Wagon placement logic"]
         end
+
+        subgraph "Entities"
+            Track["Track<br/>Individual track entity"]
+        end
         
-        subgraph "Services"
-            Selector["TrackSelector<br/>Selection strategies"]
-            Capacity["CapacityService<br/>Capacity queries"]
+        subgraph "Domain Services"
+            Selection["TrackSelectionService<br/>Selection strategies"]
+            GroupSvc["TrackGroupService"]
+            OccSvc["TrackOccupancyService"]
+            Topology["TopologyService"]
+        end
+
+        subgraph "Repositories & Adapters"
+            Repos["domain/repositories/<br/>RailwayYard, TrackOccupancy"]
+            DI["infrastructure/di_container.py<br/>+ adapters.py"]
         end
     end
     
-    Context --> TrackGroup
+    Context --> Yard
+    Yard --> TrackGroup
     TrackGroup --> Track
     Track --> Occupancy
-    Context --> Selector
-    Context --> Capacity
-    Selector --> TrackGroup
-    Capacity --> Track
+    Context --> Selection
+    Context --> DI
+    DI --> Repos
+    Selection --> TrackGroup
     
     classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     
-    class Context,TrackGroup,Track,Occupancy,Selector,Capacity component
+    class Context,Yard,TrackGroup,Track,Occupancy,Selection,GroupSvc,OccSvc,Topology,Repos,DI component
 ```
 
 ### Components
 
 | Component | Responsibility | Pattern |
 |-----------|----------------|---------|
-| **RailwayContext** | Build tracks from scenario, provide services | Context |
+| **RailwayInfrastructureContext** | Build tracks from scenario, provide services | Context |
+| **RailwayYard** | Yard-level aggregate over track groups | Aggregate |
 | **TrackGroup** | Group tracks by type (collection, retrofit, parking, workshop) | Aggregate |
 | **Track** | Individual track with capacity and fill factor | Entity |
 | **TrackOccupancy** | Manage wagon placement and capacity | Aggregate |
-| **TrackSelector** | Select tracks based on strategies | Service |
-| **CapacityService** | Query track capacity and availability | Service |
+| **TrackSelectionService** | Select tracks based on strategies | Domain Service |
+| **TrackGroupService / TrackOccupancyService / TopologyService** | Track grouping, occupancy, and topology queries | Domain Services |
+
+Repositories (`domain/repositories/`) and their adapters/DI wiring
+(`infrastructure/di_container.py`, `infrastructure/adapters.py`) provide persistence-style
+access to yard and occupancy state.
 
 ### Track Selection Strategies
 
+Track selection uses the shared `SelectionStrategy` value object:
+
+- **FIRST_AVAILABLE**: Select first track with available capacity
 - **LEAST_OCCUPIED**: Select track with lowest occupancy ratio
 - **ROUND_ROBIN**: Cycle through available tracks
-- **FIRST_AVAILABLE**: Select first track with capacity
+- **BEST_FIT**: Select the track that best fits the required length
 - **RANDOM**: Random selection from available tracks
 
 ---
@@ -257,33 +284,43 @@ graph TB
     subgraph "External Trains Context - Level 3"
         Context["ExternalTrainsContext<br/>Train arrival management"]
         
-        subgraph "Components"
-            Publisher["EventPublisher<br/>Publish train arrivals"]
-            Factory["WagonFactory<br/>Create wagon entities"]
+        subgraph "Domain"
+            Schedule["TrainSchedule<br/>Scheduled arrivals (aggregate)"]
+            Train["ExternalTrain<br/>Train entity"]
         end
         
         subgraph "Events"
             TrainEvent["TrainArrivedEvent<br/>Train + wagons"]
         end
+
+        subgraph "Ports & Adapters"
+            Port["ExternalTrainsContextPort"]
+        end
     end
     
-    Context --> Publisher
-    Context --> Factory
-    Publisher --> TrainEvent
-    Factory --> TrainEvent
+    Context --> Schedule
+    Schedule --> Train
+    Context --> TrainEvent
+    Context --> Port
     
     classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     
-    class Context,Publisher,Factory,TrainEvent component
+    class Context,Schedule,Train,TrainEvent,Port component
 ```
 
 ### Components
 
-| Component | Responsibility |
-|-----------|----------------|
-| **ExternalTrainsContext** | Initialize train arrivals from scenario |
-| **EventPublisher** | Publish TrainArrivedEvent to event bus |
-| **WagonFactory** | Create wagon entities from train data |
+| Component | File | Responsibility |
+|-----------|------|----------------|
+| **ExternalTrainsContext** | `application/external_trains_context.py` | Schedule train arrivals, create wagons, publish events |
+| **TrainSchedule** | `domain/aggregates/train_schedule.py` | Manage scheduled train arrivals |
+| **ExternalTrain** | `domain/entities/external_train.py` | Train entity with arrival time and wagons |
+| **Train events** | `domain/events/train_events.py` | Train arrival/departure domain events |
+| **ExternalTrainsContextPort** | `application/ports/external_trains_context_port.py` | Port exposing the context to other contexts |
+
+The context publishes the shared `TrainArrivedEvent`
+(`shared/domain/events/wagon_lifecycle_events.py`) onto the event bus; wagon entities are
+created directly by the context (there is no separate `WagonFactory`/`EventPublisher`).
 
 ### Train Arrival Flow
 
@@ -310,42 +347,40 @@ sequenceDiagram
 ### Event Bus Communication
 
 ```python
-from contexts.shared.domain.events import EventBus, TrainArrivedEvent
+from infrastructure.event_bus.event_bus import EventBus
+from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
 
-# External Trains publishes event
-event_bus.publish(TrainArrivedEvent(train_id='T001', wagons=[wagon1, wagon2, wagon3], arrival_time=100.0))
+# External Trains publishes an event onto the shared bus
+event_bus.publish(TrainArrivedEvent(...))
 
 # Retrofit Workflow subscribes
-event_bus.subscribe(TrainArrivedEvent, arrival_coordinator.handle_train_arrival)
+event_bus.subscribe(TrainArrivedEvent, handler)
 ```
 
-### Track Capacity Queries
+> The concrete `EventBus` lives in `infrastructure/event_bus/event_bus.py`; the shared
+> domain events (including `TrainArrivedEvent`) live in `shared/domain/events/`.
+
+### Track Selection
 
 ```python
-from contexts.railway_infrastructure.application.railway_context import RailwayContext
+from contexts.railway_infrastructure.application.railway_context import RailwayInfrastructureContext
 
-# Query track capacity
-railway = RailwayContext(scenario)
-track = railway.track_selector.select_track_with_capacity('collection', required_length=50.0)
+# Build the railway context (via its DI factory in practice — see di_container.py)
+railway = RailwayInfrastructureContext(...)
 
-# Place wagons on track
-railway.place_wagons_on_track(track.id, wagons)
+# Track selection is provided by TrackSelectionService using a SelectionStrategy
+# (see contexts/retrofit_workflow/domain/services/track_selection_service.py)
 ```
 
 ### Resource Allocation
 
 ```python
-from contexts.retrofit_workflow.infrastructure.resource_managers import LocomotiveResourceManager
+from contexts.retrofit_workflow.infrastructure.resources.locomotive_resource_manager import (
+    LocomotiveResourceManager,
+)
 
-# Allocate locomotive
-loco_manager = LocomotiveResourceManager(env, locomotives)
-locomotive = yield loco_manager.allocate()
-
-# Use locomotive
-yield from transport_wagons(locomotive, wagons, destination)
-
-# Release locomotive
-loco_manager.release(locomotive)
+# Locomotive allocation/release is coordinated through the resource manager
+# and driven as a SimPy process by the coordinators.
 ```
 
 ---
@@ -362,9 +397,11 @@ popupsim/backend/src/
 │   │   ├── domain/
 │   │   │   ├── configuration_builder.py       # Load from files
 │   │   │   └── models/
-│   │   │       ├── scenario.py
+│   │   │       ├── scenario.py                # Root Scenario model
 │   │   │       ├── process_times.py
-│   │   │       └── ...
+│   │   │       └── topology.py
+│   │   ├── application/
+│   │   │   └── dtos/                           # Input DTOs (train, wagon, track, workshop, ...)
 │   │   └── infrastructure/
 │   │       └── file_loader.py                 # Parse JSON/CSV
 │   ├── retrofit_workflow/                     # Retrofit Workflow Context
@@ -384,50 +421,82 @@ popupsim/backend/src/
 │   │   │       ├── coupling_service.py
 │   │   │       └── route_service.py
 │   │   └── infrastructure/
-│   │       ├── resource_managers/
+│   │       ├── resources/
 │   │       │   ├── locomotive_resource_manager.py
 │   │       │   ├── track_capacity_manager.py
 │   │       │   └── workshop_resource_manager.py
-│   │       └── metrics/
-│   │           ├── simulation_metrics.py
-│   │           ├── wagon_collector.py
-│   │           ├── locomotive_collector.py
-│   │           └── workshop_collector.py
+│   │       ├── exporters/
+│   │       │   ├── csv_event_exporter.py
+│   │       │   └── dual_stream_csv_exporter.py
+│   │       ├── adapters/
+│   │       └── di_container.py
 │   ├── railway_infrastructure/                # Railway Infrastructure Context
 │   │   ├── application/
-│   │   │   └── railway_context.py             # Track building & services
+│   │   │   ├── railway_context.py             # RailwayInfrastructureContext
+│   │   │   └── track_occupancy_event_handler.py
 │   │   ├── domain/
 │   │   │   ├── aggregates/
+│   │   │   │   ├── railway_yard.py
 │   │   │   │   ├── track_group.py
-│   │   │   │   ├── track.py
 │   │   │   │   └── track_occupancy.py
+│   │   │   ├── entities/
+│   │   │   │   └── track.py
+│   │   │   ├── repositories/
+│   │   │   │   ├── railway_yard_repository.py
+│   │   │   │   └── track_occupancy_repository.py
 │   │   │   └── services/
-│   │   │       ├── track_selector.py
-│   │   │       └── capacity_service.py
+│   │   │       ├── track_selection_service.py
+│   │   │       ├── track_group_service.py
+│   │   │       ├── track_occupancy_service.py
+│   │   │       └── topology_service.py
 │   │   └── infrastructure/
-│   │       └── track_repository.py
+│   │       ├── di_container.py                # RailwayContextFactory
+│   │       └── adapters.py
 │   ├── external_trains/                       # External Trains Context
 │   │   ├── application/
-│   │   │   └── external_trains_context.py     # Train arrival management
+│   │   │   ├── external_trains_context.py     # Train arrival management
+│   │   │   └── ports/
+│   │   │       └── external_trains_context_port.py
 │   │   ├── domain/
-│   │   │   ├── wagon_factory.py
-│   │   │   └── events/
-│   │   │       └── train_arrived_event.py
+│   │   │   ├── aggregates/
+│   │   │   │   └── train_schedule.py
+│   │   │   ├── entities/
+│   │   │   │   └── external_train.py
+│   │   │   ├── events/
+│   │   │   │   └── train_events.py
+│   │   │   └── value_objects/
+│   │   │       ├── train_id.py
+│   │   │       └── arrival_metrics.py
 │   │   └── infrastructure/
-│   │       └── event_publisher.py
+│   │       └── adapters/
 │   └── shared/                                # Shared Kernel
 │       ├── domain/
-│       │   ├── events/
-│       │   │   └── event_bus.py
-│       │   └── value_objects/
+│       │   ├── events/                        # Shared domain events (wagon lifecycle, ...)
+│       │   └── value_objects/                 # e.g. selection_strategy.py
 │       └── infrastructure/
-│           └── simpy_adapter.py
-└── tests/
-    └── unit/
-        ├── configuration/
-        ├── retrofit_workflow/
-        ├── railway_infrastructure/
-        └── external_trains/
+│           └── simulation/
+│               └── engines/
+│                   └── simpy_adapter.py       # SimPyEngineAdapter
+├── infrastructure/                            # Technical infrastructure (outside contexts)
+│   ├── event_bus/
+│   │   └── event_bus.py                       # EventBus
+│   └── tracking/                              # Process/state tracking + export helpers
+└── optimizer/                                 # Two-phase scenario optimization
+```
+
+Tests live under `popupsim/backend/tests/` (not `src/tests/`):
+
+```
+popupsim/backend/tests/
+├── unit/
+│   ├── contexts/
+│   │   ├── configuration/
+│   │   ├── retrofit_workflow/
+│   │   ├── railway_infrastructure/
+│   │   └── optimizer_search/
+│   └── ...
+├── validation/
+└── fixtures/
 ```
 
 ---
@@ -461,15 +530,17 @@ stateDiagram-v2
 
 ### SimPy Integration
 
-**SimPyAdapter** provides abstraction:
+**SimPyEngineAdapter** (`shared/infrastructure/simulation/engines/simpy_adapter.py`)
+wraps SimPy behind a port (`SimulationEnginePort`):
 ```python
-class SimPyAdapter:
-    def delay(self, duration: float) -> Generator
-    def run_process(self, process: Callable, *args) -> None
-    def create_store(self, capacity: int) -> Any
-    def create_event(self) -> Any
+class SimPyEngineAdapter(SimulationEnginePort):
     def current_time(self) -> float
-    def run(self, until: float) -> None
+    def delay(self, duration: float | timedelta) -> Generator
+    def schedule_process(self, process: Generator | Callable) -> Any
+    def create_resource(self, capacity: int, name: str | None = None) -> simpy.Resource
+    def create_store(self, capacity: int | None = None, name: str | None = None) -> Any
+    def create_event(self) -> Any
+    def run(self, until: float | None = None) -> None
 ```
 
 ### Pydantic Integration
@@ -484,7 +555,8 @@ All domain models use Pydantic for:
 ### Event Bus Integration
 
 ```python
-from contexts.shared.domain.events import EventBus
+from infrastructure.event_bus.event_bus import EventBus
+from shared.domain.events.wagon_lifecycle_events import TrainArrivedEvent
 
 # Initialize event bus
 event_bus = EventBus()

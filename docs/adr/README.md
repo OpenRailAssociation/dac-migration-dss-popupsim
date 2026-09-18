@@ -103,4 +103,4 @@ For a typical large scenario (20 resources, 10 trains, 500 wagons, 10,000 events
 - **Wagon Collector:** 50 MB leak → 10 KB stable (5,000x reduction)
 - **CSV Loading:** 25.35 ms → 2.37 ms (10.7x faster)
 
-**Total improvement:** Simulation initialization and metrics calculation are now **orders of magnitude faster** with **minimal memory footprint**.
+**Total improvement:** The measurements above (for this scenario) show reduced runtime for simulation initialization and metrics calculation, and lower memory use. Numbers are specific to the benchmarked scenario and hardware.

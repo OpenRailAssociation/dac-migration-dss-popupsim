@@ -7,6 +7,7 @@ This folder contains **developer-focused documentation** for implementing the Po
 ## Documentation Structure
 
 ### Core Documents
+0. **[Getting Started](00-getting-started.md)** - Clone → run → test; the developer entry point
 1. **[MVP Overview](01-mvp-overview.md)** - System overview, goals, constraints
 2. **[Bounded Contexts](02-mvp-contexts.md)** - 4 MVP contexts and their responsibilities
 3. **[Domain Model](03-mvp-domain-model.md)** - Domain entities, value objects, services
@@ -52,32 +53,30 @@ See `.amazonq/rules/project-rules.md` in the repository root for complete coding
 
 ## Quick Start for Developers
 
-1. **Read architecture first**: Start with [MVP Architecture Overview](../architecture/README.md)
-2. **Understand contexts**: Review [Bounded Contexts](02-mvp-contexts.md)
-3. **Study domain model**: Check [Domain Model](03-mvp-domain-model.md)
-4. **Review actual code**: See `popupsim/backend/src/` for implementation
-5. **Run tests**: Use `uv run pytest` to verify setup
+New here? Start with **[Getting Started](00-getting-started.md)** — it walks you from a fresh
+clone through installing, running a scenario, viewing the dashboard, and running the quality
+checks, then points to the deeper docs and the recommended reading order.
 
 ## Documentation Status
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| Core Documents (1-11) | ✅ Complete | Updated for 4 contexts |
-| Code Examples | ✅ Actual implementation | Real code from codebase |
+| Core Documents (1-11) | Complete | Updated for 4 contexts |
+| Code Examples | Actual implementation | Real code from codebase |
 
 ## Implementation Status
 
 | Component | Status | Location |
 |-----------|--------|----------|
-| Configuration Context | ✅ Implemented | `contexts/configuration/` |
-| Retrofit Workflow Context | ✅ Implemented | `contexts/retrofit_workflow/` |
-| Railway Infrastructure Context | ✅ Implemented | `contexts/railway_infrastructure/` |
-| External Trains Context | ✅ Implemented | `contexts/external_trains/` |
-| SimPy Integration | ✅ Implemented | `shared/infrastructure/simulation/` |
-| Resource Management | ✅ Implemented | `contexts/retrofit_workflow/infrastructure/resources/` |
-| Event Collection | ✅ Implemented | `contexts/retrofit_workflow/application/event_collector.py` |
-| 4 Process Coordinators | ✅ Implemented | `contexts/retrofit_workflow/application/coordinators/` |
-| Testing | ✅ Complete | `popupsim/backend/tests/` (378 tests, 54% coverage) |
+| Configuration Context | Implemented | `contexts/configuration/` |
+| Retrofit Workflow Context | Implemented | `contexts/retrofit_workflow/` |
+| Railway Infrastructure Context | Implemented | `contexts/railway_infrastructure/` |
+| External Trains Context | Implemented | `contexts/external_trains/` |
+| SimPy Integration | Implemented | `shared/infrastructure/simulation/` |
+| Resource Management | Implemented | `contexts/retrofit_workflow/infrastructure/resources/` |
+| Event Collection | Implemented | `contexts/retrofit_workflow/application/event_collector.py` |
+| 4 Process Coordinators | Implemented | `contexts/retrofit_workflow/application/coordinators/` |
+| Testing | Complete | `popupsim/backend/tests/` (run `uv run pytest`; min 40% coverage enforced) |
 
 ## Contributing
 

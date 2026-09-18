@@ -50,6 +50,20 @@ nav:
       - Risks & Technical Debt: mvp/architecture/11-risks-technical-debt.md
       - Glossary: mvp/architecture/12-glossary.md
       - Bibliography: mvp/architecture/13-bibliography.md
+  - Development:
+      - Overview: mvp/development/README.md
+      - Getting Started: mvp/development/00-getting-started.md
+      - MVP Overview: mvp/development/01-mvp-overview.md
+      - Bounded Contexts: mvp/development/02-mvp-contexts.md
+      - Domain Model: mvp/development/03-mvp-domain-model.md
+      - SimPy Integration: mvp/development/04-mvp-simpy-integration.md
+      - Data Flow: mvp/development/05-mvp-data-flow.md
+      - Technology Stack: mvp/development/06-mvp-technology-stack.md
+      - File Formats: mvp/development/07-mvp-file-formats.md
+      - Testing Strategy: mvp/development/08-mvp-testing-strategy.md
+      - Deployment: mvp/development/09-mvp-deployment.md
+      - Migration Path: mvp/development/10-mvp-migration-path.md
+      - Domain Processes: mvp/development/11-mvp-domain-processes.md
   - CI/CD: ci-cd.md
   - Tutorials:
       - Installation: tutorial/00-installation.md
@@ -63,6 +77,7 @@ nav:
       - Routes configuration: tutorial/08-routes-configuration.md
       - Train schedule configuration: tutorial/09-train-schedule-configuration.md
       - Running the simulation: tutorial/10-running-simulation.md
+      - Optimizing scenarios: tutorial/11-optimizing-scenarios.md
 
 plugins:
   - search

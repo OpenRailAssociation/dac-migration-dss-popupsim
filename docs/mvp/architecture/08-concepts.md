@@ -4,7 +4,7 @@ This section describes architectural concepts and patterns that apply across mul
 
 ## 8.1 Layered Architecture
 
-**Note:** Each bounded context follows a layered architecture pattern ([ADR MVP-005](09-architecture-decisions.md#adr-mvp-005-layered-architecture)).
+**Note:** Each bounded context follows a layered architecture pattern ([ADR-010](decisions/ADR-010-layered-architecture.md)).
 
 ### Layer Structure (Applied to Each Context)
 
@@ -16,9 +16,10 @@ graph TB
         end
 
         subgraph "Business Logic"
-            ConfigService[Configuration Service]
-            DomainService[Workshop Operations Service]
-            SimulationService[Analysis & Reporting Service]
+            ConfigService[Configuration Context]
+            ExternalTrains[External Trains Context]
+            RailwayInfra[Railway Infrastructure Context]
+            RetrofitWorkflow[Retrofit Workflow Context]
         end
 
         subgraph "Data Access"
@@ -28,16 +29,18 @@ graph TB
 
         subgraph "Infrastructure"
             SimPy[SimPy Framework]
-            Matplotlib[Matplotlib]
+            EventBus[Event Bus]
         end
     end
 
     CLI --> ConfigService
-    CLI --> SimulationService
+    CLI --> RetrofitWorkflow
     ConfigService --> JSONReader
-    DomainService --> SimPy
-    SimulationService --> CSVWriter
-    SimulationService --> Matplotlib
+    ExternalTrains --> EventBus
+    RailwayInfra --> EventBus
+    RetrofitWorkflow --> SimPy
+    RetrofitWorkflow --> EventBus
+    RetrofitWorkflow --> CSVWriter
 
     classDef presentation fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#fff
     classDef business fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#fff
@@ -45,9 +48,9 @@ graph TB
     classDef infrastructure fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#fff
 
     class CLI presentation
-    class ConfigService,DomainService,SimulationService business
+    class ConfigService,ExternalTrains,RailwayInfra,RetrofitWorkflow business
     class JSONReader,CSVWriter data
-    class SimPy,Matplotlib infrastructure
+    class SimPy,EventBus infrastructure
 ```
 
 | Layer | Responsibility | Components |
@@ -56,7 +59,7 @@ graph TB
 | **Domain** | Business logic, domain services | BatchFormationService, RakeFormationService, TrainFormationService, WorkshopSchedulingService |
 | **Infrastructure** | External frameworks, resource management | SimPy, LocomotiveResourceManager, TrackCapacityManager, WorkshopResourceManager |
 
-**Rationale:** Layered architecture provides clear separation of concerns within each bounded context, enabling rapid MVP development while maintaining code organization. See [Section 4.3](04-solution-strategy.md#43-technical-architecture-pattern) for architectural pattern decision.
+**Rationale:** Layered architecture provides clear separation of concerns within each bounded context, enabling rapid MVP development while maintaining code organization. See [Section 4.3](04-solution-strategy.md#43-architectural-patterns) for architectural pattern decision.
 
 ---
 
@@ -424,7 +427,7 @@ def log_memory_usage(phase: str) -> None:
 
 ## 8.8 4-Layer Validation Framework
 
-**Enterprise-grade validation** with comprehensive error stacking ensures **Simulation Accuracy & Reliability** (Priority 2). See validation framework documentation in the codebase for complete details.
+Validation collects and reports all issues in a single pass (error stacking) rather than failing on the first problem, which supports **Simulation Accuracy & Reliability** (Priority 2). See the validation framework in the codebase for complete details.
 
 ### 4-Layer Validation Architecture
 
@@ -471,8 +474,8 @@ graph TB
 
 | Approach | User Experience | Development Efficiency | Error Quality |
 |----------|-----------------|------------------------|---------------|
-| **Fail-Fast (Traditional)** | ❌ Fix 1 error → Run again → Fix 1 error | ⭐⭐ Slow iteration | ⭐⭐ Limited context |
-| **Error Stacking (PopUpSim)** | ✅ See ALL issues at once → Fix all | ⭐⭐⭐⭐⭐ Fast iteration | ⭐⭐⭐⭐⭐ Complete context |
+| **Fail-Fast (Traditional)** | Fix 1 error → Run again → Fix 1 error | Slow iteration | Limited context |
+| **Error Stacking (PopUpSim)** | See ALL issues at once → Fix all | Fast iteration | Complete context |
 
 ### Validation Layer Examples
 
@@ -515,7 +518,7 @@ if not result.is_valid:
 ### Validation Result Output Example
 
 ```
-📋 Validation Summary: 5 errors, 2 warnings
+Validation Summary: 5 errors, 2 warnings
 
 SYNTAX ERRORS:
 - Scenario ID too long (Field: id)

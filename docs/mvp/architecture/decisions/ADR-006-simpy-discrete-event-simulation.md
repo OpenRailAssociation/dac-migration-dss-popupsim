@@ -12,16 +12,16 @@ Use **SimPy** as the simulation engine.
 
 ## Rationale
 
-- **Proven in POC**: Successfully validated during 3-Länderhack 2024 hackathon
-- **Python native**: Integrates seamlessly with Python ecosystem
-- **Discrete event paradigm**: Perfect fit for workshop operations simulation
+- **Prior use**: Used in the 3-Länderhack 2024 prototype
+- **Python native**: Pure-Python library, integrates with the Python ecosystem
+- **Discrete event paradigm**: Matches the event-based nature of workshop operations
 - **Deterministic**: Supports reproducible results
 - **Well-documented**: Mature library with good community support
 - **Lightweight**: No heavy infrastructure requirements
 
 ## Alternatives Considered
 
-- **SimPy** ✅ Chosen
+- **SimPy** — Chosen
 - **Mesa**: Agent-based, overkill for our use case
 - **Custom simulation**: Too much development effort
 - **AnyLogic**: Commercial, not open source
@@ -60,13 +60,13 @@ class WorkshopOrchestrator:
 ## Consequences
 
 ### Achieved
-- ✅ **Deterministic Results**: Reproducible simulation runs with same seed
-- ✅ **Resource Management**: SimPy Resources handle workshop station blocking
-- ✅ **Event-Driven Workflow**: SimPy Stores eliminate polling delays
-- ✅ **Process Coordination**: 5 concurrent processes coordinate via SimPy primitives
-- ✅ **Abstraction Layer**: SimulationAdapter isolates SimPy dependencies
+- **Deterministic Results**: Reproducible simulation runs with same seed
+- **Resource Management**: SimPy Resources handle workshop station blocking
+- **Event-Driven Workflow**: SimPy Stores eliminate polling delays
+- **Process Coordination**: 5 concurrent processes coordinate via SimPy primitives
+- **Abstraction Layer**: SimulationAdapter isolates SimPy dependencies
 
 ### Files Implementing This Decision
-- `workshop_operations/infrastructure/simulation/simpy_adapter.py` - SimPy abstraction
-- `workshop_operations/application/orchestrator.py` - Main simulation orchestration
-- `workshop_operations/infrastructure/resources/` - Resource management with SimPy
+- `shared/infrastructure/simulation/engines/simpy_adapter.py` - SimPy engine port/adapter
+- `application/simulation_service.py` - Main simulation orchestration (drives the SimPy engine)
+- `contexts/retrofit_workflow/infrastructure/resources/` - Resource management with SimPy

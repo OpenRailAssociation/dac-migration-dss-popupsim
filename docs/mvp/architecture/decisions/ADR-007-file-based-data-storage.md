@@ -21,7 +21,7 @@ Use **file-based storage** with JSON/CSV formats.
 
 ## Alternatives Considered
 
-- **Files (JSON/CSV)** ✅ Chosen
+- **Files (JSON/CSV)** — Chosen
 - **SQLite**: Overkill for MVP data volume
 - **PostgreSQL**: Requires installation and setup
 - **In-memory only**: No persistence
@@ -69,13 +69,13 @@ class CsvDataSourceAdapter:
 ## Consequences
 
 ### Achieved
-- ✅ **Zero Installation**: No database setup required
-- ✅ **Transparent Data**: Human-readable JSON/CSV formats
-- ✅ **Version Control**: Git-friendly text files
-- ✅ **Multi-Format Support**: JSON and CSV input via hexagonal adapters
-- ✅ **Export Flexibility**: Multiple output formats for different use cases
+- **Zero Installation**: No database setup required
+- **Transparent Data**: Human-readable JSON/CSV formats
+- **Version Control**: Git-friendly text files
+- **Multi-Format Support**: JSON and CSV input via hexagonal adapters
+- **Export Flexibility**: Multiple output formats for different use cases
 
 ### Files Implementing This Decision
-- `configuration/infrastructure/adapters/` - File format adapters
-- `analytics/infrastructure/exporters/` - Results export
+- `contexts/configuration/infrastructure/file_loader.py` - Scenario file loading (JSON/CSV)
+- `contexts/retrofit_workflow/infrastructure/exporters/` - Results export (CSV/JSON)
 - `Data/examples/` - Example scenarios in JSON and CSV

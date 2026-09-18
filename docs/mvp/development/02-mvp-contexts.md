@@ -113,16 +113,20 @@ retrofit_workflow/
 │       ├── coupling_service.py
 │       └── route_service.py
 └── infrastructure/
-    ├── resource_managers/
+    ├── resources/
     │   ├── locomotive_resource_manager.py
     │   ├── track_capacity_manager.py
     │   └── workshop_resource_manager.py
-    └── metrics/
-        ├── simulation_metrics.py
-        ├── wagon_collector.py
-        ├── locomotive_collector.py
-        └── workshop_collector.py
+    ├── exporters/
+    │   ├── csv_event_exporter.py
+    │   └── dual_stream_csv_exporter.py
+    ├── adapters/
+    └── di_container.py
 ```
+
+Metrics are aggregated in the application layer
+(`application/services/metrics_aggregator.py`, `event_collection_service.py`), not in a
+separate `infrastructure/metrics/` package.
 
 ### Implementation: Main Context
 
@@ -474,13 +478,13 @@ event_collector.export_all(output_path)
 
 | Context | Status | Location |
 |---------|--------|----------|
-| Configuration Context | ✅ Implemented | `contexts/configuration/` |
-| Retrofit Workflow Context | ✅ Implemented | `contexts/retrofit_workflow/` |
-| Railway Infrastructure Context | ✅ Implemented | `contexts/railway_infrastructure/` |
-| External Trains Context | ✅ Implemented | `contexts/external_trains/` |
-| Event Collection | ✅ Implemented | `contexts/retrofit_workflow/application/event_collector.py` |
-| SimPy Integration | ✅ Implemented | `shared/infrastructure/simulation/` |
-| Testing | ✅ Complete | 378 tests passing, 54% coverage |
+| Configuration Context | Implemented | `contexts/configuration/` |
+| Retrofit Workflow Context | Implemented | `contexts/retrofit_workflow/` |
+| Railway Infrastructure Context | Implemented | `contexts/railway_infrastructure/` |
+| External Trains Context | Implemented | `contexts/external_trains/` |
+| Event Collection | Implemented | `contexts/retrofit_workflow/application/event_collector.py` |
+| SimPy Integration | Implemented | `shared/infrastructure/simulation/` |
+| Testing | Complete | 378 tests passing, 54% coverage |
 
 ---
 

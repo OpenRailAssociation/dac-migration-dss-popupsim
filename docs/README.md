@@ -34,19 +34,22 @@ docs/
 
 ## Architecture Overview
 
-PopUpSim MVP uses a 3-context architecture:
+PopUpSim uses a 4 bounded-context architecture (Domain-Driven Design):
 
 | Context | Purpose | Technology |
 |---------|---------|------------|
-| **Configuration** | Input validation & parsing | Pydantic |
-| **Workshop Operations** | Simulation execution | SimPy |
-| **Analysis & Reporting** | Output generation | Matplotlib, CSV |
+| **Configuration** | Input loading & validation | Pydantic |
+| **External Trains** | Train arrivals & wagon creation | Event publishing |
+| **Railway Infrastructure** | Track capacity & occupancy | Domain aggregates |
+| **Retrofit Workflow** | Simulation execution & reporting | SimPy, domain services |
+
+See [MVP Architecture Building Blocks](mvp/architecture/05-building-blocks.md) for the detailed context breakdown.
 
 ## Getting Started
 
 1. **For MVP Development**: Start with [MVP Architecture](mvp/architecture/README.md)
 2. **For Requirements**: Review [Use Cases](requirements/use-cases.md)
-3. **For Architecture Decisions**: Browse [MVP ADRs](mvp/architecture/decisions/)
+3. **For Architecture Decisions**: Browse the [Architecture Decisions overview](mvp/architecture/09-architecture-decisions.md)
 
 ## Contributing to Documentation
 

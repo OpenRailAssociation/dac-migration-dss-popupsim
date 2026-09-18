@@ -19,10 +19,10 @@ C4Context
     Person(developer, "Developer", "Creates scenarios, runs simulations, validates results")
     Person(planner, "Workshop Planner", "Reviews results, provides feedback on simulation logic")
 
-    System(popupsim_mvp, "PopUpSim MVP", "Desktop simulation tool: file-based configuration, SimPy engine, Matplotlib output")
+    System(popupsim_mvp, "PopUpSim", "Desktop simulation tool: file-based configuration, SimPy engine, Streamlit dashboard")
 
     SystemDb_Ext(config_files, "Configuration Files", "JSON/CSV scenario definitions")
-    SystemDb(results_files, "Result Files", "CSV data + PNG charts")
+    SystemDb(results_files, "Result Files", "CSV data + JSON metrics")
 
     Rel(developer, config_files, "Creates/edits")
     Rel(developer, popupsim_mvp, "Runs simulation")
@@ -39,7 +39,7 @@ C4Context
 | **Developer** | Scenario configurations, test data | Simulation results, KPI data | Develop and validate simulation logic |
 | **Workshop Planner** | Requirements, feedback | Result analysis, throughput estimates | Validate simulation accuracy against real-world expectations |
 | **Configuration Files** | Scenario definitions, workshop setup, train schedules | - | Define simulation parameters and input data |
-| **Result Files** | - | CSV data, PNG charts, JSON logs | Store simulation results for analysis |
+| **Result Files** | - | CSV data, JSON metrics, event logs | Store simulation results for analysis (viewed via the Streamlit dashboard) |
 
 ## 3.2 Technical Context
 
@@ -49,23 +49,27 @@ C4Context
 
     Person(users, "Users", "Developers/Planners")
 
-    System_Boundary(mvp_boundary, "PopUpSim MVP") {
-        Container(main, "Main Application", "Python Script", "Entry point, orchestrates simulation")
+    System_Boundary(mvp_boundary, "PopUpSim") {
+        Container(main, "Main Application (CLI)", "Python + Typer", "Entry point (run/optimize), orchestrates simulation")
         Container(config_reader, "Configuration Context", "Python + Pydantic", "Parses and validates JSON/CSV")
-        Container(sim_engine, "Workshop Operations Context", "Python + SimPy", "Discrete event simulation")
-        Container(output_gen, "Analysis & Reporting Context", "Python + Matplotlib", "Creates CSV and PNG outputs")
+        Container(external_trains, "External Trains Context", "Python", "Schedules train arrivals, creates wagons")
+        Container(railway, "Railway Infrastructure Context", "Python", "Manages track capacity and occupancy")
+        Container(sim_engine, "Retrofit Workflow Context", "Python + SimPy", "Discrete event simulation, coordination, result export")
+        Container(dashboard, "Dashboard", "Python + Streamlit + Plotly", "Interactive visualization of results")
     }
 
     SystemDb_Ext(config_files, "Configuration Files", "JSON/CSV on Local FS")
-    SystemDb(results_storage, "Results Storage", "Local File System")
+    SystemDb(results_storage, "Results Storage", "Local File System (CSV/JSON)")
 
     Rel(users, main, "Executes", "Command line")
     Rel(main, config_reader, "Loads configuration")
     Rel(config_reader, config_files, "File I/O", "Read")
     Rel(main, sim_engine, "Runs simulation")
-    Rel(sim_engine, output_gen, "Passes results")
-    Rel(output_gen, results_storage, "File I/O", "Write")
-    Rel(users, results_storage, "Analyzes", "Manual review")
+    Rel(external_trains, sim_engine, "Train arrival events")
+    Rel(railway, sim_engine, "Track state")
+    Rel(sim_engine, results_storage, "Exports results", "File I/O (Write)")
+    Rel(users, dashboard, "Views results")
+    Rel(dashboard, results_storage, "Reads results", "File I/O")
 ```
 
 ### 3.2.1 Technical Channels
@@ -73,7 +77,7 @@ C4Context
 | Channel | Transmission Media | Protocol/Format | Direction | Description |
 |---------|-------------------|-----------------|-----------|-------------|
 | **Configuration Input** | Local File System | File I/O (JSON/CSV) | Input | Scenario configuration files |
-| **Results Output** | Local File System | File I/O (CSV/PNG/JSON) | Output | Simulation results and visualizations |
+| **Results Output** | Local File System | File I/O (CSV/JSON) | Output | Simulation results consumed by the dashboard |
 | **Internal Communication** | Process Memory | Python function calls | Internal | Direct method invocation between components |
 
 ### 3.2.2 Security and Quality Requirements
@@ -187,7 +191,7 @@ flowchart TB
 | **SimPy Library** | High | Simulation engine fails | Version pinning, dependency monitoring |
 | **Configuration Files** | High | Cannot start simulation | Validation, example files, clear error messages |
 | **File System Access** | High | Cannot save/load data | Permission checks, error handling |
-| **Matplotlib** | Medium | No visualizations | CSV output still available |
+| **Streamlit / Plotly** | Medium | No interactive dashboard | CSV/JSON output still available |
 | **Pandas** | Medium | Slower CSV processing | Native Python CSV fallback |
 
 ---

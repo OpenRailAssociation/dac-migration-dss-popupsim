@@ -40,12 +40,15 @@ uv run pytest
 
 ```bash
 # Basic usage
-uv run python popupsim/backend/src/main.py --config Data/examples/two_trains/
+uv run python popupsim/backend/src/main.py run \
+  --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 
-# With custom output
-uv run python popupsim/backend/src/main.py \
-  --config Data/examples/medium_scenario/ \
-  --output results/my_test/
+# Optimize task priorities
+uv run python popupsim/backend/src/main.py optimize \
+  --scenario Data/examples/ten_trains_two_days_baseline/
+
+# View results in the dashboard (separate terminal)
+uv run streamlit run popupsim/frontend/dashboard.py
 ```
 
 ## Directory Structure
@@ -71,17 +74,24 @@ popupsim/backend/src/
 
 ## Output
 
-Results are written to `output/` directory:
+Results are written as flat CSV/JSON files into the `--output` directory (no chart images):
 
 ```
 output/
-├── wagon_events.csv
-├── locomotive_events.csv
-├── workshop_events.csv
-└── charts/
-    ├── throughput.png
-    └── utilization.png
+├── summary_metrics.json
+├── wagon_journey.csv
+├── rejected_wagons.csv
+├── locomotive_movements.csv
+├── workshop_metrics.csv
+├── resource_states.csv
+├── resource_locations.csv
+├── resource_processes.csv
+├── events.log
+└── scenario/                # copy of the input scenario
 ```
+
+See [Running the Simulation](../../tutorial/10-running-simulation.md#output-files) for the
+full file list and columns.
 
 ## Development Commands
 

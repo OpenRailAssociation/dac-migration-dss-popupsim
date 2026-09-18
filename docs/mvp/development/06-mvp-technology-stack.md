@@ -5,11 +5,14 @@
 | Technology | Version | Purpose | Location |
 |------------|---------|---------|----------|
 | **Python** | 3.13+ | Runtime | All contexts |
-| **SimPy** | 4.0.1+ | Discrete event simulation | Retrofit Workflow |
-| **Pydantic** | 2.0+ | Data validation | Configuration |
-| **Plotly** | 6.5+ | Visualization | Frontend dashboard |
-| **Streamlit** | 1.52+ | Dashboard UI | Frontend |
-| **Pandas** | 2.0+ | CSV processing | Configuration, Frontend |
+| **SimPy** | 4.1.2+ | Discrete event simulation | Retrofit Workflow |
+| **Pydantic** | 2.13.4+ | Data validation | Configuration |
+| **Typer** | 0.26.8+ | CLI | `main.py` |
+| **Plotly** | 6.9+ | Visualization | Frontend dashboard |
+| **Streamlit** | 1.58+ | Dashboard UI | Frontend |
+| **Pandas** | 3.0.5 (pinned) | CSV processing | Configuration, Frontend |
+
+> Versions reflect `pyproject.toml` at time of writing; check that file for the current pins.
 
 ## Development Tools
 
@@ -19,7 +22,8 @@
 | **Ruff** | Formatting & linting | `pyproject.toml` |
 | **MyPy** | Type checking | `disallow_untyped_defs = true` |
 | **Pylint** | Static analysis | `pyproject.toml` |
-| **Pytest** | Testing | 374 tests passing |
+| **Pytest** | Testing | Run `uv run pytest` |
+| **Typer** | CLI framework | `run` / `optimize` commands |
 
 ## Context-Specific Technologies
 
@@ -30,8 +34,8 @@
 
 ### Retrofit Workflow Context
 - **SimPy** - Simulation engine
-- **Matplotlib** - Chart generation
 - **Dataclasses** - Domain entities
+- **Pandas** - CSV export of events/metrics
 
 ### Railway Infrastructure Context
 - **Dataclasses** - Track aggregates

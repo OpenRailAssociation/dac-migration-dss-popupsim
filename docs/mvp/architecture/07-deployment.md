@@ -16,9 +16,10 @@ graph TB
 
         subgraph "Dependencies"
             SimPy[SimPy Framework]
-            Matplotlib[Matplotlib]
+            Typer[Typer CLI]
             Pandas[Pandas]
             Pydantic[Pydantic]
+            Streamlit[Streamlit + Plotly<br/>Dashboard]
         end
     end
 
@@ -26,16 +27,18 @@ graph TB
     App --> Config
     App --> Output
     Python --> SimPy
-    Python --> Matplotlib
+    Python --> Typer
     Python --> Pandas
     Python --> Pydantic
+    Python --> Streamlit
+    Streamlit --> Output
 
     classDef app fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#fff
     classDef deps fill:#ff9800,stroke:#e65100,stroke-width:2px,color:#fff
     classDef files fill:#9e9e9e,stroke:#616161,stroke-width:2px,color:#fff
 
     class Python,App app
-    class SimPy,Matplotlib,Pandas,Pydantic deps
+    class SimPy,Typer,Pandas,Pydantic,Streamlit deps
     class Config,Output files
 ```
 
@@ -54,12 +57,14 @@ graph TB
 
 **Core dependencies** are managed in `pyproject.toml`. Key requirements:
 
-- **Python 3.13+** - Latest stable Python version (October 2024), provides improved type system and performance
-- **SimPy 4.0.1+** - Discrete event simulation ([ADR MVP-001](09-architecture-decisions.md#adr-mvp-001-simpy-for-discrete-event-simulation))
-- **Pydantic 2.0.0+** - Data validation ([ADR MVP-003](09-architecture-decisions.md#adr-mvp-003-pydantic-for-data-validation))
-- **Matplotlib 3.7.0+** - Visualization ([ADR MVP-004](09-architecture-decisions.md#adr-mvp-004-matplotlib-for-visualization))
-- **Pandas 2.0.0+** - CSV processing
-- **NumPy 1.24.0+** - Numerical operations
+- **Python 3.13+** - Latest stable Python version, provides improved type system and performance
+- **SimPy** - Discrete event simulation ([ADR-006](decisions/ADR-006-simpy-discrete-event-simulation.md))
+- **Pydantic 2.x** - Data validation ([ADR-008](decisions/ADR-008-pydantic-data-validation.md))
+- **Typer** - CLI framework (`run` / `optimize` commands)
+- **Streamlit + Plotly** - Interactive dashboard and charts (replaces the originally planned Matplotlib approach; see superseded [ADR-009](decisions/ADR-009-matplotlib-visualization.md))
+- **Pandas** - CSV/data processing
+
+See `pyproject.toml` for exact pinned versions.
 
 **Development tools:**
 - Ruff (formatting & linting)
@@ -80,36 +85,27 @@ dac-migration-dss-popupsim/
 ├── popupsim/                   # Main Package
 │   ├── backend/               # Backend Application
 │   │   ├── src/               # Source Code
-│   │   │   ├── configuration/ # Configuration Context
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── service.py         # Configuration service
-│   │   │   │   ├── validation.py      # Pydantic validators
-│   │   │   │   ├── model_scenario.py  # Scenario model
-│   │   │   │   ├── model_workshop.py  # Workshop model
-│   │   │   │   ├── model_track.py     # Track model
-│   │   │   │   ├── model_route.py     # Route model
-│   │   │   │   ├── model_routes.py    # Routes collection
-│   │   │   │   ├── model_train.py     # Train model
-│   │   │   │   └── model_wagon.py     # Wagon model
-│   │   │   ├── simulation/        # Analysis & Reporting Context
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── popupsim.py        # Main simulation orchestrator
-│   │   │   │   └── sim_adapter.py     # SimPy adapter
-│   │   │   ├── core/              # Core utilities
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── i18n/              # Internationalization
-│   │   │   ├── main.py            # Entry point
+│   │   │   ├── main.py                     # CLI entry point (Typer: run / optimize)
+│   │   │   ├── application/                # Cross-context orchestration
+│   │   │   │   ├── simulation_service.py   # SimulationApplicationService (drives SimPy)
+│   │   │   │   ├── context_registry.py     # Registers & drives context lifecycles
+│   │   │   │   └── workflow_strategy.py
+│   │   │   ├── contexts/                   # Bounded contexts (DDD)
+│   │   │   │   ├── configuration/          # Configuration Context (domain/application/infrastructure)
+│   │   │   │   ├── external_trains/        # External Trains Context
+│   │   │   │   ├── railway_infrastructure/ # Railway Infrastructure Context
+│   │   │   │   └── retrofit_workflow/      # Retrofit Workflow Context (simulation + reporting)
+│   │   │   ├── optimizer/                  # Two-phase scenario optimization (search/harness)
+│   │   │   ├── infrastructure/             # Technical infrastructure (event_bus, logging, tracking)
+│   │   │   ├── shared/                     # Shared kernel (domain, i18n, validation, value_objects)
 │   │   │   └── __init__.py
-│   │   ├── tests/             # Unit Tests
-│   │   │   ├── unit/          # Unit test modules
-│   │   │   │   ├── test_model_*.py    # Model tests
-│   │   │   │   ├── test_service.py    # Service tests
-│   │   │   │   ├── test_validation.py # Validation tests
-│   │   │   │   └── test_sim_*.py      # Simulation tests
-│   │   │   ├── fixtures/      # Test fixtures
-│   │   │   │   └── config/        # Test configuration files
+│   │   ├── tests/             # Unit, validation, and integration tests
+│   │   │   ├── unit/          # Unit tests mirroring the contexts/ layout
+│   │   │   ├── validation/    # Scenario/timeline validation tests
+│   │   │   ├── fixtures/      # Test fixtures (JSON/CSV)
 │   │   │   └── conftest.py    # Pytest configuration
 │   │   └── README.md          # Backend documentation
+│   ├── frontend/              # Streamlit dashboard (dashboard.py + dashboard_components/)
 │   └── __init__.py
 ├── Data/                       # Example Data
 │   ├── examples/              # Example scenarios
@@ -154,23 +150,24 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 | └─ RetrofitWorkflowContext | Python class | `retrofit_workflow/application/retrofit_workflow_context.py` | Main process memory | N/A |
 | └─ Coordinators | Python classes | `retrofit_workflow/application/coordinators/` | Main process memory | N/A |
 | └─ Domain Services | Python classes | `retrofit_workflow/domain/services/` | Main process memory | N/A |
-| └─ Resource Managers | Python classes | `retrofit_workflow/infrastructure/resource_managers/` | Main process memory | N/A |
-| └─ Metrics Collection | Python classes | `retrofit_workflow/infrastructure/metrics/` | Main process memory | N/A |
+| └─ Resource Managers | Python classes | `retrofit_workflow/infrastructure/resources/` | Main process memory | N/A |
+| └─ Metrics Collection | Python classes | `retrofit_workflow/application/services/` (metrics_aggregator, event_collection) | Main process memory | N/A |
 | **Railway Infrastructure Context** | Python module | `popupsim/backend/src/contexts/railway_infrastructure/` | Main process memory | N/A |
 | └─ RailwayContext | Python class | `railway_infrastructure/application/railway_context.py` | Main process memory | N/A |
 | └─ Track Aggregates | Python classes | `railway_infrastructure/domain/aggregates/` | Main process memory | N/A |
 | └─ Track Services | Python classes | `railway_infrastructure/domain/services/` | Main process memory | N/A |
 | **External Trains Context** | Python module | `popupsim/backend/src/contexts/external_trains/` | Main process memory | N/A |
 | └─ ExternalTrainsContext | Python class | `external_trains/application/external_trains_context.py` | Main process memory | N/A |
-| └─ WagonFactory | Python class | `external_trains/domain/wagon_factory.py` | Main process memory | N/A |
-| └─ EventPublisher | Python class | `external_trains/infrastructure/event_publisher.py` | Main process memory | N/A |
+| └─ TrainSchedule | Python aggregate | `external_trains/domain/aggregates/train_schedule.py` | Main process memory | N/A |
+| └─ Train Events | Python classes | `external_trains/domain/events/train_events.py` | Main process memory | N/A |
 | **External Dependencies** | | | | |
 | └─ SimPy Framework | Python library | Virtual environment | Main process memory | N/A |
 | └─ Pydantic | Python library | Virtual environment | Main process memory | N/A |
-| └─ Matplotlib | Python library | Virtual environment | Main process memory | N/A |
+| └─ Typer | Python library | Virtual environment | Main process memory | N/A |
+| └─ Streamlit + Plotly | Python library | Virtual environment | Separate dashboard process | N/A |
 | **Data Artifacts** | | | | |
 | └─ Configuration Files | JSON/CSV files | `Data/examples/` or custom path | N/A | File system |
-| └─ Result Files | CSV/PNG/JSON | `output/` directory | N/A | File system |
+| └─ Result Files | CSV/JSON/log | `output/` directory | N/A | File system |
 
 **Key Observations:**
 - All bounded contexts run in **single Python process** (desktop application)
@@ -185,10 +182,10 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 
 | Component | Status | Directory | Purpose |
 |-----------|--------|-----------|----------|
-| **Configuration Context** | ✅ Implemented | `contexts/configuration/` | Load and validate scenarios |
-| **Retrofit Workflow Context** | ✅ Implemented | `contexts/retrofit_workflow/` | Core simulation logic |
-| **Railway Infrastructure Context** | ✅ Implemented | `contexts/railway_infrastructure/` | Track management |
-| **External Trains Context** | ✅ Implemented | `contexts/external_trains/` | Train arrivals |
+| **Configuration Context** | Implemented | `contexts/configuration/` | Load and validate scenarios |
+| **Retrofit Workflow Context** | Implemented | `contexts/retrofit_workflow/` | Core simulation logic |
+| **Railway Infrastructure Context** | Implemented | `contexts/railway_infrastructure/` | Track management |
+| **External Trains Context** | Implemented | `contexts/external_trains/` | Train arrivals |
 
 ## 7.4 Execution Environment
 
@@ -206,24 +203,28 @@ This table maps the bounded contexts from [Section 5](05-building-blocks.md) to 
 
 ### Command Line Interface
 
+The CLI is built with Typer and exposes two subcommands: `run` and `optimize`.
+
 ```bash
-# Basic execution
-uv run python main.py
+# Run a simulation for a scenario directory
+uv run python popupsim/backend/src/main.py run \
+  --scenario Data/examples/ten_trains_two_days_baseline/ \
+  --output output/
 
-# With custom models
-uv run python main.py --config custom_config/
+# Verbose output
+uv run python popupsim/backend/src/main.py run \
+  --scenario Data/examples/ten_trains_two_days_baseline/ --verbose
 
-# With custom output directory
-uv run python main.py --output results/
-
-# Import infrastructure data (US-003)
-uv run python main.py --import-infra topology.csv workshop.csv
-
-# Debug mode
-uv run python main.py --debug --verbose
+# Optimize task priorities via two-phase adaptive coordinate search
+uv run python popupsim/backend/src/main.py optimize \
+  --scenario Data/examples/ten_trains_two_days_baseline/ \
+  --n-random 500 --n-workers 10 --k-starts 5 --max-rounds 5 \
+  --results-json optimization_results.json
 
 # Help
-uv run python main.py --help
+uv run python popupsim/backend/src/main.py --help
+uv run python popupsim/backend/src/main.py run --help
+uv run python popupsim/backend/src/main.py optimize --help
 ```
 
 ## 7.5 Configuration Management
@@ -276,36 +277,40 @@ graph TB
         Simulation[Simulation Results]
 
         subgraph "Output Formats"
-            CSV[CSV Files<br/>Structured Data]
-            PNG[PNG Charts<br/>Matplotlib Plots]
-            JSON[JSON Logs<br/>Event Timeline]
+            CSV[CSV Files<br/>wagon_journey, locomotive_movements,<br/>rejected_wagons, resource_* streams]
+            JSON[JSON Metrics<br/>summary_metrics.json]
+            LOG[Event Log<br/>events.log]
         end
 
         subgraph "Output Locations"
             OutputDir[output/<br/>Default Directory]
             CustomDir[Custom Directory<br/>--output parameter]
         end
+
+        Dashboard[Streamlit + Plotly<br/>Dashboard]
     end
 
     Simulation --> CSV
-    Simulation --> PNG
     Simulation --> JSON
+    Simulation --> LOG
 
     CSV --> OutputDir
-    PNG --> OutputDir
     JSON --> OutputDir
+    LOG --> OutputDir
 
     CSV -.-> CustomDir
-    PNG -.-> CustomDir
     JSON -.-> CustomDir
+    LOG -.-> CustomDir
+
+    OutputDir --> Dashboard
 
     classDef simulation fill:#4caf50,stroke:#2e7d32
     classDef format fill:#ff9800,stroke:#e65100
     classDef location fill:#9e9e9e,stroke:#616161
 
     class Simulation simulation
-    class CSV,PNG,JSON format
-    class OutputDir,CustomDir location
+    class CSV,JSON,LOG format
+    class OutputDir,CustomDir,Dashboard location
 ```
 
 ## 7.7 Error Handling & Logging
@@ -331,7 +336,7 @@ logging.basicConfig(
 
 | Error Type | MVP Behavior | Recovery Action |
 |------------|--------------|----------------|
-| **Configuration Error** | Exit with comprehensive error summary | Fix all reported configuration issues |
+| **Configuration Error** | Exit with a summary of all errors | Fix all reported configuration issues |
 | **Simulation Error** | Save partial results | Check system resources, adjust configuration |
 | **Output Error** | Continue without failed output | Check file permissions |
 | **Dependency Error** | Exit with installation instructions | Install missing packages with `uv sync` |
@@ -412,11 +417,11 @@ graph LR
 |------------|---------|---------|-------------------|
 | **Python** | 3.13+ | Runtime environment | Latest stable version with improved type system |
 | **uv** | Latest | Package manager | Fast, reliable dependency management |
-| **SimPy** | 4.0.1+ | Discrete event simulation | [ADR MVP-001](09-architecture-decisions.md#adr-mvp-001-simpy-for-discrete-event-simulation) |
-| **Pydantic** | 2.0.0+ | Data validation | [ADR MVP-003](09-architecture-decisions.md#adr-mvp-003-pydantic-for-data-validation) |
-| **Matplotlib** | 3.7.0+ | Visualization | [ADR MVP-004](09-architecture-decisions.md#adr-mvp-004-matplotlib-for-visualization) |
-| **Pandas** | 2.0.0+ | CSV processing | Data manipulation |
-| **NumPy** | 1.24.0+ | Numerical operations | KPI calculations |
+| **SimPy** | 4.1.2+ | Discrete event simulation | [ADR-006](decisions/ADR-006-simpy-discrete-event-simulation.md) |
+| **Pydantic** | 2.13+ | Data validation | [ADR-008](decisions/ADR-008-pydantic-data-validation.md) |
+| **Streamlit + Plotly** | current | Dashboard & interactive visualization | Superseded [ADR-009](decisions/ADR-009-matplotlib-visualization.md) |
+| **Typer** | current | CLI (`run` / `optimize`) | Command-line interface |
+| **Pandas** | 3.0.5 (pinned) | CSV/data processing | Data manipulation |
 
 ### Development Tools
 
@@ -429,14 +434,14 @@ graph LR
 
 ### Deployment Model
 
-**MVP:** Desktop application (local execution)
+**Current:** Desktop application (local execution)
 - File-based configuration (JSON/CSV)
-- File-based output (CSV/PNG/JSON)
-- No network dependencies
-- Single-user, single-threaded
+- File-based output (CSV/JSON/log)
+- Local Streamlit dashboard for visualization (runs as a separate process)
+- Single-user
 
 **Future:** Web application (cloud-ready)
-- Web interface
+- Hosted web interface
 - Database storage
 - Multi-user support
 - Distributed execution
@@ -498,7 +503,7 @@ uv sync
 uv run pytest
 
 # 5. Run simulation with example data
-uv run python popupsim/backend/src/main.py --config Data/examples/small_scenario/
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 
 # 6. Set up pre-commit hooks (optional)
 uv run python setup/dev/set_commit_msg_hooks.py
@@ -547,11 +552,15 @@ uv sync
 uv run python popupsim/backend/src/main.py --help
 
 # 5. Run simulation with example scenario
-uv run python popupsim/backend/src/main.py --config Data/examples/medium_scenario/
+uv run python popupsim/backend/src/main.py run --scenario Data/examples/ten_trains_two_days_baseline/ --output output/
 
 # 6. Review results
 ls output/
-# simulation_results.csv, kpi_charts.png, simulation_log.json
+# wagon_journey.csv, locomotive_movements.csv, rejected_wagons.csv,
+# summary_metrics.json, resource_states.csv, events.log, scenario/
+
+# 7. (Optional) Launch the dashboard to visualize results
+uv run streamlit run popupsim/frontend/dashboard.py
 ```
 
 **Environment:**
@@ -563,7 +572,7 @@ ls output/
 **Typical Workflow (US-001):**
 1. Copy example scenario: `cp -r Data/examples/medium_scenario/ my_workshop_4stations/`
 2. Edit `my_workshop_4stations/scenario.json` (change station count to 4)
-3. Run simulation: `uv run python popupsim/backend/src/main.py --config my_workshop_4stations/`
+3. Run simulation: `uv run python popupsim/backend/src/main.py run --scenario my_workshop_4stations/ --output output/4stations/`
 4. Repeat for 2 stations and 6 stations
 5. Compare results in `output/` directory
 6. Select optimal configuration
@@ -586,21 +595,17 @@ ls output/
 ```bash
 # 1-3. Same as Strategic Planner (extract, install uv, uv sync)
 
-# 4. Prepare company data
-mkdir my_company_data
-cp company_track_topology.csv my_company_data/topology.csv
-cp company_workshop_layout.csv my_company_data/workshop.csv
-cp company_train_schedule.csv my_company_data/schedule.csv
+# 4. Prepare a scenario directory from company data
+#    Assemble the scenario files (scenario.json + referenced topology,
+#    tracks, workshops, locomotives, routes, and train schedule) following
+#    the format of the bundled examples under Data/examples/.
+mkdir my_company_scenario
+# ... populate my_company_scenario/ with the company's configuration files ...
 
-# 5. Import infrastructure data (US-003)
-uv run python popupsim/backend/src/main.py --import-infra \
-  my_company_data/topology.csv \
-  my_company_data/workshop.csv
-
-# 6. Run capacity assessment (US-004)
-uv run python popupsim/backend/src/main.py \
-  --config validated_scenario.json \
-  --schedule my_company_data/schedule.csv
+# 5. Run capacity assessment (US-004)
+uv run python popupsim/backend/src/main.py run \
+  --scenario my_company_scenario/ \
+  --output output/company_assessment/
 
 # 7. Review capacity assessment
 cat output/capacity_assessment.csv

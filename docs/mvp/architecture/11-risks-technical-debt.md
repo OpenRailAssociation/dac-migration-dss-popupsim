@@ -46,10 +46,10 @@ graph TB
 | **Symptoms** | Unexpected SimPy behavior, hard-to-debug processes |
 
 **Mitigation:**
-- ✅ **Simple SimPy processes**: Use only basic events
-- ✅ **Early prototyping**: Implement SimPy integration first (validated in 3-Länderhack POC)
-- ✅ **Documentation**: Document SimPy patterns
-- ✅ **Team expertise**: Leverage POC experience from hackathon
+- **Simple SimPy processes**: Use only basic events
+- **Early prototyping**: Implement SimPy integration first (validated in 3-Länderhack POC)
+- **Documentation**: Document SimPy patterns
+- **Team expertise**: Leverage POC experience from hackathon
 
 ### Risk 2: Performance Issues with Larger Scenarios
 
@@ -61,10 +61,10 @@ graph TB
 | **Symptoms** | Long execution times, high memory usage |
 
 **Mitigation:**
-- ✅ **Profiling**: Early performance measurements
-- ✅ **Optimization**: Algorithm improvements
-- ✅ **Limits**: Define accepted scenario sizes
-- ✅ **Monitoring**: Memory/CPU monitoring
+- **Profiling**: Early performance measurements
+- **Optimization**: Algorithm improvements
+- **Limits**: Define accepted scenario sizes
+- **Monitoring**: Memory/CPU monitoring
 
 ### Risk 3: Schedule Overrun
 
@@ -76,10 +76,10 @@ graph TB
 | **Symptoms** | Milestone delays, unfinished features |
 
 **Mitigation:**
-- ✅ **Scope reduction**: Cut additional features if necessary
-- ✅ **Parallel development**: Optimize team coordination
-- ✅ **Weekly reviews**: Early risk detection
-- ✅ **Minimum MVP**: Define absolutely minimal functionality
+- **Scope reduction**: Cut additional features if necessary
+- **Parallel development**: Optimize team coordination
+- **Weekly reviews**: Early risk detection
+- **Minimum MVP**: Define absolutely minimal functionality
 
 ## 11.3 MVP Technical Debt
 
@@ -108,7 +108,7 @@ class WorkshopService:
 - **Type**: Architecture debt
 - **Priority**: High
 - **Effort**: Estimated 2-3 days refactoring (to be validated)
-- **Created by**: [ADR MVP-001](09-architecture-decisions.md#adr-mvp-001-simpy-for-discrete-event-simulation) (SimPy decision)
+- **Created by**: [ADR-006](decisions/ADR-006-simpy-discrete-event-simulation.md) (SimPy decision)
 - **Full version solution**: Hexagonal architecture with ports
 
 ### Debt 2: Missing Event Architecture
@@ -133,7 +133,7 @@ class SimulationService:
 - **Type**: Integration debt
 - **Priority**: Medium
 - **Effort**: Estimated 1-2 weeks refactoring (to be validated)
-- **Created by**: [ADR MVP-007](09-architecture-decisions.md#adr-mvp-007-direct-method-calls-between-contexts) (Direct calls decision)
+- **Created by**: [ADR-012](decisions/ADR-012-direct-method-calls.md) (Direct calls decision)
 - **Full version solution**: Event-driven architecture
 
 ### Debt 3: File-Based Persistence
@@ -159,7 +159,7 @@ class ConfigurationService:
 - **Type**: Persistence debt
 - **Priority**: Low
 - **Effort**: Estimated 3-5 days refactoring (to be validated)
-- **Created by**: [ADR MVP-002](09-architecture-decisions.md#adr-mvp-002-file-based-data-storage) (File storage decision)
+- **Created by**: [ADR-007](decisions/ADR-007-file-based-data-storage.md) (File storage decision)
 - **Full version solution**: Database + Repository pattern
 
 ### Debt 4: `PLR0917` (too-many-positional-arguments) temporarily ignored

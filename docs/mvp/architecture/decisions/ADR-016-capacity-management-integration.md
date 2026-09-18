@@ -38,7 +38,7 @@ class WorkshopOrchestrator:
         """Put wagon in retrofitted store only if track has physical capacity."""
         retrofitted_track_id = self.retrofitted_tracks[0].id
         if self.track_capacity.can_add_wagon(retrofitted_track_id, wagon.length):
-            # ✅ Capacity validation before SimPy store operation
+            # Capacity validation before SimPy store operation
             yield self.retrofitted_wagons_ready.put(wagon)
             return True
         logger.warning('Cannot add wagon %s - track %s full', wagon.id, retrofitted_track_id)
@@ -71,15 +71,15 @@ def put_wagon_if_fits(self, store_name: str, track_id: str, wagon: Wagon) -> Gen
 ```
 
 **Pros:**
-- ✅ Minimal code changes
-- ✅ Reuses existing TrackCapacityManager
-- ✅ Maintains current SimPy store behavior
-- ✅ Easy to implement incrementally
+- Minimal code changes
+- Reuses existing TrackCapacityManager
+- Maintains current SimPy store behavior
+- Easy to implement incrementally
 
 **Cons:**
-- ⚠️ Manual validation required at each put()
-- ⚠️ Easy to forget validation in new code
-- ⚠️ Dual responsibility (capacity + workflow)
+- Manual validation required at each put()
+- Easy to forget validation in new code
+- Dual responsibility (capacity + workflow)
 
 ### Option B: Custom Length-Aware Store
 
@@ -105,15 +105,15 @@ class LengthAwareStore:
 ```
 
 **Pros:**
-- ✅ Automatic capacity validation
-- ✅ Single responsibility per store
-- ✅ Type-safe domain modeling
-- ✅ Impossible to forget validation
+- Automatic capacity validation
+- Single responsibility per store
+- Type-safe domain modeling
+- Impossible to forget validation
 
 **Cons:**
-- ⚠️ More complex implementation
-- ⚠️ New abstraction to maintain
-- ⚠️ Requires refactoring existing code
+- More complex implementation
+- New abstraction to maintain
+- Requires refactoring existing code
 
 ## Analysis
 
@@ -163,13 +163,13 @@ class LengthAwareStore:
 ## Implementation Results
 
 ### Achieved in MVP
-- ✅ **W07 Problem Solved**: Wagons no longer get lost between retrofit and parking
-- ✅ **Complete Workflow Chain**: Train → Collection → Retrofit → Workshop → Retrofitted → Parking
-- ✅ **Separation of Concerns**: WagonStateManager for tracking, SimPy stores for workflow
-- ✅ **Event-Driven Coordination**: No polling, all SimPy store-based coordination
-- ✅ **Capacity Integration**: Physical capacity validated before all store operations
+- **W07 Problem Solved**: Wagons no longer get lost between retrofit and parking
+- **Complete Workflow Chain**: Train → Collection → Retrofit → Workshop → Retrofitted → Parking
+- **Separation of Concerns**: WagonStateManager for tracking, SimPy stores for workflow
+- **Event-Driven Coordination**: No polling, all SimPy store-based coordination
+- **Capacity Integration**: Physical capacity validated before all store operations
 
 ### Files Implementing This Decision
-- `workshop_operations/application/orchestrator.py` - Main workflow coordination
-- `workshop_operations/domain/services/wagon_operations.py` - WagonStateManager
-- `workshop_operations/infrastructure/resources/track_capacity_manager.py` - Capacity management
+- `contexts/retrofit_workflow/application/retrofit_workflow_context.py` - Main workflow coordination
+- `contexts/retrofit_workflow/application/coordinators/` - Process coordinators (arrival, collection, workshop, parking)
+- `contexts/retrofit_workflow/infrastructure/resources/track_capacity_manager.py` - Capacity management

@@ -7,7 +7,8 @@
 PopUpSim is a microscopic simulation system for optimizing Pop-Up retrofitting sites during the European freight rail industry's transition to Digital Automatic Couplers (DAC). The tool simulates the complex logistics of retrofitting approximately 500,000 freight wagons during the critical 3-week "Big Bang" migration period (2029-2034).
 
 > [!NOTE]  
-> Currently the dependency to Pandas library is fixed to 3.0.3. 3.0.4 segfaults on Windows.
+> The Pandas dependency is pinned to an exact version (`pandas==3.0.5`) to avoid a
+> Windows segfault observed with some releases. See `pyproject.toml` for the current pin.
 
 ## Overview
 
@@ -23,7 +24,7 @@ PopUpSim helps railway operators:
 - **Microscopic Simulation** - Track individual wagons and resources through workshop operations
 - **SimPy-based Engine** - Deterministic discrete event simulation for reproducible results
 - **File-based Configuration** - Easy-to-edit JSON/CSV configuration files
-- **Comprehensive Analysis** - Throughput metrics, utilization statistics, bottleneck identification
+- **Analysis** - Throughput metrics, utilization statistics, bottleneck identification
 - **Open Source** - Apache 2.0 licensed for cross-company collaboration
 
 ## Quick Start
@@ -110,15 +111,15 @@ uv run streamlit run popupsim/frontend/dashboard.py
 
 The dashboard will open in your browser at http://localhost:8501
 
-**Dashboard Features:**
-- **Overview** - KPIs, wagon flow, locomotive activity, workshop utilization
-- **Wagon Flow** - Individual wagon journeys, status distribution, track occupancy over time
-- **Workshop Performance** - Utilization, throughput, comparison between workshops
-- **Locomotive Operations** - Activity breakdown, utilization percentages
-- **Track Capacity** - Track utilization, capacity analysis
-- **Rejected Wagons** - Rejection reasons and details
-- **Event Log** - Searchable simulation events
-- **Process Log** - Detailed process execution log
+**Dashboard Tabs:**
+- **Overview** - KPIs, per-workshop breakdown, locomotive activity, workshop utilization
+- **Scenario Config** - The input configuration for the loaded run
+- **Wagons** - Wagon status distribution, location changes, individual journeys
+- **Locomotives** - Activity breakdown and utilization
+- **Workshops** - Workshop utilization and throughput
+- **Track Capacity** - Track configuration and utilization per track
+- **Bottleneck Analysis** - Process flow heatmap and resource utilization
+- **Animation** - Animated playback of the run on a schematic yard
 
 **Note:** Run the dashboard in a separate terminal window so you can continue running simulations.
 
@@ -127,25 +128,29 @@ The dashboard will open in your browser at http://localhost:8501
 
 Seven ready-to-use scenarios are included (10 trains, 224 wagons over 2 days):
 
-- **[Baseline](Data/examples/ten_trains_two_days_baseline/)** - 2 locomotives, 2 collection tracks, 2 workshops (2 bays each), 1 retrofit track, 1 retrofitted track
-- **[Variant 1](Data/examples/ten_trains_two_days_var1/)** - 1 locomotive (bottleneck), 3 collection tracks, 2 workshops (2 bays each)
-- **[Variant 2](Data/examples/ten_trains_two_days_var2/)** - 1 locomotive, 3 collection tracks, 2 workshops (2 bays each), 2 retrofit tracks
-- **[Variant 3](Data/examples/ten_trains_two_days_var3/)** - 2 locomotives, 3 collection tracks, 2 workshops (2 bays each)
-- **[Variant 4](Data/examples/ten_trains_two_days_var4/)** - 2 locomotives, 3 collection tracks, 2 workshops (4 bays each - increased capacity)
-- **[Variant 5](Data/examples/ten_trains_two_days_var5/)** - 4 locomotives, 3 collection tracks, 2 workshops (4 bays each), 2 retrofitted tracks
-- **[Variant 6](Data/examples/ten_trains_two_days_var6/)** - Same as Variant 5 but with opportunistic parking strategy
+- **[Baseline](Data/examples/ten_trains_two_days_baseline/)** - 1 locomotive, 2 collection tracks, 1 retrofit track, 1 retrofitted track, 2 workshops (2 bays each)
+- **[Variant 1](Data/examples/ten_trains_two_days_var1/)** - 1 locomotive, 3 collection tracks, 2 workshops (2 bays each), plus fill-level task prioritization
+- **[Variant 2](Data/examples/ten_trains_two_days_var2/)** - 1 locomotive, 3 collection tracks, 2 retrofit tracks, 2 workshops (2 bays each)
+- **[Variant 3](Data/examples/ten_trains_two_days_var3/)** - 2 locomotives, 3 collection tracks, 2 retrofit tracks, 2 workshops (2 bays each)
+- **[Variant 4](Data/examples/ten_trains_two_days_var4/)** - 2 locomotives, 3 collection tracks, 2 retrofit tracks, 2 workshops (4 bays each - increased capacity)
+- **[Variant 5](Data/examples/ten_trains_two_days_var5/)** - 2 locomotives, 3 collection tracks, 2 retrofit tracks, 2 workshops (4 bays each)
+- **[Variant 6](Data/examples/ten_trains_two_days_var6/)** - 4 locomotives, 3 collection tracks, 2 retrofit tracks, 3 workshops (2 bays each), opportunistic parking strategy
 
 **Known Limitations:**
-- ⚠️ **Multiple retrofitted tracks**: Currently not fully stable - use single retrofitted track for production scenarios
-- ⚠️ **Smart accumulation parking strategy**: May cause simulation deadlock if threshold is not reached at end of simulation - use `opportunistic` strategy for reliability
+- **Multiple retrofitted tracks**: Currently not fully stable - use single retrofitted track for production scenarios
+- **Smart accumulation parking strategy**: May cause simulation deadlock if threshold is not reached at end of simulation - use `opportunistic` strategy for reliability
 
 ## Architecture
 
-PopUpSim MVP uses a 3-context architecture:
+PopUpSim uses a 4 bounded-context architecture following Domain-Driven Design:
 
-1. **Configuration Context** - Input validation & parsing (Pydantic)
-2. **Workshop Operations Context** - Simulation execution & analysis (SimPy)
-3. **Analysis & Reporting Context** - Orchestration & output (Matplotlib, CSV)
+1. **Configuration Context** - Input loading & validation (Pydantic)
+2. **External Trains Context** - Train arrivals & wagon creation (event publishing)
+3. **Railway Infrastructure Context** - Track capacity & occupancy (domain aggregates)
+4. **Retrofit Workflow Context** - Simulation execution, coordination & reporting (SimPy)
+
+The bounded contexts follow a hexagonal (ports/adapters) style and communicate through a
+shared event bus. Simulation output is consumed by a separate Streamlit dashboard.
 
 For detailed architecture documentation, see [docs/mvp/architecture/](docs/mvp/architecture/README.md).
 
@@ -190,7 +195,7 @@ uv run pylint popupsim/backend/src/    # Code quality analysis
 - **Type hints mandatory** - All functions/methods must have explicit type annotations
 - **MyPy strict mode** - `disallow_untyped_defs = true`
 - **Ruff formatting** - Consistent code style
-- **Pytest** - Comprehensive test coverage
+- **Pytest** - Automated test suite
 - **Pylint** - Static code analysis and linting
 
 ## Technology Stack
@@ -198,8 +203,9 @@ uv run pylint popupsim/backend/src/    # Code quality analysis
 - **Python 3.13+** - Latest stable Python with improved type system
 - **SimPy** - Discrete event simulation framework
 - **Pydantic 2.0+** - Data validation and settings management
-- **Matplotlib** - Visualization and chart generation
-- **Pandas** - CSV data processing
+- **Typer** - CLI framework for the `run` and `optimize` commands
+- **Streamlit + Plotly** - Web dashboard and interactive visualization
+- **Pandas** - CSV/data processing
 - **uv** - Fast, reliable Python package manager
 
 ## Project Status

@@ -16,8 +16,8 @@ This Project welcomes contributions, suggestions, and feedback. All contribution
 
 ### Quick Start
 ```bash
-git clone https://github.com/jhw-db/PopUp-Sim.git
-cd PopUp-Sim
+git clone https://github.com/OpenRailAssociation/dac-migration-dss-popupsim.git
+cd dac-migration-dss-popupsim
 uv sync --all-extras --dev
 uv run pre-commit install
 ```

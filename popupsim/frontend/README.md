@@ -7,7 +7,17 @@ configuration analysis, resource utilizations and bottleneck identification.
 
 ## Features
 
-### 1. Scenario Configuration Tab ⚙️
+The dashboard presents eight tabs, in this order:
+
+### 1. Overview Tab 📊
+
+Simulation results summary:
+
+- KPI cards (wagons, completion rate, duration)
+- Per-workshop performance breakdown
+- Locomotive operations statistics
+
+### 2. Scenario Config Tab ⚙️
 
 Visualizes input scenario configuration before simulation:
 
@@ -18,15 +28,36 @@ Visualizes input scenario configuration before simulation:
 - **Train Schedule**: Arrival timeline histogram
 - **Capacity Analysis**: Capacity vs demand with bottleneck identification
 
-### 2. Overview Tab 📊
+### 3. Wagons Tab 🚃
 
-Simulation results summary:
+Wagon flow analysis:
 
-- KPI cards (wagons, completion rate, duration)
-- Workshop performance metrics
-- Locomotive operations statistics
+- Final wagon status distribution (retrofitted, parked, rejected)
+- Location changes over the run
+- Individual wagon journeys
 
-### 3. Bottleneck Analysis Tab 🚧
+### 4. Locomotives Tab 🚂
+
+Shunting resource analysis:
+
+- Activity breakdown (moving, parking, coupling, decoupling)
+- Utilization percentages and activity timeline
+
+### 5. Workshops Tab 🏭
+
+Workshop performance analysis:
+
+- Utilization per workshop
+- Throughput and utilization over time
+
+### 6. Track Capacity Tab 🛤️
+
+Track usage analysis:
+
+- Track configuration and utilization per track
+- Capacity charts
+
+### 7. Bottleneck Analysis Tab 🚧
 
 Timeline-based bottleneck identification:
 
@@ -35,7 +66,7 @@ Timeline-based bottleneck identification:
 - Locomotive usage
 - Interactive timeline visualization
 
-### 4. Animation Tab 🎬
+### 8. Animation Tab 🎬
 
 Animated playback of a simulation run on a schematic yard:
 

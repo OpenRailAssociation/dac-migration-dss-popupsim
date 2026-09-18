@@ -27,7 +27,7 @@ sequenceDiagram
     Planner->>Files: Create workshop_6stations.json
 
     loop For each configuration
-        Planner->>CLI: python main.py --config workshop_Xstations.json
+        Planner->>CLI: main.py run --scenario workshop_Xstations/
         CLI->>Config: load_configuration()
         Config->>Files: Read JSON/CSV
         Config->>Config: Validate with Pydantic
@@ -52,13 +52,13 @@ sequenceDiagram
         end
 
         Retrofit->>Retrofit: Aggregate results
-        Retrofit->>Files: Write simulation_results_Xstations.csv
-        Retrofit->>Files: Write kpi_charts_Xstations.png
+        Retrofit->>Files: Write wagon_journey.csv, locomotive_movements.csv
+        Retrofit->>Files: Write summary_metrics.json
         Retrofit-->>CLI: Simulation complete
         CLI-->>Planner: Results available
     end
 
-    Planner->>Files: Compare CSV results
+    Planner->>Files: Compare results (dashboard / CSV)
     Planner->>Planner: Select optimal configuration
 ```
 
@@ -103,7 +103,7 @@ sequenceDiagram
     Planner->>Files: Create scenario_high_load.json
     Note over Files: 30 wagons/hour arrival rate
 
-    Planner->>CLI: python main.py --config scenario_high_load.json
+    Planner->>CLI: main.py run --scenario scenario_high_load/
     CLI->>Config: load_configuration()
     Config-->>CLI: Validated scenario
 
@@ -144,12 +144,12 @@ sequenceDiagram
     Retrofit->>Metrics: Get aggregated KPIs
     Metrics-->>Retrofit: Throughput, utilization, bottlenecks
 
-    Retrofit->>Files: Write throughput_analysis.csv
-    Retrofit->>Files: Write bottleneck_chart.png
+    Retrofit->>Files: Write summary_metrics.json (throughput, utilization)
+    Retrofit->>Files: Write resource_states.csv / locomotive_movements.csv
     Retrofit-->>CLI: Analysis complete
 
     CLI-->>Planner: Results with bottleneck identification
-    Planner->>Files: Review bottleneck_chart.png
+    Planner->>Files: Review results in the dashboard (Bottleneck Analysis tab)
     Planner->>Planner: Decide: Add stations or optimize layout
 ```
 
@@ -217,8 +217,9 @@ sequenceDiagram
     Planner->>Files: Prepare workshop_layout.csv
     Note over Files: Contains: station_id, location, capacity
 
-    Planner->>CLI: python main.py --import-infra infrastructure_topology.csv workshop_layout.csv
-    CLI->>Config: import_infrastructure()
+    Note over Planner,Files: Infrastructure files are placed in the scenario directory<br/>(topology, tracks, workshops referenced from scenario.json)
+    Planner->>CLI: main.py run --scenario my_scenario/ --output output/
+    CLI->>Config: ConfigurationBuilder(scenario_path).build()
 
     Config->>Files: Read infrastructure_topology.csv
     Files-->>Config: CSV data (tracks)
@@ -307,7 +308,7 @@ sequenceDiagram
     Planner->>Files: Update validated_scenario.json
     Note over Files: Add capacity target: 500 wagons/week
 
-    Planner->>CLI: python main.py --config validated_scenario.json --schedule company_wagon_schedule.csv
+    Planner->>CLI: main.py run --scenario validated_scenario/ --output output/
     CLI->>Config: load_configuration()
     Config->>Files: Read validated_scenario.json
     Config->>Files: Read company_wagon_schedule.csv
@@ -339,14 +340,14 @@ sequenceDiagram
 
     alt Capacity target met
         Metrics-->>Retrofit: Throughput: 520 wagons (target: 500)
-        Retrofit->>Files: Write capacity_assessment_PASS.csv
-        Retrofit->>Files: Write capacity_chart.png
+        Retrofit->>Files: Write summary_metrics.json (PASS: target met)
+        Retrofit->>Files: Write wagon_journey.csv
         Retrofit-->>CLI: Capacity target achieved
         CLI-->>Planner: Workshop layout sufficient
     else Capacity target not met
         Metrics-->>Retrofit: Throughput: 450 wagons (target: 500)
-        Retrofit->>Files: Write capacity_assessment_FAIL.csv
-        Retrofit->>Files: Write bottleneck_analysis.png
+        Retrofit->>Files: Write summary_metrics.json (FAIL: target missed)
+        Retrofit->>Files: Write rejected_wagons.csv
         Retrofit-->>CLI: Capacity target missed
         CLI-->>Planner: Workshop needs optimization
         Planner->>Planner: Review bottlenecks, adjust layout
@@ -412,7 +413,7 @@ sequenceDiagram
     participant Validator as Pydantic Validator
     participant Files as File System
 
-    User->>CLI: python main.py --config invalid.json
+    User->>CLI: main.py run --scenario invalid_scenario/
     CLI->>Config: load_configuration()
     Config->>Files: Read invalid.json
     Files-->>Config: JSON data
@@ -440,7 +441,7 @@ sequenceDiagram
 - User sees complete list of issues in one summary
 - Enables fixing all problems in single iteration
 
-**Recovery:** User corrects all configuration errors based on comprehensive error summary
+**Recovery:** User corrects all configuration errors based on the full error summary
 
 ### 6.5.2 Simulation Failure
 
@@ -449,11 +450,11 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant CLI
-    participant Control as Analysis & Reporting Context
-    participant Domain as Workshop Operations Context
+    participant Control as SimulationApplicationService
+    participant Domain as Retrofit Workflow Context
     participant Files as File System
 
-    CLI->>Control: run_simulation()
+    CLI->>Control: execute(until)
     Control->>Domain: Start SimPy
     Domain->>Domain: Processing...
     Domain--xControl: SimulationError: Resource conflict

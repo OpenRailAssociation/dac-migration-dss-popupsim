@@ -9,8 +9,8 @@ Currently installation is only possible from source. Installation using PyPi may
 
 **Using uv:**
 ```bash
-git clone https://github.com/jhw-db/PopUp-Sim.git
-cd PopUp-Sim
+git clone https://github.com/OpenRailAssociation/dac-migration-dss-popupsim.git
+cd dac-migration-dss-popupsim
 uv sync --frozen
 ```
 
@@ -25,8 +25,8 @@ uv sync --frozen
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/jhw-db/PopUp-Sim.git
-   cd PopUp-Sim
+   git clone https://github.com/OpenRailAssociation/dac-migration-dss-popupsim.git
+   cd dac-migration-dss-popupsim
    ```
 
 2. **Install uv (if not already installed):**
@@ -100,7 +100,7 @@ The project uses pre-commit hooks to ensure code quality. These run automaticall
 - **Code formatting:** Ruff formatter (tabs, single quotes, 120 char lines)
 - **Linting:** Ruff linter with complexity metrics (bugs, unused code, simplifications, McCabe complexity)
 - **Type checking:** MyPy for static type analysis with error codes and column numbers
-- **Code quality:** Pylint for comprehensive code quality analysis
+- **Code quality:** Pylint for static code quality analysis
 
 **Manual pre-commit run:**
 ```bash
@@ -116,14 +116,13 @@ graph TD
     A --> E[README.md]
 
     subgraph Backend
-        B --> D[pyproject.toml]
         B --> F[src/]
         B --> G[tests/]
         B --> I[README.md]
     end
 
     subgraph Frontend
-        C --> J[Vue.js application]
+        C --> J[Streamlit dashboard]
     end
 
     E --> I
@@ -137,18 +136,24 @@ graph TD
 
 ## Example Scenarios
 
-The project includes example scenarios to help you get started:
+The project includes ready-to-use example scenarios under [`Data/examples/`](../../Data/examples/)
+(10 trains, 224 wagons over 2 days):
 
-- **[Small Scenario](../../Data/examples/small_scenario/README.md)** - Minimal simulation with 2 trains (20 wagons) and 1 workshop track for quick testing
-- **[Medium Scenario](../../Data/examples/medium_scenario/README.md)** - Medium-scale simulation with 4 trains (160 wagons) and 2 workshop tracks
-- **[Large Scenario](../../Data/examples/large_scenario/README.md)** - Large-scale simulation with 10 trains (500 wagons) and 2 workshop tracks, demonstrating high operational complexity
+- **[Baseline](../../Data/examples/ten_trains_two_days_baseline/)** - 2 locomotives, 2 collection tracks, 2 workshops (2 bays each)
+- **[Variant 1-6](../../Data/examples/)** - Variations of locomotive count, collection/retrofit tracks, workshop bays, and parking strategy
+- **[Priority Dispatch](../../Data/examples/ten_trains_two_days_priority_dispatch/)** - Demonstrates configurable task priorities
 
-Each example scenario includes:
-- `scenario.json` - Main configuration file
+Each example scenario directory includes:
+- `scenario.json` - Main configuration file with references to the files below
+- `topology.json` - Network structure (nodes/edges)
+- `tracks.json` - Track definitions
+- `workshops.json` - Workshop configuration
+- `locomotive.json` - Locomotive fleet
+- `routes.json` - Route network between tracks
+- `process_times.json` - Operation durations
 - `train_schedule.csv` - Train arrival schedule and wagon details
-- `workshop_tracks.csv` - Workshop track configuration
-- `routes.csv` - Route network between tracks
-- `README.md` - Detailed scenario documentation
+
+See the [tutorial](../../docs/tutorial/README.md) for a full walkthrough of each file.
 
 ## Contributing
 

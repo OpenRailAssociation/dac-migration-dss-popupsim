@@ -6,237 +6,196 @@
 
 The MVP domain model follows Domain-Driven Design principles across 4 bounded contexts.
 
+The Configuration context uses Pydantic models/DTOs for input; the Retrofit Workflow
+context uses plain dataclass entities and aggregates for the simulation domain. The diagram
+below shows the main simulation-domain types (see the linked files for the authoritative
+definitions).
+
 ```mermaid
 classDiagram
-    class ScenarioConfig {
-        +str scenario_id
-        +date start_date
-        +date end_date
-        +Workshop workshop
-        +str train_schedule_file
-    }
-
-    class Workshop {
-        +list tracks
-        +validate_tracks()
-    }
-
-    class WorkshopTrack {
+    class Scenario {
         +str id
-        +TrackFunction function
-        +int retrofit_time_min
-    }
-
-    class Train {
-        +str id
-        +datetime arrival_time
-        +list wagons
-        +get_total_length() float
+        +datetime start_date
+        +datetime end_date
+        +list~WorkshopInputDTO~ workshops
+        +Sequence~TrackInputDTO~ tracks
+        +list~LocomotiveInputDTO~ locomotives
+        +ProcessTimes process_times
     }
 
     class Wagon {
         +str id
-        +str train_id
         +float length
-        +bool needs_retrofit
-        +str status
+        +Coupler coupler_a
+        +Coupler coupler_b
+        +str train_id
+        +WagonStatus status
     }
 
-    ScenarioConfig --o Workshop
-    Workshop --o WorkshopTrack
-    Train --o Wagon
+    class Workshop {
+        +list~RetrofitBay~ bays
+    }
+
+    class RetrofitBay {
+        +str id
+        +str workshop_id
+        +BayStatus status
+    }
+
+    Scenario ..> Wagon : configures
+    Workshop --o RetrofitBay
 ```
+
+**Authoritative definitions:**
+- `Scenario`, `ProcessTimes`, `Topology`: `contexts/configuration/domain/models/`
+- Input DTOs (`WorkshopInputDTO`, `TrackInputDTO`, ...): `contexts/configuration/application/dtos/`
+- `Wagon`, `Workshop`, `RetrofitBay`: `contexts/retrofit_workflow/domain/entities/`
 
 ## 3.2 Configuration Context Models
 
 **Actual implementation:** `popupsim/backend/src/contexts/configuration/domain/models/`
 
-### Scenario
+### Scenario (abridged)
+
+The real `Scenario` model carries more than shown here (selection strategies, parking
+thresholds, locomotive strategies, and a `task_priorities` map). See `scenario.py` for the
+full definition.
 
 ```python
-from pydantic import BaseModel
 from datetime import datetime
+from pydantic import BaseModel
 
 
 class Scenario(BaseModel):
-    """Root configuration model."""
+    """Scenario configuration for simulation (abridged)."""
 
     id: str
     start_date: datetime
     end_date: datetime
-    trains: list[Train] | None = None
-    tracks: list[Track] | None = None
-    workshops: list[Workshop] | None = None
-    locomotives: list[Locomotive] | None = None
-    routes: list[Route] | None = None
+    workshops: list[WorkshopInputDTO] | None = None
+    tracks: Sequence[TrackInputDTO] = []
+    locomotives: list[LocomotiveInputDTO] | None = None
+    routes: list[RouteInputDTO] | None = None
     process_times: ProcessTimes | None = None
+    trains: Any | None = None
+    # ... plus selection strategies, parking thresholds, task_priorities, etc.
 ```
 
-### Workshop
+### WorkshopInputDTO
+
+Workshops are provided as input DTOs (`application/dtos/workshop_input_dto.py`):
 
 ```python
-class Workshop(BaseModel):
-    """Workshop configuration."""
+class WorkshopInputDTO(BaseModel):
+    """Workshop configuration input."""
 
-    workshop_id: str
-    track_id: str
+    id: str
+    track: str
     retrofit_stations: int
-    name: str | None = None
 ```
 
 ## 3.3 Retrofit Workflow Domain Services
 
 **Actual implementation:** `popupsim/backend/src/contexts/retrofit_workflow/domain/services/`
 
+Domain services are pure business logic (no SimPy dependencies). The signatures below are
+representative; see the linked files for the authoritative definitions.
+
 ### Batch Formation Service
+
+`batch_formation_service.py` builds batches for the different transport legs, e.g.
+`form_batch_for_retrofit_track(...)`, `form_batch_for_workshop(...)`,
+`form_batch_for_parking_track(...)`, plus `create_batch_aggregate(...)` and `can_form_batch(...)`:
 
 ```python
 class BatchFormationService:
     """Form wagon batches (no SimPy dependencies)."""
-    
-    @staticmethod
-    def can_form_batch(
-        wagons: list[Wagon],
-        min_batch_size: int,
-        max_batch_size: int,
-    ) -> bool:
-        """Check if batch can be formed."""
-        return min_batch_size <= len(wagons) <= max_batch_size
+
+    def form_batch_for_workshop(self, wagons: list[Wagon], ...) -> Batch:
+        """Form a batch of wagons for workshop processing."""
+        ...
 ```
 
 ### Workshop Scheduling Service
 
+`workshop_scheduling_service.py` schedules a batch onto a workshop and returns a
+`SchedulingResult`:
+
 ```python
 class WorkshopSchedulingService:
     """Schedule wagon batches to workshops (no SimPy dependencies)."""
-    
-    @staticmethod
-    def select_workshop(
-        workshops: list[Workshop],
-        batch_size: int,
-    ) -> Workshop | None:
-        """Select workshop with sufficient capacity."""
-        for workshop in workshops:
-            if workshop.retrofit_stations >= batch_size:
-                return workshop
-        return None
+
+    def schedule_batch(self, wagons: list[Wagon], workshop: Workshop) -> SchedulingResult:
+        """Schedule wagons for workshop processing."""
+        ...
+
+    def can_workshop_handle_batch(self, batch_size: int, workshop: Workshop) -> bool:
+        """Check whether the workshop can accept a batch of this size."""
+        ...
 ```
 
-## 3.4 Value Objects
+## 3.4 Validation Result
+
+Configuration validation uses `ValidationResult` from `shared/validation/base.py`, which
+collects a list of `ValidationIssue`s (each with a level) rather than separate error/warning
+string lists:
+
+```python
+from dataclasses import dataclass, field
+
+
+@dataclass
+class ValidationResult:
+    """Result of validation process."""
+
+    is_valid: bool
+    issues: list[ValidationIssue] = field(default_factory=list)
+
+    def has_errors(self) -> bool:
+        return any(i.level == ValidationLevel.ERROR for i in self.issues)
+
+    def get_errors(self) -> list[ValidationIssue]:
+        return [i for i in self.issues if i.level == ValidationLevel.ERROR]
+```
+
+The multi-layer validation pipeline lives under `shared/validation/`
+(see [ADR-002](../architecture/decisions/ADR-002-4-layer-validation-framework.md)).
+
+## 3.5 Simulation Result
+
+The simulation result is defined in `application/simulation_service.py`:
 
 ```python
 from dataclasses import dataclass
+from typing import Any
 
 
-@dataclass(frozen=True)
-class ValidationResult:
-    """Result of validation"""
-
-    is_valid: bool
-    errors: list[str]
-    warnings: list[str]
-
-    def has_errors(self) -> bool:
-        return len(self.errors) > 0
-
-
-@dataclass(frozen=True)
+@dataclass
 class SimulationResult:
-    """Result of simulation"""
+    """Result of simulation execution."""
 
-    scenario_id: str
-    duration_hours: int
-    total_trains_processed: int
-    total_wagons_processed: int
-    average_processing_time_minutes: float
-    throughput_per_hour: float
+    metrics: dict[str, Any]
+    duration: float
+    success: bool
 ```
 
-## 3.5 Domain Services
+Aggregated KPIs (completion rate, throughput, workshop/locomotive statistics) are written to
+`summary_metrics.json` by the event collector and exporters; see
+[Running the Simulation](../../tutorial/10-running-simulation.md#output-files).
+
+## 3.6 Type Hints
+
+All code includes explicit type annotations per project rules
+([ADR-005](../architecture/decisions/ADR-005-type-hints-mandatory.md)); MyPy runs in strict
+mode (`disallow_untyped_defs = true`). Example:
 
 ```python
-class ThroughputCalculationService:
-    """Service for throughput calculations"""
-
-    def calculate_theoretical_throughput(self, workshop: Workshop) -> float:
-        """Calculates theoretical workshop throughput"""
-        total_capacity = sum(t.capacity for t in workshop.tracks)
-        avg_processing_time = sum(t.retrofit_time_min for t in workshop.tracks) / len(workshop.tracks)
-
-        wagons_per_hour = (total_capacity * 60) / avg_processing_time
-        return wagons_per_hour
-
-
-class ValidationService:
-    """Service for data validation"""
-
-    def validate_scenario(self, config: ScenarioConfig) -> ValidationResult:
-        """Validates scenario models"""
-        errors = []
-        warnings = []
-
-        # Date validation
-        if config.end_date <= config.start_date:
-            errors.append('end_date must be after start_date')
-
-        # Workshop validation
-        if config.workshop and not config.workshop.tracks:
-            errors.append('Workshop must have at least one track')
-
-        return ValidationResult(is_valid=len(errors) == 0, errors=errors, warnings=warnings)
+def can_workshop_handle_batch(self, batch_size: int, workshop: Workshop) -> bool:
+    """Check whether the workshop can accept a batch of this size."""
+    ...
 ```
 
-## 3.6 Exceptions
-
-```python
-class PopUpSimDomainError(Exception):
-    """Base for domain-specific errors"""
-
-    pass
-
-
-class ValidationError(PopUpSimDomainError):
-    """Configuration validation error"""
-
-    pass
-
-
-class SimulationRuntimeError(PopUpSimDomainError):
-    """Error during simulation"""
-
-    pass
-
-
-class InsufficientCapacityError(PopUpSimDomainError):
-    """Insufficient track/workshop capacity"""
-
-    pass
-```
-
-## 3.7 Type Hints
-
-All code must include explicit type annotations per project rules:
-
-```python
-from typing import Optional
-
-
-def process_wagon(wagon: Wagon, track: WorkshopTrack) -> Optional[float]:
-    """Process wagon on track, returns completion time"""
-    if not track.capacity > 0:
-        raise InsufficientCapacityError(f'Track {track.id} is full')
-
-    completion_time = track.retrofit_time_min
-    return completion_time
-
-
-def validate_configuration(config: ScenarioConfig) -> ValidationResult:
-    """Validate scenario models"""
-    # Implementation
-    pass
-```
-
-## 3.8 Migration Path
+## 3.7 Migration Path
 
 The simplified MVP domain model can be extended to full DDD implementation:
 

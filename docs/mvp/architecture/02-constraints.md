@@ -13,7 +13,7 @@
 | **Single Site Simulation** | One Pop-Up site with one layout at a time | Architecture focused on single-site efficiency |
 | **Microscopic Simulation** | Individual wagons/resources modeling | Cannot use macroscopic or aggregate approaches |
 | **Workshop Operations Focus** | Pop-Up workshop operations only | Cannot include general railway operations |
-| **Prototype Foundation** | Reuse suitable components from 3-Länderhack 2024 prototype | Leverage proven SimPy approach |
+| **Prototype Foundation** | Reuse suitable components from 3-Länderhack 2024 prototype | Reuse the SimPy approach from the prototype |
 
 ## 2.2 Technical Constraints
 

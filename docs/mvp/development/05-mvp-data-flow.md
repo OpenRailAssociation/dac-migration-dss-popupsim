@@ -29,8 +29,12 @@ Data flows through 4 bounded contexts: Configuration → Railway Infrastructure 
                └──────────┬──────────────────────┘
                           │ Results
                           ▼
-                    CSV + Charts
+                    CSV + JSON files
 ```
+
+Orchestration is driven by `SimulationApplicationService`
+(`application/simulation_service.py`), which registers the four contexts and runs the SimPy
+engine.
 
 ## Phase 1: Configuration Loading
 
@@ -38,11 +42,13 @@ Data flows through 4 bounded contexts: Configuration → Railway Infrastructure 
 ```
 scenario_dir/
 ├── scenario.json
+├── topology.json
 ├── tracks.json
 ├── workshops.json
-├── locomotives.json
+├── locomotive.json
+├── process_times.json
 ├── routes.json
-└── trains.csv
+└── train_schedule.csv
 ```
 
 ### Process
@@ -59,72 +65,68 @@ scenario = builder.build()
 ```python
 Scenario(
     id='demo',
-    start_date=datetime(2025, 1, 1),
-    end_date=datetime(2025, 1, 2),
-    trains=[...],
-    tracks=[...],
+    start_date=datetime(2025, 12, 1, tzinfo=timezone.utc),
+    end_date=datetime(2025, 12, 20, tzinfo=timezone.utc),
     workshops=[...],
+    tracks=[...],
     locomotives=[...],
     routes=[...],
+    process_times=ProcessTimes(...),
+    trains=[...],
+    # ... plus selection strategies, parking thresholds, task_priorities
 )
 ```
 
-## Phase 2: Railway Infrastructure Setup
+## Phase 2: Context Wiring & Railway Infrastructure Setup
 
-### Input: Scenario
+The application service builds the SimPy engine and the shared infrastructure, then registers
+the contexts.
 
 ### Process
 
 ```python
-from contexts.railway_infrastructure.application.railway_context import RailwayContext
+from application.simulation_service import SimulationApplicationService
 
-railway = RailwayContext(scenario)
-# Builds track groups, initializes capacity management
+service = SimulationApplicationService(scenario, output_dir)
+# Internally: creates the SimPy engine, event bus, and registers
+# the railway (via create_railway_context / di_container), external_trains,
+# and retrofit_workflow contexts.
 ```
 
-### Output
-
-```python
-RailwayContext(
-    track_groups={
-        'collection': TrackGroup([Track(...), Track(...)]),
-        'retrofit': TrackGroup([Track(...)]),
-        'parking': TrackGroup([Track(...)]),
-    },
-    track_selector=TrackSelector(...),
-    capacity_service=CapacityService(...),
-)
-```
+The Railway Infrastructure context is built through its DI factory
+(`contexts/railway_infrastructure/infrastructure/di_container.py`) and exposes
+`RailwayInfrastructureContext`, which manages `RailwayYard` / `TrackGroup` / `TrackOccupancy`
+and provides track selection via `TrackSelectionService`.
 
 ## Phase 3: External Trains Initialization
-
-### Input: Scenario
 
 ### Process
 
 ```python
 from contexts.external_trains.application.external_trains_context import ExternalTrainsContext
 
-external_trains = ExternalTrainsContext(env, scenario, event_bus)
-external_trains.initialize_arrivals()
-# Schedules train arrival events
+external_trains = ExternalTrainsContext(event_bus)
+external_trains.initialize(infra)
+external_trains.start_processes()
+# Schedules a SimPy process per train that publishes TrainArrivedEvent at its arrival time
 ```
 
 ### Output
 
-Scheduled SimPy processes that publish TrainArrivedEvent at specified times.
+Scheduled SimPy processes that publish `TrainArrivedEvent` at the configured arrival times.
 
 ## Phase 4: Retrofit Workflow Execution
 
-### Input: Scenario + Railway + External Trains
-
 ### Process
 
-```python
-from contexts.retrofit_workflow.application.retrofit_workflow_context import RetrofitWorkflowContext
+The `RetrofitWorkshopContext` subscribes to train-arrival events and runs its coordinators as
+SimPy processes. Execution is driven by the application service:
 
-workflow = RetrofitWorkflowContext(env, scenario, railway, external_trains)
-workflow.run()
+```python
+from shared.infrastructure.simpy_time_converters import timedelta_to_sim_ticks
+
+until = timedelta_to_sim_ticks(scenario.end_date - scenario.start_date)
+result = service.execute(until)  # runs the SimPy engine until `until`
 ```
 
 ### Data Flow Within Workflow
@@ -135,42 +137,46 @@ TrainArrivedEvent
 ArrivalCoordinator
     ↓ (classify wagons)
 CollectionCoordinator
-    ↓ (form batches)
+    ↓ (form batches, transport to retrofit track)
 WorkshopCoordinator
     ↓ (retrofit)
 ParkingCoordinator
     ↓ (to parking)
-Metrics Collection
+EventCollector (metrics)
 ```
 
 ### Output
 
-```python
-{'wagon_events': [...], 'locomotive_events': [...], 'workshop_events': [...]}
-```
+A `SimulationResult` (`metrics: dict`, `duration: float`, `success: bool`), with events held
+by the `EventCollector` for export.
 
 ## Phase 5: Results Export
-
-### Input: Metrics
 
 ### Process
 
 ```python
-metrics = workflow.get_metrics()
-workflow.export_events(output_path)
+# From main.py after a successful run:
+retrofit_context.export_events(str(output_path))
 ```
 
 ### Output
 
+Flat CSV/JSON files in the output directory (no chart images). Key files:
+
 ```
 output/
-├── wagon_events.csv
-├── locomotive_events.csv
-├── workshop_events.csv
-└── charts/
-    ├── throughput.png
-    └── utilization.png
+├── summary_metrics.json
+├── wagon_journey.csv
+├── rejected_wagons.csv
+├── locomotive_movements.csv
+├── workshop_metrics.csv
+├── resource_states.csv
+├── resource_locations.csv
+└── resource_processes.csv
 ```
+
+See [Running the Simulation](../../tutorial/10-running-simulation.md#output-files) for the
+full file list and column descriptions.
 
 ## Data Transformations
 
@@ -179,8 +185,8 @@ output/
 | 1 | JSON/CSV files | Scenario | Configuration |
 | 2 | Scenario | Track infrastructure | Railway Infrastructure |
 | 3 | Scenario | Scheduled arrivals | External Trains |
-| 4 | All above | Metrics | Retrofit Workflow |
-| 5 | Metrics | CSV/Charts | Retrofit Workflow |
+| 4 | All above | SimulationResult + collected events | Retrofit Workflow |
+| 5 | Collected events | CSV/JSON files | Retrofit Workflow |
 
 ## Event Flow
 
@@ -206,22 +212,20 @@ sequenceDiagram
 
 ## Error Handling
 
-```python
-try:
-    # Load configuration
-    scenario = builder.build()
-except ValidationError as e:
-    logger.error(f'Configuration error: {e}')
-    sys.exit(1)
+Configuration problems surface during `ConfigurationBuilder.build()` (Pydantic validation
+errors / the validation pipeline). The `run` command reports them and exits non-zero.
 
-try:
-    # Run simulation
-    workflow.run()
-except SimulationError as e:
-    logger.error(f'Simulation error: {e}')
-    # Export partial results
-    workflow.export_events(output_path)
-    sys.exit(2)
+The simulation reports success via `SimulationResult.success`; `main.run()` checks it and
+exits with a non-zero code on failure:
+
+```python
+result = service.execute(until)
+if not result.success:
+    typer.echo('\nSIMULATION FAILED')
+    raise typer.Exit(1)
 ```
+
+If the engine stops before the requested `until` time, the application service logs a warning
+about a likely deadlock or early completion.
 
 ---

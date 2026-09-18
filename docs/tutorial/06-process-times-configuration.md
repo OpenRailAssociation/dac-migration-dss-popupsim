@@ -6,21 +6,25 @@ The process_times.json file defines the duration of various operations in the si
 
 ## Example Configuration
 
+The baseline example (`ten_trains_two_days_baseline/process_times.json`) sets these values:
+
 ```json
 {
   "wagon_retrofit_time": 60.0,
   "train_to_hump_delay": 0.0,
   "wagon_hump_interval": 0.0,
-  "screw_coupling_time": 3.0,
-  "screw_decoupling_time": 5.0,
+  "screw_coupling_time": 2.0,
+  "screw_decoupling_time": 3.0,
   "dac_coupling_time": 0.5,
-  "dac_decoupling_time": 0.5,
-  "brake_continuity_check_time": 0.5,
-  "full_brake_test_time": 4.0,
-  "technical_inspection_time": 2.0,
-  "shunting_preparation_time": 1.0
+  "dac_decoupling_time": 0.5
 }
 ```
+
+Additional fields are supported and fall back to sensible defaults when omitted (values in
+minutes unless noted): `brake_continuity_check_time` (default 30s), `full_brake_test_time`
+(4.0), `technical_inspection_time` (2.0), `shunting_preparation_time` (1.0),
+`wagon_move_to_next_station` (0.5), and `loco_parking_delay` (0.0). See `process_times.py`
+for the complete list.
 
 ## Parameters
 
@@ -60,7 +64,7 @@ wagons_per_station_per_day = (24 × 60) / wagon_retrofit_time
 - Standard retrofit: 60-90 minutes
 - Complex retrofit: 120-180 minutes
 
-### train_to_hump_delay (CNot fully implemented yet)
+### train_to_hump_delay (not fully implemented yet)
 
 Delay before train wagons can be distributed:
 
