@@ -654,6 +654,14 @@ class WorkshopCoordinator:  # pylint: disable=too-many-instance-attributes,too-f
         yield self.env.timeout(transport_time)
         train.arrive(self.env.now)
 
+        # Re-select the emptiest retrofitted track right before reserving capacity. The
+        # track picked at the start of this method can be stale after the loco move + prep +
+        # transport yields, and with multiple retrofitted tracks a different one may now have
+        # room. This keeps the reservation from blocking on a full track while the workshop
+        # bay is still held (the hold-and-wait pattern that stalls the pipeline).
+        retrofitted_track = max(retrofitted_tracks, key=lambda t: t.get_available_capacity())
+        retrofitted_track_id = retrofitted_track.track_id
+
         # Wagons arrived at retrofitted track - add to queue immediately, capacity managed by track
         logger.info(
             't=%.1f: BATCH → Putting %d wagons on retrofitted track %s', self.env.now, len(wagons), retrofitted_track_id
