@@ -35,6 +35,9 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         self.batch_counter = 0
         self.track_manager = config.track_manager
         self.locomotive_dispatcher = None  # Set by context if task_priorities configured
+        # Pause (sim minutes) before a collection process retries after finding no retrofit
+        # buffer room, so it doesn't busy-spin re-acquiring the loco at the same sim time.
+        self._buffer_wait_interval = 5.0
 
     def start(self) -> None:
         """Start coordinator processes - one per collection track."""
@@ -323,9 +326,15 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         retrofit_track, wagons = self._resize_batch_to_buffer(retrofit_track, wagons, collection_queue)
         if not wagons:
             logger.info(
-                't=%.1f: COLLECTION → No retrofit buffer has room; releasing loco', self.config.env.now
+                't=%.1f: COLLECTION → No retrofit buffer has room; releasing loco, pausing before retry',
+                self.config.env.now,
             )
             yield from self._release_locomotive_no_op(loco)
+            # Advance the clock before returning. Without this, the collection process
+            # would release the loco and immediately re-request it at the SAME sim time,
+            # busy-spinning forever when a second locomotive is free (multi-loco livelock).
+            # Pausing lets the workshop drain a buffer so the retry can make progress.
+            yield self.config.env.timeout(self._buffer_wait_interval)
             return
         # If the batch was trimmed, rebuild the aggregate so train formation and all
         # downstream events use exactly the wagons that travel.
