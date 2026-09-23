@@ -124,6 +124,7 @@ def _compute_animation(  # noqa: PLR0913  # pylint: disable=too-many-arguments,t
         layout_config.get('workshops', []),
         route_graph,
         active,
+        layout_config.get('fill_factors', {}),
     )
     timelines = ad.extract_timelines(resource_locations, resource_states, layout_config.get('wagon_lengths', {}))
     cap_tl = ad.parse_capacity_timeline(track_capacity)
@@ -166,6 +167,45 @@ _WAGON_BORDER_PENDING = '#013a63'
 _WAGON_BORDER_DONE = '#04503a'
 _LOCO_BORDER = '#f1c40f'
 _STATS_FONT = {'size': 17, 'color': '#2c3e50'}
+
+# Reject pile: rejected wagons accumulate as a red block of squares near the top,
+# so the "turned away at the gate" volume is visible and grows over the run.
+_REJECT_COLOR = '#e74c3c'
+_REJECT_BORDER = '#922b21'
+_REJECT_PER_ROW = 10  # squares per row before wrapping upward
+
+
+def _reject_pile_trace(frame: ad.FrameData, layout: ad.YardLayout) -> go.Scatter:
+    """Build a growing block of red squares — one per cumulative rejected wagon.
+
+    Placed above the yard on the throat side; each square is a rejected wagon, so
+    the pile visibly grows every time a wagon is turned away at a full gate.
+    """
+    n = int(frame.stats.cumulative_rejected)
+    # Anchor the pile in the right margin, growing DOWNWARD from the top so it never
+    # collides with the counters and stays inside the plot's y-range.
+    x0 = layout.x_max + _LABEL_OFFSET_M * 1.5
+    col_step = (_LABEL_OFFSET_M * 2.2) / _REJECT_PER_ROW or 1.0
+    y_top = layout.y_max + 1.2
+    row_step = max(0.18, (y_top - (layout.y_min - 1.0)) / max(1, (n - 1) // _REJECT_PER_ROW + 1))
+    row_step = min(row_step, 0.30)
+
+    xs: list[float] = []
+    ys: list[float] = []
+    for i in range(n):
+        col = i % _REJECT_PER_ROW
+        row = i // _REJECT_PER_ROW
+        xs.append(x0 + col * col_step)
+        ys.append(y_top - row * row_step)
+    return go.Scatter(
+        x=xs,
+        y=ys,
+        mode='markers',
+        marker={'symbol': 'square', 'size': 11, 'color': _REJECT_COLOR, 'line': {'color': _REJECT_BORDER, 'width': 1}},
+        name='Rejected',
+        hoverinfo='skip',
+        showlegend=False,
+    )
 _UTIL_FONT_SIZE = 16
 _UTIL_OFFSET_M = 30.0  # gap past a track's throat end for its utilization label (toward middle)
 
@@ -268,11 +308,12 @@ def _dynamic_traces(frame: ad.FrameData, layout: ad.YardLayout, show_labels: boo
         _rect_trace(frame.loco_x, frame.loco_y, frame.loco_len, ad.LOCO_COLOR, _LOCO_BORDER),
         _label_trace(frame, show_labels),
         _counters_trace(frame, layout),
+        _reject_pile_trace(frame, layout),
         _utilization_trace(frame, layout),
     ]
 
 
-_DYNAMIC_TRACE_COUNT = 8
+_DYNAMIC_TRACE_COUNT = 9
 
 
 def _unpack(group: dict[str, list[float]]) -> tuple[list[float], list[float], list[float]]:
@@ -311,19 +352,52 @@ def _add_static_geometry(fig: go.Figure, layout: ad.YardLayout) -> None:
 
 
 def _track_line(fig: go.Figure, tl: ad.TrackLayout) -> None:
-    """Draw a single track as a workshop box or a plain horizontal line."""
+    """Draw a single track as a workshop box or a plain horizontal line.
+
+    Meter-capacity tracks are drawn to their FULL physical length; a short tick
+    marks the usable-capacity point (fill factor). Wagons fill from the far end
+    toward the throat, so when the rake reaches the tick the track is at the
+    model's 100% capacity — the remaining stretch to the throat is the
+    intentionally-unused margin.
+    """
     if tl.is_workshop:
         _draw_workshop(fig, tl)
-    else:
+        return
+
+    fig.add_shape(
+        type='line',
+        x0=tl.x_start,
+        y0=tl.lane_y,
+        x1=tl.x_end,
+        y1=tl.lane_y,
+        line={'color': tl.color, 'width': _TRACK_LINE_WIDTH},
+        opacity=0.5,
+        layer='below',
+    )
+
+    # Capacity marker at the fill-factor point, measured from the FAR end (wagons
+    # fill from the far end toward the throat). Drawn on the default (above) layer
+    # and taller than a wagon so it stays visible against a full rake, with a label.
+    if 0.0 < tl.usable_frac < 1.0:
+        far_x = tl.x_start if abs(tl.throat_x - tl.x_end) < 1e-9 else tl.x_end
+        near_x = tl.x_end if abs(tl.throat_x - tl.x_end) < 1e-9 else tl.x_start
+        mark_x = far_x + (near_x - far_x) * tl.usable_frac
+        half = _LANE_HALF_HEIGHT + 0.12
         fig.add_shape(
             type='line',
-            x0=tl.x_start,
-            y0=tl.lane_y,
-            x1=tl.x_end,
-            y1=tl.lane_y,
-            line={'color': tl.color, 'width': _TRACK_LINE_WIDTH},
-            opacity=0.5,
-            layer='below',
+            x0=mark_x,
+            y0=tl.lane_y - half,
+            x1=mark_x,
+            y1=tl.lane_y + half,
+            line={'color': '#c0392b', 'width': 2.5, 'dash': 'dash'},
+        )
+        fig.add_annotation(
+            x=mark_x,
+            y=tl.lane_y + half,
+            text=f'{tl.usable_frac * 100:.0f}%',
+            showarrow=False,
+            yanchor='bottom',
+            font={'size': 8, 'color': '#c0392b'},
         )
 
 
@@ -527,6 +601,15 @@ def _build_figure(
     first = frames[active]
     fig = go.Figure(data=[*_dynamic_traces(first, layout, show_labels), *_legend_traces()])
     _add_static_geometry(fig, layout)
+    # Persistent header over the reject pile (the pile itself grows per frame).
+    fig.add_annotation(
+        x=layout.x_max + _LABEL_OFFSET_M * 1.5,
+        y=layout.y_max + 1.7,
+        text='<b>Rejected</b>',
+        showarrow=False,
+        xanchor='left',
+        font={'size': 12, 'color': _REJECT_BORDER},
+    )
 
     fig.frames = [
         go.Frame(name=str(i), data=_dynamic_traces(f, layout, show_labels), traces=list(range(_DYNAMIC_TRACE_COUNT)))
@@ -622,6 +705,9 @@ def render_animation_tab(data: dict[str, Any]) -> None:  # pylint: disable=too-m
     topology = scenario_config.get('topology', {})
     workshops_config = scenario_config.get('workshops', {}).get('workshops', [])
     lengths = ad.wagon_lengths(scenario_config.get('train_schedule'))
+    # Per-type fill factors so the drawn track length matches the usable capacity
+    # the simulation enforces (edge length x fill factor), not the raw edge length.
+    fill_factors = scenario_config.get('scenario', {}).get('track_type_fill_factors', {})
     if not tracks_config:
         st.warning('⚠️ No track configuration found — cannot build the yard layout.')
         return
@@ -638,6 +724,7 @@ def render_animation_tab(data: dict[str, Any]) -> None:  # pylint: disable=too-m
                 'workshops': workshops_config,
                 'routes': scenario_config.get('routes'),
                 'wagon_lengths': lengths,
+                'fill_factors': fill_factors,
             },
             num_frames,
             data.get('rejected_wagons'),

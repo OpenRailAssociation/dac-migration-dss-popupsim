@@ -59,6 +59,7 @@ class TrackLayout:  # pylint: disable=too-many-instance-attributes
     cluster: str = 'local'
     throat_x: float = 0.0  # x of the connecting (ladder) end of the track
     zone: str = 'single'  # 'single' | 'left' | 'middle' | 'right'
+    usable_frac: float = 1.0  # fraction of drawn length that is usable (fill factor)
 
 
 @dataclass(frozen=True)
@@ -99,30 +100,55 @@ def _edge_length(topology: dict[str, Any], edges: list[str]) -> float:
     return total
 
 
+def _fill_factor(track: dict[str, Any] | None, track_type: str, fill_factors: dict[str, float]) -> float:
+    """Resolve a track's fill factor: per-track override > per-type > default 0.75.
+
+    Mirrors the backend capacity rule so the drawn track length reflects the
+    *usable* capacity the simulation enforces, not the raw physical edge length.
+    """
+    default = fill_factors.get(track_type, 0.75)
+    if track and 'fillfactor' in track:
+        try:
+            return float(track['fillfactor'])
+        except (TypeError, ValueError):
+            return default
+    return default
+
+
 def _resolve_track_meta(
     track_id: str,
     tracks_by_id: dict[str, dict[str, Any]],
     topology: dict[str, Any],
     bays_by_id: dict[str, int],
     default_ws_len: float,
-) -> tuple[str, float, int | None]:
-    """Resolve (track_type, length_m, bays) for a track id, robust to id drift.
+    fill_factors: dict[str, float] | None = None,
+) -> tuple[str, float, int | None, float]:
+    """Resolve (track_type, length_m, bays, usable_frac) for a track id.
+
+    ``length_m`` is the FULL physical edge length (tracks are drawn to their real
+    length). ``usable_frac`` is the fill factor: the fraction of that length the
+    simulation actually allows wagons to occupy, used to draw a capacity marker so
+    "usable-length full" reads as the model's 100%. Workshops (bay-based) and the
+    mainline have no fill marker (usable_frac = 1.0).
 
     Handles scenarios where the runtime/route id (e.g. workshop ``WS_01``) does
     not match the ``tracks.json`` id (``WS1``): such ids fall back to the
     workshop config for type/bays and a default workshop length.
     """
+    fill_factors = fill_factors or {}
     if track_id in tracks_by_id:
         track = tracks_by_id[track_id]
         track_type = str(track.get('type', 'parking'))
         length_m = _edge_length(topology, track.get('edges', [track_id]))
         bays = bays_by_id.get(track_id) if track_type == 'workshop' else None
-        return track_type, length_m, bays
+        usable = 1.0 if track_type == 'workshop' else _fill_factor(track, track_type, fill_factors)
+        return track_type, length_m, bays, usable
     if track_id in bays_by_id:  # a workshop id with no matching track entry
-        return 'workshop', default_ws_len, bays_by_id[track_id]
+        return 'workshop', default_ws_len, bays_by_id[track_id], 1.0
     if track_id == rg.MAINLINE:
-        return 'mainline', _edge_length(topology, [track_id]), None
-    return 'parking', _edge_length(topology, [track_id]) or MIN_TRACK_LEN_M, None
+        return 'mainline', _edge_length(topology, [track_id]), None, 1.0
+    length_m = _edge_length(topology, [track_id])
+    return 'parking', length_m or MIN_TRACK_LEN_M, None, _fill_factor(None, 'parking', fill_factors)
 
 
 def build_layout(  # pylint: disable=too-many-locals
@@ -131,6 +157,7 @@ def build_layout(  # pylint: disable=too-many-locals
     workshops_config: list[dict[str, Any]] | None = None,
     route_graph: rg.RouteGraph | None = None,
     active_ids: list[str] | None = None,
+    fill_factors: dict[str, float] | None = None,
 ) -> YardLayout:
     """Build a schematic yard layout from scenario configuration.
 
@@ -156,7 +183,9 @@ def build_layout(  # pylint: disable=too-many-locals
 
     enriched: list[dict[str, Any]] = []
     for track_id in dict.fromkeys(ids):  # de-duplicate, preserve order
-        track_type, length_m, bays = _resolve_track_meta(track_id, tracks_by_id, topology, bays_by_id, default_ws_len)
+        track_type, length_m, bays, usable_frac = _resolve_track_meta(
+            track_id, tracks_by_id, topology, bays_by_id, default_ws_len, fill_factors
+        )
         enriched.append(
             {
                 'id': track_id,
@@ -164,6 +193,7 @@ def build_layout(  # pylint: disable=too-many-locals
                 'length_m': length_m,
                 'bays': bays,
                 'cluster': cluster_of.get(track_id, 'local'),
+                'usable_frac': usable_frac,
             }
         )
 
@@ -200,6 +230,7 @@ def _make_track(
         cluster=track['cluster'],
         throat_x=throat_x,
         zone=zone,
+        usable_frac=track.get('usable_frac', 1.0),
     )
 
 
