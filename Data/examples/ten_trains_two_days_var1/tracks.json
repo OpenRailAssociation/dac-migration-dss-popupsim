@@ -21,8 +21,8 @@
     {"id": "collection3", "name": "Collection track", "edges": ["collection3"], "type": "collection"},
     {"id": "retrofit", "edges": ["retrofit"], "type": "retrofit"},
     {"id": "retrofitted", "edges": ["retrofitted"], "type": "retrofitted"},
-    {"id": "WS1", "edges": ["WS1"], "type": "workshop"},
-    {"id": "WS2", "edges": ["WS2"], "type": "workshop"},
+    {"id": "WS01", "edges": ["WS01"], "type": "workshop"},
+    {"id": "WS02", "edges": ["WS02"], "type": "workshop"},
     {"id": "Mainline", "name": "Mainline connecting yards", "edges": ["Mainline"], "type": "mainline"}
   ]
 }

@@ -9,13 +9,13 @@
       "id": "WS_01",
       "name": "First workshop",
       "retrofit_stations": 2,
-      "track": "WS1"
+      "track": "WS01"
     },
     {
       "id": "WS_02",
       "name": "Second workshop",
       "retrofit_stations": 2,
-      "track": "WS2"
+      "track": "WS02"
     }
   ]
 }
