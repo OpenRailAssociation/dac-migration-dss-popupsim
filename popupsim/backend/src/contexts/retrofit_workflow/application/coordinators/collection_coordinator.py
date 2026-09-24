@@ -310,9 +310,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         # hold a loco (the old order) deadlocks: a batch that fills the buffer can then
         # never win the loco it needs to move that very reservation. With the dispatcher,
         # this is also where the priority/hold_until gate is evaluated.
-        logger.info(
-            't=%.1f: COLLECTION → Requesting locomotive for %d wagons', self.config.env.now, len(wagons)
-        )
+        logger.info('t=%.1f: COLLECTION → Requesting locomotive for %d wagons', self.config.env.now, len(wagons))
         loco = yield from self._allocate_locomotive(wagons)
 
         # Loco in hand. Re-select the emptiest retrofit buffer and trim the batch to what

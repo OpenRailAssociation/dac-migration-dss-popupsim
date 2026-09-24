@@ -280,7 +280,11 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
         for wagon in wagons:
             # Find a collection track that can currently hold this wagon.
             collection_track = self._track_selector.select_track_with_capacity('collection', wagon.length)
-            track = self._track_manager.get_track(collection_track.track_id) if (self._track_manager and collection_track) else None
+            track = (
+                self._track_manager.get_track(collection_track.track_id)
+                if (self._track_manager and collection_track)
+                else None
+            )
 
             # Re-confirm the chosen track can fit the wagon before reserving, so the
             # reservation below cannot block. (Guards against any drift between the
