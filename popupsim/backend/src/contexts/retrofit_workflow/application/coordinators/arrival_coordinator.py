@@ -280,27 +280,23 @@ class ArrivalCoordinator(BaseCoordinator):  # pylint: disable=too-many-instance-
         for wagon in wagons:
             # Find a collection track that can currently hold this wagon.
             collection_track = self._track_selector.select_track_with_capacity('collection', wagon.length)
-            track = (
-                self._track_manager.get_track(collection_track.track_id)
-                if (self._track_manager and collection_track)
-                else None
-            )
-
-            # Re-confirm the chosen track can fit the wagon before reserving, so the
-            # reservation below cannot block. (Guards against any drift between the
-            # selector's view and the live container level.)
-            if track is None or not track.can_fit_wagons([wagon]):
-                if track is not None:
-                    self._reject_wagon_track_full(wagon, track.track_id, track.get_available_capacity())
-                else:
-                    self._reject_wagon_no_track(wagon)
+            if collection_track is None:
+                # No collection track has room for this wagon — reject just this one.
+                self._reject_wagon_no_track(wagon)
                 continue
 
-            # Assign and reserve — fits by construction, so this will not block.
-            wagon.current_track_id = collection_track.track_id
-            yield from track.add_wagons([wagon])
+            track = self._track_manager.get_track(collection_track.track_id) if self._track_manager else None
+            if track is not None:
+                # Re-confirm the chosen track can fit the wagon before reserving, so the
+                # reservation cannot block (guards against drift between the selector's
+                # view and the live container level). A full track rejects THIS wagon only.
+                if not track.can_fit_wagons([wagon]):
+                    self._reject_wagon_track_full(wagon, track.track_id, track.get_available_capacity())
+                    continue
+                yield from track.add_wagons([wagon])  # fits by construction — will not block
 
-            # Add to collection system
+            # Assign and add to the collection system.
+            wagon.current_track_id = collection_track.track_id
             self._collection_coordinator.add_wagon(wagon)
 
     def _reject_wagon_no_track(self, wagon: Wagon) -> None:

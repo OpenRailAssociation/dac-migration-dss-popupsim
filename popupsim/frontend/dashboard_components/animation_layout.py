@@ -115,7 +115,7 @@ def _fill_factor(track: dict[str, Any] | None, track_type: str, fill_factors: di
     return default
 
 
-def _resolve_track_meta(
+def _resolve_track_meta(  # noqa: PLR0913  # pylint: disable=too-many-arguments,too-many-positional-arguments
     track_id: str,
     tracks_by_id: dict[str, dict[str, Any]],
     topology: dict[str, Any],
@@ -151,7 +151,7 @@ def _resolve_track_meta(
     return 'parking', length_m or MIN_TRACK_LEN_M, None, _fill_factor(None, 'parking', fill_factors)
 
 
-def build_layout(  # pylint: disable=too-many-locals
+def build_layout(  # noqa: PLR0913  # pylint: disable=too-many-locals,too-many-arguments,too-many-positional-arguments
     tracks_config: list[dict[str, Any]],
     topology: dict[str, Any],
     workshops_config: list[dict[str, Any]] | None = None,
