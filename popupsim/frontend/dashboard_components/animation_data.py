@@ -375,28 +375,44 @@ def extract_timelines(
 
 
 def _stack_centers(tl: TrackLayout, present: list[tuple[float, bool, str, float]]) -> dict[str, float]:
-    """Pack present resources flush from the far end (away from the throat) as a LIFO stack.
+    """Pack wagons within the usable (fill-factor) region; the loco sits in the margin.
 
-    The earliest arrival sits deepest (against the far end); later arrivals — and
-    locomotives on an arrival tie — sit nearer the throat, where a loco couples.
-    There are never holes: the present set is re-packed every frame, so a
-    departure makes the rest slide flush toward the far end.
+    Wagons pack deepest-first (earliest arrival against the far end) and only fill
+    the *usable* portion of the track — the length up to the fill-factor marker,
+    which is what the simulation lets them occupy. The locomotive is always placed
+    just past the wagons toward the THROAT (its coupling end); because wagons stop
+    at the fill marker, the loco naturally sits in the unused margin beyond it — it
+    does not count against wagon capacity — and never renders wedged mid-rake.
+
+    If the wagons alone would exceed the usable region, their spacing is compressed
+    so they stay within it (safety net; the model normally caps them at usable).
+    The present set is re-packed every frame, so there are never holes.
     """
-    order = sorted(present, key=lambda p: (p[0], p[1]))
     centers: dict[str, float] = {}
-    # Determine packing direction: fill away from the throat toward the far end.
-    if abs(tl.throat_x - tl.x_end) < 1e-9:
-        # Throat is on the right edge (left-zone) → far end is x_start, fill rightward
-        x = tl.x_start
-        for _t_arrive, _is_loco, rid, length in order:
-            centers[rid] = x + length / 2.0
-            x += length + UNIFORM_GAP_M
-    else:
-        # Throat is on the left edge (right-zone / single) → far end is x_end, fill leftward
-        x = tl.x_end
-        for _t_arrive, _is_loco, rid, length in order:
-            centers[rid] = x - length / 2.0
-            x -= length + UNIFORM_GAP_M
+    if not present:
+        return centers
+
+    wagons = sorted((p for p in present if not p[1]), key=lambda p: p[0])
+    locos = sorted((p for p in present if p[1]), key=lambda p: p[0])
+
+    span = abs(tl.x_end - tl.x_start)
+    usable = span * (tl.usable_frac or 1.0)
+    wagon_total = sum(length for *_r, length in wagons) + UNIFORM_GAP_M * max(0, len(wagons) - 1)
+    # Compress ONLY the wagons, and only if they would overrun the usable region.
+    scale = usable / wagon_total if wagon_total > usable > 0 else 1.0
+
+    fill_right = abs(tl.throat_x - tl.x_end) < 1e-9  # throat on right → far end is x_start
+    direction = 1.0 if fill_right else -1.0
+    x = tl.x_start if fill_right else tl.x_end
+
+    # Wagons first, within the usable region.
+    for _t_arrive, _is_loco, rid, length in wagons:
+        centers[rid] = x + direction * (length / 2.0) * scale
+        x += direction * (length + UNIFORM_GAP_M) * scale
+    # Loco(s) continue toward the throat at full size (they may sit past the fill marker).
+    for _t_arrive, _is_loco, rid, length in locos:
+        centers[rid] = x + direction * (length / 2.0)
+        x += direction * (length + UNIFORM_GAP_M)
     return centers
 
 
@@ -809,7 +825,10 @@ def _frame_stats(  # pylint: disable=too-many-locals
             if cap_val is not None:
                 utilization[track_id] = cap_val
                 continue
-        utilization[track_id] = occupied.get(track_id, 0.0) / tl.length_m
+        # Tracks are drawn full-length; usable capacity is length_m * usable_frac,
+        # so divide by the usable length for a correct model-100% reading.
+        usable = tl.length_m * (tl.usable_frac or 1.0)
+        utilization[track_id] = occupied.get(track_id, 0.0) / usable if usable > 0 else 0.0
 
     cumulative_rejected = sum(1 for rt_t in rejected_at if rt_t <= t)
     return FrameStats(

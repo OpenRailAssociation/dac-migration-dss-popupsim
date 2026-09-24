@@ -77,8 +77,14 @@ class MetricsAggregator:
         all_timestamps = [e.timestamp for e in wagon_events]
         sim_duration = max(all_timestamps) if all_timestamps else 1
 
+        # A train "arrived" if it physically showed up at the yard, regardless of whether
+        # any of its wagons were accepted. Count distinct train IDs across BOTH accepted
+        # (ARRIVED) and rejected events — otherwise a train whose wagons were all rejected
+        # at a full gate would be missed, undercounting arrivals.
+        trains_arrived = len({e.train_id for e in arrived if e.train_id} | {e.train_id for e in rejected if e.train_id})
+
         return {
-            'trains_arrived': len({e.train_id for e in arrived if e.train_id}),
+            'trains_arrived': trains_arrived,
             'total_wagons': total_wagons,
             'wagons_eligible': wagons_eligible,
             'wagons_processable': wagons_processable,

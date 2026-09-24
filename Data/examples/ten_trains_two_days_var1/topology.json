@@ -22,8 +22,8 @@
     "collection3": {"nodes": [1, 2], "length": 500.0},
     "retrofit": {"nodes": [1, 2], "length": 426.0},
     "retrofitted": {"nodes": [1, 2], "length": 352.0},
-    "WS1": {"nodes": [1, 2], "length": 260.0},
-    "WS2": {"nodes": [1, 2], "length": 260.0},
+    "WS01": {"nodes": [1, 2], "length": 260.0},
+    "WS02": {"nodes": [1, 2], "length": 260.0},
     "Mainline": {"nodes": [1, 2], "length": 8000.0}
   }
 }

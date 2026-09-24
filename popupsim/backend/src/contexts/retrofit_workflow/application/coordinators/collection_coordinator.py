@@ -8,6 +8,7 @@ from contexts.retrofit_workflow.application.config.coordinator_config import Col
 from contexts.retrofit_workflow.application.coordinators.event_publisher_helper import EventPublisherHelper
 from contexts.retrofit_workflow.application.services.locomotive_dispatcher import TaskRequest
 from contexts.retrofit_workflow.domain.entities.wagon import Wagon
+from contexts.retrofit_workflow.domain.entities.wagon import WagonStatus
 from contexts.retrofit_workflow.domain.value_objects.task_priority import TaskType
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,9 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         self.batch_counter = 0
         self.track_manager = config.track_manager
         self.locomotive_dispatcher = None  # Set by context if task_priorities configured
+        # Pause (sim minutes) before a collection process retries after finding no retrofit
+        # buffer room, so it doesn't busy-spin re-acquiring the loco at the same sim time.
+        self._buffer_wait_interval = 5.0
 
     def start(self) -> None:
         """Start coordinator processes - one per collection track."""
@@ -117,7 +121,7 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
             return
 
         batch_aggregate = self.config.batch_service.create_batch_aggregate(wagons, 'retrofit')
-        yield from self._transport_batch_aggregate(batch_aggregate, retrofit_track)
+        yield from self._transport_batch_aggregate(batch_aggregate, retrofit_track, queue)
 
     def _collect_wagons_simple(
         self, first_wagon: Wagon, queue: Any, retrofit_track: Any
@@ -156,22 +160,18 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
 
         return wagons
 
-    def _transport_batch_aggregate(self, batch_aggregate: Any, retrofit_track: Any) -> Generator[Any, Any]:
+    def _transport_batch_aggregate(
+        self, batch_aggregate: Any, retrofit_track: Any, collection_queue: Any = None
+    ) -> Generator[Any, Any]:
         """Transport batch aggregate to retrofit track."""
         batch_id = batch_aggregate.id
-        wagons = batch_aggregate.wagons
-
-        # Release capacity from collection track BEFORE transport
-        # Only if wagons are actually on the track (check wagon count)
-        if self.track_manager and wagons:
-            collection_track_id = wagons[0].current_track_id
-            if collection_track_id:
-                collection_track = self.track_manager.get_track(collection_track_id)
-                if collection_track and any(w in collection_track.wagons for w in wagons):
-                    yield from collection_track.remove_wagons(wagons)
-
-        # Batch events published AFTER locomotive arrives in _transport_to_retrofit_with_batch
-        yield from self._transport_to_retrofit_with_batch(None, batch_aggregate, retrofit_track, batch_id)
+        # Collection capacity is released inside _transport_to_retrofit_with_batch, AFTER
+        # the loco is allocated and the batch is re-sized to the chosen buffer — and only
+        # for the wagons that actually travel. Releasing here (before resize) would leave
+        # trimmed-off wagons with freed capacity but still on the collection track.
+        yield from self._transport_to_retrofit_with_batch(
+            None, batch_aggregate, retrofit_track, batch_id, collection_queue
+        )
 
     def _publish_batch_events(self, batch_aggregate: Any) -> None:
         """Publish batch formation events."""
@@ -247,21 +247,138 @@ class CollectionCoordinator:  # pylint: disable=too-few-public-methods
         loco = yield from self.config.locomotive_manager.allocate(purpose='collection_pickup')
         return loco
 
+    def _resize_batch_to_buffer(
+        self, retrofit_track: Any, wagons: list[Wagon], collection_queue: Any
+    ) -> tuple[Any, list[Wagon]]:
+        """Re-select the emptiest retrofit buffer and trim the batch to fit it now.
+
+        Returns the (possibly re-selected) retrofit track and the wagons that fit. Overflow
+        wagons are returned to the collection queue ONLY if still CLASSIFIED; wagons already
+        advanced in the pipeline are weeded out (never re-introduced). Overflow wagons keep
+        their collection-track capacity (the caller releases capacity only for kept wagons).
+        """
+        candidate = self.config.track_selector.select_track_with_capacity('retrofit', 0.0)
+        if candidate is not None:
+            retrofit_track = candidate
+
+        available = retrofit_track.get_available_capacity()
+        kept: list[Wagon] = []
+        overflow: list[Wagon] = []
+        used = 0.0
+        for wagon in wagons:
+            if used + wagon.length <= available:
+                kept.append(wagon)
+                used += wagon.length
+            else:
+                overflow.append(wagon)
+
+        weeded = 0
+        for wagon in overflow:
+            if wagon.status != WagonStatus.CLASSIFIED:
+                weeded += 1
+                continue
+            target_queue = collection_queue
+            if target_queue is None and self.track_manager and wagon.current_track_id:
+                ct = self.track_manager.get_track(wagon.current_track_id)
+                target_queue = ct.queue if ct else None
+            if target_queue is not None:
+                target_queue.put(wagon)
+
+        if overflow:
+            logger.info(
+                't=%.1f: COLLECTION → Trimmed to buffer %s: %d kept, %d overflow (%d weeded out)',
+                self.config.env.now,
+                retrofit_track.track_id,
+                len(kept),
+                len(overflow),
+                weeded,
+            )
+        return retrofit_track, kept
+
+    def _release_locomotive_no_op(self, loco: Any) -> Generator[Any, Any]:
+        """Release a locomotive that was allocated but has no work to do."""
+        purpose = 'dispatcher' if self.locomotive_dispatcher else 'collection_pickup'
+        yield from self.config.locomotive_manager.release(loco, purpose=purpose)
+
+    def _stage_batch_onto_buffer(
+        self, loco: Any, batch_aggregate: Any, retrofit_track: Any, collection_queue: Any
+    ) -> Generator[Any, Any, tuple[Any, list[Wagon], Any, str] | None]:
+        """Re-select the emptiest buffer, trim the batch to fit, and reserve capacity.
+
+        Called with the locomotive already allocated. Re-selects the emptiest retrofit
+        buffer and trims the batch to what fits it now — so the reservation cannot block
+        while holding the loco (hold-and-wait deadlock). Overflow wagons are returned to
+        the collection queue only if still CLASSIFIED; wagons already in the pipeline are
+        weeded out (the model does not support re-introducing an in-process wagon).
+
+        Returns
+        -------
+        tuple | None
+            (retrofit_track, wagons, batch_aggregate, batch_id) ready for transport, or
+            None if no buffer currently has room (the loco is released and the clock is
+            advanced before returning, to avoid a multi-loco busy-spin).
+        """
+        wagons = batch_aggregate.wagons
+        original_count = len(wagons)
+        retrofit_track, wagons = self._resize_batch_to_buffer(retrofit_track, wagons, collection_queue)
+        if not wagons:
+            logger.info(
+                't=%.1f: COLLECTION → No retrofit buffer has room; releasing loco, pausing before retry',
+                self.config.env.now,
+            )
+            yield from self._release_locomotive_no_op(loco)
+            # Advance the clock before returning; otherwise the process would release the
+            # loco and immediately re-request it at the SAME sim time, busy-spinning forever
+            # when a second locomotive is free. Pausing lets the workshop drain a buffer.
+            yield self.config.env.timeout(self._buffer_wait_interval)
+            return None
+
+        # If trimmed, rebuild the aggregate so train formation/events use only the wagons
+        # that travel.
+        batch_id = batch_aggregate.id
+        if len(wagons) != original_count:
+            batch_aggregate = self.config.batch_service.create_batch_aggregate(wagons, 'retrofit')
+            batch_id = batch_aggregate.id
+
+        # Release collection capacity for exactly the travelling wagons (remove_wagons is a
+        # container.get and never blocks). Overflow wagons kept their reservation.
+        if self.track_manager:
+            ct = self.track_manager.get_track(wagons[0].current_track_id)
+            if ct:
+                on_track = [w for w in wagons if w in ct.wagons]
+                if on_track:
+                    yield from ct.remove_wagons(on_track)
+
+        # Reserve retrofit buffer capacity (fits by construction; will not block).
+        logger.info(
+            't=%.1f: COLLECTION → Reserving retrofit buffer %s for %d wagons',
+            self.config.env.now,
+            retrofit_track.track_id,
+            len(wagons),
+        )
+        yield from retrofit_track.add_wagons(wagons)
+        return retrofit_track, wagons, batch_aggregate, batch_id
+
     def _transport_to_retrofit_with_batch(  # noqa: PLR0915  # pylint: disable=too-many-locals,too-many-statements
-        self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str
+        self, loco: Any, batch_aggregate: Any, retrofit_track: Any, batch_id: str, collection_queue: Any = None
     ) -> Generator[Any, Any]:
         """Transport batch aggregate to retrofit track with train formation."""
         wagons = batch_aggregate.wagons
 
-        # CRITICAL: Reserve retrofit track capacity BEFORE allocating locomotive to prevent deadlock
-        logger.info(
-            't=%.1f: COLLECTION → Reserving retrofit track capacity for %d wagons', self.config.env.now, len(wagons)
-        )
-        yield from retrofit_track.add_wagons(wagons)
-        logger.info('t=%.1f: COLLECTION → Capacity reserved, allocating locomotive', self.config.env.now)
-
-        # Allocate locomotive and move to collection
+        # Allocate the locomotive FIRST. Reserving retrofit-buffer capacity before we
+        # hold a loco (the old order) deadlocks: a batch that fills the buffer can then
+        # never win the loco it needs to move that very reservation. With the dispatcher,
+        # this is also where the priority/hold_until gate is evaluated.
+        logger.info('t=%.1f: COLLECTION → Requesting locomotive for %d wagons', self.config.env.now, len(wagons))
         loco = yield from self._allocate_locomotive(wagons)
+
+        # Stage the batch onto a retrofit buffer now that we hold the loco (re-select
+        # buffer, trim to fit, release collection capacity, reserve buffer). Returns None
+        # if no buffer currently has room, in which case the loco was released.
+        staged = yield from self._stage_batch_onto_buffer(loco, batch_aggregate, retrofit_track, collection_queue)
+        if staged is None:
+            return
+        retrofit_track, wagons, batch_aggregate, batch_id = staged
 
         # Get collection track ID from first wagon
         collection_track_id = wagons[0].current_track_id
