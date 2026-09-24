@@ -206,6 +206,8 @@ def _reject_pile_trace(frame: ad.FrameData, layout: ad.YardLayout) -> go.Scatter
         hoverinfo='skip',
         showlegend=False,
     )
+
+
 _UTIL_FONT_SIZE = 16
 _UTIL_OFFSET_M = 30.0  # gap past a track's throat end for its utilization label (toward middle)
 
