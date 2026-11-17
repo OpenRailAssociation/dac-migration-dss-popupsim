@@ -75,7 +75,7 @@ See [Optimizing Scenarios](../../tutorial/11-optimizing-scenarios.md).
 # Tests
 uv run pytest
 
-# Coverage (a minimum of 40% is enforced)
+# Coverage (a minimum of 60% is enforced)
 uv run pytest --cov=popupsim/backend/src/
 
 # Full quality gate (format, lint, type-check, static analysis, tests)

@@ -9,6 +9,7 @@ on:
       - '.github/actions/setup-python-**/**'
       - 'pyproject.toml'
       - 'uv.lock'
+      - '.python-version'
   push:
     branches: [main]
     paths:
@@ -16,6 +17,7 @@ on:
       - '.github/actions/setup-python-**/**'
       - 'pyproject.toml'
       - 'uv.lock'
+      - '.python-version'
 
 jobs:
   format:
@@ -227,10 +229,21 @@ jobs:
             exit 0
           fi
         shell: bash
+      - name: Coverage summary
+        if: always() && hashFiles('.coverage') != ''
+        run: |
+          echo "Total coverage: $(uv run --no-sync coverage report --format=total --precision=1)%" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && hashFiles('htmlcov/index.html') != ''
+        with:
+          name: coverage-html
+          path: htmlcov/
       - name: Upload coverage reports
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         if: hashFiles('coverage.xml') != ''
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
           fail_ci_if_error: false
           flags: backend
