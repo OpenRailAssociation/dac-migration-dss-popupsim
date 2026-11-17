@@ -3,6 +3,7 @@
 [![Badge Stage 1](https://openrailassociation.org/badges/openrail-project-stage-1.svg)](https://link.openrailassociation.org/stage-1)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python Backend](https://img.shields.io/badge/Backend-Python%203.13+-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/actions/workflows/python-backend.yaml/badge.svg?branch=main)](https://github.com/OpenRailAssociation/dac-migration-dss-popupsim/actions/workflows/python-backend.yaml)
 
 PopUpSim is a microscopic simulation system for optimizing Pop-Up retrofitting sites during the European freight rail industry's transition to Digital Automatic Couplers (DAC). The tool simulates the complex logistics of retrofitting approximately 500,000 freight wagons during the critical 3-week "Big Bang" migration period (2029-2034).
 

@@ -5,7 +5,7 @@
 **Location:** `popupsim/backend/tests/`
 
 **Status:** run `uv run pytest` for the current test count and `uv run pytest --cov=popupsim/backend/src/`
-for coverage. A minimum of 40% coverage is enforced.
+for coverage. A minimum of 60% coverage is enforced.
 
 ## Test Organization
 

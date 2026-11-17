@@ -364,23 +364,22 @@ def _validate_locomotive(
         )
         assert found, f'No ALLOCATED event for locomotive {locomotive_id} with purpose {purpose} at t={time}'
 
-    elif status_name == 'MOVING':
+    elif status_name == 'MOVING' and '->' in details:
         # Parse "from->to" format
-        if '->' in details:
-            from_loc, to_loc = details.split('->')
-            from_loc = from_loc.strip()
-            to_loc = to_loc.strip()
-            found = any(
-                abs(t - time) < 0.5
-                and type(e).__name__ == 'LocomotiveMovementEvent'
-                and hasattr(e, 'locomotive_id')
-                and e.locomotive_id == locomotive_id
-                and hasattr(e, 'event_type')
-                and e.event_type == 'MOVING'
-                and hasattr(e, 'from_location')
-                and hasattr(e, 'to_location')
-                and e.from_location == from_loc
-                and e.to_location == to_loc
-                for t, e in events
-            )
-            assert found, f'No MOVING event for locomotive {locomotive_id} from {from_loc} to {to_loc} at t={time}'
+        from_loc, to_loc = details.split('->')
+        from_loc = from_loc.strip()
+        to_loc = to_loc.strip()
+        found = any(
+            abs(t - time) < 0.5
+            and type(e).__name__ == 'LocomotiveMovementEvent'
+            and hasattr(e, 'locomotive_id')
+            and e.locomotive_id == locomotive_id
+            and hasattr(e, 'event_type')
+            and e.event_type == 'MOVING'
+            and hasattr(e, 'from_location')
+            and hasattr(e, 'to_location')
+            and e.from_location == from_loc
+            and e.to_location == to_loc
+            for t, e in events
+        )
+        assert found, f'No MOVING event for locomotive {locomotive_id} from {from_loc} to {to_loc} at t={time}'

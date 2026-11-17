@@ -106,8 +106,10 @@ graph TD
 **Dependencies:** Requires format job to pass first
 
 **Steps:**
-- Run `uv run pytest --tb=short`
-- Upload coverage to Codecov
+- Run `uv run pytest --tb=short` (fails if total coverage drops below 60%)
+- Write total coverage to the job summary
+- Upload HTML coverage report as `coverage-html` artifact
+- Upload coverage to Codecov (needs the `CODECOV_TOKEN` secret)
 
 ## Documentation Pipeline Jobs
 
@@ -294,7 +296,7 @@ sequenceDiagram
 - **Output:** Error codes for easier debugging
 
 ### Pytest
-- **Config:** Coverage reporting with 90% threshold
+- **Config:** Coverage reporting, build fails below 60% (`--cov-fail-under` in `pyproject.toml`)
 - **Output:** Terminal, HTML, and XML reports
 - **Upload:** Coverage data sent to Codecov
 
